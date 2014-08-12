@@ -42,6 +42,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes.cs" />
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />
@@ -82,9 +83,7 @@
     <Compile Include="Utils\ObjUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Hooks\EarlyExecutionUpdateEventHooks.cs.meta" />
     <None Include="Hooks\TardyExecutionUpdateEventHooks.cs.meta" />
