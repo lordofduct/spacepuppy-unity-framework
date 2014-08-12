@@ -2,6 +2,7 @@
 
 namespace com.spacepuppy
 {
+
     public class SPConstants
     {
         public const string TAG_UNTAGGED = "Untagged";

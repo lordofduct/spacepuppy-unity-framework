@@ -42,10 +42,53 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\ListDictionary.cs" />
+    <Compile Include="Collections\UniqueList.cs" />
+    <Compile Include="Collections\WeakInternalTypes.cs" />
+    <Compile Include="Collections\WeakKeyDictionary.cs" />
+    <Compile Include="Collections\WeakList.cs" />
+    <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="GameLoopEntry.cs" />
+    <Compile Include="GameTime.cs" />
+    <Compile Include="Geom\AABBox.cs" />
+    <Compile Include="Geom\AxisInterval.cs" />
+    <Compile Include="Geom\Capsule.cs" />
+    <Compile Include="Geom\GeomUtil.cs" />
+    <Compile Include="Geom\IGeom.cs" />
+    <Compile Include="Geom\Line.cs" />
+    <Compile Include="Geom\RaycastInfo.cs" />
+    <Compile Include="Geom\Sphere.cs" />
+    <Compile Include="Geom\Trans.cs" />
+    <Compile Include="Hooks\EarlyExecutionUpdateEventHooks.cs" />
+    <Compile Include="Hooks\TardyExecutionUpdateEventHooks.cs" />
+    <Compile Include="Hooks\UpdateEventHooks.cs" />
+    <Compile Include="IComponent.cs" />
+    <Compile Include="MultiTag.cs" />
+    <Compile Include="Notification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SPConstants.cs" />
+    <Compile Include="Timers\DelayTimer.cs" />
+    <Compile Include="Timers\GameTimers.cs" />
+    <Compile Include="Timers\ITimer.cs" />
+    <Compile Include="Timers\StopWatch.cs" />
+    <Compile Include="Timers\SystemTimers.cs" />
+    <Compile Include="Timers\Timer.cs" />
+    <Compile Include="Timers\TimerCollection.cs" />
+    <Compile Include="Utils\Assertions.cs" />
+    <Compile Include="Utils\ComponentUtil.cs" />
+    <Compile Include="Utils\ConvertUtil.cs" />
+    <Compile Include="Utils\GameObjUtil.cs" />
+    <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
+    <Compile Include="Utils\ObjUtil.cs" />
+    <Compile Include="Utils\StringUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Hooks\EarlyExecutionUpdateEventHooks.cs.meta" />
+    <None Include="Hooks\TardyExecutionUpdateEventHooks.cs.meta" />
+    <None Include="Hooks\UpdateEventHooks.cs.meta" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
