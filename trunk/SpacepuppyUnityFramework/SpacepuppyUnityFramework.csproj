@@ -49,6 +49,7 @@
     <Compile Include="Collections\WeakKeyDictionary.cs" />
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="Editor\Inspectors\MultiTagInspector.cs" />
     <Compile Include="GameLoopEntry.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Geom\AABBox.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
     <Compile Include="Utils\ObjUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
+    <Compile Include="Utils\VectorUtil.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
