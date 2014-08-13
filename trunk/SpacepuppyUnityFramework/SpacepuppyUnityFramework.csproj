@@ -83,6 +83,7 @@
     <Compile Include="Utils\Assertions.cs" />
     <Compile Include="Utils\ComponentUtil.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
+    <Compile Include="Utils\CoroutineUtil.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
     <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
     <Compile Include="Utils\ObjUtil.cs" />
