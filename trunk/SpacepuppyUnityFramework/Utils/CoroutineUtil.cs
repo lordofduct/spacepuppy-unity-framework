@@ -7,6 +7,8 @@ namespace com.spacepuppy.Utils
     public static class CoroutineUtil
     {
 
+        #region StartCoroutine
+
         public static Coroutine StartCoroutine(this MonoBehaviour behaviour, System.Collections.IEnumerable enumerable)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
@@ -42,6 +44,10 @@ namespace com.spacepuppy.Utils
 
             return behaviour.StartCoroutine(e);
         }
+
+        #endregion
+
+        #region RadicalCoroutine
 
         public static RadicalCoroutine StartRadicalCoroutine(this MonoBehaviour behaviour, System.Collections.IEnumerator routine)
         {
@@ -79,6 +85,110 @@ namespace com.spacepuppy.Utils
 
             return RadicalCoroutine.StartRadicalCoroutine(behaviour, e);
         }
+
+        #endregion
+
+        #region Invoke
+
+        public static Coroutine Invoke(this MonoBehaviour behaviour, System.Action method, float delay)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return behaviour.StartCoroutine(InvokeRedirect(method, delay));
+        }
+
+        public static Coroutine Invoke(this MonoBehaviour behaviour, CoroutineMethod method, float delay)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return behaviour.StartCoroutine(InvokeRedirect(method, delay));
+        }
+
+        public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, System.Action method, float delay)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
+        }
+
+        public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, CoroutineMethod method, float delay)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
+        }
+
+        public static RadicalCoroutine InvokeRepeatingRadical(this MonoBehaviour behaviour, System.Action method, float delay, float repeatRate)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
+        }
+
+        public static RadicalCoroutine InvokeRepeatingRadical(this MonoBehaviour behaviour, CoroutineMethod method, float delay, float repeatRate)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
+        }
+
+        private static System.Collections.IEnumerator InvokeRedirect(System.Action method, float delay, float repeatRate = -1f)
+        {
+            yield return new WaitForSeconds(delay);
+            if (repeatRate < 0f)
+            {
+                method();
+            }
+            else if (repeatRate == 0f)
+            {
+                while (true)
+                {
+                    method();
+                    yield return null;
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    method();
+                    yield return new WaitForSeconds(repeatRate);
+                }
+            }
+        }
+
+        private static System.Collections.IEnumerator InvokeRedirect(CoroutineMethod method, float delay, float repeatRate = -1f)
+        {
+            yield return new WaitForSeconds(delay);
+            if (repeatRate < 0f)
+            {
+                yield return method();
+            }
+            else if (repeatRate == 0f)
+            {
+                while (true)
+                {
+                    yield return method();
+                    yield return null;
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    yield return method();
+                    yield return new WaitForSeconds(repeatRate);
+                }
+            }
+        }
+
+        #endregion
 
     }
 }
