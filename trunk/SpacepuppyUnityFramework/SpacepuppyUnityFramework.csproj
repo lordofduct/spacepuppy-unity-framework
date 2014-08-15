@@ -50,6 +50,7 @@
     <Compile Include="Collections\WeakKeyDictionary.cs" />
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="Delegates.cs" />
     <Compile Include="Editor\Inspectors\MultiTagInspector.cs" />
     <Compile Include="GameLoopEntry.cs" />
     <Compile Include="GameTime.cs" />
