@@ -213,26 +213,12 @@ namespace com.spacepuppy
             return co;
         }
 
-        public static RadicalCoroutine StartRadicalCoroutine(MonoBehaviour behaviour, System.Delegate method, params object[] args)
+        public static RadicalCoroutine StartRadicalCoroutine(MonoBehaviour behaviour, CoroutineMethod routine)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (method == null) throw new System.ArgumentNullException("method");
+            if (routine == null) throw new System.ArgumentNullException("routine");
 
-            System.Collections.IEnumerator e;
-            if (com.spacepuppy.Utils.ObjUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerable)))
-            {
-                e = (method.DynamicInvoke(args) as System.Collections.IEnumerable).GetEnumerator();
-            }
-            else if (com.spacepuppy.Utils.ObjUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerator)))
-            {
-                e = (method.DynamicInvoke(args) as System.Collections.IEnumerator);
-            }
-            else
-            {
-                throw new System.ArgumentException("Delegate must have a return type of IEnumerable or IEnumerator.", "method");
-            }
-
-            var co = new RadicalCoroutine(e);
+            var co = new RadicalCoroutine(routine().GetEnumerator());
             co.SetOwner(behaviour.StartCoroutine(co));
             return co;
         }
@@ -246,7 +232,7 @@ namespace com.spacepuppy
                 var r = f();
                 if (r is bool)
                 {
-                    if((bool)r)
+                    if ((bool)r)
                         yield break;
                     else
                         yield return null;

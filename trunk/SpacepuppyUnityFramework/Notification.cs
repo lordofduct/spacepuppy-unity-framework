@@ -58,7 +58,7 @@ namespace com.spacepuppy
 
         static Notification()
         {
-            _timer = new com.spacepuppy.Timers.Timer(60.0f, 0);
+            _timer = new com.spacepuppy.Timers.Timer(1.0f, 0);
             _timer.TimerCount += delegate(com.spacepuppy.Timers.Timer t)
             {
                 Notification.CleanWeakReferences();
@@ -138,7 +138,15 @@ namespace com.spacepuppy
             }
         }
 
-        public static void PostNotification<T>(object sender, T notification, bool bNotifyRoot = false) where T : Notification
+        /// <summary>
+        /// Posts a notification of type T. Returns true if an observer was found and received the notification.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sender"></param>
+        /// <param name="notification"></param>
+        /// <param name="bNotifyRoot"></param>
+        /// <returns></returns>
+        public static bool PostNotification<T>(object sender, T notification, bool bNotifyRoot = false) where T : Notification
         {
             if (sender == null) throw new ArgumentNullException("sender");
             if (notification == null) throw new ArgumentNullException("notification");
@@ -146,10 +154,11 @@ namespace com.spacepuppy
 
             NotificationHandlerCollection coll;
 
+            bool handled = false;
             ////we first notify those registered directly with the sender
             if (_senderSpecificNotificationHandlers.TryGetValue(sender, out coll))
             {
-                coll.PostNotification<T>(notification);
+                if (coll.PostNotification<T>(notification)) handled = true;
             }
 
             //if the sender was a gameObject source, let anyone registered with the gameObject hear about it
@@ -160,7 +169,7 @@ namespace com.spacepuppy
                 {
                     if (_senderSpecificNotificationHandlers.TryGetValue(go, out coll))
                     {
-                        coll.PostNotification<T>(notification);
+                        if (coll.PostNotification<T>(notification)) handled = true;
                     }
                 }
 
@@ -171,14 +180,50 @@ namespace com.spacepuppy
                     {
                         if (_senderSpecificNotificationHandlers.TryGetValue(root, out coll))
                         {
-                            coll.PostNotification<T>(notification);
+                            if (coll.PostNotification<T>(notification)) handled = true;
                         }
                     }
                 }
             }
 
             //finally let anyone registered with the global hear about it
-            _globalNotificationHandlers.PostNotification<T>(notification);
+            bool globallyHandled = _globalNotificationHandlers.PostNotification<T>(notification);
+
+            //if not handled, check if we should throw an exception
+            if (!(handled || globallyHandled))
+            {
+                var requiredAttrib = typeof(T).GetCustomAttributes(typeof(RequireReceiverAttribute), false).FirstOrDefault() as RequireReceiverAttribute;
+                if (requiredAttrib != null)
+                {
+                    if (!handled)
+                    {
+                        if (!requiredAttrib.GlobalObserverConsidered || !globallyHandled)
+                        {
+                            if (notification.GameObject != null)
+                            {
+                                var root = notification.GameObject.FindRoot();
+                                if (sender == go)
+                                {
+                                    throw new AbsentNotificationReceiverException(notification, "A GameObject named '" + root.name + "' requires a receiver to notification of type '" + typeof(T).Name + "'.");
+                                }
+                                else
+                                {
+                                    throw new AbsentNotificationReceiverException(notification, "An object of type '" + sender.GetType().Name + "' on GameObject named '" + root.name + "' requires a receiver to notification of type '" + typeof(T).Name + "'.");
+                                }
+                            }
+                            else
+                            {
+                                throw new AbsentNotificationReceiverException(notification, "An object of type '" + sender.GetType().Name + "' requires a receiver to notification of type '" + typeof(T).Name + "'.");
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+            {
+                return true;
+            }
         }
 
         public static bool HasObserver<T>(object sender, bool bNotifyRoot = false)
@@ -220,6 +265,29 @@ namespace com.spacepuppy
         #region Special Types
 
         public delegate void NotificationHandler<T>(T notification) where T : Notification;
+
+        [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+        public class RequireReceiverAttribute : System.Attribute
+        {
+
+            public bool GlobalObserverConsidered;
+
+        }
+
+        public class AbsentNotificationReceiverException : System.Exception
+        {
+
+            private Notification _n;
+
+            public AbsentNotificationReceiverException(Notification n, string msg)
+                : base()
+            {
+                _n = n;
+            }
+
+            public Notification Notification { get { return _n; } }
+
+        }
 
         private class NotificationHandlerCollection
         {
@@ -292,7 +360,7 @@ namespace com.spacepuppy
                 }
             }
 
-            public void PostNotification<T>(T notification) where T : Notification
+            public bool PostNotification<T>(T notification) where T : Notification
             {
                 var tp = typeof(T);
                 Delegate d = null;
@@ -319,7 +387,15 @@ namespace com.spacepuppy
                     }
                 }
 
-                if (d != null && d is NotificationHandler<T>) (d as NotificationHandler<T>)(notification);
+                if (d != null && d is NotificationHandler<T>)
+                {
+                    (d as NotificationHandler<T>)(notification);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
 
             public bool HasObserverOf<T>()
@@ -361,4 +437,5 @@ namespace com.spacepuppy
         #endregion
 
     }
+
 }
