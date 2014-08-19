@@ -13,6 +13,9 @@ namespace com.spacepuppy
     /// You can register for a notification from a specific object, or register for a type of notification globally. 
     /// You can register to listen to notifications directly from the object, a gameObject if that object is a gameObject supplier, 
     /// or from a root gameObject if that gameObject has a root other than itself.
+    /// 
+    /// When using Unsafe access for adding and removing handlers. You must use the same for both. If you add a handler with Unsafe 
+    /// you must remove it with Unsafe. If you add with the standard generic method, you must remove with the standard generic method.
     /// </summary>
     public abstract class Notification
     {
@@ -100,6 +103,7 @@ namespace com.spacepuppy
         public static void RemoveGlobalObserver<T>(NotificationHandler<T> handler) where T : Notification
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
+
             _globalNotificationHandlers.RemoveObserver<T>(handler);
         }
 
@@ -226,9 +230,74 @@ namespace com.spacepuppy
             }
         }
 
-        public static bool HasObserver<T>(object sender, bool bNotifyRoot = false)
+        #endregion
+
+        #region Unsafe Register Interface
+
+        public static void UnsafeRegisterGlobalObserver(System.Type notificationType, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+            _globalNotificationHandlers.UnsafeRegisterObserver(notificationType, handler);
+        }
+
+        public static void UnsafeRemoveGlobalObserver(System.Type notificationType, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            _globalNotificationHandlers.UnsafeRemoveObserver(notificationType, handler);
+        }
+
+        public static void UnsafeRegisterObserver(System.Type notificationType, object sender, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+            _senderSpecificNotificationHandlers.Clean();
+
+            NotificationHandlerCollection coll;
+            if (!_senderSpecificNotificationHandlers.ContainsKey(sender))
+            {
+                coll = new NotificationHandlerCollection();
+                _senderSpecificNotificationHandlers[sender] = coll;
+            }
+            else
+            {
+                coll = _senderSpecificNotificationHandlers[sender];
+            }
+            coll.UnsafeRegisterObserver(notificationType, handler);
+        }
+
+        public static void UnsafeRemoveObserver(System.Type notificationType, object sender, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+            _senderSpecificNotificationHandlers.Clean();
+
+            if (!_senderSpecificNotificationHandlers.ContainsKey(sender)) return;
+
+            var coll = _senderSpecificNotificationHandlers[sender];
+            coll.UnsafeRemoveObserver(notificationType, handler);
+            if (coll.IsEmpty)
+            {
+                _senderSpecificNotificationHandlers.Remove(sender);
+            }
+        }
+
+        #endregion
+
+        #region Has/Contains
+
+        public static bool HasObserver<T>(object sender, bool bNotifyRoot = false) where T : Notification
         {
             if (sender == null) throw new ArgumentNullException("sender");
+
             if (_senderSpecificNotificationHandlers.ContainsKey(sender) && _senderSpecificNotificationHandlers[sender].HasObserverOf<T>()) return true;
 
             var go = GameObjectUtil.GetGameObjectFromSource(sender);
@@ -253,9 +322,47 @@ namespace com.spacepuppy
             return _globalNotificationHandlers.HasObserverOf<T>();
         }
 
-        public static bool HasGlobalObserver<T>()
+        public static bool HasGlobalObserver<T>() where T : Notification
         {
             return _globalNotificationHandlers.HasObserverOf<T>();
+        }
+
+        public static bool HasObserver(System.Type notificationType, object sender, bool bNotifyRoot = false)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new ArgumentNullException("sender");
+
+            if (_senderSpecificNotificationHandlers.ContainsKey(sender) && _senderSpecificNotificationHandlers[sender].HasObserverOf(notificationType)) return true;
+
+            var go = GameObjectUtil.GetGameObjectFromSource(sender);
+            if (go != null)
+            {
+                if (go != sender)
+                {
+                    if (_senderSpecificNotificationHandlers.ContainsKey(go) && _senderSpecificNotificationHandlers[go].HasObserverOf(notificationType)) return true;
+                }
+
+                if (bNotifyRoot)
+                {
+                    //if not bubbles, only test the root
+                    var root = com.spacepuppy.Utils.GameObjectUtil.FindRoot(go);
+                    if (root != null && root != go)
+                    {
+                        if (_senderSpecificNotificationHandlers.ContainsKey(root) && _senderSpecificNotificationHandlers[root].HasObserverOf(notificationType)) return true;
+                    }
+                }
+            }
+
+            return _globalNotificationHandlers.HasObserverOf(notificationType);
+        }
+
+        public static bool HasGlobalObserver(System.Type notificationType)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+
+            return _globalNotificationHandlers.HasObserverOf(notificationType);
         }
 
         #endregion
@@ -264,6 +371,7 @@ namespace com.spacepuppy
 
         #region Special Types
 
+        public delegate void NotificationHandler(Notification n);
         public delegate void NotificationHandler<T>(T notification) where T : Notification;
 
         [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
@@ -296,6 +404,7 @@ namespace com.spacepuppy
 
             private Dictionary<Type, Delegate> _table = new Dictionary<Type, Delegate>();
             private ListDictionary<Type, Delegate> _weakTable = new ListDictionary<Type, Delegate>(() => new WeakList<Delegate>());
+            private Dictionary<Type, NotificationHandler> _unsafeTable = new Dictionary<Type, NotificationHandler>();
 
             #endregion
 
@@ -316,6 +425,8 @@ namespace com.spacepuppy
 
             #region Methods
 
+            #region Safe
+
             public void RegisterObserver<T>(NotificationHandler<T> handler, bool useWeakReference = false) where T : Notification
             {
                 var tp = typeof(T);
@@ -335,26 +446,26 @@ namespace com.spacepuppy
 
             public void RemoveObserver<T>(NotificationHandler<T> handler) where T : Notification
             {
-                var tp = typeof(T);
-                if (_weakTable.ContainsKey(tp) && _weakTable.Lists[tp].Contains(handler))
+                var notificationType = typeof(T);
+                if (_weakTable.ContainsKey(notificationType) && _weakTable.Lists[notificationType].Contains(handler))
                 {
-                    _weakTable.Lists[tp].Remove(handler);
-                    (_weakTable.Lists[tp] as WeakList<Delegate>).Clean();
+                    _weakTable.Lists[notificationType].Remove(handler);
+                    (_weakTable.Lists[notificationType] as WeakList<Delegate>).Clean();
                     _weakTable.Purge();
                 }
-                else if (_table.ContainsKey(tp))
+                else if (_table.ContainsKey(notificationType))
                 {
-                    var d = _table[tp];
+                    var d = _table[notificationType];
                     if (d != null)
                     {
                         d = Delegate.Remove(d, handler);
                         if (d != null)
                         {
-                            _table[tp] = d;
+                            _table[notificationType] = d;
                         }
                         else
                         {
-                            _table.Remove(tp);
+                            _table.Remove(notificationType);
                         }
                     }
                 }
@@ -362,13 +473,16 @@ namespace com.spacepuppy
 
             public bool PostNotification<T>(T notification) where T : Notification
             {
-                var tp = typeof(T);
-                Delegate d = null;
-                _table.TryGetValue(tp, out d);
+                bool bSuccess = false;
 
-                if (_weakTable.ContainsKey(tp))
+                //post safe receivers
+                var notificationType = typeof(T);
+                Delegate d = null;
+                _table.TryGetValue(notificationType, out d);
+
+                if (_weakTable.ContainsKey(notificationType))
                 {
-                    var lst = _weakTable.Lists[tp];
+                    var lst = _weakTable.Lists[notificationType];
                     if (lst != null && lst.Count > 0)
                     {
                         //try
@@ -390,30 +504,81 @@ namespace com.spacepuppy
                 if (d != null && d is NotificationHandler<T>)
                 {
                     (d as NotificationHandler<T>)(notification);
-                    return true;
+                    bSuccess = true;
                 }
-                else
+
+                //post unsafe receivers
+                if (_unsafeTable.ContainsKey(notificationType))
                 {
-                    return false;
+                    var ud = _unsafeTable[notificationType];
+                    if (ud != null)
+                    {
+                        ud(notification);
+                        bSuccess = true;
+                    }
+                }
+
+                return bSuccess;
+            }
+
+            #endregion
+
+            #region Unsafe
+
+            public void UnsafeRegisterObserver(System.Type notificationType, NotificationHandler handler)
+            {
+                NotificationHandler d = (_unsafeTable.ContainsKey(notificationType)) ? _unsafeTable[notificationType] : null;
+                d += handler;
+                _unsafeTable[notificationType] = d;
+            }
+
+            public void UnsafeRemoveObserver(System.Type notificationType, NotificationHandler handler)
+            {
+                if (_unsafeTable.ContainsKey(notificationType))
+                {
+                    var d = _unsafeTable[notificationType];
+                    if (d != null)
+                    {
+                        d -= handler;
+                        if (d != null)
+                        {
+                            _unsafeTable[notificationType] = d;
+                        }
+                        else
+                        {
+                            _unsafeTable.Remove(notificationType);
+                        }
+                    }
                 }
             }
 
-            public bool HasObserverOf<T>()
-            {
-                var tp = typeof(T);
+            #endregion
 
-                if (_table.ContainsKey(tp))
+
+            public bool HasObserverOf<T>() where T : Notification
+            {
+                return this.HasObserverOf(typeof(T));
+            }
+            public bool HasObserverOf(System.Type notificationType)
+            {
+                if (_table.ContainsKey(notificationType))
                 {
-                    return _table[tp] != null;
+                    return _table[notificationType] != null;
                 }
 
-                if (_weakTable.ContainsKey(tp))
+                if (_unsafeTable.ContainsKey(notificationType))
                 {
-                    return _weakTable.Lists[tp].Count != 0;
+                    return _unsafeTable[notificationType] != null;
+                }
+
+                if (_weakTable.ContainsKey(notificationType))
+                {
+                    return _weakTable.Lists[notificationType].Count != 0;
                 }
 
                 return false;
             }
+
 
 
             public void CleanWeakReferences()

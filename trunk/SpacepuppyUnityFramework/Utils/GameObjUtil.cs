@@ -154,6 +154,8 @@ namespace com.spacepuppy.Utils
             }
         }
 
+         */
+
         /// <summary>
         /// Destroys self and all children
         /// </summary>
@@ -195,8 +197,6 @@ namespace com.spacepuppy.Utils
 
             obj.SetActive(true);
         }
-
-         */
 
         #endregion
 
@@ -367,7 +367,7 @@ namespace com.spacepuppy.Utils
                         {
                             sval = arr[i];
                             //now we're going to do our recursing search
-                            trans = SearchFor(trans, sval, bIgnoreCase);
+                            trans = FindByName(trans, sval, bIgnoreCase);
                             if (trans == null) return null;
                         }
                     }
@@ -390,9 +390,9 @@ namespace com.spacepuppy.Utils
         /// <param name="sname"></param>
         /// <param name="bIgnoreCase"></param>
         /// <returns></returns>
-        public static GameObject SearchFor(this GameObject go, string sname, bool bIgnoreCase = false)
+        public static GameObject FindByName(this GameObject go, string sname, bool bIgnoreCase = false)
         {
-            var result = SearchFor(go.transform, sname, bIgnoreCase);
+            var result = FindByName(go.transform, sname, bIgnoreCase);
             if (result != null)
                 return result.gameObject;
             else
@@ -406,17 +406,11 @@ namespace com.spacepuppy.Utils
         /// <param name="sname"></param>
         /// <param name="bIgnoreCase"></param>
         /// <returns></returns>
-        public static Transform SearchFor(this Transform trans, string sname, bool bIgnoreCase = false)
+        public static Transform FindByName(this Transform trans, string sname, bool bIgnoreCase = false)
         {
-            foreach (Transform child in trans)
+            foreach (var child in trans.GetAllChildren())
             {
                 if (StringUtil.Equals(child.name, sname, bIgnoreCase)) return child;
-            }
-
-            foreach (Transform child in trans)
-            {
-                var nxt = SearchFor(child, sname, bIgnoreCase);
-                if (nxt != null) return nxt;
             }
 
             return null;
