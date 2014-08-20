@@ -421,45 +421,6 @@ namespace com.spacepuppy.Utils
         #region Tags
 
         /**
-         * HasTag
-         */
-
-        public static bool HasTag(this GameObject go, string stag)
-        {
-            if (go == null) return false;
-            if (go.tag == stag) return true;
-
-            var multitag = go.GetComponent<MultiTag>();
-            if (multitag != null && multitag.ContainsTag(stag)) return true;
-
-            return false;
-        }
-
-        public static bool HasTag(this Component c, string stag)
-        {
-            if (c == null) return false;
-            return HasTag(c.gameObject, stag);
-        }
-
-        public static bool HasTag(this GameObject go, params string[] stags)
-        {
-            if (stags == null) return false;
-            if (go == null) return false;
-            if (stags.Contains(go.tag)) return true;
-
-            var multitag = go.GetComponent<MultiTag>();
-            if (multitag != null && multitag.ContainsTag(stags)) return true;
-
-            return false;
-        }
-
-        public static bool HasTag(this Component c, params string[] stags)
-        {
-            if (c == null) return false;
-            return HasTag(c.gameObject, stags);
-        }
-
-        /**
          * Find
          */
 
