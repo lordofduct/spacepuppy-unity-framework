@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy
 {
 
-    public class RadicalCoroutine : IRadicalYieldInstruction, System.Collections.IEnumerator
+    public class RadicalCoroutine : RadicalYieldInstruction
     {
 
         #region Fields
@@ -13,8 +13,7 @@ namespace com.spacepuppy
         private Coroutine _coroutine;
 
         private System.Collections.IEnumerator _routine;
-        private object _current;
-        private DerivativeOperation _derivative;
+        private System.Collections.IEnumerator _derivative;
 
         private bool _cancelled = false;
 
@@ -54,142 +53,86 @@ namespace com.spacepuppy
             _cancelled = true;
         }
 
-        public void Reset()
+        public override void Reset()
         {
-            _current = null;
-            _derivative = null;
+            base.Reset();
+
             _cancelled = false;
             _routine.Reset();
         }
 
-        private bool MoveNext()
+        protected override bool ContinueBlocking(ref object yieldObject)
         {
-            _current = null;
+            if (_cancelled) return false;
 
-            if (_cancelled)
+            if (_derivative != null)
             {
-                _derivative = null;
-                return false;
+                if (_derivative.MoveNext())
+                {
+                    yieldObject = _derivative.Current;
+                    return true;
+                }
+                else
+                {
+                    _derivative = null;
+                }
             }
 
-            int derivativeResult = -1;
 
-            derivativeResult = this.OperateDerivative();
-            if (derivativeResult >= 0)
+            if (_routine.MoveNext())
             {
-                return (derivativeResult > 0);
-            }
-
-            while (_routine.MoveNext())
-            {
-                var obj = _routine.Current;
-
-                if (obj is IRadicalYieldInstruction)
+                var current = _routine.Current;
+                if (current == null)
                 {
-                    _derivative = new DerivativeOperation(obj as IRadicalYieldInstruction);
-                    derivativeResult = this.OperateDerivative();
-                    if (derivativeResult >= 0)
+                    //do nothing
+                }
+                else if (current is YieldInstruction)
+                {
+                    yieldObject = current;
+                }
+                else if (current is RadicalCoroutine)
+                {
+                    var e = current as IEnumerator;
+                    if (e.MoveNext())
                     {
-                        return (derivativeResult > 0);
+                        yieldObject = e.Current;
+                        _derivative = e;
                     }
                 }
-                else if (obj is System.Collections.IEnumerable)
+                else if (current is IEnumerable)
                 {
-                    _derivative = new DerivativeOperation(new RadicalCoroutine((obj as System.Collections.IEnumerable).GetEnumerator()));
-                    derivativeResult = this.OperateDerivative();
-                    if (derivativeResult >= 0)
+                    var e = new RadicalCoroutine((current as IEnumerable).GetEnumerator()) as IEnumerator;
+                    if (e.MoveNext())
                     {
-                        return (derivativeResult > 0);
+                        yieldObject = e.Current;
+                        _derivative = e;
                     }
                 }
-                else if (obj is System.Collections.IEnumerator)
+                else if (current is IEnumerator)
                 {
-                    _derivative = new DerivativeOperation(new RadicalCoroutine(obj as System.Collections.IEnumerator));
-                    derivativeResult = this.OperateDerivative();
-                    if (derivativeResult >= 0)
+                    var e = new RadicalCoroutine(current as IEnumerator) as IEnumerator;
+                    if (e.MoveNext())
                     {
-                        return (derivativeResult > 0);
+                        yieldObject = e.Current;
+                        _derivative = e;
                     }
                 }
                 else
                 {
-                    _current = obj;
-                    return true;
+                    yieldObject = current;
                 }
-            }
 
-            _current = null;
-            _derivative = null;
-            return false;
-        }
-
-        /// <summary>
-        /// 1 - continue blocking
-        /// 0 - stop blocking
-        /// -1 - loop past
-        /// </summary>
-        /// <returns></returns>
-        private int OperateDerivative()
-        {
-            if (_derivative == null) return -1;
-
-            if (_derivative.ContinueBlocking(this))
-            {
-                if (_cancelled)
-                {
-                    _current = null;
-                    return 0;
-                }
-                _current = _derivative.CurrentYieldObject;
-                return 1;
+                return true;
             }
             else
             {
-                _derivative = null;
-                if (_cancelled)
-                {
-                    _current = null;
-                    return 0;
-                }
-                _current = null;
-                return -1;
+                return false;
             }
         }
 
         #endregion
 
-        #region IRadicalYieldInstruction Interface
 
-        object IRadicalYieldInstruction.CurrentYieldObject
-        {
-            get { return _current; }
-        }
-
-        bool IRadicalYieldInstruction.ContinueBlocking(RadicalCoroutine routine)
-        {
-            return this.MoveNext();
-        }
-
-        #endregion
-
-        #region IEnumerator Interface
-
-        object System.Collections.IEnumerator.Current
-        {
-            get { return _current; }
-        }
-
-        bool System.Collections.IEnumerator.MoveNext()
-        {
-            return this.MoveNext();
-        }
-
-        void System.Collections.IEnumerator.Reset()
-        {
-            this.Reset();
-        }
-
-        #endregion
 
         #region Factory Methods
 
@@ -241,88 +184,6 @@ namespace com.spacepuppy
                 {
                     yield return r;
                 }
-            }
-        }
-
-        #endregion
-
-        #region Special Types
-
-        private class DerivativeOperation : IRadicalYieldInstruction
-        {
-            private IRadicalYieldInstruction _instruction;
-            private DerivativeOperation _derivative;
-
-            public DerivativeOperation(IRadicalYieldInstruction instruction)
-            {
-                if (instruction == null) throw new System.ArgumentNullException("instruction");
-                _instruction = instruction;
-            }
-
-            public object CurrentYieldObject
-            {
-                get { return (_derivative != null) ? _derivative.CurrentYieldObject : _instruction.CurrentYieldObject; }
-            }
-
-            public bool ContinueBlocking(RadicalCoroutine routine)
-            {
-                if (_derivative != null)
-                {
-                    if (_derivative.ContinueBlocking(routine))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        _derivative = null;
-                    }
-                }
-
-                while (_instruction.ContinueBlocking(routine))
-                {
-                    if (_instruction.CurrentYieldObject is IRadicalYieldInstruction)
-                    {
-                        _derivative = new DerivativeOperation(_instruction.CurrentYieldObject as IRadicalYieldInstruction);
-                        if (!_derivative.ContinueBlocking(routine))
-                        {
-                            _derivative = null;
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                    else if (_instruction.CurrentYieldObject is System.Collections.IEnumerable)
-                    {
-                        _derivative = new DerivativeOperation(new RadicalCoroutine((_instruction.CurrentYieldObject as System.Collections.IEnumerable).GetEnumerator()));
-                        if (!_derivative.ContinueBlocking(routine))
-                        {
-                            _derivative = null;
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                    else if (_instruction.CurrentYieldObject is System.Collections.IEnumerator)
-                    {
-                        _derivative = new DerivativeOperation(new RadicalCoroutine(_instruction.CurrentYieldObject as System.Collections.IEnumerator));
-                        if (!_derivative.ContinueBlocking(routine))
-                        {
-                            _derivative = null;
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
             }
         }
 
