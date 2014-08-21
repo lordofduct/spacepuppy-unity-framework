@@ -7,6 +7,15 @@ namespace com.spacepuppy.Utils
     public static class CoroutineUtil
     {
 
+        #region Wait
+
+        public static YieldInstruction WaitUntilDone(this MonoBehaviour behaviour, RadicalCoroutine routine)
+        {
+            return RadicalCoroutine.WaitUntilDone(behaviour, routine);
+        }
+
+        #endregion
+
         #region StartCoroutine
 
         public static Coroutine StartCoroutine(this MonoBehaviour behaviour, System.Collections.IEnumerable enumerable)

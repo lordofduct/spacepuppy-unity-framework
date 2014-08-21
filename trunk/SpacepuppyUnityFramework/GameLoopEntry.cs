@@ -168,8 +168,6 @@ namespace com.spacepuppy
 
         #region Methods
 
-        /*
-
         //Regular
 
         public static Coroutine StartCoroutine(System.Collections.IEnumerator routine, bool operatesEarly = false)
@@ -245,8 +243,6 @@ namespace com.spacepuppy
                 return _updateHook.StartRadicalCoroutine(routine, args);
             }
         }
-
-         */
 
         #endregion
 
