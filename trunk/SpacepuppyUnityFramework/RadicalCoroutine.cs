@@ -267,7 +267,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public bool ManualTick(MonoBehaviour handle)
         {
-            if (_owner == null) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated on.");
+            if (_owner != null) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated on.");
             if (handle == null) throw new System.ArgumentNullException("handle");
 
             object current = null;
