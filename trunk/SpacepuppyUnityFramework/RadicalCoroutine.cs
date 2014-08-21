@@ -10,39 +10,48 @@ namespace com.spacepuppy
 
         #region Fields
 
+        //the coroutine operating this radical coroutine, a reference is kept in case we want to yield this to a standard coroutine
         private Coroutine _coroutine;
 
         private System.Collections.IEnumerator _routine;
         private System.Collections.IEnumerator _derivative;
 
-        private bool _cancelled = false;
+        private bool _completed = false;
 
         #endregion
 
         #region CONSTRUCTOR
 
+        /// <summary>
+        /// Operating level constructor.
+        /// </summary>
+        /// <param name="routine"></param>
+        /// <param name="coroutine"></param>
+        private RadicalCoroutine(System.Collections.IEnumerator routine, Coroutine coroutine)
+        {
+            _routine = routine;
+            _coroutine = coroutine;
+        }
+
+        /// <summary>
+        /// Factory level constructor. SetOwner is required to be called after this.
+        /// </summary>
+        /// <param name="routine"></param>
         private RadicalCoroutine(System.Collections.IEnumerator routine)
         {
             _routine = routine;
         }
 
-        private void SetOwner(Coroutine co)
+        private void SetOwner(Coroutine routine)
         {
-            _coroutine = co;
+            _coroutine = routine;
         }
 
         #endregion
 
         #region Properties
 
-        /// <summary>
-        /// A refernence to the routine that is operating this RadicalCoroutine. 
-        /// This can be used for yielding this RadicalCoroutine in the midst of 
-        /// a standard coroutine.
-        /// </summary>
-        public Coroutine Coroutine { get { return _coroutine; } }
-
-        public bool Cancelled { get { return _cancelled; } }
+        public bool Complete { get { return _completed; } }
 
         #endregion
 
@@ -50,20 +59,31 @@ namespace com.spacepuppy
 
         public void Cancel()
         {
-            _cancelled = true;
+            _completed = true;
         }
 
         public override void Reset()
         {
             base.Reset();
 
-            _cancelled = false;
+            _completed = false;
             _routine.Reset();
         }
 
+        /// <summary>
+        /// Get a YieldInstruction for yielding to another Coroutine that isn't a radical coroutine.
+        /// </summary>
+        /// <param name="behaviour"></param>
+        /// <returns></returns>
+        public YieldInstruction Yield()
+        {
+            return _coroutine;
+        }
+
+
         protected override bool ContinueBlocking(ref object yieldObject)
         {
-            if (_cancelled) return false;
+            if (_completed) return false;
 
             if (_derivative != null)
             {
@@ -101,7 +121,8 @@ namespace com.spacepuppy
                 }
                 else if (current is IEnumerable)
                 {
-                    var e = new RadicalCoroutine((current as IEnumerable).GetEnumerator()) as IEnumerator;
+                    //yes we have to test for IEnumerable before IEnumerator. When a yield method is returned as an IEnumerator, it still needs 'GetEnumerator' called on it.
+                    var e = new RadicalCoroutine((current as IEnumerable).GetEnumerator(), _coroutine) as IEnumerator;
                     if (e.MoveNext())
                     {
                         yieldObject = e.Current;
@@ -110,7 +131,7 @@ namespace com.spacepuppy
                 }
                 else if (current is IEnumerator)
                 {
-                    var e = new RadicalCoroutine(current as IEnumerator) as IEnumerator;
+                    var e = new RadicalCoroutine(current as IEnumerator, _coroutine) as IEnumerator;
                     if (e.MoveNext())
                     {
                         yieldObject = e.Current;
@@ -126,6 +147,7 @@ namespace com.spacepuppy
             }
             else
             {
+                _completed = true;
                 return false;
             }
         }
