@@ -22,9 +22,16 @@ namespace com.spacepuppy
 
         #region CONSTRUCTOR
 
-        public RadicalCoroutine()
+        public RadicalCoroutine(System.Collections.IEnumerable routine)
         {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+            _routine = routine.GetEnumerator();
+        }
 
+        public RadicalCoroutine(System.Collections.IEnumerator routine)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+            _routine = routine;
         }
 
         private RadicalCoroutine(System.Collections.IEnumerator routine, RadicalCoroutine owner)
@@ -55,15 +62,11 @@ namespace com.spacepuppy
 
         #region Methods
 
-        public void Start(MonoBehaviour behaviour, IEnumerator routine)
+        public void Start(MonoBehaviour behaviour)
         {
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (routine == null) throw new System.ArgumentNullException("routine");
             if (_owner != null) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
 
-            this.Clear();
-
-            _routine = routine;
             _owner = behaviour.StartCoroutine(this);
         }
 
@@ -74,10 +77,7 @@ namespace com.spacepuppy
         {
             base.Reset();
 
-            if (_routine != null)
-            {
-                _routine.Reset();
-            }
+            _routine.Reset();
             if (_derivative != null && _derivative is RadicalCoroutine)
             {
                 (_derivative as RadicalCoroutine).Cancel();
@@ -93,7 +93,7 @@ namespace com.spacepuppy
         /// </summary>
         public void Cancel()
         {
-            if (_routine != null && _routine is RadicalCoroutine)
+            if (_routine is RadicalCoroutine)
             {
                 (_routine as RadicalCoroutine).Cancel();
             }
@@ -107,45 +107,11 @@ namespace com.spacepuppy
             _completed = true;
         }
 
-        /// <summary>
-        /// Stops the coroutine completely and purges the underlying routines. The coroutine still may not be used again until the operator has cleaned itself. Can take about one frame. Check the 'HasOwner' property.
-        /// </summary>
-        public void Clear()
-        {
-            if (_routine != null && _routine is RadicalCoroutine)
-            {
-                (_routine as RadicalCoroutine).Clear();
-            }
-            if (_derivative != null && _derivative is RadicalCoroutine)
-            {
-                (_derivative as RadicalCoroutine).Clear();
-            }
-            _routine = null;
-            _derivative = null;
-            _completed = false;
-            _manualWaitingOnInstruction = null;
-
-            if (_owner != null && _owner is RadicalCoroutine)
-            {
-                var rad = _owner as RadicalCoroutine;
-                if (rad._routine == this)
-                {
-                    rad.Clear();
-                }
-                else if (rad._derivative == this)
-                {
-                    rad._derivative = null;
-                }
-                _owner = null;
-            }
-        }
-
-
 
 
         protected override bool ContinueBlocking(ref object yieldObject)
         {
-            if (_completed || _routine == null)
+            if (_completed)
             {
                 if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
                 return false;
@@ -171,7 +137,7 @@ namespace com.spacepuppy
 
             if (_routine.MoveNext())
             {
-                if (_completed || _routine == null) return false; //our routine cancelled/cleared/reset itself
+                if (_completed) return false; //our routine cancelled/cleared/reset itself
 
                 var current = _routine.Current;
                 if (current == null)
@@ -240,26 +206,6 @@ namespace com.spacepuppy
 
         #region Manual Coroutine Methods
 
-        public void StartManual(IEnumerator routine)
-        {
-            if (routine == null) throw new System.ArgumentNullException("routine");
-            if (_owner != null) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
-
-            this.Clear();
-
-            _routine = routine;
-        }
-
-        public void StartManual(IEnumerable routine)
-        {
-            if (routine == null) throw new System.ArgumentNullException("routine");
-            if (_owner != null) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
-
-            this.Clear();
-
-            _routine = routine.GetEnumerator();
-        }
-
         /// <summary>
         /// Manually step the coroutine. This is usually done from within a Update event.
         /// </summary>
@@ -296,8 +242,8 @@ namespace com.spacepuppy
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
 
-            var co = new RadicalCoroutine();
-            co.Start(behaviour, routine);
+            var co = new RadicalCoroutine(routine);
+            co.Start(behaviour);
             return co;
         }
 
@@ -306,8 +252,8 @@ namespace com.spacepuppy
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
 
-            var co = new RadicalCoroutine();
-            co.Start(behaviour, routine.GetEnumerator());
+            var co = new RadicalCoroutine(routine.GetEnumerator());
+            co.Start(behaviour);
             return co;
         }
 
@@ -316,8 +262,8 @@ namespace com.spacepuppy
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
 
-            var co = new RadicalCoroutine();
-            co.Start(behaviour, routine().GetEnumerator());
+            var co = new RadicalCoroutine(routine().GetEnumerator());
+            co.Start(behaviour);
             return co;
         }
 
