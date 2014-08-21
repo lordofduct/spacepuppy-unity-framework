@@ -260,17 +260,23 @@ namespace com.spacepuppy
             _routine = routine.GetEnumerator();
         }
 
-        public bool ManualTick()
+        /// <summary>
+        /// Manually step the coroutine. This is usually done from within a Update event.
+        /// </summary>
+        /// <param name="handle">A MonoBehaviour to use as a handle if a YieldInstruction is to be operated on.</param>
+        /// <returns></returns>
+        public bool ManualTick(MonoBehaviour handle)
         {
             if (_owner == null) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated on.");
+            if (handle == null) throw new System.ArgumentNullException("handle");
 
             object current = null;
             if (this.ContinueBlocking(ref current))
             {
-                if(current is YieldInstruction)
+                if (current is YieldInstruction)
                 {
-                    _manualWaitingOnInstruction = new ManualWaitRedirectYieldInstruction(this, current as YieldInstruction);
-                    GameLoopEntry.StartCoroutine(_manualWaitingOnInstruction);
+                    _manualWaitingOnInstruction = new ManualWaitRedirectYieldInstruction(this, handle, current as YieldInstruction);
+                    handle.StartCoroutine(_manualWaitingOnInstruction);
                 }
                 return true;
             }
@@ -370,12 +376,14 @@ namespace com.spacepuppy
         private class ManualWaitRedirectYieldInstruction : RadicalYieldInstruction
         {
             private RadicalCoroutine _owner;
+            private MonoBehaviour _handle;
             private YieldInstruction _instruction;
             private bool _called;
 
-            public ManualWaitRedirectYieldInstruction(RadicalCoroutine owner, YieldInstruction instruction)
+            public ManualWaitRedirectYieldInstruction(RadicalCoroutine owner, MonoBehaviour handle, YieldInstruction instruction)
             {
                 _owner = owner;
+                _handle = handle;
                 _instruction = instruction;
             }
 
@@ -392,7 +400,7 @@ namespace com.spacepuppy
                     _owner._manualWaitingOnInstruction = null;
                     if (_instruction is WaitForEndOfFrame || _instruction is WaitForFixedUpdate)
                     {
-                        _owner.ManualTick();
+                        _owner.ManualTick(_handle);
                     }
                 }
 
