@@ -7,7 +7,7 @@ using com.spacepuppy.Collections;
 namespace com.spacepuppy
 {
 
-    public class RadicalAsyncOperation : IRadicalYieldInstruction
+    public class RadicalAsyncOperation : RadicalYieldInstruction
     {
 
         #region Fields
@@ -38,25 +38,18 @@ namespace com.spacepuppy
 
         #region Methods
 
-        protected virtual object Update(RadicalCoroutine routine)
+        protected virtual object Update()
         {
             return null;
         }
 
         #endregion
 
-        #region IRadicalYieldInstruction Interface
+        #region RadicalYieldInstruction Interface
 
-        private object _yieldObject;
-
-        object IRadicalYieldInstruction.CurrentYieldObject
+        protected override bool ContinueBlocking(ref object yieldObject)
         {
-            get { return _yieldObject; }
-        }
-
-        bool IRadicalYieldInstruction.ContinueBlocking(RadicalCoroutine routine)
-        {
-            _yieldObject = this.Update(routine);
+            yieldObject = this.Update();
             return !this.Complete;
         }
 
