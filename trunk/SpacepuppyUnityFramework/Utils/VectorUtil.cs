@@ -92,14 +92,6 @@ namespace com.spacepuppy.Utils
 
         #region Vector2 Trig
 
-        public static Vector2 Slerp(Vector2 a, Vector2 b, float t)
-        {
-            var a3 = new Vector3(a.x, a.y, 0);
-            var b3 = new Vector3(b.x, b.y, 0);
-            var r3 = Vector3.Slerp(a3, b3, t);
-            return new Vector2(r3.x, r3.y);
-        }
-
         /// <summary>
         /// Get the angle in degrees off the forward defined by x.
         /// </summary>
@@ -173,12 +165,58 @@ namespace com.spacepuppy.Utils
             v.y = (float)(v.x * sa + v.y * ca);
         }
 
+        /// <summary>
+        /// Rotates a vector toward another. Magnitude of the from vector is maintained.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="a"></param>
+        /// <param name="bUseRadians"></param>
+        /// <returns></returns>
         public static Vector2 RotateToward(Vector2 from, Vector2 to, float a, bool bUseRadians = false)
         {
-            var angleBetween = AngleBetween(from, to);
-            if (bUseRadians) angleBetween *= Mathf.Deg2Rad;
-            var t = angleBetween / a;
-            return Slerp(from, to, t);
+            //var angleBetween = Mathf.Acos(Vector2.Dot(from, to) / (from.magnitude * to.magnitude));
+            //if (!bUseRadians) a *= Mathf.Deg2Rad;
+            //var t = angleBetween / a;
+            //return Slerp(from, to, t);
+
+            if (!bUseRadians) a *= Mathf.Deg2Rad;
+            var a1 = Mathf.Atan2(from.y, from.x);
+            var a2 = Mathf.Atan2(to.y, to.x);
+            a2 = MathUtil.NormalizeAngleToAnother(a2, a1, true);
+            var ra = (a2 - a1 >= 0f) ? a1 + a : a1 - a;
+            var l = from.magnitude;
+            return new Vector2(Mathf.Cos(ra) * l, Mathf.Sin(ra) * l);
+        }
+
+        public static Vector2 RotateTowardClamped(Vector2 from, Vector2 to, float a, bool bUseRadians = false)
+        {
+            if (!bUseRadians) a *= Mathf.Deg2Rad;
+            var a1 = Mathf.Atan2(from.y, from.x);
+            var a2 = Mathf.Atan2(to.y, to.x);
+            a2 = MathUtil.NormalizeAngleToAnother(a2, a1, true);
+
+            var da = a2 - a1;
+            var ra = a1 + Mathf.Clamp(Mathf.Abs(a), 0f, Mathf.Abs(da)) * Mathf.Sign(da);
+
+            var l = from.magnitude;
+            return new Vector2(Mathf.Cos(ra) * l, Mathf.Sin(ra) * l);
+        }
+
+        /// <summary>
+        /// Angular interpolates between two vectors.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="t"></param>
+        /// <returns>The vectors are 2 dimensional, so technically this is not a spherical linear interpolation. The name Slerp is kept for consistency. 
+        /// The result would be if you Slerped between 2 Vector3's that had a z value of 0. The direction interpolates at an angular rate, where as the 
+        /// magnitude interpolates at a linear rate.</returns>
+        public static Vector2 Slerp(Vector2 from, Vector2 to, float t)
+        {
+            var a = MathUtil.NormalizeAngle(Mathf.Lerp(Mathf.Atan2(from.y, from.x), Mathf.Atan2(to.y, to.x), t), true);
+            var l = Mathf.Lerp(from.magnitude, to.magnitude, t);
+            return new Vector2(Mathf.Cos(a) * l, Mathf.Sin(a) * l);
         }
 
         #endregion
@@ -329,6 +367,10 @@ namespace com.spacepuppy.Utils
         }
 
         #endregion
+
+
+
+
 
         public static string ToDetailedString(this Vector2 v)
         {

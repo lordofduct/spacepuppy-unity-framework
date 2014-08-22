@@ -87,6 +87,7 @@
     <Compile Include="Utils\CoroutineUtil.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
     <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
+    <Compile Include="Utils\MathUtil.cs" />
     <Compile Include="Utils\ObjUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />
