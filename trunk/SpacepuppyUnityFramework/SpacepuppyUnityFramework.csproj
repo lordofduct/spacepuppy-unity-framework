@@ -34,9 +34,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEditor">
-      <HintPath>Resources\UnityEditor.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>Resources\UnityEngine.dll</HintPath>
     </Reference>
@@ -51,7 +48,6 @@
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="Delegates.cs" />
-    <Compile Include="Editor\Inspectors\MultiTagInspector.cs" />
     <Compile Include="GameLoopEntry.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Geom\AABBox.cs" />
