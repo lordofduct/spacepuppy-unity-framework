@@ -71,24 +71,6 @@ namespace com.spacepuppy
         }
 
         /// <summary>
-        /// Resets coroutine so it can start over from the beginning.
-        /// </summary>
-        public override void Reset()
-        {
-            base.Reset();
-
-            _routine.Reset();
-            if (_derivative != null && _derivative is RadicalCoroutine)
-            {
-                (_derivative as RadicalCoroutine).Cancel();
-            }
-
-            _derivative = null;
-            _manualWaitingOnInstruction = null;
-            _completed = false;
-        }
-
-        /// <summary>
         /// Stops the coroutine flagging it as complete. The coroutine still may not be used again as the operator may maintain a reference for resetting. Check the 'HasOwner' property.
         /// </summary>
         public void Cancel()
@@ -145,6 +127,10 @@ namespace com.spacepuppy
                     //do nothing
                 }
                 else if (current is YieldInstruction)
+                {
+                    yieldObject = current;
+                }
+                else if (current is WWW)
                 {
                     yieldObject = current;
                 }
