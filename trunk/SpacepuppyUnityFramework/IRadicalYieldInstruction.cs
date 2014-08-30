@@ -24,11 +24,6 @@ namespace com.spacepuppy
 
         protected abstract bool ContinueBlocking(ref object yieldObject);
 
-        public virtual void Reset()
-        {
-            _current = null;
-        }
-
         #endregion
 
         #region IEnumerator Interface
@@ -46,7 +41,7 @@ namespace com.spacepuppy
 
         void System.Collections.IEnumerator.Reset()
         {
-            this.Reset();
+            throw new System.NotSupportedException();
         }
 
         #endregion
