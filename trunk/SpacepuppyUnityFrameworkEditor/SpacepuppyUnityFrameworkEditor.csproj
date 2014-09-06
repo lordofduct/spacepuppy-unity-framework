@@ -52,6 +52,9 @@
     <Compile Include="Inspectors\LabelPropertyDrawer.cs" />
     <Compile Include="Inspectors\MultiTagInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerInspector.cs" />
+    <Compile Include="Inspectors\TagSelectorPropertyDrawer.cs" />
+    <Compile Include="Inspectors\TypeReferencePropertyDrawer.cs" />
+    <Compile Include="Inspectors\VariantReferencePropertyDrawer.cs" />
     <Compile Include="MaterialHelper.cs" />
     <Compile Include="Modifiers\DefaultFromSelfModifier.cs" />
     <Compile Include="Modifiers\DisableOnPlayModifier.cs" />
