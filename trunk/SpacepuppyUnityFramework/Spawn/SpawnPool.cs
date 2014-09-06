@@ -42,7 +42,7 @@ namespace com.spacepuppy.Spawn
             if (_pools.Count > 0) return;
 
             var point = (from p in GameObject.FindObjectsOfType<SpawnPool>() orderby p.name == "Spacepuppy.PrimarySpawnPool" select p).FirstOrDefault();
-            if(!Object.ReferenceEquals(point, null))
+            if (!Object.ReferenceEquals(point, null))
             {
                 _pools.Add(point);
             }
@@ -80,6 +80,13 @@ namespace com.spacepuppy.Spawn
             {
                 cache.Load();
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (_pools.Contains(this)) _pools.Remove(this);
         }
 
         #endregion
