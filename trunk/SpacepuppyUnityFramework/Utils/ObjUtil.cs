@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 #pragma warning disable 0168 // variable declared but not used.
 
@@ -37,6 +38,18 @@ namespace com.spacepuppy.Utils
             return EnumValueIsDefined(value, typeof(T));
         }
 
+        public static IEnumerable<System.Enum> GetUniqueEnumFlags(System.Type enumType)
+        {
+            if (enumType == null) throw new System.ArgumentNullException("enumType");
+            if (!enumType.IsEnum) throw new System.ArgumentException("Type must be an enum.", "enumType");
+
+            foreach (var e in System.Enum.GetValues(enumType))
+            {
+                var d = System.Convert.ToDecimal(e);
+                if (d > 0 && MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(d))) yield return e as System.Enum;
+            }
+        }
+
         #endregion
 
         public static System.Type[] GetTypesAssignableFrom(System.Reflection.Assembly assemb, System.Type rootType)
@@ -68,12 +81,13 @@ namespace com.spacepuppy.Utils
 
         public static object GetValue(this object obj, string sprop, params object[] args)
         {
+            const System.Reflection.BindingFlags BINDING = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
             if (obj == null) return null;
 
             try
             {
                 var tp = obj.GetType();
-                var members = tp.GetMember(sprop);
+                var members = tp.GetMember(sprop, BINDING);
                 if (members == null || members.Length == 0) return null;
 
                 foreach (var member in members)
@@ -128,13 +142,14 @@ namespace com.spacepuppy.Utils
 
         public static bool SetValue(this object obj, string sprop, object value)
         {
+            const System.Reflection.BindingFlags BINDING = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
             if (obj == null) return false;
 
             try
             {
                 var tp = obj.GetType();
 
-                var members = tp.GetMember(sprop);
+                var members = tp.GetMember(sprop, BINDING);
                 if (members == null || members.Length == 0) return false;
 
                 System.Type vtp = (value != null) ? value.GetType() : null;
@@ -226,5 +241,38 @@ namespace com.spacepuppy.Utils
 
             return System.Delegate.CreateDelegate(delegateType, obj, name, ignoreCase, throwOnBindFailure);
         }
+
+
+        public static bool IsListType(this System.Type tp)
+        {
+            if (tp == null) return false;
+
+            if (tp.IsArray) return true;
+
+            var interfaces = tp.GetInterfaces();
+            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static System.Type GetElementTypeOfListType(this System.Type tp)
+        {
+            if (tp == null) return null;
+
+            if (tp.IsArray) return tp.GetElementType();
+
+            var interfaces = tp.GetInterfaces();
+            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            {
+                if (tp.IsGenericType) return tp.GetGenericArguments()[0];
+                else return typeof(object);
+            }
+
+            return null;
+        }
+
     }
 }

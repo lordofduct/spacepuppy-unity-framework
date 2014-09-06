@@ -19,66 +19,134 @@ namespace com.spacepuppy.Utils
 
         #region HasComponent
 
-        public static bool HasComponent<T>(this GameObject obj) where T : Component
+        public static bool HasComponent<T>(this GameObject obj, bool testIfEnabled = false) where T : Component
         {
-            return (obj.GetComponent<T>() != null);
+            if (obj == null) return false;
+            if (testIfEnabled)
+            {
+                foreach (var c in obj.GetComponents<T>())
+                {
+                    if (c.IsEnabled()) return true;
+                }
+                return false;
+            }
+            else
+            {
+                return (obj.GetComponent<T>() != null);
+            }
         }
-        public static bool HasComponent<T>(this Component obj) where T : Component
+        public static bool HasComponent<T>(this Component obj, bool testIfEnabled = false) where T : Component
         {
-            return (obj.GetComponent<T>() != null);
+            if (obj == null) return false;
+            if (testIfEnabled)
+            {
+                foreach (var c in obj.GetComponents<T>())
+                {
+                    if (c.IsEnabled()) return true;
+                }
+                return false;
+            }
+            else
+            {
+                return (obj.GetComponent<T>() != null);
+            }
         }
 
-        public static bool HasComponent(this GameObject obj, string tp)
+        public static bool HasComponent(this GameObject obj, string tp, bool testIfEnabled = false)
         {
-            return (obj.GetComponent(tp) != null);
+            if (obj == null) return false;
+            if (testIfEnabled)
+            {
+                var c = obj.GetComponent(tp);
+                if (c == null) return false;
+                return c.IsEnabled();
+            }
+            else
+            {
+                return (obj.GetComponent(tp) != null);
+            }
         }
-        public static bool HasComponent(this Component obj, string tp)
+        public static bool HasComponent(this Component obj, string tp, bool testIfEnabled = false)
         {
-            return (obj.GetComponent(tp) != null);
+            if (obj == null) return false;
+            if (testIfEnabled)
+            {
+                var c = obj.GetComponent(tp);
+                if (c == null) return false;
+                return c.IsEnabled();
+            }
+            else
+            {
+                return (obj.GetComponent(tp) != null);
+            }
         }
 
-        public static bool HasComponent(this GameObject obj, System.Type tp)
+        public static bool HasComponent(this GameObject obj, System.Type tp, bool testIfEnabled = false)
         {
-            return (obj.GetComponent(tp) != null);
+            if (obj == null) return false;
+            if (testIfEnabled)
+            {
+                foreach (var c in obj.GetComponents(tp))
+                {
+                    if (c.IsEnabled()) return true;
+                }
+                return false;
+            }
+            else
+            {
+                return (obj.GetComponent(tp) != null);
+            }
         }
-        public static bool HasComponent(this Component obj, System.Type tp)
+        public static bool HasComponent(this Component obj, System.Type tp, bool testIfEnabled = false)
         {
-            return (obj.GetComponent(tp) != null);
+            if (obj == null) return false;
+            if (testIfEnabled)
+            {
+                foreach (var c in obj.GetComponents(tp))
+                {
+                    if (c.IsEnabled()) return true;
+                }
+                return false;
+            }
+            else
+            {
+                return (obj.GetComponent(tp) != null);
+            }
         }
 
-        public static bool HasLikeComponent<T>(this GameObject obj)
+        public static bool HasLikeComponent<T>(this GameObject obj, bool testIfEnabled = false)
         {
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (comp is T) return true;
+                if (comp is T && (!testIfEnabled || comp.IsEnabled())) return true;
             }
 
             return false;
         }
-        public static bool HasLikeComponent<T>(this Component obj)
+        public static bool HasLikeComponent<T>(this Component obj, bool testIfEnabled = false)
         {
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (comp is T) return true;
+                if (comp is T && (!testIfEnabled || comp.IsEnabled())) return true;
             }
 
             return false;
         }
 
-        public static bool HasLikeComponent(this GameObject obj, System.Type tp)
+        public static bool HasLikeComponent(this GameObject obj, System.Type tp, bool testIfEnabled = false)
         {
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp)) return true;
+                if (ObjUtil.IsType(comp.GetType(), tp) && (!testIfEnabled || comp.IsEnabled())) return true;
             }
 
             return false;
         }
-        public static bool HasLikeComponent(this Component obj, System.Type tp)
+        public static bool HasLikeComponent(this Component obj, System.Type tp, bool testIfEnabled = false)
         {
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp)) return true;
+                if (ObjUtil.IsType(comp.GetType(), tp) && (!testIfEnabled || comp.IsEnabled())) return true;
             }
 
             return false;
@@ -367,15 +435,6 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<T> GetLikeComponents<T>(this GameObject obj) where T : class
         {
-            //if (obj == null) return null;
-
-            //var lst = new List<T>();
-            //foreach (object comp in obj.GetComponents<Component>())
-            //{
-            //    if (comp is T) lst.Add((T)comp);
-            //}
-            //return lst.ToArray();
-
             if (obj == null) yield break;
 
             foreach (var comp in obj.GetComponents<Component>())
@@ -386,15 +445,6 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<T> GetLikeComponents<T>(this Component obj) where T : class
         {
-            //if (obj == null) return null;
-
-            //var lst = new List<T>();
-            //foreach (object comp in obj.GetComponents<Component>())
-            //{
-            //    if (comp is T) lst.Add((T)comp);
-            //}
-            //return lst.ToArray();
-
             if (obj == null) yield break;
 
             foreach (var comp in obj.GetComponents<Component>())
@@ -405,15 +455,6 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<Component> GetLikeComponents(this GameObject obj, System.Type tp)
         {
-            //if (obj == null) return null;
-
-            //var lst = new List<Component>();
-            //foreach (Component comp in obj.GetComponents<Component>())
-            //{
-            //    if (ObjUtil.IsType(comp.GetType(), tp)) lst.Add(comp);
-            //}
-            //return lst.ToArray();
-
             if (obj == null) yield break;
 
             foreach (var comp in obj.GetComponents<Component>())
@@ -424,15 +465,6 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<Component> GetLikeComponents(this Component obj, System.Type tp)
         {
-            //if (obj == null) return null;
-
-            //var lst = new List<Component>();
-            //foreach (Component comp in obj.GetComponents<Component>())
-            //{
-            //    if (ObjUtil.IsType(comp.GetType(), tp)) lst.Add(comp);
-            //}
-            //return lst.ToArray();
-
             if (obj == null) yield break;
 
             foreach (var comp in obj.GetComponents<Component>())
@@ -448,42 +480,112 @@ namespace com.spacepuppy.Utils
         public static void RemoveComponent<T>(this GameObject obj) where T : Component
         {
             var comp = obj.GetComponent<T>();
-            if (comp != null) Object.Destroy(comp);
+            if (comp != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Object.Destroy(comp);
+                }
+                else
+                {
+                    Object.DestroyImmediate(comp);
+                }
+            }
         }
 
         public static void RemoveComponent<T>(this Component obj) where T : Component
         {
             var comp = obj.GetComponent<T>();
-            if (comp != null) Object.Destroy(comp);
+            if (comp != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Object.Destroy(comp);
+                }
+                else
+                {
+                    Object.DestroyImmediate(comp);
+                }
+            }
         }
 
         public static void RemoveComponent(this GameObject obj, string tp)
         {
             var comp = obj.GetComponent(tp);
-            if (comp != null) Object.Destroy(comp);
+            if (comp != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Object.Destroy(comp);
+                }
+                else
+                {
+                    Object.DestroyImmediate(comp);
+                }
+            }
         }
 
         public static void RemoveComponent(this Component obj, string tp)
         {
             var comp = obj.GetComponent(tp);
-            if (comp != null) Object.Destroy(comp);
+            if (comp != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Object.Destroy(comp);
+                }
+                else
+                {
+                    Object.DestroyImmediate(comp);
+                }
+            }
         }
 
         public static void RemoveComponent(this GameObject obj, System.Type tp)
         {
             var comp = obj.GetComponent(tp);
-            if (comp != null) Object.Destroy(comp);
+            if (comp != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Object.Destroy(comp);
+                }
+                else
+                {
+                    Object.DestroyImmediate(comp);
+                }
+            }
         }
 
         public static void RemoveComponent(this Component obj, System.Type tp)
         {
             var comp = obj.GetComponent(tp);
-            if (comp != null) Object.Destroy(comp);
+            if (comp != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Object.Destroy(comp);
+                }
+                else
+                {
+                    Object.DestroyImmediate(comp);
+                }
+            }
         }
 
         public static void RemoveFromOwner(this Component comp)
         {
-            Object.Destroy(comp);
+            if (comp != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Object.Destroy(comp);
+                }
+                else
+                {
+                    Object.DestroyImmediate(comp);
+                }
+            }
         }
 
         #endregion
@@ -492,84 +594,84 @@ namespace com.spacepuppy.Utils
 
         #region EntityHasComponent
 
-        public static bool EntityHasComponent<T>(this GameObject obj) where T : Component
+        public static bool EntityHasComponent<T>(this GameObject obj, bool testIfEnabled = false) where T : Component
         {
             var root = obj.FindRoot();
 
             foreach (var t in root.GetAllChildrenAndSelf())
             {
-                if (t.HasComponent<T>()) return true;
+                if (t.HasComponent<T>(testIfEnabled)) return true;
             }
 
             return false;
         }
-        public static bool EntityHasComponent<T>(this Component obj) where T : Component
+        public static bool EntityHasComponent<T>(this Component obj, bool testIfEnabled = false) where T : Component
         {
-            return EntityHasComponent<T>(obj.gameObject);
+            return EntityHasComponent<T>(obj.gameObject, testIfEnabled);
         }
 
-        public static bool EntityHasComponent(this GameObject obj, string tp)
+        public static bool EntityHasComponent(this GameObject obj, string tp, bool testIfEnabled = false)
         {
             var root = obj.FindRoot();
 
             foreach (var t in root.GetAllChildrenAndSelf())
             {
-                if (t.HasComponent(tp)) return true;
+                if (t.HasComponent(tp, testIfEnabled)) return true;
             }
 
             return false;
         }
-        public static bool EntityHasComponent(this Component obj, string tp)
+        public static bool EntityHasComponent(this Component obj, string tp, bool testIfEnabled = false)
         {
-            return EntityHasComponent(obj.gameObject, tp);
+            return EntityHasComponent(obj.gameObject, tp, testIfEnabled);
         }
 
-        public static bool EntityHasComponent(this GameObject obj, System.Type tp)
+        public static bool EntityHasComponent(this GameObject obj, System.Type tp, bool testIfEnabled = false)
         {
             var root = obj.FindRoot();
 
             foreach (var t in root.GetAllChildrenAndSelf())
             {
-                if (t.HasComponent(tp)) return true;
+                if (t.HasComponent(tp, testIfEnabled)) return true;
             }
 
             return false;
         }
-        public static bool EntityHasComponent(this Component obj, System.Type tp)
+        public static bool EntityHasComponent(this Component obj, System.Type tp, bool testIfEnabled = false)
         {
-            return EntityHasComponent(obj.gameObject, tp);
+            return EntityHasComponent(obj.gameObject, tp, testIfEnabled);
         }
 
-        public static bool EntityHasLikeComponent<T>(this GameObject obj)
+        public static bool EntityHasLikeComponent<T>(this GameObject obj, bool testIfEnabled = false)
         {
             var root = obj.FindRoot();
 
             foreach (var t in root.GetAllChildrenAndSelf())
             {
-                if (t.HasLikeComponent<T>()) return true;
+                if (t.HasLikeComponent<T>(testIfEnabled)) return true;
             }
 
             return false;
         }
-        public static bool EntityHasLikeComponent<T>(this Component obj)
+        public static bool EntityHasLikeComponent<T>(this Component obj, bool testIfEnabled = false)
         {
-            return EntityHasLikeComponent<T>(obj.gameObject);
+            return EntityHasLikeComponent<T>(obj.gameObject, testIfEnabled);
         }
 
-        public static bool EntityHasLikeComponent(this GameObject obj, System.Type tp)
+        public static bool EntityHasLikeComponent(this GameObject obj, System.Type tp, bool testIfEnabled = false)
         {
             var root = obj.FindRoot();
 
             foreach (var t in root.GetAllChildrenAndSelf())
             {
-                if (t.HasLikeComponent(tp)) return true;
+                if (t.HasLikeComponent(tp, testIfEnabled)) return true;
             }
 
             return false;
         }
-        public static bool EntityHasLikeComponent(this Component obj, System.Type tp)
+        public static bool EntityHasLikeComponent(this Component obj, System.Type tp, bool testIfEnabled = false)
         {
-            return EntityHasLikeComponent(obj.gameObject, tp);
+            return EntityHasLikeComponent(obj.gameObject, tp, testIfEnabled);
         }
 
         #endregion

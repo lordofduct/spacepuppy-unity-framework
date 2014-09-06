@@ -15,6 +15,21 @@ namespace com.spacepuppy.Utils
 
         #region Vector Convert
 
+        public static string Stringify(Vector2 v)
+        {
+            return v.x.ToString() + "," + v.y.ToString();
+        }
+
+        public static string Stringify(Vector3 v)
+        {
+            return v.x.ToString() + "," + v.y.ToString() + "," + v.z.ToString();
+        }
+
+        public static string Stringify(Quaternion q)
+        {
+            return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + q.w.ToString();
+        }
+
         /// <summary>
         /// Get Vector2 from angle
         /// </summary>
@@ -65,6 +80,25 @@ namespace com.spacepuppy.Utils
 
             return new Vector3(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]), ConvertUtil.ToSingle(arr[2]));
         }
+
+
+        /// <summary>
+        /// Parses a Quaterion
+        /// </summary>
+        /// <param name="v"></param>
+        /// <param name="a"></param>
+        /// <param name="axis"></param>
+        /// <param name="bUseRadians"></param>
+        /// <returns></returns>
+        public static Quaternion ToQuaternion(string sval)
+        {
+            if (string.IsNullOrEmpty(sval)) return Quaternion.identity;
+
+            var arr = StringUtil.SplitFixedLength(sval.Replace(" ", ""), ',', 4);
+            return new Quaternion(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]), ConvertUtil.ToSingle(arr[2]), ConvertUtil.ToSingle(arr[3]));
+        }
+
+
 
         public static Vector3 RotateAroundAxis(Vector3 v, float a, Vector3 axis, bool bUseRadians = false)
         {
@@ -324,6 +358,16 @@ namespace com.spacepuppy.Utils
         public static bool NearSameAxis(Vector3 a, Vector3 b, float epsilon = MathUtil.EPSILON)
         {
             return MathUtil.FuzzyEqual(Mathf.Abs(Vector3.Dot(a.normalized, b.normalized)), 1.0f, epsilon);
+        }
+
+        public static bool NearZeroVector(Vector3 v)
+        {
+            return MathUtil.FuzzyEqual(v.sqrMagnitude, 0f, MathUtil.EPSILON_SQR);
+        }
+
+        public static bool NearZeroVector(Vector2 v)
+        {
+            return MathUtil.FuzzyEqual(v.sqrMagnitude, 0f, MathUtil.EPSILON_SQR);
         }
 
         #endregion

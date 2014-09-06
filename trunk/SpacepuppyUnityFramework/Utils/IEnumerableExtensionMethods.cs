@@ -114,6 +114,15 @@ namespace com.spacepuppy.Utils
             return lst.Intersect(objs).Count() > 0;
         }
 
+        public static IEnumerable<T> Prepend<T>(this IEnumerable<T> lst, T obj)
+        {
+            yield return obj;
+            foreach (var o in lst)
+            {
+                yield return o;
+            }
+        }
+
         #region Array Methods
 
         public static int IndexOf(this System.Array lst, object obj)

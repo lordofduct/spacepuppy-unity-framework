@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Linq;
 
 using com.spacepuppy.Geom;
+using com.spacepuppy.Spawn;
 
 namespace com.spacepuppy.Utils
 {
@@ -12,7 +13,7 @@ namespace com.spacepuppy.Utils
 
         public static bool IsGameObjectSource(object obj)
         {
-            return (obj is GameObject || obj is Component || obj is IComponent);
+            return (obj is GameObject || obj is Component || obj is IGameObjectSource);
         }
 
         public static GameObject GetGameObjectFromSource(object obj)
@@ -21,8 +22,8 @@ namespace com.spacepuppy.Utils
                 return obj as GameObject;
             if (obj is Component)
                 return (obj as Component).gameObject;
-            if (obj is IComponent)
-                return (obj as IComponent).gameObject;
+            if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).gameObject;
 
             return null;
         }
@@ -35,8 +36,8 @@ namespace com.spacepuppy.Utils
                 return (obj as GameObject).transform;
             if (obj is Component)
                 return (obj as Component).transform;
-            if (obj is IComponent)
-                return (obj as IComponent).transform;
+            if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).transform;
 
             return null;
         }
@@ -91,8 +92,6 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region Spawnable Methods
-
-        /*
 
         public static bool IsSpawnedObject(this GameObject obj)
         {
@@ -153,8 +152,6 @@ namespace com.spacepuppy.Utils
                 obj.DestroyAll();
             }
         }
-
-         */
 
         /// <summary>
         /// Destroys self and all children

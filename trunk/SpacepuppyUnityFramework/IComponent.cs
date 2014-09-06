@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 using com.spacepuppy.Utils;
 
@@ -9,12 +10,13 @@ namespace com.spacepuppy
     /// <summary>
     /// Base contract for any interface contract that should be considered a Component
     /// </summary>
-    public interface IComponent
+    public interface IComponent : IGameObjectSource
     {
+        event System.EventHandler ComponentDestroyed;
+
         bool enabled { get; set; }
         Component component { get; }
-        GameObject gameObject { get; }
-        Transform transform { get; }
+
     }
 
     public abstract class SPComponent : MonoBehaviour, IComponent
@@ -25,6 +27,8 @@ namespace com.spacepuppy
         [System.NonSerialized]
         private GameObject _root;
         private bool _started = false;
+
+        private AutoNotificationManager _autoNotificationManager;
 
         #endregion
 
@@ -42,6 +46,11 @@ namespace com.spacepuppy
             }
 
             this.SyncRoot();
+            //register only if we have auto handlers, otherwise don't bother creating the object
+            if (AutoNotificationManager.TypeHasAutoHandlers(this.GetType()))
+            {
+                _autoNotificationManager = new AutoNotificationManager(this);
+            }
         }
 
         protected virtual void Start()
@@ -53,6 +62,11 @@ namespace com.spacepuppy
         protected virtual void OnDestroy()
         {
             //InvokeUtil.CancelInvoke(this);
+            if (this.ComponentDestroyed != null)
+            {
+                this.ComponentDestroyed(this, System.EventArgs.Empty);
+            }
+            Notification.PurgeNotificationsFor(this);
         }
 
         protected virtual void OnEnable()
@@ -93,7 +107,20 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Handlers
+
+        protected void AutoNotificationMessageHandler(Notification n)
+        {
+            if (_autoNotificationManager == null) return;
+
+            _autoNotificationManager.OnNotification(n);
+        }
+
+        #endregion
+
         #region IComponent Interface
+
+        public event System.EventHandler ComponentDestroyed;
 
         bool IComponent.enabled
         {

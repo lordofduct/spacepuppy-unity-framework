@@ -141,7 +141,7 @@ namespace com.spacepuppy.Collections
             return null;
         }
 
-        public GameObject SearchFor(string sname, bool bIgnoreCase = false)
+        public GameObject FindByName(string sname, bool bIgnoreCase = false)
         {
             if (sname == null) return null;
 
@@ -156,7 +156,7 @@ namespace com.spacepuppy.Collections
             {
                 if (r != null)
                 {
-                    var child = r.SearchFor(sname, bIgnoreCase);
+                    var child = r.FindByName(sname, bIgnoreCase);
                     if (child != null) return child;
                 }
             }

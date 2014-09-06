@@ -2,7 +2,6 @@
 
 namespace com.spacepuppy
 {
-
     public class SPConstants
     {
         public const string TAG_UNTAGGED = "Untagged";
@@ -23,6 +22,9 @@ namespace com.spacepuppy
         //sent by SpawnPool on GameObject being spawned
         public const string MSG_ONSPAWN = "OnSpawn";
         public const string MSG_ONDESPAWN = "OnDespawn";
+
+        //sent by Notification to all members of some entity
+        public const string MSG_AUTONOTIFICATIONMESSAGEHANDLER = "AutoNotificationMessageHandler";
 
     }
 }

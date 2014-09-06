@@ -41,6 +41,8 @@ namespace com.spacepuppy
         public object Sender { get { return _sender; } }
         public UnityEngine.GameObject GameObject { get { return _go; } }
 
+        internal bool AutoReceived { get; set; }
+
         #endregion
 
         #region Methods
@@ -61,10 +63,10 @@ namespace com.spacepuppy
 
         static Notification()
         {
-            _timer = new com.spacepuppy.Timers.Timer(1.0f, 0);
+            _timer = new com.spacepuppy.Timers.Timer(10.0f, 0);
             _timer.TimerCount += delegate(com.spacepuppy.Timers.Timer t)
             {
-                Notification.CleanWeakReferences();
+                Notification.CleanDestroyedObjects();
             };
             com.spacepuppy.Timers.SystemTimers.Start(_timer);
         }
@@ -80,24 +82,31 @@ namespace com.spacepuppy
             set { _timer.Interval = value; }
         }
 
-        public static void CleanWeakReferences()
+        /// <summary>
+        /// Clears out any notification handlers for objects that have been destroyed.
+        /// </summary>
+        public static void CleanDestroyedObjects()
         {
-            foreach (var h in _senderSpecificNotificationHandlers.Values)
+            var toRemove = (from o in _senderSpecificNotificationHandlers.Keys where o is UnityEngine.Object && o == null select o).ToArray();
+            foreach (var o in toRemove)
             {
-                h.CleanWeakReferences();
+                _senderSpecificNotificationHandlers.Remove(o);
             }
+        }
 
-            _globalNotificationHandlers.CleanWeakReferences();
+        public static void PurgeNotificationsFor(object obj)
+        {
+            if (_senderSpecificNotificationHandlers.ContainsKey(obj)) _senderSpecificNotificationHandlers.Remove(obj);
         }
 
         #endregion
 
         #region Register/Post Interface
 
-        public static void RegisterGlobalObserver<T>(NotificationHandler<T> handler, bool useWeakReference = false) where T : Notification
+        public static void RegisterGlobalObserver<T>(NotificationHandler<T> handler) where T : Notification
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
-            _globalNotificationHandlers.RegisterObserver<T>(handler, useWeakReference);
+            _globalNotificationHandlers.RegisterObserver<T>(handler);
         }
 
         public static void RemoveGlobalObserver<T>(NotificationHandler<T> handler) where T : Notification
@@ -107,7 +116,7 @@ namespace com.spacepuppy
             _globalNotificationHandlers.RemoveObserver<T>(handler);
         }
 
-        public static void RegisterObserver<T>(object sender, NotificationHandler<T> handler, bool useWeakReference = false) where T : Notification
+        public static void RegisterObserver<T>(object sender, NotificationHandler<T> handler) where T : Notification
         {
             if (sender == null) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
@@ -123,7 +132,7 @@ namespace com.spacepuppy
             {
                 coll = _senderSpecificNotificationHandlers[sender];
             }
-            coll.RegisterObserver<T>(handler, useWeakReference);
+            coll.RegisterObserver<T>(handler);
         }
 
         public static void RemoveObserver<T>(object sender, NotificationHandler<T> handler) where T : Notification
@@ -180,21 +189,29 @@ namespace com.spacepuppy
                 if (bNotifyRoot)
                 {
                     var root = com.spacepuppy.Utils.GameObjectUtil.FindRoot(go);
-                    if (root != null && root != go)
+                    if (root != go)
                     {
                         if (_senderSpecificNotificationHandlers.TryGetValue(root, out coll))
                         {
                             if (coll.PostNotification<T>(notification)) handled = true;
                         }
                     }
+                    //AUTO NOTIFICATION
+                    root.BroadcastMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, notification, UnityEngine.SendMessageOptions.DontRequireReceiver);
                 }
+                else
+                {
+                    //AUTO NOTIFICATION
+                    go.SendMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, notification, UnityEngine.SendMessageOptions.DontRequireReceiver);
+                }
+                if (notification.AutoReceived) handled = true;
             }
 
             //finally let anyone registered with the global hear about it
             bool globallyHandled = _globalNotificationHandlers.PostNotification<T>(notification);
 
             //if not handled, check if we should throw an exception
-            if (!(handled || globallyHandled))
+            if (!(handled || globallyHandled) && Attribute.IsDefined(typeof(T), typeof(RequireReceiverAttribute), false))
             {
                 var requiredAttrib = typeof(T).GetCustomAttributes(typeof(RequireReceiverAttribute), false).FirstOrDefault() as RequireReceiverAttribute;
                 if (requiredAttrib != null)
@@ -403,7 +420,6 @@ namespace com.spacepuppy
             #region Fields
 
             private Dictionary<Type, Delegate> _table = new Dictionary<Type, Delegate>();
-            private ListDictionary<Type, Delegate> _weakTable = new ListDictionary<Type, Delegate>(() => new WeakList<Delegate>());
             private Dictionary<Type, NotificationHandler> _unsafeTable = new Dictionary<Type, NotificationHandler>();
 
             #endregion
@@ -419,7 +435,7 @@ namespace com.spacepuppy
 
             #region Properties
 
-            public bool IsEmpty { get { return _table.Count == 0 && _weakTable.Count == 0; } }
+            public bool IsEmpty { get { return _table.Count == 0 && _unsafeTable.Count == 0; } }
 
             #endregion
 
@@ -427,33 +443,19 @@ namespace com.spacepuppy
 
             #region Safe
 
-            public void RegisterObserver<T>(NotificationHandler<T> handler, bool useWeakReference = false) where T : Notification
+            public void RegisterObserver<T>(NotificationHandler<T> handler) where T : Notification
             {
                 var tp = typeof(T);
-                if (useWeakReference)
-                {
-                    _weakTable.Add(tp, handler);
-                    (_weakTable.Lists[tp] as WeakList<Delegate>).Clean();
-                }
-                else
-                {
-                    System.Delegate d = (_table.ContainsKey(tp)) ? _table[tp] : null;
-                    //this would only fail if someone modified this code to allow adding mismatched delegates with notification types
-                    d = Delegate.Combine(d, handler);
-                    _table[tp] = d;
-                }
+                System.Delegate d = (_table.ContainsKey(tp)) ? _table[tp] : null;
+                //this would only fail if someone modified this code to allow adding mismatched delegates with notification types
+                d = Delegate.Combine(d, handler);
+                _table[tp] = d;
             }
 
             public void RemoveObserver<T>(NotificationHandler<T> handler) where T : Notification
             {
                 var notificationType = typeof(T);
-                if (_weakTable.ContainsKey(notificationType) && _weakTable.Lists[notificationType].Contains(handler))
-                {
-                    _weakTable.Lists[notificationType].Remove(handler);
-                    (_weakTable.Lists[notificationType] as WeakList<Delegate>).Clean();
-                    _weakTable.Purge();
-                }
-                else if (_table.ContainsKey(notificationType))
+                if (_table.ContainsKey(notificationType))
                 {
                     var d = _table[notificationType];
                     if (d != null)
@@ -469,56 +471,6 @@ namespace com.spacepuppy
                         }
                     }
                 }
-            }
-
-            public bool PostNotification<T>(T notification) where T : Notification
-            {
-                bool bSuccess = false;
-
-                //post safe receivers
-                var notificationType = typeof(T);
-                Delegate d = null;
-                _table.TryGetValue(notificationType, out d);
-
-                if (_weakTable.ContainsKey(notificationType))
-                {
-                    var lst = _weakTable.Lists[notificationType];
-                    if (lst != null && lst.Count > 0)
-                    {
-                        //try
-                        //{
-                        //    var wd = Delegate.Combine(lst.ToArray());
-                        //    d = Delegate.Combine(d, wd);
-                        //}
-                        //catch
-                        //{
-
-                        //}
-                        foreach (var wd in lst)
-                        {
-                            if (wd != null) d = Delegate.Combine(d, wd);
-                        }
-                    }
-                }
-
-                if (d != null && d is NotificationHandler<T>)
-                {
-                    (d as NotificationHandler<T>)(notification);
-                    bSuccess = true;
-                }
-
-                //post unsafe receivers
-                if (_unsafeTable.ContainsKey(notificationType))
-                {
-                    var ud = _unsafeTable[notificationType];
-                    if (ud != null)
-                    {
-                        ud(notification);
-                        bSuccess = true;
-                    }
-                }
-
-                return bSuccess;
             }
 
             #endregion
@@ -554,6 +506,42 @@ namespace com.spacepuppy
 
             #endregion
 
+            #region Post
+
+            public bool PostNotification<T>(T notification) where T : Notification
+            {
+                bool bSuccess = false;
+
+                //post safe receivers
+                var notificationType = typeof(T);
+                var baseType = typeof(Notification);
+                while (baseType.IsAssignableFrom(notificationType))
+                {
+                    Delegate d = null;
+                    if (_table.TryGetValue(notificationType, out d) && d != null && d is NotificationHandler<T>)
+                    {
+                        (d as NotificationHandler<T>)(notification);
+                        bSuccess = true;
+                    }
+
+                    //post unsafe receivers
+                    if (_unsafeTable.ContainsKey(notificationType))
+                    {
+                        var ud = _unsafeTable[notificationType];
+                        if (ud != null)
+                        {
+                            ud(notification);
+                            bSuccess = true;
+                        }
+                    }
+
+                    notificationType = notificationType.BaseType;
+                }
+
+                return bSuccess;
+            }
+
+            #endregion
 
             public bool HasObserverOf<T>() where T : Notification
             {
@@ -561,38 +549,23 @@ namespace com.spacepuppy
             }
             public bool HasObserverOf(System.Type notificationType)
             {
-                if (_table.ContainsKey(notificationType))
+                var baseType = typeof(Notification);
+                while (baseType.IsAssignableFrom(notificationType))
                 {
-                    return _table[notificationType] != null;
-                }
+                    if (_table.ContainsKey(notificationType))
+                    {
+                        if (_table[notificationType] != null) return true;
+                    }
 
-                if (_unsafeTable.ContainsKey(notificationType))
-                {
-                    return _unsafeTable[notificationType] != null;
-                }
+                    if (_unsafeTable.ContainsKey(notificationType))
+                    {
+                        if (_unsafeTable[notificationType] != null) return true;
+                    }
 
-                if (_weakTable.ContainsKey(notificationType))
-                {
-                    return _weakTable.Lists[notificationType].Count != 0;
+                    notificationType = notificationType.BaseType;
                 }
 
                 return false;
-            }
-
-
-
-            public void CleanWeakReferences()
-            {
-                var arr = _weakTable.ToArray();
-                foreach (var pair in arr)
-                {
-                    var lst = pair.Value as WeakList<Delegate>;
-                    if (lst != null)
-                    {
-                        lst.Clean();
-                        if (lst.Count == 0) _weakTable.Remove(pair.Key);
-                    }
-                }
             }
 
             #endregion

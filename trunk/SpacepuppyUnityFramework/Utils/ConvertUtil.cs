@@ -13,6 +13,38 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
+        #region Color
+
+        public static int ToInt(Color color)
+        {
+            return (Mathf.RoundToInt(color.a * 255) << 24) +
+                   (Mathf.RoundToInt(color.r * 255) << 16) +
+                   (Mathf.RoundToInt(color.g * 255) << 8) +
+                   Mathf.RoundToInt(color.b * 255);
+        }
+
+        public static Color ToColor(int value)
+        {
+            var a = (float)(value >> 24 & 0xFF) / 255f;
+            var r = (float)(value >> 16 & 0xFF) / 255f;
+            var g = (float)(value >> 8 & 0xFF) / 255f;
+            var b = (float)(value & 0xFF) / 255f;
+            return new Color(r, g, b, a);
+        }
+
+        public static Color ToColor(string value)
+        {
+            return ToColor(ToInt(value));
+        }
+
+        public static Color ToColor(object value)
+        {
+            if (value is Color) return (Color)value;
+            return ToColor(ToInt(value));
+        }
+
+        #endregion
+
         #region ToEnum
 
         public static T ToEnum<T>(string val, T defaultValue) where T : struct, System.IConvertible
@@ -2184,6 +2216,11 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
+        public static object ToPrim(object value, System.TypeCode code)
+        {
+            return ToPrim(value, null, code);
+        }
+
         private static object ToPrim(object value, System.Type tp, System.TypeCode code)
         {
             switch (code)
@@ -2197,7 +2234,7 @@ namespace com.spacepuppy.Utils
                     {
                         return ConvertUtil.ToTime(value);
                     }
-                    else if (object.ReferenceEquals(tp, typeof(object)))
+                    else if (tp == null || object.ReferenceEquals(tp, typeof(object)))
                     {
                         return value;
                     }

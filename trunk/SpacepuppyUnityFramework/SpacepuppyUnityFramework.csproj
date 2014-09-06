@@ -40,6 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes.cs" />
+    <Compile Include="AutoNotificationManager.cs" />
+    <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\UniqueList.cs" />
@@ -48,6 +50,7 @@
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="GameLoopEntry.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Geom\AABBox.cs" />
@@ -63,12 +66,33 @@
     <Compile Include="Hooks\TardyExecutionUpdateEventHooks.cs" />
     <Compile Include="Hooks\UpdateEventHooks.cs" />
     <Compile Include="IComponent.cs" />
+    <Compile Include="IGameObjectSource.cs" />
     <Compile Include="IRadicalYieldInstruction.cs" />
     <Compile Include="MultiTag.cs" />
     <Compile Include="Notification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RadicalAsyncOperation.cs" />
     <Compile Include="RadicalCoroutine.cs" />
+    <Compile Include="Scenario\AbstractTriggerPoint.cs" />
+    <Compile Include="Scenario\EnterTrigger.cs" />
+    <Compile Include="Scenario\IntervalTrigger.cs" />
+    <Compile Include="Scenario\ITriggerable.cs" />
+    <Compile Include="Scenario\MultiTargetTrigger.cs" />
+    <Compile Include="Scenario\OnNotificationTrigger.cs" />
+    <Compile Include="Scenario\ScenarioActivatorMask.cs" />
+    <Compile Include="Scenario\Trigger.cs" />
+    <Compile Include="ShortGuid.cs" />
+    <Compile Include="Signal.cs" />
+    <Compile Include="Spawn\AbstractSpawnPoint.cs" />
+    <Compile Include="Spawn\ISpawnPointPrefabSelector.cs" />
+    <Compile Include="Spawn\OnSpawnModifier.cs" />
+    <Compile Include="Spawn\OrientOnSpawn.cs" />
+    <Compile Include="Spawn\PlaceAtRandomNodeOnSpawn.cs" />
+    <Compile Include="Spawn\RestrictSpawnCount.cs" />
+    <Compile Include="Spawn\SpawnedObjectController.cs" />
+    <Compile Include="Spawn\SpawnNotification.cs" />
+    <Compile Include="Spawn\SpawnPoint.cs" />
+    <Compile Include="Spawn\SpawnPool.cs" />
     <Compile Include="SPConstants.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
     <Compile Include="Timers\GameTimers.cs" />
@@ -77,6 +101,7 @@
     <Compile Include="Timers\SystemTimers.cs" />
     <Compile Include="Timers\Timer.cs" />
     <Compile Include="Timers\TimerCollection.cs" />
+    <Compile Include="TypeReference.cs" />
     <Compile Include="Utils\Assertions.cs" />
     <Compile Include="Utils\ComponentUtil.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
@@ -85,8 +110,10 @@
     <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
     <Compile Include="Utils\MathUtil.cs" />
     <Compile Include="Utils\ObjUtil.cs" />
+    <Compile Include="Utils\QuaternionUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />
+    <Compile Include="VariantReference.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
