@@ -49,7 +49,6 @@
     <Compile Include="HandlesHelper.cs" />
     <Compile Include="Inspectors\ComponentTypeRestrictionPropertyDrawer.cs" />
     <Compile Include="Inspectors\EnumFlagsPropertyDrawer.cs" />
-    <Compile Include="Inspectors\LabelPropertyDrawer.cs" />
     <Compile Include="Inspectors\MultiTagInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerInspector.cs" />
     <Compile Include="Inspectors\TagSelectorPropertyDrawer.cs" />

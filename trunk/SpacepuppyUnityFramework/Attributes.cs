@@ -125,26 +125,6 @@ namespace com.spacepuppy
     #region Property Drawer Attributes
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class LabelAttribute : PropertyAttribute
-    {
-
-        public string Label;
-        public string ToolTip;
-
-        public LabelAttribute()
-        {
-
-        }
-
-        public LabelAttribute(string lbl, string msg)
-        {
-            this.Label = lbl;
-            this.ToolTip = msg;
-        }
-
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class EulerRotationInspectorAttribute : PropertyAttribute
     {
 
