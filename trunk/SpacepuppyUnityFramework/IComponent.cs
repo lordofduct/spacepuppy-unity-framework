@@ -19,16 +19,16 @@ namespace com.spacepuppy
 
     }
 
-    public abstract class SPComponent : MonoBehaviour, IComponent
+    public abstract class SPComponent : MonoBehaviour, IComponent, INotificationDispatcher
     {
 
         #region Fields
 
         [System.NonSerialized]
-        private GameObject _root;
+        private GameObject _entityRoot;
         private bool _started = false;
 
-        private AutoNotificationManager _autoNotificationManager;
+        private NotificationDispatcher _dispatcher;
 
         #endregion
 
@@ -45,18 +45,14 @@ namespace com.spacepuppy
                 Object.Destroy(this);
             }
 
-            this.SyncRoot();
-            //register only if we have auto handlers, otherwise don't bother creating the object
-            if (AutoNotificationManager.TypeHasAutoHandlers(this.GetType()))
-            {
-                _autoNotificationManager = new AutoNotificationManager(this);
-            }
+            this.SyncEntityRoot();
         }
 
         protected virtual void Start()
         {
-            this.SyncRoot();
             _started = true;
+            this.SyncEntityRoot();
+            this.OnStartOrEnable();
         }
 
         protected virtual void OnDestroy()
@@ -66,12 +62,22 @@ namespace com.spacepuppy
             {
                 this.ComponentDestroyed(this, System.EventArgs.Empty);
             }
-            Notification.PurgeNotificationsFor(this);
         }
 
         protected virtual void OnEnable()
         {
             this.SendMessage(SPConstants.MSG_ONSPCOMPONENTENABLED, this, SendMessageOptions.DontRequireReceiver);
+
+            if (_started) this.OnStartOrEnable();
+        }
+
+        /// <summary>
+        /// On start or on enable if and only if start already occurred. This adjusts the order of 'OnEnable' so that it can be used in conjunction with 'OnDisable' to wire up handlers cleanly. 
+        /// OnEnable occurs BEFORE Start sometimes, and other components aren't ready yet. This remedies that.
+        /// </summary>
+        protected virtual void OnStartOrEnable()
+        {
+
         }
 
         protected virtual void OnDisable()
@@ -79,13 +85,16 @@ namespace com.spacepuppy
             this.SendMessage(SPConstants.MSG_ONSPCOMPONENTDISABLED, this, SendMessageOptions.DontRequireReceiver);
         }
 
+        protected virtual void OnDespawn()
+        {
+            this.PurgeHandlers();
+        }
+
         #endregion
 
         #region Properties
 
-        public GameObject root { get { return _root; } }
-
-        public Transform rootTransform { get { return _root.transform; } }
+        public GameObject entityRoot { get { return _entityRoot; } }
 
         /// <summary>
         /// Start has been called on this component.
@@ -100,20 +109,9 @@ namespace com.spacepuppy
         /// Call this to resync the 'root' property incase the hierarchy of this object has changed. This needs to be performed since 
         /// unity doesn't have an event/message to signal a change in hierarchy.
         /// </summary>
-        public void SyncRoot()
+        public virtual void SyncEntityRoot()
         {
-            _root = this.FindRoot();
-        }
-
-        #endregion
-
-        #region Handlers
-
-        protected void AutoNotificationMessageHandler(Notification n)
-        {
-            if (_autoNotificationManager == null) return;
-
-            _autoNotificationManager.OnNotification(n);
+            _entityRoot = this.FindRoot();
         }
 
         #endregion
@@ -138,6 +136,84 @@ namespace com.spacepuppy
         GameObject IComponent.gameObject { get { return this.gameObject; } }
         Transform IComponent.transform { get { return this.transform; } }
         */
+
+        #endregion
+
+        #region INotificationDispatcher Interface
+
+        public void RegisterObserver<T>(NotificationHandler<T> handler) where T : Notification
+        {
+            if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            _dispatcher.RegisterObserver<T>(handler);
+        }
+
+        public void RemoveObserver<T>(NotificationHandler<T> handler) where T : Notification
+        {
+            if (_dispatcher == null) return;
+            _dispatcher.RemoveObserver<T>(handler);
+        }
+
+        public bool HasObserver<T>(bool bNotifyEntity) where T : Notification
+        {
+            //if(bNotifyEntity)
+            //{
+            //    if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            //    return _dispatcher.HasObserver<T>(bNotifyEntity);
+            //}
+            //else
+            //{
+            //    if (_dispatcher == null) return false;
+            //    return _dispatcher.HasObserver<T>(bNotifyEntity);
+            //}
+            if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            return _dispatcher.HasObserver<T>(bNotifyEntity);
+        }
+
+        public bool PostNotification<T>(T n, bool bNotifyEntity) where T : Notification
+        {
+            if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            return _dispatcher.PostNotification<T>(n, bNotifyEntity);
+        }
+
+        public void UnsafeRegisterObserver(System.Type tp, NotificationHandler handler)
+        {
+            if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            _dispatcher.UnsafeRegisterObserver(tp, handler);
+        }
+
+        public void UnsafeRemoveObserver(System.Type tp, NotificationHandler handler)
+        {
+            if (_dispatcher == null) return;
+            _dispatcher.UnsafeRemoveObserver(tp, handler);
+        }
+
+        public bool HasObserver(System.Type tp, bool bNotifyEntity)
+        {
+            //if (bNotifyEntity)
+            //{
+            //    if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            //    return _dispatcher.HasObserver(tp, bNotifyEntity);
+            //}
+            //else
+            //{
+            //    if (_dispatcher == null) return false;
+            //    return _dispatcher.HasObserver(tp, bNotifyEntity);
+            //}
+            if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            return _dispatcher.HasObserver(tp, bNotifyEntity);
+        }
+
+        public bool UnsafePostNotification(Notification n, bool bNotifyEntity)
+        {
+            if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
+            return _dispatcher.PostNotification(n, bNotifyEntity);
+        }
+
+        public void PurgeHandlers()
+        {
+            if (_dispatcher == null) return;
+            _dispatcher.PurgeHandlers();
+        }
 
         #endregion
 

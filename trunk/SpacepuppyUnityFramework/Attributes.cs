@@ -4,11 +4,23 @@ using System.Reflection;
 namespace com.spacepuppy
 {
 
-    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class AutoNotificationHandler : System.Attribute
+    #region Notification Attributes
+
+    [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public class RequireNotificationReceiverAttribute : System.Attribute
     {
 
+        public bool GlobalObserverConsidered;
+
     }
+
+    //[System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Class, AllowMultiple=false, Inherited=true)]
+    //public class AutoNotificationHandler : System.Attribute
+    //{
+
+    //}
+
+    #endregion
 
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class RequireLikeComponentAttribute : System.Attribute
@@ -119,117 +131,5 @@ namespace com.spacepuppy
         }
 
     }
-
-
-
-    #region Property Drawer Attributes
-
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class EulerRotationInspectorAttribute : PropertyAttribute
-    {
-
-        public bool UseRadians = false;
-
-        public EulerRotationInspectorAttribute()
-        {
-
-        }
-
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class EnumFlagsAttribute : PropertyAttribute
-    {
-
-        public System.Type EnumType;
-
-        public EnumFlagsAttribute()
-        {
-
-        }
-
-        public EnumFlagsAttribute(System.Type enumType)
-        {
-            this.EnumType = enumType;
-        }
-
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class TagSelectorAttribute : PropertyAttribute
-    {
-        public bool AllowUntagged;
-    }
-
-    public class ComponentTypeRestrictionAttribute : PropertyAttribute
-    {
-        public System.Type InheritsFromType;
-        public TypeDropDownListingStyle MenuListingStyle = TypeDropDownListingStyle.ComponentMenu;
-
-        public ComponentTypeRestrictionAttribute(System.Type inheritsFromType)
-        {
-            this.InheritsFromType = inheritsFromType;
-        }
-
-    }
-
-    #endregion
-
-    #region ModifierDrawer Attributes
-
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = true)]
-    public abstract class PropertyModifierAttribute : PropertyAttribute
-    {
-        public bool IncludeChidrenOnDraw;
-    }
-
-    /// <summary>
-    /// Process a series of PropertyModifierAttributes before drawing the inspector for this property. The order of processing 
-    /// is determined by the 'order' value of the attribute, with the highest order acting as the visual drawn.
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class ModifierChainAttribute : PropertyAttribute
-    {
-
-        public ModifierChainAttribute()
-        {
-            this.order = int.MinValue;
-        }
-
-    }
-
-    /// <summary>
-    /// While in the editor, if the value is ever null, an attempt is made to get the value from self. You will still 
-    /// have to initialize the value on Awake if null. The cost of doing it automatically is too high for all components 
-    /// to test themselves for this attribute.
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class DefaultFromSelfAttribute : PropertyModifierAttribute
-    {
-        public bool FindInEntity = false;
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class DisableOnPlayAttribute : PropertyModifierAttribute
-    {
-
-    }
-
-    #endregion
-
-    #region Decorator Attributes
-
-    public class InfoboxAttribute : PropertyAttribute
-    {
-        public string Message;
-
-        public InfoboxAttribute(string msg)
-        {
-            this.Message = msg;
-        }
-
-    }
-
-    #endregion
 
 }

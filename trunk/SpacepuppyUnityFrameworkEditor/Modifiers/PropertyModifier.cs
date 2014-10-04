@@ -6,6 +6,8 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Modifiers
 {
 
@@ -19,27 +21,14 @@ namespace com.spacepuppyeditor.Modifiers
 
         internal void Init(bool bIsVisibleDrawer)
         {
-            if(_initialized) return;
+            if (_initialized) return;
 
-            if(bIsVisibleDrawer)
+            if (bIsVisibleDrawer)
             {
-                try
+                var drawerTp = ScriptAttributeUtility.GetDrawerTypeForType(this.fieldInfo.FieldType);
+                if (drawerTp != null)
                 {
-                    //this is hack as shit, but it reflects out the method used internally by Unity to get the default property drawer for a type if any.
-                    var ass = System.Reflection.Assembly.GetAssembly(typeof(PropertyDrawer));
-                    var ScriptAttributeUtilityType = ass.GetType("UnityEditor.ScriptAttributeUtility");
-                    var meth = ScriptAttributeUtilityType.GetMethod("GetDrawerTypeForType", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                    var drawerTp = meth.Invoke(null, new object[] { this.fieldInfo.FieldType }) as System.Type;
-                    if(drawerTp != null)
-                    {
-                        var drawer = System.Activator.CreateInstance(drawerTp) as PropertyDrawer;
-                        ObjUtil.SetValue(drawer, "m_Attribute", null);
-                        ObjUtil.SetValue(drawer, "m_FieldInfo", this.fieldInfo);
-                        _subDrawer = drawer;
-                    }
-                }
-                catch
-                {
+                    _subDrawer = PropertyDrawerActivator.Create(drawerTp, null, this.fieldInfo);
                 }
             }
 

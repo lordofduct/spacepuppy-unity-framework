@@ -369,7 +369,7 @@ namespace com.spacepuppy
 
         public static object Convert(object obj, VariantType tp)
         {
-            switch(tp)
+            switch (tp)
             {
                 case VariantType.Null:
                     return null;
@@ -402,6 +402,65 @@ namespace com.spacepuppy
                     return obj as Component;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Returns true if the supplied type is an acceptable type for a value stored in a VariantReference
+        /// </summary>
+        /// <param name="tp"></param>
+        /// <returns></returns>
+        public static bool AcceptableType(System.Type tp)
+        {
+            if (tp == null) throw new System.ArgumentNullException("tp");
+
+            switch (System.Type.GetTypeCode(tp))
+            {
+                case System.TypeCode.String:
+                case System.TypeCode.Boolean:
+                case System.TypeCode.Int32:
+                case System.TypeCode.Single:
+                case System.TypeCode.Double:
+                case System.TypeCode.DateTime:
+                    return true;
+            }
+
+            if (tp == typeof(Vector2)) return true;
+            else if (tp == typeof(Vector3)) return true;
+            else if (tp == typeof(Quaternion)) return true;
+            else if (tp == typeof(Color)) return true;
+            else if (tp == typeof(GameObject)) return true;
+            else if (typeof(Component).IsAssignableFrom(tp)) return true;
+            else return false;
+        }
+
+        public static VariantType GetVariantType(System.Type tp)
+        {
+            if (tp == null) throw new System.ArgumentNullException("tp");
+
+            switch (System.Type.GetTypeCode(tp))
+            {
+                case System.TypeCode.String:
+                    return VariantType.String;
+                case System.TypeCode.Boolean:
+                    return VariantType.Boolean;
+                case System.TypeCode.Int32:
+                    return VariantType.Integer;
+                case System.TypeCode.Single:
+                    return VariantType.Float;
+                case System.TypeCode.Double:
+                    return VariantType.Double;
+                case System.TypeCode.DateTime:
+                    return VariantType.DateTime;
+            }
+
+            if (tp == typeof(Vector2)) return VariantType.Vector2;
+            else if (tp == typeof(Vector3)) return VariantType.Vector3;
+            else if (tp == typeof(Quaternion)) return VariantType.Quaternion;
+            else if (tp == typeof(Color)) return VariantType.Color;
+            else if (tp == typeof(GameObject)) return VariantType.GameObject;
+            else if (typeof(Component).IsAssignableFrom(tp)) return VariantType.Component;
+
+            return VariantType.Null;
         }
 
         #endregion

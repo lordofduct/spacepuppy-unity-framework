@@ -16,6 +16,7 @@ namespace com.spacepuppyeditor.Inspectors
         {
             if (property.propertyType == SerializedPropertyType.String)
             {
+                EditorGUI.BeginChangeCheck();
                 EditorGUI.BeginProperty(position, label, property);
 
                 var attrib = this.attribute as TagSelectorAttribute;
@@ -29,16 +30,16 @@ namespace com.spacepuppyeditor.Inspectors
                     var tags = (from s in UnityEditorInternal.InternalEditorUtility.tags where s != SPConstants.TAG_UNTAGGED select new GUIContent(s)).ToArray();
                     var stag = property.stringValue;
                     int index = -1;
-                    for(int i = 0; i < tags.Length; i++)
+                    for (int i = 0; i < tags.Length; i++)
                     {
-                        if(tags[i].text == stag)
+                        if (tags[i].text == stag)
                         {
                             index = i;
                             break;
                         }
                     }
                     index = EditorGUI.Popup(position, label, index, tags);
-                    if(index >= 0)
+                    if (index >= 0)
                     {
                         property.stringValue = tags[index].text;
                     }
@@ -49,6 +50,7 @@ namespace com.spacepuppyeditor.Inspectors
                 }
 
                 EditorGUI.EndProperty();
+                if (EditorGUI.EndChangeCheck()) property.serializedObject.ApplyModifiedProperties();
             }
             else
             {

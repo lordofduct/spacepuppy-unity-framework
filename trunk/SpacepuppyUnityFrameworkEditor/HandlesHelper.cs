@@ -3,14 +3,39 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppyeditor
 {
     public static class HandlesHelper
     {
 
-        public static void DrawWireCollider( Collider c)
+        #region Private Draw Utils
+
+        private static Color RealHandleColor
         {
-            if(c == null) throw new System.ArgumentNullException("c");
+            get
+            {
+                return Handles.color * new Color(1f, 1f, 1f, 0.5f) + (!Handles.lighting ? new Color(0.0f, 0.0f, 0.0f, 0.0f) : new Color(0.0f, 0.0f, 0.0f, 0.5f));
+            }
+        }
+
+        private static Matrix4x4 StartDraw(Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            Shader.SetGlobalColor("_HandleColor", RealHandleColor);
+            Shader.SetGlobalFloat("_HandleSize", 1.0f);
+            Matrix4x4 mat = Handles.matrix * Matrix4x4.TRS(position, rotation, scale);
+            Shader.SetGlobalMatrix("_ObjectToWorld", mat);
+            HandleUtility.handleMaterial.SetPass(0);
+            return mat;
+        }
+
+        #endregion
+
+
+        public static void DrawWireCollider(Collider c)
+        {
+            if (c == null) throw new System.ArgumentNullException("c");
 
             if (c is BoxCollider)
             {
@@ -211,7 +236,7 @@ namespace com.spacepuppyeditor
 
         public static void DrawCollider(Collider c)
         {
-            if(c == null) throw new System.ArgumentNullException("c");
+            if (c == null) throw new System.ArgumentNullException("c");
 
             if (c is BoxCollider)
             {
@@ -235,8 +260,11 @@ namespace com.spacepuppyeditor
             }
             else if (c is MeshCollider)
             {
-                //not supported
-                throw new System.ArgumentException("Unsupported collider type '" + c.GetType().Name + "'.", "c");
+                var mc = c as MeshCollider;
+                if (mc.sharedMesh != null)
+                {
+                    DrawMesh(mc.sharedMesh, mc.transform.position, mc.transform.rotation, mc.transform.lossyScale);
+                }
             }
             else
             {
@@ -247,88 +275,93 @@ namespace com.spacepuppyeditor
 
         public static void DrawRectoid(Vector3 center, Quaternion rot, Vector3 size)
         {
-            Vector3[] verts = new Vector3[5];
-            Vector3 dir;
-            Vector3 a;
-            Vector3 b;
+            //Vector3[] verts = new Vector3[5];
+            //Vector3 dir;
+            //Vector3 a;
+            //Vector3 b;
 
-            //draw top
-            dir = Vector3.up * size.y / 2.0f;
-            a = Vector3.right * size.x / 2.0f;
-            b = Vector3.forward * size.z / 2.0f;
+            ////draw top
+            //dir = Vector3.up * size.y / 2.0f;
+            //a = Vector3.right * size.x / 2.0f;
+            //b = Vector3.forward * size.z / 2.0f;
 
-            verts[0] = center + rot * (dir + a + b);
-            verts[1] = center + rot * (dir + a - b);
-            verts[2] = center + rot * (dir - a - b);
-            verts[3] = center + rot * (dir - a + b);
-            verts[4] = verts[0];
+            //verts[0] = center + rot * (dir + a + b);
+            //verts[1] = center + rot * (dir + a - b);
+            //verts[2] = center + rot * (dir - a - b);
+            //verts[3] = center + rot * (dir - a + b);
+            //verts[4] = verts[0];
 
-            Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
 
-            //draw bottom
-            dir = Vector3.down * size.y / 2.0f;
-            a = Vector3.right * size.x / 2.0f;
-            b = Vector3.forward * size.z / 2.0f;
+            ////draw bottom
+            //dir = Vector3.down * size.y / 2.0f;
+            //a = Vector3.right * size.x / 2.0f;
+            //b = Vector3.forward * size.z / 2.0f;
 
-            verts[0] = center + rot * (dir + a + b);
-            verts[1] = center + rot * (dir + a - b);
-            verts[2] = center + rot * (dir - a - b);
-            verts[3] = center + rot * (dir - a + b);
-            verts[4] = verts[0];
+            //verts[0] = center + rot * (dir + a + b);
+            //verts[1] = center + rot * (dir + a - b);
+            //verts[2] = center + rot * (dir - a - b);
+            //verts[3] = center + rot * (dir - a + b);
+            //verts[4] = verts[0];
 
-            Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
 
-            //draw right
-            dir = Vector3.right * size.x / 2.0f;
-            a = Vector3.up * size.y / 2.0f;
-            b = Vector3.forward * size.z / 2.0f;
+            ////draw right
+            //dir = Vector3.right * size.x / 2.0f;
+            //a = Vector3.up * size.y / 2.0f;
+            //b = Vector3.forward * size.z / 2.0f;
 
-            verts[0] = center + rot * (dir + a + b);
-            verts[1] = center + rot * (dir + a - b);
-            verts[2] = center + rot * (dir - a - b);
-            verts[3] = center + rot * (dir - a + b);
-            verts[4] = verts[0];
+            //verts[0] = center + rot * (dir + a + b);
+            //verts[1] = center + rot * (dir + a - b);
+            //verts[2] = center + rot * (dir - a - b);
+            //verts[3] = center + rot * (dir - a + b);
+            //verts[4] = verts[0];
 
-            Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
 
-            //draw left
-            dir = Vector3.left * size.x / 2.0f;
-            a = Vector3.up * size.y / 2.0f;
-            b = Vector3.forward * size.z / 2.0f;
+            ////draw left
+            //dir = Vector3.left * size.x / 2.0f;
+            //a = Vector3.up * size.y / 2.0f;
+            //b = Vector3.forward * size.z / 2.0f;
 
-            verts[0] = center + rot * (dir + a + b);
-            verts[1] = center + rot * (dir + a - b);
-            verts[2] = center + rot * (dir - a - b);
-            verts[3] = center + rot * (dir - a + b);
-            verts[4] = verts[0];
+            //verts[0] = center + rot * (dir + a + b);
+            //verts[1] = center + rot * (dir + a - b);
+            //verts[2] = center + rot * (dir - a - b);
+            //verts[3] = center + rot * (dir - a + b);
+            //verts[4] = verts[0];
 
-            Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
 
-            //draw front
-            dir = Vector3.forward * size.z / 2.0f;
-            a = Vector3.right * size.x / 2.0f;
-            b = Vector3.up * size.y / 2.0f;
+            ////draw front
+            //dir = Vector3.forward * size.z / 2.0f;
+            //a = Vector3.right * size.x / 2.0f;
+            //b = Vector3.up * size.y / 2.0f;
 
-            verts[0] = center + rot * (dir + a + b);
-            verts[1] = center + rot * (dir + a - b);
-            verts[2] = center + rot * (dir - a - b);
-            verts[3] = center + rot * (dir - a + b);
-            verts[4] = verts[0];
+            //verts[0] = center + rot * (dir + a + b);
+            //verts[1] = center + rot * (dir + a - b);
+            //verts[2] = center + rot * (dir - a - b);
+            //verts[3] = center + rot * (dir - a + b);
+            //verts[4] = verts[0];
 
-            Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
 
-            //draw back
-            dir = Vector3.back * size.z / 2.0f;
-            a = Vector3.right * size.x / 2.0f;
-            b = Vector3.up * size.y / 2.0f;
+            ////draw back
+            //dir = Vector3.back * size.z / 2.0f;
+            //a = Vector3.right * size.x / 2.0f;
+            //b = Vector3.up * size.y / 2.0f;
 
-            verts[0] = center + rot * (dir + a + b);
-            verts[1] = center + rot * (dir + a - b);
-            verts[2] = center + rot * (dir - a - b);
-            verts[3] = center + rot * (dir - a + b);
-            verts[4] = verts[0];
+            //verts[0] = center + rot * (dir + a + b);
+            //verts[1] = center + rot * (dir + a - b);
+            //verts[2] = center + rot * (dir - a - b);
+            //verts[3] = center + rot * (dir - a + b);
+            //verts[4] = verts[0];
 
-            Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+
+
+
+            var mat = StartDraw(center, rot, size);
+            Graphics.DrawMeshNow(PrimitiveUtil.CubeMesh, mat);
         }
 
         public static void DrawSphere(Vector3 center, Quaternion rot, float radius)
@@ -338,69 +371,90 @@ namespace com.spacepuppyeditor
 
         public static void DrawCapsule(Vector3 bottom, Vector3 top, float radius)
         {
-            var axis = (top - bottom).normalized;
-            var rot = Quaternion.FromToRotation(Vector3.up, axis);
+            //var axis = (top - bottom).normalized;
+            //var rot = Quaternion.FromToRotation(Vector3.up, axis);
 
-            ////spheres
-            //Handles.SphereCap(0, top, rot, radius * 2.0f);
-            //Handles.SphereCap(0, bottom, rot, radius * 2.0f);
+            //////spheres
+            ////Handles.SphereCap(0, top, rot, radius * 2.0f);
+            ////Handles.SphereCap(0, bottom, rot, radius * 2.0f);
 
-            Vector3 norm;
-            Vector3 start;
+            //Vector3 norm;
+            //Vector3 start;
 
-            //draw top circles
-            norm = rot * Vector3.right;
-            start = rot * Vector3.back;
-            Handles.DrawSolidArc(top, norm, start, 180.0f, radius);
+            ////draw top circles
+            //norm = rot * Vector3.right;
+            //start = rot * Vector3.back;
+            //Handles.DrawSolidArc(top, norm, start, 180.0f, radius);
 
-            norm = rot * Vector3.forward;
-            start = rot * Vector3.right;
-            Handles.DrawSolidArc(top, norm, start, 180.0f, radius);
+            //norm = rot * Vector3.forward;
+            //start = rot * Vector3.right;
+            //Handles.DrawSolidArc(top, norm, start, 180.0f, radius);
 
-            //draw bottom circles
-            norm = rot * Vector3.right;
-            start = rot * Vector3.forward;
-            Handles.DrawSolidArc(bottom, norm, start, 180.0f, radius);
+            ////draw bottom circles
+            //norm = rot * Vector3.right;
+            //start = rot * Vector3.forward;
+            //Handles.DrawSolidArc(bottom, norm, start, 180.0f, radius);
 
-            norm = rot * Vector3.forward;
-            start = rot * Vector3.left;
-            Handles.DrawSolidArc(bottom, norm, start, 180.0f, radius);
+            //norm = rot * Vector3.forward;
+            //start = rot * Vector3.left;
+            //Handles.DrawSolidArc(bottom, norm, start, 180.0f, radius);
 
-            //cylinder
-            const int DETAIL = 18;
-            const float ANGLE_STEP = 360.0f / DETAIL;
-            for (int i = 0; i < DETAIL; i++)
-            {
-                Vector3 a = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, i * ANGLE_STEP, Vector3.up, true)) * radius;
-                Vector3 b = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, (i + 1) * ANGLE_STEP, Vector3.up, true)) * radius;
+            ////cylinder
+            //const int DETAIL = 18;
+            //const float ANGLE_STEP = 360.0f / DETAIL;
+            //for (int i = 0; i < DETAIL; i++)
+            //{
+            //    Vector3 a = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, i * ANGLE_STEP, Vector3.up, true)) * radius;
+            //    Vector3 b = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, (i + 1) * ANGLE_STEP, Vector3.up, true)) * radius;
 
-                var verts = new Vector3[] { bottom + a, bottom + b, top + b, top + a, bottom + a };
-                Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
-            }
+            //    var verts = new Vector3[] { bottom + a, bottom + b, top + b, top + a, bottom + a };
+            //    Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //}
+
+            var rod = top - bottom;
+            var adjRad = radius / 0.5f;
+            var adjHght = rod.magnitude / 2.0f + radius; //(rod.magnitude + radius * 2f);
+            var mat = StartDraw(Vector3.Lerp(bottom, top, 0.5f), Quaternion.FromToRotation(Vector3.up, rod.normalized), new Vector3(adjRad, adjHght, adjRad));
+            Graphics.DrawMeshNow(PrimitiveUtil.CapsuleMesh, mat);
         }
 
         public static void DrawCylinder(Vector3 bottom, Vector3 top, float radius)
         {
-            var axis = (top - bottom).normalized;
-            var rot = Quaternion.FromToRotation(Vector3.up, axis);
+            //var axis = (top - bottom).normalized;
+            //var rot = Quaternion.FromToRotation(Vector3.up, axis);
 
-            //circles
-            Vector3 norm = rot * Vector3.up;
-            Vector3 start = rot * Vector3.right;
-            Handles.DrawSolidArc(top, norm, start, 360.0f, radius);
-            Handles.DrawSolidArc(bottom, norm, start, 360.0f, radius);
-            
-            //sides
-            const int DETAIL = 18;
-            const float ANGLE_STEP = 360.0f / DETAIL;
-            for (int i = 0; i < DETAIL; i++)
-            {
-                Vector3 a = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, i * ANGLE_STEP, Vector3.up)) * radius;
-                Vector3 b = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, (i + 1) * ANGLE_STEP, Vector3.up)) * radius;
+            ////circles
+            //Vector3 norm = rot * Vector3.up;
+            //Vector3 start = rot * Vector3.right;
+            //Handles.DrawSolidArc(top, norm, start, 360.0f, radius);
+            //Handles.DrawSolidArc(bottom, norm, start, 360.0f, radius);
 
-                var verts = new Vector3[] { bottom + a, bottom + b, top + b, top + a, bottom + a };
-                Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
-            }
+            ////sides
+            //const int DETAIL = 18;
+            //const float ANGLE_STEP = 360.0f / DETAIL;
+            //for (int i = 0; i < DETAIL; i++)
+            //{
+            //    Vector3 a = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, i * ANGLE_STEP, Vector3.up)) * radius;
+            //    Vector3 b = rot * (com.spacepuppy.Utils.VectorUtil.RotateAroundAxis(Vector3.right, (i + 1) * ANGLE_STEP, Vector3.up)) * radius;
+
+            //    var verts = new Vector3[] { bottom + a, bottom + b, top + b, top + a, bottom + a };
+            //    Handles.DrawSolidRectangleWithOutline(verts, Handles.color, Handles.color);
+            //}
+
+
+            var rod = top - bottom;
+            var adjRad = radius / 0.5f;
+            var adjHght = rod.magnitude / 2.0f;
+            var mat = StartDraw(Vector3.Lerp(bottom, top, 0.5f), Quaternion.FromToRotation(Vector3.up, rod.normalized), new Vector3(adjRad, adjHght, adjRad));
+            Graphics.DrawMeshNow(PrimitiveUtil.CylinderMesh, mat);
+
+        }
+
+        public static void DrawMesh(Mesh mesh, Vector3 pos, Quaternion rot, Vector3 scale)
+        {
+            if (mesh == null) throw new System.ArgumentNullException("mesh");
+            var mat = StartDraw(pos, rot, scale);
+            Graphics.DrawMeshNow(mesh, mat);
         }
 
     }

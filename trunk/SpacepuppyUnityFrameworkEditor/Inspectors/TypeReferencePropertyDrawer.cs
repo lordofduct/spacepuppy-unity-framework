@@ -26,10 +26,11 @@ namespace com.spacepuppyeditor.Inspectors
             //    this.fieldInfo.SetValue(targOwner, tpref);
             //}
             var tpref = EditorHelper.GetTargetObjectOfProperty(property) as TypeReference;
-            if(tpref == null)
+            if (tpref == null)
             {
                 tpref = new TypeReference();
                 EditorHelper.SetTargetObjectOfProperty(property, tpref);
+                property.serializedObject.ApplyModifiedProperties();
             }
 
             var attrib = this.fieldInfo.GetCustomAttributes(typeof(TypeReferenceRestrictionAttribute), true).FirstOrDefault() as TypeReferenceRestrictionAttribute;
@@ -45,7 +46,10 @@ namespace com.spacepuppyeditor.Inspectors
                 defaultType = attrib.defaultType;
             }
 
-            tpref.Type = EditorHelper.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType);
+            EditorGUI.BeginChangeCheck();
+            tpref.Type = SPEditorGUI.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType);
+            if (EditorGUI.EndChangeCheck())
+                property.serializedObject.Update();
 
             EditorGUI.EndProperty();
         }

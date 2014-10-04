@@ -51,13 +51,22 @@
     <Compile Include="Inspectors\EnumFlagsPropertyDrawer.cs" />
     <Compile Include="Inspectors\MultiTagInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerInspector.cs" />
+    <Compile Include="Inspectors\Scenario\TriggerTargetPropertyDrawer.cs" />
     <Compile Include="Inspectors\TagSelectorPropertyDrawer.cs" />
     <Compile Include="Inspectors\TypeReferencePropertyDrawer.cs" />
     <Compile Include="Inspectors\VariantReferencePropertyDrawer.cs" />
+    <Compile Include="Internal\InternalTypeUtil.cs" />
+    <Compile Include="Internal\IPropertyHandler.cs" />
+    <Compile Include="Internal\PropertyDrawerActivator.cs" />
+    <Compile Include="Internal\PropertyHandlerCache.cs" />
+    <Compile Include="Internal\ScriptAttributeUtility.cs" />
+    <Compile Include="Internal\SPPropertyHandler.cs" />
+    <Compile Include="Internal\StandardPropertyHandler.cs" />
     <Compile Include="MaterialHelper.cs" />
     <Compile Include="Modifiers\DefaultFromSelfModifier.cs" />
     <Compile Include="Modifiers\DisableOnPlayModifier.cs" />
     <Compile Include="Modifiers\ModifierChainPropertyDrawer.cs" />
+    <Compile Include="Modifiers\OnChangedInEditorModifier.cs" />
     <Compile Include="Modifiers\PropertyModifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Inspectors\Spawn\PlaceAtRandomNodeOnSpawnInspector.cs" />
@@ -65,6 +74,10 @@
     <Compile Include="Inspectors\Spawn\SpawnPointInspector.cs" />
     <Compile Include="Inspectors\Spawn\SpawnPoolEditor.cs" />
     <Compile Include="Inspectors\Spawn\SpawnPoolInspector.cs" />
+    <Compile Include="ReorderableListHelper.cs" />
+    <Compile Include="SPEditor.cs" />
+    <Compile Include="SPEditorGUI.cs" />
+    <Compile Include="SPEditorGUILayout.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpacepuppyUnityFramework\SpacepuppyUnityFramework.csproj">

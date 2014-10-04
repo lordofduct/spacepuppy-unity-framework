@@ -29,4 +29,11 @@ namespace com.spacepuppy
 
     public delegate System.Collections.IEnumerable CoroutineMethod();
 
+    public delegate void NotificationHandler(Notification n);
+    public delegate void NotificationHandler<T>(T notification) where T : Notification;
+
+    public delegate void CollisionEventHandler(GameObject sender, CollisionEventArgs e);
+    public delegate void TriggerEventHandler(GameObject sender, TriggerEventArgs e);
+    public delegate void ControllerColliderHitEventHandler(GameObject sender, ControllerColliderHitEventArgs e);
+
 }

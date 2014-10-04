@@ -13,131 +13,133 @@ namespace com.spacepuppyeditor.Inspectors
     public class VariantReferencePropertyDrawer : PropertyDrawer
     {
 
-        private System.Type _componentType;
-
-
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        public bool RestrictVariantType = false;
+        private System.Type _forcedComponentType;
+        public System.Type ForcedComponentType
         {
-            var h = base.GetPropertyHeight(property, label);
-
-            if(property.isExpanded)
+            get { return _forcedComponentType; }
+            set
             {
-                var targ = EditorHelper.GetTargetObjectWithProperty(property);
-                var variant = this.fieldInfo.GetValue(targ) as VariantReference;
-                if (variant != null && variant.ValueType == VariantReference.VariantType.Component)
-                {
-                    h = h * 4f + 4f;
-                }
+                if (value == null)
+                    _forcedComponentType = null;
+                else if (typeof(Component).IsAssignableFrom(value))
+                    _forcedComponentType = value;
                 else
-                {
-                    h = h * 3f + 2f;
-                }
+                    throw new System.ArgumentException("Type must inherit from Component", "value");
             }
-            
-            return h;
         }
+
+        private System.Type _selectedComponentType;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            EditorGUI.BeginChangeCheck();
             EditorGUI.BeginProperty(position, label, property);
 
-            if (property.isExpanded)
+            var variant = EditorHelper.GetTargetObjectOfProperty(property) as VariantReference;
+            if (variant == null)
             {
-                //var targ = EditorHelper.GetTargetObjectWithProperty(property);
-                //var variant = this.fieldInfo.GetValue(targ) as VariantReference;
-                //if (variant == null)
-                //{
-                //    variant = new VariantReference();
-                //    this.fieldInfo.SetValue(targ, variant);
-                //}
-                var variant = EditorHelper.GetTargetObjectOfProperty(property) as VariantReference;
-                if(variant == null)
-                {
-                    variant = new VariantReference();
-                    EditorHelper.SetTargetObjectOfProperty(property, variant);
-                }
+                variant = new VariantReference();
+                EditorHelper.SetTargetObjectOfProperty(property, variant);
+                property.serializedObject.ApplyModifiedProperties();
+            }
 
-                var h = base.GetPropertyHeight(property, label);
-                var r0 = new Rect(position.xMin, position.yMin, position.width, h);
-                var r1 = new Rect(position.xMin + 10f, position.yMin + h, position.width - 10f, h);
-                var r2 = new Rect(position.xMin + 10f, position.yMin + h * 2f + 2f, position.width - 10f, h);
+            var totalRect = EditorGUI.PrefixLabel(position, label);
 
+            var r0 = new Rect(totalRect.xMin, totalRect.yMin, 90.0f, EditorGUIUtility.singleLineHeight);
+            var r1 = new Rect(r0.xMax, totalRect.yMin, totalRect.xMax - r0.xMax, EditorGUIUtility.singleLineHeight);
 
-                property.isExpanded = EditorGUI.Foldout(r0, property.isExpanded, label);
-                variant.ValueType = (VariantReference.VariantType)EditorGUI.EnumPopup(r1, "Value Type", variant.ValueType);
+            var bCache = GUI.enabled;
+            if (this.RestrictVariantType) GUI.enabled = false;
+            variant.ValueType = (VariantReference.VariantType)EditorGUI.EnumPopup(r0, GUIContent.none, variant.ValueType);
+            GUI.enabled = bCache;
 
-                switch(variant.ValueType)
-                {
-                    case VariantReference.VariantType.Null:
-                        GUI.enabled = false;
-                        EditorGUI.TextField(r2, "Value", "Null");
-                        GUI.enabled = true;
-                        break;
-                    case VariantReference.VariantType.String:
-                        variant.StringValue = EditorGUI.TextField(r2, "Value", variant.StringValue);
-                        break;
-                    case VariantReference.VariantType.Boolean:
-                        variant.BoolValue = EditorGUI.Toggle(r2, "Value", variant.BoolValue);
-                        break;
-                    case VariantReference.VariantType.Integer:
-                        variant.IntValue = EditorGUI.IntField(r2, "Value", variant.IntValue);
-                        break;
-                    case VariantReference.VariantType.Float:
-                        variant.FloatValue = EditorGUI.FloatField(r2, "Value", variant.FloatValue);
-                        break;
-                    case VariantReference.VariantType.Double:
-                        variant.DoubleValue = ConvertUtil.ToDouble(EditorGUI.TextField(r2, "Value", variant.DoubleValue.ToString()));
-                        break;
-                    case VariantReference.VariantType.Vector2:
-                        variant.Vector2Value = EditorGUI.Vector2Field(r2, "Value", variant.Vector2Value);
-                        break;
-                    case VariantReference.VariantType.Vector3:
-                        variant.Vector3Value = EditorGUI.Vector3Field(r2, "Value", variant.Vector3Value);
-                        break;
-                    case VariantReference.VariantType.Quaternion:
-                        variant.QuaternionValue = EditorHelper.QuaternionField(r2, new GUIContent("Value"), variant.QuaternionValue);
-                        break;
-                    case VariantReference.VariantType.Color:
-                        variant.ColorValue = EditorGUI.ColorField(r2, "Value", variant.ColorValue);
-                        break;
-                    case VariantReference.VariantType.DateTime:
-                        variant.DateValue = ConvertUtil.ToDate(EditorGUI.TextField(r2, "Value", variant.DateValue.ToString()));
-                        break;
-                    case VariantReference.VariantType.GameObject:
-                        variant.GameObjectValue = EditorGUI.ObjectField(r2, "Value", variant.GameObjectValue, typeof(GameObject), true) as GameObject;
-                        break;
-                    case VariantReference.VariantType.Component:
-                        var r3 = new Rect(position.xMin + 10f, position.yMin + h * 3f + 4f, position.width - 10f, h);
-                        if(_componentType == null && variant.ComponentValue != null)
+            switch (variant.ValueType)
+            {
+                case VariantReference.VariantType.Null:
+                    GUI.enabled = false;
+                    EditorGUI.TextField(r1, "Null");
+                    GUI.enabled = true;
+                    break;
+                case VariantReference.VariantType.String:
+                    variant.StringValue = EditorGUI.TextField(r1, variant.StringValue);
+                    break;
+                case VariantReference.VariantType.Boolean:
+                    variant.BoolValue = EditorGUI.Toggle(r1, variant.BoolValue);
+                    break;
+                case VariantReference.VariantType.Integer:
+                    variant.IntValue = EditorGUI.IntField(r1, variant.IntValue);
+                    break;
+                case VariantReference.VariantType.Float:
+                    variant.FloatValue = EditorGUI.FloatField(r1, variant.FloatValue);
+                    break;
+                case VariantReference.VariantType.Double:
+                    variant.DoubleValue = ConvertUtil.ToDouble(EditorGUI.TextField(r1, variant.DoubleValue.ToString()));
+                    break;
+                case VariantReference.VariantType.Vector2:
+                    variant.Vector2Value = EditorGUI.Vector2Field(r1, GUIContent.none, variant.Vector2Value);
+                    break;
+                case VariantReference.VariantType.Vector3:
+                    variant.Vector3Value = EditorGUI.Vector3Field(r1, GUIContent.none, variant.Vector3Value);
+                    break;
+                case VariantReference.VariantType.Quaternion:
+                    variant.QuaternionValue = SPEditorGUI.QuaternionField(r1, GUIContent.none, variant.QuaternionValue);
+                    break;
+                case VariantReference.VariantType.Color:
+                    variant.ColorValue = EditorGUI.ColorField(r1, variant.ColorValue);
+                    break;
+                case VariantReference.VariantType.DateTime:
+                    variant.DateValue = ConvertUtil.ToDate(EditorGUI.TextField(r1, variant.DateValue.ToString()));
+                    break;
+                case VariantReference.VariantType.GameObject:
+                    variant.GameObjectValue = EditorGUI.ObjectField(r1, variant.GameObjectValue, typeof(GameObject), true) as GameObject;
+                    break;
+                case VariantReference.VariantType.Component:
+                    if (_forcedComponentType == null)
+                    {
+                        var totalMax = r1.xMax;
+                        r1 = new Rect(r1.xMin, r1.yMin, Mathf.Max(100f, r1.width - 100f), r1.height);
+                        var r2 = new Rect(r1.xMax, r1.yMin, totalMax - r1.xMax, r1.height);
+                        if (_selectedComponentType == null && variant.ComponentValue != null)
                         {
-                            _componentType = variant.ComponentValue.GetType();
+                            _selectedComponentType = variant.ComponentValue.GetType();
                         }
-                        _componentType = EditorHelper.TypeDropDown(r2, new GUIContent("Component Type"), typeof(Component), _componentType, false, false, null, TypeDropDownListingStyle.ComponentMenu);
-                        if (_componentType != null)
+                        _selectedComponentType = SPEditorGUI.TypeDropDown(r2, GUIContent.none, typeof(Component), _selectedComponentType, false, false, null, TypeDropDownListingStyle.ComponentMenu);
+                        if (_selectedComponentType != null)
                         {
-                            variant.ComponentValue = EditorGUI.ObjectField(r3, "Value", variant.ComponentValue, _componentType, true) as Component;
+                            variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _selectedComponentType, true) as Component;
 
                             //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                            if(variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
+                            if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
                             {
                                 var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
-                                variant.ComponentValue = go.GetComponent(_componentType);
+                                variant.ComponentValue = go.GetComponent(_selectedComponentType);
                             }
                         }
                         else
                         {
-                            EditorGUI.LabelField(r3, "Select Component Type");
+                            //EditorGUI.LabelField(r1, "Select Component Type");
+                            r1.xMin += 10.0f;
+                            EditorGUI.HelpBox(r1, "Select Component Type", MessageType.Info);
                         }
+                    }
+                    else
+                    {
+                        variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _forcedComponentType, true) as Component;
 
-                        break;
-                }
-            }
-            else
-            {
-                property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, label);
+                        //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
+                        if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
+                        {
+                            var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
+                            variant.ComponentValue = go.GetComponent(_forcedComponentType);
+                        }
+                    }
+
+                    break;
             }
 
             EditorGUI.EndProperty();
+            if (EditorGUI.EndChangeCheck()) property.serializedObject.Update();
         }
 
     }

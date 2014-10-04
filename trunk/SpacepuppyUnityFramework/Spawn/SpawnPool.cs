@@ -200,8 +200,8 @@ namespace com.spacepuppy.Spawn
                 {
                     obj.BroadcastMessage(SPConstants.MSG_ONDESPAWN, SendMessageOptions.DontRequireReceiver);
                     var n = new DeSpawnNotification(obj.gameObject);
-                    Notification.PostNotification<DeSpawnNotification>(obj, n);
-                    Notification.PostNotification<DeSpawnNotification>(this, n);
+                    Notification.PostNotification<DeSpawnNotification>(obj, n, false);
+                    Notification.PostNotification<DeSpawnNotification>(this, n, false);
                     cache.Despawn(obj);
                     return;
                 }
@@ -240,8 +240,8 @@ namespace com.spacepuppy.Spawn
             if (obj == null) return;
             obj.BroadcastMessage(SPConstants.MSG_ONSPAWN, SendMessageOptions.DontRequireReceiver);
             var n = new SpawnNotification(obj);
-            Notification.PostNotification(obj, n);
-            Notification.PostNotification(this, n);
+            Notification.PostNotification(obj, n, false);
+            Notification.PostNotification(this, n, false);
         }
 
         #endregion

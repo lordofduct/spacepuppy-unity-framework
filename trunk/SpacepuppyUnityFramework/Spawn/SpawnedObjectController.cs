@@ -65,7 +65,7 @@ namespace com.spacepuppy.Spawn
 
         public void DespawnObject()
         {
-            foreach(var go in this.GetAllChildrenAndSelf())
+            foreach (var go in this.GetAllChildrenAndSelf())
             {
                 if (go.rigidbody != null)
                 {
@@ -78,11 +78,8 @@ namespace com.spacepuppy.Spawn
                     go.rigidbody2D.angularVelocity = 0f;
                 }
 
-                Notification.PurgeNotificationsFor(go);
-                foreach(var c in go.GetComponents<Component>())
-                {
-                    Notification.PurgeNotificationsFor(c);
-                }
+                //NOTE - this is handled by the components themselves
+                //Notification.PurgeHandlers(go.gameObject);
             }
 
             _pool.Despawn(this);

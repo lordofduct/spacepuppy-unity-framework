@@ -4,6 +4,10 @@ namespace com.spacepuppy
 {
     public class SPConstants
     {
+
+        public const int LAYER_WATER = 4;
+
+
         public const string TAG_UNTAGGED = "Untagged";
         public const string TAG_RESPAWN = "Respawn";
         public const string TAG_FINISH = "Finish";

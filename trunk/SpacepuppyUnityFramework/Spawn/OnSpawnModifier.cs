@@ -26,11 +26,14 @@ namespace com.spacepuppy.Spawn
 
         #region Messages
 
-        protected void OnSpawn()
-        {
-            //fake the event
-            this.OnSpawnedNotification(new SpawnPointTriggeredNotification(this.root));
-        }
+        //TODO - consider allowing these for use on entities, and not just on SpawnPoints
+
+        //protected void OnSpawn()
+        //{
+        //    //fake the event
+        //    this.OnSpawnedNotification(new SpawnPointTriggeredNotification(this.FindRoot()));
+        //}
+
 
         #endregion
 

@@ -7,7 +7,6 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
 {
-
     /// <summary>
     /// Allows registering for specific 'Types' of notification denoted by a class inherited from this class. 
     /// You can register for a notification from a specific object, or register for a type of notification globally. 
@@ -47,7 +46,7 @@ namespace com.spacepuppy
 
         #region Methods
 
-        private void SetSender(object sender)
+        internal void SetSender(object sender)
         {
             _sender = sender;
             _go = com.spacepuppy.Utils.GameObjectUtil.GetGameObjectFromSource(sender);
@@ -57,97 +56,319 @@ namespace com.spacepuppy
 
         #region Static Interface
 
-        private static WeakKeyDictionary<object, NotificationHandlerCollection> _senderSpecificNotificationHandlers = new WeakKeyDictionary<object, NotificationHandlerCollection>();
-        private static NotificationHandlerCollection _globalNotificationHandlers = new NotificationHandlerCollection();
-        private static com.spacepuppy.Timers.Timer _timer;
+        private static Dictionary<System.Type, System.Delegate> _globalHandlers = new Dictionary<System.Type, System.Delegate>();
+        private static Dictionary<System.Type, NotificationHandler> _unsafeGlobalHandlers = new Dictionary<Type, NotificationHandler>();
 
-        static Notification()
-        {
-            _timer = new com.spacepuppy.Timers.Timer(10.0f, 0);
-            _timer.TimerCount += delegate(com.spacepuppy.Timers.Timer t)
-            {
-                Notification.CleanDestroyedObjects();
-            };
-            com.spacepuppy.Timers.SystemTimers.Start(_timer);
-        }
-
-        #region Weak Reference Clean Interface
-
-        /// <summary>
-        /// The interval at which the Notification weak list cleans itself.
-        /// </summary>
-        public static float AutoCleanInterval
-        {
-            get { return _timer.Interval; }
-            set { _timer.Interval = value; }
-        }
-
-        /// <summary>
-        /// Clears out any notification handlers for objects that have been destroyed.
-        /// </summary>
-        public static void CleanDestroyedObjects()
-        {
-            var toRemove = (from o in _senderSpecificNotificationHandlers.Keys where o is UnityEngine.Object && o == null select o).ToArray();
-            foreach (var o in toRemove)
-            {
-                _senderSpecificNotificationHandlers.Remove(o);
-            }
-        }
-
-        public static void PurgeNotificationsFor(object obj)
-        {
-            if (_senderSpecificNotificationHandlers.ContainsKey(obj)) _senderSpecificNotificationHandlers.Remove(obj);
-        }
-
-        #endregion
-
-        #region Register/Post Interface
+        #region Global Notification Interface
 
         public static void RegisterGlobalObserver<T>(NotificationHandler<T> handler) where T : Notification
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
-            _globalNotificationHandlers.RegisterObserver<T>(handler);
+
+            var tp = typeof(T);
+            if (_globalHandlers.ContainsKey(tp))
+            {
+                _globalHandlers[tp] = System.Delegate.Combine(_globalHandlers[tp], handler);
+            }
+            else
+            {
+                _globalHandlers[tp] = handler;
+            }
         }
 
         public static void RemoveGlobalObserver<T>(NotificationHandler<T> handler) where T : Notification
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            _globalNotificationHandlers.RemoveObserver<T>(handler);
+            var tp = typeof(T);
+            if (_globalHandlers.ContainsKey(tp))
+            {
+                var d = System.Delegate.Remove(_globalHandlers[tp], handler);
+                if (d == null)
+                {
+                    _globalHandlers.Remove(tp);
+                }
+                else
+                {
+                    _globalHandlers[tp] = d;
+                }
+            }
+        }
+
+        public static void UnsafeRegisterGlobalObserver(System.Type notificationType, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            if (_unsafeGlobalHandlers.ContainsKey(notificationType))
+            {
+                _unsafeGlobalHandlers[notificationType] += handler;
+            }
+            else
+            {
+                _unsafeGlobalHandlers[notificationType] = handler;
+            }
+        }
+
+        public static void UnsafeRemoveGlobalObserver(System.Type notificationType, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            if (_unsafeGlobalHandlers.ContainsKey(notificationType))
+            {
+                var d = _unsafeGlobalHandlers[notificationType];
+                d -= handler;
+                if (d != null)
+                {
+                    _unsafeGlobalHandlers[notificationType] = d;
+                }
+                else
+                {
+                    _unsafeGlobalHandlers.Remove(notificationType);
+                }
+            }
+        }
+
+        public static bool HasGlobalObserver<T>() where T : Notification
+        {
+            return HasGlobalObserver(typeof(T));
+        }
+
+        public static bool HasGlobalObserver(System.Type notificationType)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+
+            var baseType = typeof(Notification);
+
+            while (baseType.IsAssignableFrom(notificationType))
+            {
+                if (_globalHandlers.ContainsKey(notificationType) || _unsafeGlobalHandlers.ContainsKey(notificationType)) return true;
+                notificationType = notificationType.BaseType;
+            }
+
+            return false;
+        }
+
+        internal static bool PostGlobalNotification(System.Type tp, Notification n)
+        {
+            bool bHandled = false;
+
+            var baseType = typeof(Notification);
+            while (baseType.IsAssignableFrom(tp))
+            {
+                if (_globalHandlers.ContainsKey(tp))
+                {
+                    var d = _globalHandlers[tp];
+                    if (d != null)
+                    {
+                        d.DynamicInvoke(n);
+                        bHandled = true;
+                    }
+                }
+
+                tp = tp.BaseType;
+            }
+
+            return bHandled;
+        }
+
+        #endregion
+
+        #region Instance Notification Interface
+
+        public static void RegisterObserver<T>(INotificationDispatcher sender, NotificationHandler<T> handler) where T : Notification
+        {
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            sender.RegisterObserver<T>(handler);
         }
 
         public static void RegisterObserver<T>(object sender, NotificationHandler<T> handler) where T : Notification
         {
             if (sender == null) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
-            _senderSpecificNotificationHandlers.Clean();
 
-            NotificationHandlerCollection coll;
-            if (!_senderSpecificNotificationHandlers.ContainsKey(sender))
+            if (sender is INotificationDispatcher)
             {
-                coll = new NotificationHandlerCollection();
-                _senderSpecificNotificationHandlers[sender] = coll;
+                (sender as INotificationDispatcher).RegisterObserver<T>(handler);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
+                dispatcher.RegisterObserver<T>(handler);
             }
             else
             {
-                coll = _senderSpecificNotificationHandlers[sender];
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
             }
-            coll.RegisterObserver<T>(handler);
+        }
+
+        public static void RemoveObserver<T>(INotificationDispatcher sender, NotificationHandler<T> handler) where T : Notification
+        {
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            sender.RemoveObserver<T>(handler);
         }
 
         public static void RemoveObserver<T>(object sender, NotificationHandler<T> handler) where T : Notification
         {
             if (sender == null) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
-            _senderSpecificNotificationHandlers.Clean();
 
-            if (!_senderSpecificNotificationHandlers.ContainsKey(sender)) return;
-
-            var coll = _senderSpecificNotificationHandlers[sender];
-            coll.RemoveObserver<T>(handler);
-            if (coll.IsEmpty)
+            if (sender is INotificationDispatcher)
             {
-                _senderSpecificNotificationHandlers.Remove(sender);
+                (sender as INotificationDispatcher).RemoveObserver<T>(handler);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
+                if (dispatcher != null) dispatcher.RemoveObserver<T>(handler);
+            }
+            else
+            {
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
+            }
+        }
+
+        public static void UnsafeRegisterObserver(System.Type notificationType, INotificationDispatcher sender, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            sender.UnsafeRegisterObserver(notificationType, handler);
+        }
+
+        public static void UnsafeRegisterObserver(System.Type notificationType, object sender, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            if (sender is INotificationDispatcher)
+            {
+                (sender as INotificationDispatcher).UnsafeRegisterObserver(notificationType, handler);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
+                dispatcher.UnsafeRegisterObserver(notificationType, handler);
+            }
+            else
+            {
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
+            }
+        }
+
+        public static void UnsafeRemoveObserver(System.Type notificationType, INotificationDispatcher sender, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            sender.UnsafeRemoveObserver(notificationType, handler);
+        }
+
+        public static void UnsafeRemoveObserver(System.Type notificationType, object sender, NotificationHandler handler)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (handler == null) throw new System.ArgumentNullException("handler");
+
+            if (sender is INotificationDispatcher)
+            {
+                (sender as INotificationDispatcher).UnsafeRemoveObserver(notificationType, handler);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
+                if (dispatcher != null) dispatcher.UnsafeRemoveObserver(notificationType, handler);
+            }
+            else
+            {
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
+            }
+        }
+
+        public static bool HasObserver<T>(INotificationDispatcher sender, bool bNotifyEntity = false) where T : Notification
+        {
+            if (sender == null) throw new ArgumentNullException("sender");
+
+            return sender.HasObserver<T>(bNotifyEntity);
+        }
+
+        public static bool HasObserver<T>(object sender, bool bNotifyEntity = false) where T : Notification
+        {
+            if (sender == null) throw new ArgumentNullException("sender");
+
+            if (sender is INotificationDispatcher)
+            {
+                return (sender as INotificationDispatcher).HasObserver<T>(bNotifyEntity);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                if (bNotifyEntity)
+                {
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher.HasObserver<T>(bNotifyEntity);
+                }
+                else
+                {
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher != null && dispatcher.HasObserver<T>(bNotifyEntity);
+                }
+            }
+            else
+            {
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
+            }
+        }
+
+        public static bool HasObserver(System.Type notificationType, INotificationDispatcher sender, bool bNotifyEntity = false)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new ArgumentNullException("sender");
+
+            return sender.HasObserver(notificationType, bNotifyEntity);
+        }
+
+        public static bool HasObserver(System.Type notificationType, object sender, bool bNotifyEntity = false)
+        {
+            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
+            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (sender == null) throw new ArgumentNullException("sender");
+
+            if (sender is INotificationDispatcher)
+            {
+                return (sender as INotificationDispatcher).HasObserver(notificationType, bNotifyEntity);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                if (bNotifyEntity)
+                {
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher.HasObserver(notificationType, bNotifyEntity);
+                }
+                else
+                {
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher != null && dispatcher.HasObserver(notificationType, bNotifyEntity);
+                }
+            }
+            else
+            {
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
             }
         }
 
@@ -157,423 +378,95 @@ namespace com.spacepuppy
         /// <typeparam name="T"></typeparam>
         /// <param name="sender"></param>
         /// <param name="notification"></param>
-        /// <param name="bNotifyRoot"></param>
+        /// <param name="bNotifyEntity"></param>
         /// <returns></returns>
-        public static bool PostNotification<T>(object sender, T notification, bool bNotifyRoot = false) where T : Notification
+        public static bool PostNotification<T>(INotificationDispatcher sender, T notification, bool bNotifyEntity = false) where T : Notification
         {
             if (sender == null) throw new ArgumentNullException("sender");
             if (notification == null) throw new ArgumentNullException("notification");
-            notification.SetSender(sender);
 
-            NotificationHandlerCollection coll;
+            return sender.PostNotification<T>(notification, bNotifyEntity);
+        }
 
-            bool handled = false;
-            ////we first notify those registered directly with the sender
-            if (_senderSpecificNotificationHandlers.TryGetValue(sender, out coll))
+        public static bool PostNotification<T>(object sender, T notification, bool bNotifyEntity = false) where T : Notification
+        {
+            if (sender == null) throw new ArgumentNullException("sender");
+            if (notification == null) throw new ArgumentNullException("notification");
+
+            if (sender is INotificationDispatcher)
             {
-                if (coll.PostNotification<T>(notification)) handled = true;
+                return (sender as INotificationDispatcher).PostNotification<T>(notification, bNotifyEntity);
             }
-
-            //if the sender was a gameObject source, let anyone registered with the gameObject hear about it
-            var go = notification.GameObject;
-            if (go != null)
+            else if (GameObjectUtil.IsGameObjectSource(sender))
             {
-                if (go != sender)
+                if (bNotifyEntity)
                 {
-                    if (_senderSpecificNotificationHandlers.TryGetValue(go, out coll))
-                    {
-                        if (coll.PostNotification<T>(notification)) handled = true;
-                    }
-                }
-
-                if (bNotifyRoot)
-                {
-                    var root = com.spacepuppy.Utils.GameObjectUtil.FindRoot(go);
-                    if (root != go)
-                    {
-                        if (_senderSpecificNotificationHandlers.TryGetValue(root, out coll))
-                        {
-                            if (coll.PostNotification<T>(notification)) handled = true;
-                        }
-                    }
-                    //AUTO NOTIFICATION
-                    root.BroadcastMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, notification, UnityEngine.SendMessageOptions.DontRequireReceiver);
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher.PostNotification<T>(notification, bNotifyEntity);
                 }
                 else
                 {
-                    //AUTO NOTIFICATION
-                    go.SendMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, notification, UnityEngine.SendMessageOptions.DontRequireReceiver);
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher != null && dispatcher.PostNotification<T>(notification, bNotifyEntity);
                 }
-                if (notification.AutoReceived) handled = true;
-            }
-
-            //finally let anyone registered with the global hear about it
-            bool globallyHandled = _globalNotificationHandlers.PostNotification<T>(notification);
-
-            //if not handled, check if we should throw an exception
-            if (!(handled || globallyHandled) && Attribute.IsDefined(typeof(T), typeof(RequireReceiverAttribute), false))
-            {
-                var requiredAttrib = typeof(T).GetCustomAttributes(typeof(RequireReceiverAttribute), false).FirstOrDefault() as RequireReceiverAttribute;
-                if (requiredAttrib != null)
-                {
-                    if (!handled)
-                    {
-                        if (!requiredAttrib.GlobalObserverConsidered || !globallyHandled)
-                        {
-                            if (notification.GameObject != null)
-                            {
-                                var root = notification.GameObject.FindRoot();
-                                if (sender == go)
-                                {
-                                    throw new AbsentNotificationReceiverException(notification, "A GameObject named '" + root.name + "' requires a receiver to notification of type '" + typeof(T).Name + "'.");
-                                }
-                                else
-                                {
-                                    throw new AbsentNotificationReceiverException(notification, "An object of type '" + sender.GetType().Name + "' on GameObject named '" + root.name + "' requires a receiver to notification of type '" + typeof(T).Name + "'.");
-                                }
-                            }
-                            else
-                            {
-                                throw new AbsentNotificationReceiverException(notification, "An object of type '" + sender.GetType().Name + "' requires a receiver to notification of type '" + typeof(T).Name + "'.");
-                            }
-                        }
-                    }
-                }
-
-                return false;
-            }
-            {
-                return true;
-            }
-        }
-
-        #endregion
-
-        #region Unsafe Register Interface
-
-        public static void UnsafeRegisterGlobalObserver(System.Type notificationType, NotificationHandler handler)
-        {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (handler == null) throw new System.ArgumentNullException("handler");
-            _globalNotificationHandlers.UnsafeRegisterObserver(notificationType, handler);
-        }
-
-        public static void UnsafeRemoveGlobalObserver(System.Type notificationType, NotificationHandler handler)
-        {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (handler == null) throw new System.ArgumentNullException("handler");
-
-            _globalNotificationHandlers.UnsafeRemoveObserver(notificationType, handler);
-        }
-
-        public static void UnsafeRegisterObserver(System.Type notificationType, object sender, NotificationHandler handler)
-        {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (sender == null) throw new System.ArgumentNullException("sender");
-            if (handler == null) throw new System.ArgumentNullException("handler");
-            _senderSpecificNotificationHandlers.Clean();
-
-            NotificationHandlerCollection coll;
-            if (!_senderSpecificNotificationHandlers.ContainsKey(sender))
-            {
-                coll = new NotificationHandlerCollection();
-                _senderSpecificNotificationHandlers[sender] = coll;
             }
             else
             {
-                coll = _senderSpecificNotificationHandlers[sender];
-            }
-            coll.UnsafeRegisterObserver(notificationType, handler);
-        }
-
-        public static void UnsafeRemoveObserver(System.Type notificationType, object sender, NotificationHandler handler)
-        {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (sender == null) throw new System.ArgumentNullException("sender");
-            if (handler == null) throw new System.ArgumentNullException("handler");
-            _senderSpecificNotificationHandlers.Clean();
-
-            if (!_senderSpecificNotificationHandlers.ContainsKey(sender)) return;
-
-            var coll = _senderSpecificNotificationHandlers[sender];
-            coll.UnsafeRemoveObserver(notificationType, handler);
-            if (coll.IsEmpty)
-            {
-                _senderSpecificNotificationHandlers.Remove(sender);
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
             }
         }
 
-        #endregion
-
-        #region Has/Contains
-
-        public static bool HasObserver<T>(object sender, bool bNotifyRoot = false) where T : Notification
+        public static bool UnsafePostNotification(INotificationDispatcher sender, Notification notification, bool bNotifyEntity = false)
         {
             if (sender == null) throw new ArgumentNullException("sender");
+            if (notification == null) throw new ArgumentNullException("notification");
 
-            if (_senderSpecificNotificationHandlers.ContainsKey(sender) && _senderSpecificNotificationHandlers[sender].HasObserverOf<T>()) return true;
-
-            var go = GameObjectUtil.GetGameObjectFromSource(sender);
-            if (go != null)
-            {
-                if (go != sender)
-                {
-                    if (_senderSpecificNotificationHandlers.ContainsKey(go) && _senderSpecificNotificationHandlers[go].HasObserverOf<T>()) return true;
-                }
-
-                if (bNotifyRoot)
-                {
-                    //if not bubbles, only test the root
-                    var root = com.spacepuppy.Utils.GameObjectUtil.FindRoot(go);
-                    if (root != null && root != go)
-                    {
-                        if (_senderSpecificNotificationHandlers.ContainsKey(root) && _senderSpecificNotificationHandlers[root].HasObserverOf<T>()) return true;
-                    }
-                }
-            }
-
-            return _globalNotificationHandlers.HasObserverOf<T>();
+            return sender.PostNotification(notification, bNotifyEntity);
         }
 
-        public static bool HasGlobalObserver<T>() where T : Notification
+        public static bool UnsafePostNotification(object sender, Notification notification, bool bNotifyEntity = false)
         {
-            return _globalNotificationHandlers.HasObserverOf<T>();
-        }
-
-        public static bool HasObserver(System.Type notificationType, object sender, bool bNotifyRoot = false)
-        {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
             if (sender == null) throw new ArgumentNullException("sender");
+            if (notification == null) throw new ArgumentNullException("notification");
 
-            if (_senderSpecificNotificationHandlers.ContainsKey(sender) && _senderSpecificNotificationHandlers[sender].HasObserverOf(notificationType)) return true;
-
-            var go = GameObjectUtil.GetGameObjectFromSource(sender);
-            if (go != null)
+            if (sender is INotificationDispatcher)
             {
-                if (go != sender)
+                return (sender as INotificationDispatcher).UnsafePostNotification(notification, bNotifyEntity);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                if (bNotifyEntity)
                 {
-                    if (_senderSpecificNotificationHandlers.ContainsKey(go) && _senderSpecificNotificationHandlers[go].HasObserverOf(notificationType)) return true;
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher.UnsafePostNotification(notification, bNotifyEntity);
                 }
-
-                if (bNotifyRoot)
+                else
                 {
-                    //if not bubbles, only test the root
-                    var root = com.spacepuppy.Utils.GameObjectUtil.FindRoot(go);
-                    if (root != null && root != go)
-                    {
-                        if (_senderSpecificNotificationHandlers.ContainsKey(root) && _senderSpecificNotificationHandlers[root].HasObserverOf(notificationType)) return true;
-                    }
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher != null && dispatcher.UnsafePostNotification(notification, bNotifyEntity);
                 }
             }
-
-            return _globalNotificationHandlers.HasObserverOf(notificationType);
-        }
-
-        public static bool HasGlobalObserver(System.Type notificationType)
-        {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-
-            return _globalNotificationHandlers.HasObserverOf(notificationType);
+            else
+            {
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
+            }
         }
 
         #endregion
 
+        #region Purge/Clean Utilities
+
+        public static void PurgeHandlers(UnityEngine.GameObject go)
+        {
+            foreach (var c in go.GetLikeComponents<INotificationDispatcher>())
+            {
+                c.PurgeHandlers();
+            }
+        }
+
         #endregion
-
-        #region Special Types
-
-        public delegate void NotificationHandler(Notification n);
-        public delegate void NotificationHandler<T>(T notification) where T : Notification;
-
-        [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-        public class RequireReceiverAttribute : System.Attribute
-        {
-
-            public bool GlobalObserverConsidered;
-
-        }
-
-        public class AbsentNotificationReceiverException : System.Exception
-        {
-
-            private Notification _n;
-
-            public AbsentNotificationReceiverException(Notification n, string msg)
-                : base()
-            {
-                _n = n;
-            }
-
-            public Notification Notification { get { return _n; } }
-
-        }
-
-        private class NotificationHandlerCollection
-        {
-
-            #region Fields
-
-            private Dictionary<Type, Delegate> _table = new Dictionary<Type, Delegate>();
-            private Dictionary<Type, NotificationHandler> _unsafeTable = new Dictionary<Type, NotificationHandler>();
-
-            #endregion
-
-            #region CONSTRUCTOR
-
-            public NotificationHandlerCollection()
-            {
-
-            }
-
-            #endregion
-
-            #region Properties
-
-            public bool IsEmpty { get { return _table.Count == 0 && _unsafeTable.Count == 0; } }
-
-            #endregion
-
-            #region Methods
-
-            #region Safe
-
-            public void RegisterObserver<T>(NotificationHandler<T> handler) where T : Notification
-            {
-                var tp = typeof(T);
-                System.Delegate d = (_table.ContainsKey(tp)) ? _table[tp] : null;
-                //this would only fail if someone modified this code to allow adding mismatched delegates with notification types
-                d = Delegate.Combine(d, handler);
-                _table[tp] = d;
-            }
-
-            public void RemoveObserver<T>(NotificationHandler<T> handler) where T : Notification
-            {
-                var notificationType = typeof(T);
-                if (_table.ContainsKey(notificationType))
-                {
-                    var d = _table[notificationType];
-                    if (d != null)
-                    {
-                        d = Delegate.Remove(d, handler);
-                        if (d != null)
-                        {
-                            _table[notificationType] = d;
-                        }
-                        else
-                        {
-                            _table.Remove(notificationType);
-                        }
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Unsafe
-
-            public void UnsafeRegisterObserver(System.Type notificationType, NotificationHandler handler)
-            {
-                NotificationHandler d = (_unsafeTable.ContainsKey(notificationType)) ? _unsafeTable[notificationType] : null;
-                d += handler;
-                _unsafeTable[notificationType] = d;
-            }
-
-            public void UnsafeRemoveObserver(System.Type notificationType, NotificationHandler handler)
-            {
-                if (_unsafeTable.ContainsKey(notificationType))
-                {
-                    var d = _unsafeTable[notificationType];
-                    if (d != null)
-                    {
-                        d -= handler;
-                        if (d != null)
-                        {
-                            _unsafeTable[notificationType] = d;
-                        }
-                        else
-                        {
-                            _unsafeTable.Remove(notificationType);
-                        }
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Post
-
-            public bool PostNotification<T>(T notification) where T : Notification
-            {
-                bool bSuccess = false;
-
-                //post safe receivers
-                var notificationType = typeof(T);
-                var baseType = typeof(Notification);
-                while (baseType.IsAssignableFrom(notificationType))
-                {
-                    Delegate d = null;
-                    if (_table.TryGetValue(notificationType, out d) && d != null && d is NotificationHandler<T>)
-                    {
-                        (d as NotificationHandler<T>)(notification);
-                        bSuccess = true;
-                    }
-
-                    //post unsafe receivers
-                    if (_unsafeTable.ContainsKey(notificationType))
-                    {
-                        var ud = _unsafeTable[notificationType];
-                        if (ud != null)
-                        {
-                            ud(notification);
-                            bSuccess = true;
-                        }
-                    }
-
-                    notificationType = notificationType.BaseType;
-                }
-
-                return bSuccess;
-            }
-
-            #endregion
-
-            public bool HasObserverOf<T>() where T : Notification
-            {
-                return this.HasObserverOf(typeof(T));
-            }
-            public bool HasObserverOf(System.Type notificationType)
-            {
-                var baseType = typeof(Notification);
-                while (baseType.IsAssignableFrom(notificationType))
-                {
-                    if (_table.ContainsKey(notificationType))
-                    {
-                        if (_table[notificationType] != null) return true;
-                    }
-
-                    if (_unsafeTable.ContainsKey(notificationType))
-                    {
-                        if (_unsafeTable[notificationType] != null) return true;
-                    }
-
-                    notificationType = notificationType.BaseType;
-                }
-
-                return false;
-            }
-
-            #endregion
-
-        }
 
         #endregion
 
     }
-
 }

@@ -55,23 +55,23 @@ namespace com.spacepuppyeditor.Inspectors
             {
                 if (property.isExpanded)
                 {
-                    return 3f * base.GetPropertyHeight(property, label) + 2f;
+                    return 3f * EditorGUIUtility.singleLineHeight + 2f;
                 }
                 else
                 {
-                    return base.GetPropertyHeight(property, label);
+                    return EditorGUIUtility.singleLineHeight;
                 }
             }
             else
             {
-                return base.GetPropertyHeight(property, label);
+                return EditorGUIUtility.singleLineHeight;
             }
         }
 
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if(!this.ValidateFieldType())
+            if (!this.ValidateFieldType())
             {
                 EditorGUI.PropertyField(position, property, label);
                 return;
@@ -81,12 +81,12 @@ namespace com.spacepuppyeditor.Inspectors
 
             //get base type
             var inheritsFromType = (this.attribute as ComponentTypeRestrictionAttribute).InheritsFromType ?? typeof(Component);
-            
+
             bool isArray = this.fieldInfo.FieldType.IsListType();
             var fieldType = (isArray) ? this.fieldInfo.FieldType.GetElementTypeOfListType() : this.fieldInfo.FieldType;
 
             //draw
-            var h = base.GetPropertyHeight(property, label);
+            var h = EditorGUIUtility.singleLineHeight;
             var r0 = new Rect(position.xMin, position.yMin, position.width, h);
             bool isExpanded = property.isExpanded;
             property.isExpanded = EditorGUI.Foldout(r0, isExpanded, this.GetHeaderLabel(property, label, inheritsFromType));
@@ -106,35 +106,13 @@ namespace com.spacepuppyeditor.Inspectors
                     else
                         _overrideBaseTypeDict[label.text] = inheritsFromType;
                 }
-                _overrideBaseTypeDict[label.text] = EditorHelper.TypeDropDown(r1, new GUIContent("Restrict Type"), inheritsFromType, _overrideBaseTypeDict[label.text], true, true, inheritsFromType, (this.attribute as ComponentTypeRestrictionAttribute).MenuListingStyle);
+                _overrideBaseTypeDict[label.text] = SPEditorGUI.TypeDropDown(r1, new GUIContent("Restrict Type"), inheritsFromType, _overrideBaseTypeDict[label.text], true, true, inheritsFromType, (this.attribute as ComponentTypeRestrictionAttribute).MenuListingStyle);
                 inheritsFromType = _overrideBaseTypeDict[label.text];
 
                 //draw object field
                 var refLabel = new GUIContent("Reference");
-                if (ObjUtil.IsType(inheritsFromType, fieldType))
-                {
-                    property.objectReferenceValue = EditorGUI.ObjectField(r2, refLabel, property.objectReferenceValue, inheritsFromType, true);
-                }
-                else if (ObjUtil.IsType(inheritsFromType, typeof(IComponent)))
-                {
-
-                    Component component = property.objectReferenceValue as Component;
-                    component = EditorGUI.ObjectField(r2, refLabel, component, fieldType, true) as Component;
-                    var go = GameObjectUtil.GetGameObjectFromSource(component);
-                    component = null;
-                    if (go != null)
-                    {
-                        foreach (var c in go.GetLikeComponents(inheritsFromType))
-                        {
-                            if (ObjUtil.IsType(c.GetType(), fieldType))
-                            {
-                                component = c as Component;
-                                break;
-                            }
-                        }
-                    }
-                    property.objectReferenceValue = component;
-                }
+                property.objectReferenceValue = SPEditorGUI.ComponentField(r2, refLabel, property.objectReferenceValue as Component, inheritsFromType, true, fieldType);
+                property.serializedObject.ApplyModifiedProperties();
 
                 EditorGUI.indentLevel -= 1;
             }

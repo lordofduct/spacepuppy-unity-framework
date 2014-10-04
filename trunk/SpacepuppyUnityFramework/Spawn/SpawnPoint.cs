@@ -7,7 +7,7 @@ namespace com.spacepuppy.Spawn
 {
 
     [AddComponentMenu("SpacePuppy/Spawn/Spawn Point")]
-    public class SpawnPoint : AbstractSpawnPoint, com.spacepuppy.Scenario.ITriggerableMechanism
+    public class SpawnPoint : AbstractSpawnPoint
     {
 
         public const string TRIGGERARG_RANDOM = "RANDOM";
@@ -77,18 +77,18 @@ namespace com.spacepuppy.Spawn
 
         #region ITriggerable Interface
 
-        bool com.spacepuppy.Scenario.ITriggerableMechanism.CanTrigger
+        public override bool CanTrigger
         {
-            get { return this.enabled && _prefabs != null && _prefabs.Length > 0; }
+            get { return base.CanTrigger && _prefabs != null && _prefabs.Length > 0; }
         }
 
-        public object Trigger(object arg)
+        public override object Trigger(object arg)
         {
-            if (!(this as com.spacepuppy.Scenario.ITriggerableMechanism).CanTrigger) return null;
+            if (!this.CanTrigger) return null;
 
             if (arg is string)
             {
-                switch((arg as string).ToUpper())
+                switch ((arg as string).ToUpper())
                 {
                     case TRIGGERARG_RANDOM:
                         return this.Spawn(Random.Range(0, this.PrefabCount));

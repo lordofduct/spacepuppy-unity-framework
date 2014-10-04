@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class OnNotificationTrigger : Trigger
+    public class t_OnNotificationTrigger : Trigger
     {
 
         #region Fields
@@ -56,7 +56,7 @@ namespace com.spacepuppy.Scenario
         {
             base.OnDisable();
 
-            if(_targCache != null)
+            if (_targCache != null)
             {
                 Notification.UnsafeRemoveObserver(_typeCache, _targCache, this.OnNotification);
                 _typeCache = null;

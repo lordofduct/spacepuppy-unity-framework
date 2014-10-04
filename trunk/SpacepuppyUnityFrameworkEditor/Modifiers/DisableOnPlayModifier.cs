@@ -16,7 +16,7 @@ namespace com.spacepuppyeditor.Modifiers
 
         protected internal override void OnBeforeGUI(SerializedProperty property)
         {
-            if(Application.isPlaying)
+            if (Application.isPlaying)
             {
                 _cached = GUI.enabled;
                 GUI.enabled = false;
@@ -29,7 +29,7 @@ namespace com.spacepuppyeditor.Modifiers
 
         protected internal override void OnPostGUI(SerializedProperty property)
         {
-            if(_cached != null)
+            if (_cached != null)
             {
                 GUI.enabled = _cached.Value;
             }

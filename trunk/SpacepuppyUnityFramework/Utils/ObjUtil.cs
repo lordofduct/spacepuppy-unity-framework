@@ -50,6 +50,21 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        public static bool HasFlag(this System.Enum e, System.Enum value)
+        {
+            return (System.Convert.ToInt64(e) & System.Convert.ToInt64(value)) != 0;
+        }
+
+        public static bool HasFlag(this System.Enum e, ulong value)
+        {
+            return (System.Convert.ToUInt64(e) & value) != 0;
+        }
+
+        public static bool HasFlag(this System.Enum e, long value)
+        {
+            return (System.Convert.ToInt64(e) & value) != 0;
+        }
+
         #endregion
 
         public static System.Type[] GetTypesAssignableFrom(System.Reflection.Assembly assemb, System.Type rootType)
@@ -87,49 +102,55 @@ namespace com.spacepuppy.Utils
             try
             {
                 var tp = obj.GetType();
-                var members = tp.GetMember(sprop, BINDING);
-                if (members == null || members.Length == 0) return null;
 
-                foreach (var member in members)
+                while (tp != null)
                 {
-                    switch (member.MemberType)
+                    var members = tp.GetMember(sprop, BINDING);
+                    if (members == null || members.Length == 0) return null;
+
+                    foreach (var member in members)
                     {
-                        case System.Reflection.MemberTypes.Field:
-                            var field = member as System.Reflection.FieldInfo;
-                            return field.GetValue(obj);
+                        switch (member.MemberType)
+                        {
+                            case System.Reflection.MemberTypes.Field:
+                                var field = member as System.Reflection.FieldInfo;
+                                return field.GetValue(obj);
 
-                        case System.Reflection.MemberTypes.Property:
-                            var prop = member as System.Reflection.PropertyInfo;
-                            if (prop.CanRead && prop.GetIndexParameters().Length == args.Length)
-                            {
-                                if (args.Length > 0)
+                            case System.Reflection.MemberTypes.Property:
+                                var prop = member as System.Reflection.PropertyInfo;
+                                if (prop.CanRead && prop.GetIndexParameters().Length == args.Length)
                                 {
-                                    //TODO - check types... but need to allow downcasting... how?
-                                    return prop.GetValue(obj, args);
+                                    if (args.Length > 0)
+                                    {
+                                        //TODO - check types... but need to allow downcasting... how?
+                                        return prop.GetValue(obj, args);
+                                    }
+                                    else
+                                    {
+                                        return prop.GetValue(obj, null);
+                                    }
                                 }
-                                else
-                                {
-                                    return prop.GetValue(obj, null);
-                                }
-                            }
-                            break;
+                                break;
 
-                        case System.Reflection.MemberTypes.Method:
-                            var meth = member as System.Reflection.MethodInfo;
-                            if (meth.GetParameters().Length == args.Length)
-                            {
-                                if (args.Length > 0)
+                            case System.Reflection.MemberTypes.Method:
+                                var meth = member as System.Reflection.MethodInfo;
+                                if (meth.GetParameters().Length == args.Length)
                                 {
-                                    //TODO - check types... but need to allow downcasting... how?
-                                    return meth.Invoke(obj, args);
+                                    if (args.Length > 0)
+                                    {
+                                        //TODO - check types... but need to allow downcasting... how?
+                                        return meth.Invoke(obj, args);
+                                    }
+                                    else
+                                    {
+                                        return meth.Invoke(obj, null);
+                                    }
                                 }
-                                else
-                                {
-                                    return meth.Invoke(obj, null);
-                                }
-                            }
-                            break;
+                                break;
+                        }
                     }
+
+                    tp = tp.BaseType;
                 }
             }
             catch
@@ -149,71 +170,76 @@ namespace com.spacepuppy.Utils
             {
                 var tp = obj.GetType();
 
-                var members = tp.GetMember(sprop, BINDING);
-                if (members == null || members.Length == 0) return false;
-
-                System.Type vtp = (value != null) ? value.GetType() : null;
-
-                //first strict test
-                foreach (var member in members)
+                while (tp != null)
                 {
-                    switch (member.MemberType)
+                    var members = tp.GetMember(sprop, BINDING);
+                    if (members == null || members.Length == 0) return false;
+
+                    System.Type vtp = (value != null) ? value.GetType() : null;
+
+                    //first strict test
+                    foreach (var member in members)
                     {
-                        case System.Reflection.MemberTypes.Field:
-                            var field = member as System.Reflection.FieldInfo;
-                            if (vtp == null || field.FieldType == vtp)
-                            {
+                        switch (member.MemberType)
+                        {
+                            case System.Reflection.MemberTypes.Field:
+                                var field = member as System.Reflection.FieldInfo;
+                                if (vtp == null || field.FieldType == vtp)
+                                {
+                                    field.SetValue(obj, value);
+                                    return true;
+                                }
+                                break;
+                            case System.Reflection.MemberTypes.Property:
+                                var prop = member as System.Reflection.PropertyInfo;
+                                if (prop.CanWrite && (vtp == null || prop.PropertyType == vtp) && prop.GetIndexParameters().Length == 0)
+                                {
+                                    prop.SetValue(obj, value, null);
+                                    return true;
+                                }
+                                break;
+                            case System.Reflection.MemberTypes.Method:
+                                var meth = member as System.Reflection.MethodInfo;
+                                var args = meth.GetParameters();
+                                if (args.Length == 1 && (vtp == null || args[0].ParameterType == vtp))
+                                {
+                                    meth.Invoke(obj, new object[] { value });
+                                    return true;
+                                }
+                                break;
+                        }
+                    }
+
+                    //now weak test
+                    foreach (var member in members)
+                    {
+                        switch (member.MemberType)
+                        {
+                            case System.Reflection.MemberTypes.Field:
+                                var field = member as System.Reflection.FieldInfo;
                                 field.SetValue(obj, value);
                                 return true;
-                            }
-                            break;
-                        case System.Reflection.MemberTypes.Property:
-                            var prop = member as System.Reflection.PropertyInfo;
-                            if (prop.CanWrite && (vtp == null || prop.PropertyType == vtp) && prop.GetIndexParameters().Length == 0)
-                            {
-                                prop.SetValue(obj, value, null);
-                                return true;
-                            }
-                            break;
-                        case System.Reflection.MemberTypes.Method:
-                            var meth = member as System.Reflection.MethodInfo;
-                            var args = meth.GetParameters();
-                            if (args.Length == 1 && (vtp == null || args[0].ParameterType == vtp))
-                            {
-                                meth.Invoke(obj, new object[] { value });
-                                return true;
-                            }
-                            break;
+                            case System.Reflection.MemberTypes.Property:
+                                var prop = member as System.Reflection.PropertyInfo;
+                                if (prop.CanWrite)
+                                {
+                                    prop.SetValue(obj, value, null);
+                                    return true;
+                                }
+                                break;
+                            case System.Reflection.MemberTypes.Method:
+                                var meth = member as System.Reflection.MethodInfo;
+                                var args = meth.GetParameters();
+                                if (args.Length == 1)
+                                {
+                                    meth.Invoke(obj, new object[] { value });
+                                    return true;
+                                }
+                                break;
+                        }
                     }
-                }
 
-                //now weak test
-                foreach (var member in members)
-                {
-                    switch (member.MemberType)
-                    {
-                        case System.Reflection.MemberTypes.Field:
-                            var field = member as System.Reflection.FieldInfo;
-                            field.SetValue(obj, value);
-                            return true;
-                        case System.Reflection.MemberTypes.Property:
-                            var prop = member as System.Reflection.PropertyInfo;
-                            if (prop.CanWrite)
-                            {
-                                prop.SetValue(obj, value, null);
-                                return true;
-                            }
-                            break;
-                        case System.Reflection.MemberTypes.Method:
-                            var meth = member as System.Reflection.MethodInfo;
-                            var args = meth.GetParameters();
-                            if (args.Length == 1)
-                            {
-                                meth.Invoke(obj, new object[] { value });
-                                return true;
-                            }
-                            break;
-                    }
+                    tp = tp.BaseType;
                 }
             }
             catch
@@ -222,6 +248,86 @@ namespace com.spacepuppy.Utils
             }
 
             return false;
+        }
+
+        public static bool CallMethod(this object obj, string name, object optionalArg = null)
+        {
+            const System.Reflection.BindingFlags BINDING = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance;
+            if (obj == null) return false;
+
+            var tp = obj.GetType();
+            System.Reflection.MethodInfo meth;
+            bool hasParam = false;
+
+            if (optionalArg != null)
+            {
+                hasParam = true;
+                var argTp = optionalArg.GetType();
+                try
+                {
+                    meth = tp.GetMethod(name, BINDING, null, new System.Type[] { argTp }, null);
+                    if (meth != null) goto DoCallMethod;
+                }
+                catch
+                {
+                    meth = null;
+                }
+
+                foreach (var m in tp.GetMethods(BINDING))
+                {
+                    if (m.Name == name)
+                    {
+                        var parr = m.GetParameters();
+                        if (parr.Length != 1) continue;
+
+                        if (ObjUtil.IsType(argTp, parr[0].ParameterType))
+                        {
+                            meth = m;
+                            goto DoCallMethod;
+                        }
+                    }
+                }
+
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    meth = tp.GetMethod(name, BINDING, null, System.Type.EmptyTypes, null);
+                    if (meth != null) goto DoCallMethod;
+                }
+                catch
+                {
+                    meth = null;
+                }
+
+                foreach (var m in tp.GetMethods(BINDING))
+                {
+                    if (m.Name == name)
+                    {
+                        var parr = m.GetParameters();
+                        if (parr.Length != 1) continue;
+
+                        meth = m;
+                        goto DoCallMethod;
+                    }
+                }
+
+                return false;
+            }
+
+
+        DoCallMethod:
+            if (hasParam)
+            {
+                meth.Invoke(obj, new object[] { optionalArg });
+            }
+            else
+            {
+                meth.Invoke(obj, null);
+            }
+            return true;
         }
 
         public static T ExtractDelegate<T>(object obj, string name, bool ignoreCase = false, bool throwOnBindFailure = false) where T : class

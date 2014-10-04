@@ -62,27 +62,27 @@ namespace com.spacepuppy
         {
             _quickLookupTable = new Dictionary<System.Type, System.Reflection.MethodInfo[]>();
 
-            var behTp = typeof(MonoBehaviour);
-            var attribType = typeof(AutoNotificationHandler);
-            var baseNotifType = typeof(Notification);
-            var voidType = typeof(void);
-            var types = from ass in System.AppDomain.CurrentDomain.GetAssemblies()
-                        from tp in ass.GetTypes()
-                        where behTp.IsAssignableFrom(tp) && System.Attribute.IsDefined(tp, attribType, true)
-                        select tp;
-            foreach (var tp in types)
-            {
-                var methods = from m in tp.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
-                              where m.ReturnType == voidType &&
-                              System.Attribute.IsDefined(m, attribType, true)
-                              let p = m.GetParameters()
-                              where p.Length == 1 && baseNotifType.IsAssignableFrom(p[0].ParameterType)
-                              select m;
-                if (methods.Count() > 0)
-                {
-                    _quickLookupTable.Add(tp, methods.ToArray());
-                }
-            }
+            //var behTp = typeof(MonoBehaviour);
+            //var attribType = typeof(AutoNotificationHandler);
+            //var baseNotifType = typeof(Notification);
+            //var voidType = typeof(void);
+            //var types = from ass in System.AppDomain.CurrentDomain.GetAssemblies()
+            //            from tp in ass.GetTypes()
+            //            where behTp.IsAssignableFrom(tp) && System.Attribute.IsDefined(tp, attribType, true)
+            //            select tp;
+            //foreach (var tp in types)
+            //{
+            //    var methods = from m in tp.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
+            //                  where m.ReturnType == voidType &&
+            //                  System.Attribute.IsDefined(m, attribType, true)
+            //                  let p = m.GetParameters()
+            //                  where p.Length == 1 && baseNotifType.IsAssignableFrom(p[0].ParameterType)
+            //                  select m;
+            //    if (methods.Count() > 0)
+            //    {
+            //        _quickLookupTable.Add(tp, methods.ToArray());
+            //    }
+            //}
         }
 
         private static System.Reflection.MethodInfo[] GetMethodInfos(System.Type tp)

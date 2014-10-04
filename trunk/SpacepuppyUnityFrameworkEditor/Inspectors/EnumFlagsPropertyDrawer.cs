@@ -19,9 +19,10 @@ namespace com.spacepuppyeditor.Inspectors
 
             var attrib = this.attribute as EnumFlagsAttribute;
             var tp = (attrib.EnumType != null && attrib.EnumType.IsEnum) ? attrib.EnumType : this.fieldInfo.FieldType;
-            if(tp.IsEnum)
+            if (tp.IsEnum)
             {
-                property.intValue = EditorHelper.EnumFlagField(position, tp, label, property.intValue);
+                property.intValue = SPEditorGUI.EnumFlagField(position, tp, label, property.intValue);
+                property.serializedObject.ApplyModifiedProperties();
             }
             else
             {

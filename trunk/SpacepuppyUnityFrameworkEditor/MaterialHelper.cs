@@ -17,7 +17,7 @@ namespace com.spacepuppyeditor
         {
             get
             {
-                if(_defaultMaterial == null)
+                if (_defaultMaterial == null)
                 {
                     _defaultMaterial = new Material("Shader \"SPEditor/DefaultShader\"{   SubShader   {      Pass      {         BindChannels { Bind \"Color\", color }         Blend SrcAlpha OneMinusSrcAlpha         ZWrite Off Cull Off Fog { Mode Off }         Color(1, 1, 1, 1)      }   }}");
                     _defaultMaterial.hideFlags = HideFlags.HideAndDontSave;

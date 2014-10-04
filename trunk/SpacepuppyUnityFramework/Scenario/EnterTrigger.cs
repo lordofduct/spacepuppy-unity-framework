@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Scenario
 {
     public class EnterTrigger : Trigger
@@ -9,27 +11,31 @@ namespace com.spacepuppy.Scenario
 
         public ScenarioActivatorMask Mask;
         public float CooldownInterval = 1.0f;
+        public bool IncludeColliderAsTriggerArg = true;
 
         [System.NonSerialized()]
-        private float _currentCooldown;
+        private bool _coolingDown;
 
         void OnTriggerEnter(Collider other)
         {
-            if (_currentCooldown > 0f) return;
+            if (_coolingDown) return;
 
             if (Mask == null || Mask.Intersects(other))
             {
-                _currentCooldown = this.CooldownInterval;
-                this.ActivateTrigger();
-            }
-        }
+                if (this.IncludeColliderAsTriggerArg)
+                {
+                    this.ActivateTrigger(other);
+                }
+                else
+                {
+                    this.ActivateTrigger();
+                }
 
-        void Update()
-        {
-            if (_currentCooldown > 0f)
-            {
-                _currentCooldown -= GameTime.DeltaTime;
-                if (_currentCooldown <= 0.0f) _currentCooldown = 0f;
+                _coolingDown = true;
+                this.Invoke(() =>
+                {
+                    _coolingDown = false;
+                }, this.CooldownInterval);
             }
         }
 

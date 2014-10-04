@@ -18,7 +18,7 @@ namespace com.spacepuppy.Spawn
 
         public SpawnNotification(GameObject spawnedObject)
         {
-            if(spawnedObject == null) throw new System.ArgumentNullException("spawnedObject");
+            if (spawnedObject == null) throw new System.ArgumentNullException("spawnedObject");
             _spawnedObject = spawnedObject;
         }
 
@@ -45,7 +45,7 @@ namespace com.spacepuppy.Spawn
 
         public DeSpawnNotification(GameObject spawnedObject)
         {
-            if(spawnedObject == null) throw new System.ArgumentNullException("spawnedObject");
+            if (spawnedObject == null) throw new System.ArgumentNullException("spawnedObject");
             _spawnedObject = spawnedObject;
         }
 

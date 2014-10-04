@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Spawn
 {
-    public abstract class AbstractSpawnPoint : SPComponent
+    public abstract class AbstractSpawnPoint : com.spacepuppy.Scenario.TriggerableMechanism
     {
 
         #region Fields
@@ -94,11 +94,11 @@ namespace com.spacepuppy.Spawn
             var modifiers = this.GetComponents<OnSpawnModifier>().OrderBy((c) => c.order).ToArray();
 
             var beforeNotif = new SpawnPointBeforeSpawnNotification(prefab);
-            foreach(var m in modifiers)
+            foreach (var m in modifiers)
             {
                 m.OnBeforeSpawnNotification(beforeNotif);
             }
-            Notification.PostNotification<SpawnPointBeforeSpawnNotification>(this, beforeNotif);
+            Notification.PostNotification<SpawnPointBeforeSpawnNotification>(this, beforeNotif, false);
             if (beforeNotif.Cancelled) return null;
 
             if (_spawnPool == null)
@@ -115,17 +115,13 @@ namespace com.spacepuppy.Spawn
             if (go == null) return null;
 
             var spawnNotif = new SpawnPointTriggeredNotification(go);
-            foreach(var m in modifiers)
+            foreach (var m in modifiers)
             {
                 m.OnSpawnedNotification(spawnNotif);
             }
-            Notification.PostNotification<SpawnPointTriggeredNotification>(this, spawnNotif);
+            Notification.PostNotification<SpawnPointTriggeredNotification>(this, spawnNotif, false);
             return go;
         }
-
-        #endregion
-
-        #region ITriggerable Interface
 
         #endregion
 

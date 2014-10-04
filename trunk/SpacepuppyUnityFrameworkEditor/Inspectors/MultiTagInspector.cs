@@ -30,6 +30,7 @@ namespace com.spacepuppyeditor.Inspectors
                 var currentTags = this.target.GetTags().ToArray();
                 var selectedTags = new List<string>();
 
+                EditorGUI.BeginChangeCheck();
                 var tags = from tag in UnityEditorInternal.InternalEditorUtility.tags where (tag != SPConstants.TAG_UNTAGGED && tag != SPConstants.TAG_MULTITAG && tag != SPConstants.TAG_EDITORONLY) select tag;
                 foreach (var tag in tags)
                 {
@@ -40,7 +41,11 @@ namespace com.spacepuppyeditor.Inspectors
                     }
                 }
 
-                this.target.UpdateTags(selectedTags.ToArray());
+                if (EditorGUI.EndChangeCheck())
+                {
+                    this.target.UpdateTags(selectedTags.ToArray());
+                    this.serializedObject.Update();
+                }
             }
 
         }

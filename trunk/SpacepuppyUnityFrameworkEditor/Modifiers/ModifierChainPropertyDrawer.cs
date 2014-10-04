@@ -24,9 +24,9 @@ namespace com.spacepuppyeditor.Modifiers
             _modifiers = null;
             _visibleDrawer = null;
 
-            _attributes = (from a in this.fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), true) 
-                           where !(a is ModifierChainAttribute) 
-                           orderby (a as PropertyAttribute).order ascending 
+            _attributes = (from a in this.fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), true)
+                           where !(a is ModifierChainAttribute)
+                           orderby (a as PropertyAttribute).order ascending
                            select a as PropertyAttribute).ToArray();
 
             var propDrawerTp = typeof(PropertyDrawer);

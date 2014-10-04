@@ -30,7 +30,7 @@ namespace com.spacepuppy.Spawn
 
         protected internal override void OnSpawnedNotification(SpawnPointTriggeredNotification n)
         {
-             _currentCount++;
+            _currentCount++;
         }
 
         #endregion
