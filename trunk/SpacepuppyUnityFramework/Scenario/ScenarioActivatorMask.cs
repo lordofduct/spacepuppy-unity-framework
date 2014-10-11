@@ -85,6 +85,17 @@ namespace com.spacepuppy.Scenario
             if (go == null) return false;
             if (!go.IntersectsLayerMask(_layerMask)) return false;
             if (_tags != null && _tags.Length > 0 && !go.HasTag(_tags)) return false;
+
+            if (this.TestRoot && (root = go.FindRoot()) != go)
+            {
+                var root = go.FindRoot();
+                if (root != go)
+                {
+                    if (!root.IntersectsLayerMask(_layerMask)) return false;
+                    if (_tags != null && _tags.Length > 0 && !root.HasTag(_tags)) return false;
+                }
+            }
+
             return true;
         }
 

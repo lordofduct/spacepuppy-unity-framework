@@ -25,7 +25,7 @@ namespace com.spacepuppyeditor.Modifiers
             {
                 _cached = null;
             }
-        }
+        }/
 
         protected internal override void OnPostGUI(SerializedProperty property)
         {
