@@ -15,7 +15,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Quaternion FromToRotation(Quaternion start, Quaternion end)
         {
-            return end * Quaternion.Inverse(start);
+            return Quaternion.Inverse(start) * end;
         }
 
         public static Quaternion SpeedSlerp(Quaternion from, Quaternion to, float angularSpeed, float dt, bool bUseRadians = false)
