@@ -108,9 +108,19 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
+        public static bool SimilarTo<T>(this IEnumerable<T> first, IEnumerable<T> second)
+        {
+            return first.Intersect(second).Count() == first.Count();
+        }
+
         public static bool ContainsAny<T>(this IEnumerable<T> lst, params T[] objs)
         {
             if (objs == null) return false;
+            return lst.Intersect(objs).Count() > 0;
+        }
+
+        public static bool ContainsAny<T>(this IEnumerable<T> lst, IEnumerable<T> objs)
+        {
             return lst.Intersect(objs).Count() > 0;
         }
 
@@ -120,6 +130,23 @@ namespace com.spacepuppy.Utils
             foreach (var o in lst)
             {
                 yield return o;
+            }
+        }
+
+        public static bool Contains(this IEnumerable lst, object obj)
+        {
+            foreach (var o in lst)
+            {
+                if (Object.Equals(o, obj)) return true;
+            }
+            return false;
+        }
+
+        public static void AddRange<T>(this ICollection<T> lst, IEnumerable<T> elements)
+        {
+            foreach (var e in elements)
+            {
+                lst.Add(e);
             }
         }
 

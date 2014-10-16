@@ -27,6 +27,8 @@ namespace com.spacepuppyeditor.Inspectors
 
             if (_showTags)
             {
+                EditorGUI.indentLevel++;
+
                 var currentTags = this.target.GetTags().ToArray();
                 var selectedTags = new List<string>();
 
@@ -46,6 +48,8 @@ namespace com.spacepuppyeditor.Inspectors
                     this.target.UpdateTags(selectedTags.ToArray());
                     this.serializedObject.Update();
                 }
+
+                EditorGUI.indentLevel--;
             }
 
         }

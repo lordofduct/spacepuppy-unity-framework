@@ -59,13 +59,19 @@ namespace com.spacepuppy
 
         public bool ContainsTag(string tag)
         {
-            if (_tags == null) return false;
+            if (_tags == null || _tags.Length == 0) return MultiTag.IsEmptyTag(tag);
             return System.Array.IndexOf(_tags, tag) >= 0;
         }
 
         public bool ContainsTag(params string[] tags)
         {
-            if (_tags == null) return false;
+            if (_tags == null || _tags.Length == 0) return tags.Contains(SPConstants.TAG_UNTAGGED);
+            return _tags.ContainsAny(tags);
+        }
+
+        public bool ContainsTag(IEnumerable<string> tags)
+        {
+            if (_tags == null || _tags.Length == 0) return tags.Contains(SPConstants.TAG_UNTAGGED);
             return _tags.ContainsAny(tags);
         }
 
@@ -116,17 +122,20 @@ namespace com.spacepuppy
         public static bool IsValidTag(string stag)
         {
             //TODO - need a way to find list of known tags
-            return !string.IsNullOrEmpty(stag);
+            //return !string.IsNullOrEmpty(stag);
+            return TagData.Tags.Contains(stag);
         }
 
         public static bool IsValidActiveTag(string stag)
         {
-            return !string.IsNullOrEmpty(stag) && stag != SPConstants.TAG_UNTAGGED;
+            //return !string.IsNullOrEmpty(stag) && stag != SPConstants.TAG_UNTAGGED;
+            return TagData.Tags.Contains(stag) && stag != SPConstants.TAG_UNTAGGED;
         }
 
         public static bool IsValidMultiTag(string stag)
         {
-            return !string.IsNullOrEmpty(stag) && stag != SPConstants.TAG_UNTAGGED && stag != SPConstants.TAG_MULTITAG;
+            //return !string.IsNullOrEmpty(stag) && stag != SPConstants.TAG_UNTAGGED && stag != SPConstants.TAG_MULTITAG;
+            return TagData.Tags.Contains(stag) && stag != SPConstants.TAG_UNTAGGED && stag != SPConstants.TAG_MULTITAG;
         }
 
         public static bool IsEmptyTag(string stag)
@@ -208,6 +217,25 @@ namespace com.spacepuppy
             if (c == null) return false;
             return HasTag(c.gameObject, stags);
         }
+
+        public static bool HasTag(this GameObject go, IEnumerable<string> stags)
+        {
+            if (stags == null) return false;
+            if (go == null) return false;
+            if (stags.Contains(go.tag)) return true;
+
+            var multitag = go.GetComponent<MultiTag>();
+            if (multitag != null && multitag.ContainsTag(stags)) return true;
+
+            return false;
+        }
+
+        public static bool HasTag(this Component c, IEnumerable<string> stags)
+        {
+            if (c == null) return false;
+            return HasTag(c.gameObject, stags);
+        }
+
 
         /**
          * AddTag

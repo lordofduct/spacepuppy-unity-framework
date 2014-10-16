@@ -52,6 +52,7 @@
     <Compile Include="Inspectors\MultiTagInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerTargetPropertyDrawer.cs" />
+    <Compile Include="Inspectors\TagMaskInspector.cs" />
     <Compile Include="Inspectors\TagSelectorPropertyDrawer.cs" />
     <Compile Include="Inspectors\TypeReferencePropertyDrawer.cs" />
     <Compile Include="Inspectors\VariantReferencePropertyDrawer.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Internal\ScriptAttributeUtility.cs" />
     <Compile Include="Internal\SPPropertyHandler.cs" />
     <Compile Include="Internal\StandardPropertyHandler.cs" />
+    <Compile Include="Internal\TagDataInspector.cs" />
     <Compile Include="MaterialHelper.cs" />
     <Compile Include="Modifiers\DefaultFromSelfModifier.cs" />
     <Compile Include="Modifiers\DisableOnPlayModifier.cs" />
@@ -75,6 +77,7 @@
     <Compile Include="Inspectors\Spawn\SpawnPoolEditor.cs" />
     <Compile Include="Inspectors\Spawn\SpawnPoolInspector.cs" />
     <Compile Include="ReorderableListHelper.cs" />
+    <Compile Include="ScriptableObjectHelper.cs" />
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorGUI.cs" />
     <Compile Include="SPEditorGUILayout.cs" />

@@ -97,6 +97,8 @@
     <Compile Include="Spawn\SpawnPoint.cs" />
     <Compile Include="Spawn\SpawnPool.cs" />
     <Compile Include="SPConstants.cs" />
+    <Compile Include="TagData.cs" />
+    <Compile Include="TagMask.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
     <Compile Include="Timers\GameTimers.cs" />
     <Compile Include="Timers\ITimer.cs" />

@@ -86,7 +86,7 @@ namespace com.spacepuppy.Scenario
             if (!go.IntersectsLayerMask(_layerMask)) return false;
             if (_tags != null && _tags.Length > 0 && !go.HasTag(_tags)) return false;
 
-            if (this.TestRoot && (root = go.FindRoot()) != go)
+            if (this.TestRoot)
             {
                 var root = go.FindRoot();
                 if (root != go)
