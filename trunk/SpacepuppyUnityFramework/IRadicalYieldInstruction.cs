@@ -8,7 +8,7 @@ namespace com.spacepuppy
     /// </summary>
     public interface IRadicalYieldInstruction : System.Collections.IEnumerator
     {
-
+        void Init(RadicalCoroutine routine);
     }
 
     public abstract class RadicalYieldInstruction : IRadicalYieldInstruction
@@ -17,12 +17,39 @@ namespace com.spacepuppy
         #region Fields
 
         private object _current;
+        private RadicalCoroutine _routine;
+
+        #endregion
+
+        #region Properties
+
+        protected RadicalCoroutine Routine { get { return _routine; } }
 
         #endregion
 
         #region Methods
 
+        protected virtual void Init()
+        {
+
+        }
+
+        protected virtual void DeInit()
+        {
+
+        }
+
         protected abstract bool ContinueBlocking(ref object yieldObject);
+
+        #endregion
+
+        #region IRadicalYieldInstruction Interface
+
+        void IRadicalYieldInstruction.Init(RadicalCoroutine routine)
+        {
+            _routine = routine;
+            this.Init();
+        }
 
         #endregion
 
@@ -36,7 +63,16 @@ namespace com.spacepuppy
         bool System.Collections.IEnumerator.MoveNext()
         {
             _current = null;
-            return this.ContinueBlocking(ref _current);
+            if (this.ContinueBlocking(ref _current))
+            {
+                return true;
+            }
+            else
+            {
+                this.DeInit();
+                _routine = null;
+                return false;
+            }
         }
 
         void System.Collections.IEnumerator.Reset()
@@ -47,4 +83,5 @@ namespace com.spacepuppy
         #endregion
 
     }
+
 }

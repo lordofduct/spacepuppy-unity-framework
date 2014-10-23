@@ -48,6 +48,8 @@ namespace com.spacepuppyeditor.Tools
                 var helper = new TagData.EditorHelper(tagData);
                 helper.UpdateTags(UnityEditorInternal.InternalEditorUtility.tags);
                 EditorUtility.SetDirty(tagData);
+
+                
                 AssetDatabase.SaveAssets();
             }
 

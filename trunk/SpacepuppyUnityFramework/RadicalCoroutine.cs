@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy
 {
 
-    public class RadicalCoroutine : RadicalYieldInstruction
+    public class RadicalCoroutine : IEnumerator
     {
 
         #region Events
@@ -21,10 +21,12 @@ namespace com.spacepuppy
 
         private System.Collections.IEnumerator _routine;
         private System.Collections.IEnumerator _derivative;
+        private object _currentIEnumeratorYieldValue;
 
         private bool _completed = false;
         private bool _cancelled = false;
         private IManualWait _manualWaitingOnInstruction;
+        private bool _forcedTick = false;
 
         #endregion
 
@@ -101,115 +103,6 @@ namespace com.spacepuppy
             if (this.OnCancelled != null) this.OnCancelled(this, System.EventArgs.Empty);
         }
 
-        protected override bool ContinueBlocking(ref object yieldObject)
-        {
-            if (_cancelled)
-            {
-                if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
-                return false;
-            }
-
-            if (_manualWaitingOnInstruction != null)
-            {
-                if (_manualWaitingOnInstruction.StillWait)
-                {
-                    return true;
-                }
-                else
-                {
-                    _manualWaitingOnInstruction = null;
-                }
-            }
-
-            if (_derivative != null)
-            {
-                if (_derivative.MoveNext())
-                {
-                    if (_cancelled) return false; //our routine cancelled itself
-                    if (_derivative == null) return !_completed; //the derivative was cleared out by a manual tick, wait a frame or exit depending on if we completed in that time
-                    yieldObject = _derivative.Current;
-                    return true;
-                }
-                else
-                {
-                    if (_derivative is RadicalCoroutine) (_derivative as RadicalCoroutine)._owner = null;
-                    _derivative = null;
-                }
-            }
-
-
-            if (_routine.MoveNext())
-            {
-                if (_cancelled) return false; //our routine cancelled itself
-
-                var current = _routine.Current;
-                if (current == null)
-                {
-                    //do nothing
-                }
-                else if (current is YieldInstruction)
-                {
-                    yieldObject = current;
-                }
-                else if (current is WWW)
-                {
-                    yieldObject = current;
-                }
-                else if (current is RadicalCoroutine)
-                {
-                    IEnumerator e = null;
-                    var rad = current as RadicalCoroutine;
-                    if (rad._owner == null)
-                    {
-                        rad._owner = this;
-                        e = rad as IEnumerator;
-                    }
-                    else
-                    {
-                        e = WaitUntilDone_Routine(rad).GetEnumerator();
-                    }
-
-                    if (e.MoveNext())
-                    {
-                        yieldObject = e.Current;
-                        _derivative = e;
-                    }
-                }
-                else if (current is IEnumerable)
-                {
-                    //yes we have to test for IEnumerable before IEnumerator. When a yield method is returned as an IEnumerator, it still needs 'GetEnumerator' called on it.
-                    var e = new RadicalCoroutine((current as IEnumerable).GetEnumerator(), this) as IEnumerator;
-                    if (e.MoveNext())
-                    {
-                        yieldObject = e.Current;
-                        _derivative = e;
-                    }
-                }
-                else if (current is IEnumerator)
-                {
-                    var e = new RadicalCoroutine(current as IEnumerator, this) as IEnumerator;
-                    if (e.MoveNext())
-                    {
-                        yieldObject = e.Current;
-                        _derivative = e;
-                    }
-                }
-                else
-                {
-                    yieldObject = current;
-                }
-
-                return true;
-            }
-            else
-            {
-                _completed = true;
-                if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
-                if (this.OnComplete != null) this.OnComplete(this, System.EventArgs.Empty);
-                return false;
-            }
-        }
-
         #endregion
 
         #region Scheduling
@@ -278,9 +171,11 @@ namespace com.spacepuppy
             if (_owner != null) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated on.");
             if (handle == null) throw new System.ArgumentNullException("handle");
 
-            object current = null;
-            if (this.ContinueBlocking(ref current))
+            if ((this as IEnumerator).MoveNext())
             {
+                var current = _currentIEnumeratorYieldValue;
+                _currentIEnumeratorYieldValue = null;
+
                 if (current is YieldInstruction || current is WWW)
                 {
                     if (current is WaitForSeconds)
@@ -300,6 +195,158 @@ namespace com.spacepuppy
             {
                 return false;
             }
+        }
+
+        public void ForceTick()
+        {
+            _forcedTick = false;
+            if ((this as IEnumerator).MoveNext())
+            {
+                _forcedTick = true;
+            }
+        }
+
+        #endregion
+
+        #region IEnumerator Interface
+
+        object IEnumerator.Current
+        {
+            get { return _currentIEnumeratorYieldValue; }
+        }
+
+        bool IEnumerator.MoveNext()
+        {
+            if (_forcedTick)
+            {
+                _forcedTick = false;
+                return true;
+            }
+
+            _currentIEnumeratorYieldValue = null;
+
+            if (_cancelled)
+            {
+                if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
+                return false;
+            }
+
+            if (_manualWaitingOnInstruction != null)
+            {
+                if (_manualWaitingOnInstruction.StillWait)
+                {
+                    return true;
+                }
+                else
+                {
+                    _manualWaitingOnInstruction = null;
+                }
+            }
+
+            if (_derivative != null)
+            {
+                if (_derivative.MoveNext())
+                {
+                    if (_cancelled) return false; //our routine cancelled itself
+                    if (_derivative == null) return !_completed; //the derivative was cleared out by a manual tick, wait a frame or exit depending on if we completed in that time
+                    _currentIEnumeratorYieldValue = _derivative.Current;
+                    return true;
+                }
+                else
+                {
+                    if (_derivative is RadicalCoroutine) (_derivative as RadicalCoroutine)._owner = null;
+                    _derivative = null;
+                }
+            }
+
+
+            if (_routine.MoveNext())
+            {
+                if (_cancelled) return false; //our routine cancelled itself
+
+                var current = _routine.Current;
+                if (current == null)
+                {
+                    //do nothing
+                }
+                else if (current is YieldInstruction)
+                {
+                    _currentIEnumeratorYieldValue = current;
+                }
+                else if (current is WWW)
+                {
+                    _currentIEnumeratorYieldValue = current;
+                }
+                else if (current is RadicalCoroutine)
+                {
+                    IEnumerator e = null;
+                    var rad = current as RadicalCoroutine;
+                    if (rad._owner == null)
+                    {
+                        rad._owner = this;
+                        e = rad as IEnumerator;
+                    }
+                    else
+                    {
+                        e = WaitUntilDone_Routine(rad).GetEnumerator();
+                    }
+
+                    if (e.MoveNext())
+                    {
+                        _currentIEnumeratorYieldValue = e.Current;
+                        _derivative = e;
+                    }
+                }
+                else if (current is IRadicalYieldInstruction)
+                {
+                    var rad = current as IRadicalYieldInstruction;
+                    rad.Init(this);
+
+                    var e = new RadicalCoroutine(current as IEnumerator, this) as IEnumerator;
+                    if (e.MoveNext())
+                    {
+                        _currentIEnumeratorYieldValue = e.Current;
+                        _derivative = e;
+                    }
+                }
+                else if (current is IEnumerable)
+                {
+                    //yes we have to test for IEnumerable before IEnumerator. When a yield method is returned as an IEnumerator, it still needs 'GetEnumerator' called on it.
+                    var e = new RadicalCoroutine((current as IEnumerable).GetEnumerator(), this) as IEnumerator;
+                    if (e.MoveNext())
+                    {
+                        _currentIEnumeratorYieldValue = e.Current;
+                        _derivative = e;
+                    }
+                }
+                else if (current is IEnumerator)
+                {
+                    var e = new RadicalCoroutine(current as IEnumerator, this) as IEnumerator;
+                    if (e.MoveNext())
+                    {
+                        _currentIEnumeratorYieldValue = e.Current;
+                        _derivative = e;
+                    }
+                }
+                else
+                {
+                    _currentIEnumeratorYieldValue = current;
+                }
+
+                return true;
+            }
+            else
+            {
+                _completed = true;
+                if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
+                if (this.OnComplete != null) this.OnComplete(this, System.EventArgs.Empty);
+                return false;
+            }
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new System.NotSupportedException();
         }
 
         #endregion
