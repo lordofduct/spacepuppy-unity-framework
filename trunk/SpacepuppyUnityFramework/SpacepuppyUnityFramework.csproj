@@ -96,6 +96,7 @@
     <Compile Include="Spawn\SpawnNotification.cs" />
     <Compile Include="Spawn\SpawnPoint.cs" />
     <Compile Include="Spawn\SpawnPool.cs" />
+    <Compile Include="SPComponent.cs" />
     <Compile Include="SPConstants.cs" />
     <Compile Include="TagData.cs" />
     <Compile Include="TagMask.cs" />
