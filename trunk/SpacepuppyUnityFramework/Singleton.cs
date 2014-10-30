@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy
 {
 
-    public class Singleton : MonoBehaviour
+    public class Singleton : SPComponent
     {
 
         #region Static Interface
