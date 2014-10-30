@@ -52,6 +52,7 @@
     <Compile Include="Inspectors\MultiTagInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerTargetPropertyDrawer.cs" />
+    <Compile Include="Inspectors\SingletonInspector.cs" />
     <Compile Include="Inspectors\TagDataInspector.cs" />
     <Compile Include="Inspectors\TagMaskInspector.cs" />
     <Compile Include="Inspectors\TagSelectorPropertyDrawer.cs" />

@@ -86,6 +86,7 @@
     <Compile Include="Scenario\t_OnNotificationTrigger.cs" />
     <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
+    <Compile Include="Singleton.cs" />
     <Compile Include="Spawn\AbstractSpawnPoint.cs" />
     <Compile Include="Spawn\ISpawnPointPrefabSelector.cs" />
     <Compile Include="Spawn\OnSpawnModifier.cs" />
