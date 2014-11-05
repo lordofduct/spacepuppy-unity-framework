@@ -49,34 +49,34 @@ namespace com.spacepuppy.Scenario
 
             foreach (var targ in _targets)
             {
-                var arg = (targ.TriggerableArg != null) ? targ.TriggerableArg.Value : null;
                 if (targ != null && targ.Triggerable != null)
                 {
+                    var arg0 = (targ.TriggerableArgs != null && targ.TriggerableArgs.Length > 0) ? targ.TriggerableArgs[0].Value : null;
                     switch (targ.ActivationType)
                     {
                         case TriggerActivationType.TriggerAllOnTarget:
                             foreach (var t in (from t in targ.Triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
                             {
-                                t.Trigger(arg);
+                                t.Trigger(arg0);
                             }
                             break;
                         case TriggerActivationType.TriggerSelectedTarget:
                             if (targ.Triggerable is ITriggerableMechanism)
                             {
-                                (targ.Triggerable as ITriggerableMechanism).Trigger(arg);
+                                (targ.Triggerable as ITriggerableMechanism).Trigger(arg0);
                             }
                             break;
                         case TriggerActivationType.SendMessage:
                             var go = GameObjectUtil.GetGameObjectFromSource(targ.Triggerable);
                             if (go != null && targ.MethodName != null)
                             {
-                                go.SendMessage(targ.MethodName, arg, SendMessageOptions.DontRequireReceiver);
+                                go.SendMessage(targ.MethodName, arg0, SendMessageOptions.DontRequireReceiver);
                             }
                             break;
                         case TriggerActivationType.CallMethodOnSelectedTarget:
                             if (targ.Triggerable != null && targ.MethodName != null)
                             {
-                                ObjUtil.CallMethod(targ.Triggerable, targ.MethodName, arg);
+                                ObjUtil.CallMethod(targ.Triggerable, targ.MethodName, arg0);
                             }
                             break;
                     }
@@ -94,25 +94,26 @@ namespace com.spacepuppy.Scenario
             {
                 if (targ != null && targ.Triggerable != null)
                 {
+                    var arg0 = (targ.TriggerableArgs != null && targ.TriggerableArgs.Length > 0) ? targ.TriggerableArgs[0].Value : arg;
                     switch (targ.ActivationType)
                     {
                         case TriggerActivationType.TriggerAllOnTarget:
                             foreach (var t in (from t in targ.Triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
                             {
-                                t.Trigger(arg);
+                                t.Trigger(arg0);
                             }
                             break;
                         case TriggerActivationType.TriggerSelectedTarget:
                             if (targ.Triggerable is ITriggerableMechanism)
                             {
-                                (targ.Triggerable as ITriggerableMechanism).Trigger(arg);
+                                (targ.Triggerable as ITriggerableMechanism).Trigger(arg0);
                             }
                             break;
                         case TriggerActivationType.SendMessage:
                             var go = GameObjectUtil.GetGameObjectFromSource(targ.Triggerable);
                             if (go != null && targ.MethodName != null)
                             {
-                                go.SendMessage(targ.MethodName, arg, SendMessageOptions.DontRequireReceiver);
+                                go.SendMessage(targ.MethodName, arg0, SendMessageOptions.DontRequireReceiver);
                             }
                             break;
                         case TriggerActivationType.CallMethodOnSelectedTarget:
@@ -144,7 +145,7 @@ namespace com.spacepuppy.Scenario
 
             [ComponentTypeRestriction(typeof(ITriggerableMechanism), order = 1)]
             public Component Triggerable;
-            public VariantReference TriggerableArg;
+            public VariantReference[] TriggerableArgs;
             public TriggerActivationType ActivationType;
             public string MethodName;
 
@@ -183,9 +184,9 @@ namespace com.spacepuppy.Scenario
 
                 var targ = this.AddNew();
                 targ.Triggerable = mechanism.component;
-                targ.TriggerableArg = new VariantReference()
-                {
-                    Value = arg
+                targ.TriggerableArgs = new VariantReference[1] { new VariantReference() {
+                                                                    Value = arg
+                                                                }
                 };
 
                 return targ;

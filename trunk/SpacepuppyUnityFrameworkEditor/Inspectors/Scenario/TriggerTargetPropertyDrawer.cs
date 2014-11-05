@@ -15,11 +15,19 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
     public class TriggerTargetPropertyDrawer : PropertyDrawer
     {
         private const string PROP_TRIGGERABLETARG = "Triggerable";
-        private const string PROP_TRIGGERABLEARG = "TriggerableArg";
+        private const string PROP_TRIGGERABLEARGS = "TriggerableArgs";
         private const string PROP_ACTIVATIONTYPE = "ActivationType";
         private const string PROP_METHODNAME = "MethodName";
 
-        private VariantReferencePropertyDrawer _variantDrawer;
+        private const float ARG_BTN_WIDTH = 18f;
+
+        private GUIContent _defaultArgLabel = new GUIContent("Triggerable Arg");
+        private GUIContent _undefinedArgLabel = new GUIContent("Undefined Arg", "The argument is not explicitly defined unless the trigger's event defines it.");
+        private GUIContent _messageArgLabel = new GUIContent("Message Arg", "A parameter to be passed to the message if one is desired.");
+        private GUIContent _methodArgLabel = new GUIContent("Method Arg", "A parameter to be passed to the method if needed.");
+        private GUIContent _argBtnLabel = new GUIContent("||", "Change between accepting a configured argument or not.");
+        private VariantReferencePropertyDrawer _variantDrawer = new VariantReferencePropertyDrawer();
+        private int _callMethodModeExtraLines = 0;
 
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -41,7 +49,7 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
                     h += EditorGUIUtility.singleLineHeight * 3.0f;
                     break;
                 case Trigger.TriggerActivationType.CallMethodOnSelectedTarget:
-                    h += EditorGUIUtility.singleLineHeight * 4.0f;
+                    h += EditorGUIUtility.singleLineHeight * (3.0f + _callMethodModeExtraLines);
                     break;
             }
 
@@ -91,9 +99,33 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
 
 
             //Draw Triggerable Arg
-            var argRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            var argProp = property.FindPropertyRelative(PROP_TRIGGERABLEARG);
-            EditorGUI.PropertyField(argRect, argProp);
+            var argRect = new Rect(area.xMin, targRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+            if (argArrayProp.arraySize == 0)
+            {
+                EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 1;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
+            else
+            {
+                if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
+                var argProp = argArrayProp.GetArrayElementAtIndex(0);
+                //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
+                _variantDrawer.RestrictVariantType = false;
+                _variantDrawer.ForcedComponentType = null;
+                _variantDrawer.OnGUI(argRect, argProp, _defaultArgLabel);
+
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 0;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
         }
 
         private void DrawAdvanced_TriggerSelected(Rect area, SerializedProperty property)
@@ -133,9 +165,33 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
 
 
             //Draw Triggerable Arg
-            var argRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            var argProp = property.FindPropertyRelative(PROP_TRIGGERABLEARG);
-            EditorGUI.PropertyField(argRect, argProp);
+            var argRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+            if (argArrayProp.arraySize == 0)
+            {
+                EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 1;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
+            else
+            {
+                if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
+                var argProp = argArrayProp.GetArrayElementAtIndex(0);
+                //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
+                _variantDrawer.RestrictVariantType = false;
+                _variantDrawer.ForcedComponentType = null;
+                _variantDrawer.OnGUI(argRect, argProp, _defaultArgLabel);
+
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 0;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
         }
 
         private void DrawAdvanced_SendMessage(Rect area, SerializedProperty property)
@@ -165,8 +221,32 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
 
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, msgRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            var argProp = property.FindPropertyRelative(PROP_TRIGGERABLEARG);
-            EditorGUI.PropertyField(argRect, argProp, new GUIContent("Message Arg", "A parameter to be passed to the message if one is desired."));
+            var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+            if (argArrayProp.arraySize == 0)
+            {
+                EditorGUI.LabelField(argRect, _messageArgLabel, _undefinedArgLabel);
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 1;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
+            else
+            {
+                if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
+                var argProp = argArrayProp.GetArrayElementAtIndex(0);
+                //EditorGUI.PropertyField(argRect, argProp, _messageArgLabel);
+                _variantDrawer.RestrictVariantType = false;
+                _variantDrawer.ForcedComponentType = null;
+                _variantDrawer.OnGUI(argRect, argProp, _messageArgLabel);
+
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 0;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
         }
 
         private void DrawAdvanced_CallMethodOnSelected(Rect area, SerializedProperty property)
@@ -227,60 +307,127 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
             property.serializedObject.ApplyModifiedProperties();
 
             //Draw Triggerable Arg
-            var argRect = new Rect(area.xMin, methNameRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            var argProp = property.FindPropertyRelative(PROP_TRIGGERABLEARG);
-            var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
-            var argLabel = new GUIContent("Method Arg", "A parameter to be passed to the method if needed.");
-
-            if (selectedMethod != null)
+            var parr = (selectedMethod != null) ? selectedMethod.GetParameters() : null;
+            if (parr == null || parr.Length == 0)
             {
-                var parr = selectedMethod.GetParameters();
-                if (parr.Length == 0)
-                {
-                    if (variantRef.ValueType != VariantReference.VariantType.Null)
-                    {
-                        variantRef.ValueType = VariantReference.VariantType.Null;
-                        property.serializedObject.Update();
-                    }
+                //NO PARAMETERS
+                _callMethodModeExtraLines = 1;
 
-                    GUI.enabled = false;
-                    EditorGUI.PropertyField(argRect, argProp, argLabel);
-                    GUI.enabled = true;
+                var argRect = new Rect(area.xMin, methNameRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
+                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+                if (argArrayProp.arraySize > 0)
+                {
+                    argArrayProp.arraySize = 0;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+
+                GUI.enabled = false;
+                EditorGUI.LabelField(argRect, _methodArgLabel, new GUIContent("*Zero Parameter Count*"));
+                GUI.enabled = true;
+            }
+            else if (parr.Length == 1)
+            {
+                //ONE PARAMETER - allow trigger event arg
+                _callMethodModeExtraLines = 1;
+
+                var argRect = new Rect(area.xMin, methNameRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+                var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+                if (argArrayProp.arraySize == 0)
+                {
+                    EditorGUI.LabelField(argRect, _methodArgLabel, _undefinedArgLabel);
+                    if (GUI.Button(btnRect, _argBtnLabel))
+                    {
+                        argArrayProp.arraySize = 1;
+                        argArrayProp.serializedObject.ApplyModifiedProperties();
+                    }
                 }
                 else
                 {
                     if (parr[0].ParameterType == typeof(object))
                     {
                         //draw the default variant as the method accepts anything
-                        EditorGUI.PropertyField(argRect, argProp, argLabel);
+                        if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
+                        var argProp = argArrayProp.GetArrayElementAtIndex(0);
+                        //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
+                        _variantDrawer.RestrictVariantType = false;
+                        _variantDrawer.ForcedComponentType = null;
+                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+
+                        if (GUI.Button(btnRect, _argBtnLabel))
+                        {
+                            argArrayProp.arraySize = 0;
+                        }
                     }
                     else
                     {
+                        if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
+                        var argProp = argArrayProp.GetArrayElementAtIndex(0);
+
+                        var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
+
                         var argType = VariantReference.GetVariantType(parr[0].ParameterType);
+
                         if (variantRef.ValueType != argType)
                         {
                             variantRef.ValueType = argType;
                             property.serializedObject.Update();
                         }
 
-                        if (_variantDrawer == null) _variantDrawer = new VariantReferencePropertyDrawer();
                         _variantDrawer.RestrictVariantType = true;
                         _variantDrawer.ForcedComponentType = (ObjUtil.IsType(parr[0].ParameterType, typeof(Component))) ? parr[0].ParameterType : null;
-                        _variantDrawer.OnGUI(argRect, argProp, argLabel);
+                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+                    }
+
+                    if (GUI.Button(btnRect, _argBtnLabel))
+                    {
+                        argArrayProp.arraySize = 0;
+                        argArrayProp.serializedObject.ApplyModifiedProperties();
                     }
                 }
             }
             else
             {
-                if (variantRef.ValueType != VariantReference.VariantType.Null)
-                {
-                    variantRef.ValueType = VariantReference.VariantType.Null;
-                    property.serializedObject.Update();
-                }
+                //MULTIPLE PARAMETERS - special case, does not support trigger event arg
+                _callMethodModeExtraLines = parr.Length;
 
-                GUI.enabled = false;
-                EditorGUI.PropertyField(argRect, argProp, argLabel);
-                GUI.enabled = true;
+                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+
+                if (argArrayProp.arraySize != parr.Length)
+                {
+                    argArrayProp.arraySize = parr.Length;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+                for (int i = 0; i < parr.Length; i++)
+                {
+                    var param = parr[i];
+                    var argRect = new Rect(area.xMin, methNameRect.yMax + i * EditorGUIUtility.singleLineHeight, area.width, EditorGUIUtility.singleLineHeight);
+                    var argProp = argArrayProp.GetArrayElementAtIndex(i);
+
+                    if (param.ParameterType == typeof(object))
+                    {
+                        //draw the default variant as the method accepts anything
+                        //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
+                        _variantDrawer.RestrictVariantType = false;
+                        _variantDrawer.ForcedComponentType = null;
+                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+                    }
+                    else
+                    {
+                        var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
+                        var argType = VariantReference.GetVariantType(param.ParameterType);
+
+                        if (variantRef.ValueType != argType)
+                        {
+                            variantRef.ValueType = argType;
+                            property.serializedObject.Update();
+                        }
+
+                        _variantDrawer.RestrictVariantType = true;
+                        _variantDrawer.ForcedComponentType = (ObjUtil.IsType(param.ParameterType, typeof(Component))) ? param.ParameterType : null;
+                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+                    }
+                }
             }
 
         }
@@ -316,13 +463,26 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
                 {
                     yield return m;
                 }
-                else if (parr.Length == 1)
+                else
                 {
-                    if (VariantReference.AcceptableType(parr[0].ParameterType))
-                        yield return m;
-                    else if (parr[0].ParameterType == typeof(object))
-                        yield return m;
+                    bool pass = true;
+                    foreach (var p in parr)
+                    {
+                        if (!(VariantReference.AcceptableType(p.ParameterType) || p.ParameterType == typeof(object)))
+                        {
+                            pass = false;
+                            break;
+                        }
+                    }
+                    if (pass) yield return m;
                 }
+                //else if (parr.Length == 1)
+                //{
+                //    if (VariantReference.AcceptableType(parr[0].ParameterType))
+                //        yield return m;
+                //    else if (parr[0].ParameterType == typeof(object))
+                //        yield return m;
+                //}
             }
         }
 
