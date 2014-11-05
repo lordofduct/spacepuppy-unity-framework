@@ -40,9 +40,7 @@ namespace com.spacepuppy
         [SerializeField()]
         private string _valueReference;
         [SerializeField()]
-        private GameObject _gameObjectReference;
-        [SerializeField()]
-        private Component _componentReference;
+        private UnityEngine.Object _unityObjectReference;
 
         #endregion
 
@@ -237,15 +235,14 @@ namespace com.spacepuppy
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             _valueReference = null;
-            _gameObjectReference = null;
-            _componentReference = null;
+            _unityObjectReference = null;
             switch (_type)
             {
                 case VariantType.GameObject:
-                    _gameObjectReference = _value as GameObject;
+                    _unityObjectReference = _value as GameObject;
                     break;
                 case VariantType.Component:
-                    _componentReference = _value as Component;
+                    _unityObjectReference = _value as Component;
                     break;
                 case VariantType.Vector2:
                     _valueReference = VectorUtil.Stringify(this.Vector2Value);
@@ -270,10 +267,10 @@ namespace com.spacepuppy
             switch (_type)
             {
                 case VariantType.GameObject:
-                    _value = _gameObjectReference;
+                    _value = _unityObjectReference as GameObject;
                     break;
                 case VariantType.Component:
-                    _value = _componentReference;
+                    _value = _unityObjectReference as Component;
                     break;
                 case VariantType.Vector2:
                     _value = VectorUtil.ToVector2(_valueReference);
@@ -292,8 +289,7 @@ namespace com.spacepuppy
                     break;
             }
             _valueReference = null;
-            _gameObjectReference = null;
-            _componentReference = null;
+            _unityObjectReference = null;
         }
 
         #endregion
@@ -327,8 +323,7 @@ namespace com.spacepuppy
                         break;
                 }
                 _valueReference = null;
-                _gameObjectReference = null;
-                _componentReference = null;
+                _unityObjectReference = null;
             }
 
         }
@@ -336,8 +331,7 @@ namespace com.spacepuppy
         private VariantReference(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
             _valueReference = null;
-            _gameObjectReference = null;
-            _componentReference = null;
+            _unityObjectReference = null;
 
             _type = (VariantType)info.GetInt32("type");
             switch (_type)
