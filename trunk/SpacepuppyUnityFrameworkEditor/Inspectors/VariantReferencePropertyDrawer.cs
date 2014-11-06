@@ -145,5 +145,6 @@ namespace com.spacepuppyeditor.Inspectors
             if (EditorGUI.EndChangeCheck()) property.serializedObject.Update();
         }
 
+
     }
 }

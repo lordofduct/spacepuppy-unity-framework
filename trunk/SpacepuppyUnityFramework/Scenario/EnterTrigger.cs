@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class EnterTrigger : Trigger
+    public class EnterTrigger : TriggerComponent
     {
 
         public ScenarioActivatorMask Mask;

@@ -11,7 +11,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Inspectors.Scenario
 {
 
-    [CustomPropertyDrawer(typeof(Trigger.TriggerTarget))]
+    [CustomPropertyDrawer(typeof(TriggerTarget))]
     public class TriggerTargetPropertyDrawer : PropertyDrawer
     {
         private const string PROP_TRIGGERABLETARG = "Triggerable";
@@ -33,22 +33,22 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var actProp = property.FindPropertyRelative(PROP_ACTIVATIONTYPE);
-            var act = (Trigger.TriggerActivationType)actProp.enumValueIndex;
+            var act = (TriggerActivationType)actProp.enumValueIndex;
 
             float h = EditorGUIUtility.singleLineHeight;
 
             switch (act)
             {
-                case Trigger.TriggerActivationType.TriggerAllOnTarget:
+                case TriggerActivationType.TriggerAllOnTarget:
                     h += EditorGUIUtility.singleLineHeight * 2.0f;
                     break;
-                case Trigger.TriggerActivationType.TriggerSelectedTarget:
+                case TriggerActivationType.TriggerSelectedTarget:
                     h += EditorGUIUtility.singleLineHeight * 3.0f;
                     break;
-                case Trigger.TriggerActivationType.SendMessage:
+                case TriggerActivationType.SendMessage:
                     h += EditorGUIUtility.singleLineHeight * 3.0f;
                     break;
-                case Trigger.TriggerActivationType.CallMethodOnSelectedTarget:
+                case TriggerActivationType.CallMethodOnSelectedTarget:
                     h += EditorGUIUtility.singleLineHeight * (3.0f + _callMethodModeExtraLines);
                     break;
             }
@@ -58,31 +58,34 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            EditorGUI.BeginProperty(position, label, property);
+
             //Draw ActivationType Popup
             var r0 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
             var actProp = property.FindPropertyRelative(PROP_ACTIVATIONTYPE);
             EditorGUI.PropertyField(r0, actProp);
-            var act = (Trigger.TriggerActivationType)actProp.enumValueIndex;
+            var act = (TriggerActivationType)actProp.enumValueIndex;
 
             //Draw Advanced
             var area = new Rect(position.xMin, r0.yMax, position.width, position.height - r0.height);
             switch (act)
             {
-                case Trigger.TriggerActivationType.TriggerAllOnTarget:
+                case TriggerActivationType.TriggerAllOnTarget:
                     this.DrawAdvanced_TriggerAll(area, property);
                     break;
-                case Trigger.TriggerActivationType.TriggerSelectedTarget:
+                case TriggerActivationType.TriggerSelectedTarget:
                     this.DrawAdvanced_TriggerSelected(area, property);
                     break;
-                case Trigger.TriggerActivationType.SendMessage:
+                case TriggerActivationType.SendMessage:
                     this.DrawAdvanced_SendMessage(area, property);
                     break;
-                case Trigger.TriggerActivationType.CallMethodOnSelectedTarget:
+                case TriggerActivationType.CallMethodOnSelectedTarget:
                     this.DrawAdvanced_CallMethodOnSelected(area, property);
                     break;
             }
-        }
 
+            EditorGUI.EndProperty();
+        }
 
 
         private void DrawAdvanced_TriggerAll(Rect area, SerializedProperty property)
@@ -220,7 +223,7 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
             EditorGUI.PropertyField(msgRect, property.FindPropertyRelative(PROP_METHODNAME), new GUIContent("Message", "Name of the message that should be sent."), false);
 
             //Draw Triggerable Arg
-            var argRect = new Rect(area.xMin, msgRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
+            var argRect = new Rect(area.xMin, msgRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
             if (argArrayProp.arraySize == 0)

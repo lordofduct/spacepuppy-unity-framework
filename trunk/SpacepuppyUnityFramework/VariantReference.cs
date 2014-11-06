@@ -240,6 +240,18 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Methods
+
+        public VariantReference Clone()
+        {
+            var c = new VariantReference();
+            c._value = _value;
+            c._type = _type;
+            return c;
+        }
+
+        #endregion
+
         #region ISerializationCallbackReceiver Interface
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()

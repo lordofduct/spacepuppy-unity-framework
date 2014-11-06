@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Scenario
 {
-    public class IntervalTrigger : Trigger
+    public class IntervalTrigger : TriggerComponent
     {
 
         public float Interval = 1.0f;

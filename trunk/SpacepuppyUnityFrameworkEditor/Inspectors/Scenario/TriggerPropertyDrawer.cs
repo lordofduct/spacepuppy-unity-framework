@@ -11,82 +11,121 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Inspectors.Scenario
 {
 
-    [CustomEditor(typeof(Trigger), true)]
-    public class TriggerInspector : Editor
+    [CustomPropertyDrawer(typeof(Trigger))]
+    public class TriggerPropertyDrawer : PropertyDrawer
     {
+
+        private const float MARGIN = 2.0f;
 
         private const string PROP_TARGETS = "_targets";
         private const string PROP_TRIGGERABLETARG = "Triggerable";
-        private const string PROP_TRIGGERABLEARG = "TriggerableArg";
+        private const string PROP_TRIGGERABLEARGS = "TriggerableArgs";
         private const string PROP_ACTIVATIONTYPE = "ActivationType";
         private const string PROP_METHODNAME = "MethodName";
 
+        #region Fields
+
+        private bool _initialized;
+
+        private GUIContent _propertyLabel;
         private ReorderableList _targetList;
         private bool _foldoutTargetExtra;
+        private TriggerTargetPropertyDrawer _triggerTargetDrawer;
 
-        void OnEnable()
+        #endregion
+
+        #region CONSTRUCTOR
+
+        private void Init(SerializedProperty prop)
         {
-            _targetList = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty("_targets"), true, true, true, true);
+            _targetList = new ReorderableList(prop.serializedObject, prop.FindPropertyRelative("_targets"), true, true, true, true);
             _targetList.drawHeaderCallback = _targetList_DrawHeader;
             _targetList.drawElementCallback = _targetList_DrawElement;
             _targetList.onAddCallback = _targetList_OnAdd;
+
+            _triggerTargetDrawer = new TriggerTargetPropertyDrawer();
+
+            _initialized = true;
         }
 
-        public override void OnInspectorGUI()
+        #endregion
+
+
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (_targetList.index >= _targetList.count) _targetList.index = -1;
+            if (!_initialized) this.Init(property);
 
-            this.serializedObject.Update();
-
-            this.DrawDefaultInspector(EditorHelper.PROP_SCRIPT);
-
-            this.DrawTargets();
-
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, "_targets");
-
-            this.serializedObject.ApplyModifiedProperties();
-        }
-
-
-        #region Draw Targets
-
-        private void DrawTargets()
-        {
-            EditorGUI.BeginChangeCheck();
-            _targetList.DoLayoutList();
-            if (EditorGUI.EndChangeCheck())
-                this.serializedObject.ApplyModifiedProperties();
-            if (_targetList.index >= _targetList.count) _targetList.index = -1;
-
-            _foldoutTargetExtra = EditorGUILayout.Foldout(_foldoutTargetExtra, "Advanced Target Settings");
+            var h = MARGIN * 2f;
+            h += _targetList.GetHeight();
+            h += EditorGUIUtility.singleLineHeight;
             if (_foldoutTargetExtra)
             {
-                EditorGUILayout.BeginVertical("Box");
+                if (_targetList.index >= 0)
+                {
+                    var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
+                    h += _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none);
+                }
+                else
+                {
+                    h += EditorGUIUtility.singleLineHeight * 3.0f;
+                }
+            }
+            return h;
+        }
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            if (!_initialized) this.Init(property);
+
+            _propertyLabel = label;
+            GUI.Box(position, GUIContent.none);
+            position = new Rect(position.xMin + MARGIN, position.yMin + MARGIN, position.width - MARGIN * 2f, position.height - MARGIN * 2f);
+            EditorGUI.BeginProperty(position, label, property);
+
+            var listRect = new Rect(position.xMin, position.yMin, position.width, _targetList.GetHeight());
+
+            EditorGUI.BeginChangeCheck();
+            _targetList.DoList(listRect);
+            if (EditorGUI.EndChangeCheck())
+                property.serializedObject.ApplyModifiedProperties();
+            if (_targetList.index >= _targetList.count) _targetList.index = -1;
+
+            const float FOLDOUT_MRG = 12f;
+            var foldoutRect = new Rect(position.xMin + FOLDOUT_MRG, listRect.yMax, position.width - FOLDOUT_MRG, EditorGUIUtility.singleLineHeight); //for some reason the foldout needs to be pushed in an extra amount for the arrow...
+            _foldoutTargetExtra = EditorGUI.Foldout(foldoutRect, _foldoutTargetExtra, "Advanced Target Settings");
+            if (_foldoutTargetExtra)
+            {
+                //EditorGUI.indentLevel++;
 
                 if (_targetList.index >= 0)
                 {
                     var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
-
-                    EditorGUILayout.PropertyField(element);
+                    const float INDENT_MRG = 14f;
+                    var settingsRect = new Rect(position.xMin + INDENT_MRG, foldoutRect.yMax, position.width - INDENT_MRG, _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none));
+                    _triggerTargetDrawer.OnGUI(settingsRect, element, GUIContent.none);
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("Select a target to edit.", MessageType.Info);
+                    var helpRect = new Rect(position.xMin, foldoutRect.yMax, position.width, EditorGUIUtility.singleLineHeight * 3.0f);
+                    EditorGUI.HelpBox(helpRect, "Select a target to edit.", MessageType.Info);
                 }
 
-                EditorGUILayout.EndVertical();
+                //EditorGUI.indentLevel--;
             }
 
+
+            EditorGUI.EndProperty();
         }
 
-        #endregion
+
 
 
         #region ReorderableList Handlers
 
         private void _targetList_DrawHeader(Rect area)
         {
-            EditorGUI.LabelField(area, "Trigger Targets");
+            EditorGUI.LabelField(area, _propertyLabel, new GUIContent("Trigger Targets"));
         }
 
         private void _targetList_DrawElement(Rect area, int index, bool isActive, bool isFocused)
@@ -95,10 +134,10 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
 
             var trigProp = element.FindPropertyRelative(PROP_TRIGGERABLETARG);
             var actProp = element.FindPropertyRelative(PROP_ACTIVATIONTYPE);
-            var act = (Trigger.TriggerActivationType)actProp.enumValueIndex;
+            var act = (TriggerActivationType)actProp.enumValueIndex;
 
             const float MARGIN = 1.0f;
-            if (act == Trigger.TriggerActivationType.TriggerAllOnTarget)
+            if (act == TriggerActivationType.TriggerAllOnTarget)
             {
                 //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
                 var trigRect = new Rect(area.xMin, area.yMin + MARGIN, area.width, EditorGUIUtility.singleLineHeight);
@@ -124,13 +163,13 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
                     GUIContent extraLabel;
                     switch (act)
                     {
-                        case Trigger.TriggerActivationType.SendMessage:
+                        case TriggerActivationType.SendMessage:
                             extraLabel = new GUIContent("(SendMessage) " + go.name);
                             break;
-                        case Trigger.TriggerActivationType.TriggerSelectedTarget:
+                        case TriggerActivationType.TriggerSelectedTarget:
                             extraLabel = new GUIContent("(TriggerSelectedTarget) " + go.name + " -> " + trigType.Name);
                             break;
-                        case Trigger.TriggerActivationType.CallMethodOnSelectedTarget:
+                        case TriggerActivationType.CallMethodOnSelectedTarget:
                             extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + go.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(PROP_METHODNAME).stringValue);
                             break;
                         default:
@@ -153,15 +192,9 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
             lst.serializedProperty.arraySize++;
             lst.index = lst.serializedProperty.arraySize - 1;
 
-            //var objProp = lst.serializedProperty.GetArrayElementAtIndex(lst.index);
-            //objProp.FindPropertyRelative(PROP_TRIGGERABLETARG).objectReferenceValue = null;
-            ////the TriggerableArg has no easy way to set the value, this is why we do the object method below
-            //objProp.FindPropertyRelative(PROP_ACTIVATIONTYPE).boolValue = true;
-            //objProp.FindPropertyRelative(PROP_METHODNAME).stringValue = null;
-
             lst.serializedProperty.serializedObject.ApplyModifiedProperties();
 
-            var obj = EditorHelper.GetTargetObjectOfProperty(lst.serializedProperty.GetArrayElementAtIndex(lst.index)) as Trigger.TriggerTarget;
+            var obj = EditorHelper.GetTargetObjectOfProperty(lst.serializedProperty.GetArrayElementAtIndex(lst.index)) as TriggerTarget;
             if (obj != null)
             {
                 obj.Triggerable = null;
@@ -169,7 +202,7 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
                                                                     ValueType = VariantReference.VariantType.Null
                                                                 }
                 };
-                obj.ActivationType = Trigger.TriggerActivationType.TriggerAllOnTarget;
+                obj.ActivationType = TriggerActivationType.TriggerAllOnTarget;
                 obj.MethodName = null;
                 lst.serializedProperty.serializedObject.Update();
             }

@@ -83,6 +83,9 @@
     <Compile Include="Scenario\ScenarioActivatorMask.cs" />
     <Compile Include="Scenario\Trigger.cs" />
     <Compile Include="Scenario\TriggerableMechanism.cs" />
+    <Compile Include="Scenario\TriggerActivationType.cs" />
+    <Compile Include="Scenario\TriggerComponent.cs" />
+    <Compile Include="Scenario\TriggerTarget.cs" />
     <Compile Include="Scenario\t_OnNotificationTrigger.cs" />
     <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
