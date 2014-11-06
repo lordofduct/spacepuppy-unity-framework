@@ -325,7 +325,52 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
                 EditorGUI.LabelField(argRect, _methodArgLabel, new GUIContent("*Zero Parameter Count*"));
                 GUI.enabled = true;
             }
-            else if (parr.Length == 1)
+            else
+            {
+                //MULTIPLE PARAMETERS - special case, does not support trigger event arg
+                _callMethodModeExtraLines = parr.Length;
+
+                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+
+                if (argArrayProp.arraySize != parr.Length)
+                {
+                    argArrayProp.arraySize = parr.Length;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+                for (int i = 0; i < parr.Length; i++)
+                {
+                    var param = parr[i];
+                    var argRect = new Rect(area.xMin, methNameRect.yMax + i * EditorGUIUtility.singleLineHeight, area.width, EditorGUIUtility.singleLineHeight);
+                    var argProp = argArrayProp.GetArrayElementAtIndex(i);
+
+                    if (param.ParameterType == typeof(object))
+                    {
+                        //draw the default variant as the method accepts anything
+                        //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
+                        _variantDrawer.RestrictVariantType = false;
+                        _variantDrawer.ForcedComponentType = null;
+                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+                    }
+                    else
+                    {
+                        var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
+                        var argType = VariantReference.GetVariantType(param.ParameterType);
+
+                        if (variantRef.ValueType != argType)
+                        {
+                            variantRef.ValueType = argType;
+                            property.serializedObject.Update();
+                        }
+
+                        _variantDrawer.RestrictVariantType = true;
+                        _variantDrawer.ForcedComponentType = (ObjUtil.IsType(param.ParameterType, typeof(Component))) ? param.ParameterType : null;
+                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+                    }
+                }
+            }
+
+            /*
+            else if(parr.Length == 1)
             {
                 //ONE PARAMETER - allow trigger event arg
                 _callMethodModeExtraLines = 1;
@@ -386,49 +431,7 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
                     }
                 }
             }
-            else
-            {
-                //MULTIPLE PARAMETERS - special case, does not support trigger event arg
-                _callMethodModeExtraLines = parr.Length;
-
-                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
-
-                if (argArrayProp.arraySize != parr.Length)
-                {
-                    argArrayProp.arraySize = parr.Length;
-                    argArrayProp.serializedObject.ApplyModifiedProperties();
-                }
-                for (int i = 0; i < parr.Length; i++)
-                {
-                    var param = parr[i];
-                    var argRect = new Rect(area.xMin, methNameRect.yMax + i * EditorGUIUtility.singleLineHeight, area.width, EditorGUIUtility.singleLineHeight);
-                    var argProp = argArrayProp.GetArrayElementAtIndex(i);
-
-                    if (param.ParameterType == typeof(object))
-                    {
-                        //draw the default variant as the method accepts anything
-                        //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
-                        _variantDrawer.RestrictVariantType = false;
-                        _variantDrawer.ForcedComponentType = null;
-                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
-                    }
-                    else
-                    {
-                        var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
-                        var argType = VariantReference.GetVariantType(param.ParameterType);
-
-                        if (variantRef.ValueType != argType)
-                        {
-                            variantRef.ValueType = argType;
-                            property.serializedObject.Update();
-                        }
-
-                        _variantDrawer.RestrictVariantType = true;
-                        _variantDrawer.ForcedComponentType = (ObjUtil.IsType(param.ParameterType, typeof(Component))) ? param.ParameterType : null;
-                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
-                    }
-                }
-            }
+             */
 
         }
 

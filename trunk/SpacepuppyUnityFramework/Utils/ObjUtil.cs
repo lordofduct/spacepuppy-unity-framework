@@ -67,6 +67,8 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
+        #region Type Methods
+
         public static System.Type[] GetTypesAssignableFrom(System.Reflection.Assembly assemb, System.Type rootType)
         {
             var lst = new List<System.Type>();
@@ -93,6 +95,93 @@ namespace com.spacepuppy.Utils
 
             return false;
         }
+
+        public static System.Type FindType(string assembName, string typeName)
+        {
+            var assemb = (from a in System.AppDomain.CurrentDomain.GetAssemblies()
+                          where a.GetName().Name == assembName || a.FullName == assembName
+                          select a).FirstOrDefault();
+            if (assemb != null)
+            {
+                return (from t in assemb.GetTypes()
+                        where t.FullName == typeName
+                        select t).FirstOrDefault();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static System.Type FindType(string typeName)
+        {
+            foreach (var assemb in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var t in assemb.GetTypes())
+                {
+                    if (t.FullName == typeName) return t;
+                }
+            }
+            return null;
+        }
+
+        public static bool IsListType(this System.Type tp)
+        {
+            if (tp == null) return false;
+
+            if (tp.IsArray) return tp.GetArrayRank() == 1;
+
+            var interfaces = tp.GetInterfaces();
+            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsListType(this System.Type tp, bool ignoreAsInterface)
+        {
+            if (tp == null) return false;
+
+            if (tp.IsArray) return tp.GetArrayRank() == 1;
+
+            if (ignoreAsInterface)
+            {
+                //if (tp == typeof(System.Collections.ArrayList) || (tp.IsGenericType && tp.GetGenericTypeDefinition() == typeof(List<>))) return true;
+                if (tp.IsGenericType && tp.GetGenericTypeDefinition() == typeof(List<>)) return true;
+            }
+            else
+            {
+                var interfaces = tp.GetInterfaces();
+                if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static System.Type GetElementTypeOfListType(this System.Type tp)
+        {
+            if (tp == null) return null;
+
+            if (tp.IsArray) return tp.GetElementType();
+
+            var interfaces = tp.GetInterfaces();
+            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            {
+                if (tp.IsGenericType) return tp.GetGenericArguments()[0];
+                else return typeof(object);
+            }
+
+            return null;
+        }
+
+        #endregion
+
+
 
         public static object GetValue(this object obj, string sprop, params object[] args)
         {
@@ -250,6 +339,7 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
+        /*
         public static bool CallMethod(this object obj, string name, object optionalArg = null)
         {
             const System.Reflection.BindingFlags BINDING = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance;
@@ -259,7 +349,7 @@ namespace com.spacepuppy.Utils
             System.Reflection.MethodInfo meth;
             bool hasParam = false;
 
-            if (optionalArg != null)
+            if(optionalArg != null)
             {
                 hasParam = true;
                 var argTp = optionalArg.GetType();
@@ -273,14 +363,14 @@ namespace com.spacepuppy.Utils
                     meth = null;
                 }
 
-                foreach (var m in tp.GetMethods(BINDING))
+                foreach(var m in tp.GetMethods(BINDING))
                 {
-                    if (m.Name == name)
+                    if(m.Name == name)
                     {
                         var parr = m.GetParameters();
                         if (parr.Length != 1) continue;
 
-                        if (ObjUtil.IsType(argTp, parr[0].ParameterType))
+                        if(ObjUtil.IsType(argTp, parr[0].ParameterType))
                         {
                             meth = m;
                             goto DoCallMethod;
@@ -316,10 +406,10 @@ namespace com.spacepuppy.Utils
 
                 return false;
             }
-
+            
 
         DoCallMethod:
-            if (hasParam)
+            if(hasParam)
             {
                 meth.Invoke(obj, new object[] { optionalArg });
             }
@@ -328,6 +418,25 @@ namespace com.spacepuppy.Utils
                 meth.Invoke(obj, null);
             }
             return true;
+        }
+         */
+
+        public static bool CallMethod(this object obj, string name, params object[] args)
+        {
+            const System.Reflection.BindingFlags BINDING = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance |
+                                                           System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.OptionalParamBinding;
+            if (obj == null) return false;
+
+            var tp = obj.GetType();
+            try
+            {
+                tp.InvokeMember(name, BINDING, null, obj, args);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static T ExtractDelegate<T>(object obj, string name, bool ignoreCase = false, bool throwOnBindFailure = false) where T : class
@@ -348,37 +457,6 @@ namespace com.spacepuppy.Utils
             return System.Delegate.CreateDelegate(delegateType, obj, name, ignoreCase, throwOnBindFailure);
         }
 
-
-        public static bool IsListType(this System.Type tp)
-        {
-            if (tp == null) return false;
-
-            if (tp.IsArray) return true;
-
-            var interfaces = tp.GetInterfaces();
-            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public static System.Type GetElementTypeOfListType(this System.Type tp)
-        {
-            if (tp == null) return null;
-
-            if (tp.IsArray) return tp.GetElementType();
-
-            var interfaces = tp.GetInterfaces();
-            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
-            {
-                if (tp.IsGenericType) return tp.GetGenericArguments()[0];
-                else return typeof(object);
-            }
-
-            return null;
-        }
 
     }
 }

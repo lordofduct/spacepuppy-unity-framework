@@ -76,7 +76,9 @@ namespace com.spacepuppy.Scenario
                         case TriggerActivationType.CallMethodOnSelectedTarget:
                             if (targ.Triggerable != null && targ.MethodName != null)
                             {
-                                ObjUtil.CallMethod(targ.Triggerable, targ.MethodName, arg0);
+                                //CallMethod does not support using the passed in arg
+                                var args = (from a in targ.TriggerableArgs select (a != null) ? a.Value : null).ToArray();
+                                ObjUtil.CallMethod(targ.Triggerable, targ.MethodName, args);
                             }
                             break;
                     }
@@ -119,7 +121,9 @@ namespace com.spacepuppy.Scenario
                         case TriggerActivationType.CallMethodOnSelectedTarget:
                             if (targ.Triggerable != null && targ.MethodName != null)
                             {
-                                ObjUtil.CallMethod(targ.Triggerable, targ.MethodName, arg);
+                                //CallMethod does not support using the passed in arg
+                                var args = (from a in targ.TriggerableArgs select (a != null) ? a.Value : null).ToArray();
+                                ObjUtil.CallMethod(targ.Triggerable, targ.MethodName, args);
                             }
                             break;
                     }
