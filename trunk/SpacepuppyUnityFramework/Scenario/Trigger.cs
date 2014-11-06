@@ -74,7 +74,7 @@ namespace com.spacepuppy.Scenario
                             }
                             break;
                         case TriggerActivationType.CallMethodOnSelectedTarget:
-                            if (targ.Triggerable != null && targ.MethodName != null)
+                            if (targ.MethodName != null)
                             {
                                 //CallMethod does not support using the passed in arg
                                 var args = (from a in targ.TriggerableArgs select (a != null) ? a.Value : null).ToArray();
@@ -119,7 +119,7 @@ namespace com.spacepuppy.Scenario
                             }
                             break;
                         case TriggerActivationType.CallMethodOnSelectedTarget:
-                            if (targ.Triggerable != null && targ.MethodName != null)
+                            if (targ.MethodName != null)
                             {
                                 //CallMethod does not support using the passed in arg
                                 var args = (from a in targ.TriggerableArgs select (a != null) ? a.Value : null).ToArray();
