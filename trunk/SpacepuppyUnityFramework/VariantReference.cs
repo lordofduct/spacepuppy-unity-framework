@@ -314,7 +314,7 @@ namespace com.spacepuppy
 
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
-            if (_type == VariantType.GameObject || _type == VariantType.Component)
+            if (_type == VariantType.GameObject || _type == VariantType.Component || _type == VariantType.Object)
             {
                 info.AddValue("type", _type);
             }
