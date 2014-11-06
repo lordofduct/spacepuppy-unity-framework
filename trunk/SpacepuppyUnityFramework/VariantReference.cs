@@ -13,6 +13,7 @@ namespace com.spacepuppy
 
         public enum VariantType
         {
+            Object = -1,
             Null = 0,
             String = 1,
             Boolean = 2,
@@ -227,6 +228,15 @@ namespace com.spacepuppy
                 _type = VariantType.Component;
             }
         }
+        public UnityEngine.Object ObjectValue
+        {
+            get { return _value as UnityEngine.Object; }
+            set
+            {
+                _value = value;
+                _type = (Object.ReferenceEquals(_value, null)) ? VariantType.Object : VariantReference.GetVariantType(_value.GetType());
+            }
+        }
 
         #endregion
 
@@ -238,6 +248,9 @@ namespace com.spacepuppy
             _unityObjectReference = null;
             switch (_type)
             {
+                case VariantType.Object:
+                    _unityObjectReference = _value as UnityEngine.Object;
+                    break;
                 case VariantType.GameObject:
                     _unityObjectReference = _value as GameObject;
                     break;
@@ -266,6 +279,9 @@ namespace com.spacepuppy
         {
             switch (_type)
             {
+                case VariantType.Object:
+                    _value = _unityObjectReference;
+                    break;
                 case VariantType.GameObject:
                     _value = _unityObjectReference as GameObject;
                     break;
@@ -308,6 +324,7 @@ namespace com.spacepuppy
                 info.AddValue("type", _type);
                 switch (_type)
                 {
+                    case VariantType.Object:
                     case VariantType.GameObject:
                     case VariantType.Component:
                         //do nothing
@@ -336,6 +353,7 @@ namespace com.spacepuppy
             _type = (VariantType)info.GetInt32("type");
             switch (_type)
             {
+                case VariantType.Object:
                 case VariantType.GameObject:
                 case VariantType.Component:
                     //do nothing
@@ -365,6 +383,8 @@ namespace com.spacepuppy
         {
             switch (tp)
             {
+                case VariantType.Object:
+                    return obj as UnityEngine.Object;
                 case VariantType.Null:
                     return null;
                 case VariantType.String:
@@ -424,6 +444,7 @@ namespace com.spacepuppy
             else if (tp == typeof(Color)) return true;
             else if (tp == typeof(GameObject)) return true;
             else if (typeof(Component).IsAssignableFrom(tp)) return true;
+            else if (typeof(UnityEngine.Object).IsAssignableFrom(tp)) return true;
             else return false;
         }
 
@@ -453,6 +474,7 @@ namespace com.spacepuppy
             else if (tp == typeof(Color)) return VariantType.Color;
             else if (tp == typeof(GameObject)) return VariantType.GameObject;
             else if (typeof(Component).IsAssignableFrom(tp)) return VariantType.Component;
+            else if (typeof(UnityEngine.Object).IsAssignableFrom(tp)) return VariantType.Object;
 
             return VariantType.Null;
         }

@@ -136,6 +136,9 @@ namespace com.spacepuppyeditor.Inspectors
                     }
 
                     break;
+                case VariantReference.VariantType.Object:
+                    variant.ObjectValue = EditorGUI.ObjectField(r1, variant.ObjectValue, typeof(UnityEngine.Object), true);
+                    break;
             }
 
             EditorGUI.EndProperty();
