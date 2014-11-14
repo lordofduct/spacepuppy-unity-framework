@@ -37,7 +37,7 @@ namespace com.spacepuppy.Geom
 
         public Vector3 Extents
         {
-            get { return this.Size / 2.0f; }
+            get { return _size / 2.0f; }
         }
 
         public Vector3 Min
@@ -69,7 +69,8 @@ namespace com.spacepuppy.Geom
 
         public Sphere GetBoundingSphere()
         {
-            return new Sphere(Center, Size.magnitude / 2.0f);
+            //return new Sphere(Center, com.spacepuppy.Utils.VectorUtil.GetMaxScalar(Size) / 2.0f);
+            return new Sphere(Center, this.Extents.magnitude);
         }
 
         public bool Contains(Vector3 pos)

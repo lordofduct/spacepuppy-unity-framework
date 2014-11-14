@@ -192,6 +192,15 @@ namespace com.spacepuppy.Geom
             }
         }
 
+        public static Sphere FromMesh(Mesh mesh)
+        {
+            if (mesh == null) return new Sphere();
+
+            //TODO - calculate this more accurately using some 'SmallestSphere' algorithm
+            var bounds = mesh.bounds;
+            return new Sphere(bounds.center, Mathf.Max(bounds.extents.x, bounds.extents.y, bounds.extents.z));
+        }
+
         #endregion
 
     }
