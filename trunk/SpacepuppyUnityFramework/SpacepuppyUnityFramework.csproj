@@ -62,7 +62,10 @@
     <Compile Include="Geom\Capsule.cs" />
     <Compile Include="Geom\GeomUtil.cs" />
     <Compile Include="Geom\IGeom.cs" />
+    <Compile Include="Geom\Interval.cs" />
     <Compile Include="Geom\Line.cs" />
+    <Compile Include="Geom\Matrix2D.cs" />
+    <Compile Include="Geom\PhysicsUtil.cs" />
     <Compile Include="Geom\RaycastInfo.cs" />
     <Compile Include="Geom\Sphere.cs" />
     <Compile Include="Geom\Trans.cs" />
