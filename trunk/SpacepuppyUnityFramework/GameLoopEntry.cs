@@ -16,106 +16,6 @@ namespace com.spacepuppy
 
         #region Events
 
-        //public static event System.EventHandler EarlyUpdate
-        //{
-        //    add
-        //    {
-        //        _earlyUpdateHook.UpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _earlyUpdateHook.UpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler Update
-        //{
-        //    add
-        //    {
-        //        _updateHook.UpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _updateHook.UpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler TardyUpdate
-        //{
-        //    add
-        //    {
-        //        _tardyUpdateHook.UpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _tardyUpdateHook.UpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler EarlyFixedUpdate
-        //{
-        //    add
-        //    {
-        //        _earlyUpdateHook.FixedUpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _earlyUpdateHook.FixedUpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler FixedUpdate
-        //{
-        //    add
-        //    {
-        //        _updateHook.FixedUpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _updateHook.FixedUpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler TardyFixedUpdate
-        //{
-        //    add
-        //    {
-        //        _tardyUpdateHook.FixedUpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _tardyUpdateHook.FixedUpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler EarlyLateUpdate
-        //{
-        //    add
-        //    {
-        //        _earlyUpdateHook.LateUpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _earlyUpdateHook.LateUpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler LateUpdate
-        //{
-        //    add
-        //    {
-        //        _updateHook.LateUpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _updateHook.LateUpdateHook -= value;
-        //    }
-        //}
-        //public static event System.EventHandler TardyLateUpdate
-        //{
-        //    add
-        //    {
-        //        _tardyUpdateHook.LateUpdateHook += value;
-        //    }
-        //    remove
-        //    {
-        //        _tardyUpdateHook.LateUpdateHook -= value;
-        //    }
-        //}
-
         public static event System.EventHandler EarlyUpdate;
         public static event System.EventHandler Update;
         public static event System.EventHandler TardyUpdate;
@@ -170,78 +70,36 @@ namespace com.spacepuppy
 
         //Regular
 
-        public static Coroutine StartCoroutine(System.Collections.IEnumerator routine, bool operatesEarly = false)
+        public static Coroutine StartCoroutine(System.Collections.IEnumerator routine)
         {
-            if (operatesEarly)
-            {
-                return _earlyUpdateHook.StartCoroutine(routine);
-            }
-            else
-            {
-                return _updateHook.StartCoroutine(routine);
-            }
+            return _updateHook.StartCoroutine(routine);
         }
 
-        public static Coroutine StartCoroutine(System.Collections.IEnumerable routine, bool operatesEarly = false)
+        public static Coroutine StartCoroutine(System.Collections.IEnumerable routine)
         {
-            if (operatesEarly)
-            {
-                return _earlyUpdateHook.StartCoroutine(routine);
-            }
-            else
-            {
-                return _updateHook.StartCoroutine(routine);
-            }
+            return _updateHook.StartCoroutine(routine);
         }
 
-        public static Coroutine StartCoroutine(System.Delegate routine, bool operatesEarly = false, params object[] args)
+        public static Coroutine StartCoroutine(System.Delegate routine, params object[] args)
         {
-            if (operatesEarly)
-            {
-                return _earlyUpdateHook.StartCoroutine(routine, args);
-            }
-            else
-            {
-                return _updateHook.StartCoroutine(routine, args);
-            }
+            return _updateHook.StartCoroutine(routine, args);
         }
 
         //Radical
 
-        public static RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerator routine, bool operatesEarly = false)
+        public static RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerator routine)
         {
-            if (operatesEarly)
-            {
-                return _earlyUpdateHook.StartRadicalCoroutine(routine);
-            }
-            else
-            {
-                return _updateHook.StartRadicalCoroutine(routine);
-            }
+            return _updateHook.StartRadicalCoroutine(routine);
         }
 
-        public static RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerable routine, bool operatesEarly = false)
+        public static RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerable routine)
         {
-            if (operatesEarly)
-            {
-                return _earlyUpdateHook.StartRadicalCoroutine(routine);
-            }
-            else
-            {
-                return _updateHook.StartRadicalCoroutine(routine);
-            }
+            return _updateHook.StartRadicalCoroutine(routine);
         }
 
-        public static RadicalCoroutine StartRadicalCoroutine(System.Delegate routine, bool operatesEarly = false, params object[] args)
+        public static RadicalCoroutine StartRadicalCoroutine(System.Delegate routine, params object[] args)
         {
-            if (operatesEarly)
-            {
-                return _earlyUpdateHook.StartRadicalCoroutine(routine, args);
-            }
-            else
-            {
-                return _updateHook.StartRadicalCoroutine(routine, args);
-            }
+            return _updateHook.StartRadicalCoroutine(routine, args);
         }
 
         #endregion

@@ -36,6 +36,15 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region LayerMaskField
+
+        public static LayerMask LayerMaskField(string label, int selectedMask)
+        {
+            return EditorGUILayout.MaskField(label, selectedMask, LayerUtil.GetAllLayerNames());
+        }
+
+        #endregion
+
         #region EnumFlag Inspector
 
         public static int EnumFlagField(System.Type enumType, GUIContent label, int value)
@@ -76,7 +85,7 @@ namespace com.spacepuppyeditor
         #endregion
 
         #region IComponentField
-        
+
         public static Component ComponentField(GUIContent label, Component value, System.Type inheritsFromType, bool allowSceneObjects)
         {
             var position = EditorGUILayout.GetControlRect(true);

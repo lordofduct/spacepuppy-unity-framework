@@ -6,10 +6,13 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Spawn
 {
-    public abstract class AbstractSpawnPoint : com.spacepuppy.Scenario.TriggerableMechanism
+    public abstract class AbstractSpawnPoint : SPNotifyingComponent, com.spacepuppy.Scenario.ITriggerableMechanism
     {
 
         #region Fields
+
+        [SerializeField()]
+        private int _order;
 
         [SerializeField()]
         [Tooltip("If left empty the default SpawnPool will be used instead.")]
@@ -34,7 +37,7 @@ namespace com.spacepuppy.Spawn
 
         public bool UsesDefaultSpawnPool
         {
-            get { return Object.ReferenceEquals(_spawnPool, null) || _spawnPool == SpawnPool.DefaultPool; }
+            get { return Object.ReferenceEquals(_spawnPool, null) || Object.ReferenceEquals(_spawnPool, SpawnPool.DefaultPool); }
         }
 
         public SpawnPool SpawnPool
@@ -108,8 +111,10 @@ namespace com.spacepuppy.Spawn
 
             GameObject go;
             Transform par = (_spawnAsChild) ? this.transform : null;
-            var pos = (par != null) ? Vector3.zero : this.transform.position;
-            var rot = (par != null) ? Quaternion.identity : this.transform.rotation;
+            //var pos = (par != null) ? Vector3.zero : this.transform.position;
+            //var rot = (par != null) ? Quaternion.identity : this.transform.rotation;
+            var pos = this.transform.position;
+            var rot = this.transform.rotation;
             go = _spawnPool.Spawn(prefab, pos, rot, par, initializeProperties);
 
             if (go == null) return null;
@@ -122,6 +127,22 @@ namespace com.spacepuppy.Spawn
             Notification.PostNotification<SpawnPointTriggeredNotification>(this, spawnNotif, false);
             return go;
         }
+
+        #endregion
+
+        #region ITriggerableMechanism Interface
+
+        public int Order
+        {
+            get { return _order; }
+        }
+
+        public virtual bool CanTrigger
+        {
+            get { return this.enabled; }
+        }
+
+        public abstract object Trigger(object arg);
 
         #endregion
 

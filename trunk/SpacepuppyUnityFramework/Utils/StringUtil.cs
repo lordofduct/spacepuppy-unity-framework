@@ -453,6 +453,66 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
+
+        #region Replace Chars
+
+        //####################
+        //EnsureNotStartWith
+
+        public static string EnsureNotStartWith(this string value, string start)
+        {
+            if (value.StartsWith(start)) return value.Substring(start.Length);
+            else return value;
+        }
+
+        public static string EnsureNotStartWith(this string value, string start, bool ignoreCase)
+        {
+            if (value.StartsWith(start, StringComparison.OrdinalIgnoreCase)) return value.Substring(start.Length);
+            else return value;
+        }
+
+        public static string EnsureNotStartWith(this string value, string start, bool ignoreCase, System.Globalization.CultureInfo culture)
+        {
+            if (value.StartsWith(start, ignoreCase, culture)) return value.Substring(start.Length);
+            else return value;
+        }
+
+        public static string EnsureNotStartWith(this string value, string start, StringComparison comparison)
+        {
+            if (value.StartsWith(start, comparison)) return value.Substring(start.Length);
+            else return value;
+        }
+
+
+        //####################
+        //EnsureNotStartWith
+
+        public static string EnsureNotEndsWith(this string value, string end)
+        {
+            if (value.EndsWith(end)) return value.Substring(0, value.Length - end.Length);
+            else return value;
+        }
+
+        public static string EnsureNotEndsWith(this string value, string end, bool ignoreCase)
+        {
+            if (value.EndsWith(end, StringComparison.OrdinalIgnoreCase)) return value.Substring(0, value.Length - end.Length);
+            else return value;
+        }
+
+        public static string EnsureNotEndsWith(this string value, string end, bool ignoreCase, System.Globalization.CultureInfo culture)
+        {
+            if (value.EndsWith(end, ignoreCase, culture)) return value.Substring(0, value.Length - end.Length);
+            else return value;
+        }
+
+        public static string EnsureNotEndsWith(this string value, string end, StringComparison comparison)
+        {
+            if (value.EndsWith(end, comparison)) return value.Substring(0, value.Length - end.Length);
+            else return value;
+        }
+
+        #endregion
+
     }
 }
 

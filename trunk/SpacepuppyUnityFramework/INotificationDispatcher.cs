@@ -69,7 +69,7 @@ namespace com.spacepuppy
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
             var tp = typeof(T);
-            if(_handlers.ContainsKey(tp))
+            if (_handlers.ContainsKey(tp))
             {
                 _handlers[tp] = System.Delegate.Combine(_handlers[tp], handler);
             }
@@ -83,11 +83,11 @@ namespace com.spacepuppy
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
             var tp = typeof(T);
-            if(_handlers.ContainsKey(tp))
+            if (_handlers.ContainsKey(tp))
             {
                 var d = _handlers[tp];
                 d = System.Delegate.Remove(d, handler);
-                if(d != null)
+                if (d != null)
                 {
                     _handlers[tp] = d;
                 }
@@ -176,19 +176,19 @@ namespace com.spacepuppy
         {
             var tpForLoop = tp;
             var baseType = typeof(Notification);
-            while(baseType.IsAssignableFrom(tpForLoop))
+            while (baseType.IsAssignableFrom(tpForLoop))
             {
                 if (_handlers.ContainsKey(tpForLoop) || _unsafeHandlers.ContainsKey(tpForLoop)) return true;
                 tpForLoop = tpForLoop.BaseType;
             }
             if (_ownerGameObject == null) return false;
 
-            if(!Object.ReferenceEquals(_ownerGameObject, _owner))
+            if (!Object.ReferenceEquals(_ownerGameObject, _owner))
             {
                 if (_ownerGameObject.HasObserver(tp, false)) return true;
             }
 
-            if(bNotifyEntity)
+            if (bNotifyEntity)
             {
                 //TODO - a bottleneck here, consider possibilities of speeding this up by removing the need to constantly call 'FindRoot'
                 var root = _ownerGameObject.FindRoot();
@@ -198,7 +198,7 @@ namespace com.spacepuppy
                     if (dispatcher._dispatcher.HasObserver_Imp(tp, false)) return true;
                 }
             }
-            
+
             //return false;
             return Notification.HasGlobalObserver(tp);
         }
@@ -292,10 +292,10 @@ namespace com.spacepuppy
                         bHandled = true;
                     }
                 }
-                if(_unsafeHandlers.ContainsKey(tp))
+                if (_unsafeHandlers.ContainsKey(tp))
                 {
                     var d = _unsafeHandlers[tp];
-                    if(d != null)
+                    if (d != null)
                     {
                         d.DynamicInvoke(n);
                         bHandled = true;

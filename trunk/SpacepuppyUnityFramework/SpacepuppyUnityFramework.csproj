@@ -44,6 +44,8 @@
     <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
     <Compile Include="Collections\ListDictionary.cs" />
+    <Compile Include="Collections\NotificationPool.cs" />
+    <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />
     <Compile Include="Collections\WeakKeyDictionary.cs" />
@@ -102,6 +104,7 @@
     <Compile Include="Spawn\SpawnPool.cs" />
     <Compile Include="SPComponent.cs" />
     <Compile Include="SPConstants.cs" />
+    <Compile Include="SPNotifyingComponent.cs" />
     <Compile Include="TagData.cs" />
     <Compile Include="TagMask.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
@@ -119,6 +122,7 @@
     <Compile Include="Utils\Dynamic\TypeAccessWrapper.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
     <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
+    <Compile Include="Utils\LayerUtil.cs" />
     <Compile Include="Utils\MathUtil.cs" />
     <Compile Include="Utils\MouseUtil.cs" />
     <Compile Include="Utils\ObjUtil.cs" />

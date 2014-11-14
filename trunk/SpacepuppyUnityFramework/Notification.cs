@@ -388,6 +388,12 @@ namespace com.spacepuppy
             return sender.PostNotification<T>(notification, bNotifyEntity);
         }
 
+        public static bool PostNotification<T>(UnityEngine.GameObject sender, T notification, bool bNotifyEntity = false) where T : Notification
+        {
+            return false;
+        }
+
+        /*
         public static bool PostNotification<T>(object sender, T notification, bool bNotifyEntity = false) where T : Notification
         {
             if (sender == null) throw new ArgumentNullException("sender");
@@ -415,6 +421,7 @@ namespace com.spacepuppy
                 throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
             }
         }
+         */
 
         public static bool UnsafePostNotification(INotificationDispatcher sender, Notification notification, bool bNotifyEntity = false)
         {

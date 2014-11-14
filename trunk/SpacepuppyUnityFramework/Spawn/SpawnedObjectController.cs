@@ -7,7 +7,7 @@ namespace com.spacepuppy.Spawn
 {
 
     [AddComponentMenu("SpacePuppy/Spawn/Spawned Object")]
-    public class SpawnedObjectController : SPComponent
+    public class SpawnedObjectController : SPNotifyingComponent
     {
 
         #region Fields
@@ -87,7 +87,7 @@ namespace com.spacepuppy.Spawn
 
         public GameObject CloneObject()
         {
-            return _pool.Spawn(this.gameObject);
+            return _pool.Spawn(this.gameObject, this.transform.position, this.transform.rotation);
         }
 
         #endregion

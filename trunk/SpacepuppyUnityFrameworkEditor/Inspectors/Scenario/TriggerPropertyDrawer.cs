@@ -198,10 +198,7 @@ namespace com.spacepuppyeditor.Inspectors.Scenario
             if (obj != null)
             {
                 obj.Triggerable = null;
-                obj.TriggerableArgs = new VariantReference[] { new VariantReference() {
-                                                                    ValueType = VariantReference.VariantType.Null
-                                                                }
-                };
+                obj.TriggerableArgs = new VariantReference[0];
                 obj.ActivationType = TriggerActivationType.TriggerAllOnTarget;
                 obj.MethodName = null;
                 lst.serializedProperty.serializedObject.Update();

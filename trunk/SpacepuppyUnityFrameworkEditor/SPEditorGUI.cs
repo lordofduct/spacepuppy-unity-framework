@@ -25,6 +25,15 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region LayerMaskField
+
+        public static LayerMask LayerMaskField(Rect position, string label, int selectedMask)
+        {
+            return EditorGUI.MaskField(position, label, selectedMask, LayerUtil.GetAllLayerNames());
+        }
+
+        #endregion
+
         #region EnumFlag Inspector
 
         public static int EnumFlagField(Rect position, System.Type enumType, GUIContent label, int value)

@@ -37,10 +37,10 @@ namespace com.spacepuppyeditor.Tools
 
         public static void SyncTags()
         {
-            var tagData = (TagData)AssetDatabase.LoadAssetAtPath(@"Assets\Resources\TagData.asset", typeof(TagData));
+            var tagData = (TagData)AssetDatabase.LoadAssetAtPath(@"Assets/Resources/TagData.asset", typeof(TagData));
             if (tagData == null)
             {
-                tagData = ScriptableObjectHelper.CreateAsset<TagData>(@"Assets\Resources\TagData.asset");
+                tagData = ScriptableObjectHelper.CreateAsset<TagData>(@"Assets/Resources/TagData.asset");
             }
 
             if (!tagData.SimilarTo(UnityEditorInternal.InternalEditorUtility.tags))
@@ -48,8 +48,6 @@ namespace com.spacepuppyeditor.Tools
                 var helper = new TagData.EditorHelper(tagData);
                 helper.UpdateTags(UnityEditorInternal.InternalEditorUtility.tags);
                 EditorUtility.SetDirty(tagData);
-
-                
                 AssetDatabase.SaveAssets();
             }
 

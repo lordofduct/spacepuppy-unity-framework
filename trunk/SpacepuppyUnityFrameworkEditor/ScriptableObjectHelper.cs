@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppyeditor
 {
     public static class ScriptableObjectHelper
@@ -35,6 +37,9 @@ namespace com.spacepuppyeditor
         /// </summary>
         public static T CreateAsset<T>(string path) where T : ScriptableObject
         {
+            if (StringUtil.IsNullOrWhitespace(path)) throw new System.ArgumentException("Path must not be null or whitespace.", "path");
+            //make sure folder exists
+            CreateFolderIfNotExist(System.IO.Path.GetDirectoryName(path));
             path = AssetDatabase.GenerateUniqueAssetPath(path);
 
             T asset = ScriptableObject.CreateInstance<T>();
@@ -45,6 +50,21 @@ namespace com.spacepuppyeditor
             Selection.activeObject = asset;
 
             return asset;
+        }
+
+        public static bool FolderExists(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return true;
+            return Directory.Exists(Application.dataPath + "/" + path.EnsureNotStartWith("Assets").EnsureNotStartWith("/"));
+        }
+
+        public static void CreateFolderIfNotExist(string folder)
+        {
+            if (string.IsNullOrEmpty(folder)) return;
+            if (!FolderExists(folder))
+            {
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(folder), Path.GetFileName(folder));
+            }
         }
 
     }

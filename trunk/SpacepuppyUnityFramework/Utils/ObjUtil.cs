@@ -433,7 +433,7 @@ namespace com.spacepuppy.Utils
                 tp.InvokeMember(name, BINDING, null, obj, args);
                 return true;
             }
-            catch
+            catch (System.Exception ex)
             {
                 return false;
             }

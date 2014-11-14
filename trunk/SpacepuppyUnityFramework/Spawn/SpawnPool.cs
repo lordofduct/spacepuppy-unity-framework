@@ -2,54 +2,57 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Spawn
 {
 
     [AddComponentMenu("SpacePuppy/Spawn/Spawn Pool")]
-    public class SpawnPool : SPComponent, ISerializationCallbackReceiver
+    public class SpawnPool : SPNotifyingComponent, ISerializationCallbackReceiver
     {
 
         #region Static Multiton Interface
 
-        private static List<SpawnPool> _pools = new List<SpawnPool>();
+        private static SpawnPool _defaultPool;
+        private static UniqueList<SpawnPool> _pools = new UniqueList<SpawnPool>(ObjectReferenceEqualityComparer<SpawnPool>.Default);
 
         public static SpawnPool DefaultPool
         {
             get
             {
-                if (_pools.Count == 0) CreatePrimaryPool();
-                return _pools[0];
+                if (_defaultPool == null) CreatePrimaryPool();
+                return _defaultPool;
             }
         }
 
         public static SpawnPool Pool(int index)
         {
-            if (_pools.Count == 0) CreatePrimaryPool();
-            return _pools[index];
+            if (_defaultPool == null) CreatePrimaryPool();
+            return (index == 0) ? _defaultPool : _pools[index - 1];
         }
 
         public static SpawnPool Pool(string name)
         {
+            if (_defaultPool != null && _defaultPool.name == name) return _defaultPool;
             return (from p in _pools where p.name == name select p).FirstOrDefault();
         }
 
-        public static int PoolCount { get { return _pools.Count; } }
+        public static int PoolCount { get { return _pools.Count + 1; } }
 
         private static void CreatePrimaryPool()
         {
-            if (_pools.Count > 0) return;
+            if (_defaultPool != null) return;
 
             var point = (from p in GameObject.FindObjectsOfType<SpawnPool>() orderby p.name == "Spacepuppy.PrimarySpawnPool" select p).FirstOrDefault();
             if (!Object.ReferenceEquals(point, null))
             {
-                _pools.Add(point);
+                _defaultPool = point;
             }
             else
             {
                 var go = new GameObject("Spacepuppy.PrimarySpawnPool");
-                _pools.Add(go.AddComponent<SpawnPool>());
+                _defaultPool = go.AddComponent<SpawnPool>();
             }
         }
 
@@ -69,7 +72,10 @@ namespace com.spacepuppy.Spawn
         protected override void Awake()
         {
             base.Awake();
-            if (!_pools.Contains(this)) _pools.Add(this);
+            if (Object.ReferenceEquals(this, _defaultPool))
+            {
+                _pools.Add(this);
+            }
         }
 
         protected override void Start()
@@ -86,7 +92,14 @@ namespace com.spacepuppy.Spawn
         {
             base.OnDestroy();
 
-            if (_pools.Contains(this)) _pools.Remove(this);
+            if (Object.ReferenceEquals(this, _defaultPool))
+            {
+                _defaultPool = null;
+            }
+            else
+            {
+                _pools.Remove(this);
+            }
         }
 
         #endregion
@@ -104,7 +117,9 @@ namespace com.spacepuppy.Spawn
             if (index < 0 || index >= _registeredPrefabs.Count) throw new System.ArgumentException("Index out of range.", "index");
 
             var cache = _registeredPrefabs[index];
-            var obj = cache.Spawn(Vector3.zero, Quaternion.identity, par, initializeProperties);
+            var pos = (par != null) ? par.position : Vector3.zero;
+            var rot = (par != null) ? par.rotation : Quaternion.identity;
+            var obj = cache.Spawn(pos, rot, par, initializeProperties);
             this.SignalSpawned(obj);
             return obj;
         }
@@ -124,7 +139,9 @@ namespace com.spacepuppy.Spawn
             var cache = (from o in _registeredPrefabs where o.ItemName == sname select o).FirstOrDefault();
             if (cache == null) return null;
 
-            var obj = cache.Spawn(Vector3.zero, Quaternion.identity, par, initializeProperties);
+            var pos = (par != null) ? par.position : Vector3.zero;
+            var rot = (par != null) ? par.rotation : Quaternion.identity;
+            var obj = cache.Spawn(pos, rot, par, initializeProperties);
             this.SignalSpawned(obj);
             return obj;
         }
@@ -142,9 +159,12 @@ namespace com.spacepuppy.Spawn
         public GameObject Spawn(GameObject prefab, Transform par = null, System.Action<GameObject> initializeProperties = null)
         {
             var cache = this.FindPrefabCache(prefab);
+            var pos = (par != null) ? par.position : Vector3.zero;
+            var rot = (par != null) ? par.rotation : Quaternion.identity;
+
             if (cache != null)
             {
-                var obj = cache.Spawn(Vector3.zero, Quaternion.identity, par, initializeProperties);
+                var obj = cache.Spawn(pos, rot, par, initializeProperties);
                 this.SignalSpawned(obj);
                 return obj;
             }
@@ -154,8 +174,8 @@ namespace com.spacepuppy.Spawn
                 if (obj != null)
                 {
                     obj.transform.parent = par;
-                    obj.transform.localPosition = Vector3.zero;
-                    obj.transform.localRotation = Quaternion.identity;
+                    obj.transform.position = pos;
+                    obj.transform.rotation = rot;
                     if (initializeProperties != null) initializeProperties(obj);
                     this.SignalSpawned(obj);
                 }
@@ -178,8 +198,8 @@ namespace com.spacepuppy.Spawn
                 if (obj != null)
                 {
                     obj.transform.parent = par;
-                    obj.transform.localPosition = position;
-                    obj.transform.localRotation = rotation;
+                    obj.transform.position = position;
+                    obj.transform.rotation = rotation;
                     if (initializeProperties != null) initializeProperties(obj);
                     this.SignalSpawned(obj);
                 }
@@ -187,6 +207,30 @@ namespace com.spacepuppy.Spawn
             }
         }
 
+        //public T Spawn<T>(T prefab, Vector3 position, Quaternion rotation, Transform par = null, System.Action<T> initializeProperties = null) where T : UnityEngine.Component
+        //{
+        //    var cache = this.FindPrefabCache(prefab.gameObject);
+        //    if(cache != null)
+        //    {
+        //        System.Action<GameObject> act = (initializeProperties == null) ? null : new System.Action<GameObject>(delegate (GameObject go) { initializeProperties(go.GetComponent<T>()); });
+        //        var obj = cache.Spawn(position, rotation, par, act);
+        //        this.SignalSpawned(obj);
+        //        return obj.GetComponent<T>();
+        //    }
+        //    else
+        //    {
+        //        var obj = GameObject.Instantiate(prefab) as T;
+        //        if(obj != null)
+        //        {
+        //            obj.transform.parent = par;
+        //            obj.transform.position = position;
+        //            obj.transform.rotation = rotation;
+        //            if (initializeProperties != null) initializeProperties(obj);
+        //            this.SignalSpawned(obj.gameObject);
+        //        }
+        //        return obj;
+        //    }
+        //}
 
         /// <summary>
         /// Return an object to the pool.
@@ -352,8 +396,8 @@ namespace com.spacepuppy.Spawn
                         var cntrl = _instances[i];
 
                         cntrl.transform.parent = par;
-                        cntrl.transform.localPosition = pos;
-                        cntrl.transform.localRotation = rot;
+                        cntrl.transform.position = pos;
+                        cntrl.transform.rotation = rot;
                         cntrl.SetSpawned();
 
                         if (initializeProperties != null) initializeProperties(cntrl.gameObject);
@@ -377,8 +421,8 @@ namespace com.spacepuppy.Spawn
                     //grab instance
                     var cntrl = _instances[cnt];
                     cntrl.transform.parent = par;
-                    cntrl.transform.localPosition = pos;
-                    cntrl.transform.localRotation = rot;
+                    cntrl.transform.position = pos;
+                    cntrl.transform.rotation = rot;
                     cntrl.transform.parent = par;
                     cntrl.SetSpawned();
 
