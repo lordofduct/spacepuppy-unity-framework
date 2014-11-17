@@ -35,6 +35,8 @@ namespace com.spacepuppy
         private static UpdateEventHooks _updateHook;
         private static TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
+        private static bool _inUpdateLoop;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -63,6 +65,8 @@ namespace com.spacepuppy
         #endregion
 
         #region Properties
+
+        public static bool InUpdateLoop { get { return _inUpdateLoop; } }
 
         #endregion
 
@@ -110,6 +114,9 @@ namespace com.spacepuppy
 
         private static void _earlyUpdateHook_Update(object sender, System.EventArgs e)
         {
+            //Track entry into update loop
+            _inUpdateLoop = true;
+
             if (EarlyUpdate != null) EarlyUpdate(sender, e);
         }
 
@@ -155,6 +162,9 @@ namespace com.spacepuppy
         private static void _tardyUpdateHook_LateUpdate(object sender, System.EventArgs e)
         {
             if (TardyLateUpdate != null) TardyLateUpdate(sender, e);
+
+            //Track exit of update loop
+            _inUpdateLoop = false;
         }
 
         #endregion
