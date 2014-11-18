@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4B8E57AC-F3B2-4DFD-BA0B-20F6BE3B17C9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppy</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFramework.Base</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attributes.cs" />
+    <Compile Include="AutoNotificationManager.cs" />
+    <Compile Include="CancellableNotification.cs" />
+    <Compile Include="Collections\GameObjectCollection.cs" />
+    <Compile Include="Collections\ListDictionary.cs" />
+    <Compile Include="Collections\NotificationPool.cs" />
+    <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
+    <Compile Include="Collections\UniqueList.cs" />
+    <Compile Include="Collections\WeakInternalTypes.cs" />
+    <Compile Include="Collections\WeakKeyDictionary.cs" />
+    <Compile Include="Collections\WeakList.cs" />
+    <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="Delegates.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="EventArgs.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="GameLoopEntry.cs" />
+    <Compile Include="GameTime.cs" />
+    <Compile Include="Geom\AABBox.cs" />
+    <Compile Include="Geom\AxisInterval.cs" />
+    <Compile Include="Geom\Capsule.cs" />
+    <Compile Include="Geom\GeomUtil.cs" />
+    <Compile Include="Geom\IGeom.cs" />
+    <Compile Include="Geom\Interval.cs" />
+    <Compile Include="Geom\Line.cs" />
+    <Compile Include="Geom\Matrix2D.cs" />
+    <Compile Include="Geom\PhysicsUtil.cs" />
+    <Compile Include="Geom\RaycastInfo.cs" />
+    <Compile Include="Geom\Sphere.cs" />
+    <Compile Include="Geom\Trans.cs" />
+    <Compile Include="Hooks\EarlyExecutionUpdateEventHooks.cs" />
+    <Compile Include="Hooks\TardyExecutionUpdateEventHooks.cs" />
+    <Compile Include="Hooks\UpdateEventHooks.cs" />
+    <Compile Include="IComponent.cs" />
+    <Compile Include="IGameObjectSource.cs" />
+    <Compile Include="INotificationDispatcher.cs" />
+    <Compile Include="IRadicalYieldInstruction.cs" />
+    <Compile Include="MultiTag.cs" />
+    <Compile Include="Notification.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyAttributes.cs" />
+    <Compile Include="RadicalAsyncOperation.cs" />
+    <Compile Include="RadicalCoroutine.cs" />
+    <Compile Include="ShortGuid.cs" />
+    <Compile Include="Signal.cs" />
+    <Compile Include="Singleton.cs" />
+    <Compile Include="SPComponent.cs" />
+    <Compile Include="SPConstants.cs" />
+    <Compile Include="SPNotifyingComponent.cs" />
+    <Compile Include="TagData.cs" />
+    <Compile Include="TagMask.cs" />
+    <Compile Include="Timers\DelayTimer.cs" />
+    <Compile Include="Timers\GameTimers.cs" />
+    <Compile Include="Timers\ITimer.cs" />
+    <Compile Include="Timers\StopWatch.cs" />
+    <Compile Include="Timers\SystemTimers.cs" />
+    <Compile Include="Timers\Timer.cs" />
+    <Compile Include="Timers\TimerCollection.cs" />
+    <Compile Include="TypeReference.cs" />
+    <Compile Include="Utils\Assertions.cs" />
+    <Compile Include="Utils\ComponentUtil.cs" />
+    <Compile Include="Utils\ConvertUtil.cs" />
+    <Compile Include="Utils\CoroutineUtil.cs" />
+    <Compile Include="Utils\Dynamic\TypeAccessWrapper.cs" />
+    <Compile Include="Utils\GameObjUtil.cs" />
+    <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
+    <Compile Include="Utils\LayerUtil.cs" />
+    <Compile Include="Utils\MathUtil.cs" />
+    <Compile Include="Utils\MouseUtil.cs" />
+    <Compile Include="Utils\ObjUtil.cs" />
+    <Compile Include="Utils\PrimitiveUtil.cs" />
+    <Compile Include="Utils\QuaternionUtil.cs" />
+    <Compile Include="Utils\StringUtil.cs" />
+    <Compile Include="Utils\VectorUtil.cs" />
+    <Compile Include="VariantReference.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Hooks\EarlyExecutionUpdateEventHooks.cs.meta" />
+    <None Include="Hooks\TardyExecutionUpdateEventHooks.cs.meta" />
+    <None Include="Hooks\UpdateEventHooks.cs.meta" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(TargetDir)SpacepuppyUnityFramework.Base.dll" "$(ProjectDir)..\Builds\SpacepuppyUnityFramework.Base.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Base.pdb" "$(ProjectDir)..\Builds\SpacepuppyUnityFramework.Base.pdb"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
