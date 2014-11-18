@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A0466EE3-9582-4C0D-965D-E2D2F9006971}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppyeditor</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFrameworkEditor.Base</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\Resources\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Decorators\InfoboxDecorator.cs" />
+    <Compile Include="EditorHelper.cs" />
+    <Compile Include="EditorProjectPrefs.cs" />
+    <Compile Include="EditorSceneEvents.cs" />
+    <Compile Include="HandlesHelper.cs" />
+    <Compile Include="Inspectors\ComponentTypeRestrictionPropertyDrawer.cs" />
+    <Compile Include="Inspectors\EnumFlagsPropertyDrawer.cs" />
+    <Compile Include="Inspectors\EulerRotationInspectorPropertyDrawer.cs" />
+    <Compile Include="Inspectors\GenericMaskPropertyDrawer.cs" />
+    <Compile Include="Inspectors\Geom\IntervalInspector.cs" />
+    <Compile Include="Inspectors\MultiTagInspector.cs" />
+    <Compile Include="Inspectors\SingletonInspector.cs" />
+    <Compile Include="Inspectors\TagDataInspector.cs" />
+    <Compile Include="Inspectors\TagMaskInspector.cs" />
+    <Compile Include="Inspectors\TagSelectorPropertyDrawer.cs" />
+    <Compile Include="Inspectors\TypeReferencePropertyDrawer.cs" />
+    <Compile Include="Inspectors\VariantReferencePropertyDrawer.cs" />
+    <Compile Include="Internal\InternalTypeUtil.cs" />
+    <Compile Include="Internal\IPropertyHandler.cs" />
+    <Compile Include="Internal\PropertyDrawerActivator.cs" />
+    <Compile Include="Internal\PropertyHandlerCache.cs" />
+    <Compile Include="Internal\ScriptAttributeUtility.cs" />
+    <Compile Include="Internal\SPPropertyHandler.cs" />
+    <Compile Include="Internal\StandardPropertyHandler.cs" />
+    <Compile Include="MaterialHelper.cs" />
+    <Compile Include="Modifiers\DefaultFromSelfModifier.cs" />
+    <Compile Include="Modifiers\DisableOnPlayModifier.cs" />
+    <Compile Include="Modifiers\ModifierChainPropertyDrawer.cs" />
+    <Compile Include="Modifiers\OnChangedInEditorModifier.cs" />
+    <Compile Include="Modifiers\PropertyModifier.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReorderableListHelper.cs" />
+    <Compile Include="ScriptableObjectHelper.cs" />
+    <Compile Include="SPEditor.cs" />
+    <Compile Include="SPEditorGUI.cs" />
+    <Compile Include="SPEditorGUILayout.cs" />
+    <Compile Include="Tools\PrefabTools.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
+      <Project>{4b8e57ac-f3b2-4dfd-ba0b-20f6be3b17c9}</Project>
+      <Name>SpacepuppyBase</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Editor\
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Base.dll" "$(ProjectDir)..\Builds\Editor\SpacepuppyUnityFrameworkEditor.Base.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Base.pdb" "$(ProjectDir)..\Builds\Editor\SpacepuppyUnityFrameworkEditor.Base.pdb"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
