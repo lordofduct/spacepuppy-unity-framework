@@ -110,7 +110,7 @@ namespace com.spacepuppy.Utils
 
         public static bool SimilarTo<T>(this IEnumerable<T> first, IEnumerable<T> second)
         {
-            return first.Intersect(second).Count() == first.Count();
+            return first.Except(second).Count() == 0;
         }
 
         public static bool ContainsAny<T>(this IEnumerable<T> lst, params T[] objs)

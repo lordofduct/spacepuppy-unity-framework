@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy
 {
 
-    public class Singleton : SPComponent
+    public class Singleton : SPNotifyingComponent
     {
 
         #region Static Interface
@@ -13,6 +13,7 @@ namespace com.spacepuppy
         public const string GAMEOBJECT_NAME = "Spacepuppy.SingletonSource";
 
         private static GameObject _gameObject;
+        private static Dictionary<System.Type, Singleton> _singletonRefs = new Dictionary<System.Type, Singleton>();
 
         public static GameObject GameObjectSource
         {
@@ -33,6 +34,8 @@ namespace com.spacepuppy
 
         public static T Instance<T>() where T : Singleton
         {
+            if (_singletonRefs.ContainsKey(typeof(T))) return _singletonRefs[typeof(T)] as T;
+
             var single = Singleton.GameObjectSource.GetComponent<T>();
             if (single == null)
             {
@@ -44,8 +47,9 @@ namespace com.spacepuppy
         public static Singleton Instance(System.Type tp)
         {
             if (!typeof(Singleton).IsAssignableFrom(tp)) throw new System.ArgumentException("Type must inherit from Singleton.", "tp");
+            if (_singletonRefs.ContainsKey(tp)) return _singletonRefs[tp];
 
-            var single = Singleton.GameObjectSource.GetComponent(tp);
+            var single = Singleton.GameObjectSource.GetComponent(tp) as Singleton;
             if (single == null)
             {
                 single = Singleton.GameObjectSource.AddComponent(tp) as Singleton;
@@ -53,20 +57,17 @@ namespace com.spacepuppy
             return single as Singleton;
         }
 
-        public static Singleton Instance(string stype)
-        {
-            var single = Singleton.GameObjectSource.GetComponent(stype);
-            if (single == null)
-            {
-                single = Singleton.GameObjectSource.AddComponent(stype);
-            }
-            if (!(single is Singleton))
-            {
-                Object.Destroy(single);
-                throw new System.ArgumentException("Type must inherit from Singleton.", "tp");
-            }
+        #endregion
 
-            return single as Singleton;
+        #region Properties
+
+        [SerializeField()]
+        [Tooltip("Should this Singleton be maintained when a new scene is loaded.")]
+        private bool _maintainOnLoad = true;
+        public virtual bool MaintainOnLoad
+        {
+            get { return _maintainOnLoad; }
+            set { _maintainOnLoad = value; }
         }
 
         #endregion
@@ -75,46 +76,68 @@ namespace com.spacepuppy
 
         protected virtual void Awake()
         {
-            var c = Singleton.GameObjectSource.GetComponent(this.GetType());
-            if (!Object.ReferenceEquals(c, this))
+            var c = (_singletonRefs.ContainsKey(this.GetType())) ? _singletonRefs[this.GetType()] : null;
+            if (!Object.ReferenceEquals(c, null) && !Object.ReferenceEquals(c, this))
             {
                 Object.Destroy(this);
                 throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
             }
+            else
+            {
+                _singletonRefs[this.GetType()] = this;
+            }
+
+
+            //for singletons not on the primary singleton source
+            if (!this.gameObject == Singleton.GameObjectSource && this.MaintainOnLoad)
+            {
+                GameObject.DontDestroyOnLoad(this.gameObject);
+            }
+        }
+
+        protected virtual void OnLevelWasLoaded(int level)
+        {
+            if (this.MaintainOnLoad) return;
+
+            //for singletons not on the primary singleton source
+            if (this.enabled && !this.started) return;
+            Object.Destroy(this);
         }
 
         #endregion
 
     }
 
-    public static class Singleton<T> where T : Singleton
-    {
-
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = Singleton.Instance<T>();
-
-                return _instance;
-            }
-        }
-    }
-
     public class SingletonManager : Singleton
     {
 
-        public bool MaintainSingletonsOnLoad = true;
+        [SerializeField()]
+        private bool _maintainAllSingletonsOnLoad = true;
+
+        public bool MaintainAllSingletonsOnLoad { get { return _maintainAllSingletonsOnLoad; } }
+
+        public override bool MaintainOnLoad
+        {
+            get
+            {
+                return true;
+            }
+            set
+            {
+            }
+        }
 
         protected override void Awake()
         {
             base.Awake();
 
-            if (MaintainSingletonsOnLoad)
+            if (_maintainAllSingletonsOnLoad)
                 GameObject.DontDestroyOnLoad(this.gameObject);
+        }
+
+        protected override void OnLevelWasLoaded(int level)
+        {
+            //block for SingletonManager
         }
 
     }

@@ -30,6 +30,8 @@ namespace com.spacepuppy
         /// </summary>
         public static float DeltaTime { get { return UnityEngine.Time.deltaTime; } }
 
+        public static float RealDeltaTime { get { return UnityEngine.Time.unscaledDeltaTime; } }
+
 
         public static GameTime Current
         {

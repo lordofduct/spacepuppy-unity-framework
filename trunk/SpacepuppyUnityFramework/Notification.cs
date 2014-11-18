@@ -390,7 +390,19 @@ namespace com.spacepuppy
 
         public static bool PostNotification<T>(UnityEngine.GameObject sender, T notification, bool bNotifyEntity = false) where T : Notification
         {
-            return false;
+            if (sender == null) throw new ArgumentNullException("sender");
+            if (notification == null) throw new ArgumentNullException("notification");
+
+            if (bNotifyEntity)
+            {
+                var dispatcher = sender.AddOrGetComponent<GameObjectNotificationDispatcher>();
+                return dispatcher.PostNotification<T>(notification, bNotifyEntity);
+            }
+            else
+            {
+                var dispatcher = sender.GetComponent<GameObjectNotificationDispatcher>();
+                return dispatcher != null && dispatcher.PostNotification<T>(notification, bNotifyEntity);
+            }
         }
 
         /*

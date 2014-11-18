@@ -49,6 +49,7 @@
     <Compile Include="HandlesHelper.cs" />
     <Compile Include="Inspectors\ComponentTypeRestrictionPropertyDrawer.cs" />
     <Compile Include="Inspectors\EnumFlagsPropertyDrawer.cs" />
+    <Compile Include="Inspectors\GenericMaskPropertyDrawer.cs" />
     <Compile Include="Inspectors\MultiTagInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerComponentInspector.cs" />
     <Compile Include="Inspectors\Scenario\TriggerPropertyDrawer.cs" />
