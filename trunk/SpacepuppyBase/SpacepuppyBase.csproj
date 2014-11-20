@@ -11,7 +11,7 @@
     <AssemblyName>SpacepuppyUnityFramework.Base</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,6 +75,7 @@
     <Compile Include="Hooks\UpdateEventHooks.cs" />
     <Compile Include="IComponent.cs" />
     <Compile Include="IGameObjectSource.cs" />
+    <Compile Include="IKillableObject.cs" />
     <Compile Include="INotificationDispatcher.cs" />
     <Compile Include="IRadicalYieldInstruction.cs" />
     <Compile Include="MultiTag.cs" />
@@ -123,8 +124,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)SpacepuppyUnityFramework.Base.dll" "$(ProjectDir)..\Builds\SpacepuppyUnityFramework.Base.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.Base.pdb" "$(ProjectDir)..\Builds\SpacepuppyUnityFramework.Base.pdb"</PostBuildEvent>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Base.dll" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Base.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Base.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Base.pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

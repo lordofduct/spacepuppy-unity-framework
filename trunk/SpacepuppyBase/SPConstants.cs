@@ -23,10 +23,6 @@ namespace com.spacepuppy
         public const string MSG_ONSPCOMPONENTENABLED = "OnSPComponentEnabled";
         public const string MSG_ONSPCOMPONENTDISABLED = "OnSPComponentDisabled";
 
-        //sent by SpawnPool on GameObject being spawned
-        public const string MSG_ONSPAWN = "OnSpawn";
-        public const string MSG_ONDESPAWN = "OnDespawn";
-
         //sent by Notification to all members of some entity
         public const string MSG_AUTONOTIFICATIONMESSAGEHANDLER = "AutoNotificationMessageHandler";
 

@@ -48,6 +48,11 @@ namespace com.spacepuppy.Utils
         //    return cnt;
         //}
 
+        public static bool IsEmpty(this IEnumerable lst)
+        {
+            return !lst.GetEnumerator().MoveNext();
+        }
+
         public static IEnumerable<T> Like<T>(this IEnumerable lst)
         {
             foreach (var obj in lst)
