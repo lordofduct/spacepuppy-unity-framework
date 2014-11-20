@@ -10,6 +10,24 @@ namespace com.spacepuppy.Utils
     public static class GameObjectUtil
     {
 
+        public static GameObject CreateRoot(string name)
+        {
+            var go = new GameObject(name);
+            go.AddTag(SPConstants.TAG_ROOT);
+            return go;
+        }
+
+        public static GameObject CreateRoot(string name, params System.Type[] components)
+        {
+            var go = new GameObject(name);
+            go.AddTag(SPConstants.TAG_ROOT);
+            foreach (var tp in components)
+            {
+                go.AddComponent(tp);
+            }
+            return go;
+        }
+
         public static bool IsGameObjectSource(object obj)
         {
             return (obj is GameObject || obj is Component || obj is IGameObjectSource);
@@ -41,6 +59,64 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+        #region Kill Extension Methods
+
+        /// <summary>
+        /// Tests if the object is either destroyed or killed.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsKilled(this GameObject obj)
+        {
+            if (obj.IsNullOrDestroyed()) return true;
+
+            var comp = obj.FindRoot().GetFirstLikeComponent<IKillableObject>();
+            if (!comp.IsNullOrDestroyed())
+            {
+                return comp.IsDead;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tests if the object is either destroyed or killed.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsKilled(this Component obj)
+        {
+            if (obj.IsNullOrDestroyed()) return true;
+
+            var comp = obj.FindRoot().GetFirstLikeComponent<IKillableObject>();
+            if(!comp.IsNullOrDestroyed())
+            {
+                return comp.IsDead;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Like DestroyAll but will test for IKillableObject first and instead let those override...
+        /// </summary>
+        /// <param name="obj"></param>
+        public static void Kill(this GameObject obj)
+        {
+            if (obj.IsNullOrDestroyed()) return;
+
+            var comp = obj.FindRoot().GetFirstLikeComponent<IKillableObject>();
+            if(comp != null)
+            {
+                comp.Kill();
+            }
+            else
+            {
+                obj.DestroyAll();
+            }
+        }
+
+        #endregion
 
         #region Layer Methods
 
@@ -90,7 +166,7 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
-        #region Spawnable Methods
+        #region Actication Methods
 
         /// <summary>
         /// Destroys self and all children
