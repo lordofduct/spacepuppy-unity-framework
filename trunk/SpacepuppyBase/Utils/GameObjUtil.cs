@@ -70,7 +70,7 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return true;
 
-            var comp = obj.FindRoot().GetFirstLikeComponent<IKillableObject>();
+            var comp = obj.FindRoot().GetComponent<KillableEntityProxy>();
             if (!comp.IsNullOrDestroyed())
             {
                 return comp.IsDead;
@@ -88,8 +88,8 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return true;
 
-            var comp = obj.FindRoot().GetFirstLikeComponent<IKillableObject>();
-            if(!comp.IsNullOrDestroyed())
+            var comp = obj.FindRoot().GetComponent<KillableEntityProxy>();
+            if (!comp.IsNullOrDestroyed())
             {
                 return comp.IsDead;
             }
@@ -98,21 +98,23 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Like DestroyAll but will test for IKillableObject first and instead let those override...
+        /// Destroys the entire entity, if the entity contains a KillableEntity component that will handle death first and foremost.
         /// </summary>
         /// <param name="obj"></param>
         public static void Kill(this GameObject obj)
         {
             if (obj.IsNullOrDestroyed()) return;
 
-            var comp = obj.FindRoot().GetFirstLikeComponent<IKillableObject>();
-            if(comp != null)
+            var root = obj.FindRoot();
+            var comp = root.GetComponent<KillableEntityProxy>();
+            if (comp != null)
             {
                 comp.Kill();
+                return;
             }
             else
             {
-                obj.DestroyAll();
+                root.DestroyAll();
             }
         }
 
@@ -166,7 +168,7 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
-        #region Actication Methods
+        #region Activation Methods
 
         /// <summary>
         /// Destroys self and all children
