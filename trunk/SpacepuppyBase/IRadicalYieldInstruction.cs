@@ -106,6 +106,11 @@ namespace com.spacepuppy
 
         #region Methods
 
+        protected override void Init()
+        {
+            _t = 0f;
+        }
+
         protected override bool ContinueBlocking(ref object yieldObject)
         {
             _t += GameTime.RealDeltaTime;
