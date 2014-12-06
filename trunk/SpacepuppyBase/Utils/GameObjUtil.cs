@@ -98,10 +98,30 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Destroys the entire entity, if the entity contains a KillableEntity component that will handle death first and foremost.
+        /// Destroys the GameObject and its children, if the GameObject contains a KillableEntity component that will handle the death first and foremost.
         /// </summary>
         /// <param name="obj"></param>
         public static void Kill(this GameObject obj)
+        {
+            if (obj.IsNullOrDestroyed()) return;
+
+            var comp = obj.GetComponent<KillableEntityProxy>();
+            if (comp != null)
+            {
+                comp.Kill();
+                return;
+            }
+            else
+            {
+                obj.DestroyAll();
+            }
+        }
+
+        /// <summary>
+        /// Destroys the entire entity, if the entity contains a KillableEntity component that will handle death first and foremost.
+        /// </summary>
+        /// <param name="obj"></param>
+        public static void KillEntity(this GameObject obj)
         {
             if (obj.IsNullOrDestroyed()) return;
 
