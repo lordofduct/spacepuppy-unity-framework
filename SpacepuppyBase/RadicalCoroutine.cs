@@ -50,13 +50,6 @@ namespace com.spacepuppy
             _owner = owner;
         }
 
-        protected void SetOwner(object owner)
-        {
-            if (_owner != null) throw new System.InvalidOperationException("Can not set the owner of a routine that is already owned.");
-
-            _owner = owner;
-        }
-
         #endregion
 
         #region Properties
@@ -81,6 +74,28 @@ namespace com.spacepuppy
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
 
             _owner = behaviour.StartCoroutine(this);
+        }
+
+        /// <summary>
+        /// Stops the coroutine, but preserves the state of it, so that it could be resumed again later by calling start.
+        /// </summary>
+        /// <param name="behaviour"></param>
+        public void Stop(MonoBehaviour behaviour)
+        {
+            if (_owner is Coroutine)
+            {
+                _owner = null;
+                behaviour.StopCoroutine(this);
+            }
+            else if (_owner is RadicalCoroutine)
+            {
+                (_owner as RadicalCoroutine).Stop(behaviour);
+            }
+            else
+            {
+                //assume that the coroutine was started with out calling 'start'...
+                behaviour.StopCoroutine(this);
+            }
         }
 
         /// <summary>

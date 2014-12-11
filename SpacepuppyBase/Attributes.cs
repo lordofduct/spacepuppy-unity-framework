@@ -115,7 +115,6 @@ namespace com.spacepuppy
     }
 
 
-
     [System.AttributeUsage(System.AttributeTargets.Field)]
     public class TypeReferenceRestrictionAttribute : System.Attribute
     {
