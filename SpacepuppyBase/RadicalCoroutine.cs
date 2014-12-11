@@ -67,6 +67,10 @@ namespace com.spacepuppy
 
         #region Methods
 
+        /// <summary>
+        /// Starts the coroutine, one should always call this method or the StartRadicalCoroutine extension method. Never pass the coroutine into the 'StartCoroutine' method.
+        /// </summary>
+        /// <param name="behaviour">A reference to the MonoBehaviour that should be handling the coroutine.</param>
         public void Start(MonoBehaviour behaviour)
         {
             if (_owner != null) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
@@ -79,7 +83,7 @@ namespace com.spacepuppy
         /// <summary>
         /// Stops the coroutine, but preserves the state of it, so that it could be resumed again later by calling start.
         /// </summary>
-        /// <param name="behaviour"></param>
+        /// <param name="behaviour">A reference to the MonoBehaviour that is handling the coroutine.</param>
         public void Stop(MonoBehaviour behaviour)
         {
             if (_owner is Coroutine)
