@@ -5,6 +5,7 @@ using System.Text;
 
 namespace com.spacepuppy.Timers
 {
+
     public class BulkTimer : ITimer
     {
 
@@ -12,7 +13,8 @@ namespace com.spacepuppy.Timers
 
         private bool _stopWhenEmpty = false;
 
-        private float _currentTime;
+        //NOTE - we use a double for better precission over long periods of time
+        private double _currentTime = 0d;
         private List<TimerEntry> _lst = new List<TimerEntry>();
 
         #endregion
@@ -33,7 +35,7 @@ namespace com.spacepuppy.Timers
         {
             if (callback == null) throw new System.ArgumentNullException("callback");
 
-            var endTime = _currentTime + dur;
+            double endTime = _currentTime + dur;
             var entry = new TimerEntry(endTime, callback);
 
             for(int i = 0; i < _lst.Count; i++)
@@ -46,6 +48,12 @@ namespace com.spacepuppy.Timers
             }
 
             _lst.Add(entry);
+        }
+
+        public void Reset()
+        {
+            _lst.Clear();
+            _currentTime = 0d;
         }
 
         #endregion
@@ -79,10 +87,10 @@ namespace com.spacepuppy.Timers
 
         private struct TimerEntry
         {
-            public float EndTime;
+            public double EndTime;
             public System.Action Callback;
 
-            public TimerEntry(float endTime, System.Action callback)
+            public TimerEntry(double endTime, System.Action callback)
             {
                 this.EndTime = endTime;
                 this.Callback = callback;
