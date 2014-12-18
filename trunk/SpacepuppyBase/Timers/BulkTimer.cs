@@ -11,7 +11,7 @@ namespace com.spacepuppy.Timers
 
         #region Fields
 
-        private bool _stopWhenEmpty = false;
+        private bool _stopWhenEmpty = true;
 
         //NOTE - we use a double for better precission over long periods of time
         private double _currentTime = 0d;
