@@ -12,4 +12,11 @@ namespace com.spacepuppy
         ComponentMenu = 2
     }
 
+    public enum CartesianAxis
+    {
+        X = 0,
+        Y = 1,
+        Z = 2
+    }
+
 }
