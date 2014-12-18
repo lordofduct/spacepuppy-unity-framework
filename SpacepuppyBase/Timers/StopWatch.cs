@@ -29,6 +29,15 @@ namespace com.spacepuppy.Timers
 
         #endregion
 
+        #region Methods
+
+        public void Reset()
+        {
+            _currentTime = 0f;
+        }
+
+        #endregion
+
         #region ITimer Interface
 
         public bool Update(float dt)
