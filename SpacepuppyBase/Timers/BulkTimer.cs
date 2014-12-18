@@ -22,6 +22,7 @@ namespace com.spacepuppy.Timers
         public bool StopWhenEmpty
         {
             get { return _stopWhenEmpty; }
+            set { _stopWhenEmpty = value; }
         }
 
         #endregion
