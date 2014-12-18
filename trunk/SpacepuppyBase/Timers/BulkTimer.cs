@@ -38,12 +38,15 @@ namespace com.spacepuppy.Timers
             double endTime = _currentTime + dur;
             var entry = new TimerEntry(endTime, callback);
 
-            for(int i = 0; i < _lst.Count; i++)
+            if(_lst.Count > 0 && endTime < _lst.Last().EndTime)
             {
-                if(endTime < _lst[i].EndTime)
+                for (int i = 0; i < _lst.Count; i++)
                 {
-                    _lst.Insert(i, entry);
-                    return;
+                    if (endTime < _lst[i].EndTime)
+                    {
+                        _lst.Insert(i, entry);
+                        return;
+                    }
                 }
             }
 
@@ -62,7 +65,7 @@ namespace com.spacepuppy.Timers
 
         public bool Update(float dt)
         {
-            _currentTime += dt;
+            _currentTime += (double)dt;
 
             while(_lst.Count > 0 && _currentTime >= _lst[0].EndTime)
             {
