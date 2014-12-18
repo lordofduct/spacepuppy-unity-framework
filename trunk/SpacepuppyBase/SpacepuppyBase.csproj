@@ -47,6 +47,7 @@
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\NotificationPool.cs" />
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
+    <Compile Include="Collections\OrderedDelegate.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />
     <Compile Include="Collections\WeakKeyDictionary.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="SPNotifyingComponent.cs" />
     <Compile Include="TagData.cs" />
     <Compile Include="TagMask.cs" />
+    <Compile Include="Timers\BulkTimer.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
     <Compile Include="Timers\GameTimers.cs" />
     <Compile Include="Timers\ITimer.cs" />
@@ -114,6 +116,7 @@
     <Compile Include="Utils\PrimitiveUtil.cs" />
     <Compile Include="Utils\QuaternionUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
+    <Compile Include="Utils\TransformUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />
     <Compile Include="VariantReference.cs" />
   </ItemGroup>
