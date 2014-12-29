@@ -107,14 +107,6 @@ namespace com.spacepuppy.Utils
             return behaviour.StartCoroutine(InvokeRedirect(method, delay));
         }
 
-        public static Coroutine Invoke(this MonoBehaviour behaviour, CoroutineMethod method, float delay)
-        {
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (method == null) throw new System.ArgumentNullException("method");
-
-            return behaviour.StartCoroutine(InvokeRedirect(method, delay));
-        }
-
         public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, System.Action method, float delay)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
@@ -123,23 +115,7 @@ namespace com.spacepuppy.Utils
             return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
         }
 
-        public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, CoroutineMethod method, float delay)
-        {
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (method == null) throw new System.ArgumentNullException("method");
-
-            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
-        }
-
         public static RadicalCoroutine InvokeRepeatingRadical(this MonoBehaviour behaviour, System.Action method, float delay, float repeatRate)
-        {
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (method == null) throw new System.ArgumentNullException("method");
-
-            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
-        }
-
-        public static RadicalCoroutine InvokeRepeatingRadical(this MonoBehaviour behaviour, CoroutineMethod method, float delay, float repeatRate)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (method == null) throw new System.ArgumentNullException("method");
@@ -173,31 +149,55 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        private static System.Collections.IEnumerator InvokeRedirect(CoroutineMethod method, float delay, float repeatRate = -1f)
-        {
-            yield return new WaitForSeconds(delay);
-            if (repeatRate < 0f)
-            {
-                yield return method();
-            }
-            else if (repeatRate == 0f)
-            {
-                while (true)
-                {
-                    yield return method();
-                    yield return null;
-                }
-            }
-            else
-            {
-                var w = new WaitForSeconds(repeatRate);
-                while (true)
-                {
-                    yield return method();
-                    yield return w;
-                }
-            }
-        }
+        //public static Coroutine Invoke(this MonoBehaviour behaviour, CoroutineMethod method, float delay)
+        //{
+        //    if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+        //    if (method == null) throw new System.ArgumentNullException("method");
+
+        //    return behaviour.StartCoroutine(InvokeRedirect(method, delay));
+        //}
+
+        //public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, CoroutineMethod method, float delay)
+        //{
+        //    if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+        //    if (method == null) throw new System.ArgumentNullException("method");
+
+        //    return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
+        //}
+
+        //public static RadicalCoroutine InvokeRepeatingRadical(this MonoBehaviour behaviour, CoroutineMethod method, float delay, float repeatRate)
+        //{
+        //    if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+        //    if (method == null) throw new System.ArgumentNullException("method");
+
+        //    return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
+        //}
+
+        //private static System.Collections.IEnumerator InvokeRedirect(CoroutineMethod method, float delay, float repeatRate = -1f)
+        //{
+        //    yield return new WaitForSeconds(delay);
+        //    if (repeatRate < 0f)
+        //    {
+        //        yield return method();
+        //    }
+        //    else if (repeatRate == 0f)
+        //    {
+        //        while (true)
+        //        {
+        //            yield return method();
+        //            yield return null;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var w = new WaitForSeconds(repeatRate);
+        //        while (true)
+        //        {
+        //            yield return method();
+        //            yield return w;
+        //        }
+        //    }
+        //}
 
         #endregion
 

@@ -11,7 +11,7 @@ namespace com.spacepuppyeditor.Tools
 
     [InitializeOnLoad()]
     [CustomEditor(typeof(TagData))]
-    internal class TagDataInspector : Editor
+    internal class TagDataInspector : SPEditor
     {
 
         #region Static Interface

@@ -6,7 +6,7 @@ namespace com.spacepuppyeditor.Tools
 {
 
     [InitializeOnLoad()]
-    public class PrefabTools : Editor
+    public class PrefabTools : SPEditor
     {
 
         static PrefabTools()

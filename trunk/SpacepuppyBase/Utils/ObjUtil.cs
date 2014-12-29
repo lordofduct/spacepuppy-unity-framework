@@ -9,9 +9,25 @@ namespace com.spacepuppy.Utils
     public static class ObjUtil
     {
 
+        /// <summary>
+        /// Returns true if the object is either a null reference or has been destroyed by unity.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static bool IsNullOrDestroyed(this System.Object obj)
         {
             return ReferenceEquals(obj, null) || obj.Equals(null);
+        }
+
+        /// <summary>
+        /// Unlike IsNullOrDestroyed, this only returns true if the managed object half of the object still exists, 
+        /// but the unmanaged half has been destroyed by unity.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsDestroyed(this System.Object obj)
+        {
+            return !ReferenceEquals(obj, null) && obj.Equals(null);
         }
 
         public static bool EqualsAny(System.Object obj, params System.Object[] others)

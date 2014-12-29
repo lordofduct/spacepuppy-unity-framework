@@ -349,6 +349,23 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
+        #region Vector3 Mod
+
+        public static Vector3 Normalize(float x, float y, float z)
+        {
+            float l = Mathf.Sqrt(x * x + y * y + z * z);
+            return new Vector3(x / l, y / l, z / l);
+        }
+
+        public static Vector3 SetLengthOnAxis(Vector3 v, Vector3 axis, float len)
+        {
+            axis.Normalize();
+            var d = len - Vector3.Dot(v, axis);
+            return v + axis * d;
+        }
+
+        #endregion
+
         #region Scale Vector
 
         public static float GetMaxScalar(Vector2 v)
