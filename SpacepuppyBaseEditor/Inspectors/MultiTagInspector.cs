@@ -9,7 +9,7 @@ namespace com.spacepuppyeditor.Inspectors
 {
 
     [CustomEditor(typeof(MultiTag))]
-    public class MultiTagInspector : Editor
+    public class MultiTagInspector : SPEditor
     {
 
         #region Properties

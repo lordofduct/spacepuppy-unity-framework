@@ -6,7 +6,7 @@ namespace com.spacepuppyeditor
 {
 
     [InitializeOnLoad()]
-    public class EditorSceneEvents : Editor
+    public class EditorSceneEvents : SPEditor
     {
 
         #region Static Fields

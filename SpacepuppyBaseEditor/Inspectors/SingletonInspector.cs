@@ -9,7 +9,7 @@ namespace com.spacepuppyeditor.Inspectors
 {
 
     [CustomEditor(typeof(SingletonManager))]
-    public class SingletonInspector : Editor
+    public class SingletonInspector : SPEditor
     {
         [MenuItem("Spacepuppy/Create SingletonSource", priority=1000000)]
         public static void CreateSingletonSource()
