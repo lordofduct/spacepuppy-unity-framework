@@ -314,7 +314,7 @@ namespace com.spacepuppy.Utils
                 return null;
         }
 
-        public static T GetFirstLikeComponent<T>(this GameObject obj) where T : class
+        public static T GetFirstLikeComponent<T>(this GameObject obj)
         {
             if (obj == null) return default(T);
 
@@ -326,7 +326,7 @@ namespace com.spacepuppy.Utils
             return default(T);
         }
 
-        public static T GetFirstLikeComponent<T>(this Component obj) where T : class
+        public static T GetFirstLikeComponent<T>(this Component obj)
         {
             if (obj == null) return default(T);
 
@@ -362,7 +362,7 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
-        public static bool GetFirstLikeComponent<T>(this GameObject obj, out T comp) where T : class
+        public static bool GetFirstLikeComponent<T>(this GameObject obj, out T comp)
         {
             comp = default(T);
             if (obj == null) return false;
@@ -379,7 +379,7 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
-        public static bool GetFirstLikeComponent<T>(this Component obj, out T comp) where T : class
+        public static bool GetFirstLikeComponent<T>(this Component obj, out T comp)
         {
             comp = default(T);
             if (obj == null) return false;
@@ -434,23 +434,25 @@ namespace com.spacepuppy.Utils
         // GetComponents
         // #########
 
-        public static IEnumerable<T> GetLikeComponents<T>(this GameObject obj) where T : class
+        public static IEnumerable<T> GetLikeComponents<T>(this GameObject obj)
         {
             if (obj == null) yield break;
 
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (comp is T) yield return comp as T;
+                //if (comp is T) yield return comp as T;
+                if (comp is T) yield return (T)(comp as object);
             }
         }
 
-        public static IEnumerable<T> GetLikeComponents<T>(this Component obj) where T : class
+        public static IEnumerable<T> GetLikeComponents<T>(this Component obj)
         {
             if (obj == null) yield break;
 
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (comp is T) yield return comp as T;
+                //if (comp is T) yield return comp as T;
+                if (comp is T) yield return (T)(comp as object);
             }
         }
 
@@ -824,18 +826,18 @@ namespace com.spacepuppy.Utils
         /// <typeparam name="T"></typeparam>
         /// <param name="go"></param>
         /// <returns></returns>
-        public static T FindLikeComponent<T>(this GameObject go) where T : class
+        public static T FindLikeComponent<T>(this GameObject go)
         {
             var root = go.FindRoot();
 
-            T c = null;
+            T c = default(T);
             foreach (var t in root.GetAllChildrenAndSelf())
             {
                 c = t.GetFirstLikeComponent<T>();
                 if (c != null) return c;
             }
 
-            return null;
+            return default(T);
         }
 
         /// <summary>
@@ -845,7 +847,7 @@ namespace com.spacepuppy.Utils
         /// <typeparam name="T"></typeparam>
         /// <param name="c"></param>
         /// <returns></returns>
-        public static T FindLikeComponent<T>(this Component c) where T : class
+        public static T FindLikeComponent<T>(this Component c)
         {
             return FindLikeComponent<T>(c.gameObject);
         }
@@ -922,7 +924,7 @@ namespace com.spacepuppy.Utils
 
 
 
-        public static IEnumerable<T> FindLikeComponents<T>(this GameObject go) where T : class
+        public static IEnumerable<T> FindLikeComponents<T>(this GameObject go)
         {
             var root = go.FindRoot();
             foreach (var t in root.GetAllChildrenAndSelf())
@@ -933,7 +935,7 @@ namespace com.spacepuppy.Utils
                 }
             }
         }
-        public static IEnumerable<T> FindLikeComponents<T>(this Component c) where T : class
+        public static IEnumerable<T> FindLikeComponents<T>(this Component c)
         {
             return FindLikeComponents<T>(c.gameObject);
         }
@@ -996,7 +998,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<T> GetChildLikeComponents<T>(this GameObject obj) where T : class
+        public static IEnumerable<T> GetChildLikeComponents<T>(this GameObject obj)
         {
             foreach (var child in obj.GetAllChildren())
             {
@@ -1007,7 +1009,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<T> GetChildLikeComponents<T>(this Component obj) where T : class
+        public static IEnumerable<T> GetChildLikeComponents<T>(this Component obj)
         {
             foreach (var child in obj.GetAllChildren())
             {
