@@ -70,10 +70,14 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return true;
 
-            var comp = obj.FindRoot().GetComponent<KillableEntityProxy>();
-            if (!comp.IsNullOrDestroyed())
+            //var comp = obj.GetComponent<KillableEntityProxy>();
+            //if (!comp.IsNullOrDestroyed())
+            //{
+            //    return comp.IsDead;
+            //}
+            foreach(var c in obj.GetLikeComponents<IKillableEntity>())
             {
-                return comp.IsDead;
+                if (c.IsDead) return true;
             }
 
             return false;
@@ -88,10 +92,14 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return true;
 
-            var comp = obj.FindRoot().GetComponent<KillableEntityProxy>();
-            if (!comp.IsNullOrDestroyed())
+            //var comp = obj.GetComponent<KillableEntityProxy>();
+            //if (!comp.IsNullOrDestroyed())
+            //{
+            //    return comp.IsDead;
+            //}
+            foreach (var c in obj.GetLikeComponents<IKillableEntity>())
             {
-                return comp.IsDead;
+                if (c.IsDead) return true;
             }
 
             return false;
@@ -105,11 +113,23 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return;
 
-            var comp = obj.GetComponent<KillableEntityProxy>();
-            if (comp != null)
+            //var comp = obj.GetComponent<KillableEntityProxy>();
+            //if (comp != null)
+            //{
+            //    comp.Kill();
+            //    return;
+            //}
+            //else
+            //{
+            //    obj.DestroyAll();
+            //}
+            var comps = obj.GetLikeComponents<IKillableEntity>().ToArray();
+            if(comps.Length > 0)
             {
-                comp.Kill();
-                return;
+                for(int i = 0; i < comps.Length; i++)
+                {
+                    comps[i].Kill();
+                }
             }
             else
             {
@@ -125,16 +145,28 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return;
 
-            var root = obj.FindRoot();
-            var comp = root.GetComponent<KillableEntityProxy>();
-            if (comp != null)
+            //var root = obj.FindRoot();
+            //var comp = root.GetComponent<KillableEntityProxy>();
+            //if (comp != null)
+            //{
+            //    comp.Kill();
+            //    return;
+            //}
+            //else
+            //{
+            //    root.DestroyAll();
+            //}
+            var comps = obj.FindLikeComponents<IKillableEntity>().ToArray();
+            if (comps.Length > 0)
             {
-                comp.Kill();
-                return;
+                for (int i = 0; i < comps.Length; i++)
+                {
+                    comps[i].Kill();
+                }
             }
             else
             {
-                root.DestroyAll();
+                obj.DestroyAll();
             }
         }
 

@@ -48,6 +48,7 @@
     <Compile Include="EditorProjectPrefs.cs" />
     <Compile Include="EditorSceneEvents.cs" />
     <Compile Include="HandlesHelper.cs" />
+    <Compile Include="Inspectors\AdvancedAnimationInspector.cs" />
     <Compile Include="Inspectors\ComponentTypeRestrictionPropertyDrawer.cs" />
     <Compile Include="Inspectors\EnumFlagsPropertyDrawer.cs" />
     <Compile Include="Inspectors\EulerRotationInspectorPropertyDrawer.cs" />

@@ -7,92 +7,18 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
-    public abstract class KillableEntity : SPNotifyingComponent
+    /// <summary>
+    /// Implement this interface if you want to write a script that handles how the entity is dealt with when 'Kill' is called on it. 
+    /// This overrides the default behaviour of destroying the GameObject and child GameObjects. You will have to destroy the objects 
+    /// as you see fit. This is useful for things like returning a GameObject to an object pool to be used later instead of destroying it. 
+    /// Multiple IKillableEntity scripts on an entity will cause the kill calls to stack, so any script that contradicts another can result 
+    /// in bugs.
+    /// </summary>
+    public interface IKillableEntity : IComponent
     {
 
-        #region CONSTRUCTOR
-
-        protected override void Awake()
-        {
-            base.Awake();
-
-            var proxy = this.entityRoot.AddOrGetComponent<KillableEntityProxy>();
-            proxy.RegisterKillableEntityController(this);
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            var proxy = this.entityRoot.GetComponent<KillableEntityProxy>();
-            if(proxy != null)
-            {
-                proxy.UnRegisterKillableEntityController(this);
-            }
-        }
-
-        #endregion
-
-
-        #region Abstract Interface
-
-        public abstract bool IsDead { get; }
-
-        public abstract void Kill();
-
-        #endregion
-
-    }
-
-    public class KillableEntityProxy : SPComponent
-    {
-
-        #region Fields
-
-        private List<KillableEntity> _lst = new List<KillableEntity>();
-
-        #endregion
-
-        #region Properties
-
-        public bool IsDead
-        {
-            get
-            {
-                for (int i = 0; i < _lst.Count; i++ )
-                {
-                    if (_lst[i].IsDead) return true;
-                }
-                return false;
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        internal void Kill()
-        {
-            //ToArray because Kill may end up calling 'UnRegisterKillableEntityController'
-            foreach(var c in _lst.ToArray())
-            {
-                c.Kill();
-            }
-        }
-
-        internal void RegisterKillableEntityController(KillableEntity controller)
-        {
-            if (_lst.Contains(controller)) return;
-
-            _lst.Add(controller);
-        }
-
-        internal void UnRegisterKillableEntityController(KillableEntity controller)
-        {
-            _lst.Remove(controller);
-        }
-
-        #endregion
+        bool IsDead { get; }
+        void Kill();
 
     }
 
