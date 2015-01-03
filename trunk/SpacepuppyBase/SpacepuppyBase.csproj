@@ -48,6 +48,7 @@
     <Compile Include="Collections\NotificationPool.cs" />
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\OrderedDelegate.cs" />
+    <Compile Include="Collections\SDictionary.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />
     <Compile Include="Collections\WeakKeyDictionary.cs" />
