@@ -74,7 +74,7 @@ namespace com.spacepuppy.Utils
             return Quaternion.LookRotation(forward, up);
         }
 
-        public static void GetAngleAxis(Quaternion q, out Vector3 axis, out float angle)
+        public static void GetAngleAxis(this Quaternion q, out Vector3 axis, out float angle)
         {
             if (q.w > 1) q = QuaternionUtil.Normalize(q);
 
