@@ -7,6 +7,11 @@ namespace com.spacepuppy.Utils
     public static class QuaternionUtil
     {
 
+        public static string ToDetailedString(this Quaternion v)
+        {
+            return System.String.Format("<{0}, {1}, {2}, {3}>", v.x, v.y, v.z, v.w);
+        }
+
         public static Quaternion Normalize(Quaternion q)
         {
             var mag = System.Math.Sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
