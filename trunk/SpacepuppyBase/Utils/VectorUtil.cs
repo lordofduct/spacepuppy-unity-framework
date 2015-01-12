@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace com.spacepuppy.Utils
 {
@@ -50,7 +49,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector2 ToVector2(string sval)
         {
-            if (String.IsNullOrEmpty(sval)) return Vector2.zero;
+            if (System.String.IsNullOrEmpty(sval)) return Vector2.zero;
 
             var arr = StringUtil.SplitFixedLength(sval, ',', 2);
 
@@ -74,7 +73,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector3 ToVector3(string sval)
         {
-            if (String.IsNullOrEmpty(sval)) return Vector3.zero;
+            if (System.String.IsNullOrEmpty(sval)) return Vector3.zero;
 
             var arr = StringUtil.SplitFixedLength(sval, ',', 3);
 
@@ -191,8 +190,8 @@ namespace com.spacepuppy.Utils
         public static Vector2 RotateBy(Vector2 v, float a, bool bUseRadians = false)
         {
             if (!bUseRadians) a *= Mathf.Deg2Rad;
-            var ca = Math.Cos(a);
-            var sa = Math.Sin(a);
+            var ca = System.Math.Cos(a);
+            var sa = System.Math.Sin(a);
             var rx = v.x * ca - v.y * sa;
 
             return new Vector2((float)rx, (float)(v.x * sa + v.y * ca));
@@ -206,8 +205,8 @@ namespace com.spacepuppy.Utils
         public static void RotateBy(ref Vector2 v, float a, bool bUseRadians = false)
         {
             if (!bUseRadians) a *= Mathf.Deg2Rad;
-            var ca = Math.Cos(a);
-            var sa = Math.Sin(a);
+            var ca = System.Math.Cos(a);
+            var sa = System.Math.Sin(a);
             var rx = v.x * ca - v.y * sa;
 
             v.x = (float)rx;
@@ -472,11 +471,11 @@ namespace com.spacepuppy.Utils
 
         public static string ToDetailedString(this Vector2 v)
         {
-            return String.Format("<{0}, {1}>", v.x, v.y);
+            return System.String.Format("<{0}, {1}>", v.x, v.y);
         }
         public static string ToDetailedString(this Vector3 v)
         {
-            return String.Format("<{0}, {1}, {2}>", v.x, v.y, v.z);
+            return System.String.Format("<{0}, {1}, {2}>", v.x, v.y, v.z);
         }
     }
 }
