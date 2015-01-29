@@ -98,16 +98,9 @@ namespace com.spacepuppy.Geom
             return (pos - _cent).sqrMagnitude < (_rad * _rad);
         }
 
-        public bool Intersects(IGeom geom)
+        public IEnumerable<Vector3> GetAxes()
         {
-            //TODO
-            throw new System.NotImplementedException();
-        }
-
-        public bool Intersects(Bounds bounds)
-        {
-            //TODO
-            throw new System.NotImplementedException();
+            return System.Linq.Enumerable.Empty<Vector3>();
         }
 
         #endregion
@@ -156,7 +149,7 @@ namespace com.spacepuppy.Geom
         #endregion
 
 
-        #region "Static Interface"
+        #region Static Interface
 
         public static Sphere FromCollider(SphereCollider s)
         {
@@ -199,6 +192,17 @@ namespace com.spacepuppy.Geom
             //TODO - calculate this more accurately using some 'SmallestSphere' algorithm
             var bounds = mesh.bounds;
             return new Sphere(bounds.center, Mathf.Max(bounds.extents.x, bounds.extents.y, bounds.extents.z));
+        }
+
+        /// <summary>
+        /// Measures the distance between 2 spheres. If the value is negative, the spheres are overlapping.
+        /// </summary>
+        /// <param name="s1"></param>
+        /// <param name="s2"></param>
+        /// <returns></returns>
+        public static float DistanceBetween(Sphere s1, Sphere s2)
+        {
+            return (s1.Center - s2.Center).magnitude - (s1.Radius + s2.Radius);
         }
 
         #endregion

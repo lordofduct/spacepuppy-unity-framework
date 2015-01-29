@@ -6,7 +6,7 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
-namespace com.spacepuppyeditor.Tools
+namespace com.spacepuppyeditor.Inspectors
 {
 
     [InitializeOnLoad()]

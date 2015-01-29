@@ -11,19 +11,31 @@ namespace com.spacepuppyeditor.Inspectors
     [CustomEditor(typeof(SingletonManager))]
     public class SingletonInspector : SPEditor
     {
+
         [MenuItem("Spacepuppy/Create SingletonSource", priority=1000000)]
         public static void CreateSingletonSource()
         {
-            var go = new GameObject(Singleton.GAMEOBJECT_NAME);
-            go.AddComponent<SingletonManager>();
+            Singleton.CreateSpecialInstance<SingletonManager>(Singleton.GAMEOBJECT_NAME);
         }
 
         [MenuItem("Spacepuppy/Create SingletonSource", validate = true)]
         public static bool CreateSingletonSource_Validate()
         {
             if (Application.isPlaying) return false;
-            var go = GameObject.Find(Singleton.GAMEOBJECT_NAME);
-            return (go == null);
+            return !Singleton.HasInstance<GameLoopEntry>();
+        }
+
+        [MenuItem("Spacepuppy/Create GameLoopEntry", priority = 1000001)]
+        public static void CreateGameLoopEntry()
+        {
+            GameLoopEntry.Init();
+        }
+
+        [MenuItem("Spacepuppy/Create GameLoopEntry", validate = true)]
+        public static bool CreateGameLoopEntry_Validate()
+        {
+            if (Application.isPlaying) return false;
+            return !Singleton.HasInstance<GameLoopEntry>();
         }
 
 

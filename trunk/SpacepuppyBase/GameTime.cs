@@ -17,7 +17,7 @@ namespace com.spacepuppy
 
 
 
-
+        #region Static Interface
 
         /// <summary>
         /// SP Time, ignores moments when game was paused.
@@ -64,6 +64,21 @@ namespace com.spacepuppy
                 return new GameTime(UnityEngine.Time.time, UnityEngine.Time.smoothDeltaTime);
             }
         }
+
+        public static float TimeScale
+        {
+            get
+            {
+                return UnityEngine.Time.timeScale;
+            }
+            set
+            {
+                UnityEngine.Time.timeScale = value;
+                UnityEngine.Time.fixedDeltaTime = UnityEngine.Time.timeScale * 0.02f;
+            }
+        }
+
+        #endregion
 
     }
 

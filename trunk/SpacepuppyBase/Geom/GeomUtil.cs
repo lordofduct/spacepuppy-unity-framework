@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace com.spacepuppy.Geom
 {
@@ -192,6 +193,29 @@ namespace com.spacepuppy.Geom
         #endregion
 
         #region Intersections
+
+        public static bool Intersects(this IGeom geom1, IGeom geom2)
+        {
+            if (geom1 == null || geom2 == null) return false;
+
+            var s1 = geom1.GetBoundingSphere();
+            var s2 = geom2.GetBoundingSphere();
+            if ((s1.Center - s2.Center).magnitude > (s1.Radius + s2.Radius)) return false;
+
+            foreach(var a in geom1.GetAxes().Union(geom2.GetAxes()))
+            {
+                if (geom1.Project(a).Intersects(geom2.Project(a))) return true;
+            }
+
+            return false;
+        }
+
+        public static bool Intersects(this IGeom geom, Bounds bounds)
+        {
+            //TODO - re-implement independent of geom, may speed this up
+            var geom2 = new AABBox(bounds);
+            return Intersects(geom, geom2);
+        }
 
         /// <summary>
         /// Find intersecting line of two planes

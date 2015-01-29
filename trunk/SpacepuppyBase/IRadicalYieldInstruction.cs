@@ -8,7 +8,12 @@ namespace com.spacepuppy
     /// </summary>
     public interface IRadicalYieldInstruction : System.Collections.IEnumerator
     {
-        void Init(RadicalCoroutine routine);
+
+    }
+
+    public interface IImmediatelyResumingYieldInstruction : IRadicalYieldInstruction
+    {
+        event System.EventHandler Signal;
     }
 
     public abstract class RadicalYieldInstruction : IRadicalYieldInstruction
@@ -17,43 +22,20 @@ namespace com.spacepuppy
         #region Fields
 
         private object _current;
-        private RadicalCoroutine _routine;
 
         #endregion
 
         #region Properties
 
-        protected RadicalCoroutine Routine { get { return _routine; } }
-
         #endregion
 
         #region Methods
-
-        protected virtual void Init()
-        {
-
-        }
-
-        protected virtual void DeInit()
-        {
-
-        }
 
         protected abstract bool ContinueBlocking(ref object yieldObject);
 
         #endregion
 
         #region IRadicalYieldInstruction Interface
-
-        void IRadicalYieldInstruction.Init(RadicalCoroutine routine)
-        {
-            _routine = routine;
-            this.Init();
-        }
-
-        #endregion
-
-        #region IEnumerator Interface
 
         object System.Collections.IEnumerator.Current
         {
@@ -63,16 +45,7 @@ namespace com.spacepuppy
         bool System.Collections.IEnumerator.MoveNext()
         {
             _current = null;
-            if (this.ContinueBlocking(ref _current))
-            {
-                return true;
-            }
-            else
-            {
-                this.DeInit();
-                _routine = null;
-                return false;
-            }
+            return this.ContinueBlocking(ref _current);
         }
 
         void System.Collections.IEnumerator.Reset()
@@ -81,6 +54,24 @@ namespace com.spacepuppy
         }
 
         #endregion
+
+    }
+
+    public abstract class ImmediatelyResumingYieldInstruction : RadicalYieldInstruction, IImmediatelyResumingYieldInstruction
+    {
+
+        private System.EventHandler _handler;
+
+        protected void SetSignal()
+        {
+            if (_handler != null) _handler(this, System.EventArgs.Empty);
+        }
+
+        event System.EventHandler IImmediatelyResumingYieldInstruction.Signal
+        {
+            add { _handler += value; }
+            remove { _handler -= value; }
+        }
 
     }
 
@@ -106,11 +97,6 @@ namespace com.spacepuppy
 
         #region Methods
 
-        protected override void Init()
-        {
-            _t = 0f;
-        }
-
         protected override bool ContinueBlocking(ref object yieldObject)
         {
             _t += GameTime.RealDeltaTime;
@@ -123,7 +109,7 @@ namespace com.spacepuppy
 
     }
 
-    public class WaitForNotification<T> : RadicalYieldInstruction where T : Notification
+    public class WaitForNotification<T> : ImmediatelyResumingYieldInstruction where T : Notification
     {
 
         private INotificationDispatcher _dispatcher;
@@ -145,6 +131,7 @@ namespace com.spacepuppy
 
             _notification = n;
             _dispatcher.RemoveObserver<T>(this.OnNotification);
+            this.SetSignal();
         }
 
         protected override bool ContinueBlocking(ref object yieldObject)

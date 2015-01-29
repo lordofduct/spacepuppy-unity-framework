@@ -35,6 +35,7 @@ namespace com.spacepuppy.Utils
 
         public static GameObject GetGameObjectFromSource(object obj)
         {
+            if (obj == null) return null;
             if (obj is GameObject)
                 return obj as GameObject;
             if (obj is Component)
@@ -47,6 +48,7 @@ namespace com.spacepuppy.Utils
 
         public static Transform GetTransformFromSource(object obj)
         {
+            if (obj == null) return null;
             if (obj is Transform)
                 return obj as Transform;
             if (obj is GameObject)

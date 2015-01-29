@@ -181,6 +181,16 @@ namespace com.spacepuppy.Utils
             return new Vector2(v.x - normal.x * dp, v.y - normal.y * dp);
         }
 
+        public static void Mirror(ref Vector2 v, Vector2 axis)
+        {
+            v = (2 * (Vector2.Dot(v, axis) / Vector2.Dot(axis, axis)) * axis) - v;
+        }
+
+        public static Vector2 Mirror(Vector2 v, Vector2 axis)
+        {
+            return (2 * (Vector2.Dot(v, axis) / Vector2.Dot(axis, axis)) * axis) - v;
+        }
+
         /// <summary>
         /// Rotate Vector2 clockwise by 'a'
         /// </summary>

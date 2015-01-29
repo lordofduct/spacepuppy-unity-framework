@@ -11,53 +11,55 @@ namespace com.spacepuppy
     /// <summary>
     /// This class is really only for internal use by com.spacepuppy, avoid using it outside of it.
     /// </summary>
-    public static class GameLoopEntry
+    public class GameLoopEntry : Singleton
     {
 
         #region Events
 
         public static event System.EventHandler EarlyUpdate;
-        public static event System.EventHandler Update;
+        public static event System.EventHandler OnUpdate;
         public static event System.EventHandler TardyUpdate;
         public static event System.EventHandler EarlyFixedUpdate;
-        public static event System.EventHandler FixedUpdate;
+        public static event System.EventHandler OnFixedUpdate;
         public static event System.EventHandler TardyFixedUpdate;
         public static event System.EventHandler EarlyLateUpdate;
-        public static event System.EventHandler LateUpdate;
+        public static event System.EventHandler OnLateUpdate;
         public static event System.EventHandler TardyLateUpdate;
 
         #endregion
 
         #region Fields
 
-        private static GameObject _gameObject;
-        private static EarlyExecutionUpdateEventHooks _earlyUpdateHook;
-        private static UpdateEventHooks _updateHook;
-        private static TardyExecutionUpdateEventHooks _tardyUpdateHook;
+        private static GameLoopEntry _instance;
+        private static UpdateSequence _currentSequence;
 
-        private static bool _inUpdateLoop;
+        private UpdateEventHooks _updateHook;
+        private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        static GameLoopEntry()
+        public static void Init()
         {
-            _gameObject = new GameObject("SpacePuppy.GameLoopEntryObject");
-            _earlyUpdateHook = _gameObject.AddComponent<EarlyExecutionUpdateEventHooks>();
-            _updateHook = _gameObject.AddComponent<UpdateEventHooks>();
-            _tardyUpdateHook = _gameObject.AddComponent<TardyExecutionUpdateEventHooks>();
-            GameObject.DontDestroyOnLoad(_gameObject);
+            if (_instance != null) return;
 
-            _earlyUpdateHook.UpdateHook += _earlyUpdateHook_Update;
+            _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntryObject");
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            _updateHook = this.gameObject.AddComponent<UpdateEventHooks>();
+            _tardyUpdateHook = this.gameObject.AddComponent<TardyExecutionUpdateEventHooks>();
+
             _updateHook.UpdateHook += _updateHook_Update;
             _tardyUpdateHook.UpdateHook += _tardyUpdateHook_Update;
 
-            _earlyUpdateHook.FixedUpdateHook += _earlyUpdateHook_FixedUpdate;
             _updateHook.FixedUpdateHook += _updateHook_FixedUpdate;
             _tardyUpdateHook.FixedUpdateHook += _tardyUpdateHook_FixedUpdate;
 
-            _earlyUpdateHook.LateUpdateHook += _earlyUpdateHook_LateUpdate;
             _updateHook.LateUpdateHook += _updateHook_LateUpdate;
             _tardyUpdateHook.LateUpdateHook += _tardyUpdateHook_LateUpdate;
         }
@@ -66,45 +68,13 @@ namespace com.spacepuppy
 
         #region Properties
 
-        public static bool InUpdateLoop { get { return _inUpdateLoop; } }
-
-        #endregion
-
-        #region Methods
-
-        //Regular
-
-        public static Coroutine StartCoroutine(System.Collections.IEnumerator routine)
-        {
-            return _updateHook.StartCoroutine(routine);
-        }
-
-        public static Coroutine StartCoroutine(System.Collections.IEnumerable routine)
-        {
-            return _updateHook.StartCoroutine(routine);
-        }
-
-        public static Coroutine StartCoroutine(System.Delegate routine, params object[] args)
-        {
-            return _updateHook.StartCoroutine(routine, args);
-        }
-
-        //Radical
-
-        public static RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerator routine)
-        {
-            return _updateHook.StartRadicalCoroutine(routine);
-        }
-
-        public static RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerable routine)
-        {
-            return _updateHook.StartRadicalCoroutine(routine);
-        }
-
-        public static RadicalCoroutine StartRadicalCoroutine(System.Delegate routine, params object[] args)
-        {
-            return _updateHook.StartRadicalCoroutine(routine, args);
-        }
+        /// <summary>
+        /// Returns which event sequence that code is currently operating as. 
+        /// WARNING - during 'OnMouseXXX' messages this will report that we're in the FixedUpdate sequence. 
+        /// This is because there's no end of FixedUpdate available to hook into, so it reports FixedUpdate 
+        /// until Update starts, and 'OnMouseXXX' occurs in between those 2.
+        /// </summary>
+        public static UpdateSequence CurrentSequence { get { return _currentSequence; } }
 
         #endregion
 
@@ -112,59 +82,65 @@ namespace com.spacepuppy
 
         //Update
 
-        private static void _earlyUpdateHook_Update(object sender, System.EventArgs e)
+        private void Update()
         {
             //Track entry into update loop
-            _inUpdateLoop = true;
+            _currentSequence = UpdateSequence.Update;
 
-            if (EarlyUpdate != null) EarlyUpdate(sender, e);
+            if (EarlyUpdate != null) EarlyUpdate(this, System.EventArgs.Empty);
         }
 
-        private static void _updateHook_Update(object sender, System.EventArgs e)
+        private void _updateHook_Update(object sender, System.EventArgs e)
         {
-            if (Update != null) Update(sender, e);
+            if (OnUpdate != null) OnUpdate(this, e);
         }
 
-        private static void _tardyUpdateHook_Update(object sender, System.EventArgs e)
+        private void _tardyUpdateHook_Update(object sender, System.EventArgs e)
         {
-            if (TardyUpdate != null) TardyUpdate(sender, e);
+            if (TardyUpdate != null) TardyUpdate(this, e);
         }
 
         //Fixed Update
 
-        private static void _earlyUpdateHook_FixedUpdate(object sender, System.EventArgs e)
+        private void FixedUpdate()
         {
-            if (EarlyFixedUpdate != null) EarlyFixedUpdate(sender, e);
+            //Track entry into fixedupdate loop
+            _currentSequence = UpdateSequence.FixedUpdate;
+
+            if (EarlyFixedUpdate != null) EarlyFixedUpdate(this, System.EventArgs.Empty);
         }
 
-        private static void _updateHook_FixedUpdate(object sender, System.EventArgs e)
+        private void _updateHook_FixedUpdate(object sender, System.EventArgs e)
         {
-            if (FixedUpdate != null) FixedUpdate(sender, e);
+            if (OnFixedUpdate != null) OnFixedUpdate(this, e);
         }
 
-        private static void _tardyUpdateHook_FixedUpdate(object sender, System.EventArgs e)
+        private void _tardyUpdateHook_FixedUpdate(object sender, System.EventArgs e)
         {
-            if (TardyFixedUpdate != null) TardyFixedUpdate(sender, e);
+            if (TardyFixedUpdate != null) TardyFixedUpdate(this, e);
+
+            ////Track exit of fixedupdate loop
+            //_currentSequence = UpdateSequence.None;
         }
 
         //LateUpdate
 
-        private static void _earlyUpdateHook_LateUpdate(object sender, System.EventArgs e)
+        private void LateUpdate()
         {
-            if (EarlyLateUpdate != null) EarlyLateUpdate(sender, e);
+            if (EarlyLateUpdate != null) EarlyLateUpdate(this, System.EventArgs.Empty);
         }
 
-        private static void _updateHook_LateUpdate(object sender, System.EventArgs e)
+        private void _updateHook_LateUpdate(object sender, System.EventArgs e)
         {
-            if (LateUpdate != null) LateUpdate(sender, e);
+            if (OnLateUpdate != null) OnLateUpdate(this, e);
         }
 
-        private static void _tardyUpdateHook_LateUpdate(object sender, System.EventArgs e)
+        private void _tardyUpdateHook_LateUpdate(object sender, System.EventArgs e)
         {
-            if (TardyLateUpdate != null) TardyLateUpdate(sender, e);
+            if (TardyLateUpdate != null) TardyLateUpdate(this, e);
 
             //Track exit of update loop
-            _inUpdateLoop = false;
+            _currentSequence = UpdateSequence.None;
         }
 
         #endregion

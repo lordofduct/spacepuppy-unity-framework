@@ -50,6 +50,11 @@ namespace com.spacepuppy
 
         public NotificationDispatcher(INotificationDispatcher owner)
         {
+            this.SetOwner(owner);
+        }
+
+        internal void SetOwner(INotificationDispatcher owner)
+        {
             _owner = owner;
             if (GameObjectUtil.IsGameObjectSource(_owner))
             {
@@ -62,6 +67,11 @@ namespace com.spacepuppy
         }
 
         #endregion
+
+        public System.Type[] ListObservedNotifications()
+        {
+            return _handlers.Keys.Union(_unsafeHandlers.Keys).ToArray();
+        }
 
         #region INotificationDispatcher Interface
 
@@ -183,7 +193,7 @@ namespace com.spacepuppy
             }
             if (_ownerGameObject == null) return false;
 
-            if (!Object.ReferenceEquals(_ownerGameObject, _owner))
+            if (!object.ReferenceEquals(_ownerGameObject, _owner))
             {
                 if (_ownerGameObject.HasObserver(tp, false)) return true;
             }
@@ -317,7 +327,7 @@ namespace com.spacepuppy
 
         #region Fields
 
-        internal NotificationDispatcher _dispatcher;
+        internal NotificationDispatcher _dispatcher = new NotificationDispatcher();
 
         #endregion
 
@@ -325,7 +335,7 @@ namespace com.spacepuppy
 
         private void Awake()
         {
-            _dispatcher = new NotificationDispatcher(this);
+            _dispatcher.SetOwner(this);
         }
 
         private void OnDestroy()
@@ -339,6 +349,11 @@ namespace com.spacepuppy
         }
 
         #endregion
+
+        public System.Type[] ListObserveredNotifications()
+        {
+            return _dispatcher.ListObservedNotifications();
+        }
 
         #region INotificationDispatcher Interface
 

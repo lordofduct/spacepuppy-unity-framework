@@ -2,16 +2,54 @@
 using System.Collections;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy
 {
 
-    public class RadicalCoroutine : IEnumerator
+    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction
     {
+
+        private enum OperatingState
+        {
+            Inactive = 0,
+            Active = 1,
+            Completing = 2,
+            Complete = 3,
+            Cancelling = -1,
+            Cancelled = -2
+        }
 
         #region Events
 
         public event System.EventHandler OnComplete;
         public event System.EventHandler OnCancelled;
+        private System.EventHandler _immediatelyResumingSignal;
+
+        private void OnFinish(bool cancelled)
+        {
+            _derivative = null;
+            _currentIEnumeratorYieldValue = null;
+            _manualWaitingOnInstruction = null;
+            if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
+
+            if(cancelled)
+            {
+                _state = OperatingState.Cancelled;
+
+                var ev = System.EventArgs.Empty;
+                if (this.OnCancelled != null) this.OnCancelled(this, ev);
+                if (_immediatelyResumingSignal != null) _immediatelyResumingSignal(this, ev);
+            }
+            else
+            {
+                _state = OperatingState.Complete;
+
+                var ev = System.EventArgs.Empty;
+                if (this.OnComplete != null) this.OnComplete(this, ev);
+                if (_immediatelyResumingSignal != null) _immediatelyResumingSignal(this, ev);
+            }
+        }
 
         #endregion
 
@@ -23,8 +61,9 @@ namespace com.spacepuppy
         private System.Collections.IEnumerator _derivative;
         private object _currentIEnumeratorYieldValue;
 
-        private bool _completed = false;
-        private bool _cancelled = false;
+        //private bool _completed = false;
+        //private bool _cancelled = false;
+        private OperatingState _state;
         private IManualWait _manualWaitingOnInstruction;
         private bool _forcedTick = false;
 
@@ -54,9 +93,9 @@ namespace com.spacepuppy
 
         #region Properties
 
-        public bool Complete { get { return _completed; } }
+        public bool Complete { get { return _state >= OperatingState.Completing; } }
 
-        public bool Cancelled { get { return _cancelled; } }
+        public bool Cancelled { get { return _state <= OperatingState.Cancelling; } }
 
         /// <summary>
         /// An operator is still operating this routine and it is not eligible to be started again.
@@ -73,10 +112,10 @@ namespace com.spacepuppy
         /// <param name="behaviour">A reference to the MonoBehaviour that should be handling the coroutine.</param>
         public void Start(MonoBehaviour behaviour)
         {
-            if (_owner != null) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
-            if (_cancelled || _completed) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine has already ended.");
+            if (_state != OperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
 
+            _state = OperatingState.Active;
             _owner = behaviour.StartCoroutine(this);
         }
 
@@ -116,10 +155,12 @@ namespace com.spacepuppy
                 (_derivative as RadicalCoroutine).Cancel();
             }
 
-            _derivative = null;
-            _manualWaitingOnInstruction = null;
-            _cancelled = true;
-            if (this.OnCancelled != null) this.OnCancelled(this, System.EventArgs.Empty);
+            //_derivative = null;
+            //_currentIEnumeratorYieldValue = null;
+            //_manualWaitingOnInstruction = null;
+            //_cancelled = true;
+            //this.OnFinish(true);
+            _state = OperatingState.Cancelling;
         }
 
         #endregion
@@ -227,7 +268,7 @@ namespace com.spacepuppy
 
         #endregion
 
-        #region IEnumerator Interface
+        #region IYieldInstruction/IEnumerator Interface
 
         object IEnumerator.Current
         {
@@ -236,6 +277,23 @@ namespace com.spacepuppy
 
         bool IEnumerator.MoveNext()
         {
+            if (this.Cancelled)
+            {
+                if(_state == OperatingState.Cancelling)
+                {
+                    this.OnFinish(true);
+                }
+                return false;
+            }
+            else if(this.Complete)
+            {
+                if(_state == OperatingState.Completing)
+                {
+                    this.OnFinish(false);
+                }
+                return false;
+            }
+
             if (_forcedTick)
             {
                 _forcedTick = false;
@@ -243,12 +301,6 @@ namespace com.spacepuppy
             }
 
             _currentIEnumeratorYieldValue = null;
-
-            if (_cancelled)
-            {
-                if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
-                return false;
-            }
 
             if (_manualWaitingOnInstruction != null)
             {
@@ -266,14 +318,21 @@ namespace com.spacepuppy
             {
                 if (_derivative.MoveNext())
                 {
-                    if (_cancelled) return false; //our routine cancelled itself
-                    if (_derivative == null) return !_completed; //the derivative was cleared out by a manual tick, wait a frame or exit depending on if we completed in that time
+                    if (this.Cancelled)
+                    {
+                        //routine cancelled itself
+                        if (_state == OperatingState.Cancelling)
+                        {
+                            this.OnFinish(true);
+                        }
+                        return false;
+                    }
+                    if (_derivative == null) return !this.Complete; //the derivative was cleared out by a manual tick, wait a frame or exit depending on if we completed in that time
                     _currentIEnumeratorYieldValue = _derivative.Current;
                     return true;
                 }
                 else
                 {
-                    if (_derivative is RadicalCoroutine) (_derivative as RadicalCoroutine)._owner = null;
                     _derivative = null;
                 }
             }
@@ -281,7 +340,15 @@ namespace com.spacepuppy
 
             if (_routine.MoveNext())
             {
-                if (_cancelled) return false; //our routine cancelled itself
+                if (this.Cancelled)
+                {
+                    //routine cancelled itself
+                    if (_state == OperatingState.Cancelling)
+                    {
+                        this.OnFinish(true);
+                    }
+                    return false;
+                }
 
                 var current = _routine.Current;
                 if (current == null)
@@ -298,28 +365,33 @@ namespace com.spacepuppy
                 }
                 else if (current is RadicalCoroutine)
                 {
-                    IEnumerator e = null;
-                    var rad = current as RadicalCoroutine;
-                    if (rad._owner == null)
-                    {
-                        rad._owner = this;
-                        e = rad as IEnumerator;
-                    }
-                    else
-                    {
-                        e = WaitUntilDone_Routine(rad).GetEnumerator();
-                    }
+                    //IEnumerator e = null;
+                    //var rad = current as RadicalCoroutine;
+                    //if (rad._owner == null)
+                    //{
+                    //    //honestly, this is weird, this means someone return a RadicalCoroutine that hasn't been started.
+                    //    rad._owner = this;
+                    //    e = rad as IEnumerator;
+                    //}
+                    //else
+                    //{
+                    //    e = WaitUntilDone_Routine(rad).GetEnumerator();
+                    //}
 
-                    if (e.MoveNext())
-                    {
-                        _currentIEnumeratorYieldValue = e.Current;
-                        _derivative = e;
-                    }
+                    //if (e.MoveNext())
+                    //{
+                    //    _currentIEnumeratorYieldValue = e.Current;
+                    //    _derivative = e;
+                    //}
+
+                    var rad = current as RadicalCoroutine;
+                    _derivative = WaitUntilDone_Routine(rad).GetEnumerator();
+
                 }
                 else if (current is IRadicalYieldInstruction)
                 {
                     var rad = current as IRadicalYieldInstruction;
-                    rad.Init(this);
+                    if (rad is IImmediatelyResumingYieldInstruction) (rad as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
 
                     var e = new RadicalCoroutine(current as IEnumerator, this) as IEnumerator;
                     if (e.MoveNext())
@@ -347,6 +419,37 @@ namespace com.spacepuppy
                         _derivative = e;
                     }
                 }
+                else if(current is RadicalCoroutineEndCommand)
+                {
+                    var cmd = (RadicalCoroutineEndCommand)current;
+                    
+                    if(cmd.HasFlag(RadicalCoroutineEndCommand.Cancel))
+                    {
+                        this.Cancel();
+                        if(cmd.HasFlag(RadicalCoroutineEndCommand.StallImmediateResume))
+                        {
+                            _currentIEnumeratorYieldValue = null;
+                        }
+                        else
+                        {
+                            this.OnFinish(true);
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (cmd.HasFlag(RadicalCoroutineEndCommand.StallImmediateResume))
+                        {
+                            _state = OperatingState.Completing;
+                            _currentIEnumeratorYieldValue = null;
+                        }
+                        else
+                        {
+                            this.OnFinish(false);
+                            return false;
+                        }
+                    }
+                }
                 else
                 {
                     _currentIEnumeratorYieldValue = current;
@@ -356,9 +459,7 @@ namespace com.spacepuppy
             }
             else
             {
-                _completed = true;
-                if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
-                if (this.OnComplete != null) this.OnComplete(this, System.EventArgs.Empty);
+                this.OnFinish(false);
                 return false;
             }
         }
@@ -370,6 +471,27 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IImmediatelyResumingYieldInstruction Interface
+
+        event System.EventHandler IImmediatelyResumingYieldInstruction.Signal
+        {
+            add { _immediatelyResumingSignal += value; }
+            remove { _immediatelyResumingSignal -= value; }
+        }
+
+        #endregion
+
+        #region IImmediatelyResumingYieldInstruction Handler
+
+        private void OnImmediatelyResumingYieldInstructionSignaled(object sender, System.EventArgs e)
+        {
+            var instruction = sender as IImmediatelyResumingYieldInstruction;
+            if (instruction != null) instruction.Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
+
+            this.ForceTick();
+        }
+
+        #endregion
 
         #region Factory Methods
 
@@ -521,6 +643,8 @@ namespace com.spacepuppy
 
         #endregion
 
+
+        
     }
 
 }

@@ -141,6 +141,12 @@ namespace com.spacepuppy.Geom
             return new Sphere(this.Center, (_end - _start).magnitude + _rad);
         }
 
+        public IEnumerable<Vector3> GetAxes()
+        {
+            //TODO
+            return System.Linq.Enumerable.Empty<Vector3>();
+        }
+
         public bool Contains(Vector3 pos)
         {
             var sqrRad = _rad * _rad;
@@ -172,18 +178,6 @@ namespace com.spacepuppy.Geom
                 else
                     return true;
             }
-        }
-
-        public bool Intersects(IGeom geom)
-        {
-            //TODO
-            throw new System.NotImplementedException();
-        }
-
-        public bool Intersects(Bounds bounds)
-        {
-            //TODO
-            throw new System.NotImplementedException();
         }
 
         #endregion
