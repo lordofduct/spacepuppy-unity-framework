@@ -36,6 +36,23 @@ namespace com.spacepuppy.Hooks
             FixedUpdateHook = null;
             LateUpdateHook = null;
         }
+
+
+        public void ScheduleNextUpdate(System.Action callback)
+        {
+
+        }
+
+        public void ScheduleNextFixedUpdate(System.Action callback)
+        {
+
+        }
+
+        public void ScheduleNextLateUpdate(System.Action callback)
+        {
+
+        }
+
     }
 
 }

@@ -6,7 +6,19 @@ namespace com.spacepuppy
 
     public abstract class SPPropertyAttribute : PropertyAttribute
     {
+        private bool _handlesEntireArray;
 
+        public SPPropertyAttribute()
+        {
+
+        }
+
+        public SPPropertyAttribute(bool handlesEntireArray)
+        {
+            _handlesEntireArray = handlesEntireArray;
+        }
+
+        public bool HandlesEntireArray { get { return _handlesEntireArray; } }
     }
 
 
@@ -76,6 +88,17 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class ReorderableArrayAttribute : SPPropertyAttribute
+    {
+
+        public ReorderableArrayAttribute() : base(true)
+        {
+
+        }
+
+    }
+
     #endregion
 
     #region ModifierDrawer Attributes
@@ -134,6 +157,21 @@ namespace com.spacepuppy
     #endregion
 
     #region Decorator Attributes
+
+    public class InsertButtonAttribute : PropertyAttribute
+    {
+
+        public string Label;
+        public string OnClick;
+        public bool PrecedeProperty;
+
+        public InsertButtonAttribute(string label, string onClick)
+        {
+            this.Label = label;
+            this.OnClick = onClick;
+        }
+
+    }
 
     public class InfoboxAttribute : PropertyAttribute
     {

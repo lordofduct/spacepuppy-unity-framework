@@ -44,6 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Decorators\InfoboxDecorator.cs" />
+    <Compile Include="Inspectors\GameObjectNotificationDispatcherInspector.cs" />
+    <Compile Include="Inspectors\ReorderableArrayPropertyDrawer.cs" />
+    <Compile Include="Modifiers\InsertButtonModifier.cs" />
     <Compile Include="EditorHelper.cs" />
     <Compile Include="EditorProjectPrefs.cs" />
     <Compile Include="EditorSceneEvents.cs" />

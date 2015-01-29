@@ -78,15 +78,11 @@ namespace com.spacepuppy.Geom
             return this.GetBounds().Contains(pos);
         }
 
-        public bool Intersects(IGeom geom)
+        public IEnumerable<Vector3> GetAxes()
         {
-            //TODO
-            throw new System.NotImplementedException();
-        }
-
-        public bool Intersects(Bounds bounds)
-        {
-            return this.GetBounds().Intersects(bounds);
+            yield return Vector3.up;
+            yield return Vector3.right;
+            yield return Vector3.forward;
         }
 
         /*

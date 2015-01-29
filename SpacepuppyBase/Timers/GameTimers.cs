@@ -17,7 +17,7 @@ namespace com.spacepuppy.Timers
 
         static GameTimers()
         {
-            GameLoopEntry.Update += OnUpdate;
+            GameLoopEntry.OnUpdate += OnUpdate;
         }
 
         #endregion

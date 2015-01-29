@@ -6,6 +6,8 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor
 {
 
@@ -65,6 +67,7 @@ namespace com.spacepuppyeditor
             EditorGUI.BeginChangeCheck();
 
             obj.Update();
+
             SerializedProperty iterator = obj.GetIterator();
             for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
             {

@@ -32,7 +32,7 @@ namespace com.spacepuppy
             }
         }
 
-        public static T Instance<T>() where T : Singleton
+        public static T GetInstance<T>() where T : Singleton
         {
             if (_singletonRefs.ContainsKey(typeof(T))) return _singletonRefs[typeof(T)] as T;
 
@@ -44,7 +44,7 @@ namespace com.spacepuppy
             return single;
         }
 
-        public static Singleton Instance(System.Type tp)
+        public static Singleton GetInstance(System.Type tp)
         {
             if (!typeof(Singleton).IsAssignableFrom(tp)) throw new System.ArgumentException("Type must inherit from Singleton.", "tp");
             if (_singletonRefs.ContainsKey(tp)) return _singletonRefs[tp];
@@ -54,7 +54,36 @@ namespace com.spacepuppy
             {
                 single = Singleton.GameObjectSource.AddComponent(tp) as Singleton;
             }
-            return single as Singleton;
+            return single;
+        }
+
+        public static T CreateSpecialInstance<T>(string gameObjectName) where T:Singleton
+        {
+            if (_singletonRefs.ContainsKey(typeof(T))) return _singletonRefs[typeof(T)] as T;
+
+            var go = new GameObject(gameObjectName);
+            var single = go.AddComponent<T>();
+            return single;
+        }
+
+        public static Singleton CreateSpecialInstance(System.Type tp, string gameObjectName)
+        {
+            if (!typeof(Singleton).IsAssignableFrom(tp)) throw new System.ArgumentException("Type must inherit from Singleton.", "tp");
+            if (_singletonRefs.ContainsKey(tp)) return _singletonRefs[tp];
+
+            var go = new GameObject(gameObjectName);
+            var single = go.AddComponent(tp) as Singleton;
+            return single;
+        }
+
+        public static bool HasInstance<T>() where T : Singleton
+        {
+            return _singletonRefs.ContainsKey(typeof(T));
+        }
+
+        public static bool HasInstance(System.Type tp)
+        {
+            return _singletonRefs.ContainsKey(tp);
         }
 
         #endregion
@@ -74,8 +103,16 @@ namespace com.spacepuppy
 
         #region Singleton Enforcement
 
-        protected virtual void Awake()
+        public Singleton()
         {
+            var tp = this.GetType();
+            if (!_singletonRefs.ContainsKey(tp)) _singletonRefs[tp] = this;
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+
             var c = (_singletonRefs.ContainsKey(this.GetType())) ? _singletonRefs[this.GetType()] : null;
             if (!Object.ReferenceEquals(c, null) && !Object.ReferenceEquals(c, this))
             {

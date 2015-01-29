@@ -210,7 +210,7 @@ namespace com.spacepuppy
 
         public static void RemoveObserver<T>(INotificationDispatcher sender, NotificationHandler<T> handler) where T : Notification
         {
-            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             sender.RemoveObserver<T>(handler);
@@ -218,7 +218,7 @@ namespace com.spacepuppy
 
         public static void RemoveObserver<T>(object sender, NotificationHandler<T> handler) where T : Notification
         {
-            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (sender is INotificationDispatcher)
@@ -272,7 +272,7 @@ namespace com.spacepuppy
         {
             if (notificationType == null) throw new System.ArgumentNullException("notificationType");
             if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             sender.UnsafeRemoveObserver(notificationType, handler);
@@ -282,7 +282,7 @@ namespace com.spacepuppy
         {
             if (notificationType == null) throw new System.ArgumentNullException("notificationType");
             if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (sender == null) throw new System.ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (sender is INotificationDispatcher)
@@ -302,14 +302,14 @@ namespace com.spacepuppy
 
         public static bool HasObserver<T>(INotificationDispatcher sender, bool bNotifyEntity = false) where T : Notification
         {
-            if (sender == null) throw new ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
             return sender.HasObserver<T>(bNotifyEntity);
         }
 
         public static bool HasObserver<T>(object sender, bool bNotifyEntity = false) where T : Notification
         {
-            if (sender == null) throw new ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
             if (sender is INotificationDispatcher)
             {
@@ -338,7 +338,7 @@ namespace com.spacepuppy
         {
             if (notificationType == null) throw new System.ArgumentNullException("notificationType");
             if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (sender == null) throw new ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
             return sender.HasObserver(notificationType, bNotifyEntity);
         }
@@ -347,7 +347,7 @@ namespace com.spacepuppy
         {
             if (notificationType == null) throw new System.ArgumentNullException("notificationType");
             if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
-            if (sender == null) throw new ArgumentNullException("sender");
+            if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
             if (sender is INotificationDispatcher)
             {

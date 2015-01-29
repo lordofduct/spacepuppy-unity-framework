@@ -962,45 +962,50 @@ namespace com.spacepuppy.Utils
 
         #region Child Components
 
-        public static IEnumerable<T> GetChildComponents<T>(this GameObject obj) where T : Component
+        public static IEnumerable<T> GetChildComponents<T>(this GameObject obj, bool bIncludeSelf = false) where T : Component
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 var comp = child.GetComponent<T>();
                 if (comp != null) yield return comp;
             }
         }
 
-        public static IEnumerable<T> GetChildComponents<T>(this Component obj) where T : Component
+        public static IEnumerable<T> GetChildComponents<T>(this Component obj, bool bIncludeSelf = false) where T : Component
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 var comp = child.GetComponent<T>();
                 if (comp != null) yield return comp;
             }
         }
 
-        public static IEnumerable<Component> GetChildComponents(this GameObject obj, System.Type tp)
+        public static IEnumerable<Component> GetChildComponents(this GameObject obj, System.Type tp, bool bIncludeSelf = false)
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 var comp = child.GetComponent(tp);
                 if (comp != null) yield return comp;
             }
         }
 
-        public static IEnumerable<Component> GetChildComponents(this Component obj, System.Type tp)
+        public static IEnumerable<Component> GetChildComponents(this Component obj, System.Type tp, bool bIncludeSelf = false)
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 var comp = child.GetComponent(tp);
                 if (comp != null) yield return comp;
             }
         }
 
-        public static IEnumerable<T> GetChildLikeComponents<T>(this GameObject obj)
+        public static IEnumerable<T> GetChildLikeComponents<T>(this GameObject obj, bool bIncludeSelf = false)
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 foreach (var comp in child.GetLikeComponents<T>())
                 {
@@ -1009,9 +1014,10 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<T> GetChildLikeComponents<T>(this Component obj)
+        public static IEnumerable<T> GetChildLikeComponents<T>(this Component obj, bool bIncludeSelf = false)
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 foreach (var comp in child.GetLikeComponents<T>())
                 {
@@ -1020,9 +1026,10 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<Component> GetChildLikeComponents(this GameObject obj, System.Type tp)
+        public static IEnumerable<Component> GetChildLikeComponents(this GameObject obj, System.Type tp, bool bIncludeSelf = false)
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 foreach (var comp in child.GetLikeComponents(tp))
                 {
@@ -1031,9 +1038,10 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<Component> GetChildLikeComponents(this Component obj, System.Type tp)
+        public static IEnumerable<Component> GetChildLikeComponents(this Component obj, System.Type tp, bool bIncludeSelf = false)
         {
-            foreach (var child in obj.GetAllChildren())
+            var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
+            foreach (var child in e)
             {
                 foreach (var comp in child.GetLikeComponents(tp))
                 {

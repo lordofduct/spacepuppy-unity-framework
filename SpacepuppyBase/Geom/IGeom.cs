@@ -9,10 +9,9 @@ namespace com.spacepuppy.Geom
         AxisInterval Project(Vector3 axis);
         Bounds GetBounds();
         Sphere GetBoundingSphere();
+        IEnumerable<Vector3> GetAxes();
 
         bool Contains(Vector3 pos);
-        bool Intersects(IGeom geom);
-        bool Intersects(Bounds bounds);
 
     }
 
