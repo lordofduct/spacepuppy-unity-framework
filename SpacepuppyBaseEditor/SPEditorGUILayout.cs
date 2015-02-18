@@ -14,6 +14,59 @@ namespace com.spacepuppyeditor
 
         #region PropertyFields
 
+        public static bool PropertyField(SerializedObject obj, string prop)
+        {
+            if (obj == null) throw new System.ArgumentNullException("obj");
+
+            var serial = obj.FindProperty(prop);
+            if (serial != null)
+            {
+                EditorGUI.BeginChangeCheck();
+                //EditorGUILayout.PropertyField(serial);
+                SPEditorGUILayout.PropertyField(serial);
+                return EditorGUI.EndChangeCheck();
+            }
+
+            return false;
+        }
+
+        public static bool PropertyField(SerializedObject obj, string prop, bool includeChildren)
+        {
+            if (obj == null) throw new System.ArgumentNullException("obj");
+
+            var serial = obj.FindProperty(prop);
+            if (serial != null)
+            {
+                EditorGUI.BeginChangeCheck();
+                //EditorGUILayout.PropertyField(serial, includeChildren);
+                SPEditorGUILayout.PropertyField(serial, includeChildren);
+                return EditorGUI.EndChangeCheck();
+            }
+
+            return false;
+        }
+
+        public static bool PropertyField(SerializedObject obj, string prop, string label, bool includeChildren)
+        {
+            return SPEditorGUILayout.PropertyField(obj, prop, EditorHelper.TempContent(label), includeChildren);
+        }
+
+        public static bool PropertyField(SerializedObject obj, string prop, GUIContent content, bool includeChildren)
+        {
+            if (obj == null) throw new System.ArgumentNullException("obj");
+
+            var serial = obj.FindProperty(prop);
+            if (serial != null)
+            {
+                EditorGUI.BeginChangeCheck();
+                //EditorGUILayout.PropertyField(serial, content, includeChildren);
+                SPEditorGUILayout.PropertyField(serial, content, includeChildren);
+                return EditorGUI.EndChangeCheck();
+            }
+
+            return false;
+        }
+
         public static bool PropertyField(SerializedProperty property, params GUILayoutOption[] options)
         {
             return SPEditorGUILayout.PropertyField(property, (GUIContent)null, false, options);

@@ -40,10 +40,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Async\AsyncOperationWrapper.cs" />
+    <Compile Include="Async\ProgressingAsyncOperationWrapper.cs" />
+    <Compile Include="Async\RadicalAsyncOperation.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="AutoNotificationManager.cs" />
     <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\CooldownPool.cs" />
+    <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\NotificationPool.cs" />
@@ -77,7 +81,6 @@
     <Compile Include="Hooks\UpdateEventHooks.cs" />
     <Compile Include="IComponent.cs" />
     <Compile Include="IGameObjectSource.cs" />
-    <Compile Include="IPsuedoAsyncResult.cs" />
     <Compile Include="KillableEntity.cs" />
     <Compile Include="INotificationDispatcher.cs" />
     <Compile Include="IRadicalYieldInstruction.cs" />
@@ -93,6 +96,7 @@
     <Compile Include="SPComponent.cs" />
     <Compile Include="SPConstants.cs" />
     <Compile Include="SPNotifyingComponent.cs" />
+    <Compile Include="DiscreteFloat.cs" />
     <Compile Include="TagData.cs" />
     <Compile Include="TagMask.cs" />
     <Compile Include="Timers\BulkTimer.cs" />

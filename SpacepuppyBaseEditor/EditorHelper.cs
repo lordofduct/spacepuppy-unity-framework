@@ -15,75 +15,6 @@ namespace com.spacepuppyeditor
 
         public const string PROP_SCRIPT = "m_Script";
 
-        #region DrawDefaultInspector
-
-        public static void DrawDefaultInspector(this Editor editor, string prop)
-        {
-            if (editor == null) throw new System.ArgumentNullException("editor");
-
-            var serial = editor.serializedObject.FindProperty(prop);
-            if (serial != null)
-            {
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(serial);
-                if (EditorGUI.EndChangeCheck())
-                    editor.serializedObject.ApplyModifiedProperties();
-            }
-        }
-
-        public static void DrawDefaultInspector(this Editor editor, string prop, bool includeChildren)
-        {
-            if (editor == null) throw new System.ArgumentNullException("editor");
-
-            var serial = editor.serializedObject.FindProperty(prop);
-            if (serial != null)
-            {
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(serial, includeChildren);
-                if (EditorGUI.EndChangeCheck())
-                    editor.serializedObject.ApplyModifiedProperties();
-            }
-        }
-
-        public static void DrawDefaultInspector(this Editor editor, string prop, string label, bool includeChildren)
-        {
-            DrawDefaultInspector(editor, prop, new GUIContent(label), includeChildren);
-        }
-
-        public static void DrawDefaultInspector(this Editor editor, string prop, GUIContent content, bool includeChildren)
-        {
-            if (editor == null) throw new System.ArgumentNullException("editor");
-
-            var serial = editor.serializedObject.FindProperty(prop);
-            if (serial != null)
-            {
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(serial, content, includeChildren);
-                if (EditorGUI.EndChangeCheck())
-                    editor.serializedObject.ApplyModifiedProperties();
-            }
-        }
-
-        #endregion
-
-        #region DrawDefaultInspectorExcept
-
-        public static void DrawDefaultInspectorExcept(this Editor editor, params string[] propsNotToDraw)
-        {
-            if (editor == null) throw new System.ArgumentNullException("editor");
-
-            var prop = editor.serializedObject.GetIterator();
-            for (bool enterChildren = true; prop.NextVisible(enterChildren); enterChildren = false)
-            {
-                if (propsNotToDraw == null || !propsNotToDraw.Contains(prop.name))
-                {
-                    EditorGUILayout.PropertyField(prop, true);
-                }
-            }
-        }
-
-        #endregion
-
         #region SerializedProperty Helpers
 
         /// <summary>
@@ -335,6 +266,26 @@ namespace com.spacepuppyeditor
             }
 
             return null;
+        }
+
+        #endregion
+
+
+
+        #region Temp Content
+
+        private static GUIContent _temp_text = new GUIContent();
+
+
+        /// <summary>
+        /// Single immediate use GUIContent for a label. Should be used immediately and not stored/referenced for later use.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static GUIContent TempContent(string text)
+        {
+            _temp_text.text = text;
+            return _temp_text;
         }
 
         #endregion

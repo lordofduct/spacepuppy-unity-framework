@@ -2,40 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace com.spacepuppy
+namespace com.spacepuppy.Async
 {
 
-    public delegate void PsuedoAsyncCallback(IPsuedoAsyncResult asyncResult);
-
-    /// <summary>
-    /// Contract for an object that acts as the token for a coroutine
-    /// </summary>
-    public interface IPsuedoAsyncResult : IRadicalYieldInstruction
-    {
-
-        /// <summary>
-        /// An token to identify this state on complete.
-        /// </summary>
-        object AsyncState { get; }
-        bool IsComplete { get; }
-
-    }
-
-    public abstract class PsuedoAsyncResult : IPsuedoAsyncResult, IImmediatelyResumingYieldInstruction
+    public abstract class RadicalAsyncOperation : IRadicalAsyncOperation, IImmediatelyResumingYieldInstruction
     {
 
         #region Fields
 
-        private object _asyncState;
         private bool _complete;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public PsuedoAsyncResult(object asyncState) : base()
+        public RadicalAsyncOperation()
         {
-            _asyncState = asyncState;
         }
 
         #endregion
@@ -51,11 +33,6 @@ namespace com.spacepuppy
         #endregion
 
         #region IPsuedoAsyncResult
-
-        public object AsyncState
-        {
-            get { return _asyncState; }
-        }
 
         public bool IsComplete
         {

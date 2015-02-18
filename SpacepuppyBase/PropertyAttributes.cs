@@ -99,6 +99,15 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple=false)]
+    public class OneOrManyAttribute : SPPropertyAttribute
+    {
+        public OneOrManyAttribute() : base(true)
+        {
+
+        }
+    }
+
     #endregion
 
     #region ModifierDrawer Attributes
@@ -173,9 +182,11 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Class, AllowMultiple = false)]
     public class InfoboxAttribute : PropertyAttribute
     {
         public string Message;
+        public InfoBoxMessageType MessageType = InfoBoxMessageType.Info;
 
         public InfoboxAttribute(string msg)
         {

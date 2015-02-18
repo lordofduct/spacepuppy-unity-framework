@@ -21,13 +21,6 @@ namespace com.spacepuppyeditor.Internal
 
         #endregion
 
-        #region Internal Wrapper Methods
-
-        bool RequiresInternalUpdate { get; }
-        void UpdateInternal(object internalPropertyHandler);
-
-        #endregion
-
     }
 
 }

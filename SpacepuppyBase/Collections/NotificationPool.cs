@@ -11,7 +11,7 @@ namespace com.spacepuppy.Collections
 
         #region Events
 
-        public event System.Action<Notification> OnNotification;
+        public event System.EventHandler<Notification> OnNotification;
 
         #endregion
 
@@ -121,7 +121,7 @@ namespace com.spacepuppy.Collections
 
         private void HandleGenericNotification(Notification n)
         {
-            if (this.OnNotification != null) this.OnNotification(n);
+            if (this.OnNotification != null) this.OnNotification(this, n);
         }
 
         #endregion

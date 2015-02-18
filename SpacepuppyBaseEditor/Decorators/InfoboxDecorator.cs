@@ -14,15 +14,24 @@ namespace com.spacepuppyeditor.Decorators
 
         public override float GetHeight()
         {
-            var attrib = this.attribute as InfoboxAttribute;
-            GUIStyle style = GUI.skin.GetStyle("HelpBox");
-            return Mathf.Max(40f, style.CalcHeight(new GUIContent(attrib.Message), EditorGUIUtility.currentViewWidth));
+            return InfoboxDecorator.GetHeight(this.attribute as InfoboxAttribute);
         }
 
         public override void OnGUI(Rect position)
         {
-            var attrib = this.attribute as InfoboxAttribute;
-            EditorGUI.HelpBox(position, attrib.Message, MessageType.Info);
+            InfoboxDecorator.OnGUI(position, this.attribute as InfoboxAttribute);
+        }
+
+
+        public static float GetHeight(InfoboxAttribute attrib)
+        {
+            GUIStyle style = GUI.skin.GetStyle("HelpBox");
+            return Mathf.Max(40f, style.CalcHeight(new GUIContent(attrib.Message), EditorGUIUtility.currentViewWidth));
+        }
+
+        public static void OnGUI(Rect position, InfoboxAttribute attrib)
+        {
+            EditorGUI.HelpBox(position, attrib.Message, (MessageType)attrib.MessageType);
         }
 
     }

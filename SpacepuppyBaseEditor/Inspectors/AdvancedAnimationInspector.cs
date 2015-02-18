@@ -52,8 +52,8 @@ namespace com.spacepuppyeditor.Inspectors
 
             _animList.DoLayoutList();
 
-            this.DrawDefaultInspector(PROP_ANIMATE_PHYSICS);
-            this.DrawDefaultInspector(PROP_CULLINGTYPE);
+            this.DrawPropertyField(PROP_ANIMATE_PHYSICS);
+            this.DrawPropertyField(PROP_CULLINGTYPE);
 
             this.serializedObject.ApplyModifiedProperties();
         }

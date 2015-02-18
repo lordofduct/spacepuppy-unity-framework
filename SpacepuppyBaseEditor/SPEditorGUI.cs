@@ -15,7 +15,7 @@ namespace com.spacepuppyeditor
 
         public static bool PropertyField(Rect position, SerializedProperty property, bool includeChildren = false)
         {
-            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.GetHandler(property).OnGUI(position, property, null, includeChildren);
+            return PropertyField(position, property, (GUIContent)null, includeChildren);
         }
 
         public static bool PropertyField(Rect position, SerializedProperty property, GUIContent label, bool includeChildren = false)
