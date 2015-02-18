@@ -8,6 +8,44 @@ using com.spacepuppy.Utils.Dynamic;
 namespace com.spacepuppyeditor.Internal
 {
 
+    internal class StandardPropertyDrawer : IPropertyHandler
+    {
+
+        private static StandardPropertyDrawer _instance;
+
+        public static StandardPropertyDrawer Instance
+        {
+            get
+            {
+                if (_instance == null) _instance = new StandardPropertyDrawer();
+                return _instance;
+            }
+        }
+
+        private StandardPropertyDrawer()
+        {
+            //block constructor
+        }
+
+        #region IPropertyHandler Interface
+
+        public bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
+        {
+            return EditorGUI.PropertyField(position, property, label, includeChildren);
+        }
+
+        public bool OnGUILayout(SerializedProperty property, GUIContent label, bool includeChildren, GUILayoutOption[] options)
+        {
+            return EditorGUILayout.PropertyField(property, label, includeChildren, options);
+        }
+
+        #endregion
+
+    }
+
+
+    /*
+
     /// <summary>
     /// Represents a PropertyHandler as it is defined in the standard UnityEditor.
     /// </summary>
@@ -21,6 +59,9 @@ namespace com.spacepuppyeditor.Internal
         private System.Func<Rect, SerializedProperty, GUIContent, bool, bool> _imp_OnGUI;
         private System.Func<SerializedProperty, GUIContent, bool, GUILayoutOption[], bool> _imp_OnGUILayout;
 
+
+        private System.Func<SerializedProperty, GUIContent, bool, float> _imp_GetHeight;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -28,6 +69,24 @@ namespace com.spacepuppyeditor.Internal
         internal StandardPropertyHandler(object internalHandler)
         {
             _wrapper = new TypeAccessWrapper(InternalTypeUtil.UnityEditorAssembly.GetType("UnityEditor.PropertyHandler"), internalHandler);
+        }
+
+        #endregion
+
+        #region Wrapped Members
+
+        public PropertyDrawer propertyDrawer
+        {
+            get
+            {
+                return _wrapper.GetProperty("propertyDrawer") as PropertyDrawer;
+            }
+        }
+
+        public float GetHeight(SerializedProperty property, GUIContent label, bool includeChildren)
+        {
+            if (_imp_GetHeight == null) _imp_GetHeight = _wrapper.GetMethod("GetHeight", typeof(System.Func<SerializedProperty, GUIContent, bool, float>)) as System.Func<SerializedProperty, GUIContent, bool, float>;
+            return _imp_GetHeight(property, label, includeChildren);
         }
 
         #endregion
@@ -66,4 +125,5 @@ namespace com.spacepuppyeditor.Internal
 
     }
 
+     */
 }

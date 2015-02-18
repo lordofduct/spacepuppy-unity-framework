@@ -317,6 +317,23 @@ namespace com.spacepuppy.Geom
             return new Capsule(cent, cent, sph.radius);
         }
 
+        public static Capsule FromCollider(Collider c)
+        {
+            if (c is SphereCollider)
+            {
+                return FromCollider(c as SphereCollider);
+            }
+            else if (c is CapsuleCollider)
+            {
+                return FromCollider(c as CapsuleCollider);
+            }
+            else
+            {
+                var bounds = c.bounds;
+                return new Capsule(bounds.center, bounds.center, bounds.extents.magnitude);
+            }
+        }
+
         #endregion
 
     }

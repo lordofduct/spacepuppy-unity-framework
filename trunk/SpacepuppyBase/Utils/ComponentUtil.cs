@@ -225,6 +225,62 @@ namespace com.spacepuppy.Utils
             return comp;
         }
 
+
+
+        public static T AddOrFindComponent<T>(this GameObject obj) where T : Component
+        {
+            if (obj == null) return null;
+
+            T comp = obj.FindComponent<T>();
+            if (comp == null)
+            {
+                comp = obj.AddComponent<T>();
+            }
+
+            return comp;
+        }
+
+        public static T AddOrFindComponent<T>(this Component obj) where T : Component
+        {
+            if (obj == null) return null;
+
+            T comp = obj.FindComponent<T>();
+            if (comp == null)
+            {
+                comp = obj.gameObject.AddComponent<T>();
+            }
+
+            return comp;
+        }
+
+        public static Component AddOrFindComponent(this GameObject obj, System.Type tp)
+        {
+            if (obj == null) return null;
+            if (!ObjUtil.IsType(tp, typeof(ComponentUtil))) return null;
+
+            var comp = obj.FindComponent(tp);
+            if (comp == null)
+            {
+                comp = obj.AddComponent(tp);
+            }
+
+            return comp;
+        }
+
+        public static Component AddOrFindComponent(this Component obj, System.Type tp)
+        {
+            if (obj == null) return null;
+            if (!ObjUtil.IsType(tp, typeof(ComponentUtil))) return null;
+
+            var comp = obj.FindComponent(tp);
+            if (comp == null)
+            {
+                comp = obj.gameObject.AddComponent(tp);
+            }
+
+            return comp;
+        }
+
         #endregion
 
         #region GetComponent

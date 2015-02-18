@@ -16,7 +16,7 @@ namespace com.spacepuppy
     /// When using Unsafe access for adding and removing handlers. You must use the same for both. If you add a handler with Unsafe 
     /// you must remove it with Unsafe. If you add with the standard generic method, you must remove with the standard generic method.
     /// </summary>
-    public abstract class Notification
+    public abstract class Notification : System.EventArgs
     {
 
         #region Fields

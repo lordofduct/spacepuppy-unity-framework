@@ -93,10 +93,19 @@ namespace com.spacepuppy
         [SerializeField()]
         [Tooltip("Should this Singleton be maintained when a new scene is loaded.")]
         private bool _maintainOnLoad = true;
+        [System.NonSerialized()]
+        private bool _flaggedSelfMaintaining;
+
         public virtual bool MaintainOnLoad
         {
             get { return _maintainOnLoad; }
-            set { _maintainOnLoad = value; }
+            set
+            {
+                if (_maintainOnLoad == value) return;
+                _maintainOnLoad = value;
+
+                if (!_flaggedSelfMaintaining && _maintainOnLoad) this.UpdateMaintainOnLoadStatus();
+            }
         }
 
         #endregion
@@ -124,12 +133,7 @@ namespace com.spacepuppy
                 _singletonRefs[this.GetType()] = this;
             }
 
-
-            //for singletons not on the primary singleton source
-            if (!this.gameObject == Singleton.GameObjectSource && this.MaintainOnLoad)
-            {
-                GameObject.DontDestroyOnLoad(this.gameObject);
-            }
+            this.UpdateMaintainOnLoadStatus();
         }
 
         protected virtual void OnLevelWasLoaded(int level)
@@ -139,6 +143,17 @@ namespace com.spacepuppy
             //for singletons not on the primary singleton source
             if (this.enabled && !this.started) return;
             Object.Destroy(this);
+        }
+
+
+        private void UpdateMaintainOnLoadStatus()
+        {
+            //for singletons not on the primary singleton source
+            if (!_flaggedSelfMaintaining && this.gameObject != Singleton.GameObjectSource && this.MaintainOnLoad)
+            {
+                GameObject.DontDestroyOnLoad(this.gameObject);
+                _flaggedSelfMaintaining = true;
+            }
         }
 
         #endregion

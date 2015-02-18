@@ -43,16 +43,30 @@ namespace com.spacepuppyeditor.Inspectors
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            this.Init(property);
+            if(property.isArray)
+            {
+                this.Init(property);
 
-            return _lst.GetHeight();
+                return _lst.GetHeight();
+            }
+            else
+            {
+                return EditorGUIUtility.singleLineHeight;
+            }
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            this.Init(property);
+            if(property.isArray)
+            {
+                this.Init(property);
 
-            _lst.DoList(position);
+                _lst.DoList(position);
+            }
+            else
+            {
+                EditorGUI.PropertyField(position, property, label, false);
+            }
         }
 
         #endregion

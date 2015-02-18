@@ -6,6 +6,8 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Modifiers
 {
 
@@ -30,20 +32,7 @@ namespace com.spacepuppyeditor.Modifiers
                            select a as PropertyAttribute).ToArray();
 
             var propDrawerTp = typeof(PropertyDrawer);
-            var drawerTypes = (from ass in System.AppDomain.CurrentDomain.GetAssemblies()
-                               from tp in ass.GetTypes()
-                               where tp != propDrawerTp && ObjUtil.IsType(tp, propDrawerTp)
-                               select tp).Where((tp) =>
-                               {
-                                   var cpd = tp.GetCustomAttributes(typeof(CustomPropertyDrawer), false).FirstOrDefault() as CustomPropertyDrawer;
-                                   var handledTp = ObjUtil.GetValue(cpd, "m_Type") as System.Type;
-                                   if (handledTp == null) return false;
-                                   foreach (var a in _attributes)
-                                   {
-                                       if (a.GetType() == handledTp) return true;
-                                   }
-                                   return false;
-                               }).ToArray();
+            var drawerTypes = ScriptAttributeUtility.GetDrawerTypesForType((from a in _attributes select a.GetType()).ToArray());
 
             var lst = new List<PropertyModifier>();
             if (_attributes.Length > 0)

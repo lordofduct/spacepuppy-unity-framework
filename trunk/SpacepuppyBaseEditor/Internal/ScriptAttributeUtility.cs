@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 
 using com.spacepuppy;
+using com.spacepuppy.Utils;
 using com.spacepuppy.Utils.Dynamic;
 
 namespace com.spacepuppyeditor.Internal
@@ -14,17 +15,22 @@ namespace com.spacepuppyeditor.Internal
 
         #region Fields
 
+        private static PropertyHandlerCache _handlerCache = new PropertyHandlerCache();
+
+        private static List<System.Type> _knownPropertyDrawerTypes;
+
+
+
+        //Internal Wrapper Fields
+
         private static TypeAccessWrapper _accessWrapper;
 
         private static System.Func<System.Type, System.Type> _imp_getDrawerTypeForType;
-        private static System.Func<SerializedProperty, object> _imp_getHandler;
 
         private delegate System.Reflection.FieldInfo GetFieldInfoFromPropertyDelegate(SerializedProperty property, out System.Type type);
         private static GetFieldInfoFromPropertyDelegate _imp_getFieldInfoFromProperty;
 
         private static System.Func<SerializedProperty, System.Type> _imp_getScriptTypeFromProperty;
-
-        private static PropertyHandlerCache _handlerCache = new PropertyHandlerCache();
 
         #endregion
 
@@ -40,6 +46,35 @@ namespace com.spacepuppyeditor.Internal
 
         #region Methods
 
+        private static void BuildKnownPropertyDrawerTypes()
+        {
+            _knownPropertyDrawerTypes = new List<System.Type>();
+
+            var propDrawerTp = typeof(PropertyDrawer);
+            _knownPropertyDrawerTypes.AddRange(from ass in System.AppDomain.CurrentDomain.GetAssemblies()
+                                               from tp in ass.GetTypes()
+                                               where tp != propDrawerTp && ObjUtil.IsType(tp, propDrawerTp)
+                                               select tp);
+        }
+
+        public static System.Type[] GetDrawerTypesForType(params System.Type[] types)
+        {
+            if (_knownPropertyDrawerTypes == null) ScriptAttributeUtility.BuildKnownPropertyDrawerTypes();
+
+            return _knownPropertyDrawerTypes.Where((tp) =>
+                               {
+                                   var cpd = tp.GetCustomAttributes(typeof(CustomPropertyDrawer), false).FirstOrDefault() as CustomPropertyDrawer;
+                                   var handledTp = ObjUtil.GetValue(cpd, "m_Type") as System.Type;
+                                   if (handledTp == null) return false;
+                                   foreach(var type in types)
+                                   {
+                                       if (type == handledTp) return true;
+                                   }
+                                   return false;
+                               }).ToArray();
+        }
+
+
         //#######################
         // GetDrawerTypeForType
 
@@ -51,7 +86,7 @@ namespace com.spacepuppyeditor.Internal
 
         //#######################
         // GetHandler
-
+        
         public static IPropertyHandler GetHandler(SerializedProperty property)
         {
             if (property == null) throw new System.ArgumentNullException("property");
@@ -59,7 +94,6 @@ namespace com.spacepuppyeditor.Internal
             IPropertyHandler result = _handlerCache.GetHandler(property);
             if (result != null)
             {
-                if (result.RequiresInternalUpdate) result.UpdateInternal(GetHandlerInternal(property));
                 return result;
             }
 
@@ -67,26 +101,17 @@ namespace com.spacepuppyeditor.Internal
             var fieldInfo = ScriptAttributeUtility.GetFieldInfoFromProperty(property);
             if (fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(SPPropertyAttribute)))
             {
-                //TODO - figure out how to handle custom stuff
-                //var attribs = fieldInfo.GetCustomAttributes(typeof(SPPropertyAttribute), false);
-                //var attrib = attribs[0] as SPPropertyAttribute;
-                //if(attrib.HandlesEntireArray)
-                //{
-
-                //}
+                var attribs = fieldInfo.GetCustomAttributes(typeof(SPPropertyAttribute), false).Cast<SPPropertyAttribute>().ToArray();
+                if (attribs[0].HandlesEntireArray)
+                {
+                    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
+                    _handlerCache.SetHandler(property, result);
+                    return result;
+                }
             }
 
-            //USE STANDARD HANDLER
-            var internalPropHandler = GetHandlerInternal(property);
-            result = (internalPropHandler != null) ? new StandardPropertyHandler(internalPropHandler) : (IPropertyHandler)null;
-            _handlerCache.SetHandler(property, result);
-            return result;
-        }
-
-        private static object GetHandlerInternal(SerializedProperty property)
-        {
-            if (_imp_getHandler == null) _imp_getHandler = _accessWrapper.GetStaticMethod("GetHandler", typeof(System.Func<SerializedProperty, object>)) as System.Func<SerializedProperty, object>;
-            return _imp_getHandler(property);
+            //USE STANDARD HANDLER if none was found
+            return StandardPropertyDrawer.Instance;
         }
 
         //#######################

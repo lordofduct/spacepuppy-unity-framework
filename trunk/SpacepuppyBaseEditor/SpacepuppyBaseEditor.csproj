@@ -44,8 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Decorators\InfoboxDecorator.cs" />
+    <Compile Include="Inspectors\DiscreteFloatPropertyDrawer.cs" />
     <Compile Include="Inspectors\GameObjectNotificationDispatcherInspector.cs" />
+    <Compile Include="Inspectors\OneOrManyPropertyDrawer.cs" />
     <Compile Include="Inspectors\ReorderableArrayPropertyDrawer.cs" />
+    <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Modifiers\InsertButtonModifier.cs" />
     <Compile Include="EditorHelper.cs" />
     <Compile Include="EditorProjectPrefs.cs" />
@@ -69,7 +72,6 @@
     <Compile Include="Internal\PropertyDrawerActivator.cs" />
     <Compile Include="Internal\PropertyHandlerCache.cs" />
     <Compile Include="Internal\ScriptAttributeUtility.cs" />
-    <Compile Include="Internal\SPPropertyHandler.cs" />
     <Compile Include="Internal\StandardPropertyHandler.cs" />
     <Compile Include="MaterialHelper.cs" />
     <Compile Include="Modifiers\DefaultFromSelfModifier.cs" />
