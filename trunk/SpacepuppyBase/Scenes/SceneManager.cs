@@ -49,18 +49,18 @@ namespace com.spacepuppy.Scenes
             }
         }
 
-        public IProgressingAsyncOperation LoadScene<T>() where T : class, ISceneBehaviour
+        public IProgressingYieldInstruction LoadScene<T>() where T : class, ISceneBehaviour
         {
             return this.LoadScene(new SceneBehaviourLoadOptions<T>());
         }
 
-        public IProgressingAsyncOperation LoadScene(System.Type tp)
+        public IProgressingYieldInstruction LoadScene(System.Type tp)
         {
             if (tp == null || !ObjUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
             return this.LoadScene(new SceneBehaviourLoadOptions(tp));
         }
 
-        public IProgressingAsyncOperation LoadScene(ISceneBehaviourLoadOptions options)
+        public IProgressingYieldInstruction LoadScene(ISceneBehaviourLoadOptions options)
         {
             if (options == null) throw new System.ArgumentNullException("options");
 
@@ -84,14 +84,14 @@ namespace com.spacepuppy.Scenes
 
         #region Special Types
 
-        private class WaitForSceneLoaded : com.spacepuppy.Async.RadicalAsyncOperation, IProgressingAsyncOperation
+        private class WaitForSceneLoaded : RadicalYieldInstruction, IProgressingYieldInstruction
         {
 
             #region Fields
 
             private ISceneBehaviour _scene;
             private ISceneBehaviourLoadOptions _options;
-            private IProgressingAsyncOperation _loadOp;
+            private IProgressingYieldInstruction _loadOp;
 
             private RadicalCoroutine _routine;
 
@@ -126,6 +126,11 @@ namespace com.spacepuppy.Scenes
                 _scene.BeginScene();
                 this.SetSignal();
                 _options.OnSceneStarted(_scene);
+            }
+
+            protected override object Tick()
+            {
+                return null;
             }
 
             #endregion

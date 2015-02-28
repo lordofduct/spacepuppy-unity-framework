@@ -620,13 +620,12 @@ namespace com.spacepuppy
                 _instruction = instruction;
             }
 
-            protected override bool ContinueBlocking(ref object yieldObject)
+            protected override object Tick()
             {
                 if (!_called)
                 {
-                    yieldObject = _instruction;
                     _called = true;
-                    return true;
+                    return _instruction;
                 }
                 else if (_owner._manualWaitingOnInstruction == this)
                 {
@@ -637,7 +636,8 @@ namespace com.spacepuppy
                     }
                 }
 
-                return false;
+                this.SetSignal();
+                return null;
             }
 
             public bool StillWait
