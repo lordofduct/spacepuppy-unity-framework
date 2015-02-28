@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Async
 {
-    public class AsyncOperationWrapper : IProgressingAsyncOperation
+    public class AsyncOperationWrapper : IProgressingYieldInstruction
     {
 
         #region Fields

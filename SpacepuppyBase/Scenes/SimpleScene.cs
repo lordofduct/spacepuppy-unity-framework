@@ -38,7 +38,7 @@ namespace com.spacepuppy.Scenes
             Application.LoadLevel(_sceneAssetId);
         }
 
-        protected internal override IProgressingAsyncOperation DoLoadAsync()
+        protected internal override IProgressingYieldInstruction DoLoadAsync()
         {
             return new com.spacepuppy.Async.AsyncOperationWrapper(Application.LoadLevelAsync(_sceneAssetId));
         }
@@ -48,7 +48,7 @@ namespace com.spacepuppy.Scenes
             Application.LoadLevelAdditive(_sceneAssetId);
         }
 
-        protected internal override IProgressingAsyncOperation DoLoadAdditiveAsync()
+        protected internal override IProgressingYieldInstruction DoLoadAdditiveAsync()
         {
             return new com.spacepuppy.Async.AsyncOperationWrapper(Application.LoadLevelAdditiveAsync(_sceneAssetId));
         }

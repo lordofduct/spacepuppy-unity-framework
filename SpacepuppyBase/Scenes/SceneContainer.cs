@@ -44,9 +44,9 @@ namespace com.spacepuppy.Scenes
             }
         }
 
-        protected internal override IProgressingAsyncOperation DoLoadAsync()
+        protected internal override IProgressingYieldInstruction DoLoadAsync()
         {
-            var arr = new IProgressingAsyncOperation[this.ChildCount];
+            var arr = new IProgressingYieldInstruction[this.ChildCount];
             for (int i = 0; i < this.ChildCount; i++)
             {
                 if (i == 0)
@@ -54,7 +54,7 @@ namespace com.spacepuppy.Scenes
                 else
                     arr[i] = this.GetChild(i).DoLoadAdditiveAsync();
             }
-            return new com.spacepuppy.Async.ProgressingAsyncOperationWrapper(arr);
+            return new ProgressingYieldInstructionQueue(arr);
         }
 
         protected internal override void DoLoadAdditive()
@@ -65,14 +65,14 @@ namespace com.spacepuppy.Scenes
             }
         }
 
-        protected internal override IProgressingAsyncOperation DoLoadAdditiveAsync()
+        protected internal override IProgressingYieldInstruction DoLoadAdditiveAsync()
         {
-            var arr = new IProgressingAsyncOperation[this.ChildCount];
+            var arr = new IProgressingYieldInstruction[this.ChildCount];
             for (int i = 0; i < this.ChildCount; i++)
             {
                 arr[i] = this.GetChild(i).DoLoadAdditiveAsync();
             }
-            return new com.spacepuppy.Async.ProgressingAsyncOperationWrapper(arr);
+            return new ProgressingYieldInstructionQueue(arr);
         }
 
         #endregion

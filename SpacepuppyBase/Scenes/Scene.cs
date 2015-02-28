@@ -48,7 +48,7 @@ namespace com.spacepuppy.Scenes
             Scene.RegisterLoadedScene(this);
         }
 
-        public IProgressingAsyncOperation LoadAsync()
+        public IProgressingYieldInstruction LoadAsync()
         {
             _lastLoadCall = null;
 
@@ -66,11 +66,11 @@ namespace com.spacepuppy.Scenes
 
         protected internal abstract void DoLoad();
 
-        protected internal abstract IProgressingAsyncOperation DoLoadAsync();
+        protected internal abstract IProgressingYieldInstruction DoLoadAsync();
 
         protected internal abstract void DoLoadAdditive();
 
-        protected internal abstract IProgressingAsyncOperation DoLoadAdditiveAsync();
+        protected internal abstract IProgressingYieldInstruction DoLoadAdditiveAsync();
 
         #endregion
 
@@ -147,19 +147,19 @@ namespace com.spacepuppy.Scenes
 
         #region Special Types
 
-        private class LoadSceneAsyncOperation : com.spacepuppy.Async.RadicalAsyncOperation, IProgressingAsyncOperation
+        private class LoadSceneAsyncOperation : RadicalYieldInstruction, IProgressingYieldInstruction
         {
 
             #region Fields
 
             private Scene _scene;
-            private IProgressingAsyncOperation _op;
+            private IProgressingYieldInstruction _op;
 
             #endregion
 
             #region Methods
 
-            public void Start(Scene scene, IProgressingAsyncOperation innerOp)
+            public void Start(Scene scene, IProgressingYieldInstruction innerOp)
             {
                 _scene = scene;
                 _op = innerOp;
@@ -181,9 +181,14 @@ namespace com.spacepuppy.Scenes
                 this.SetSignal();
             }
 
+            protected override object Tick()
+            {
+                return null;
+            }
+
             #endregion
 
-            #region IProgressingAsyncOperation Interface
+            #region IProgressingYieldInstruction Interface
 
             public float Progress
             {

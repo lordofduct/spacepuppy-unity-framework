@@ -48,7 +48,7 @@ namespace com.spacepuppy.Scenes
             _scenes.Clear();
         }
 
-        public IProgressingAsyncOperation LoadNextScene()
+        public IProgressingYieldInstruction LoadNextScene()
         {
             if (!_isCurrentlyLoaded) throw new System.InvalidOperationException("This SceneBehaviour must first be loaded before it can continue to the next scene.");
             if (_scenes.Count == 0) throw new System.InvalidOperationException("Scene queue is empty.");
@@ -67,7 +67,7 @@ namespace com.spacepuppy.Scenes
 
         #region ISceneBehaviour Interface
 
-        IProgressingAsyncOperation ISceneBehaviour.LoadScene()
+        IProgressingYieldInstruction ISceneBehaviour.LoadScene()
         {
             _isCurrentlyLoaded = true;
             return this.LoadNextScene();

@@ -11,6 +11,12 @@ namespace com.spacepuppy
 
     }
 
+    public interface IProgressingYieldInstruction : IRadicalYieldInstruction
+    {
+        bool IsComplete { get; }
+        float Progress { get; }
+    }
+
     public interface IImmediatelyResumingYieldInstruction : IRadicalYieldInstruction
     {
         event System.EventHandler Signal;
@@ -22,16 +28,24 @@ namespace com.spacepuppy
         #region Fields
 
         private object _current;
+        private bool _complete;
 
         #endregion
 
         #region Properties
 
+        public bool IsComplete { get { return _complete; } }
+
         #endregion
 
         #region Methods
 
-        protected abstract bool ContinueBlocking(ref object yieldObject);
+        protected virtual void SetSignal()
+        {
+            _complete = true;
+        }
+
+        protected abstract object Tick();
 
         #endregion
 
@@ -44,13 +58,57 @@ namespace com.spacepuppy
 
         bool System.Collections.IEnumerator.MoveNext()
         {
-            _current = null;
-            return this.ContinueBlocking(ref _current);
+            _current = this.Tick();
+            return !_complete;
         }
 
         void System.Collections.IEnumerator.Reset()
         {
             throw new System.NotSupportedException();
+        }
+
+        #endregion
+
+
+
+        #region Static Interface
+
+        private static IProgressingYieldInstruction _null = new NullYieldInstruction();
+        public static IProgressingYieldInstruction Null
+        {
+            get
+            {
+                return _null;
+            }
+        }
+
+        private class NullYieldInstruction : IProgressingYieldInstruction
+        {
+
+            public bool IsComplete
+            {
+                get { return true; }
+            }
+
+            public float Progress
+            {
+                get { return 1f; }
+            }
+
+            public object Current
+            {
+                get { return null; }
+            }
+
+            public bool MoveNext()
+            {
+                return false;
+            }
+
+            public void Reset()
+            {
+
+            }
         }
 
         #endregion
@@ -62,8 +120,9 @@ namespace com.spacepuppy
 
         private System.EventHandler _handler;
 
-        protected void SetSignal()
+        protected override void SetSignal()
         {
+            base.SetSignal();
             if (_handler != null) _handler(this, System.EventArgs.Empty);
         }
 
@@ -72,6 +131,89 @@ namespace com.spacepuppy
             add { _handler += value; }
             remove { _handler -= value; }
         }
+
+    }
+
+    public class ProgressingYieldInstructionQueue : IProgressingYieldInstruction
+    {
+        
+        #region Fields
+
+        private IProgressingYieldInstruction[] _operations;
+        private bool _complete;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public ProgressingYieldInstructionQueue(params IProgressingYieldInstruction[] operations)
+        {
+            if (operations == null) throw new System.ArgumentNullException("operations");
+            _operations = operations;
+        }
+
+        #endregion
+
+        #region IProgressingAsyncOperation Interface
+
+        public float Progress
+        {
+            get
+            {
+                if (_operations.Length == 0) return 1f;
+                else if (_operations.Length == 1) return _operations[0].Progress;
+                else
+                {
+                    float p = 0f;
+                    for (int i = 0; i < _operations.Length; i++)
+                    {
+                        p += _operations[i].Progress;
+                    }
+                    return p / _operations.Length;
+                }
+            }
+        }
+
+        public bool IsComplete
+        {
+            get
+            {
+                if (_complete) return true;
+                else
+                {
+                    for (int i = 0; i < _operations.Length; i++)
+                    {
+                        if (!_operations[i].IsComplete) return false;
+                    }
+                    _complete = true;
+                    return true;
+                }
+            }
+        }
+
+        object System.Collections.IEnumerator.Current
+        {
+            get
+            {
+                for (int i = 0; i < _operations.Length; i++)
+                {
+                    if (!_operations[i].IsComplete) return _operations[i];
+                }
+                return null;
+            }
+        }
+
+        bool System.Collections.IEnumerator.MoveNext()
+        {
+            return !this.IsComplete;
+        }
+
+        void System.Collections.IEnumerator.Reset()
+        {
+            throw new System.NotSupportedException();
+        }
+
+        #endregion
 
     }
 
@@ -97,12 +239,11 @@ namespace com.spacepuppy
 
         #region Methods
 
-        protected override bool ContinueBlocking(ref object yieldObject)
+        protected override object Tick()
         {
             _t += GameTime.RealDeltaTime;
-
-            yieldObject = null;
-            return _t < _dur;
+            if (_t >= _dur) this.SetSignal();
+            return null;
         }
 
         #endregion
@@ -134,10 +275,9 @@ namespace com.spacepuppy
             this.SetSignal();
         }
 
-        protected override bool ContinueBlocking(ref object yieldObject)
+        protected override object Tick()
         {
-            yieldObject = null;
-            return _notification == null;
+            return null;
         }
 
     }

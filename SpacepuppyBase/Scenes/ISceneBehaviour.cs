@@ -7,7 +7,7 @@ namespace com.spacepuppy.Scenes
     public interface ISceneBehaviour : IComponent
     {
 
-        IProgressingAsyncOperation LoadScene();
+        IProgressingYieldInstruction LoadScene();
         void BeginScene();
 
     }
