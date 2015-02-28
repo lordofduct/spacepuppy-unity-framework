@@ -12,6 +12,8 @@ namespace com.spacepuppyeditor.Inspectors
     public class SingletonInspector : SPEditor
     {
 
+        #region Menu
+
         [MenuItem("Spacepuppy/Create SingletonSource", priority=1000000)]
         public static void CreateSingletonSource()
         {
@@ -22,7 +24,7 @@ namespace com.spacepuppyeditor.Inspectors
         public static bool CreateSingletonSource_Validate()
         {
             if (Application.isPlaying) return false;
-            return !Singleton.HasInstance<GameLoopEntry>();
+            return !Singleton.HasInstance<SingletonManager>();
         }
 
         [MenuItem("Spacepuppy/Create GameLoopEntry", priority = 1000001)]
@@ -38,6 +40,8 @@ namespace com.spacepuppyeditor.Inspectors
             return !Singleton.HasInstance<GameLoopEntry>();
         }
 
+        #endregion
+
 
 
 
@@ -46,7 +50,8 @@ namespace com.spacepuppyeditor.Inspectors
         {
             this.DrawDefaultInspector();
 
-            var selectedTypes = (from c in (this.target as SingletonManager).GetComponents<Singleton>() select c.GetType()).ToArray();
+            //var selectedTypes = (from c in (this.target as SingletonManager).GetComponents<Singleton>() select c.GetType()).ToArray();
+            var selectedTypes = (from c in Singleton.Instances select c.GetType()).ToArray();
 
             var singletonType = typeof(Singleton);
             var types = (from a in System.AppDomain.CurrentDomain.GetAssemblies()
@@ -65,5 +70,6 @@ namespace com.spacepuppyeditor.Inspectors
                 (this.target as SingletonManager).gameObject.AddComponent(tp);
             }
         }
+
     }
 }

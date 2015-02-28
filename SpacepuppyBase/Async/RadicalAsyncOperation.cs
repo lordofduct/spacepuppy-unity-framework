@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy.Async
 {
 
-    public abstract class RadicalAsyncOperation : IRadicalAsyncOperation, IImmediatelyResumingYieldInstruction
+    public abstract class RadicalAsyncOperation : IRadicalAsyncOperation
     {
 
         #region Fields
@@ -22,12 +22,20 @@ namespace com.spacepuppy.Async
 
         #endregion
 
+        #region Properties
+
+        protected virtual object CurrentYieldObject
+        {
+            get { return null; }
+        }
+
+        #endregion
+
         #region Methods
 
         protected void SetSignal()
         {
             _complete = true;
-            if (_signalHandler != null) _signalHandler(this, System.EventArgs.Empty);
         }
 
         #endregion
@@ -45,7 +53,7 @@ namespace com.spacepuppy.Async
 
         object System.Collections.IEnumerator.Current
         {
-            get { return null; }
+            get { return this.CurrentYieldObject; }
         }
 
         bool System.Collections.IEnumerator.MoveNext()
@@ -56,17 +64,6 @@ namespace com.spacepuppy.Async
         void System.Collections.IEnumerator.Reset()
         {
             throw new System.NotSupportedException();
-        }
-
-        #endregion
-
-        #region IImmediatelyResumingYieldInstruction Interface
-
-        private System.EventHandler _signalHandler;
-        event System.EventHandler IImmediatelyResumingYieldInstruction.Signal
-        {
-            add { _signalHandler += value; }
-            remove { _signalHandler -= value; }
         }
 
         #endregion

@@ -107,11 +107,6 @@ namespace com.spacepuppy.Collections
             }
         }
 
-        public System.Collections.ObjectModel.ReadOnlyCollection<T> AsReadOnly()
-        {
-            return new System.Collections.ObjectModel.ReadOnlyCollection<T>(_lst);
-        }
-
         /// <summary>
         /// Removes any duplicates in a wrapped IList that may have creeped in.
         /// </summary>

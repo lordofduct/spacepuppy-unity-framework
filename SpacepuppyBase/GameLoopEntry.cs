@@ -45,6 +45,7 @@ namespace com.spacepuppy
             if (_instance != null) return;
 
             _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntryObject");
+            //_instance = Singleton.GetInstance<GameLoopEntry>();
         }
 
         protected override void Awake()
@@ -67,6 +68,15 @@ namespace com.spacepuppy
         #endregion
 
         #region Properties
+
+        public static GameLoopEntry Hook
+        {
+            get
+            {
+                if (_instance == null) GameLoopEntry.Init();
+                return _instance;
+            }
+        }
 
         /// <summary>
         /// Returns which event sequence that code is currently operating as. 

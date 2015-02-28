@@ -11,6 +11,7 @@ namespace com.spacepuppy.Async
         #region Fields
 
         private IProgressingAsyncOperation[] _operations;
+        private bool _complete;
 
         #endregion
 
@@ -48,11 +49,16 @@ namespace com.spacepuppy.Async
         {
             get
             {
-                for (int i = 0; i < _operations.Length; i++)
+                if (_complete) return true;
+                else
                 {
-                    if (!_operations[i].IsComplete) return false;
+                    for (int i = 0; i < _operations.Length; i++)
+                    {
+                        if (!_operations[i].IsComplete) return false;
+                    }
+                    _complete = true;
+                    return true;
                 }
-                return true;
             }
         }
 

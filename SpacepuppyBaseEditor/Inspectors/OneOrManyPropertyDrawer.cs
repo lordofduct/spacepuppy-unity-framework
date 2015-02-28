@@ -9,6 +9,9 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Inspectors
 {
 
+    /// <summary>
+    /// Currently only works with builtin unity types.
+    /// </summary>
     [CustomPropertyDrawer(typeof(OneOrManyAttribute))]
     public class OneOrManyPropertyDrawer : PropertyDrawer
     {
@@ -46,8 +49,8 @@ namespace com.spacepuppyeditor.Inspectors
                 var propArea = new Rect(position.xMin, position.yMin, Mathf.Max(0f, position.width - BTN_WIDTH), EditorGUIUtility.singleLineHeight);
                 var btnArea = new Rect(propArea.xMax, position.yMin, Mathf.Min(BTN_WIDTH, position.width), EditorGUIUtility.singleLineHeight);
 
-                EditorGUI.PropertyField(propArea, property.GetArrayElementAtIndex(0), label);
-                if(GUI.Button(btnArea, _moreBtnLabel))
+                SPEditorGUI.DefaultPropertyField(propArea, property.GetArrayElementAtIndex(0), label);
+                if (GUI.Button(btnArea, _moreBtnLabel))
                 {
                     property.arraySize = 2;
                 }
@@ -72,7 +75,7 @@ namespace com.spacepuppyeditor.Inspectors
                 for(int i = 0; i < property.arraySize; i++)
                 {
                     elementArea = new Rect(position.xMin, elementArea.yMax, position.width, EditorGUIUtility.singleLineHeight);
-                    EditorGUI.PropertyField(elementArea, property.GetArrayElementAtIndex(i), new GUIContent("Element " + i.ToString()));
+                    SPEditorGUI.DefaultPropertyField(elementArea, property.GetArrayElementAtIndex(i), EditorHelper.TempContent("Element " + i.ToString()));
                 }
                 EditorGUI.indentLevel--;
             }

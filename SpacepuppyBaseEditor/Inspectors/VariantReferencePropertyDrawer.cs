@@ -25,7 +25,7 @@ namespace com.spacepuppyeditor.Inspectors
                 else if (typeof(Component).IsAssignableFrom(value))
                     _forcedComponentType = value;
                 else
-                    throw new System.ArgumentException("Type must inherit from Component", "value");
+                    throw new TypeArgumentMismatchException(value, typeof(Component), "value");
             }
         }
 
