@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy.Async
 {
 
-    public abstract class RadicalAsyncOperation : IRadicalAsyncOperation
+    public abstract class RadicalAsyncOperation : IRadicalYieldInstruction
     {
 
         #region Fields
@@ -32,6 +32,18 @@ namespace com.spacepuppy.Async
         #endregion
 
         #region Methods
+
+        public void Begin()
+        {
+            System.Threading.ThreadPool.QueueUserWorkItem(this.AsyncCallback, null);
+        }
+
+        private void AsyncCallback(object state)
+        {
+            this.DoAsyncWork();
+        }
+
+        protected abstract void DoAsyncWork();
 
         protected void SetSignal()
         {
