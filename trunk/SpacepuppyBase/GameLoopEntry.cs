@@ -36,6 +36,8 @@ namespace com.spacepuppy
         private UpdateEventHooks _updateHook;
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
+        private List<System.Action> _invokeList = new List<System.Action>();
+
         #endregion
 
         #region CONSTRUCTOR
@@ -88,6 +90,16 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Methods
+
+        public static void InvokeNextUpdate(System.Action action)
+        {
+            if(action == null) throw new System.ArgumentNullException("action");
+            _instance._invokeList.Add(action);
+        }
+
+        #endregion
+
         #region Event Handlers
 
         //Update
@@ -103,6 +115,16 @@ namespace com.spacepuppy
         private void _updateHook_Update(object sender, System.EventArgs e)
         {
             if (OnUpdate != null) OnUpdate(this, e);
+
+            if(_invokeList.Count > 0)
+            {
+                var arr = _invokeList.ToArray();
+                _invokeList.Clear();
+                for(int i = 0; i < arr.Length; i++)
+                {
+                    arr[i]();
+                }
+            }
         }
 
         private void _tardyUpdateHook_Update(object sender, System.EventArgs e)
