@@ -122,8 +122,7 @@ namespace com.spacepuppy
 
         public void UnsafeRegisterObserver(System.Type notificationType, NotificationHandler handler)
         {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (_unsafeHandlers.ContainsKey(notificationType))
@@ -138,8 +137,7 @@ namespace com.spacepuppy
 
         public void UnsafeRemoveObserver(System.Type notificationType, NotificationHandler handler)
         {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (_handlers.ContainsKey(notificationType))
@@ -159,8 +157,7 @@ namespace com.spacepuppy
 
         public bool HasObserver(System.Type notificationType, bool bNotifyEntity)
         {
-            if (notificationType == null) throw new System.ArgumentNullException("notificationType");
-            if (!ObjUtil.IsType(notificationType, typeof(Notification))) throw new System.ArgumentException("Notification Type must be a type that inherits from Notification.", "notificationType");
+            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
 
             return this.HasObserver_Imp(notificationType, bNotifyEntity);
         }

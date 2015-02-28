@@ -15,7 +15,15 @@ namespace com.spacepuppy.Utils
         {
             if (comp == null) return false;
             if (comp is Behaviour) return (comp as Behaviour).enabled;
+            if (comp is Collider) return (comp as Collider).enabled;
             return true;
+        }
+
+        public static void SetEnabled(this Component comp, bool enabled)
+        {
+            if (comp == null) return;
+            else if (comp is Behaviour) (comp as Behaviour).enabled = enabled;
+            else if (comp is Collider) (comp as Collider).enabled = enabled;
         }
 
         #region HasComponent

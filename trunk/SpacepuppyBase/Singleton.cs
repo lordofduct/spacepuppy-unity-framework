@@ -46,7 +46,7 @@ namespace com.spacepuppy
 
         public static Singleton GetInstance(System.Type tp)
         {
-            if (!typeof(Singleton).IsAssignableFrom(tp)) throw new System.ArgumentException("Type must inherit from Singleton.", "tp");
+            if (!typeof(Singleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(Singleton), "tp");
             if (_singletonRefs.ContainsKey(tp)) return _singletonRefs[tp];
 
             var single = Singleton.GameObjectSource.GetComponent(tp) as Singleton;
@@ -68,7 +68,7 @@ namespace com.spacepuppy
 
         public static Singleton CreateSpecialInstance(System.Type tp, string gameObjectName)
         {
-            if (!typeof(Singleton).IsAssignableFrom(tp)) throw new System.ArgumentException("Type must inherit from Singleton.", "tp");
+            if (!typeof(Singleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(Singleton), "tp");
             if (_singletonRefs.ContainsKey(tp)) return _singletonRefs[tp];
 
             var go = new GameObject(gameObjectName);
@@ -84,6 +84,14 @@ namespace com.spacepuppy
         public static bool HasInstance(System.Type tp)
         {
             return _singletonRefs.ContainsKey(tp);
+        }
+
+        public static IEnumerable<Singleton> Instances
+        {
+            get
+            {
+                return _singletonRefs.Values;
+            }
         }
 
         #endregion
@@ -123,17 +131,40 @@ namespace com.spacepuppy
             base.Awake();
 
             var c = (_singletonRefs.ContainsKey(this.GetType())) ? _singletonRefs[this.GetType()] : null;
-            if (!Object.ReferenceEquals(c, null) && !Object.ReferenceEquals(c, this))
+            //if (!System.Object.ReferenceEquals(c, null) && !System.Object.ReferenceEquals(c, this))
+            //{
+            //    Object.Destroy(this);
+            //    throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
+            //}
+            //else
+            //{
+            //    _singletonRefs[this.GetType()] = this;
+            //}
+            if(c == null || c == this)
+            {
+                _singletonRefs[this.GetType()] = this;
+            }
+            else
             {
                 Object.Destroy(this);
                 throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
             }
-            else
-            {
-                _singletonRefs[this.GetType()] = this;
-            }
 
             this.UpdateMaintainOnLoadStatus();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            var tp = this.GetType();
+            if(_singletonRefs.ContainsKey(tp))
+            {
+                if (_singletonRefs[tp] == this)
+                {
+                    _singletonRefs.Remove(tp);
+                }
+            }
         }
 
         protected virtual void OnLevelWasLoaded(int level)

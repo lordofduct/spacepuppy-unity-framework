@@ -48,6 +48,7 @@
     <Compile Include="Inspectors\GameObjectNotificationDispatcherInspector.cs" />
     <Compile Include="Inspectors\OneOrManyPropertyDrawer.cs" />
     <Compile Include="Inspectors\ReorderableArrayPropertyDrawer.cs" />
+    <Compile Include="Inspectors\SelectableComponentPropertyDrawer.cs" />
     <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Modifiers\InsertButtonModifier.cs" />
     <Compile Include="EditorHelper.cs" />

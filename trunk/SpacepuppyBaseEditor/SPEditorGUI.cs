@@ -5,11 +5,47 @@ using System.Linq;
 
 using com.spacepuppy;
 using com.spacepuppy.Utils;
+using com.spacepuppy.Utils.Dynamic;
+
+using com.spacepuppyeditor.Internal;
 
 namespace com.spacepuppyeditor
 {
     public static class SPEditorGUI
     {
+
+        #region Fields
+
+        private static TypeAccessWrapper _editorGuiAccessWrapper;
+
+        private static System.Func<Rect, SerializedProperty, GUIContent, bool> _imp_DefaultPropertyField;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        static SPEditorGUI()
+        {
+            _editorGuiAccessWrapper = new TypeAccessWrapper(typeof(EditorGUI));
+            _editorGuiAccessWrapper.IncludeNonPublic = true;
+        }
+
+        #endregion
+
+        #region DefaultPropertyField
+
+        public static bool DefaultPropertyField(Rect position, SerializedProperty property)
+        {
+            return DefaultPropertyField(position, property, (GUIContent)null);
+        }
+
+        public static bool DefaultPropertyField(Rect position, SerializedProperty property, GUIContent label)
+        {
+            if (_imp_DefaultPropertyField == null) _imp_DefaultPropertyField = _editorGuiAccessWrapper.GetStaticMethod("DefaultPropertyField", typeof(System.Func<Rect, SerializedProperty, GUIContent, bool>)) as System.Func<Rect, SerializedProperty, GUIContent, bool>;
+            return _imp_DefaultPropertyField(position, property, label);
+        }
+
+        #endregion
 
         #region PropertyFields
 
@@ -164,8 +200,8 @@ namespace com.spacepuppyeditor
         public static Component ComponentField(Rect position, GUIContent label, Component value, System.Type inheritsFromType, bool allowSceneObjects)
         {
             if (inheritsFromType == null) inheritsFromType = typeof(Component);
-            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new System.ArgumentException("Type must inherit from IComponent or Component.", "inheritsFromType");
-            if (value != null && !inheritsFromType.IsAssignableFrom(value.GetType())) throw new System.ArgumentException("value must inherit from " + inheritsFromType.Name, "value");
+            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from IComponent or Component.", "inheritsFromType");
+            if (value != null && !inheritsFromType.IsAssignableFrom(value.GetType())) throw new TypeArgumentMismatchException(value.GetType(), inheritsFromType, "value must inherit from " + inheritsFromType.Name, "value");
 
             if (ObjUtil.IsType(inheritsFromType, typeof(Component)))
             {
@@ -187,10 +223,10 @@ namespace com.spacepuppyeditor
         public static Component ComponentField(Rect position, GUIContent label, Component value, System.Type inheritsFromType, bool allowSceneObjects, System.Type targetComponentType)
         {
             if (inheritsFromType == null) inheritsFromType = typeof(Component);
-            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new System.ArgumentException("Type must inherit from IComponent or Component.", "inheritsFromType");
+            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from IComponent or Component.", "inheritsFromType");
             if (targetComponentType == null) throw new System.ArgumentNullException("targetComponentType");
-            if (!typeof(Component).IsAssignableFrom(targetComponentType)) throw new System.ArgumentException("Type must inherit from Component.", "targetComponentType");
-            if (value != null && !targetComponentType.IsAssignableFrom(value.GetType())) throw new System.ArgumentException("value must inherit from " + targetComponentType.Name, "value");
+            if (!typeof(Component).IsAssignableFrom(targetComponentType)) throw new TypeArgumentMismatchException(targetComponentType, typeof(Component), "targetComponentType");
+            if (value != null && !targetComponentType.IsAssignableFrom(value.GetType())) throw new TypeArgumentMismatchException(value.GetType(), inheritsFromType, "value must inherit from " + inheritsFromType.Name, "value");
 
             if (ObjUtil.IsType(inheritsFromType, typeof(Component)))
             {

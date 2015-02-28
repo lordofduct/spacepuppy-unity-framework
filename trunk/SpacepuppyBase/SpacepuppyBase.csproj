@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Async\AsyncOperationWrapper.cs" />
+    <Compile Include="Async\DummyAsyncOperation.cs" />
     <Compile Include="Async\ProgressingAsyncOperationWrapper.cs" />
     <Compile Include="Async\RadicalAsyncOperation.cs" />
     <Compile Include="Attributes.cs" />
@@ -90,6 +91,15 @@
     <Compile Include="PropertyAttributes.cs" />
     <Compile Include="RadicalAsyncOperation.cs" />
     <Compile Include="RadicalCoroutine.cs" />
+    <Compile Include="Scenes\CompositeScene.cs" />
+    <Compile Include="Scenes\ISceneBehaviour.cs" />
+    <Compile Include="Scenes\ISceneBehaviourLoadOptions.cs" />
+    <Compile Include="Scenes\ModifiedLoadedSceneContainerException.cs" />
+    <Compile Include="Scenes\Scene.cs" />
+    <Compile Include="Scenes\SceneBehaviourSequence.cs" />
+    <Compile Include="Scenes\SceneContainer.cs" />
+    <Compile Include="Scenes\SceneManager.cs" />
+    <Compile Include="Scenes\SimpleScene.cs" />
     <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="Singleton.cs" />

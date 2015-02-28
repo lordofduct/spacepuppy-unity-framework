@@ -76,6 +76,7 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class ComponentTypeRestrictionAttribute : SPPropertyAttribute
     {
         public System.Type InheritsFromType;
@@ -86,6 +87,12 @@ namespace com.spacepuppy
             this.InheritsFromType = inheritsFromType;
         }
 
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class SelectableComponentAttribute : SPPropertyAttribute
+    {
+        public bool AllowSceneObjects = true;
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]

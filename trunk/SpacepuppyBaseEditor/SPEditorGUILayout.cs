@@ -12,6 +12,22 @@ namespace com.spacepuppyeditor
     public static class SPEditorGUILayout
     {
 
+        #region DefaultPropertyField
+
+        public static bool DefaultPropertyField(SerializedProperty property)
+        {
+            var position = EditorGUILayout.GetControlRect();
+            return SPEditorGUI.DefaultPropertyField(position, property, (GUIContent)null);
+        }
+
+        public static bool DefaultPropertyField(SerializedProperty property, GUIContent label)
+        {
+            var position = EditorGUILayout.GetControlRect();
+            return SPEditorGUI.DefaultPropertyField(position, property, label);
+        }
+
+        #endregion
+
         #region PropertyFields
 
         public static bool PropertyField(SerializedObject obj, string prop)

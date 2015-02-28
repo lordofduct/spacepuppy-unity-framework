@@ -2190,8 +2190,7 @@ namespace com.spacepuppy.Utils
 
         public static object ToPrim(object value, System.Type tp)
         {
-            if (tp == null)
-                throw new System.ArgumentException("Type must be non-null", "tp");
+            if (tp == null) throw new System.ArgumentException("Type must be non-null", "tp");
             System.TypeCode code = System.Type.GetTypeCode(tp);
             if (!ConvertUtil.IsSupportedType(tp, code))
             {

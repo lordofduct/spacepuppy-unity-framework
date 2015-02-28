@@ -97,6 +97,8 @@ namespace com.spacepuppy
 
         public bool Cancelled { get { return _state <= OperatingState.Cancelling; } }
 
+        public bool Active { get { return _state == OperatingState.Active; } }
+
         /// <summary>
         /// An operator is still operating this routine and it is not eligible to be started again.
         /// </summary>
@@ -125,6 +127,9 @@ namespace com.spacepuppy
         /// <param name="behaviour">A reference to the MonoBehaviour that is handling the coroutine.</param>
         public void Stop(MonoBehaviour behaviour)
         {
+            if (_state != OperatingState.Active) throw new System.InvalidOperationException("Failed to stop RadicalCoroutine. The Coroutine must be active to stop it.");
+
+            _state = OperatingState.Inactive;
             if (_owner is Coroutine)
             {
                 _owner = null;

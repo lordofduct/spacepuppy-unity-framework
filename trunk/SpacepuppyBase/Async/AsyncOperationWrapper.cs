@@ -10,6 +10,8 @@ namespace com.spacepuppy.Async
         #region Fields
 
         private AsyncOperation[] _operations;
+        private AsyncOperation _recentOperation;
+        private bool _complete;
 
         #endregion
 
@@ -47,11 +49,16 @@ namespace com.spacepuppy.Async
         {
             get
             {
-                for (int i = 0; i < _operations.Length; i++)
+                if (_complete) return true;
+                else
                 {
-                    if (!_operations[i].isDone) return false;
+                    for (int i = 0; i < _operations.Length; i++)
+                    {
+                        if (!_operations[i].isDone) return false;
+                    }
+                    _complete = true;
+                    return true;
                 }
-                return true;
             }
         }
 
@@ -59,10 +66,18 @@ namespace com.spacepuppy.Async
         {
             get
             {
-                for (int i = 0; i < _operations.Length; i++)
+                if (_recentOperation == null || _recentOperation.isDone)
                 {
-                    if (!_operations[i].isDone) return _operations[i];
+                    for (int i = 0; i < _operations.Length; i++)
+                    {
+                        if (!_operations[i].isDone)
+                        {
+                            _recentOperation = _operations[i];
+                            return _recentOperation;
+                        }
+                    }
                 }
+
                 return null;
             }
         }
