@@ -24,6 +24,11 @@ namespace com.spacepuppy.Async
 
         #region Properties
 
+        public bool IsComplete
+        {
+            get { return _complete; }
+        }
+
         protected virtual object CurrentYieldObject
         {
             get { return null; }
@@ -48,15 +53,6 @@ namespace com.spacepuppy.Async
         protected void SetSignal()
         {
             _complete = true;
-        }
-
-        #endregion
-
-        #region IPsuedoAsyncResult
-
-        public bool IsComplete
-        {
-            get { return _complete; }
         }
 
         #endregion
