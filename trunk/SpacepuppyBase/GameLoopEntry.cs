@@ -95,6 +95,7 @@ namespace com.spacepuppy
         public static void InvokeNextUpdate(System.Action action)
         {
             if(action == null) throw new System.ArgumentNullException("action");
+            if (_instance == null) GameLoopEntry.Init();
             _instance._invokeList.Add(action);
         }
 
