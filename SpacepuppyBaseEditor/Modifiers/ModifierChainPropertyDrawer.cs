@@ -32,7 +32,6 @@ namespace com.spacepuppyeditor.Modifiers
                            select a as PropertyAttribute).ToArray();
 
             var propDrawerTp = typeof(PropertyDrawer);
-            var drawerTypes = ScriptAttributeUtility.GetDrawerTypesForType((from a in _attributes select a.GetType()).ToArray());
 
             var lst = new List<PropertyModifier>();
             if (_attributes.Length > 0)
@@ -42,36 +41,29 @@ namespace com.spacepuppyeditor.Modifiers
                     var attrib = _attributes[i];
                     if (attrib is PropertyModifierAttribute)
                     {
-                        foreach (var dtp in drawerTypes)
+                        var dtp = ScriptAttributeUtility.GetDrawerTypeForType(attrib.GetType());
+                        if(ObjUtil.IsType(dtp, typeof(PropertyModifier)))
                         {
-                            var a = dtp.GetCustomAttributes(typeof(CustomPropertyDrawer), false).FirstOrDefault() as CustomPropertyDrawer;
-                            if (a != null && attrib.GetType() == ObjUtil.GetValue(a, "m_Type"))
-                            {
-                                var drawer = System.Activator.CreateInstance(dtp) as PropertyModifier;
-                                ObjUtil.SetValue(drawer, "m_Attribute", attrib);
-                                ObjUtil.SetValue(drawer, "m_FieldInfo", this.fieldInfo);
-                                drawer.Init(false);
-                                lst.Add(drawer);
-                                break;
-                            }
+                            var drawer = System.Activator.CreateInstance(dtp) as PropertyModifier;
+                            if (drawer == null) continue;
+                            ObjUtil.SetValue(drawer, "m_Attribute", attrib);
+                            ObjUtil.SetValue(drawer, "m_FieldInfo", this.fieldInfo);
+                            drawer.Init(false);
+                            lst.Add(drawer);
                         }
                     }
                 }
                 _modifiers = lst.ToArray();
 
                 var lastAttrib = _attributes.Last();
-                foreach (var dtp in drawerTypes)
+                var lastDrawerTp = ScriptAttributeUtility.GetDrawerTypeForType(lastAttrib.GetType());
+                if (ObjUtil.IsType(lastDrawerTp, typeof(PropertyDrawer)))
                 {
-                    var a = dtp.GetCustomAttributes(typeof(CustomPropertyDrawer), false).FirstOrDefault() as CustomPropertyDrawer;
-                    if (a != null && lastAttrib.GetType() == ObjUtil.GetValue(a, "m_Type"))
-                    {
-                        var drawer = System.Activator.CreateInstance(dtp) as PropertyDrawer;
-                        ObjUtil.SetValue(drawer, "m_Attribute", lastAttrib);
-                        ObjUtil.SetValue(drawer, "m_FieldInfo", this.fieldInfo);
-                        if (drawer is PropertyModifier) (drawer as PropertyModifier).Init(true);
-                        _visibleDrawer = drawer;
-                        break;
-                    }
+                    var drawer = System.Activator.CreateInstance(lastDrawerTp) as PropertyDrawer;
+                    ObjUtil.SetValue(drawer, "m_Attribute", lastDrawerTp);
+                    ObjUtil.SetValue(drawer, "m_FieldInfo", this.fieldInfo);
+                    if (drawer is PropertyModifier) (drawer as PropertyModifier).Init(true);
+                    _visibleDrawer = drawer;
                 }
             }
 

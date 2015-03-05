@@ -220,7 +220,10 @@ namespace com.spacepuppy
 
         protected override void OnLevelWasLoaded(int level)
         {
-            //block for SingletonManager
+            if(!_maintainAllSingletonsOnLoad)
+            {
+                GameObject.Destroy(this.gameObject);
+            }
         }
 
     }

@@ -22,6 +22,70 @@ namespace com.spacepuppy
     }
 
 
+    #region Component Attributes
+
+    public abstract class ComponentHeaderAttribute : PropertyAttribute
+    {
+
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class RequireLikeComponentAttribute : ComponentHeaderAttribute
+    {
+
+        private System.Type[] _types;
+
+        public RequireLikeComponentAttribute(params System.Type[] tps)
+        {
+            _types = tps;
+        }
+
+        public System.Type[] Types
+        {
+            get { return _types; }
+        }
+
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class RequireComponentInEntityAttribute : ComponentHeaderAttribute
+    {
+
+        private System.Type[] _types;
+
+        public RequireComponentInEntityAttribute(params System.Type[] tps)
+        {
+            _types = tps;
+        }
+
+        public System.Type[] Types
+        {
+            get { return _types; }
+        }
+
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class UniqueToEntityAttribute : ComponentHeaderAttribute
+    {
+
+        public bool MustBeAttachedToRoot;
+
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class RequireLayerAttribute : ComponentHeaderAttribute
+    {
+        public int Layer;
+
+        public RequireLayerAttribute(int layer)
+        {
+            this.Layer = layer;
+        }
+    }
+
+    #endregion
+
     #region Property Drawer Attributes
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
@@ -162,6 +226,7 @@ namespace com.spacepuppy
     {
 
         public readonly string MethodName;
+        public bool OnlyAtRuntime;
 
         public OnChangedInEditorAttribute(string methodName)
         {
@@ -190,7 +255,7 @@ namespace com.spacepuppy
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Class, AllowMultiple = false)]
-    public class InfoboxAttribute : PropertyAttribute
+    public class InfoboxAttribute : ComponentHeaderAttribute
     {
         public string Message;
         public InfoBoxMessageType MessageType = InfoBoxMessageType.Info;
