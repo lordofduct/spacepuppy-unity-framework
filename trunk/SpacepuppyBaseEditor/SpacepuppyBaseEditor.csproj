@@ -43,6 +43,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComponentHeaderDrawer.cs" />
+    <Compile Include="ComponentHeaderDrawers\RequireComponentInEntityHeaderDrawer.cs" />
+    <Compile Include="ComponentHeaderDrawers\RequireLayerHeaderDrawer.cs" />
+    <Compile Include="ComponentHeaderDrawers\RequireLikeComponentHeaderDrawer.cs" />
+    <Compile Include="ComponentHeaderDrawers\UniqueToEntityHeaderDrawer.cs" />
     <Compile Include="Decorators\InfoboxDecorator.cs" />
     <Compile Include="Inspectors\DiscreteFloatPropertyDrawer.cs" />
     <Compile Include="Inspectors\GameObjectNotificationDispatcherInspector.cs" />
@@ -94,6 +99,7 @@
       <Name>SpacepuppyBase</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

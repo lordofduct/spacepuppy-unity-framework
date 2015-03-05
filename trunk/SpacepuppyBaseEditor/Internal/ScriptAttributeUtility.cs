@@ -46,35 +46,6 @@ namespace com.spacepuppyeditor.Internal
 
         #region Methods
 
-        private static void BuildKnownPropertyDrawerTypes()
-        {
-            _knownPropertyDrawerTypes = new List<System.Type>();
-
-            var propDrawerTp = typeof(PropertyDrawer);
-            _knownPropertyDrawerTypes.AddRange(from ass in System.AppDomain.CurrentDomain.GetAssemblies()
-                                               from tp in ass.GetTypes()
-                                               where tp != propDrawerTp && ObjUtil.IsType(tp, propDrawerTp)
-                                               select tp);
-        }
-
-        public static System.Type[] GetDrawerTypesForType(params System.Type[] types)
-        {
-            if (_knownPropertyDrawerTypes == null) ScriptAttributeUtility.BuildKnownPropertyDrawerTypes();
-
-            return _knownPropertyDrawerTypes.Where((tp) =>
-                               {
-                                   var cpd = tp.GetCustomAttributes(typeof(CustomPropertyDrawer), false).FirstOrDefault() as CustomPropertyDrawer;
-                                   var handledTp = ObjUtil.GetValue(cpd, "m_Type") as System.Type;
-                                   if (handledTp == null) return false;
-                                   foreach(var type in types)
-                                   {
-                                       if (type == handledTp) return true;
-                                   }
-                                   return false;
-                               }).ToArray();
-        }
-
-
         //#######################
         // GetDrawerTypeForType
 

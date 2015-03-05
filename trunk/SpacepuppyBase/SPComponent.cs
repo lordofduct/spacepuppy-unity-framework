@@ -23,11 +23,11 @@ namespace com.spacepuppy
 
         protected virtual void Awake()
         {
-            if (Application.isEditor)
-            {
-                com.spacepuppy.Utils.Assertions.AssertRequireLikeComponentAttrib(this);
-                com.spacepuppy.Utils.Assertions.AssertUniqueToEntityAttrib(this);
-            }
+            //if (Application.isEditor)
+            //{
+            //    com.spacepuppy.Utils.Assertions.AssertRequireLikeComponentAttrib(this);
+            //    com.spacepuppy.Utils.Assertions.AssertUniqueToEntityAttrib(this);
+            //}
 
             this.SyncEntityRoot();
         }

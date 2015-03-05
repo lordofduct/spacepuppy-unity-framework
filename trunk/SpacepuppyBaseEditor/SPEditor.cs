@@ -17,6 +17,8 @@ namespace com.spacepuppyeditor
 
         #region Fields
 
+        private List<GUIDrawer> _headerDrawers;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -37,11 +39,74 @@ namespace com.spacepuppyeditor
 
         public override void OnInspectorGUI()
         {
+            //draw header infobox if needed
+            this.DrawDefaultInspectorHeader();
             this.DrawDefaultInspector();
         }
 
 
+        public void DrawDefaultInspectorHeader()
+        {
+            //var attribs = this.serializedObject.targetObject.GetType().GetCustomAttributes(typeof(InfoboxAttribute), false);
+            //InfoboxAttribute infoboxAttrib = (attribs.Length > 0) ? attribs[0] as InfoboxAttribute : null;
+            //if (infoboxAttrib != null)
+            //{
+            //    var position = EditorGUILayout.GetControlRect(false, com.spacepuppyeditor.Decorators.InfoboxDecorator.GetHeight(infoboxAttrib));
+            //    com.spacepuppyeditor.Decorators.InfoboxDecorator.OnGUI(position, infoboxAttrib);
+            //}
 
+            if (_headerDrawers == null)
+            {
+                _headerDrawers = new List<GUIDrawer>();
+                var componentType = serializedObject.targetObject.GetType();
+                if(ObjUtil.IsType(componentType, typeof(Component)))
+                {
+                    var attribs = (from o in componentType.GetCustomAttributes(typeof(ComponentHeaderAttribute), true) 
+                                   let a = o as ComponentHeaderAttribute 
+                                   where a != null 
+                                   orderby a.order 
+                                   select a).ToArray();
+                    foreach (var attrib in attribs)
+                    {
+                        var dtp = ScriptAttributeUtility.GetDrawerTypeForType(attrib.GetType());
+                        if (dtp != null)
+                        {
+                            if(ObjUtil.IsType(dtp, typeof(DecoratorDrawer)))
+                            {
+                                var decorator = System.Activator.CreateInstance(dtp) as DecoratorDrawer;
+                                ObjUtil.SetValue(decorator, "m_Attribute", attrib);
+                                _headerDrawers.Add(decorator);
+                            }
+                            else if (ObjUtil.IsType(dtp, typeof(ComponentHeaderDrawer)))
+                            {
+                                var drawer = System.Activator.CreateInstance(dtp) as ComponentHeaderDrawer;
+                                drawer.Init(attrib, componentType);
+                                _headerDrawers.Add(drawer);
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < _headerDrawers.Count; i++)
+            {
+                var drawer = _headerDrawers[i];
+                if(drawer is DecoratorDrawer)
+                {
+                    var decorator = drawer as DecoratorDrawer;
+                    var h = decorator.GetHeight();
+                    Rect position = EditorGUILayout.GetControlRect(false, h);
+                    decorator.OnGUI(position);
+                }
+                else if (drawer is ComponentHeaderDrawer)
+                {
+                    var compDrawer = drawer as ComponentHeaderDrawer;
+                    var h = compDrawer.GetHeight(this.serializedObject);
+                    Rect position = EditorGUILayout.GetControlRect(false, h);
+                    compDrawer.OnGUI(position, this.serializedObject);
+                }
+            }
+        }
 
         /// <summary>
         /// Draw the inspector as it would have been if not an SPEditor.
@@ -53,15 +118,6 @@ namespace com.spacepuppyeditor
 
         public new bool DrawDefaultInspector()
         {
-            //draw header infobox if needed
-            var attribs = this.serializedObject.targetObject.GetType().GetCustomAttributes(typeof(InfoboxAttribute), false);
-            InfoboxAttribute infoboxAttrib = (attribs.Length > 0) ? attribs[0] as InfoboxAttribute : null;
-            if (infoboxAttrib != null)
-            {
-                var position = EditorGUILayout.GetControlRect(false, com.spacepuppyeditor.Decorators.InfoboxDecorator.GetHeight(infoboxAttrib));
-                com.spacepuppyeditor.Decorators.InfoboxDecorator.OnGUI(position, infoboxAttrib);
-            }
-
             //draw properties
             this.serializedObject.Update();
             var result = SPEditor.DrawDefaultInspectorExcept(this.serializedObject);
@@ -101,12 +157,12 @@ namespace com.spacepuppyeditor
 
         #region Static Interface
 
-        public static bool DrawDefaultInspectorExcept(SerializedObject obj, params string[] propsNotToDraw)
+        public static bool DrawDefaultInspectorExcept(SerializedObject serializedObject, params string[] propsNotToDraw)
         {
-            if (obj == null) throw new System.ArgumentNullException("obj");
+            if (serializedObject == null) throw new System.ArgumentNullException("serializedObject");
 
             EditorGUI.BeginChangeCheck();
-            var iterator = obj.GetIterator();
+            var iterator = serializedObject.GetIterator();
             for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
             {
                 if (propsNotToDraw == null || !propsNotToDraw.Contains(iterator.name))

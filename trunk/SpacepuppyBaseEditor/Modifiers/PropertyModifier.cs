@@ -67,7 +67,7 @@ namespace com.spacepuppyeditor.Modifiers
                     includeChildren = (this.attribute as PropertyModifierAttribute).IncludeChidrenOnDraw;
                 }
 
-                EditorGUI.PropertyField(position, property, label, includeChildren);
+                SPEditorGUI.PropertyField(position, property, label, includeChildren);
             }
 
             this.OnPostGUI(property);

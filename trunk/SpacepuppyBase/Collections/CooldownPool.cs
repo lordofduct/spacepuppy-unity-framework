@@ -11,18 +11,47 @@ namespace com.spacepuppy.Collections
         #region Fields
 
         private List<CooldownInfo> _lst = new List<CooldownInfo>();
+        private bool _autoUpdate;
+        private bool _currentlyAutoUpdating;
 
         #endregion
 
         #region CONSTRUCTOR
 
+        public CooldownPool()
+        {
 
+        }
+
+        public CooldownPool(bool autoUpdate)
+        {
+            _autoUpdate = autoUpdate;
+        }
 
         #endregion
 
         #region Properties
 
         public int Count { get { return _lst.Count; } }
+
+        public bool AutoUpdate
+        {
+            get { return _autoUpdate; }
+            set
+            {
+                if (_autoUpdate == value) return;
+
+                _autoUpdate = value;
+                if(_autoUpdate && _lst.Count > 0)
+                {
+                    this.StartAutoUpdate();
+                }
+                else
+                {
+                    this.StopAutoUpdate();
+                }
+            }
+        }
 
         #endregion
 
@@ -41,6 +70,7 @@ namespace com.spacepuppy.Collections
 
             var info = new CooldownInfo(obj, duration);
             _lst.Add(info);
+            if (_autoUpdate && _lst.Count > 0 && !_currentlyAutoUpdating) this.StartAutoUpdate();
         }
 
         public bool Contains(T obj)
@@ -67,6 +97,31 @@ namespace com.spacepuppy.Collections
         public void Clear()
         {
             _lst.Clear();
+            this.StopAutoUpdate();
+        }
+
+
+
+        private void StartAutoUpdate()
+        {
+            if(_autoUpdate)
+            {
+                GameLoopEntry.EarlyUpdate -= this.OnEarlyUpdate;
+                GameLoopEntry.EarlyUpdate += this.OnEarlyUpdate;
+                _currentlyAutoUpdating = true;
+            }
+        }
+
+        private void StopAutoUpdate()
+        {
+            GameLoopEntry.EarlyUpdate -= this.OnEarlyUpdate;
+            _currentlyAutoUpdating = false;
+        }
+
+        private void OnEarlyUpdate(object sender, System.EventArgs e)
+        {
+            this.Update(GameTime.DeltaTime);
+            if (_lst.Count == 0) this.StopAutoUpdate();
         }
 
         #endregion

@@ -84,14 +84,14 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
-        public static bool AssertRequireLikeComponentAttrib(Component comp)
+        public static bool AssertRequireLikeComponentAttrib(Component comp, bool silent = false)
         {
             System.Type missingCompType;
 
-            return AssertRequireLikeComponentAttrib(comp, out missingCompType);
+            return AssertRequireLikeComponentAttrib(comp, out missingCompType, silent);
         }
 
-        public static bool AssertRequireLikeComponentAttrib(Component comp, out System.Type missingCompType)
+        public static bool AssertRequireLikeComponentAttrib(Component comp, out System.Type missingCompType, bool silent = false)
         {
             if (comp == null) throw new System.ArgumentNullException("comp");
             missingCompType = null;
@@ -105,7 +105,7 @@ namespace com.spacepuppy.Utils
                     if (!comp.HasLikeComponent(reqType))
                     {
                         missingCompType = reqType;
-                        Assert(System.String.Format("(GameObject:{2}) Component type {0} requires the gameobject to also have a component of type {1}.", tp.Name, reqType.Name, comp.gameObject.name), comp);
+                        if(!silent) Assert(System.String.Format("(GameObject:{2}) Component type {0} requires the gameobject to also have a component of type {1}.", tp.Name, reqType.Name, comp.gameObject.name), comp);
                         return true;
                     }
                 }
@@ -114,14 +114,14 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
-        public static bool AssertRequireComponentInEntityAttrib(Component comp)
+        public static bool AssertRequireComponentInEntityAttrib(Component comp, bool silent = false)
         {
             System.Type missingCompType;
 
-            return AssertRequireComponentInEntityAttrib(comp, out missingCompType);
+            return AssertRequireComponentInEntityAttrib(comp, out missingCompType, silent);
         }
 
-        public static bool AssertRequireComponentInEntityAttrib(Component comp, out System.Type missingCompType)
+        public static bool AssertRequireComponentInEntityAttrib(Component comp, out System.Type missingCompType, bool silent = false)
         {
             if (comp == null) throw new System.ArgumentNullException("comp");
             missingCompType = null;
@@ -135,7 +135,7 @@ namespace com.spacepuppy.Utils
                     if (!comp.EntityHasComponent(reqType))
                     {
                         missingCompType = reqType;
-                        Assert(System.String.Format("(Entity:{2}) Component type {0} requires the entity to also have a component of type {1}.", tp.Name, reqType.Name, comp.FindRoot().name), comp);
+                        if(!silent) Assert(System.String.Format("(Entity:{2}) Component type {0} requires the entity to also have a component of type {1}.", tp.Name, reqType.Name, comp.FindRoot().name), comp);
                         return true;
                     }
                 }
@@ -145,7 +145,7 @@ namespace com.spacepuppy.Utils
         }
 
 
-        public static bool AssertUniqueToEntityAttrib(Component comp)
+        public static bool AssertUniqueToEntityAttrib(Component comp, bool silent = false)
         {
             var tp = comp.GetType();
             var attrib = tp.GetCustomAttributes(typeof(UniqueToEntityAttribute), false).FirstOrDefault() as UniqueToEntityAttribute;
@@ -156,7 +156,7 @@ namespace com.spacepuppy.Utils
                 {
                     if (!comp.HasTag(SPConstants.TAG_ROOT))
                     {
-                        Assert(System.String.Format("(Entity:{1}) Component type {0} must be attached to the root gameObject.", tp.Name, comp.FindRoot().name), comp);
+                        if(!silent) Assert(System.String.Format("(Entity:{1}) Component type {0} must be attached to the root gameObject.", tp.Name, comp.FindRoot().name), comp);
                         return true;
                     }
                 }
@@ -168,7 +168,7 @@ namespace com.spacepuppy.Utils
                     {
                         if (child != comp.transform && child.HasComponent(tp))
                         {
-                            Assert(System.String.Format("(Entity:{1}) Only one component of type {0} must be attached to a root or any of its children.", tp.Name, root.name), comp);
+                            if(!silent) Assert(System.String.Format("(Entity:{1}) Only one component of type {0} must be attached to a root or any of its children.", tp.Name, root.name), comp);
                             return true;
                         }
                     }

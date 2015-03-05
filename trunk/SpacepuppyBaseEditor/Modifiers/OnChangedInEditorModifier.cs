@@ -23,6 +23,7 @@ namespace com.spacepuppyeditor.Modifiers
             if(GUI.changed)
             {
                 var attrib = this.attribute as OnChangedInEditorAttribute;
+                if (attrib.OnlyAtRuntime && !Application.isPlaying) return;
                 var targ = EditorHelper.GetTargetObjectWithProperty(property);
                 if (targ == null) return;
 

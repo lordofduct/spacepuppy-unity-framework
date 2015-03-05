@@ -19,6 +19,24 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
+        public static bool IsEnabled(this Component comp, bool checkGameObject)
+        {
+            if(checkGameObject)
+            {
+                if (comp == null) return false;
+                if (comp is Behaviour) return (comp as Behaviour).enabled && comp.gameObject.activeInHierarchy;
+                if (comp is Collider) return (comp as Collider).enabled && comp.gameObject.activeInHierarchy;
+                return true;
+            }
+            else
+            {
+                if (comp == null) return false;
+                if (comp is Behaviour) return (comp as Behaviour).enabled;
+                if (comp is Collider) return (comp as Collider).enabled;
+                return true;
+            }
+        }
+
         public static void SetEnabled(this Component comp, bool enabled)
         {
             if (comp == null) return;
