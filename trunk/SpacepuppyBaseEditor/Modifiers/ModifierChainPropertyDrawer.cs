@@ -44,10 +44,9 @@ namespace com.spacepuppyeditor.Modifiers
                         var dtp = ScriptAttributeUtility.GetDrawerTypeForType(attrib.GetType());
                         if(ObjUtil.IsType(dtp, typeof(PropertyModifier)))
                         {
-                            var drawer = System.Activator.CreateInstance(dtp) as PropertyModifier;
+                            var drawer = PropertyDrawerActivator.Create(dtp) as PropertyModifier;
                             if (drawer == null) continue;
-                            ObjUtil.SetValue(drawer, "m_Attribute", attrib);
-                            ObjUtil.SetValue(drawer, "m_FieldInfo", this.fieldInfo);
+                            PropertyDrawerActivator.InitializePropertyDrawer(drawer, attrib, this.fieldInfo);
                             drawer.Init(false);
                             lst.Add(drawer);
                         }
@@ -59,9 +58,7 @@ namespace com.spacepuppyeditor.Modifiers
                 var lastDrawerTp = ScriptAttributeUtility.GetDrawerTypeForType(lastAttrib.GetType());
                 if (ObjUtil.IsType(lastDrawerTp, typeof(PropertyDrawer)))
                 {
-                    var drawer = System.Activator.CreateInstance(lastDrawerTp) as PropertyDrawer;
-                    ObjUtil.SetValue(drawer, "m_Attribute", lastDrawerTp);
-                    ObjUtil.SetValue(drawer, "m_FieldInfo", this.fieldInfo);
+                    var drawer = PropertyDrawerActivator.Create(lastDrawerTp, lastAttrib, this.fieldInfo);
                     if (drawer is PropertyModifier) (drawer as PropertyModifier).Init(true);
                     _visibleDrawer = drawer;
                 }

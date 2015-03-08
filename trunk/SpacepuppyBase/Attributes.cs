@@ -70,21 +70,4 @@ namespace com.spacepuppy
 
     }
 
-
-    [System.AttributeUsage(System.AttributeTargets.Field)]
-    public class TypeReferenceRestrictionAttribute : System.Attribute
-    {
-
-        public System.Type InheritsFromType;
-        public bool allowAbstractClasses = false;
-        public bool allowInterfaces = false;
-        public System.Type defaultType = null;
-
-        public TypeReferenceRestrictionAttribute(System.Type inheritsFromType)
-        {
-            this.InheritsFromType = inheritsFromType;
-        }
-
-    }
-
 }

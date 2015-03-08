@@ -9,7 +9,12 @@ namespace com.spacepuppy.Scenes
 
         IProgressingYieldInstruction LoadScene();
         void BeginScene();
+        void EndScene();
+    }
 
+    public interface ISceneSequenceBehaviour : ISceneBehaviour
+    {
+        IProgressingYieldInstruction LoadNextScene();
     }
 
 }

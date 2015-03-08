@@ -113,9 +113,16 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
+        /// <summary>
+        /// Each enumerable contains the same elements, not necessarily in the same order, or of the same count. Just the same elements.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <returns></returns>
         public static bool SimilarTo<T>(this IEnumerable<T> first, IEnumerable<T> second)
         {
-            return first.Except(second).Count() == 0;
+            return first.Except(second).Count() + second.Except(first).Count() == 0;
         }
 
         public static bool ContainsAny<T>(this IEnumerable<T> lst, params T[] objs)

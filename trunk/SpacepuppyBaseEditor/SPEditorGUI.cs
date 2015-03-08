@@ -14,35 +14,26 @@ namespace com.spacepuppyeditor
     public static class SPEditorGUI
     {
 
-        #region Fields
+        #region DefaultPropertyField
 
-        private static TypeAccessWrapper _editorGuiAccessWrapper;
-
-        private static System.Func<Rect, SerializedProperty, GUIContent, bool> _imp_DefaultPropertyField;
-
-        #endregion
-
-        #region CONSTRUCTOR
-
-        static SPEditorGUI()
+        public static float GetDefaultPropertyHeight(SerializedProperty property)
         {
-            _editorGuiAccessWrapper = new TypeAccessWrapper(typeof(EditorGUI));
-            _editorGuiAccessWrapper.IncludeNonPublic = true;
+            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.GetHeight(property, GUIContent.none);
         }
 
-        #endregion
-
-        #region DefaultPropertyField
+        public static float GetDefaultPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.GetHeight(property, label);
+        }
 
         public static bool DefaultPropertyField(Rect position, SerializedProperty property)
         {
-            return DefaultPropertyField(position, property, (GUIContent)null);
+            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUI(position, property, GUIContent.none, false);
         }
 
         public static bool DefaultPropertyField(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (_imp_DefaultPropertyField == null) _imp_DefaultPropertyField = _editorGuiAccessWrapper.GetStaticMethod("DefaultPropertyField", typeof(System.Func<Rect, SerializedProperty, GUIContent, bool>)) as System.Func<Rect, SerializedProperty, GUIContent, bool>;
-            return _imp_DefaultPropertyField(position, property, label);
+            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUI(position, property, label, false);
         }
 
         #endregion
@@ -85,6 +76,25 @@ namespace com.spacepuppyeditor
             var enumType = value.GetType();
             int i = EnumFlagField(position, enumType, label, System.Convert.ToInt32(value));
             return System.Enum.ToObject(enumType, i) as System.Enum;
+        }
+        
+        public static WrapMode WrapModeField(Rect position, string label, WrapMode mode, bool allowDefault = false)
+        {
+            return WrapModeField(position, EditorHelper.TempContent(label), mode, allowDefault);
+        }
+
+        public static WrapMode WrapModeField(Rect position, GUIContent label, WrapMode mode, bool allowDefault = false)
+        {
+            if(allowDefault)
+            {
+                return (WrapMode)EditorGUI.Popup(position, label, (int)mode, new GUIContent[] { EditorHelper.TempContent("Default"), EditorHelper.TempContent("Once|Clamp"), EditorHelper.TempContent("Loop"), EditorHelper.TempContent("PingPong"), EditorHelper.TempContent("ClampForever") });
+            }
+            else
+            {
+                if (mode == WrapMode.Default) mode = WrapMode.Once;
+                var i = EditorGUI.Popup(position, label, ((int)mode - 1), new GUIContent[] {EditorHelper.TempContent("Once|Clamp"), EditorHelper.TempContent("Loop"), EditorHelper.TempContent("PingPong"), EditorHelper.TempContent("ClampForever") });
+                return (WrapMode)(i + 1);
+            }
         }
 
         #endregion

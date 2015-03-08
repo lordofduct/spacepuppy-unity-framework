@@ -16,14 +16,12 @@ namespace com.spacepuppyeditor
 
         public static bool DefaultPropertyField(SerializedProperty property)
         {
-            var position = EditorGUILayout.GetControlRect();
-            return SPEditorGUI.DefaultPropertyField(position, property, (GUIContent)null);
+            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUILayout(property, GUIContent.none, false, null);
         }
 
         public static bool DefaultPropertyField(SerializedProperty property, GUIContent label)
         {
-            var position = EditorGUILayout.GetControlRect();
-            return SPEditorGUI.DefaultPropertyField(position, property, label);
+            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUILayout(property, label, false, null);
         }
 
         #endregion
@@ -129,6 +127,18 @@ namespace com.spacepuppyeditor
             var enumType = value.GetType();
             int i = EnumFlagField(enumType, label, System.Convert.ToInt32(value));
             return System.Enum.ToObject(enumType, i) as System.Enum;
+        }
+
+        public static WrapMode WrapModeField(string label, WrapMode mode, bool allowDefault = false)
+        {
+            var position = EditorGUILayout.GetControlRect(true);
+            return SPEditorGUI.WrapModeField(position, label, mode, allowDefault);
+        }
+
+        public static WrapMode WrapModeField(GUIContent label, WrapMode mode, bool allowDefault = false)
+        {
+            var position = EditorGUILayout.GetControlRect(true);
+            return SPEditorGUI.WrapModeField(position, label, mode, allowDefault);
         }
 
         #endregion

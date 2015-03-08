@@ -33,6 +33,7 @@ namespace com.spacepuppyeditor.Inspectors
             else
             {
                 _lst.serializedProperty = property;
+                _lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(property) + 1;
             }
             if (_lst.serializedProperty != null && _lst.index >= _lst.count) _lst.index = -1;
         }
@@ -83,7 +84,18 @@ namespace com.spacepuppyeditor.Inspectors
             var element = _lst.serializedProperty.GetArrayElementAtIndex(index);
             if (element == null) return;
 
-            EditorGUI.PropertyField(area, element, GUIContent.none, false);
+            //EditorGUI.PropertyField(area, element, GUIContent.none, false);
+            var attrib = this.attribute as ReorderableArrayAttribute;
+            GUIContent label;
+            if(attrib != null && attrib.ElementLabelFormatString != null)
+            {
+                label = EditorHelper.TempContent(string.Format(attrib.ElementLabelFormatString, index));
+            }
+            else
+            {
+                label = GUIContent.none;
+            }
+            SPEditorGUI.DefaultPropertyField(area, element, label);
 
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_lst, area, index, isActive, isFocused);
         }

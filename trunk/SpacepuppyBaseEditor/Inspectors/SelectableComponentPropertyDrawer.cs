@@ -15,7 +15,12 @@ namespace com.spacepuppyeditor.Inspectors
 
         #region Fields
 
+        public const float DEFAULT_POPUP_WIDTH_SCALE = 0.4f;
+
         public bool AllowSceneObject;
+        public float PopupWidthScale = DEFAULT_POPUP_WIDTH_SCALE;
+        public IComponentChoiceSelector ChoiceSelector;
+
         private System.Type _restrictionType = typeof(Component);
 
         public System.Type RestrictionType
@@ -71,28 +76,25 @@ namespace com.spacepuppyeditor.Inspectors
             }
             else
             {
-                const float POPUP_WIDTH = 100f;
-                if (position.width > POPUP_WIDTH + EditorGUIUtility.labelWidth)
-                {
-                    var ra = new Rect(position.xMin, position.yMin, POPUP_WIDTH + EditorGUIUtility.labelWidth, position.height);
-                    var rb = new Rect(ra.xMax, position.yMin, position.width - ra.width, position.height);
+                float w = (label == GUIContent.none) ? position.width : Mathf.Max(position.width - EditorGUIUtility.labelWidth, 0);
+                var ra = new Rect(position.xMin, position.yMin, w * this.PopupWidthScale, position.height);
+                var rb = new Rect(ra.xMax, position.yMin, w - ra.width, position.height);
 
-                    var go = (property.objectReferenceValue as Component).gameObject;
-                    var components = go.GetComponents(_restrictionType);
-                    var names = (from c in components select new GUIContent(c.GetType().Name)).ToArray();
-                    int oi = components.IndexOf(property.objectReferenceValue);
-                    int ni = EditorGUI.Popup(ra, label, oi, names);
-                    if(oi != ni)
-                    {
-                        property.objectReferenceValue = components[ni];
-                    }
-
-                    this.DrawObjectRefField(rb, property);
-                }
-                else
+                var go = (property.objectReferenceValue as Component).gameObject;
+                var components = go.GetComponents(_restrictionType);
+                if(this.ChoiceSelector == null)
                 {
-                    this.DrawObjectRefField(position, property);
+                    this.ChoiceSelector = new DefaultComponentChoiceSelector();
                 }
+
+                this.ChoiceSelector.BeforeGUI(property, components);
+                var names = this.ChoiceSelector.GetPopupEntries(property, components);
+                int oi = this.ChoiceSelector.GetIndexOfComponent(property, components, names, property.objectReferenceValue as Component);
+                int ni = EditorGUI.Popup(ra, label, oi, names);
+                if(oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponent(property, components, names, ni);
+                this.ChoiceSelector.GUIComplete(property, components);
+
+                this.DrawObjectRefField(rb, property);
             }
 
         }
@@ -118,6 +120,76 @@ namespace com.spacepuppyeditor.Inspectors
         private void DrawAsMismatchedAttribute(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.LabelField(position, label, EditorHelper.TempContent("Mismatched type of PropertyDrawer attribute with field."));
+        }
+
+
+
+
+        public interface IComponentChoiceSelector
+        {
+
+            void BeforeGUI(SerializedProperty property, Component[] components);
+
+            GUIContent[] GetPopupEntries(SerializedProperty property, Component[] components);
+            int GetIndexOfComponent(SerializedProperty property, Component[] components, GUIContent[] popupEntries, Component comp);
+            Component GetComponent(SerializedProperty property, Component[] components, GUIContent[] popupEntries, int index);
+
+            void GUIComplete(SerializedProperty property, Component[] components);
+
+        }
+
+        public class DefaultComponentChoiceSelector : IComponentChoiceSelector
+        {
+
+            public virtual void BeforeGUI(SerializedProperty property, Component[] components)
+            {
+
+            }
+
+            public virtual GUIContent[] GetPopupEntries(SerializedProperty property, Component[] components)
+            {
+                //return (from c in components select new GUIContent(c.GetType().Name)).ToArray();
+                return (from s in DefaultComponentChoiceSelector.GetUniqueComponentNames(components) select new GUIContent(s)).ToArray();
+            }
+
+            public virtual int GetIndexOfComponent(SerializedProperty property, Component[] components, GUIContent[] popupEntries, Component comp)
+            {
+                return components.IndexOf(property.objectReferenceValue);
+            }
+
+            public virtual Component GetComponent(SerializedProperty property, Component[] components, GUIContent[] popupEntries, int index)
+            {
+                if (index < 0 || index >= components.Length) return null;
+                return components[index];
+            }
+
+            public virtual void GUIComplete(SerializedProperty property, Component[] components)
+            {
+
+            }
+
+
+
+            private static Dictionary<System.Type, int> _uniqueCount = new Dictionary<System.Type, int>();
+            public static IEnumerable<string> GetUniqueComponentNames(Component[] components)
+            {
+                _uniqueCount.Clear();
+                for (int i = 0; i < components.Length; i++)
+                {
+                    var tp = components[i].GetType();
+                    if (_uniqueCount.ContainsKey(tp))
+                    {
+                        _uniqueCount[tp]++;
+                        yield return tp.Name + " " + _uniqueCount[tp].ToString();
+                    }
+                    else
+                    {
+                        _uniqueCount.Add(tp, 1);
+                        yield return tp.Name;
+                    }
+                }
+                _uniqueCount.Clear();
+            }
         }
 
     }
