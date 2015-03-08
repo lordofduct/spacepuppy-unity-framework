@@ -124,6 +124,7 @@ namespace com.spacepuppy
             public bool allowAbstractClasses = false;
             public bool allowInterfaces = false;
             public System.Type defaultType = null;
+            public TypeDropDownListingStyle dropDownStyle = TypeDropDownListingStyle.Namespace;
 
             public ConfigAttribute(System.Type inheritsFromType)
             {
