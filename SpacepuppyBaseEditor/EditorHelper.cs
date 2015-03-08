@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor
@@ -14,6 +15,13 @@ namespace com.spacepuppyeditor
     {
 
         public const string PROP_SCRIPT = "m_Script";
+
+        static EditorHelper()
+        {
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
+            SceneView.onSceneGUIDelegate += OnSceneGUI;
+        }
+
 
         #region SerializedProperty Helpers
 
@@ -274,7 +282,7 @@ namespace com.spacepuppyeditor
 
         #region Temp Content
 
-        private static GUIContent _temp_text = new GUIContent();
+        private static ObjectCachePool<GUIContent> _temp_text = new ObjectCachePool<GUIContent>(50);
 
 
         /// <summary>
@@ -284,9 +292,22 @@ namespace com.spacepuppyeditor
         /// <returns></returns>
         public static GUIContent TempContent(string text)
         {
-            _temp_text.text = text;
-            return _temp_text;
+            var c = _temp_text.GetInstance();
+            c.text = text;
+            return c;
         }
+
+
+
+
+        private static void OnSceneGUI(SceneView scene)
+        {
+            foreach(var c in _temp_text.ActiveMembers.ToArray())
+            {
+                _temp_text.Release(c);
+            }
+        }
+
 
         #endregion
 

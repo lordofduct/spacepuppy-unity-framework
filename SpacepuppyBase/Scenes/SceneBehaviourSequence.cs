@@ -7,7 +7,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenes
 {
 
-    public class SceneBehaviourSequence : SPComponent, ISceneBehaviour
+    public class SceneBehaviourSequence : SPComponent, ISceneSequenceBehaviour
     {
 
         #region Fields
@@ -48,24 +48,9 @@ namespace com.spacepuppy.Scenes
             _scenes.Clear();
         }
 
-        public IProgressingYieldInstruction LoadNextScene()
-        {
-            if (!_isCurrentlyLoaded) throw new System.InvalidOperationException("This SceneBehaviour must first be loaded before it can continue to the next scene.");
-            if (_scenes.Count == 0) throw new System.InvalidOperationException("Scene queue is empty.");
-
-            if (_currentScene != null)
-            {
-                Object.Destroy(_currentScene.component);
-                _currentScene = null;
-            }
-
-            _currentScene = this.AddComponent(_scenes.Dequeue()) as ISceneBehaviour;
-            return _currentScene.LoadScene();
-        }
-
         #endregion
 
-        #region ISceneBehaviour Interface
+        #region ISceneSequenceBehaviour Interface
 
         IProgressingYieldInstruction ISceneBehaviour.LoadScene()
         {
@@ -76,6 +61,70 @@ namespace com.spacepuppy.Scenes
         void ISceneBehaviour.BeginScene()
         {
             _currentScene.BeginScene();
+        }
+
+        void ISceneBehaviour.EndScene()
+        {
+            _currentScene.EndScene();
+        }
+
+        public IProgressingYieldInstruction LoadNextScene()
+        {
+            if (!_isCurrentlyLoaded) throw new System.InvalidOperationException("This SceneBehaviour must first be loaded before it can continue to the next scene.");
+            if (_scenes.Count == 0) throw new System.InvalidOperationException("Scene queue is empty.");
+
+            if (_currentScene != null)
+            {
+                _currentScene.EndScene();
+                Object.Destroy(_currentScene.component);
+                _currentScene = null;
+            }
+
+            _currentScene = this.AddComponent(_scenes.Dequeue()) as ISceneBehaviour;
+            var op = new LoadSubSceneOperation();
+            op.Start(_currentScene);
+            return op;
+        }
+
+        #endregion
+
+        #region Special Types
+
+        private class LoadSubSceneOperation : RadicalYieldInstruction, IProgressingYieldInstruction
+        {
+
+            private ISceneBehaviour _scene;
+            private IProgressingYieldInstruction _innerOp;
+
+            public void Start(ISceneBehaviour scene)
+            {
+                _scene = scene;
+
+                GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad());
+            }
+
+            private System.Collections.IEnumerator DoLoad()
+            {
+                _innerOp = _scene.LoadScene();
+                yield return _innerOp;
+                _scene.BeginScene();
+            }
+
+
+            #region IProgressingYieldInstruction Interface
+
+            public float Progress
+            {
+                get { return (_innerOp != null) ? _innerOp.Progress : 0f; }
+            }
+
+            protected override object Tick()
+            {
+                return null;
+            }
+
+            #endregion
+
         }
 
         #endregion

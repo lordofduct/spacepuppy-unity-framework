@@ -39,5 +39,26 @@ namespace com.spacepuppy.Utils
             return Vector3.zero;
         }
 
+        public static Vector3 GetAxis(this Transform trans, CartesianAxis axis, bool inLocalSpace)
+        {
+            if (trans == null) throw new System.ArgumentNullException("trans");
+
+            Vector3 v = Vector3.zero;
+            switch (axis)
+            {
+                case CartesianAxis.X:
+                    v = trans.right;
+                    break;
+                case CartesianAxis.Y:
+                    v = trans.up;
+                    break;
+                case CartesianAxis.Z:
+                    v = trans.forward;
+                    break;
+            }
+
+            return (inLocalSpace) ? trans.InverseTransformDirection(v) : v;
+        }
+
     }
 }

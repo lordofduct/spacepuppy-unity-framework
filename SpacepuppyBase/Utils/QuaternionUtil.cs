@@ -42,6 +42,11 @@ namespace com.spacepuppy.Utils
 
         #region Transform
 
+        public static Quaternion IndependentLookRotation(Vector3 dir, Vector3 forwardAxis)
+        {
+            return Quaternion.LookRotation(dir) * Quaternion.FromToRotation(Vector3.forward, forwardAxis);
+        }
+
         /// <summary>
         /// Transforms rotation from local space to world space.
         /// </summary>

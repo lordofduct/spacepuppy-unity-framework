@@ -33,7 +33,7 @@ namespace com.spacepuppyeditor.Inspectors
                 property.serializedObject.ApplyModifiedProperties();
             }
 
-            var attrib = this.fieldInfo.GetCustomAttributes(typeof(TypeReferenceRestrictionAttribute), true).FirstOrDefault() as TypeReferenceRestrictionAttribute;
+            var attrib = this.fieldInfo.GetCustomAttributes(typeof(TypeReference.ConfigAttribute), true).FirstOrDefault() as TypeReference.ConfigAttribute;
             var baseType = typeof(Object);
             bool allowAbstractTypes = false;
             bool allowInterfaces = false;

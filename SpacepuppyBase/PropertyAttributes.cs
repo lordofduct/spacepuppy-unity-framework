@@ -163,6 +163,8 @@ namespace com.spacepuppy
     public class ReorderableArrayAttribute : SPPropertyAttribute
     {
 
+        public string ElementLabelFormatString = null;
+
         public ReorderableArrayAttribute() : base(true)
         {
 

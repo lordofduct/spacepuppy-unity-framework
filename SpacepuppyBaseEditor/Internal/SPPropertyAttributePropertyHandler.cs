@@ -36,9 +36,7 @@ namespace com.spacepuppyeditor.Internal
         private void Init()
         {
             var dtp = ScriptAttributeUtility.GetDrawerTypeForType(_attribs[0].GetType());
-            var drawer = System.Activator.CreateInstance(dtp) as PropertyDrawer;
-            ObjUtil.SetValue(drawer, "m_Attribute", _attribs[0]);
-            ObjUtil.SetValue(drawer, "m_FieldInfo", _fieldInfo);
+            var drawer = PropertyDrawerActivator.Create(dtp, _attribs[0], _fieldInfo);
             if (drawer is PropertyModifier) (drawer as PropertyModifier).Init(true);
             _visibleDrawer = drawer;
         }
@@ -46,6 +44,13 @@ namespace com.spacepuppyeditor.Internal
         #endregion
 
         #region IPropertyHandler Interface
+
+        public float GetHeight(SerializedProperty property, GUIContent label)
+        {
+            if (_visibleDrawer == null) this.Init();
+
+            return _visibleDrawer.GetPropertyHeight(property, label);
+        }
 
         public bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {

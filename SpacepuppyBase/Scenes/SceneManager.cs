@@ -43,6 +43,7 @@ namespace com.spacepuppy.Scenes
 
             if (_currentSceneBehaviourGameObject != null)
             {
+                if(_currentSceneBehaviour != null) _currentSceneBehaviour.EndScene();
                 GameObject.Destroy(_currentSceneBehaviourGameObject);
                 _currentSceneBehaviourGameObject = null;
                 _currentSceneBehaviour = null;

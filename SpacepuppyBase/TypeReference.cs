@@ -103,13 +103,36 @@ namespace com.spacepuppy
 
         #endregion
 
-
+        #region Operators
 
         public static implicit operator System.Type(TypeReference a)
         {
             if (a != null) return a.Type;
             else return null;
         }
+
+        #endregion
+
+
+        #region Special Types
+
+        [System.AttributeUsage(System.AttributeTargets.Field)]
+        public class ConfigAttribute : System.Attribute
+        {
+
+            public System.Type InheritsFromType;
+            public bool allowAbstractClasses = false;
+            public bool allowInterfaces = false;
+            public System.Type defaultType = null;
+
+            public ConfigAttribute(System.Type inheritsFromType)
+            {
+                this.InheritsFromType = inheritsFromType;
+            }
+
+        }
+
+        #endregion
 
     }
 
