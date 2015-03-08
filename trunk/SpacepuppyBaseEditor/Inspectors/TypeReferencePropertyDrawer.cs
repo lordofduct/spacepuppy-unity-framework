@@ -38,16 +38,18 @@ namespace com.spacepuppyeditor.Inspectors
             bool allowAbstractTypes = false;
             bool allowInterfaces = false;
             System.Type defaultType = null;
+            TypeDropDownListingStyle style = TypeDropDownListingStyle.Namespace;
             if (attrib != null)
             {
                 baseType = attrib.InheritsFromType;
                 allowAbstractTypes = attrib.allowAbstractClasses;
                 allowInterfaces = attrib.allowInterfaces;
                 defaultType = attrib.defaultType;
+                style = attrib.dropDownStyle;
             }
 
             EditorGUI.BeginChangeCheck();
-            tpref.Type = SPEditorGUI.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType);
+            tpref.Type = SPEditorGUI.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType, style);
             if (EditorGUI.EndChangeCheck())
                 property.serializedObject.Update();
 
