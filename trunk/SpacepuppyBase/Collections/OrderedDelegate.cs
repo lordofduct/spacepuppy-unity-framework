@@ -206,7 +206,7 @@ namespace com.spacepuppy.Collections
 
         public OrderedDelegate()
         {
-            if (!com.spacepuppy.Utils.ObjUtil.IsType(typeof(T), typeof(Delegate)))
+            if (!com.spacepuppy.Utils.TypeUtil.IsType(typeof(T), typeof(Delegate)))
             {
                 throw new System.InvalidOperationException("Cannot create an OrderedDelegate<T> where T does not inherit from System.Delegate.");
             }
@@ -328,7 +328,7 @@ namespace com.spacepuppy.Collections
 
         public OrderedDelegate()
         {
-            if(!com.spacepuppy.Utils.ObjUtil.IsType(typeof(T), typeof(Delegate)))
+            if(!com.spacepuppy.Utils.TypeUtil.IsType(typeof(T), typeof(Delegate)))
             {
                 throw new System.InvalidOperationException("Cannot create an OrderedDelegate<T> where T does not inherit from System.Delegate.");
             }

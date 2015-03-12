@@ -164,7 +164,7 @@ namespace com.spacepuppy.Utils
         {
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp) && (!testIfEnabled || comp.IsEnabled())) return true;
+                if (TypeUtil.IsType(comp.GetType(), tp) && (!testIfEnabled || comp.IsEnabled())) return true;
             }
 
             return false;
@@ -173,7 +173,7 @@ namespace com.spacepuppy.Utils
         {
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp) && (!testIfEnabled || comp.IsEnabled())) return true;
+                if (TypeUtil.IsType(comp.GetType(), tp) && (!testIfEnabled || comp.IsEnabled())) return true;
             }
 
             return false;
@@ -226,7 +226,7 @@ namespace com.spacepuppy.Utils
         public static Component AddOrGetComponent(this GameObject obj, System.Type tp)
         {
             if (obj == null) return null;
-            if (!ObjUtil.IsType(tp, typeof(ComponentUtil))) return null;
+            if (!TypeUtil.IsType(tp, typeof(ComponentUtil))) return null;
 
             var comp = obj.GetComponent(tp);
             if (comp == null)
@@ -240,7 +240,7 @@ namespace com.spacepuppy.Utils
         public static Component AddOrGetComponent(this Component obj, System.Type tp)
         {
             if (obj == null) return null;
-            if (!ObjUtil.IsType(tp, typeof(ComponentUtil))) return null;
+            if (!TypeUtil.IsType(tp, typeof(ComponentUtil))) return null;
 
             var comp = obj.GetComponent(tp);
             if (comp == null)
@@ -282,7 +282,7 @@ namespace com.spacepuppy.Utils
         public static Component AddOrFindComponent(this GameObject obj, System.Type tp)
         {
             if (obj == null) return null;
-            if (!ObjUtil.IsType(tp, typeof(ComponentUtil))) return null;
+            if (!TypeUtil.IsType(tp, typeof(ComponentUtil))) return null;
 
             var comp = obj.FindComponent(tp);
             if (comp == null)
@@ -296,7 +296,7 @@ namespace com.spacepuppy.Utils
         public static Component AddOrFindComponent(this Component obj, System.Type tp)
         {
             if (obj == null) return null;
-            if (!ObjUtil.IsType(tp, typeof(ComponentUtil))) return null;
+            if (!TypeUtil.IsType(tp, typeof(ComponentUtil))) return null;
 
             var comp = obj.FindComponent(tp);
             if (comp == null)
@@ -426,7 +426,7 @@ namespace com.spacepuppy.Utils
 
             foreach (Component comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp)) return comp;
+                if (TypeUtil.IsType(comp.GetType(), tp)) return comp;
             }
 
             return null;
@@ -438,7 +438,7 @@ namespace com.spacepuppy.Utils
 
             foreach (Component comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp)) return comp;
+                if (TypeUtil.IsType(comp.GetType(), tp)) return comp;
             }
 
             return null;
@@ -485,7 +485,7 @@ namespace com.spacepuppy.Utils
 
             foreach (Component possibleComp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(possibleComp.GetType(), tp))
+                if (TypeUtil.IsType(possibleComp.GetType(), tp))
                 {
                     comp = possibleComp;
                     return true;
@@ -502,7 +502,7 @@ namespace com.spacepuppy.Utils
 
             foreach (Component possibleComp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(possibleComp.GetType(), tp))
+                if (TypeUtil.IsType(possibleComp.GetType(), tp))
                 {
                     comp = possibleComp;
                     return true;
@@ -544,7 +544,7 @@ namespace com.spacepuppy.Utils
 
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp)) yield return comp;
+                if (TypeUtil.IsType(comp.GetType(), tp)) yield return comp;
             }
         }
 
@@ -554,7 +554,7 @@ namespace com.spacepuppy.Utils
 
             foreach (var comp in obj.GetComponents<Component>())
             {
-                if (ObjUtil.IsType(comp.GetType(), tp)) yield return comp;
+                if (TypeUtil.IsType(comp.GetType(), tp)) yield return comp;
             }
         }
 

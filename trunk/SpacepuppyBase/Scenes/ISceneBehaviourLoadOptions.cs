@@ -12,11 +12,11 @@ namespace com.spacepuppy.Scenes
 
         System.Type SceneBehaviourType { get; }
 
-        void OnSceneCreated(ISceneBehaviour sceneBehaviour);
+        void OnSceneCreated(SceneManager manager, ISceneBehaviour sceneBehaviour);
 
-        void OnSceneLoaded(ISceneBehaviour sceneBehaviour);
+        void OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour);
 
-        void OnSceneStarted(ISceneBehaviour sceneBehaviour);
+        void OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour);
 
     }
 
@@ -34,7 +34,7 @@ namespace com.spacepuppy.Scenes
         public SceneBehaviourLoadOptions(System.Type tp)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
-            if (!ObjUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
+            if (!TypeUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
             _sceneBehaviourType = tp;
         }
 
@@ -46,17 +46,17 @@ namespace com.spacepuppy.Scenes
         public event System.Action<ISceneBehaviour> SceneLoaded;
         public event System.Action<ISceneBehaviour> SceneStarted;
 
-        protected virtual void OnSceneCreated(ISceneBehaviour sceneBehaviour)
+        protected virtual void OnSceneCreated(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
             if (this.SceneCreated != null) this.SceneCreated(sceneBehaviour);
         }
 
-        protected virtual void OnSceneLoaded(ISceneBehaviour sceneBehaviour)
+        protected virtual void OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
             if (this.SceneLoaded != null) this.SceneLoaded(sceneBehaviour);
         }
 
-        protected virtual void OnSceneStarted(ISceneBehaviour sceneBehaviour)
+        protected virtual void OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
             if (this.SceneStarted != null) this.SceneStarted(sceneBehaviour);
         }
@@ -70,19 +70,19 @@ namespace com.spacepuppy.Scenes
             get { return _sceneBehaviourType; }
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneCreated(ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneCreated(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
-            this.OnSceneCreated(sceneBehaviour);
+            this.OnSceneCreated(manager, sceneBehaviour);
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneLoaded(ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
-            this.OnSceneLoaded(sceneBehaviour);
+            this.OnSceneLoaded(manager, sceneBehaviour);
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneStarted(ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
-            this.OnSceneStarted(sceneBehaviour);
+            this.OnSceneStarted(manager, sceneBehaviour);
         }
 
         #endregion
@@ -98,17 +98,17 @@ namespace com.spacepuppy.Scenes
         public event System.Action<T> SceneLoaded;
         public event System.Action<T> SceneStarted;
 
-        protected virtual void OnSceneCreated(T sceneBehaviour)
+        protected virtual void OnSceneCreated(SceneManager manager, T sceneBehaviour)
         {
             if (this.SceneCreated != null) this.SceneCreated(sceneBehaviour);
         }
 
-        protected virtual void OnSceneLoaded(T sceneBehaviour)
+        protected virtual void OnSceneLoaded(SceneManager manager, T sceneBehaviour)
         {
             if (this.SceneLoaded != null) this.SceneLoaded(sceneBehaviour);
         }
 
-        protected virtual void OnSceneStarted(T sceneBehaviour)
+        protected virtual void OnSceneStarted(SceneManager manager, T sceneBehaviour)
         {
             if (this.SceneStarted != null) this.SceneStarted(sceneBehaviour);
         }
@@ -122,22 +122,22 @@ namespace com.spacepuppy.Scenes
             get { return typeof(T); }
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneCreated(ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneCreated(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
             if (!(sceneBehaviour is T)) return;
-            this.OnSceneCreated(sceneBehaviour as T);
+            this.OnSceneCreated(manager, sceneBehaviour as T);
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneLoaded(ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
             if (!(sceneBehaviour is T)) return;
-            this.OnSceneLoaded(sceneBehaviour as T);
+            this.OnSceneLoaded(manager, sceneBehaviour as T);
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneStarted(ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour)
         {
             if (!(sceneBehaviour is T)) return;
-            this.OnSceneStarted(sceneBehaviour as T);
+            this.OnSceneStarted(manager, sceneBehaviour as T);
         }
 
         #endregion

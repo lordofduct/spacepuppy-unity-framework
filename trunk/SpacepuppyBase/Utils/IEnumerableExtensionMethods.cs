@@ -65,7 +65,7 @@ namespace com.spacepuppy.Utils
         {
             foreach (var obj in lst)
             {
-                if (ObjUtil.IsType(obj.GetType(), tp)) yield return obj;
+                if (TypeUtil.IsType(obj.GetType(), tp)) yield return obj;
             }
         }
 

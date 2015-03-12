@@ -96,6 +96,7 @@
     <Compile Include="Scenes\Scene.cs" />
     <Compile Include="Scenes\SceneBehaviourSequence.cs" />
     <Compile Include="Scenes\SceneContainer.cs" />
+    <Compile Include="Scenes\SceneLoadingEventArgs.cs" />
     <Compile Include="Scenes\SceneManager.cs" />
     <Compile Include="Scenes\SimpleScene.cs" />
     <Compile Include="ShortGuid.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\CoroutineUtil.cs" />
     <Compile Include="Utils\Dynamic\TypeAccessWrapper.cs" />
+    <Compile Include="Utils\EnumUtil.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
     <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
     <Compile Include="Utils\LayerUtil.cs" />
@@ -132,6 +134,7 @@
     <Compile Include="Utils\QuaternionUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="Utils\TransformUtil.cs" />
+    <Compile Include="Utils\TypeUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />
     <Compile Include="VariantReference.cs" />
   </ItemGroup>

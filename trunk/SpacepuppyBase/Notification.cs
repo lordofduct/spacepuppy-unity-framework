@@ -97,7 +97,7 @@ namespace com.spacepuppy
 
         public static void UnsafeRegisterGlobalObserver(System.Type notificationType, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (_unsafeGlobalHandlers.ContainsKey(notificationType))
@@ -112,7 +112,7 @@ namespace com.spacepuppy
 
         public static void UnsafeRemoveGlobalObserver(System.Type notificationType, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (_unsafeGlobalHandlers.ContainsKey(notificationType))
@@ -137,7 +137,7 @@ namespace com.spacepuppy
 
         public static bool HasGlobalObserver(System.Type notificationType)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
 
             var baseType = typeof(Notification);
 
@@ -163,6 +163,15 @@ namespace com.spacepuppy
                     if (d != null)
                     {
                         d.DynamicInvoke(n);
+                        bHandled = true;
+                    }
+                }
+                if (_unsafeGlobalHandlers.ContainsKey(tp))
+                {
+                    var d = _unsafeGlobalHandlers[tp];
+                    if(d != null)
+                    {
+                        d(n);
                         bHandled = true;
                     }
                 }
@@ -235,7 +244,7 @@ namespace com.spacepuppy
 
         public static void UnsafeRegisterObserver(System.Type notificationType, INotificationDispatcher sender, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (sender == null) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
@@ -244,7 +253,7 @@ namespace com.spacepuppy
 
         public static void UnsafeRegisterObserver(System.Type notificationType, object sender, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (sender == null) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
@@ -265,7 +274,7 @@ namespace com.spacepuppy
 
         public static void UnsafeRemoveObserver(System.Type notificationType, INotificationDispatcher sender, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
@@ -274,7 +283,7 @@ namespace com.spacepuppy
 
         public static void UnsafeRemoveObserver(System.Type notificationType, object sender, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
@@ -329,7 +338,7 @@ namespace com.spacepuppy
 
         public static bool HasObserver(System.Type notificationType, INotificationDispatcher sender, bool bNotifyEntity = false)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
             return sender.HasObserver(notificationType, bNotifyEntity);
@@ -337,7 +346,7 @@ namespace com.spacepuppy
 
         public static bool HasObserver(System.Type notificationType, object sender, bool bNotifyEntity = false)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
             if (sender is INotificationDispatcher)

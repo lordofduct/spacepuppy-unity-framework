@@ -42,7 +42,7 @@ namespace com.spacepuppyeditor.Modifiers
                     if (attrib is PropertyModifierAttribute)
                     {
                         var dtp = ScriptAttributeUtility.GetDrawerTypeForType(attrib.GetType());
-                        if(ObjUtil.IsType(dtp, typeof(PropertyModifier)))
+                        if(TypeUtil.IsType(dtp, typeof(PropertyModifier)))
                         {
                             var drawer = PropertyDrawerActivator.Create(dtp) as PropertyModifier;
                             if (drawer == null) continue;
@@ -56,7 +56,7 @@ namespace com.spacepuppyeditor.Modifiers
 
                 var lastAttrib = _attributes.Last();
                 var lastDrawerTp = ScriptAttributeUtility.GetDrawerTypeForType(lastAttrib.GetType());
-                if (ObjUtil.IsType(lastDrawerTp, typeof(PropertyDrawer)))
+                if (TypeUtil.IsType(lastDrawerTp, typeof(PropertyDrawer)))
                 {
                     var drawer = PropertyDrawerActivator.Create(lastDrawerTp, lastAttrib, this.fieldInfo);
                     if (drawer is PropertyModifier) (drawer as PropertyModifier).Init(true);

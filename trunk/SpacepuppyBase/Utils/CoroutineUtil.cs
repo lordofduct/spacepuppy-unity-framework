@@ -29,11 +29,11 @@ namespace com.spacepuppy.Utils
             if (method == null) throw new System.ArgumentNullException("method");
 
             System.Collections.IEnumerator e;
-            if (com.spacepuppy.Utils.ObjUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerable)))
+            if (com.spacepuppy.Utils.TypeUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerable)))
             {
                 e = (method.DynamicInvoke(args) as System.Collections.IEnumerable).GetEnumerator();
             }
-            else if (com.spacepuppy.Utils.ObjUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerator)))
+            else if (com.spacepuppy.Utils.TypeUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerator)))
             {
                 e = (method.DynamicInvoke(args) as System.Collections.IEnumerator);
             }
@@ -70,11 +70,11 @@ namespace com.spacepuppy.Utils
             if (method == null) throw new System.ArgumentNullException("method");
 
             System.Collections.IEnumerator e;
-            if (com.spacepuppy.Utils.ObjUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerable)))
+            if (com.spacepuppy.Utils.TypeUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerable)))
             {
                 e = (method.DynamicInvoke(args) as System.Collections.IEnumerable).GetEnumerator();
             }
-            else if (com.spacepuppy.Utils.ObjUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerator)))
+            else if (com.spacepuppy.Utils.TypeUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerator)))
             {
                 e = (method.DynamicInvoke(args) as System.Collections.IEnumerator);
             }

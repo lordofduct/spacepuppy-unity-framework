@@ -18,22 +18,22 @@ namespace com.spacepuppyeditor
 
         public static float GetDefaultPropertyHeight(SerializedProperty property)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.GetHeight(property, GUIContent.none);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.GetHeight(property, GUIContent.none);
         }
 
         public static float GetDefaultPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.GetHeight(property, label);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.GetHeight(property, label);
         }
 
         public static bool DefaultPropertyField(Rect position, SerializedProperty property)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUI(position, property, GUIContent.none, false);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, GUIContent.none, false);
         }
 
         public static bool DefaultPropertyField(Rect position, SerializedProperty property, GUIContent label)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUI(position, property, label, false);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, label, false);
         }
 
         #endregion
@@ -65,7 +65,7 @@ namespace com.spacepuppyeditor
 
         public static int EnumFlagField(Rect position, System.Type enumType, GUIContent label, int value)
         {
-            var names = (from e in ObjUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
+            var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
             return EditorGUI.MaskField(position, label, value, names);
         }
 
@@ -103,11 +103,11 @@ namespace com.spacepuppyeditor
 
         public static System.Type TypeDropDown(Rect position, GUIContent label, System.Type baseType, System.Type selectedType, bool allowAbstractTypes = false, bool allowInterfaces = false, System.Type defaultType = null, TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
         {
-            if (!ObjUtil.IsType(selectedType, baseType)) selectedType = null;
+            if (!TypeUtil.IsType(selectedType, baseType)) selectedType = null;
 
             var knownTypes = (from ass in System.AppDomain.CurrentDomain.GetAssemblies()
                               from tp in ass.GetTypes()
-                              where ObjUtil.IsType(tp, baseType) && (allowAbstractTypes || !tp.IsAbstract) && (allowInterfaces || !tp.IsInterface)
+                              where TypeUtil.IsType(tp, baseType) && (allowAbstractTypes || !tp.IsAbstract) && (allowInterfaces || !tp.IsInterface)
                               orderby tp.FullName.Substring(tp.FullName.LastIndexOf(".") + 1) ascending
                               select tp).ToArray();
             GUIContent[] knownTypeNames = null;
@@ -213,7 +213,7 @@ namespace com.spacepuppyeditor
             else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from IComponent or Component.", "inheritsFromType");
             if (value != null && !inheritsFromType.IsAssignableFrom(value.GetType())) throw new TypeArgumentMismatchException(value.GetType(), inheritsFromType, "value must inherit from " + inheritsFromType.Name, "value");
 
-            if (ObjUtil.IsType(inheritsFromType, typeof(Component)))
+            if (TypeUtil.IsType(inheritsFromType, typeof(Component)))
             {
                 return EditorGUI.ObjectField(position, label, value, inheritsFromType, true) as Component;
             }
@@ -238,7 +238,7 @@ namespace com.spacepuppyeditor
             if (!typeof(Component).IsAssignableFrom(targetComponentType)) throw new TypeArgumentMismatchException(targetComponentType, typeof(Component), "targetComponentType");
             if (value != null && !targetComponentType.IsAssignableFrom(value.GetType())) throw new TypeArgumentMismatchException(value.GetType(), inheritsFromType, "value must inherit from " + inheritsFromType.Name, "value");
 
-            if (ObjUtil.IsType(inheritsFromType, typeof(Component)))
+            if (TypeUtil.IsType(inheritsFromType, typeof(Component)))
             {
                 return EditorGUI.ObjectField(position, label, value, inheritsFromType, true) as Component;
             }
@@ -250,7 +250,7 @@ namespace com.spacepuppyeditor
                 {
                     foreach (var c in go.GetLikeComponents(inheritsFromType))
                     {
-                        if (ObjUtil.IsType(c.GetType(), targetComponentType))
+                        if (TypeUtil.IsType(c.GetType(), targetComponentType))
                         {
                             return c as Component;
                         }

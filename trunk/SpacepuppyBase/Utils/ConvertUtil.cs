@@ -1516,6 +1516,8 @@ namespace com.spacepuppy.Utils
 
         private static bool IsSupportedType(System.Type tp, System.TypeCode code)
         {
+            if (tp !=null && tp.IsEnum) return true;
+
             if (code == System.TypeCode.Object)
             {
                 return object.ReferenceEquals(tp, typeof(object)) || object.ReferenceEquals(tp, typeof(System.TimeSpan));
@@ -2222,6 +2224,13 @@ namespace com.spacepuppy.Utils
 
         private static object ToPrim(object value, System.Type tp, System.TypeCode code)
         {
+            //first make sure it's not an enum
+            if(tp != null && tp.IsEnum)
+            {
+                return System.Enum.Parse(tp, System.Convert.ToString(value), true);
+            }
+
+            //now base off of the TypeCode
             switch (code)
             {
                 case System.TypeCode.Empty:
@@ -2336,11 +2345,11 @@ namespace com.spacepuppy.Utils
 
             var tp = typeof(T);
             int itype = 0;
-            if (ObjUtil.IsType(tp, typeof(GameObject)))
+            if (TypeUtil.IsType(tp, typeof(GameObject)))
                 itype = 1;
-            if (ObjUtil.IsType(tp, typeof(Component)))
+            if (TypeUtil.IsType(tp, typeof(Component)))
                 itype = 2;
-            else if (ObjUtil.IsType(tp, typeof(IComponent)))
+            else if (TypeUtil.IsType(tp, typeof(IComponent)))
                 itype = 3;
 
             if (itype == 1 && GameObjectUtil.IsGameObjectSource(obj))
@@ -2367,11 +2376,11 @@ namespace com.spacepuppy.Utils
 
             var tp = typeof(T);
             int itype = 0;
-            if (ObjUtil.IsType(tp, typeof(GameObject)))
+            if (TypeUtil.IsType(tp, typeof(GameObject)))
                 itype = 1;
-            if (ObjUtil.IsType(tp, typeof(Component)))
+            if (TypeUtil.IsType(tp, typeof(Component)))
                 itype = 2;
-            else if (ObjUtil.IsType(tp, typeof(IComponent)))
+            else if (TypeUtil.IsType(tp, typeof(IComponent)))
                 itype = 3;
 
             foreach (object obj in objects)

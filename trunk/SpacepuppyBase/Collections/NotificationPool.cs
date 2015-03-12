@@ -38,7 +38,7 @@ namespace com.spacepuppy.Collections
 
         public void RegisterNotificationType(System.Type notificationType)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (_registeredNotifications.Contains(notificationType)) return;
             _registeredNotifications.Add(notificationType);
 
@@ -62,7 +62,7 @@ namespace com.spacepuppy.Collections
 
         public void UnRegisterNotification(System.Type notificationType)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (_registeredNotifications.Remove(notificationType))
             {
                 foreach (var d in _lst)
@@ -79,7 +79,7 @@ namespace com.spacepuppy.Collections
 
         public bool ContainsNotificationType(System.Type notificationType)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             return _registeredNotifications.Contains(notificationType);
         }
 

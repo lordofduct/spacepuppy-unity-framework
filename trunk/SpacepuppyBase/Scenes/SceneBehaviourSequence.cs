@@ -38,7 +38,7 @@ namespace com.spacepuppy.Scenes
 
         public void Append(System.Type tp)
         {
-            if (tp == null || !ObjUtil.IsType(typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
+            if (tp == null || !TypeUtil.IsType(typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
 
             _scenes.Enqueue(tp);
         }

@@ -16,12 +16,12 @@ namespace com.spacepuppyeditor
 
         public static bool DefaultPropertyField(SerializedProperty property)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUILayout(property, GUIContent.none, false, null);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, GUIContent.none, false, null);
         }
 
         public static bool DefaultPropertyField(SerializedProperty property, GUIContent label)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyDrawer.Instance.OnGUILayout(property, label, false, null);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, label, false, null);
         }
 
         #endregion
@@ -116,7 +116,7 @@ namespace com.spacepuppyeditor
 
         public static int EnumFlagField(System.Type enumType, GUIContent label, int value)
         {
-            var names = (from e in ObjUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
+            var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
             return EditorGUILayout.MaskField(label, value, names);
         }
 
