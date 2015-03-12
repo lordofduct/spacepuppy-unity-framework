@@ -17,8 +17,6 @@ namespace com.spacepuppyeditor.Internal
 
         private static PropertyHandlerCache _handlerCache = new PropertyHandlerCache();
 
-        private static List<System.Type> _knownPropertyDrawerTypes;
-
 
 
         //Internal Wrapper Fields

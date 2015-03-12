@@ -40,12 +40,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Path\BezierChainPath.cs" />
-    <Compile Include="Path\IWaypoint.cs" />
-    <Compile Include="Path\IWaypointPath.cs" />
-    <Compile Include="Path\SplinePath.cs" />
-    <Compile Include="Path\Waypoint.cs" />
-    <Compile Include="Path\WaypointPathComponent.cs" />
+    <Compile Include="WaypointPaths\BezierChainPath.cs" />
+    <Compile Include="WaypointPaths\IWaypoint.cs" />
+    <Compile Include="WaypointPaths\IWaypointPath.cs" />
+    <Compile Include="WaypointPaths\SplinePath.cs" />
+    <Compile Include="WaypointPaths\Waypoint.cs" />
+    <Compile Include="WaypointPaths\WaypointPathComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

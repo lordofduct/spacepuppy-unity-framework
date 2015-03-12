@@ -105,9 +105,13 @@ namespace com.spacepuppyeditor
         {
             if (!TypeUtil.IsType(selectedType, baseType)) selectedType = null;
 
-            var knownTypes = (from ass in System.AppDomain.CurrentDomain.GetAssemblies()
-                              from tp in ass.GetTypes()
-                              where TypeUtil.IsType(tp, baseType) && (allowAbstractTypes || !tp.IsAbstract) && (allowInterfaces || !tp.IsInterface)
+            //var knownTypes = (from ass in System.AppDomain.CurrentDomain.GetAssemblies()
+            //                  from tp in ass.GetTypes()
+            //                  where TypeUtil.IsType(tp, baseType) && (allowAbstractTypes || !tp.IsAbstract) && (allowInterfaces || !tp.IsInterface)
+            //                  orderby tp.FullName.Substring(tp.FullName.LastIndexOf(".") + 1) ascending
+            //                  select tp).ToArray();
+            var knownTypes = (from tp in TypeUtil.GetTypesAssignableFrom(baseType)
+                              where (allowAbstractTypes || !tp.IsAbstract) && (allowInterfaces || !tp.IsInterface)
                               orderby tp.FullName.Substring(tp.FullName.LastIndexOf(".") + 1) ascending
                               select tp).ToArray();
             GUIContent[] knownTypeNames = null;
