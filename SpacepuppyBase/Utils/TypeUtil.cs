@@ -7,16 +7,23 @@ namespace com.spacepuppy.Utils
     public static class TypeUtil
     {
 
-        public static System.Type[] GetTypesAssignableFrom(System.Reflection.Assembly assemb, System.Type rootType)
+        public static IEnumerable<System.Type> GetTypesAssignableFrom(System.Type rootType)
         {
-            var lst = new List<System.Type>();
+            foreach (var assemb in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var tp in assemb.GetTypes())
+                {
+                    if (rootType.IsAssignableFrom(tp)) yield return tp;
+                }
+            }
+        }
 
+        public static IEnumerable<System.Type> GetTypesAssignableFrom(System.Reflection.Assembly assemb, System.Type rootType)
+        {
             foreach (var tp in assemb.GetTypes())
             {
-                if (rootType.IsAssignableFrom(tp) && rootType != tp) lst.Add(tp);
+                if (rootType.IsAssignableFrom(tp) && rootType != tp) yield return tp;
             }
-
-            return lst.ToArray();
         }
 
         public static bool IsType(System.Type tp, System.Type assignableType)
