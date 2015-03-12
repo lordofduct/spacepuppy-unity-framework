@@ -17,7 +17,7 @@ namespace com.spacepuppyeditor.Modifiers
         {
             bool bUseEntity = (this.attribute as DefaultFromSelfAttribute).UseEntity;
 
-            if (ObjUtil.IsType(fieldInfo.FieldType, typeof(Component)) && property.objectReferenceValue == null)
+            if (TypeUtil.IsType(fieldInfo.FieldType, typeof(Component)) && property.objectReferenceValue == null)
             {
                 var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
                 if (targ != null)
@@ -35,7 +35,7 @@ namespace com.spacepuppyeditor.Modifiers
                     property.serializedObject.ApplyModifiedProperties();
                 }
             }
-            else if (ObjUtil.IsType(fieldInfo.FieldType, typeof(GameObject)) && property.objectReferenceValue == null)
+            else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(GameObject)) && property.objectReferenceValue == null)
             {
                 var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
                 if (targ != null)
@@ -51,7 +51,7 @@ namespace com.spacepuppyeditor.Modifiers
                     property.serializedObject.ApplyModifiedProperties();
                 }
             }
-            else if (ObjUtil.IsType(fieldInfo.FieldType, typeof(VariantReference)))
+            else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(VariantReference)))
             {
                 var variant = EditorHelper.GetTargetObjectOfProperty(property) as VariantReference;
                 if (variant != null && variant.Value == null && variant.ValueType == VariantReference.VariantType.GameObject)

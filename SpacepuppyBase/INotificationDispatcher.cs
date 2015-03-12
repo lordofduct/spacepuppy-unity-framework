@@ -122,7 +122,7 @@ namespace com.spacepuppy
 
         public void UnsafeRegisterObserver(System.Type notificationType, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (_unsafeHandlers.ContainsKey(notificationType))
@@ -137,7 +137,7 @@ namespace com.spacepuppy
 
         public void UnsafeRemoveObserver(System.Type notificationType, NotificationHandler handler)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             if (_handlers.ContainsKey(notificationType))
@@ -157,7 +157,7 @@ namespace com.spacepuppy
 
         public bool HasObserver(System.Type notificationType, bool bNotifyEntity)
         {
-            if (notificationType == null || !ObjUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
+            if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
 
             return this.HasObserver_Imp(notificationType, bNotifyEntity);
         }
@@ -215,13 +215,13 @@ namespace com.spacepuppy
             n.SetSender(_owner ?? this);
             bool handled = false;
 
-            handled = this.PostNotification_JustSelf(tp, n);
+            handled = this.PostNotificationToJustSelf(tp, n);
 
             if (_ownerGameObject != null)
             {
                 if (!Object.ReferenceEquals(_owner, _ownerGameObject))
                 {
-                    if (_ownerGameObject._dispatcher.PostNotification_JustSelf(tp, n)) handled = true;
+                    if (_ownerGameObject._dispatcher.PostNotificationToJustSelf(tp, n)) handled = true;
                 }
 
                 if (bNotifyEntity)
@@ -231,7 +231,7 @@ namespace com.spacepuppy
                     GameObjectNotificationDispatcher dispatcher;
                     if (root != _ownerGameObject.gameObject && root.GetComponent<GameObjectNotificationDispatcher>(out dispatcher))
                     {
-                        if (dispatcher._dispatcher.PostNotification_JustSelf(tp, n)) handled = true;
+                        if (dispatcher._dispatcher.PostNotificationToJustSelf(tp, n)) handled = true;
                     }
                     //root.BroadcastMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, n, UnityEngine.SendMessageOptions.DontRequireReceiver);
                 }
@@ -283,7 +283,14 @@ namespace com.spacepuppy
             }
         }
 
-        private bool PostNotification_JustSelf(System.Type tp, Notification n)
+        /// <summary>
+        /// Limited posting of a notification. Only handlers registered directly with this NotificationDispatcher will be notified. 
+        /// Not even the global notification dispatcher will be signaled.
+        /// </summary>
+        /// <param name="tp"></param>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public bool PostNotificationToJustSelf(System.Type tp, Notification n)
         {
             bool bHandled = false;
 

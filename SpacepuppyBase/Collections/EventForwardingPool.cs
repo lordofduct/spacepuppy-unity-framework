@@ -22,7 +22,7 @@ namespace com.spacepuppy.Collections
 
         public EventForwardingPool(TEvent handler, string eventName)
         {
-            if (!ObjUtil.IsType(typeof(TEvent), typeof(Delegate))) throw new InvalidOperationException("TEvent must be a Delegate of some type.");
+            if (!TypeUtil.IsType(typeof(TEvent), typeof(Delegate))) throw new InvalidOperationException("TEvent must be a Delegate of some type.");
             if (handler == null) throw new ArgumentNullException("handler");
             _handler = handler as Delegate;
 
@@ -40,7 +40,7 @@ namespace com.spacepuppy.Collections
 
         public EventForwardingPool(TEvent handler, string eventName, BindingFlags binding)
         {
-            if (!ObjUtil.IsType(typeof(TEvent), typeof(Delegate))) throw new InvalidOperationException("TEvent must be a Delegate of some type.");
+            if (!TypeUtil.IsType(typeof(TEvent), typeof(Delegate))) throw new InvalidOperationException("TEvent must be a Delegate of some type.");
             if (handler == null) throw new ArgumentNullException("handler");
             _handler = handler as Delegate;
 
@@ -58,10 +58,10 @@ namespace com.spacepuppy.Collections
 
         public EventForwardingPool(TEvent handler, EventInfo info)
         {
-            if (!ObjUtil.IsType(typeof(TEvent), typeof(Delegate))) throw new InvalidOperationException("TEvent must be a Delegate of some type.");
+            if (!TypeUtil.IsType(typeof(TEvent), typeof(Delegate))) throw new InvalidOperationException("TEvent must be a Delegate of some type.");
             if (handler == null) throw new ArgumentNullException("handler");
             if (info == null) throw new ArgumentNullException("info");
-            if (!ObjUtil.IsType(typeof(T), info.DeclaringType)) throw new ArgumentException("EventInfo must be from a type that T can be assigned to.");
+            if (!TypeUtil.IsType(typeof(T), info.DeclaringType)) throw new ArgumentException("EventInfo must be from a type that T can be assigned to.");
 
             _handler = handler as Delegate;
             _event = info;

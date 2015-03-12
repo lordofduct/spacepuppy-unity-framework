@@ -82,7 +82,7 @@ namespace com.spacepuppyeditor.Internal
             }
 
             //USE STANDARD HANDLER if none was found
-            return StandardPropertyDrawer.Instance;
+            return StandardPropertyHandler.Instance;
         }
 
         //#######################

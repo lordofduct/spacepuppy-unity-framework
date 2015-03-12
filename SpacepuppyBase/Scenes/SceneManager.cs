@@ -10,6 +10,14 @@ namespace com.spacepuppy.Scenes
     public class SceneManager : Singleton
     {
 
+        #region Events
+
+        public event System.EventHandler<SceneLoadingEventArgs> SceneCreated;
+        public event System.EventHandler<SceneLoadingEventArgs> SceneLoaded;
+        public event System.EventHandler<SceneLoadingEventArgs> SceneStarted;
+
+        #endregion
+
         #region Fields
 
         [System.NonSerialized()]
@@ -57,7 +65,7 @@ namespace com.spacepuppy.Scenes
 
         public IProgressingYieldInstruction LoadScene(System.Type tp)
         {
-            if (tp == null || !ObjUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
+            if (tp == null || !TypeUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
             return this.LoadScene(new SceneBehaviourLoadOptions(tp));
         }
 
@@ -66,7 +74,7 @@ namespace com.spacepuppy.Scenes
             if (options == null) throw new System.ArgumentNullException("options");
 
             var tp = options.SceneBehaviourType;
-            if (tp == null || !ObjUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
+            if (tp == null || !TypeUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
 
             this.Unload();
 
@@ -77,8 +85,34 @@ namespace com.spacepuppy.Scenes
             _currentSceneBehaviour = _currentSceneBehaviourGameObject.AddComponent(tp) as ISceneBehaviour;
 
             _loadingOp = new WaitForSceneLoaded();
-            _loadingOp.Start(_currentSceneBehaviour, options);
+            _loadingOp.Start(this, _currentSceneBehaviour, options);
             return _loadingOp;
+        }
+
+
+
+        protected virtual void OnSceneCreated(SceneLoadingEventArgs e)
+        {
+            if (e == null) throw new System.ArgumentNullException("e");
+
+            e.LoadOptions.OnSceneCreated(this, e.Scene);
+            if (this.SceneCreated != null) this.SceneCreated(this, e);
+        }
+
+        protected virtual void OnSceneLoaded(SceneLoadingEventArgs e)
+        {
+            if (e == null) throw new System.ArgumentNullException("e");
+
+            e.LoadOptions.OnSceneLoaded(this, e.Scene);
+            if (this.SceneLoaded != null) this.SceneLoaded(this, e);
+        }
+
+        protected virtual void OnSceneStarted(SceneLoadingEventArgs e)
+        {
+            if (e == null) throw new System.ArgumentNullException("e");
+
+            e.LoadOptions.OnSceneStarted(this, e.Scene);
+            if (this.SceneStarted != null) this.SceneStarted(this, e);
         }
 
         #endregion
@@ -90,6 +124,7 @@ namespace com.spacepuppy.Scenes
 
             #region Fields
 
+            private SceneManager _manager;
             private ISceneBehaviour _scene;
             private ISceneBehaviourLoadOptions _options;
             private IProgressingYieldInstruction _loadOp;
@@ -100,8 +135,9 @@ namespace com.spacepuppy.Scenes
 
             #region Methods
 
-            public void Start(ISceneBehaviour scene, ISceneBehaviourLoadOptions options)
+            public void Start(SceneManager manager, ISceneBehaviour scene, ISceneBehaviourLoadOptions options)
             {
+                _manager = manager;
                 _scene = scene;
                 _options = options;
                 _routine = GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad());
@@ -120,13 +156,15 @@ namespace com.spacepuppy.Scenes
 
             private System.Collections.IEnumerator DoLoad()
             {
-                _options.OnSceneCreated(_scene);
+                var args = new SceneLoadingEventArgs(_manager, _scene, _options);
+
+                _manager.OnSceneCreated(args);
                 _loadOp = _scene.LoadScene();
                 yield return _loadOp;
-                _options.OnSceneLoaded(_scene);
+                _manager.OnSceneLoaded(args);
                 _scene.BeginScene();
                 this.SetSignal();
-                _options.OnSceneStarted(_scene);
+                _manager.OnSceneStarted(args);
             }
 
             protected override object Tick()

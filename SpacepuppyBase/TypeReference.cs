@@ -72,7 +72,7 @@ namespace com.spacepuppy
             if (_typeHash != null)
             {
                 var arr = StringUtil.SplitFixedLength(_typeHash, "|", 2);
-                _type = ObjUtil.FindType(arr[0], arr[1]);
+                _type = TypeUtil.ParseType(arr[0], arr[1]);
             }
             else
             {

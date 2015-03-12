@@ -52,7 +52,7 @@ namespace com.spacepuppy
                     bool bFail = false;
                     for (int i = 0; i < arglen; i++)
                     {
-                        if (!com.spacepuppy.Utils.ObjUtil.IsType(args[i].GetType(), paramInfos[i].ParameterType))
+                        if (!com.spacepuppy.Utils.TypeUtil.IsType(args[i].GetType(), paramInfos[i].ParameterType))
                         {
                             bFail = true;
                             break;

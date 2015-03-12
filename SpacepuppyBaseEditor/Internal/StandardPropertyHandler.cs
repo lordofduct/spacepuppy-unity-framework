@@ -10,21 +10,21 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Internal
 {
 
-    internal class StandardPropertyDrawer : IPropertyHandler
+    internal class StandardPropertyHandler : IPropertyHandler
     {
 
-        private static StandardPropertyDrawer _instance;
+        private static StandardPropertyHandler _instance;
 
-        public static StandardPropertyDrawer Instance
+        public static StandardPropertyHandler Instance
         {
             get
             {
-                if (_instance == null) _instance = new StandardPropertyDrawer();
+                if (_instance == null) _instance = new StandardPropertyHandler();
                 return _instance;
             }
         }
 
-        private StandardPropertyDrawer()
+        private StandardPropertyHandler()
         {
             //block constructor
         }
@@ -51,18 +51,18 @@ namespace com.spacepuppyeditor.Internal
 
     }
 
-    internal class DefaultPropertyDrawer : IPropertyHandler
+    internal class DefaultPropertyHandler : IPropertyHandler
     {
 
         #region Singleton Interface
 
-        private static DefaultPropertyDrawer _instance;
+        private static DefaultPropertyHandler _instance;
 
-        public static DefaultPropertyDrawer Instance
+        public static DefaultPropertyHandler Instance
         {
             get
             {
-                if (_instance == null) _instance = new DefaultPropertyDrawer();
+                if (_instance == null) _instance = new DefaultPropertyHandler();
                 return _instance;
             }
         }
@@ -80,7 +80,7 @@ namespace com.spacepuppyeditor.Internal
 
         #region CONSTRUCTOR
 
-        private DefaultPropertyDrawer()
+        private DefaultPropertyHandler()
         {
             //block constructor
             _editorGuiAccessWrapper = new TypeAccessWrapper(typeof(EditorGUI));
@@ -103,7 +103,7 @@ namespace com.spacepuppyeditor.Internal
                 if (_fieldTypeToDrawer.ContainsKey(tp))
                 {
                     var result = _fieldTypeToDrawer[tp];
-                    PropertyDrawerActivator.InitializePropertyDrawer(result, null, fieldInfo);
+                    if(result != null) PropertyDrawerActivator.InitializePropertyDrawer(result, null, fieldInfo);
                     return result;
                 }
 

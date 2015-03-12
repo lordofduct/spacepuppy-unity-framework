@@ -25,12 +25,12 @@ namespace com.spacepuppyeditor.Inspectors
         {
             bool isArray = this.fieldInfo.FieldType.IsListType();
             var fieldType = (isArray) ? this.fieldInfo.FieldType.GetElementTypeOfListType() : this.fieldInfo.FieldType;
-            if (!ObjUtil.IsType(fieldType, typeof(Component))) return false;
+            if (!TypeUtil.IsType(fieldType, typeof(Component))) return false;
 
             var attrib = this.attribute as ComponentTypeRestrictionAttribute;
             return attrib.InheritsFromType == null ||
-                ObjUtil.IsType(attrib.InheritsFromType, fieldType) ||
-                ObjUtil.IsType(attrib.InheritsFromType, typeof(IComponent));
+                TypeUtil.IsType(attrib.InheritsFromType, fieldType) ||
+                TypeUtil.IsType(attrib.InheritsFromType, typeof(IComponent));
         }
 
         private GUIContent GetHeaderLabel(SerializedProperty property, GUIContent label, System.Type inheritsFromType)

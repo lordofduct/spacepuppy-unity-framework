@@ -59,7 +59,7 @@ namespace com.spacepuppyeditor
             {
                 _headerDrawers = new List<GUIDrawer>();
                 var componentType = serializedObject.targetObject.GetType();
-                if(ObjUtil.IsType(componentType, typeof(Component)))
+                if(TypeUtil.IsType(componentType, typeof(Component)))
                 {
                     var attribs = (from o in componentType.GetCustomAttributes(typeof(ComponentHeaderAttribute), true) 
                                    let a = o as ComponentHeaderAttribute 
@@ -71,13 +71,13 @@ namespace com.spacepuppyeditor
                         var dtp = ScriptAttributeUtility.GetDrawerTypeForType(attrib.GetType());
                         if (dtp != null)
                         {
-                            if(ObjUtil.IsType(dtp, typeof(DecoratorDrawer)))
+                            if(TypeUtil.IsType(dtp, typeof(DecoratorDrawer)))
                             {
                                 var decorator = System.Activator.CreateInstance(dtp) as DecoratorDrawer;
                                 ObjUtil.SetValue(decorator, "m_Attribute", attrib);
                                 _headerDrawers.Add(decorator);
                             }
-                            else if (ObjUtil.IsType(dtp, typeof(ComponentHeaderDrawer)))
+                            else if (TypeUtil.IsType(dtp, typeof(ComponentHeaderDrawer)))
                             {
                                 var drawer = System.Activator.CreateInstance(dtp) as ComponentHeaderDrawer;
                                 drawer.Init(attrib, componentType);

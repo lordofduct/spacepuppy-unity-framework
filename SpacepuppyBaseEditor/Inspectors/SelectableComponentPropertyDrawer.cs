@@ -28,7 +28,7 @@ namespace com.spacepuppyeditor.Inspectors
             get { return _restrictionType; }
             set
             {
-                if (value == null || !ObjUtil.IsType(value, typeof(Component), typeof(IComponent))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
+                if (value == null || !TypeUtil.IsType(value, typeof(Component), typeof(IComponent))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
                 _restrictionType = value;
             }
         }
@@ -64,7 +64,7 @@ namespace com.spacepuppyeditor.Inspectors
         {
             this.Init();
 
-            if (property.propertyType != SerializedPropertyType.ObjectReference || !ObjUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
+            if (property.propertyType != SerializedPropertyType.ObjectReference || !TypeUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
             {
                 this.DrawAsMismatchedAttribute(position, property, label);
                 return;
@@ -101,7 +101,7 @@ namespace com.spacepuppyeditor.Inspectors
 
         private void DrawObjectRefField(Rect position, SerializedProperty property)
         {
-            if(ObjUtil.IsType(_restrictionType, typeof(Component)))
+            if(TypeUtil.IsType(_restrictionType, typeof(Component)))
             {
                 property.objectReferenceValue = EditorGUI.ObjectField(position, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
             }
