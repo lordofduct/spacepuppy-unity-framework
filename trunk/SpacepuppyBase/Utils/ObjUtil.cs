@@ -9,6 +9,18 @@ namespace com.spacepuppy.Utils
     public static class ObjUtil
     {
 
+        public static void SmartDestroy(Object obj)
+        {
+            if(Application.isPlaying)
+            {
+                Object.Destroy(obj);
+            }
+            else
+            {
+                Object.DestroyImmediate(obj);
+            }
+        }
+
         /// <summary>
         /// Returns true if the object is either a null reference or has been destroyed by unity.
         /// </summary>

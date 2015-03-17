@@ -42,48 +42,21 @@ namespace com.spacepuppy.Utils
                         break;
                     case PrimitiveType.Cylinder:
                         go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                        if (Application.isPlaying)
-                        {
-                            GameObject.Destroy(go.GetComponent<CapsuleCollider>());
-                            var coll = go.AddComponent<MeshCollider>();
-                            coll.sharedMesh = go.GetComponent<MeshFilter>().sharedMesh;
-                            GameObject.Destroy(go.GetComponent<MeshFilter>());
-                            GameObject.Destroy(go.GetComponent<MeshRenderer>());
-                        }
-                        else
-                        {
-                            GameObject.DestroyImmediate(go.GetComponent<CapsuleCollider>());
-                            var coll = go.AddComponent<MeshCollider>();
-                            coll.sharedMesh = go.GetComponent<MeshFilter>().sharedMesh;
-                            GameObject.DestroyImmediate(go.GetComponent<MeshFilter>());
-                            GameObject.DestroyImmediate(go.GetComponent<MeshRenderer>());
-                        }
+                        ObjUtil.SmartDestroy(go.GetComponent<MeshCollider>());
+                        var coll = go.AddComponent<MeshCollider>();
+                        coll.sharedMesh = go.GetComponent<MeshFilter>().sharedMesh;
+                        ObjUtil.SmartDestroy(go.GetComponent<MeshFilter>());
+                        ObjUtil.SmartDestroy(go.GetComponent<MeshRenderer>());
                         break;
                     case PrimitiveType.Plane:
                         go = GameObject.CreatePrimitive(PrimitiveType.Plane);
-                        if (Application.isPlaying)
-                        {
-                            GameObject.Destroy(go.GetComponent<MeshFilter>());
-                            GameObject.Destroy(go.GetComponent<MeshRenderer>());
-                        }
-                        else
-                        {
-                            GameObject.DestroyImmediate(go.GetComponent<MeshFilter>());
-                            GameObject.DestroyImmediate(go.GetComponent<MeshRenderer>());
-                        }
+                        ObjUtil.SmartDestroy(go.GetComponent<MeshFilter>());
+                        ObjUtil.SmartDestroy(go.GetComponent<MeshRenderer>());
                         break;
                     case PrimitiveType.Quad:
                         go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                        if (Application.isPlaying)
-                        {
-                            GameObject.Destroy(go.GetComponent<MeshFilter>());
-                            GameObject.Destroy(go.GetComponent<MeshRenderer>());
-                        }
-                        else
-                        {
-                            GameObject.DestroyImmediate(go.GetComponent<MeshFilter>());
-                            GameObject.DestroyImmediate(go.GetComponent<MeshRenderer>());
-                        }
+                        ObjUtil.SmartDestroy(go.GetComponent<MeshFilter>());
+                        ObjUtil.SmartDestroy(go.GetComponent<MeshRenderer>());
                         break;
                 }
             }
@@ -232,14 +205,7 @@ namespace com.spacepuppy.Utils
         {
             var go = CreatePrimitive(type);
             var mesh = go.GetComponent<MeshFilter>().sharedMesh;
-            if (Application.isPlaying)
-            {
-                GameObject.Destroy(go);
-            }
-            else
-            {
-                GameObject.DestroyImmediate(go);
-            }
+            ObjUtil.SmartDestroy(go);
             return mesh;
         }
         public static Mesh CreateRingMesh()

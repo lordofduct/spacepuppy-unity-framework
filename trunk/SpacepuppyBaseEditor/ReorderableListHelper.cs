@@ -20,6 +20,11 @@ namespace com.spacepuppyeditor
             return Event.current.type == EventType.mouseUp && Event.current.button == MouseUtil.BTN_RIGHT && clickArea.Contains(Event.current.mousePosition);
         }
 
+        public static bool IsClickingArea(Rect area, int mouseButton = 0)
+        {
+            return Event.current.type == EventType.mouseUp && Event.current.button == mouseButton && area.Contains(Event.current.mousePosition);
+        }
+
         public static void DrawDraggableElementDeleteContextMenu(this ReorderableList lst, Rect area, int index, bool isActive, bool isFocused)
         {
             if (IsRightClickingDraggableArea(lst, area))
