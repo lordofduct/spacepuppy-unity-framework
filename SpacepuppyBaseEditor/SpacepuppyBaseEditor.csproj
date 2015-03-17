@@ -43,7 +43,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes.cs" />
     <Compile Include="ComponentHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireComponentInEntityHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireLayerHeaderDrawer.cs" />
@@ -92,7 +91,6 @@
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorGUI.cs" />
     <Compile Include="SPEditorGUILayout.cs" />
-    <Compile Include="SPSceneGizmo.cs" />
     <Compile Include="Tools\PrefabTools.cs" />
   </ItemGroup>
   <ItemGroup>

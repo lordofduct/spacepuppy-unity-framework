@@ -567,14 +567,7 @@ namespace com.spacepuppy.Utils
             var comp = obj.GetComponent<T>();
             if (comp != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(comp);
-                }
-                else
-                {
-                    Object.DestroyImmediate(comp);
-                }
+                ObjUtil.SmartDestroy(comp);
             }
         }
 
@@ -583,14 +576,7 @@ namespace com.spacepuppy.Utils
             var comp = obj.GetComponent<T>();
             if (comp != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(comp);
-                }
-                else
-                {
-                    Object.DestroyImmediate(comp);
-                }
+                ObjUtil.SmartDestroy(comp);
             }
         }
 
@@ -599,14 +585,7 @@ namespace com.spacepuppy.Utils
             var comp = obj.GetComponent(tp);
             if (comp != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(comp);
-                }
-                else
-                {
-                    Object.DestroyImmediate(comp);
-                }
+                ObjUtil.SmartDestroy(comp);
             }
         }
 
@@ -615,14 +594,7 @@ namespace com.spacepuppy.Utils
             var comp = obj.GetComponent(tp);
             if (comp != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(comp);
-                }
-                else
-                {
-                    Object.DestroyImmediate(comp);
-                }
+                ObjUtil.SmartDestroy(comp);
             }
         }
 
@@ -631,14 +603,7 @@ namespace com.spacepuppy.Utils
             var comp = obj.GetComponent(tp);
             if (comp != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(comp);
-                }
-                else
-                {
-                    Object.DestroyImmediate(comp);
-                }
+                ObjUtil.SmartDestroy(comp);
             }
         }
 
@@ -647,14 +612,7 @@ namespace com.spacepuppy.Utils
             var comp = obj.GetComponent(tp);
             if (comp != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(comp);
-                }
-                else
-                {
-                    Object.DestroyImmediate(comp);
-                }
+                ObjUtil.SmartDestroy(comp);
             }
         }
 
@@ -662,14 +620,7 @@ namespace com.spacepuppy.Utils
         {
             if (comp != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(comp);
-                }
-                else
-                {
-                    Object.DestroyImmediate(comp);
-                }
+                ObjUtil.SmartDestroy(comp);
             }
         }
 
@@ -1049,8 +1000,13 @@ namespace com.spacepuppy.Utils
             var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
             foreach (var child in e)
             {
-                var comp = child.GetComponent<T>();
-                if (comp != null) yield return comp;
+                //var comp = child.GetComponent<T>();
+                //if (comp != null) yield return comp;
+                var arr = child.GetComponents<T>();
+                for(int i = 0; i < arr.Length; i++)
+                {
+                    yield return arr[i];
+                }
             }
         }
 
@@ -1059,8 +1015,13 @@ namespace com.spacepuppy.Utils
             var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
             foreach (var child in e)
             {
-                var comp = child.GetComponent<T>();
-                if (comp != null) yield return comp;
+                //var comp = child.GetComponent<T>();
+                //if (comp != null) yield return comp;
+                var arr = child.GetComponents<T>();
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    yield return arr[i];
+                }
             }
         }
 
@@ -1069,8 +1030,13 @@ namespace com.spacepuppy.Utils
             var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
             foreach (var child in e)
             {
-                var comp = child.GetComponent(tp);
-                if (comp != null) yield return comp;
+                //var comp = child.GetComponent(tp);
+                //if (comp != null) yield return comp;
+                var arr = child.GetComponents(tp);
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    yield return arr[i];
+                }
             }
         }
 
@@ -1079,8 +1045,13 @@ namespace com.spacepuppy.Utils
             var e = (bIncludeSelf) ? obj.GetAllChildrenAndSelf() : obj.GetAllChildren();
             foreach (var child in e)
             {
-                var comp = child.GetComponent(tp);
-                if (comp != null) yield return comp;
+                //var comp = child.GetComponent(tp);
+                //if (comp != null) yield return comp;
+                var arr = child.GetComponents(tp);
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    yield return arr[i];
+                }
             }
         }
 
