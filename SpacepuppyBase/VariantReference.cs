@@ -276,7 +276,7 @@ namespace com.spacepuppy
                     _valueReference = VectorUtil.Stringify(this.Vector3Value);
                     break;
                 case VariantType.Quaternion:
-                    _valueReference = VectorUtil.Stringify(this.QuaternionValue);
+                    _valueReference = QuaternionUtil.Stringify(this.QuaternionValue);
                     break;
                 case VariantType.Color:
                     _valueReference = ConvertUtil.ToInt(this.ColorValue).ToString();
@@ -301,13 +301,13 @@ namespace com.spacepuppy
                     _value = _unityObjectReference as Component;
                     break;
                 case VariantType.Vector2:
-                    _value = VectorUtil.ToVector2(_valueReference);
+                    _value = ConvertUtil.ToVector2(_valueReference);
                     break;
                 case VariantType.Vector3:
-                    _value = VectorUtil.ToVector3(_valueReference);
+                    _value = ConvertUtil.ToVector3(_valueReference);
                     break;
                 case VariantType.Quaternion:
-                    _value = VectorUtil.ToQuaternion(_valueReference);
+                    _value = ConvertUtil.ToQuaternion(_valueReference);
                     break;
                 case VariantType.Color:
                     _value = ConvertUtil.ToColor(_valueReference);
@@ -411,13 +411,13 @@ namespace com.spacepuppy
                     return ConvertUtil.ToDouble(obj);
                 case VariantType.Vector2:
                     if (obj is Vector2) return (Vector2)obj;
-                    return VectorUtil.ToVector2(ConvertUtil.ToString(obj));
+                    return ConvertUtil.ToVector2(ConvertUtil.ToString(obj));
                 case VariantType.Vector3:
                     if (obj is Vector3) return (Vector3)obj;
-                    return VectorUtil.ToVector3(ConvertUtil.ToString(obj));
+                    return ConvertUtil.ToVector3(ConvertUtil.ToString(obj));
                 case VariantType.Quaternion:
                     if (obj is Quaternion) return (Quaternion)obj;
-                    return VectorUtil.ToQuaternion(ConvertUtil.ToString(obj));
+                    return ConvertUtil.ToQuaternion(ConvertUtil.ToString(obj));
                 case VariantType.Color:
                     return ConvertUtil.ToColor(obj);
                 case VariantType.DateTime:

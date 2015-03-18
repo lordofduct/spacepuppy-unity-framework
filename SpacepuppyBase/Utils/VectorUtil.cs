@@ -24,17 +24,12 @@ namespace com.spacepuppy.Utils
             return v.x.ToString() + "," + v.y.ToString() + "," + v.z.ToString();
         }
 
-        public static string Stringify(Quaternion q)
-        {
-            return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + q.w.ToString();
-        }
-
         /// <summary>
         /// Get Vector2 from angle
         /// </summary>
         /// <param name="a"></param>
         /// <returns></returns>
-        public static Vector2 ToVector2(float a, bool useRadians = false, bool yDominant = false)
+        public static Vector2 AngleToVector2(float a, bool useRadians = false, bool yDominant = false)
         {
             if (!useRadians) a *= Mathf.Deg2Rad;
             if (yDominant)
@@ -46,58 +41,6 @@ namespace com.spacepuppy.Utils
                 return new Vector2(Mathf.Cos(a), Mathf.Sin(a));
             }
         }
-
-        public static Vector2 ToVector2(string sval)
-        {
-            if (System.String.IsNullOrEmpty(sval)) return Vector2.zero;
-
-            var arr = StringUtil.SplitFixedLength(sval, ',', 2);
-
-            return new Vector2(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]));
-        }
-
-        /// <summary>
-        /// Creates Vector2 from X and Y values of a Vector3
-        /// </summary>
-        /// <param name="vec"></param>
-        /// <returns></returns>
-        public static Vector2 ToVector2(Vector3 vec)
-        {
-            return new Vector2(vec.x, vec.y);
-        }
-
-        public static Vector3 ToVector3(Vector2 vec)
-        {
-            return new Vector3(vec.x, vec.y, 0);
-        }
-
-        public static Vector3 ToVector3(string sval)
-        {
-            if (System.String.IsNullOrEmpty(sval)) return Vector3.zero;
-
-            var arr = StringUtil.SplitFixedLength(sval, ',', 3);
-
-            return new Vector3(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]), ConvertUtil.ToSingle(arr[2]));
-        }
-
-
-        /// <summary>
-        /// Parses a Quaterion
-        /// </summary>
-        /// <param name="v"></param>
-        /// <param name="a"></param>
-        /// <param name="axis"></param>
-        /// <param name="bUseRadians"></param>
-        /// <returns></returns>
-        public static Quaternion ToQuaternion(string sval)
-        {
-            if (string.IsNullOrEmpty(sval)) return Quaternion.identity;
-
-            var arr = StringUtil.SplitFixedLength(sval.Replace(" ", ""), ',', 4);
-            return new Quaternion(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]), ConvertUtil.ToSingle(arr[2]), ConvertUtil.ToSingle(arr[3]));
-        }
-
-
 
         public static Vector3 RotateAroundAxis(Vector3 v, float a, Vector3 axis, bool bUseRadians = false)
         {
