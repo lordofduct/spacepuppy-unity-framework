@@ -11,6 +11,37 @@ namespace com.spacepuppy
         [SerializeField()]
         private float _value;
 
+        #region Properties
+
+        #endregion
+
+        #region Static/Constants
+
+        public static DiscreteFloat PositiveInfinity { get { return new DiscreteFloat() { _value = float.PositiveInfinity }; } }
+        public static DiscreteFloat NegativeInfinity { get { return new DiscreteFloat() { _value = float.NegativeInfinity }; } }
+
+        public static bool IsNaN(DiscreteFloat value)
+        {
+            return float.IsNaN(value._value);
+        }
+
+        public static bool IsInfinity(DiscreteFloat value)
+        {
+            return float.IsInfinity(value._value);
+        }
+
+        public static bool IsPositiveInfinity(DiscreteFloat value)
+        {
+            return float.IsPositiveInfinity(value._value);
+        }
+
+        public static bool IsNegativeInfinity(DiscreteFloat value)
+        {
+            return float.IsNegativeInfinity(value._value);
+        }
+
+        #endregion
+
         #region Operators
 
         #region Addition

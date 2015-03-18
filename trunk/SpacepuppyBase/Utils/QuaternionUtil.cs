@@ -7,6 +7,11 @@ namespace com.spacepuppy.Utils
     public static class QuaternionUtil
     {
 
+        public static string Stringify(Quaternion q)
+        {
+            return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + q.w.ToString();
+        }
+
         public static string ToDetailedString(this Quaternion v)
         {
             return System.String.Format("<{0}, {1}, {2}, {3}>", v.x, v.y, v.z, v.w);

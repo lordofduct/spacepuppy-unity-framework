@@ -37,10 +37,56 @@ namespace com.spacepuppy.Utils
             return ToColor(ToInt(value));
         }
 
+        public static Color ToColor(Color32 value)
+        {
+            return new Color((float)value.r / 255f,
+                             (float)value.g / 255f,
+                             (float)value.b / 255f,
+                             (float)value.a / 255f);
+        }
+
         public static Color ToColor(object value)
         {
             if (value is Color) return (Color)value;
+            if (value is Color32) return ToColor((Color32)value);
             return ToColor(ToInt(value));
+        }
+
+        public static int ToInt(Color32 color)
+        {
+            return (color.a << 24) +
+                   (color.r << 16) +
+                   (color.g << 8) +
+                   color.b;
+        }
+
+        public static Color32 ToColor32(int value)
+        {
+            byte a = (byte)(value >> 24 & 0xFF);
+            byte r = (byte)(value >> 16 & 0xFF);
+            byte g = (byte)(value >> 8 & 0xFF);
+            byte b = (byte)(value & 0xFF);
+            return new Color32(r, g, b, a);
+        }
+        
+        public static Color32 ToColor32(string value)
+        {
+            return ToColor32(ToInt(value));
+        }
+
+        public static Color32 ToColor32(Color value)
+        {
+            return new Color32((byte)(value.r * 255f),
+                               (byte)(value.g * 255f),
+                               (byte)(value.b * 255f),
+                               (byte)(value.a * 255f));
+        }
+
+        public static Color32 ToColor32(object value)
+        {
+            if (value is Color32) return (Color32)value;
+            if (value is Color) return ToColor((Color)value);
+            return ToColor32(ToInt(value));
         }
 
         #endregion
@@ -1499,6 +1545,223 @@ namespace com.spacepuppy.Utils
         }
         #endregion
 
+        #region ToVector2
+
+        public static Vector2 ToVector2(string sval)
+        {
+            if (System.String.IsNullOrEmpty(sval)) return Vector2.zero;
+
+            var arr = StringUtil.SplitFixedLength(sval, ',', 2);
+
+            return new Vector2(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]));
+        }
+
+        /// <summary>
+        /// Creates Vector2 from X and Y values of a Vector3
+        /// </summary>
+        /// <param name="vec"></param>
+        /// <returns></returns>
+        public static Vector2 ToVector2(Vector3 vec)
+        {
+            return new Vector2(vec.x, vec.y);
+        }
+
+        public static Vector2 ToVector2(Vector4 vec)
+        {
+            return new Vector2(vec.x, vec.y);
+        }
+
+        public static Vector2 ToVector2(Quaternion vec)
+        {
+            return new Vector2(vec.x, vec.y);
+        }
+
+        public static Vector2 ToVector2(object value)
+        {
+            if (value is Vector2) return (Vector2)value;
+            if (value is Vector3)
+            {
+                var v = (Vector3)value;
+                return new Vector2(v.x, v.y);
+            }
+            if (value is Vector4)
+            {
+                var v = (Vector4)value;
+                return new Vector2(v.x, v.y);
+            }
+            if (value is Quaternion)
+            {
+                var q = (Quaternion)value;
+                return new Vector2(q.x, q.y);
+            }
+            return ToVector2(System.Convert.ToString(value));
+        }
+
+        #endregion
+
+        #region ToVector3
+
+        public static Vector3 ToVector3(Vector2 vec)
+        {
+            return new Vector3(vec.x, vec.y, 0);
+        }
+
+        public static Vector3 ToVector3(Vector4 vec)
+        {
+            return new Vector3(vec.x, vec.y, vec.z);
+        }
+
+        public static Vector3 ToVector3(Quaternion vec)
+        {
+            return new Vector3(vec.x, vec.y, vec.z);
+        }
+
+        public static Vector3 ToVector3(string sval)
+        {
+            if (System.String.IsNullOrEmpty(sval)) return Vector3.zero;
+
+            var arr = StringUtil.SplitFixedLength(sval, ',', 3);
+
+            return new Vector3(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]), ConvertUtil.ToSingle(arr[2]));
+        }
+
+        public static Vector3 ToVector3(object value)
+        {
+            if (value is Vector2)
+            {
+                var v = (Vector2)value;
+                return new Vector3(v.x, v.y, 0f);
+            }
+            if (value is Vector3)
+            {
+                return (Vector3)value;
+            }
+            if (value is Vector4)
+            {
+                var v = (Vector4)value;
+                return new Vector3(v.x, v.y, v.z);
+            }
+            if (value is Quaternion)
+            {
+                var q = (Quaternion)value;
+                return new Vector3(q.x, q.y, q.z);
+            }
+            return ToVector3(System.Convert.ToString(value));
+        }
+
+        #endregion
+
+        #region ToVector4
+
+        public static Vector4 ToVector4(Vector2 vec)
+        {
+            return new Vector4(vec.x, vec.y, 0f, 0f);
+        }
+
+        public static Vector4 ToVector4(Vector3 vec)
+        {
+            return new Vector4(vec.x, vec.y, vec.z, 0f);
+        }
+
+        public static Vector4 ToVector4(Quaternion vec)
+        {
+            return new Vector4(vec.x, vec.y, vec.z, vec.w);
+        }
+
+        public static Vector4 ToVector4(string sval)
+        {
+            if (System.String.IsNullOrEmpty(sval)) return Vector3.zero;
+
+            var arr = StringUtil.SplitFixedLength(sval, ',', 4);
+
+            return new Vector4(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]), ConvertUtil.ToSingle(arr[2]), ConvertUtil.ToSingle(arr[3]));
+        }
+
+        public static Vector4 ToVector4(object value)
+        {
+            if (value is Vector2)
+            {
+                var v = (Vector2)value;
+                return new Vector4(v.x, v.y, 0f, 0f);
+            }
+            if (value is Vector3)
+            {
+                var v = (Vector3)value;
+                return new Vector4(v.x, v.y, v.z, 0f);
+            }
+            if (value is Vector4)
+            {
+                return (Vector4)value;
+            }
+            if (value is Quaternion)
+            {
+                var q = (Quaternion)value;
+                return new Vector4(q.x, q.y, q.z, q.w);
+            }
+            return ToVector4(System.Convert.ToString(value));
+        }
+
+        #endregion
+
+        #region ToVector4
+
+        public static Quaternion ToQuaternion(Vector2 vec)
+        {
+            return new Quaternion(vec.x, vec.y, 0f, 0f);
+        }
+
+        public static Quaternion ToQuaternion(Vector3 vec)
+        {
+            return new Quaternion(vec.x, vec.y, vec.z, 0f);
+        }
+
+        public static Quaternion ToQuaternion(Vector4 vec)
+        {
+            return new Quaternion(vec.x, vec.y, vec.z, vec.w);
+        }
+
+        /// <summary>
+        /// Parses a Quaterion
+        /// </summary>
+        /// <param name="v"></param>
+        /// <param name="a"></param>
+        /// <param name="axis"></param>
+        /// <param name="bUseRadians"></param>
+        /// <returns></returns>
+        public static Quaternion ToQuaternion(string sval)
+        {
+            if (string.IsNullOrEmpty(sval)) return Quaternion.identity;
+
+            var arr = StringUtil.SplitFixedLength(sval.Replace(" ", ""), ',', 4);
+            return new Quaternion(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]), ConvertUtil.ToSingle(arr[2]), ConvertUtil.ToSingle(arr[3]));
+        }
+
+        public static Quaternion ToQuaternion(object value)
+        {
+            if (value is Vector2)
+            {
+                var v = (Vector2)value;
+                return new Quaternion(v.x, v.y, 0f, 0f);
+            }
+            if (value is Vector3)
+            {
+                var v = (Vector3)value;
+                return new Quaternion(v.x, v.y, v.z, 0f);
+            }
+            if (value is Vector4)
+            {
+                var v = (Vector4)value;
+                return new Quaternion(v.x, v.y, v.z, v.w);
+            }
+            if (value is Quaternion)
+            {
+                return (Quaternion)value;
+            }
+            return ToQuaternion(System.Convert.ToString(value));
+        }
+
+        #endregion
+
 
         #region "Is Supported"
 
@@ -1598,9 +1861,11 @@ namespace com.spacepuppy.Utils
         /// <remarks></remarks>
         public static bool IsNumericType(System.Type tp)
         {
+            return IsNumericType(System.Type.GetTypeCode(tp));
+        }
 
-            System.TypeCode code = System.Type.GetTypeCode(tp);
-
+        public static bool IsNumericType(System.TypeCode code)
+        {
             switch (code)
             {
                 case System.TypeCode.SByte:
@@ -1640,7 +1905,6 @@ namespace com.spacepuppy.Utils
                 default:
                     return false;
             }
-
         }
 
         #endregion

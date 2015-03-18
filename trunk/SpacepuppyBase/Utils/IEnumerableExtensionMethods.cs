@@ -136,6 +136,15 @@ namespace com.spacepuppy.Utils
             return lst.Intersect(objs).Count() > 0;
         }
 
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> lst, T obj)
+        {
+            foreach (var o in lst)
+            {
+                yield return o;
+            }
+            yield return obj;
+        }
+
         public static IEnumerable<T> Prepend<T>(this IEnumerable<T> lst, T obj)
         {
             yield return obj;

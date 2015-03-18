@@ -7,7 +7,7 @@ namespace com.spacepuppy.Utils
     public static class TypeUtil
     {
 
-        public static IEnumerable<System.Type> GetTypesAssignableFrom(System.Type rootType)
+        public static IEnumerable<Type> GetTypesAssignableFrom(System.Type rootType)
         {
             foreach (var assemb in System.AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -18,7 +18,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<System.Type> GetTypesAssignableFrom(System.Reflection.Assembly assemb, System.Type rootType)
+        public static IEnumerable<Type> GetTypesAssignableFrom(System.Reflection.Assembly assemb, System.Type rootType)
         {
             foreach (var tp in assemb.GetTypes())
             {
