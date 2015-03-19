@@ -126,6 +126,43 @@ namespace com.spacepuppy.Tween.Curves
             }
         }
 
+        public static MemberCurve Create(object target, string propName, Ease ease, float dur, object start, object end, bool slerp = false)
+        {
+            if (target == null) throw new System.ArgumentNullException("target");
+            return Create(target.GetType(), propName, ease, dur, start, end, slerp);
+        }
+
+        public static MemberCurve Create(System.Type targType, string propName, Ease ease, float dur, object start, object end, bool slerp = false)
+        {
+            MemberInfo memberInfo;
+            System.Type memberType;
+            MemberAccessorPool.GetMember(targType, propName, out memberInfo, out memberType);
+
+            if (_memberTypeToCurveType == null) BuildDictionary();
+
+            if (_memberTypeToCurveType.ContainsKey(memberType))
+            {
+                try
+                {
+                    var curve = System.Activator.CreateInstance(_memberTypeToCurveType[memberType], true) as MemberCurve;
+                    curve._dur = dur;
+                    curve.Ease = ease;
+                    curve._accessor = MemberAccessorPool.Get(memberInfo);
+                    if (curve is NumericMemberCurve && ConvertUtil.IsNumericType(memberType)) (curve as NumericMemberCurve).NumericType = System.Type.GetTypeCode(memberType);
+                    curve.Init(start, end, slerp);
+                    return curve;
+                }
+                catch (System.Exception ex)
+                {
+                    throw new System.InvalidOperationException("Failed to create a MemberCurve for the desired MemberInfo.", ex);
+                }
+            }
+            else
+            {
+                throw new System.ArgumentException("MemberInfo is for a member type that is not supported.", "info");
+            }
+        }
+
         public static MemberCurve Create(MemberInfo info, Ease ease, float dur, object start, object end, bool slerp = false)
         {
             System.Type memberType;
@@ -142,7 +179,7 @@ namespace com.spacepuppy.Tween.Curves
             {
                 try
                 {
-                    var curve = System.Activator.CreateInstance(_memberTypeToCurveType[memberType]) as MemberCurve;
+                    var curve = System.Activator.CreateInstance(_memberTypeToCurveType[memberType], true) as MemberCurve;
                     curve._dur = dur;
                     curve.Ease = ease;
                     curve._accessor = MemberAccessorPool.Get(info);
@@ -164,12 +201,9 @@ namespace com.spacepuppy.Tween.Curves
         internal static void Init(MemberCurve curve, System.Type objType, string propName)
         {
             MemberInfo info;
-            curve._accessor = MemberAccessorPool.Get(objType, propName, out info);
             System.Type memberType = null;
-            if (info is PropertyInfo)
-                memberType = (info as PropertyInfo).PropertyType;
-            else if (info is FieldInfo)
-                memberType = (info as FieldInfo).FieldType;
+            MemberAccessorPool.GetMember(objType, propName, out info, out memberType);
+            curve._accessor = MemberAccessorPool.Get(info);
             if (memberType != null && curve is NumericMemberCurve && ConvertUtil.IsNumericType(memberType)) (curve as NumericMemberCurve).NumericType = System.Type.GetTypeCode(memberType);
         }
 

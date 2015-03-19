@@ -6,7 +6,7 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
-namespace com.spacepuppyeditor.Base
+namespace com.spacepuppyeditor.Components
 {
 
     [CustomPropertyDrawer(typeof(ComponentTypeRestrictionAttribute))]

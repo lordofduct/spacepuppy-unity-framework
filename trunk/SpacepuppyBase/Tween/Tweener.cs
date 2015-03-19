@@ -20,8 +20,8 @@ namespace com.spacepuppy.Tween
 
         #region Fields
 
-        private TweenUpdateType _updateType;
-        private TweenDeltaType _deltaType;
+        private UpdateSequence _updateType;
+        private DeltaTimeType _deltaType;
         private TweenWrapMode _wrap;
         private int _wrapCount;
 
@@ -43,13 +43,13 @@ namespace com.spacepuppy.Tween
 
         #region Properties
 
-        public TweenUpdateType UpdateType
+        public UpdateSequence UpdateType
         {
             get { return _updateType; }
             set { _updateType = value; }
         }
 
-        public TweenDeltaType DeltaType
+        public DeltaTimeType DeltaType
         {
             get { return _deltaType; }
             set { _deltaType = value; }

@@ -159,6 +159,7 @@ namespace com.spacepuppy
 
         private void LateUpdate()
         {
+            _currentSequence = UpdateSequence.LateUpdate;
             if (EarlyLateUpdate != null) EarlyLateUpdate(this, System.EventArgs.Empty);
         }
 
