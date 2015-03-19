@@ -68,7 +68,7 @@ namespace com.spacepuppy.Tween
 
         private void Update()
         {
-            this.DoUpdate(TweenUpdateType.Update);
+            this.DoUpdate(UpdateSequence.Update);
 
             if(Application.isEditor)
             {
@@ -78,15 +78,15 @@ namespace com.spacepuppy.Tween
 
         private void FixedUpdate()
         {
-            this.DoUpdate(TweenUpdateType.FixedUpdate);
+            this.DoUpdate(UpdateSequence.FixedUpdate);
         }
 
         private void LateUpdate()
         {
-            this.DoUpdate(TweenUpdateType.LateUpdate);
+            this.DoUpdate(UpdateSequence.LateUpdate);
         }
 
-        private void DoUpdate(TweenUpdateType updateType)
+        private void DoUpdate(UpdateSequence updateType)
         {
             _inUpdate = true;
 
@@ -99,10 +99,10 @@ namespace com.spacepuppy.Tween
 
                 switch (twn.DeltaType)
                 {
-                    case TweenDeltaType.Real:
+                    case DeltaTimeType.Real:
                         dt = GameTime.RealDeltaTime;
                         break;
-                    case TweenDeltaType.Smooth:
+                    case DeltaTimeType.Smooth:
                         dt = GameTime.SmoothDeltaTime;
                         break;
                     default:
@@ -154,6 +154,14 @@ namespace com.spacepuppy.Tween
             return tween;
         }
 
+        public static Tweener To(object targ, string propName, object end, float dur)
+        {
+            var tween = new ObjectTweener(targ);
+            SPTween.Props().To(propName, end, dur).Apply(tween);
+            tween.Start();
+            return tween;
+        }
+
         public static Tweener To(object targ, string propName, Ease ease, object end, float dur)
         {
             var tween = new ObjectTweener(targ);
@@ -162,10 +170,42 @@ namespace com.spacepuppy.Tween
             return tween;
         }
 
+        public static Tweener From(object targ, string propName, object start, float dur)
+        {
+            var tween = new ObjectTweener(targ);
+            SPTween.Props().From(propName, start, dur).Apply(tween);
+            tween.Start();
+            return tween;
+        }
+
         public static Tweener From(object targ, string propName, Ease ease, object start, float dur)
         {
             var tween = new ObjectTweener(targ);
             SPTween.Props().From(propName, ease, start, dur).Apply(tween);
+            tween.Start();
+            return tween;
+        }
+
+        public static Tweener By(object targ, string propName, object amt, float dur)
+        {
+            var tween = new ObjectTweener(targ);
+            SPTween.Props().By(propName, amt, dur).Apply(tween);
+            tween.Start();
+            return tween;
+        }
+
+        public static Tweener By(object targ, string propName, Ease ease, object amt, float dur)
+        {
+            var tween = new ObjectTweener(targ);
+            SPTween.Props().By(propName, ease, amt, dur).Apply(tween);
+            tween.Start();
+            return tween;
+        }
+
+        public static Tweener FromTo(object targ, string propName, object start, object end, float dur)
+        {
+            var tween = new ObjectTweener(targ);
+            SPTween.Props().FromTo(propName, start, end, dur).Apply(tween);
             tween.Start();
             return tween;
         }

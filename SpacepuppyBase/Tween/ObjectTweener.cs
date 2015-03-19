@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 using com.spacepuppy.Tween.Curves;
 using com.spacepuppy.Utils;
@@ -142,8 +143,7 @@ namespace com.spacepuppy.Tween
             {
                 if (_owner.IsRunning) throw new System.NotSupportedException("Running Tweener cannot have its curve collection modified.");
 
-                var memberInfo = _owner._target.GetType().GetMember(propName).FirstOrDefault();
-                if (memberInfo == null) throw new System.ArgumentException("Member of name'" + propName + "' could not be found.");
+                var memberInfo = MemberAccessorPool.GetMember(_owner._target.GetType(), propName);
 
                 object start = MemberAccessorPool.Get(memberInfo).Get(_owner._target);
 
@@ -156,8 +156,7 @@ namespace com.spacepuppy.Tween
             {
                 if (_owner.IsRunning) throw new System.NotSupportedException("Running Tweener cannot have its curve collection modified.");
 
-                var memberInfo = _owner._target.GetType().GetMember(propName).FirstOrDefault();
-                if (memberInfo == null) throw new System.ArgumentException("Member of name'" + propName + "' could not be found.");
+                var memberInfo = MemberAccessorPool.GetMember(_owner._target.GetType(), propName);
 
                 object end = MemberAccessorPool.Get(memberInfo).Get(_owner._target);
 
@@ -170,8 +169,7 @@ namespace com.spacepuppy.Tween
             {
                 if (_owner.IsRunning) throw new System.NotSupportedException("Running Tweener cannot have its curve collection modified.");
 
-                var memberInfo = _owner._target.GetType().GetMember(propName).FirstOrDefault();
-                if (memberInfo == null) throw new System.ArgumentException("Member of name'" + propName + "' could not be found.");
+                var memberInfo = MemberAccessorPool.GetMember(_owner._target.GetType(), propName);
 
                 object start = MemberAccessorPool.Get(memberInfo).Get(_owner._target);
                 object end = CurveCollection.TrySum(memberInfo, start, amt);
@@ -185,10 +183,7 @@ namespace com.spacepuppy.Tween
             {
                 if (_owner.IsRunning) throw new System.NotSupportedException("Running Tweener cannot have its curve collection modified.");
 
-                var memberInfo = _owner._target.GetType().GetMember(propName).FirstOrDefault();
-                if (memberInfo == null) throw new System.ArgumentException("Member of name'" + propName + "' could not be found.");
-
-                var curve = MemberCurve.Create(memberInfo, ease, dur, start, end);
+                var curve = MemberCurve.Create(_owner._target, propName, ease, dur, start, end);
                 _lst.Add(curve);
                 return curve;
             }

@@ -81,21 +81,9 @@ namespace com.spacepuppy.Tween
             return this;
         }
 
-        public PropertyHash FromTo(string memberName, Ease ease, float start, float end, float dur)
+        public PropertyHash FromTo(string memberName, object start, object end, float dur)
         {
-            _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, start, dur, end));
-            return this;
-        }
-
-        public PropertyHash FromTo(string memberName, Ease ease, Vector3 start, Vector3 end, float dur)
-        {
-            _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, start, dur, end));
-            return this;
-        }
-
-        public PropertyHash FromTo(string memberName, Ease ease, Quaternion start, Quaternion end, float dur)
-        {
-            _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, start, dur, end));
+            _props.Add(new PropInfo(AnimMode.FromTo, memberName, null, start, dur, end));
             return this;
         }
 
@@ -121,35 +109,32 @@ namespace com.spacepuppy.Tween
                 {
                     Ease ease = (prop.ease == null) ? _defaultEase : prop.ease;
                     float dur = prop.dur;
-                    if (prop.mode == AnimMode.Curve)
+                    switch (prop.mode)
                     {
-                        var curve = prop.value as ICurve;
-                        if(curve != null)
-                        {
-                            tween.Curves.Add(prop.name, curve);
-                        }
-                    }
-                    else
-                    {
-                        switch (prop.mode)
-                        {
-                            case AnimMode.To:
-                                tween.Curves.AddTo(prop.name, ease, prop.value, dur);
-                                break;
-                            case AnimMode.From:
-                                tween.Curves.AddFrom(prop.name, ease, prop.value, dur);
-                                break;
-                            case AnimMode.By:
-                                tween.Curves.AddBy(prop.name, ease, prop.value, dur);
-                                break;
-                            case AnimMode.FromTo:
-                                tween.Curves.AddFromTo(prop.name, ease, prop.value, prop.altValue, dur);
-                                break;
-                        }
+                        case AnimMode.Curve:
+                            var curve = prop.value as ICurve;
+                            if(curve != null)
+                            {
+                                tween.Curves.Add(prop.name, curve);
+                            }
+                            break;
+                        case AnimMode.To:
+                            tween.Curves.AddTo(prop.name, ease, prop.value, dur);
+                            break;
+                        case AnimMode.From:
+                            tween.Curves.AddFrom(prop.name, ease, prop.value, dur);
+                            break;
+                        case AnimMode.By:
+                            tween.Curves.AddBy(prop.name, ease, prop.value, dur);
+                            break;
+                        case AnimMode.FromTo:
+                            tween.Curves.AddFromTo(prop.name, ease, prop.value, prop.altValue, dur);
+                            break;
                     }
                 }
                 catch
                 {
+                    Debug.LogWarning("Failed to tween property '" + prop.name + "' on target.", targ as Object);
                 }
             }
         }

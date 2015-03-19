@@ -15,9 +15,17 @@ namespace com.spacepuppy
 
     public enum UpdateSequence
     {
-        None = 0,
-        Update = 1,
-        FixedUpdate = 2
+        None = -1,
+        Update = 0,
+        FixedUpdate = 1,
+        LateUpdate = 2
+    }
+
+    public enum DeltaTimeType
+    {
+        Normal = 0,
+        Real = 1,
+        Smooth = 2
     }
 
     public enum TypeDropDownListingStyle

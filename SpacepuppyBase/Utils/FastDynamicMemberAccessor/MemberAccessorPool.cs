@@ -62,19 +62,22 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
             return result;
         }
 
-        public static IMemberAccessor Get(Type objectType, string memberName)
+        public static IMemberAccessor Get(object target, string memberName)
         {
-            MemberInfo[] matches = objectType.GetMember(memberName,
-                                                        MemberTypes.Field | MemberTypes.Property,
-                                                        BindingFlags.Public | BindingFlags.Instance);
-
-            if ((matches == null) || (matches.Length == 0))
-                throw new MemberAccessorException(string.Format("Member \"{0}\" does not exist for type {1}.", memberName, objectType));
-
-            return Get(matches[0]);
+            if (target == null) throw new System.ArgumentNullException("target");
+            var memberInfo = GetMember(target.GetType(), memberName);
+            return Get(memberInfo);
         }
 
-        public static IMemberAccessor Get(Type objectType, string memberName, out MemberInfo memberInfo)
+        public static IMemberAccessor Get(Type objectType, string memberName)
+        {
+            MemberInfo memberInfo;
+            System.Type memberType;
+            GetMember(objectType, memberName, out memberInfo, out memberType);
+            return Get(memberInfo);
+        }
+
+        public static MemberInfo GetMember(Type objectType, string memberName)
         {
             MemberInfo[] matches = objectType.GetMember(memberName,
                                                         MemberTypes.Field | MemberTypes.Property,
@@ -83,8 +86,17 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
             if ((matches == null) || (matches.Length == 0))
                 throw new MemberAccessorException(string.Format("Member \"{0}\" does not exist for type {1}.", memberName, objectType));
 
-            memberInfo = matches[0];
-            return Get(memberInfo);
+            return matches[0];
+        }
+
+        public static void GetMember(Type objectType, string memberName, out MemberInfo memberInfo, out System.Type memberType)
+        {
+            memberInfo = GetMember(objectType, memberName);
+            memberType = null;
+            if (memberInfo is PropertyInfo)
+                memberType = (memberInfo as PropertyInfo).PropertyType;
+            else if (memberInfo is FieldInfo)
+                memberType = (memberInfo as FieldInfo).FieldType;
         }
 
     }

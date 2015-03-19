@@ -53,7 +53,8 @@
     <Compile Include="Base\Inspectors\GameObjectNotificationDispatcherInspector.cs" />
     <Compile Include="Base\Inspectors\OneOrManyPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ReorderableArrayPropertyDrawer.cs" />
-    <Compile Include="Base\Inspectors\SelectableComponentPropertyDrawer.cs" />
+    <Compile Include="Components\IComponentChoiceSelector.cs" />
+    <Compile Include="Components\SelectableComponentPropertyDrawer.cs" />
     <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Base\Modifiers\InsertButtonModifier.cs" />
     <Compile Include="EditorHelper.cs" />
@@ -61,7 +62,7 @@
     <Compile Include="EditorSceneEvents.cs" />
     <Compile Include="HandlesHelper.cs" />
     <Compile Include="Base\Inspectors\AdvancedAnimationInspector.cs" />
-    <Compile Include="Base\Inspectors\ComponentTypeRestrictionPropertyDrawer.cs" />
+    <Compile Include="Components\ComponentTypeRestrictionPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\EnumFlagsPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\EulerRotationInspectorPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\GenericMaskPropertyDrawer.cs" />
