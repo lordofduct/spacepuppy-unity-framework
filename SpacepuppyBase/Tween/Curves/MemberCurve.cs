@@ -82,6 +82,11 @@ namespace com.spacepuppy.Tween.Curves
 
         #region Methods
 
+        /// <summary>
+        /// Returns the appropriate value of the member on the curve at t, where t is a scalar (t would be 1.0, not 100, for 100%).
+        /// </summary>
+        /// <param name="t">The percentage of completion across the curve that the member is at.</param>
+        /// <returns></returns>
         protected abstract object GetValue(float t);
 
         #endregion

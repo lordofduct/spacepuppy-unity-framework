@@ -32,6 +32,7 @@ namespace com.spacepuppy
 
         private static GameLoopEntry _instance;
         private static UpdateSequence _currentSequence;
+        private static bool _applicationClosing;
 
         private UpdateEventHooks _updateHook;
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
@@ -88,6 +89,11 @@ namespace com.spacepuppy
         /// </summary>
         public static UpdateSequence CurrentSequence { get { return _currentSequence; } }
 
+        /// <summary>
+        /// Returns true if the OnApplicationQuit message has been received.
+        /// </summary>
+        public static bool ApplicationClosing { get { return _applicationClosing; } }
+
         #endregion
 
         #region Methods
@@ -101,6 +107,11 @@ namespace com.spacepuppy
         #endregion
 
         #region Event Handlers
+
+        private void OnApplicationQuit()
+        {
+            _applicationClosing = true;
+        }
 
         //Update
 

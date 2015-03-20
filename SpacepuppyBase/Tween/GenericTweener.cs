@@ -53,17 +53,5 @@ namespace com.spacepuppy.Tween
 
         #endregion
 
-        #region IDisposable Interface
-
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            _callback = null;
-            _token = null;
-        }
-
-        #endregion
-
     }
 }
