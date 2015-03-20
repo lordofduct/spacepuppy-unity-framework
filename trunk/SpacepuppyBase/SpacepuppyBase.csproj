@@ -133,7 +133,7 @@
     <Compile Include="Tween\ICurve.cs" />
     <Compile Include="Tween\MeshTweener.cs" />
     <Compile Include="Tween\ObjectTweener.cs" />
-    <Compile Include="Tween\PropertyHash.cs" />
+    <Compile Include="Tween\TweenHash.cs" />
     <Compile Include="Tween\SPTween.cs" />
     <Compile Include="Tween\Tweener.cs" />
     <Compile Include="TypeReference.cs" />

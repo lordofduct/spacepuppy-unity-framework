@@ -26,6 +26,7 @@ namespace com.spacepuppy.Tween
         {
             _target = targ;
             _curves = new CurveCollection(this);
+            this.OnPlay += this.OnPlayHandler;
         }
 
         #endregion
@@ -49,6 +50,11 @@ namespace com.spacepuppy.Tween
                 if (lst[i].TotalDuration > l) l = lst[i].TotalDuration;
             }
             return l;
+        }
+
+        private void OnPlayHandler(object sender, System.EventArgs e)
+        {
+            _totalDur = this.CalcTotalDur();
         }
 
         #endregion
@@ -75,13 +81,6 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        public override void Start()
-        {
-            _totalDur = this.CalcTotalDur();
-
-            base.Start();
-        }
-
         public override void Stop()
         {
             base.Stop();
@@ -105,7 +104,6 @@ namespace com.spacepuppy.Tween
         }
 
         #endregion
-
 
         #region Special Types
 

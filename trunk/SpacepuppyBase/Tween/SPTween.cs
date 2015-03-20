@@ -12,14 +12,6 @@ namespace com.spacepuppy.Tween
         private const string SPECIAL_NAME = "Spacepuppy.SPTween";
 
         private static SPTween _instance;
-        public static SPTween Instance
-        {
-            get
-            {
-                if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME);
-                return _instance;
-            }
-        }
 
         #endregion
 
@@ -36,7 +28,13 @@ namespace com.spacepuppy.Tween
 
         #region Methods
 
-        internal void AddReference(Tweener tween)
+        internal static void AddReference(Tweener tween)
+        {
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME);
+            _instance.AddReference_Imp(tween);
+        }
+        private void AddReference_Imp(Tweener tween)
         {
             if(_inUpdate)
             {
@@ -50,8 +48,16 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        internal void RemoveReference(Tweener tween)
+        internal static void RemoveReference(Tweener tween)
         {
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME);
+            _instance.RemoveReference_Imp(tween);
+        }
+        private void RemoveReference_Imp(Tweener tween)
+        {
+            if (!Application.isPlaying) return;
+
             if (_inUpdate)
             {
                 _toRemove.Add(tween);
@@ -132,89 +138,85 @@ namespace com.spacepuppy.Tween
 
         #region Static Interface
 
-        public static PropertyHash Props()
+        public static TweenHash Tween(object targ)
         {
-            return new PropertyHash();
+            return new TweenHash(targ);
         }
 
-
-        public static Tweener Tween(object targ, PropertyHash properties)
+        public static TweenHash Tween(params object[] targs)
         {
-            var tween = new ObjectTweener(targ);
-            properties.Apply(tween);
-            tween.Start();
-            return tween;
+            return new TweenHash(targs);
         }
 
         public static Tweener Curve(object targ, string propName, ICurve curve)
         {
             var tween = new ObjectTweener(targ);
             tween.Curves.Add(propName, curve);
-            tween.Start();
+            tween.Play();
             return tween;
         }
 
         public static Tweener To(object targ, string propName, object end, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().To(propName, end, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddTo(propName, EaseMethods.LinearEaseNone, end, dur);
+            tween.Play();
             return tween;
         }
 
         public static Tweener To(object targ, string propName, Ease ease, object end, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().To(propName, ease, end, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddTo(propName, ease, end, dur);
+            tween.Play();
             return tween;
         }
 
         public static Tweener From(object targ, string propName, object start, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().From(propName, start, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddFrom(propName, EaseMethods.LinearEaseNone, start, dur);
+            tween.Play();
             return tween;
         }
 
         public static Tweener From(object targ, string propName, Ease ease, object start, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().From(propName, ease, start, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddFrom(propName, ease, start, dur);
+            tween.Play();
             return tween;
         }
 
         public static Tweener By(object targ, string propName, object amt, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().By(propName, amt, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddBy(propName, EaseMethods.LinearEaseNone, amt, dur);
+            tween.Play();
             return tween;
         }
 
         public static Tweener By(object targ, string propName, Ease ease, object amt, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().By(propName, ease, amt, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddBy(propName, ease, amt, dur);
+            tween.Play();
             return tween;
         }
 
         public static Tweener FromTo(object targ, string propName, object start, object end, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().FromTo(propName, start, end, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddFromTo(propName, EaseMethods.LinearEaseNone, start, end, dur);
+            tween.Play();
             return tween;
         }
 
         public static Tweener FromTo(object targ, string propName, Ease ease, object start, object end, float dur)
         {
             var tween = new ObjectTweener(targ);
-            SPTween.Props().FromTo(propName, ease, start, end, dur).Apply(tween);
-            tween.Start();
+            tween.Curves.AddFromTo(propName, ease, start, end, dur);
+            tween.Play();
             return tween;
         }
 
