@@ -96,6 +96,14 @@ namespace com.spacepuppy.Tween
             get { return _currentWrapCount; }
         }
 
+        /// <summary>
+        /// Does the configuration of this tween result in a tween that plays forever.
+        /// </summary>
+        public bool PlaysIndefinitely
+        {
+            get { return _wrap != TweenWrapMode.Once && _wrapCount <= 0; }
+        }
+
         public abstract object Target { get; }
 
         public abstract float TotalDuration { get; }
@@ -106,12 +114,14 @@ namespace com.spacepuppy.Tween
 
         public virtual void Start()
         {
+            if (_isRunning) return;
             _isRunning = true;
             SPTween.Instance.AddReference(this);
         }
 
         public virtual void Stop()
         {
+            if (!_isRunning) return;
             _isRunning = false;
             SPTween.Instance.RemoveReference(this);
         }
