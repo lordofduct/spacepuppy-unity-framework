@@ -14,7 +14,7 @@ namespace com.spacepuppyeditor
         #region Static Interface
 
         private const string PREFS_DIR = @"Editor";
-        private const string PREFS_PATH = PREFS_DIR + @"/EditorProjectPrefs.xml";
+        private const string PREFS_PATH = PREFS_DIR + @"/Spacepuppy.EditorProjectPrefs.xml";
         private static string _projectId;
 
         static EditorProjectPrefs()
