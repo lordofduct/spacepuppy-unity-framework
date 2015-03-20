@@ -55,6 +55,7 @@
     <Compile Include="Base\Inspectors\ReorderableArrayPropertyDrawer.cs" />
     <Compile Include="Components\IComponentChoiceSelector.cs" />
     <Compile Include="Components\SelectableComponentPropertyDrawer.cs" />
+    <Compile Include="IconHelper.cs" />
     <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Base\Modifiers\InsertButtonModifier.cs" />
     <Compile Include="EditorHelper.cs" />
