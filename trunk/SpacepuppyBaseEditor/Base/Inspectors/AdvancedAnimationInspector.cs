@@ -40,7 +40,7 @@ namespace com.spacepuppyeditor.Base
 
         public override void OnInspectorGUI()
         {
-            if(!EditorProjectPrefs.GetBool("AdvancedAnimationInspector.Active", true))
+            if (!EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_ADVANCEDANIMINSPECTOR_ACTIVE, true))
             {
                 this.DrawDefaultStandardInspector();
                 return;

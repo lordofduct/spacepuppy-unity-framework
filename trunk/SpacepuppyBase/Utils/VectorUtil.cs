@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace com.spacepuppy.Utils
 {
@@ -419,6 +421,66 @@ namespace com.spacepuppy.Utils
         #endregion
 
 
+        #region Linq
+
+        public static Vector3 Average(this IEnumerable<Vector3> vectors)
+        {
+            int cnt = 0;
+            Vector3 sum = Vector3.zero;
+            foreach(var v in vectors)
+            {
+                cnt++;
+                sum += v;
+            }
+            return (cnt > 0) ? sum / (float)cnt : Vector3.zero;
+        }
+
+        public static Vector3 SphericalAverage(this IEnumerable<Vector3> vectors)
+        {
+            int cnt = 0;
+            float theta = 0f;
+            float phi = 0f;
+            foreach(var v in vectors)
+            {
+                cnt++;
+                theta += Mathf.Acos(v.z / Mathf.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z));
+                phi += Mathf.Atan(v.y / v.x);
+            }
+            if (cnt == 0 || float.IsNaN(theta)) return Vector3.zero;
+            theta /= (float)cnt;
+            phi /= (float)cnt;
+            float st = Mathf.Sin(theta);
+            return new Vector3(st * Mathf.Cos(phi), st * Mathf.Sin(phi), Mathf.Cos(theta));
+        }
+
+        public static Vector2 Average(this IEnumerable<Vector2> vectors)
+        {
+            int cnt = 0;
+            Vector2 sum = Vector3.zero;
+            foreach (var v in vectors)
+            {
+                cnt++;
+                sum += v;
+            }
+            return (cnt > 0) ? sum / (float)cnt : Vector2.zero;
+        }
+
+        public static Vector2 PolarAverage(this IEnumerable<Vector2> vectors)
+        {
+            int cnt = 0;
+            float sum = 0f;
+            foreach(var v in vectors)
+            {
+                cnt++;
+                sum += Mathf.Atan2(v.y, v.x);
+            }
+            if (cnt == 0 || float.IsNaN(sum)) return Vector2.zero;
+            sum /= (float)cnt;
+            return new Vector2(Mathf.Cos(sum), Mathf.Sin(sum));
+        }
+
+        #endregion
+
 
 
 
@@ -430,6 +492,7 @@ namespace com.spacepuppy.Utils
         {
             return System.String.Format("<{0}, {1}, {2}>", v.x, v.y, v.z);
         }
+
     }
 }
 

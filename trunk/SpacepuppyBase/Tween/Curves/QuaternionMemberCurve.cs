@@ -27,22 +27,23 @@ namespace com.spacepuppy.Tween.Curves
 
         }
 
-        public QuaternionMemberCurve(float dur, Quaternion start, Quaternion end, bool slerp = false)
-            : base(dur)
+        public QuaternionMemberCurve(string propName, float dur, Quaternion start, Quaternion end, bool slerp = false)
+            : base(propName, dur)
         {
             _start = start;
             _end = end;
             _useSlerp = slerp;
         }
 
-        public QuaternionMemberCurve(Ease ease, float dur, Quaternion start, Quaternion end, bool slerp = false) : base(ease, dur)
+        public QuaternionMemberCurve(string propName, Ease ease, float dur, Quaternion start, Quaternion end, bool slerp = false)
+            : base( propName, ease, dur)
         {
             _start = start;
             _end = end;
             _useSlerp = slerp;
         }
 
-        protected override void Init(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, bool slerp)
         {
             _start = ConvertUtil.ToQuaternion(start);
             _end = ConvertUtil.ToQuaternion(end);
