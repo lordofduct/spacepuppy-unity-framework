@@ -27,22 +27,23 @@ namespace com.spacepuppy.Tween.Curves
 
         }
 
-        public Vector3MemberCurve(float dur, Vector3 start, Vector3 end, bool slerp = false)
-            : base(dur)
+        public Vector3MemberCurve(string propName, float dur, Vector3 start, Vector3 end, bool slerp = false)
+            : base(propName, dur)
         {
             _start = start;
             _end = end;
             _useSlerp = slerp;
         }
 
-        public Vector3MemberCurve(Ease ease, float dur, Vector3 start, Vector3 end, bool slerp = false) : base(ease, dur)
+        public Vector3MemberCurve(string propName, Ease ease, float dur, Vector3 start, Vector3 end, bool slerp = false)
+            : base(propName, ease, dur)
         {
             _start = start;
             _end = end;
             _useSlerp = slerp;
         }
 
-        protected override void Init(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, bool slerp)
         {
             _start = ConvertUtil.ToVector3(start);
             _end = ConvertUtil.ToVector3(end);

@@ -35,20 +35,21 @@ namespace com.spacepuppy.Tween.Curves
 
         }
 
-        public NumericMemberCurve(float dur, double start, double end)
-            : base(dur)
+        public NumericMemberCurve(string propName, float dur, double start, double end)
+            : base(propName, dur)
         {
             _start = start;
             _end = end;
         }
 
-        public NumericMemberCurve(Ease ease, float dur, double start, double end) : base(ease, dur)
+        public NumericMemberCurve(string propName, Ease ease, float dur, double start, double end)
+            : base(propName, ease, dur)
         {
             _start = start;
             _end = end;
         }
 
-        protected override void Init(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, bool slerp)
         {
             _start = ConvertUtil.ToDouble(start);
             _end = ConvertUtil.ToDouble(end);

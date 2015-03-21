@@ -26,20 +26,21 @@ namespace com.spacepuppy.Tween.Curves
 
         }
 
-        public Vector4MemberCurve(float dur, Vector4 start, Vector4 end)
-            : base(dur)
+        public Vector4MemberCurve(string propName, float dur, Vector4 start, Vector4 end)
+            : base(propName, dur)
         {
             _start = start;
             _end = end;
         }
 
-        public Vector4MemberCurve(Ease ease, float dur, Vector4 start, Vector4 end) : base(ease, dur)
+        public Vector4MemberCurve(string propName, Ease ease, float dur, Vector4 start, Vector4 end)
+            : base(propName, ease, dur)
         {
             _start = start;
             _end = end;
         }
 
-        protected override void Init(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, bool slerp)
         {
             _start = ConvertUtil.ToVector4(start);
             _end = ConvertUtil.ToVector4(end);

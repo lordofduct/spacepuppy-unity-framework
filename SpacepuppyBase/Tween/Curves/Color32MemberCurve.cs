@@ -26,21 +26,21 @@ namespace com.spacepuppy.Tween.Curves
 
         }
 
-        public Color32MemberCurve(float dur, Color32 start, Color32 end)
-            : base(dur)
+        public Color32MemberCurve(string propName, float dur, Color32 start, Color32 end)
+            : base(propName, dur)
         {
             _start = start;
             _end = end;
         }
 
-        public Color32MemberCurve(Ease ease, float dur, Color32 start, Color32 end)
-            : base(ease, dur)
+        public Color32MemberCurve(string propName, Ease ease, float dur, Color32 start, Color32 end)
+            : base(propName, ease, dur)
         {
             _start = start;
             _end = end;
         }
 
-        protected override void Init(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, bool slerp)
         {
             _start = ConvertUtil.ToColor32(start);
             _end = ConvertUtil.ToColor32(end);

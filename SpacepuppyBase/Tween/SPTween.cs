@@ -28,6 +28,13 @@ namespace com.spacepuppy.Tween
 
         #region Methods
 
+        internal static bool IsRunning(Tweener tween)
+        {
+            if (GameLoopEntry.ApplicationClosing) return false;
+            if (_instance == null) return false;
+            return _instance._runningTweens.Contains(tween) || _instance._toAdd.Contains(tween);
+        }
+
         internal static void AddReference(Tweener tween)
         {
             if (GameLoopEntry.ApplicationClosing) return;
@@ -51,15 +58,15 @@ namespace com.spacepuppy.Tween
         internal static void RemoveReference(Tweener tween)
         {
             if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME);
+            if (_instance == null) return;
             _instance.RemoveReference_Imp(tween);
         }
         private void RemoveReference_Imp(Tweener tween)
         {
-            if (!Application.isPlaying) return;
-
+            if (!_runningTweens.Contains(tween)) return;
             if (_inUpdate)
             {
+                if (_toRemove.Contains(tween)) return;
                 _toRemove.Add(tween);
             }
             else
@@ -143,79 +150,70 @@ namespace com.spacepuppy.Tween
             return new TweenHash(targ);
         }
 
-        public static TweenHash Tween(params object[] targs)
+        public static ITweenHash Tween(TweenerUpdateCallback callback, float dur)
         {
-            return new TweenHash(targs);
+            return new CallbackTweener(callback, dur);
         }
 
-        public static Tweener Curve(object targ, string propName, ICurve curve)
+        public static Tweener Curve(object targ, Curve curve)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.Add(propName, curve);
+            var tween = new ObjectTweener(targ, curve);
             tween.Play();
             return tween;
         }
 
         public static Tweener To(object targ, string propName, object end, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddTo(propName, EaseMethods.LinearEaseNone, end, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateTo(targ, propName, EaseMethods.LinearEaseNone, end, dur));
             tween.Play();
             return tween;
         }
 
         public static Tweener To(object targ, string propName, Ease ease, object end, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddTo(propName, ease, end, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateTo(targ, propName, ease, end, dur));
             tween.Play();
             return tween;
         }
 
         public static Tweener From(object targ, string propName, object start, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddFrom(propName, EaseMethods.LinearEaseNone, start, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateFrom(targ, propName, EaseMethods.LinearEaseNone, start, dur));
             tween.Play();
             return tween;
         }
 
         public static Tweener From(object targ, string propName, Ease ease, object start, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddFrom(propName, ease, start, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateFrom(targ, propName, ease, start, dur));
             tween.Play();
             return tween;
         }
 
         public static Tweener By(object targ, string propName, object amt, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddBy(propName, EaseMethods.LinearEaseNone, amt, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateBy(targ, propName, EaseMethods.LinearEaseNone, amt, dur));
             tween.Play();
             return tween;
         }
 
         public static Tweener By(object targ, string propName, Ease ease, object amt, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddBy(propName, ease, amt, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateBy(targ, propName, ease, amt, dur));
             tween.Play();
             return tween;
         }
 
         public static Tweener FromTo(object targ, string propName, object start, object end, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddFromTo(propName, EaseMethods.LinearEaseNone, start, end, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, EaseMethods.LinearEaseNone, start, end, dur));
             tween.Play();
             return tween;
         }
 
         public static Tweener FromTo(object targ, string propName, Ease ease, object start, object end, float dur)
         {
-            var tween = new ObjectTweener(targ);
-            tween.Curves.AddFromTo(propName, ease, start, end, dur);
+            var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, ease, start, end, dur));
             tween.Play();
             return tween;
         }

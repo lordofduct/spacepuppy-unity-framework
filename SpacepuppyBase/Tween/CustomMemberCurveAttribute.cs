@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace com.spacepuppy.Tween.Curves
+namespace com.spacepuppy.Tween
 {
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public class CustomMemberCurveAttribute : System.Attribute
