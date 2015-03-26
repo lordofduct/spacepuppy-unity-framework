@@ -71,12 +71,15 @@ namespace com.spacepuppyeditor.Internal
             if (fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(SPPropertyAttribute)))
             {
                 var attribs = fieldInfo.GetCustomAttributes(typeof(SPPropertyAttribute), false).Cast<SPPropertyAttribute>().ToArray();
-                if (attribs[0].HandlesEntireArray)
-                {
-                    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
-                    _handlerCache.SetHandler(property, result);
-                    return result;
-                }
+                //if (attribs[0].HandlesEntireArray)
+                //{
+                //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
+                //    _handlerCache.SetHandler(property, result);
+                //    return result;
+                //}
+                result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
+                _handlerCache.SetHandler(property, result);
+                return result;
             }
 
             //USE STANDARD HANDLER if none was found

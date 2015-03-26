@@ -16,7 +16,7 @@ namespace com.spacepuppy.Tween
         ITweenHash UseNormalTime();
         ITweenHash UseRealTime();
         ITweenHash UseSmoothTime();
-        ITweenHash Use(DeltaTimeType type);
+        ITweenHash Use(ITimeSupplier type);
         ITweenHash PlayOnce();
         ITweenHash Loop(int count = -1);
         ITweenHash PingPong(int count = -1);

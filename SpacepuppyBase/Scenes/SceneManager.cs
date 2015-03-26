@@ -91,11 +91,11 @@ namespace com.spacepuppy.Scenes
 
 
 
-        protected virtual void OnSceneCreated(SceneLoadingEventArgs e)
+        protected virtual void OnBeforeSceneLoaded(SceneLoadingEventArgs e)
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
-            e.LoadOptions.OnSceneCreated(this, e.Scene);
+            e.LoadOptions.OnBeforeSceneLoaded(this, e.Scene);
             if (this.SceneCreated != null) this.SceneCreated(this, e);
         }
 
@@ -158,7 +158,7 @@ namespace com.spacepuppy.Scenes
             {
                 var args = new SceneLoadingEventArgs(_manager, _scene, _options);
 
-                _manager.OnSceneCreated(args);
+                _manager.OnBeforeSceneLoaded(args);
                 _loadOp = _scene.LoadScene();
                 yield return _loadOp;
                 _manager.OnSceneLoaded(args);

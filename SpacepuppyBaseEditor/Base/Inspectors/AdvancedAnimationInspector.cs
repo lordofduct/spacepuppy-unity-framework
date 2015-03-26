@@ -38,7 +38,7 @@ namespace com.spacepuppyeditor.Base
             _animList.onRemoveCallback = this._animList_OnRemoved;
         }
 
-        public override void OnInspectorGUI()
+        protected override void OnSPInspectorGUI()
         {
             if (!EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_ADVANCEDANIMINSPECTOR_ACTIVE, true))
             {

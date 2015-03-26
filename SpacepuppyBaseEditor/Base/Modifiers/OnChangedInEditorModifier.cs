@@ -11,16 +11,25 @@ namespace com.spacepuppyeditor.Modifiers
     [CustomPropertyDrawer(typeof(OnChangedInEditorAttribute))]
     public class OnChangedInEditorModifier : PropertyModifier
     {
+
         private object _valueBeforeChange;
+        private bool _valueDidChange;
 
         protected internal override void OnBeforeGUI(SerializedProperty property)
         {
+            _valueDidChange = false;
             _valueBeforeChange = EditorHelper.GetTargetObjectOfProperty(property);
         }
 
         protected internal override void OnPostGUI(SerializedProperty property)
         {
-            if(GUI.changed)
+            _valueDidChange = GUI.changed;
+        }
+
+
+        protected internal override void OnValidate(SerializedProperty property)
+        {
+            if (_valueDidChange)
             {
                 var attrib = this.attribute as OnChangedInEditorAttribute;
                 if (attrib.OnlyAtRuntime && !Application.isPlaying) return;
@@ -55,7 +64,7 @@ namespace com.spacepuppyeditor.Modifiers
                                             null,
                                             System.Type.EmptyTypes,
                                             null);
-                    if(methInfo != null)
+                    if (methInfo != null)
                     {
                         methInfo.Invoke(targ, null);
                         return;
@@ -63,8 +72,10 @@ namespace com.spacepuppyeditor.Modifiers
                 }
                 catch
                 {
-
                 }
+
+                _valueDidChange = false;
+                _valueBeforeChange = null;
             }
         }
 

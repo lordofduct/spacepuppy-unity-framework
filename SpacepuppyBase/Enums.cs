@@ -25,7 +25,8 @@ namespace com.spacepuppy
     {
         Normal = 0,
         Real = 1,
-        Smooth = 2
+        Smooth = 2,
+        Custom = 3
     }
 
     public enum TypeDropDownListingStyle

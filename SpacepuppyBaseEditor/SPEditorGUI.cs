@@ -36,6 +36,11 @@ namespace com.spacepuppyeditor
             return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, label, false);
         }
 
+        public static bool DefaultPropertyField(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
+        {
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, label, includeChildren);
+        }
+
         #endregion
 
         #region PropertyFields
@@ -57,6 +62,30 @@ namespace com.spacepuppyeditor
         public static LayerMask LayerMaskField(Rect position, string label, int selectedMask)
         {
             return EditorGUI.MaskField(position, label, selectedMask, LayerUtil.GetAllLayerNames());
+        }
+
+        #endregion
+
+        #region EnumPopup Inspector
+
+        public static System.Enum EnumPopupExcluding(Rect position, System.Enum enumValue, params System.Enum[] ignoredValues)
+        {
+            return EnumPopupExcluding(position, GUIContent.none, enumValue, ignoredValues);
+        }
+
+        public static System.Enum EnumPopupExcluding(Rect position, string label, System.Enum enumValue, params System.Enum[] ignoredValues)
+        {
+            return EnumPopupExcluding(position, EditorHelper.TempContent(label), enumValue, ignoredValues);
+        }
+
+        public static System.Enum EnumPopupExcluding(Rect position, GUIContent label, System.Enum enumValue, params System.Enum[] ignoredValues)
+        {
+            var etp = enumValue.GetType();
+            var evalues = System.Enum.GetValues(etp).Cast<System.Enum>().Except(ignoredValues).ToArray();
+            if (evalues.Length == 0) throw new System.ArgumentException("Excluded all possible values, not a valid popup.");
+            var names = (from e in evalues select EditorHelper.TempContent(e.ToString())).ToArray();
+            var index = EditorGUI.Popup(position, label, evalues.IndexOf(enumValue), names);
+            return (index >= 0) ? evalues[index] : evalues.First();
         }
 
         #endregion

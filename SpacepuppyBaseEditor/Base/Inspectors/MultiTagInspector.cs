@@ -20,7 +20,7 @@ namespace com.spacepuppyeditor.Base
 
         #endregion
 
-        public override void OnInspectorGUI()
+        protected override void OnSPInspectorGUI()
         {
             //this may change in later releases...
             _showTags = EditorGUILayout.Foldout(_showTags, "Tags");

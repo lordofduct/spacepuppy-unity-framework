@@ -17,22 +17,20 @@ namespace com.spacepuppy
 
 
 
-        #region Static Interface
 
-        /// <summary>
-        /// SP Time, ignores moments when game was paused.
-        /// </summary>
-        public static float Time { get { return UnityEngine.Time.time; } }
+        //public static float ActualTimeSinceStartup { get { return UnityEngine.Time.realtimeSinceStartup; } }
 
+        //public static float Time { get { return UnityEngine.Time.time; } }
 
-        /// <summary>
-        /// SP deltaTime, ignores moments when game is paused.
-        /// </summary>
-        public static float DeltaTime { get { return UnityEngine.Time.deltaTime; } }
+        //public static float RealTime { get { return UnityEngine.Time.unscaledTime; } }
 
-        public static float RealDeltaTime { get { return UnityEngine.Time.unscaledDeltaTime; } }
+        //public static float FixedTime { get { return UnityEngine.Time.fixedTime; } }
 
-        public static float SmoothDeltaTime { get { return UnityEngine.Time.smoothDeltaTime; } }
+        //public static float DeltaTime { get { return UnityEngine.Time.deltaTime; } }
+
+        //public static float RealDeltaTime { get { return UnityEngine.Time.unscaledDeltaTime; } }
+
+        //public static float SmoothDeltaTime { get { return UnityEngine.Time.smoothDeltaTime; } }
 
 
         public static GameTime Current
@@ -47,7 +45,7 @@ namespace com.spacepuppy
         {
             get
             {
-                return new GameTime(UnityEngine.Time.time, UnityEngine.Time.deltaTime);
+                return new GameTime(UnityEngine.Time.unscaledTime, UnityEngine.Time.unscaledDeltaTime);
             }
         }
 
@@ -76,11 +74,8 @@ namespace com.spacepuppy
             set
             {
                 UnityEngine.Time.timeScale = value;
-                UnityEngine.Time.fixedDeltaTime = UnityEngine.Time.timeScale * 0.02f;
             }
         }
-
-        #endregion
 
     }
 

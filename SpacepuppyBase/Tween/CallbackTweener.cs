@@ -99,25 +99,25 @@ namespace com.spacepuppy.Tween
 
         ITweenHash ITweenHash.UseNormalTime()
         {
-            this.DeltaType = DeltaTimeType.Normal;
+            this.TimeSupplier = SPTime.Normal;
             return this;
         }
 
         ITweenHash ITweenHash.UseRealTime()
         {
-            this.DeltaType = DeltaTimeType.Real;
+            this.TimeSupplier = SPTime.Real;
             return this;
         }
 
         ITweenHash ITweenHash.UseSmoothTime()
         {
-            this.DeltaType = DeltaTimeType.Smooth;
+            this.TimeSupplier = SPTime.Smooth;
             return this;
         }
 
-        ITweenHash ITweenHash.Use(DeltaTimeType type)
+        ITweenHash ITweenHash.Use(ITimeSupplier time)
         {
-            this.DeltaType = type;
+            this.TimeSupplier = time;
             return this;
         }
 

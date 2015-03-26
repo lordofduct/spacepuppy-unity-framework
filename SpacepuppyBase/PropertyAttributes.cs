@@ -119,6 +119,18 @@ namespace com.spacepuppy
 
     }
 
+    public class EnumPopupExcludingAttribute : SPPropertyAttribute
+    {
+
+        public readonly int[] excludedValues;
+
+        public EnumPopupExcludingAttribute(params int[] excluded)
+        {
+            excludedValues = excluded;
+        }
+
+    }
+
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class TagSelectorAttribute : SPPropertyAttribute
     {

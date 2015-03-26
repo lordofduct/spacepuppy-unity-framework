@@ -110,19 +110,7 @@ namespace com.spacepuppy.Tween
                 twn = _runningTweens[i];
                 if (twn.UpdateType != updateType) continue;
 
-                switch (twn.DeltaType)
-                {
-                    case DeltaTimeType.Real:
-                        dt = GameTime.RealDeltaTime;
-                        break;
-                    case DeltaTimeType.Smooth:
-                        dt = GameTime.SmoothDeltaTime;
-                        break;
-                    default:
-                        dt = GameTime.DeltaTime;
-                        break;
-                }
-                twn.Update(dt);
+                twn.Update();
             }
 
             _inUpdate = false;
