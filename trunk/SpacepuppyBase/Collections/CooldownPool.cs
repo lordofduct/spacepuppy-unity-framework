@@ -13,6 +13,7 @@ namespace com.spacepuppy.Collections
         private List<CooldownInfo> _lst = new List<CooldownInfo>();
         private bool _autoUpdate;
         private bool _currentlyAutoUpdating;
+        private ITimeSupplier _time;
 
         #endregion
 
@@ -20,7 +21,6 @@ namespace com.spacepuppy.Collections
 
         public CooldownPool()
         {
-
         }
 
         public CooldownPool(bool autoUpdate)
@@ -50,6 +50,20 @@ namespace com.spacepuppy.Collections
                 {
                     this.StopAutoUpdate();
                 }
+            }
+        }
+
+        public ITimeSupplier AutoUpdateTimeSupplier
+        {
+            get
+            {
+                if (_time == null) _time = SPTime.Normal;
+                return _time;
+            }
+            set
+            {
+                if (value == null) throw new System.ArgumentNullException("value");
+                _time = value;
             }
         }
 
@@ -106,6 +120,7 @@ namespace com.spacepuppy.Collections
         {
             if(_autoUpdate)
             {
+                if (_time == null) _time = SPTime.Normal;
                 GameLoopEntry.EarlyUpdate -= this.OnEarlyUpdate;
                 GameLoopEntry.EarlyUpdate += this.OnEarlyUpdate;
                 _currentlyAutoUpdating = true;
@@ -120,7 +135,7 @@ namespace com.spacepuppy.Collections
 
         private void OnEarlyUpdate(object sender, System.EventArgs e)
         {
-            this.Update(GameTime.DeltaTime);
+            this.Update(_time.Delta);
             if (_lst.Count == 0) this.StopAutoUpdate();
         }
 
@@ -171,7 +186,5 @@ namespace com.spacepuppy.Collections
 
         #endregion
 
-
-      
     }
 }

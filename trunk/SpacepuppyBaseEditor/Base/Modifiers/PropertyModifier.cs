@@ -26,7 +26,7 @@ namespace com.spacepuppyeditor.Modifiers
             if(bIsVisibleDrawer)
             {
                 var drawerTp = ScriptAttributeUtility.GetDrawerTypeForType(this.fieldInfo.FieldType);
-                if(drawerTp != null)
+                if (drawerTp != null)
                 {
                     _subDrawer = PropertyDrawerActivator.Create(drawerTp, null, this.fieldInfo);
                 }
@@ -67,7 +67,8 @@ namespace com.spacepuppyeditor.Modifiers
                     includeChildren = (this.attribute as PropertyModifierAttribute).IncludeChidrenOnDraw;
                 }
 
-                SPEditorGUI.PropertyField(position, property, label, includeChildren);
+                SPEditorGUI.DefaultPropertyField(position, property, label, includeChildren);
+                
             }
 
             this.OnPostGUI(property);
@@ -83,6 +84,11 @@ namespace com.spacepuppyeditor.Modifiers
         }
 
         protected internal virtual void OnPostGUI(SerializedProperty property)
+        {
+
+        }
+
+        protected internal virtual void OnValidate(SerializedProperty property)
         {
 
         }

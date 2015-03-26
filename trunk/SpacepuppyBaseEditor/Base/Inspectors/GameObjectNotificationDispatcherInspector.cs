@@ -17,7 +17,7 @@ namespace com.spacepuppyeditor.Base
         private bool _expanded;
 
 
-        public override void OnInspectorGUI()
+        protected override void OnSPInspectorGUI()
         {
             var targ = this.target as GameObjectNotificationDispatcher;
             if(targ == null) return;

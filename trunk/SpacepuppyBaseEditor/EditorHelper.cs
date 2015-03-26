@@ -294,6 +294,15 @@ namespace com.spacepuppyeditor
         {
             var c = _temp_text.GetInstance();
             c.text = text;
+            c.tooltip = null;
+            return c;
+        }
+
+        public static GUIContent TempContent(string text, string tooltip)
+        {
+            var c = _temp_text.GetInstance();
+            c.text = text;
+            c.tooltip = tooltip;
             return c;
         }
 

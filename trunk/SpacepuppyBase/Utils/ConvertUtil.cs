@@ -123,6 +123,11 @@ namespace com.spacepuppy.Utils
             return ToEnum<T>(System.Convert.ToString(val), default(T));
         }
 
+        public static System.Enum ToEnumOfType(System.Type enumType, object value)
+        {
+            return System.Enum.Parse(enumType, System.Convert.ToString(value), true) as System.Enum;
+        }
+
         #endregion
 
         #region ConvertToUInt

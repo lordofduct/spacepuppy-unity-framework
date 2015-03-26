@@ -26,7 +26,7 @@ namespace com.spacepuppy.Timers
 
         private static void OnUpdate(object sender, System.EventArgs e)
         {
-            _activeTimers.Update(GameTime.DeltaTime);
+            _activeTimers.Update(Time.deltaTime);
         }
 
         #endregion

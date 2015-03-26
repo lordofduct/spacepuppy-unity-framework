@@ -19,8 +19,6 @@ namespace com.spacepuppy
 
         protected override void OnDespawn()
         {
-            base.OnDespawn();
-
             this.PurgeHandlers();
         }
 

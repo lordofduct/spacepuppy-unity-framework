@@ -241,7 +241,7 @@ namespace com.spacepuppy
 
         protected override object Tick()
         {
-            _t += GameTime.RealDeltaTime;
+            _t += Time.unscaledDeltaTime;
             if (_t >= _dur) this.SetSignal();
             return null;
         }

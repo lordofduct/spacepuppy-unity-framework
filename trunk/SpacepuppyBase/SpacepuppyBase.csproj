@@ -81,6 +81,7 @@
     <Compile Include="Hooks\UpdateEventHooks.cs" />
     <Compile Include="IComponent.cs" />
     <Compile Include="IGameObjectSource.cs" />
+    <Compile Include="ITimeSupplier.cs" />
     <Compile Include="KillableEntity.cs" />
     <Compile Include="INotificationDispatcher.cs" />
     <Compile Include="IRadicalYieldInstruction.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="SPConstants.cs" />
     <Compile Include="SPNotifyingComponent.cs" />
     <Compile Include="DiscreteFloat.cs" />
+    <Compile Include="SPTime.cs" />
     <Compile Include="TagData.cs" />
     <Compile Include="TagMask.cs" />
     <Compile Include="Timers\BulkTimer.cs" />

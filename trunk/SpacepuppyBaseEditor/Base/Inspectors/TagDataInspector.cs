@@ -65,7 +65,7 @@ namespace com.spacepuppyeditor.Base
             _helper = new TagData.EditorHelper(this.target as TagData);
         }
 
-        public override void OnInspectorGUI()
+        protected override void OnSPInspectorGUI()
         {
 
             EditorGUILayout.HelpBox("This holds a reference to all the available tags for access at runtime. The data is kept in Assets/Resources and should be the ONLY one that exists. Do not delete.\n\nSpacepuppy Framework", MessageType.Info);

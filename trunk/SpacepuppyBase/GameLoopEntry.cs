@@ -33,11 +33,13 @@ namespace com.spacepuppy
         private static GameLoopEntry _instance;
         private static UpdateSequence _currentSequence;
         private static bool _applicationClosing;
+        private static System.Action<bool> _internalEarlyUpdate;
 
         private UpdateEventHooks _updateHook;
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
         private List<System.Action> _invokeList = new List<System.Action>();
+
 
         #endregion
 
@@ -47,7 +49,7 @@ namespace com.spacepuppy
         {
             if (_instance != null) return;
 
-            _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntryObject");
+            _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntry");
             //_instance = Singleton.GetInstance<GameLoopEntry>();
         }
 
@@ -66,6 +68,17 @@ namespace com.spacepuppy
 
             _updateHook.LateUpdateHook += _updateHook_LateUpdate;
             _tardyUpdateHook.LateUpdateHook += _tardyUpdateHook_LateUpdate;
+        }
+
+        /// <summary>
+        /// A special static, register once, earlyupdate event hook that preceeds ALL other events. 
+        /// This is used internally by some special static classes (namely SPTime) that needs extra 
+        /// high precedence early access.
+        /// </summary>
+        /// <param name="d"></param>
+        internal static void RegisterInternalEarlyUpdate(System.Action<bool> d)
+        {
+            _internalEarlyUpdate += d;
         }
 
         #endregion
@@ -120,6 +133,7 @@ namespace com.spacepuppy
             //Track entry into update loop
             _currentSequence = UpdateSequence.Update;
 
+            if (_internalEarlyUpdate != null) _internalEarlyUpdate(false);
             if (EarlyUpdate != null) EarlyUpdate(this, System.EventArgs.Empty);
         }
 
@@ -150,6 +164,7 @@ namespace com.spacepuppy
             //Track entry into fixedupdate loop
             _currentSequence = UpdateSequence.FixedUpdate;
 
+            if (_internalEarlyUpdate != null) _internalEarlyUpdate(true);
             if (EarlyFixedUpdate != null) EarlyFixedUpdate(this, System.EventArgs.Empty);
         }
 

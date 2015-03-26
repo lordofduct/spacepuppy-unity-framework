@@ -23,7 +23,7 @@ namespace com.spacepuppy.Tween
         #region Fields
 
         private UpdateSequence _updateType;
-        private DeltaTimeType _deltaType;
+        private ITimeSupplier _timeSupplier = SPTime.Normal;
         private TweenWrapMode _wrap;
         private int _wrapCount;
         private bool _reverse;
@@ -47,10 +47,15 @@ namespace com.spacepuppy.Tween
             set { _updateType = value; }
         }
 
+        public ITimeSupplier TimeSupplier
+        {
+            get { return _timeSupplier; }
+            set { _timeSupplier = value ?? SPTime.Normal; }
+        }
+
         public DeltaTimeType DeltaType
         {
-            get { return _deltaType; }
-            set { _deltaType = value; }
+            get { return SPTime.GetDeltaType(_timeSupplier); }
         }
 
         public TweenWrapMode WrapMode
@@ -233,8 +238,9 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        internal void Update(float dt)
+        internal void Update()
         {
+            var dt = _timeSupplier.Delta;
             this.Scrub(dt);
 
             this.DoUpdate(dt, _normalizedPlayHeadTime);

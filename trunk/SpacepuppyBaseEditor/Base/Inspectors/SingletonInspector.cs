@@ -47,12 +47,12 @@ namespace com.spacepuppyeditor.Base
 
 
 
-        public override void OnInspectorGUI()
+        protected override void OnSPInspectorGUI()
         {
             this.DrawDefaultInspector();
 
             //var selectedTypes = (from c in (this.target as SingletonManager).GetComponents<Singleton>() select c.GetType()).ToArray();
-            var selectedTypes = (from c in Singleton.Instances select c.GetType()).ToArray();
+            var selectedTypes = (from c in Singleton.AllSingletons select c.GetType()).ToArray();
 
             var singletonType = typeof(Singleton);
             //var types = (from a in System.AppDomain.CurrentDomain.GetAssemblies()
@@ -74,6 +74,21 @@ namespace com.spacepuppyeditor.Base
             {
                 var tp = types[index];
                 (this.target as SingletonManager).gameObject.AddComponent(tp);
+                EditorUtility.SetDirty(this.target);
+            }
+
+            if(this.target is SingletonManager)
+            {
+                var arr = (this.target as SingletonManager).GetComponents<Singleton>();
+                for (int i = 0; i < arr.Length; i ++ )
+                {
+                    if(arr[i] != this.target && arr[i].MaintainOnLoad)
+                    {
+                        (this.target as SingletonManager).MaintainOnLoad = true;
+                        EditorUtility.SetDirty(this.target);
+                        break;
+                    }
+                }
             }
         }
 

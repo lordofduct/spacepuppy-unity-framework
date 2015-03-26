@@ -27,7 +27,7 @@ namespace com.spacepuppy.Tween
         private List<PropInfo> _props = new List<PropInfo>();
         private Ease _defaultEase = EaseMethods.LinearEaseNone;
         private UpdateSequence _updateType;
-        private DeltaTimeType _deltaType;
+        private ITimeSupplier _timeSupplier;
         private TweenWrapMode _wrap;
         private int _wrapCount;
         private bool _reverse;
@@ -85,25 +85,25 @@ namespace com.spacepuppy.Tween
 
         public TweenHash UseNormalTime()
         {
-            _deltaType = DeltaTimeType.Normal;
+            _timeSupplier = SPTime.Normal;
             return this;
         }
 
         public TweenHash UseRealTime()
         {
-            _deltaType = DeltaTimeType.Real;
+            _timeSupplier = SPTime.Real;
             return this;
         }
 
         public TweenHash UseSmoothTime()
         {
-            _deltaType = DeltaTimeType.Smooth;
+            _timeSupplier = SPTime.Smooth;
             return this;
         }
 
-        public TweenHash Use(DeltaTimeType type)
+        public TweenHash Use(ITimeSupplier time)
         {
-            _deltaType = type;
+            _timeSupplier = time ?? SPTime.Normal;
             return this;
         }
 
@@ -305,7 +305,7 @@ namespace com.spacepuppy.Tween
 
             //set props
             tween.UpdateType = _updateType;
-            tween.DeltaType = _deltaType;
+            tween.TimeSupplier = _timeSupplier;
             tween.WrapMode = _wrap;
             tween.WrapCount = _wrapCount;
             tween.Reverse = _reverse;
@@ -439,9 +439,9 @@ namespace com.spacepuppy.Tween
             return this.UseSmoothTime();
         }
 
-        ITweenHash ITweenHash.Use(DeltaTimeType type)
+        ITweenHash ITweenHash.Use(ITimeSupplier time)
         {
-            return this.Use(type);
+            return this.Use(time);
         }
 
         ITweenHash ITweenHash.PlayOnce()

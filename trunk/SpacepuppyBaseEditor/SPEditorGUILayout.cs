@@ -65,7 +65,7 @@ namespace com.spacepuppyeditor
             return SPEditorGUILayout.PropertyField(obj, prop, EditorHelper.TempContent(label), includeChildren);
         }
 
-        public static bool PropertyField(SerializedObject obj, string prop, GUIContent content, bool includeChildren)
+        public static bool PropertyField(SerializedObject obj, string prop, GUIContent label, bool includeChildren)
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
 
@@ -73,8 +73,8 @@ namespace com.spacepuppyeditor
             if (serial != null)
             {
                 EditorGUI.BeginChangeCheck();
-                //EditorGUILayout.PropertyField(serial, content, includeChildren);
-                SPEditorGUILayout.PropertyField(serial, content, includeChildren);
+                //EditorGUILayout.PropertyField(serial, label, includeChildren);
+                SPEditorGUILayout.PropertyField(serial, label, includeChildren);
                 return EditorGUI.EndChangeCheck();
             }
 
@@ -112,6 +112,25 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region EnumPopup Inspector
+
+        public static System.Enum EnumPopupExcluding(System.Enum enumValue, params System.Enum[] ignoredValues)
+        {
+            return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(false), enumValue, ignoredValues);
+        }
+
+        public static System.Enum EnumPopupExcluding(string label, System.Enum enumValue, params System.Enum[] ignoredValues)
+        {
+            return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(true), enumValue, ignoredValues);
+        }
+
+        public static System.Enum EnumPopupExcluding(GUIContent label, System.Enum enumValue, params System.Enum[] ignoredValues)
+        {
+            return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(label != null && label != GUIContent.none), enumValue, ignoredValues);
+        }
+
+        #endregion
+
         #region EnumFlag Inspector
 
         public static int EnumFlagField(System.Type enumType, GUIContent label, int value)
@@ -137,7 +156,7 @@ namespace com.spacepuppyeditor
 
         public static WrapMode WrapModeField(GUIContent label, WrapMode mode, bool allowDefault = false)
         {
-            var position = EditorGUILayout.GetControlRect(true);
+            var position = EditorGUILayout.GetControlRect(label != null && label != GUIContent.none);
             return SPEditorGUI.WrapModeField(position, label, mode, allowDefault);
         }
 

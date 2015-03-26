@@ -12,6 +12,7 @@ namespace com.spacepuppyeditor
 {
 
     [CustomEditor(typeof(SPComponent), true)]
+    [CanEditMultipleObjects()]
     public class SPEditor : Editor
     {
 
@@ -35,17 +36,38 @@ namespace com.spacepuppyeditor
 
         #endregion
 
-        #region Methods
+        #region GUI Methods
 
-        public override void OnInspectorGUI()
+        public sealed override void OnInspectorGUI()
         {
             //draw header infobox if needed
             this.DrawDefaultInspectorHeader();
+
+            EditorGUI.BeginChangeCheck();
+            this.OnSPInspectorGUI();
+            if(EditorGUI.EndChangeCheck())
+            {
+                //do call onValidate
+                SPPropertyAttributePropertyHandler.OnInspectorGUIComplete(this.serializedObject, true);
+                this.OnValidate();
+            }
+            else
+            {
+                SPPropertyAttributePropertyHandler.OnInspectorGUIComplete(this.serializedObject, false);
+            }
+        }
+
+        protected virtual void OnSPInspectorGUI()
+        {
             this.DrawDefaultInspector();
         }
 
+        protected virtual void OnValidate()
+        {
 
-        public void DrawDefaultInspectorHeader()
+        }
+
+        private void DrawDefaultInspectorHeader()
         {
             //var attribs = this.serializedObject.targetObject.GetType().GetCustomAttributes(typeof(InfoboxAttribute), false);
             //InfoboxAttribute infoboxAttrib = (attribs.Length > 0) ? attribs[0] as InfoboxAttribute : null;
@@ -108,6 +130,10 @@ namespace com.spacepuppyeditor
             }
         }
 
+        #endregion
+
+        #region Draw Methods
+
         /// <summary>
         /// Draw the inspector as it would have been if not an SPEditor.
         /// </summary>
@@ -146,14 +172,12 @@ namespace com.spacepuppyeditor
             return SPEditorGUILayout.PropertyField(this.serializedObject, prop, label, includeChildren);
         }
 
-        public bool DrawPropertyField(string prop, GUIContent content, bool includeChildren)
+        public bool DrawPropertyField(string prop, GUIContent label, bool includeChildren)
         {
-            return SPEditorGUILayout.PropertyField(this.serializedObject, prop, content, includeChildren);
+            return SPEditorGUILayout.PropertyField(this.serializedObject, prop, label, includeChildren);
         }
 
         #endregion
-
-
 
         #region Static Interface
 

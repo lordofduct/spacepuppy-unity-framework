@@ -155,12 +155,14 @@ namespace com.spacepuppy.Collections
 
         public IEnumerable<TValue> GetValues(TKey key)
         {
-            if (!_dict.ContainsKey(key)) yield break;
+            //if (!_dict.ContainsKey(key)) yield break;
 
-            foreach (var obj in _dict[key])
-            {
-                yield return obj;
-            }
+            //foreach (var obj in _dict[key])
+            //{
+            //    yield return obj;
+            //}
+
+            return _dict[key];
         }
 
         #endregion

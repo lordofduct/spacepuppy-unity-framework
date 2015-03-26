@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\BaseSettings.cs" />
+    <Compile Include="Base\Inspectors\EnumPopupExcludingPropertyDrawer.cs" />
     <Compile Include="ComponentHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireComponentInEntityHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireLayerHeaderDrawer.cs" />
