@@ -90,6 +90,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyAttributes.cs" />
     <Compile Include="RadicalCoroutine.cs" />
+    <Compile Include="RadicalCoroutineManager.cs" />
     <Compile Include="Scenes\CompositeScene.cs" />
     <Compile Include="Scenes\ISceneBehaviour.cs" />
     <Compile Include="Scenes\ISceneBehaviourLoadOptions.cs" />

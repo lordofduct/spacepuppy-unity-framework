@@ -29,6 +29,16 @@ namespace com.spacepuppy
         StallImmediateResume = 2
     }
 
+    public enum RadicalCoroutineOperatingState
+    {
+        Inactive = 0,
+        Active = 1,
+        Completing = 2,
+        Complete = 3,
+        Cancelling = -1,
+        Cancelled = -2
+    }
+
     public enum UpdateSequence
     {
         None = -1,

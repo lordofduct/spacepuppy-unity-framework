@@ -20,8 +20,8 @@ namespace com.spacepuppy
         public const string TAG_PLAYER = "Player";
 
         //sent by SPComponent when enabled and disabled
-        public const string MSG_ONSPCOMPONENTENABLED = "OnSPComponentEnabled";
-        public const string MSG_ONSPCOMPONENTDISABLED = "OnSPComponentDisabled";
+        //public const string MSG_ONSPCOMPONENTENABLED = "OnSPComponentEnabled";
+        //public const string MSG_ONSPCOMPONENTDISABLED = "OnSPComponentDisabled";
 
         //sent by Notification to all members of some entity
         public const string MSG_AUTONOTIFICATIONMESSAGEHANDLER = "AutoNotificationMessageHandler";

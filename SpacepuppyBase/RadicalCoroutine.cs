@@ -7,18 +7,8 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
-    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction
+    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IPausibleYieldInstruction
     {
-
-        private enum OperatingState
-        {
-            Inactive = 0,
-            Active = 1,
-            Completing = 2,
-            Complete = 3,
-            Cancelling = -1,
-            Cancelled = -2
-        }
 
         #region Events
 
@@ -43,29 +33,42 @@ namespace com.spacepuppy
             _manualWaitingOnInstruction = null;
             if (_owner is MonoBehaviour)
             {
-                (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
-                _owner = null;
-                _token = null;
+                try
+                {
+                    (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                }
+                catch (System.Exception ex) { Debug.LogException(ex); }
             }
 
-            if(cancelled)
+            var ev = System.EventArgs.Empty;
+            try
             {
-                _state = OperatingState.Cancelled;
-
-                var ev = System.EventArgs.Empty;
-                if (this.OnCancelled != null) this.OnCancelled(this, ev);
-                if (_immediatelyResumingSignal != null) _immediatelyResumingSignal(this, ev);
+                if (cancelled)
+                {
+                    _state = RadicalCoroutineOperatingState.Cancelled;
+                    if (this.OnCancelled != null) this.OnCancelled(this, ev);
+                }
+                else
+                {
+                    _state = RadicalCoroutineOperatingState.Complete;
+                    if (this.OnComplete != null) this.OnComplete(this, ev);
+                }
             }
-            else
+            catch (System.Exception ex) { Debug.LogException(ex); }
+
+            if (_immediatelyResumingSignal != null)
             {
-                _state = OperatingState.Complete;
-
-                var ev = System.EventArgs.Empty;
-                if (this.OnComplete != null) this.OnComplete(this, ev);
-                if (_immediatelyResumingSignal != null) _immediatelyResumingSignal(this, ev);
+                try { _immediatelyResumingSignal(this, ev); }
+                catch (System.Exception ex) { Debug.LogException(ex); }
+            }
+            if (this.OnFinished != null)
+            {
+                try { this.OnFinished(this, System.EventArgs.Empty); }
+                catch (System.Exception ex) { Debug.LogException(ex); }
             }
 
-            if (this.OnFinished != null) this.OnFinished(this, System.EventArgs.Empty);
+            _owner = null;
+            _token = null;
         }
 
         #endregion
@@ -80,8 +83,8 @@ namespace com.spacepuppy
         private System.Collections.IEnumerator _derivative;
         private object _currentIEnumeratorYieldValue;
 
-        private OperatingState _state;
-        private IManualWait _manualWaitingOnInstruction;
+        private RadicalCoroutineOperatingState _state;
+        private ManualWaitForGeneric _manualWaitingOnInstruction;
         private bool _forcedTick = false;
 
         #endregion
@@ -104,6 +107,7 @@ namespace com.spacepuppy
         {
             _routine = routine;
             _owner = owner;
+            _state = RadicalCoroutineOperatingState.Active;
         }
 
         #endregion
@@ -112,16 +116,22 @@ namespace com.spacepuppy
 
         public RadicalCoroutineDisableMode DisableMode { get { return _disableMode; } }
 
-        public bool Complete { get { return _state >= OperatingState.Completing; } }
+        public bool Complete { get { return _state >= RadicalCoroutineOperatingState.Completing; } }
 
-        public bool Cancelled { get { return _state <= OperatingState.Cancelling; } }
+        public bool Cancelled { get { return _state <= RadicalCoroutineOperatingState.Cancelling; } }
 
-        public bool Active { get { return _state == OperatingState.Active; } }
+        public bool Finished { get { return _state <= RadicalCoroutineOperatingState.Cancelling || _state >= RadicalCoroutineOperatingState.Completing; } }
 
         /// <summary>
-        /// An operator is still operating this routine and it is not eligible to be started again.
+        /// The current operating state of the coroutine. A manually ticked coroutine will not return as active.
         /// </summary>
-        public bool HasOperator { get { return _owner != null; } }
+        public RadicalCoroutineOperatingState OperatingState { get { return _state; } }
+
+        /// <summary>
+        /// The object operating this routine. Typically this is the MonoBehaviour that the routine was started with. 
+        /// Though it could also be a RadicalCoroutine if its nested in another coroutine.
+        /// </summary>
+        public object Operator { get { return _owner; } }
 
         #endregion
 
@@ -134,29 +144,33 @@ namespace com.spacepuppy
         /// <param name="disableMode">A disableMode other than Default is only supported if the behaviour is an SPComponent.</param>
         public void Start(MonoBehaviour behaviour, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
-            if (_state != OperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
+            if (_state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
 
-            _state = OperatingState.Active;
+            _state = RadicalCoroutineOperatingState.Active;
             _owner = behaviour;
             _token = behaviour.StartCoroutine(this);
 
             _disableMode = disableMode;
-            if (_disableMode > RadicalCoroutineDisableMode.Default)
+            if(_disableMode > RadicalCoroutineDisableMode.Default)
             {
-                if (!(behaviour is SPComponent)) throw new System.ArgumentException("", "behaviour");
-                (behaviour as SPComponent).RegisterCoroutine(this, _disableMode);
+                var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
+                manager.RegisterCoroutine(behaviour, this);
             }
+
+            if (_derivative is IPausibleYieldInstruction) (_derivative as IPausibleYieldInstruction).OnResume();
         }
 
         internal void Resume(SPComponent behaviour)
         {
-            if (_state != OperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
+            if (_state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
 
-            _state = OperatingState.Active;
+            _state = RadicalCoroutineOperatingState.Active;
             _owner = behaviour;
             _token = behaviour.StartCoroutine(this);
+
+            if (_derivative is IPausibleYieldInstruction) (_derivative as IPausibleYieldInstruction).OnResume();
         }
 
         /// <summary>
@@ -165,18 +179,22 @@ namespace com.spacepuppy
         /// <param name="behaviour">A reference to the MonoBehaviour that is handling the coroutine.</param>
         public void Stop()
         {
-            if (_state == OperatingState.Inactive) throw new System.InvalidOperationException("Failed to stop RadicalCoroutine. The Coroutine must be active to stop it.");
+            if (_state == RadicalCoroutineOperatingState.Inactive) return;
 
-            if (_state == OperatingState.Cancelling || _state == OperatingState.Completing)
+            if (_state == RadicalCoroutineOperatingState.Cancelling || _state == RadicalCoroutineOperatingState.Completing)
             {
-                this.OnFinish(_state == OperatingState.Cancelling);
+                this.OnFinish(_state == RadicalCoroutineOperatingState.Cancelling);
             }
-            else if(_state == OperatingState.Active)
+            else if(_state == RadicalCoroutineOperatingState.Active)
             {
-                _state = OperatingState.Inactive;
+                _state = RadicalCoroutineOperatingState.Inactive;
                 if (_owner is MonoBehaviour)
                 {
-                    (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                    try
+                    {
+                        (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                    }
+                    catch (System.Exception ex) { Debug.LogException(ex); }
                     _owner = null;
                     _token = null;
                 }
@@ -185,7 +203,10 @@ namespace com.spacepuppy
                     //we stop the parent from operating us
                     var owner = _owner as RadicalCoroutine;
                     if (owner._derivative == this) owner._derivative = null;
+                    _owner = null;
                 }
+
+                if (_derivative is IPausibleYieldInstruction) (_derivative as IPausibleYieldInstruction).OnPause();
             }
         }
 
@@ -208,7 +229,7 @@ namespace com.spacepuppy
             //_manualWaitingOnInstruction = null;
             //_cancelled = true;
             //this.OnFinish(true);
-            _state = OperatingState.Cancelling;
+            _state = RadicalCoroutineOperatingState.Cancelling;
         }
 
         #endregion
@@ -223,7 +244,7 @@ namespace com.spacepuppy
             var co = new RadicalCoroutine(routine);
             this.OnComplete += (s, e) =>
             {
-                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour, disableMode);
+                if (co._state == RadicalCoroutineOperatingState.Inactive) co.Start(behaviour, disableMode);
             };
             return co;
         }
@@ -236,7 +257,7 @@ namespace com.spacepuppy
             var co = new RadicalCoroutine(routine);
             this.OnComplete += (s, e) =>
             {
-                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour, disableMode);
+                if (co._state == RadicalCoroutineOperatingState.Inactive) co.Start(behaviour, disableMode);
             };
             return co;
         }
@@ -249,7 +270,7 @@ namespace com.spacepuppy
             var co = new RadicalCoroutine(routine().GetEnumerator());
             this.OnComplete += (s, e) =>
             {
-                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour, disableMode);
+                if (co._state == RadicalCoroutineOperatingState.Inactive) co.Start(behaviour, disableMode);
             };
             return co;
         }
@@ -261,7 +282,7 @@ namespace com.spacepuppy
 
             this.OnComplete += (s, e) =>
             {
-                if (routine._owner == null && !routine.Cancelled && !routine.Complete) routine.Start(behaviour, disableMode);
+                if (routine._state == RadicalCoroutineOperatingState.Inactive) routine.Start(behaviour, disableMode);
             };
         }
 
@@ -286,16 +307,9 @@ namespace com.spacepuppy
 
                 if (current is YieldInstruction || current is WWW)
                 {
-                    if (current is WaitForSeconds)
-                    {
-                        _manualWaitingOnInstruction = new ManualWaitForSeconds(Time.time, (float)com.spacepuppy.Utils.ObjUtil.GetValue(current, "m_Seconds"));
-                    }
-                    else
-                    {
-                        var wait = new ManualWaitForGeneric(this, handle, current as YieldInstruction);
-                        _manualWaitingOnInstruction = wait;
-                        handle.StartCoroutine(wait);
-                    }
+                    var wait = new ManualWaitForGeneric(this, handle, current);
+                    _manualWaitingOnInstruction = wait;
+                    handle.StartCoroutine(wait);
                 }
                 return true;
             }
@@ -327,7 +341,7 @@ namespace com.spacepuppy
         {
             if (this.Cancelled)
             {
-                if(_state == OperatingState.Cancelling)
+                if(_state == RadicalCoroutineOperatingState.Cancelling)
                 {
                     this.OnFinish(true);
                 }
@@ -335,7 +349,7 @@ namespace com.spacepuppy
             }
             else if(this.Complete)
             {
-                if(_state == OperatingState.Completing)
+                if(_state == RadicalCoroutineOperatingState.Completing)
                 {
                     this.OnFinish(false);
                 }
@@ -369,13 +383,13 @@ namespace com.spacepuppy
                     if (this.Cancelled)
                     {
                         //routine cancelled itself
-                        if (_state == OperatingState.Cancelling)
+                        if (_state == RadicalCoroutineOperatingState.Cancelling)
                         {
                             this.OnFinish(true);
                         }
                         return false;
                     }
-                    if (_derivative == null) return !this.Complete; //the derivative was cleared out by a manual tick, wait a frame or exit depending on if we completed in that time
+                    if (_derivative == null) return !this.Finished; //the derivative was cleared out by a manual tick, wait a frame or exit depending on if we completed in that time
                     _currentIEnumeratorYieldValue = _derivative.Current;
                     return true;
                 }
@@ -391,7 +405,7 @@ namespace com.spacepuppy
                 if (this.Cancelled)
                 {
                     //routine cancelled itself
-                    if (_state == OperatingState.Cancelling)
+                    if (_state == RadicalCoroutineOperatingState.Cancelling)
                     {
                         this.OnFinish(true);
                     }
@@ -405,7 +419,15 @@ namespace com.spacepuppy
                 }
                 else if (current is YieldInstruction)
                 {
-                    _currentIEnumeratorYieldValue = current;
+                    if(current is WaitForSeconds && _disableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
+                    {
+                        _currentIEnumeratorYieldValue = null;
+                        _derivative = WaitForDuration.FromWaitForSeconds(current as WaitForSeconds);
+                    }
+                    else
+                    {
+                        _currentIEnumeratorYieldValue = current;
+                    }
                 }
                 else if (current is WWW)
                 {
@@ -413,6 +435,7 @@ namespace com.spacepuppy
                 }
                 else if (current is RadicalCoroutine)
                 {
+                    // //v1
                     //IEnumerator e = null;
                     //var rad = current as RadicalCoroutine;
                     //if (rad._owner == null)
@@ -432,16 +455,35 @@ namespace com.spacepuppy
                     //    _derivative = e;
                     //}
 
-                    var rad = current as RadicalCoroutine;
-                    _derivative = WaitUntilDone_Routine(rad).GetEnumerator();
+                    // //v2
+                    //var rad = current as RadicalCoroutine;
+                    //_derivative = WaitUntilDone_Routine(rad);
 
+                    // //v3
+                    var rad = current as RadicalCoroutine;
+                    if(!rad.Finished)
+                    {
+                        if (rad._token != null)
+                        {
+                            _currentIEnumeratorYieldValue = rad._token;
+                        }
+                        else
+                        {
+                            _derivative = WaitUntilDone_Routine(rad);
+                        }
+                    }
+                    else
+                    {
+                        _currentIEnumeratorYieldValue = null;
+                    }
                 }
                 else if (current is IRadicalYieldInstruction)
                 {
                     var rad = current as IRadicalYieldInstruction;
                     if (rad is IImmediatelyResumingYieldInstruction) (rad as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
+                    if (rad is IPausibleYieldInstruction) rad = (rad as IPausibleYieldInstruction).Validate();
 
-                    var e = new RadicalCoroutine(current as IEnumerator, this) as IEnumerator;
+                    var e = new RadicalCoroutine(rad, this) as IEnumerator;
                     if (e.MoveNext())
                     {
                         _currentIEnumeratorYieldValue = e.Current;
@@ -488,7 +530,7 @@ namespace com.spacepuppy
                     {
                         if (cmd.HasFlag(RadicalCoroutineEndCommand.StallImmediateResume))
                         {
-                            _state = OperatingState.Completing;
+                            _state = RadicalCoroutineOperatingState.Completing;
                             _currentIEnumeratorYieldValue = null;
                         }
                         else
@@ -541,6 +583,28 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IPausibleYieldInstruction Interface
+
+        void IPausibleYieldInstruction.OnPause()
+        {
+            if (_routine is IPausibleYieldInstruction) (_routine as IPausibleYieldInstruction).OnPause();
+            if (_derivative is IPausibleYieldInstruction) (_derivative as IPausibleYieldInstruction).OnPause();
+        }
+
+        void IPausibleYieldInstruction.OnResume()
+        {
+            if (_routine is IPausibleYieldInstruction) (_routine as IPausibleYieldInstruction).OnResume();
+            if (_derivative is IPausibleYieldInstruction) (_derivative as IPausibleYieldInstruction).OnResume();
+        }
+
+        IPausibleYieldInstruction IPausibleYieldInstruction.Validate()
+        {
+            //this should never be called...
+            return this;
+        }
+
+        #endregion
+
         #region Factory Methods
 
         public static System.Collections.IEnumerable Ticker(System.Func<object> f)
@@ -578,12 +642,18 @@ namespace com.spacepuppy
 
             if (routine._token != null) return routine._token;
 
-            return behaviour.StartCoroutine(WaitUntilDone_Routine(routine).GetEnumerator());
+            if (routine.Finished) return null;
+            return behaviour.StartCoroutine(WaitUntilDone_Routine(routine));
         }
 
-        private static IEnumerable WaitUntilDone_Routine(RadicalCoroutine routine)
+        private static IEnumerator WaitUntilDone_Routine(RadicalCoroutine routine)
         {
-            while (!routine.Complete)
+            if(routine._owner is MonoBehaviour)
+            {
+                (routine._owner as MonoBehaviour).AddOrGetComponent<RadicalCoroutineManager>().RegisterCoroutine(routine._owner as MonoBehaviour, routine);
+            }
+
+            while (!routine.Finished)
             {
                 yield return null;
             }
@@ -595,42 +665,18 @@ namespace com.spacepuppy
 
         #region Special Types
 
-        private interface IManualWait
-        {
-
-            bool StillWait { get; }
-
-        }
-
-        private class ManualWaitForSeconds : IManualWait
-        {
-            private float _startTime;
-            private float _dur;
-
-            public ManualWaitForSeconds(float startTime, float dur)
-            {
-                _startTime = startTime;
-                _dur = dur;
-            }
-
-            public bool StillWait
-            {
-                get { return (Time.time - _startTime < _dur); }
-            }
-        }
-
-        private class ManualWaitForGeneric : RadicalYieldInstruction, IManualWait
+        private class ManualWaitForGeneric : RadicalYieldInstruction
         {
             private RadicalCoroutine _owner;
             private MonoBehaviour _handle;
-            private YieldInstruction _instruction;
+            private object _yieldObject;
             private bool _called;
 
-            public ManualWaitForGeneric(RadicalCoroutine owner, MonoBehaviour handle, YieldInstruction instruction)
+            public ManualWaitForGeneric(RadicalCoroutine owner, MonoBehaviour handle, object yieldObject)
             {
                 _owner = owner;
                 _handle = handle;
-                _instruction = instruction;
+                _yieldObject = yieldObject;
             }
 
             protected override object Tick()
@@ -638,12 +684,12 @@ namespace com.spacepuppy
                 if (!_called)
                 {
                     _called = true;
-                    return _instruction;
+                    return _yieldObject;
                 }
                 else if (_owner._manualWaitingOnInstruction == this)
                 {
                     _owner._manualWaitingOnInstruction = null;
-                    if (_instruction is WaitForEndOfFrame || _instruction is WaitForFixedUpdate)
+                    if (_yieldObject is WaitForEndOfFrame || _yieldObject is WaitForFixedUpdate)
                     {
                         _owner.ManualTick(_handle);
                     }
@@ -661,8 +707,6 @@ namespace com.spacepuppy
 
         #endregion
 
-
-        
     }
 
 }

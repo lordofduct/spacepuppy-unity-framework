@@ -10,14 +10,19 @@ namespace com.spacepuppy
     public abstract class SPComponent : MonoBehaviour, IComponent
     {
 
+        #region Events
+
+        public event System.EventHandler OnEnabled;
+        public event System.EventHandler OnDisabled;
+
+        #endregion
+
         #region Fields
 
         [System.NonSerialized()]
         private GameObject _entityRoot;
         [System.NonSerialized()]
         private bool _started = false;
-        [System.NonSerialized()]
-        private List<RadicalCoroutine> _managedRoutines;
 
         #endregion
 
@@ -25,12 +30,6 @@ namespace com.spacepuppy
 
         protected virtual void Awake()
         {
-            //if (Application.isEditor)
-            //{
-            //    com.spacepuppy.Utils.Assertions.AssertRequireLikeComponentAttrib(this);
-            //    com.spacepuppy.Utils.Assertions.AssertUniqueToEntityAttrib(this);
-            //}
-
             this.SyncEntityRoot();
         }
 
@@ -39,34 +38,6 @@ namespace com.spacepuppy
             _started = true;
             this.SyncEntityRoot();
             this.OnStartOrEnable();
-        }
-
-        protected virtual void OnDestroy()
-        {
-            //InvokeUtil.CancelInvoke(this);
-            if (this.ComponentDestroyed != null)
-            {
-                this.ComponentDestroyed(this, System.EventArgs.Empty);
-            }
-        }
-
-        protected virtual void OnEnable()
-        {
-            this.SendMessage(SPConstants.MSG_ONSPCOMPONENTENABLED, this, SendMessageOptions.DontRequireReceiver);
-
-            if (_started) this.OnStartOrEnable();
-
-            if(_managedRoutines != null && _managedRoutines.Count > 0)
-            {
-                for(int i = 0; i < _managedRoutines.Count; i++)
-                {
-                    var routine = _managedRoutines[i];
-                    if(!routine.Active && routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
-                    {
-                        routine.Resume(this);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -78,44 +49,30 @@ namespace com.spacepuppy
 
         }
 
-        protected virtual void OnDespawn()
+        protected virtual void OnEnable()
         {
+            //this.SendMessage(SPConstants.MSG_ONSPCOMPONENTENABLED, this, SendMessageOptions.DontRequireReceiver);
+            if (this.OnEnabled != null) this.OnEnabled(this, System.EventArgs.Empty);
+
+            if (_started) this.OnStartOrEnable();
         }
 
         protected virtual void OnDisable()
         {
-            this.SendMessage(SPConstants.MSG_ONSPCOMPONENTDISABLED, this, SendMessageOptions.DontRequireReceiver);
-            
+            //this.SendMessage(SPConstants.MSG_ONSPCOMPONENTDISABLED, this, SendMessageOptions.DontRequireReceiver);
+            if (this.OnDisabled != null) this.OnDisabled(this, System.EventArgs.Empty);
+        }
 
-            //Clean up routines
-            if(_managedRoutines != null && _managedRoutines.Count > 0)
+        protected virtual void OnDespawn()
+        {
+        }
+
+        protected virtual void OnDestroy()
+        {
+            //InvokeUtil.CancelInvoke(this);
+            if (this.ComponentDestroyed != null)
             {
-                var arr = _managedRoutines.ToArray();
-                var cancellableMode = (this.gameObject.activeInHierarchy) ? RadicalCoroutineDisableMode.CancelOnDisable : RadicalCoroutineDisableMode.CancelOnDeactivate;
-                var stoppableMode = (this.gameObject.activeInHierarchy) ? RadicalCoroutineDisableMode.StopOnDisable : RadicalCoroutineDisableMode.StopOnDeactivate;
-                RadicalCoroutine routine;
-                for (int i = 0; i < arr.Length; i++)
-                {
-                    routine = _managedRoutines[i];
-                    if (routine.DisableMode.HasFlag(cancellableMode))
-                    {
-                        routine.Cancel();
-                        routine.OnFinished -= this.OnRoutineFinished;
-                        _managedRoutines.Remove(routine);
-                    }
-                    else
-                    {
-                        if (routine.DisableMode.HasFlag(stoppableMode))
-                        {
-                            routine.Stop();
-                        }
-                        if (!routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
-                        {
-                            routine.OnFinished -= this.OnRoutineFinished;
-                            _managedRoutines.Remove(routine);
-                        }
-                    }
-                }
+                this.ComponentDestroyed(this, System.EventArgs.Empty);
             }
         }
 
@@ -191,27 +148,6 @@ namespace com.spacepuppy
             if (method == null) throw new System.ArgumentNullException("method");
 
             return this.StartRadicalCoroutine(CoroutineUtil.InvokeRedirect(method, delay), disableMode);
-        }
-
-        internal void RegisterCoroutine(RadicalCoroutine routine, RadicalCoroutineDisableMode disableMode)
-        {
-            if (disableMode == RadicalCoroutineDisableMode.Default) return;
-
-            if (_managedRoutines == null) _managedRoutines = new List<RadicalCoroutine>();
-            if (_managedRoutines.Contains(routine)) return;
-
-            routine.OnFinished -= this.OnRoutineFinished;
-            routine.OnFinished += this.OnRoutineFinished;
-            _managedRoutines.Add(routine);
-        }
-
-        private void OnRoutineFinished(object sender, System.EventArgs e)
-        {
-            var routine = sender as RadicalCoroutine;
-            if (routine == null) return;
-
-            routine.OnComplete -= this.OnRoutineFinished;
-            if (_managedRoutines != null) _managedRoutines.Remove(routine);
         }
 
         #endregion

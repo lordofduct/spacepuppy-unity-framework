@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using System.Collections;
+
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
 {
@@ -8,7 +11,6 @@ namespace com.spacepuppy
     /// </summary>
     public interface IRadicalYieldInstruction : System.Collections.IEnumerator
     {
-
     }
 
     public interface IProgressingYieldInstruction : IRadicalYieldInstruction
@@ -20,6 +22,19 @@ namespace com.spacepuppy
     public interface IImmediatelyResumingYieldInstruction : IRadicalYieldInstruction
     {
         event System.EventHandler Signal;
+    }
+
+    public interface IPausibleYieldInstruction : IRadicalYieldInstruction
+    {
+
+        void OnPause();
+        void OnResume();
+        /// <summary>
+        /// Called whenever this instruction has been yielded. If the instruction has been 
+        /// previously used, a clone of itself should be returned.
+        /// </summary>
+        /// <returns></returns>
+        IPausibleYieldInstruction Validate();
     }
 
     public abstract class RadicalYieldInstruction : IRadicalYieldInstruction
@@ -47,22 +62,32 @@ namespace com.spacepuppy
 
         protected abstract object Tick();
 
+        protected virtual void OnPause()
+        {
+
+        }
+
+        protected virtual void OnResume()
+        {
+
+        }
+
         #endregion
 
         #region IRadicalYieldInstruction Interface
 
-        object System.Collections.IEnumerator.Current
+        object IEnumerator.Current
         {
             get { return _current; }
         }
 
-        bool System.Collections.IEnumerator.MoveNext()
+        bool IEnumerator.MoveNext()
         {
             _current = this.Tick();
             return !_complete;
         }
 
-        void System.Collections.IEnumerator.Reset()
+        void IEnumerator.Reset()
         {
             throw new System.NotSupportedException();
         }
@@ -108,6 +133,14 @@ namespace com.spacepuppy
             public void Reset()
             {
 
+            }
+
+            public void OnPause()
+            {
+            }
+
+            public void OnResume()
+            {
             }
         }
 
@@ -217,33 +250,99 @@ namespace com.spacepuppy
 
     }
 
-    public class WaitForRealSeconds : RadicalYieldInstruction
+    public class WaitForDuration : IPausibleYieldInstruction
     {
 
         #region Fields
 
-        private float _dur;
+        private ITimeSupplier _supplier;
         private float _t;
+        private float _cache;
+        private float _dur;
+        private bool _used;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public WaitForRealSeconds(float duration)
+        public WaitForDuration(float dur)
         {
-            _dur = duration;
-            _t = 0f;
+            _supplier = SPTime.Normal;
+            _dur = dur;
+            (this as System.Collections.IEnumerator).Reset();
+        }
+
+        public WaitForDuration(float dur, ITimeSupplier supplier)
+        {
+            _supplier = supplier ?? SPTime.Normal;
+            _dur = dur;
+            (this as System.Collections.IEnumerator).Reset();
         }
 
         #endregion
 
-        #region Methods
 
-        protected override object Tick()
+        #region IEnumerator Interface
+
+        object IEnumerator.Current
         {
-            _t += Time.unscaledDeltaTime;
-            if (_t >= _dur) this.SetSignal();
-            return null;
+            get { return null; }
+        }
+
+        bool IEnumerator.MoveNext()
+        {
+            if (float.IsNaN(_t))
+                return (_cache < _dur);
+            else
+                return (_supplier.Total - _t) < (_dur - _cache);
+        }
+
+        void IEnumerator.Reset()
+        {
+            _t = _supplier.Total;
+            _cache = 0f;
+        }
+
+        void IPausibleYieldInstruction.OnPause()
+        {
+            _cache = (_supplier.Total - _t) + _cache;
+            _t = float.NaN;
+        }
+
+        void IPausibleYieldInstruction.OnResume()
+        {
+            _t = Time.time;
+        }
+
+        IPausibleYieldInstruction IPausibleYieldInstruction.Validate()
+        {
+            if (!_used)
+            {
+                return this;
+            }
+            else
+            {
+                _used = true;
+                return new WaitForDuration(_dur, _supplier);
+            }
+        }
+
+        #endregion
+
+
+        #region Static Factory
+
+        public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
+        {
+            var dur = ConvertUtil.ToSingle(ObjUtil.GetValue(wait, "m_Seconds"));
+            if (returnNullIfZero && dur <= 0f)
+            {
+                return null;
+            }
+            else
+            {
+                return new WaitForDuration(dur);
+            }
         }
 
         #endregion
