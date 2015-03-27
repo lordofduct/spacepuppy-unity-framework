@@ -6,6 +6,22 @@ namespace com.spacepuppy
 {
 
     [System.Flags()]
+    public enum RadicalCoroutineDisableMode
+    {
+        /// <summary>
+        /// The default action from Unity.
+        /// </summary>
+        Default = 0,
+        CancelOnDeactivate = 0,
+        CancelOnDisable = 1,
+        StopOnDeactivate = 2,
+        StopOnDisable = 4,
+        ResumeOnEnable = 8,
+
+        Pauses = 14
+    }
+
+    [System.Flags()]
     public enum RadicalCoroutineEndCommand
     {
         None = 0,

@@ -163,7 +163,7 @@ namespace com.spacepuppy.Scenes
             {
                 _scene = scene;
                 _op = innerOp;
-                GameLoopEntry.Hook.StartRadicalCoroutine(this.WaitForLoadRoutine());
+                GameLoopEntry.Hook.StartRadicalCoroutine(this.WaitForLoadRoutine(), RadicalCoroutineDisableMode.Default);
             }
 
             private System.Collections.IEnumerator WaitForLoadRoutine()

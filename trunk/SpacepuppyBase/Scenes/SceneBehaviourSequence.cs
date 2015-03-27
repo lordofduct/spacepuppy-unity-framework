@@ -100,7 +100,7 @@ namespace com.spacepuppy.Scenes
             {
                 _scene = scene;
 
-                GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad());
+                GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad(), RadicalCoroutineDisableMode.Default);
             }
 
             private System.Collections.IEnumerator DoLoad()

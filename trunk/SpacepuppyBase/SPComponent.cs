@@ -12,10 +12,12 @@ namespace com.spacepuppy
 
         #region Fields
 
-        [System.NonSerialized]
+        [System.NonSerialized()]
         private GameObject _entityRoot;
-        [System.NonSerialized]
+        [System.NonSerialized()]
         private bool _started = false;
+        [System.NonSerialized()]
+        private List<RadicalCoroutine> _managedRoutines;
 
         #endregion
 
@@ -53,6 +55,18 @@ namespace com.spacepuppy
             this.SendMessage(SPConstants.MSG_ONSPCOMPONENTENABLED, this, SendMessageOptions.DontRequireReceiver);
 
             if (_started) this.OnStartOrEnable();
+
+            if(_managedRoutines != null && _managedRoutines.Count > 0)
+            {
+                for(int i = 0; i < _managedRoutines.Count; i++)
+                {
+                    var routine = _managedRoutines[i];
+                    if(!routine.Active && routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
+                    {
+                        routine.Resume(this);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -71,6 +85,38 @@ namespace com.spacepuppy
         protected virtual void OnDisable()
         {
             this.SendMessage(SPConstants.MSG_ONSPCOMPONENTDISABLED, this, SendMessageOptions.DontRequireReceiver);
+            
+
+            //Clean up routines
+            if(_managedRoutines != null && _managedRoutines.Count > 0)
+            {
+                var arr = _managedRoutines.ToArray();
+                var cancellableMode = (this.gameObject.activeInHierarchy) ? RadicalCoroutineDisableMode.CancelOnDisable : RadicalCoroutineDisableMode.CancelOnDeactivate;
+                var stoppableMode = (this.gameObject.activeInHierarchy) ? RadicalCoroutineDisableMode.StopOnDisable : RadicalCoroutineDisableMode.StopOnDeactivate;
+                RadicalCoroutine routine;
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    routine = _managedRoutines[i];
+                    if (routine.DisableMode.HasFlag(cancellableMode))
+                    {
+                        routine.Cancel();
+                        routine.OnFinished -= this.OnRoutineFinished;
+                        _managedRoutines.Remove(routine);
+                    }
+                    else
+                    {
+                        if (routine.DisableMode.HasFlag(stoppableMode))
+                        {
+                            routine.Stop();
+                        }
+                        if (!routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
+                        {
+                            routine.OnFinished -= this.OnRoutineFinished;
+                            _managedRoutines.Remove(routine);
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
@@ -84,6 +130,11 @@ namespace com.spacepuppy
         /// </summary>
         public bool started { get { return _started; } }
 
+        public bool isActiveAndEnabled
+        {
+            get { return this.enabled && this.gameObject.activeInHierarchy; }
+        }
+
         #endregion
 
         #region Methods
@@ -95,6 +146,72 @@ namespace com.spacepuppy
         public virtual void SyncEntityRoot()
         {
             _entityRoot = this.FindRoot();
+        }
+
+        #endregion
+
+        #region Radical Coroutine Methods
+
+        public RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerator routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine);
+            co.Start(this, disableMode);
+            return co;
+        }
+
+        public RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerable routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine.GetEnumerator());
+            co.Start(this, disableMode);
+            return co;
+        }
+
+        public RadicalCoroutine StartRadicalCoroutine(CoroutineMethod routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine().GetEnumerator());
+            co.Start(this, disableMode);
+            return co;
+        }
+
+        public RadicalCoroutine InvokeRadical(System.Action method, float delay, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return this.StartRadicalCoroutine(CoroutineUtil.InvokeRedirect(method, delay), disableMode);
+        }
+
+        public RadicalCoroutine InvokeRepeatingRadical(System.Action method, float delay, float repeatRate, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return this.StartRadicalCoroutine(CoroutineUtil.InvokeRedirect(method, delay), disableMode);
+        }
+
+        internal void RegisterCoroutine(RadicalCoroutine routine, RadicalCoroutineDisableMode disableMode)
+        {
+            if (disableMode == RadicalCoroutineDisableMode.Default) return;
+
+            if (_managedRoutines == null) _managedRoutines = new List<RadicalCoroutine>();
+            if (_managedRoutines.Contains(routine)) return;
+
+            routine.OnFinished -= this.OnRoutineFinished;
+            routine.OnFinished += this.OnRoutineFinished;
+            _managedRoutines.Add(routine);
+        }
+
+        private void OnRoutineFinished(object sender, System.EventArgs e)
+        {
+            var routine = sender as RadicalCoroutine;
+            if (routine == null) return;
+
+            routine.OnComplete -= this.OnRoutineFinished;
+            if (_managedRoutines != null) _managedRoutines.Remove(routine);
         }
 
         #endregion

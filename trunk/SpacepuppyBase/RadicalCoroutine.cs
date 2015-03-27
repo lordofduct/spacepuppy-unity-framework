@@ -22,8 +22,18 @@ namespace com.spacepuppy
 
         #region Events
 
+        /// <summary>
+        /// The coroutine completed successfully.
+        /// </summary>
         public event System.EventHandler OnComplete;
+        /// <summary>
+        /// The coroutine was cancelled.
+        /// </summary>
         public event System.EventHandler OnCancelled;
+        /// <summary>
+        /// The coroutine completed or was cancelled.
+        /// </summary>
+        public event System.EventHandler OnFinished;
         private System.EventHandler _immediatelyResumingSignal;
 
         private void OnFinish(bool cancelled)
@@ -31,7 +41,12 @@ namespace com.spacepuppy
             _derivative = null;
             _currentIEnumeratorYieldValue = null;
             _manualWaitingOnInstruction = null;
-            if (_owner is Coroutine) _owner = null; //Coroutine stop owning as soon as false is returned
+            if (_owner is MonoBehaviour)
+            {
+                (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                _owner = null;
+                _token = null;
+            }
 
             if(cancelled)
             {
@@ -49,6 +64,8 @@ namespace com.spacepuppy
                 if (this.OnComplete != null) this.OnComplete(this, ev);
                 if (_immediatelyResumingSignal != null) _immediatelyResumingSignal(this, ev);
             }
+
+            if (this.OnFinished != null) this.OnFinished(this, System.EventArgs.Empty);
         }
 
         #endregion
@@ -56,13 +73,13 @@ namespace com.spacepuppy
         #region Fields
 
         private object _owner; //this houses either the Coroutine or RadicalCoroutine that may already be operating this RadicalCoroutine
+        private Coroutine _token;
+        private RadicalCoroutineDisableMode _disableMode;
 
         private System.Collections.IEnumerator _routine;
         private System.Collections.IEnumerator _derivative;
         private object _currentIEnumeratorYieldValue;
 
-        //private bool _completed = false;
-        //private bool _cancelled = false;
         private OperatingState _state;
         private IManualWait _manualWaitingOnInstruction;
         private bool _forcedTick = false;
@@ -93,6 +110,8 @@ namespace com.spacepuppy
 
         #region Properties
 
+        public RadicalCoroutineDisableMode DisableMode { get { return _disableMode; } }
+
         public bool Complete { get { return _state >= OperatingState.Completing; } }
 
         public bool Cancelled { get { return _state <= OperatingState.Cancelling; } }
@@ -112,37 +131,61 @@ namespace com.spacepuppy
         /// Starts the coroutine, one should always call this method or the StartRadicalCoroutine extension method. Never pass the coroutine into the 'StartCoroutine' method.
         /// </summary>
         /// <param name="behaviour">A reference to the MonoBehaviour that should be handling the coroutine.</param>
-        public void Start(MonoBehaviour behaviour)
+        /// <param name="disableMode">A disableMode other than Default is only supported if the behaviour is an SPComponent.</param>
+        public void Start(MonoBehaviour behaviour, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (_state != OperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
 
             _state = OperatingState.Active;
-            _owner = behaviour.StartCoroutine(this);
+            _owner = behaviour;
+            _token = behaviour.StartCoroutine(this);
+
+            _disableMode = disableMode;
+            if (_disableMode > RadicalCoroutineDisableMode.Default)
+            {
+                if (!(behaviour is SPComponent)) throw new System.ArgumentException("", "behaviour");
+                (behaviour as SPComponent).RegisterCoroutine(this, _disableMode);
+            }
+        }
+
+        internal void Resume(SPComponent behaviour)
+        {
+            if (_state != OperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+
+            _state = OperatingState.Active;
+            _owner = behaviour;
+            _token = behaviour.StartCoroutine(this);
         }
 
         /// <summary>
         /// Stops the coroutine, but preserves the state of it, so that it could be resumed again later by calling start.
         /// </summary>
         /// <param name="behaviour">A reference to the MonoBehaviour that is handling the coroutine.</param>
-        public void Stop(MonoBehaviour behaviour)
+        public void Stop()
         {
-            if (_state != OperatingState.Active) throw new System.InvalidOperationException("Failed to stop RadicalCoroutine. The Coroutine must be active to stop it.");
+            if (_state == OperatingState.Inactive) throw new System.InvalidOperationException("Failed to stop RadicalCoroutine. The Coroutine must be active to stop it.");
 
-            _state = OperatingState.Inactive;
-            if (_owner is Coroutine)
+            if (_state == OperatingState.Cancelling || _state == OperatingState.Completing)
             {
-                _owner = null;
-                behaviour.StopCoroutine(this);
+                this.OnFinish(_state == OperatingState.Cancelling);
             }
-            else if (_owner is RadicalCoroutine)
+            else if(_state == OperatingState.Active)
             {
-                (_owner as RadicalCoroutine).Stop(behaviour);
-            }
-            else
-            {
-                //assume that the coroutine was started with out calling 'start'...
-                behaviour.StopCoroutine(this);
+                _state = OperatingState.Inactive;
+                if (_owner is MonoBehaviour)
+                {
+                    (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                    _owner = null;
+                    _token = null;
+                }
+                else if (_owner is RadicalCoroutine)
+                {
+                    //we stop the parent from operating us
+                    var owner = _owner as RadicalCoroutine;
+                    if (owner._derivative == this) owner._derivative = null;
+                }
             }
         }
 
@@ -172,7 +215,7 @@ namespace com.spacepuppy
 
         #region Scheduling
 
-        public RadicalCoroutine Schedule(MonoBehaviour behaviour, System.Collections.IEnumerator routine)
+        public RadicalCoroutine Schedule(MonoBehaviour behaviour, System.Collections.IEnumerator routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
@@ -180,12 +223,12 @@ namespace com.spacepuppy
             var co = new RadicalCoroutine(routine);
             this.OnComplete += (s, e) =>
             {
-                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour);
+                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour, disableMode);
             };
             return co;
         }
 
-        public RadicalCoroutine Schedule(MonoBehaviour behaviour, System.Collections.IEnumerable routine)
+        public RadicalCoroutine Schedule(MonoBehaviour behaviour, System.Collections.IEnumerable routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
@@ -193,12 +236,12 @@ namespace com.spacepuppy
             var co = new RadicalCoroutine(routine);
             this.OnComplete += (s, e) =>
             {
-                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour);
+                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour, disableMode);
             };
             return co;
         }
 
-        public RadicalCoroutine Schedule(MonoBehaviour behaviour, CoroutineMethod routine)
+        public RadicalCoroutine Schedule(MonoBehaviour behaviour, CoroutineMethod routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
@@ -206,19 +249,19 @@ namespace com.spacepuppy
             var co = new RadicalCoroutine(routine().GetEnumerator());
             this.OnComplete += (s, e) =>
             {
-                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour);
+                if (co._owner == null && !co.Cancelled && !co.Complete) co.Start(behaviour, disableMode);
             };
             return co;
         }
 
-        public void Schedule(MonoBehaviour behaviour, RadicalCoroutine routine)
+        public void Schedule(MonoBehaviour behaviour, RadicalCoroutine routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
 
             this.OnComplete += (s, e) =>
             {
-                if (routine._owner == null && !routine.Cancelled && !routine.Complete) routine.Start(behaviour);
+                if (routine._owner == null && !routine.Cancelled && !routine.Complete) routine.Start(behaviour, disableMode);
             };
         }
 
@@ -500,36 +543,6 @@ namespace com.spacepuppy
 
         #region Factory Methods
 
-        public static RadicalCoroutine StartRadicalCoroutine(MonoBehaviour behaviour, System.Collections.IEnumerator routine)
-        {
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (routine == null) throw new System.ArgumentNullException("routine");
-
-            var co = new RadicalCoroutine(routine);
-            co.Start(behaviour);
-            return co;
-        }
-
-        public static RadicalCoroutine StartRadicalCoroutine(MonoBehaviour behaviour, System.Collections.IEnumerable routine)
-        {
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (routine == null) throw new System.ArgumentNullException("routine");
-
-            var co = new RadicalCoroutine(routine.GetEnumerator());
-            co.Start(behaviour);
-            return co;
-        }
-
-        public static RadicalCoroutine StartRadicalCoroutine(MonoBehaviour behaviour, CoroutineMethod routine)
-        {
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-            if (routine == null) throw new System.ArgumentNullException("routine");
-
-            var co = new RadicalCoroutine(routine().GetEnumerator());
-            co.Start(behaviour);
-            return co;
-        }
-
         public static System.Collections.IEnumerable Ticker(System.Func<object> f)
         {
             if (f == null) yield break;
@@ -563,7 +576,7 @@ namespace com.spacepuppy
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
 
-            if (routine._owner != null && routine._owner is Coroutine) return routine._owner as Coroutine;
+            if (routine._token != null) return routine._token;
 
             return behaviour.StartCoroutine(WaitUntilDone_Routine(routine).GetEnumerator());
         }

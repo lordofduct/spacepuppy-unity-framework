@@ -51,20 +51,35 @@ namespace com.spacepuppy.Utils
 
         public static RadicalCoroutine StartRadicalCoroutine(this MonoBehaviour behaviour, System.Collections.IEnumerator routine)
         {
-            return RadicalCoroutine.StartRadicalCoroutine(behaviour, routine);
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine);
+            co.Start(behaviour);
+            return co;
         }
 
         public static RadicalCoroutine StartRadicalCoroutine(this MonoBehaviour behaviour, System.Collections.IEnumerable routine)
         {
-            return RadicalCoroutine.StartRadicalCoroutine(behaviour, routine);
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine.GetEnumerator());
+            co.Start(behaviour);
+            return co;
         }
 
         public static RadicalCoroutine StartRadicalCoroutine(this MonoBehaviour behaviour, CoroutineMethod method)
         {
-            return RadicalCoroutine.StartRadicalCoroutine(behaviour, method);
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(method().GetEnumerator());
+            co.Start(behaviour);
+            return co;
         }
 
-        public static RadicalCoroutine StartRadicalCoroutine(this MonoBehaviour behaviour, System.Delegate method, params object[] args)
+        public static RadicalCoroutine StartRadicalCoroutine(this MonoBehaviour behaviour, System.Delegate method, object[] args = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (method == null) throw new System.ArgumentNullException("method");
@@ -83,7 +98,9 @@ namespace com.spacepuppy.Utils
                 throw new System.ArgumentException("Delegate must have a return type of IEnumerable or IEnumerator.", "method");
             }
 
-            return RadicalCoroutine.StartRadicalCoroutine(behaviour, e);
+            var co = new RadicalCoroutine(e);
+            co.Start(behaviour, disableMode);
+            return co;
         }
 
         #endregion
@@ -114,7 +131,7 @@ namespace com.spacepuppy.Utils
             return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay));
         }
 
-        private static System.Collections.IEnumerator InvokeRedirect(System.Action method, float delay, float repeatRate = -1f)
+        internal static System.Collections.IEnumerator InvokeRedirect(System.Action method, float delay, float repeatRate = -1f)
         {
             yield return new WaitForSeconds(delay);
             if (repeatRate < 0f)
