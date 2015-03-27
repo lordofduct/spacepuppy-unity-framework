@@ -124,8 +124,8 @@ namespace com.spacepuppy
                     switch (routine.OperatingState)
                     {
                         case RadicalCoroutineOperatingState.Active:
-                            //if the routine is currently active, that means that the routine was started before OnEnable was called.
-                            //either on Awake, or in an override of OnEnable
+                            //if the routine is currently active, that means the routine was already running. This could be because it 
+                            //was started in Awake, in an override of OnEnable, or the routine is in a mode that does not pause it OnDisable.
                             continue;
                         case RadicalCoroutineOperatingState.Inactive:
                             if (routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable) && component is SPComponent)
