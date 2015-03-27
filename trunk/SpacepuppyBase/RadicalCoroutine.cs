@@ -142,6 +142,12 @@ namespace com.spacepuppy
         /// </summary>
         /// <param name="behaviour">A reference to the MonoBehaviour that should be handling the coroutine.</param>
         /// <param name="disableMode">A disableMode other than Default is only supported if the behaviour is an SPComponent.</param>
+        /// <remarks>
+        /// Disable modes allow you to decide how the coroutine is dealt with when the component/gameobject are disabled. Note that 'CancelOnDeactivate' is a specical case flag, 
+        /// it only takes effect if NO OTHER flag is set (it's a 0 flag actually). What this results in is that Deactivate and Disable are pausible... but a routine can only play 
+        /// through Disable, not Deactivate. This is due to the default behaviour of coroutine in unity. In default mode, coroutines continue playing when a component gets disabled, 
+        /// but when deactivated the coroutine gets cancelled. This means we can not play through a deactivation.
+        /// </remarks>
         public void Start(MonoBehaviour behaviour, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (_state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
@@ -152,8 +158,9 @@ namespace com.spacepuppy
             _token = behaviour.StartCoroutine(this);
 
             _disableMode = disableMode;
-            if(_disableMode > RadicalCoroutineDisableMode.Default)
+            if(_disableMode > RadicalCoroutineDisableMode.Default && _disableMode != RadicalCoroutineDisableMode.ResumeOnEnable)
             {
+                //no point in managing the routine if it acts in default mode... a flag of 'ResumeOnEnable' is a redundant mode to default
                 var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
                 manager.RegisterCoroutine(behaviour, this);
             }

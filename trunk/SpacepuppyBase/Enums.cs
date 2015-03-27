@@ -9,7 +9,7 @@ namespace com.spacepuppy
     public enum RadicalCoroutineDisableMode
     {
         /// <summary>
-        /// The default action from Unity.
+        /// The default action from Unity. The routine cancels on deactivate, and plays through disable.
         /// </summary>
         Default = 0,
         CancelOnDeactivate = 0,
@@ -17,7 +17,9 @@ namespace com.spacepuppy
         StopOnDeactivate = 2,
         StopOnDisable = 4,
         ResumeOnEnable = 8,
-
+        
+        PausesOnDisable = 9,
+        PausesOnDeactivate = 10,
         Pauses = 14
     }
 
