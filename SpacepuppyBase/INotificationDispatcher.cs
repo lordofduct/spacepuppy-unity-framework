@@ -326,6 +326,7 @@ namespace com.spacepuppy
 
     }
 
+    [DisallowMultipleComponent()]
     public sealed class GameObjectNotificationDispatcher : MonoBehaviour, INotificationDispatcher
     {
 

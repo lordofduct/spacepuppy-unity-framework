@@ -140,7 +140,7 @@ namespace com.spacepuppy.Scenes
                 _manager = manager;
                 _scene = scene;
                 _options = options;
-                _routine = GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad());
+                _routine = GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad(), RadicalCoroutineDisableMode.Default);
             }
 
             public void Cancel()
