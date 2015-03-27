@@ -7,6 +7,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenes
 {
+
     public class SceneManager : Singleton
     {
 

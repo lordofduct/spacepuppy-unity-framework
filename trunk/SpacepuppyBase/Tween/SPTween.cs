@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Tween
 {
+
     public class SPTween : Singleton
     {
 
