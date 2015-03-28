@@ -33,12 +33,12 @@ namespace com.spacepuppy
 
     public enum RadicalCoroutineOperatingState
     {
+        Cancelled = -2,
+        Cancelling = -1,
         Inactive = 0,
         Active = 1,
         Completing = 2,
-        Complete = 3,
-        Cancelling = -1,
-        Cancelled = -2
+        Complete = 3
     }
 
     public enum UpdateSequence

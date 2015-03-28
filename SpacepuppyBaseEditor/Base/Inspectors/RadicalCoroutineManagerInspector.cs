@@ -29,10 +29,22 @@ namespace com.spacepuppyeditor.Base.Inspectors
                 EditorGUI.indentLevel++;
                 for(int i = 0; i < infos.Length; i++)
                 {
-                    EditorGUILayout.LabelField(infos[i].Component.GetType().Name);
+                    var info = infos[i];
+                    EditorGUILayout.LabelField(string.Format("[{0:00}] Routine {1}", i, RadicalCoroutine.EditorHelper.GetInternalRoutineID(info.Routine)));
+                    EditorGUI.indentLevel += 2;
+                    EditorGUILayout.LabelField("Component:", info.Component.GetType().Name);
+                    EditorGUILayout.LabelField("State:", info.Routine.OperatingState.ToString());
+                    EditorGUILayout.LabelField("Yield:", RadicalCoroutine.EditorHelper.GetYieldID(info.Routine));
+                    EditorGUILayout.LabelField("Derivative:", RadicalCoroutine.EditorHelper.GetDerivativeID(info.Routine));
+                    EditorGUI.indentLevel -= 2;
                 }
                 EditorGUI.indentLevel--;
             }
+        }
+
+        public override bool RequiresConstantRepaint()
+        {
+            return _expanded;
         }
 
     }

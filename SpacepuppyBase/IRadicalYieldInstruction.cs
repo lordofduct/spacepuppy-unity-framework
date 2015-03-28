@@ -281,6 +281,13 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Properties
+
+        public float Duration { get { return _dur; } }
+
+        public float CurrentTime { get { return (float.IsNaN(_t)) ? _cache : (_supplier.Total - _t) + _cache; } }
+
+        #endregion
 
         #region IEnumerator Interface
 
@@ -291,10 +298,7 @@ namespace com.spacepuppy
 
         bool IEnumerator.MoveNext()
         {
-            if (float.IsNaN(_t))
-                return (_cache < _dur);
-            else
-                return (_supplier.Total - _t) < (_dur - _cache);
+            return this.CurrentTime < _dur;
         }
 
         void IEnumerator.Reset()
