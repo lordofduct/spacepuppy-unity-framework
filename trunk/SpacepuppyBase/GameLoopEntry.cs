@@ -38,8 +38,8 @@ namespace com.spacepuppy
         private UpdateEventHooks _updateHook;
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
-        private List<System.Action> _invokeList = new List<System.Action>();
-
+        private System.Action _invoking;
+        private object _invokeLock = new object();
 
         #endregion
 
@@ -114,9 +114,10 @@ namespace com.spacepuppy
         public static void InvokeNextUpdate(System.Action action)
         {
             if(action == null) throw new System.ArgumentNullException("action");
-            lock(Hook._invokeList)
+            var h = Hook;
+            lock (h._invokeLock)
             {
-                Hook._invokeList.Add(action);
+                h._invoking += action;
             }
         }
 
@@ -144,18 +145,15 @@ namespace com.spacepuppy
         {
             if (OnUpdate != null) OnUpdate(this, e);
 
-            if(_invokeList.Count > 0)
+            if (_invoking != null)
             {
-                System.Action[] arr;
-                lock(_invokeList)
+                System.Action act;
+                lock(_invokeLock)
                 {
-                    arr = _invokeList.ToArray();
-                    _invokeList.Clear();
+                    act = _invoking;
+                    _invoking = null;
                 }
-                for(int i = 0; i < arr.Length; i++)
-                {
-                    arr[i]();
-                }
+                act();
             }
         }
 
