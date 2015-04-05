@@ -168,7 +168,7 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Shears off the fractional part of a float.
+        /// Returns the fractional part of a float.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -494,6 +494,11 @@ namespace com.spacepuppy.Utils
         public static float Interpolate(float a, float b, float weight)
         {
             return (b - a) * weight + a;
+        }
+
+        public static int Interpolate(int a, int b, float weight)
+        {
+            return (int)Math.Round((b - a) * weight + a);
         }
 
         public static float SpeedLerp(float a, float b, float speed, float dt)
@@ -945,6 +950,13 @@ namespace com.spacepuppy.Utils
         public static float Clamp(float input, float max)
         {
             return Math.Max(0, Math.Min(max, input));
+        }
+
+        public static float Clamp01(float input)
+        {
+            if (input < 0f) return 0f;
+            else if (input > 1f) return 1f;
+            else return input;
         }
 
         /// <summary>

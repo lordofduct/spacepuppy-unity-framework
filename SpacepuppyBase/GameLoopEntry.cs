@@ -114,7 +114,10 @@ namespace com.spacepuppy
         public static void InvokeNextUpdate(System.Action action)
         {
             if(action == null) throw new System.ArgumentNullException("action");
-            Hook._invokeList.Add(action);
+            lock(Hook._invokeList)
+            {
+                Hook._invokeList.Add(action);
+            }
         }
 
         #endregion
@@ -143,8 +146,12 @@ namespace com.spacepuppy
 
             if(_invokeList.Count > 0)
             {
-                var arr = _invokeList.ToArray();
-                _invokeList.Clear();
+                System.Action[] arr;
+                lock(_invokeList)
+                {
+                    arr = _invokeList.ToArray();
+                    _invokeList.Clear();
+                }
                 for(int i = 0; i < arr.Length; i++)
                 {
                     arr[i]();

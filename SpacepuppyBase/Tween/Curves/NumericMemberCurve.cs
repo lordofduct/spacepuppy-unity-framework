@@ -49,7 +49,7 @@ namespace com.spacepuppy.Tween.Curves
             _end = end;
         }
 
-        protected override void ReflectiveInit(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, object option)
         {
             _start = ConvertUtil.ToDouble(start);
             _end = ConvertUtil.ToDouble(end);

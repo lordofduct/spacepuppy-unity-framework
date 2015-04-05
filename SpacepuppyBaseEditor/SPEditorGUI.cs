@@ -210,18 +210,17 @@ namespace com.spacepuppyeditor
                 vRot.z = vRot.z * Mathf.Deg2Rad;
             }
 
-            vRot.x = MathUtil.NormalizeAngle(vRot.x, false);
-            vRot.y = MathUtil.NormalizeAngle(vRot.y, false);
-            vRot.z = MathUtil.NormalizeAngle(vRot.z, false);
+            //vRot.x = MathUtil.NormalizeAngle(vRot.x, useRadians);
+            //vRot.y = MathUtil.NormalizeAngle(vRot.y, useRadians);
+            //vRot.z = MathUtil.NormalizeAngle(vRot.z, useRadians);
 
+            EditorGUI.BeginChangeCheck();
             var vNewRot = EditorGUI.Vector3Field(position, label, vRot);
-
-            vNewRot.x = MathUtil.NormalizeAngle(vNewRot.x, false);
-            vNewRot.y = MathUtil.NormalizeAngle(vNewRot.y, false);
-            vNewRot.z = MathUtil.NormalizeAngle(vNewRot.z, false);
-
-            if (vRot != vNewRot)
+            if(EditorGUI.EndChangeCheck())
             {
+                vNewRot.x = MathUtil.NormalizeAngle(vNewRot.x, useRadians);
+                vNewRot.y = MathUtil.NormalizeAngle(vNewRot.y, useRadians);
+                vNewRot.z = MathUtil.NormalizeAngle(vNewRot.z, useRadians);
                 if (useRadians)
                 {
                     vNewRot.x = vNewRot.x * Mathf.Rad2Deg;

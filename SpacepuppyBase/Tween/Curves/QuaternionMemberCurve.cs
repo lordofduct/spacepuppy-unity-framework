@@ -27,7 +27,15 @@ namespace com.spacepuppy.Tween.Curves
 
         }
 
-        public QuaternionMemberCurve(string propName, float dur, Quaternion start, Quaternion end, bool slerp = false)
+        public QuaternionMemberCurve(string propName, float dur, Quaternion start, Quaternion end)
+            : base(propName, dur)
+        {
+            _start = start;
+            _end = end;
+            _useSlerp = false;
+        }
+
+        public QuaternionMemberCurve(string propName, float dur, Quaternion start, Quaternion end, bool slerp)
             : base(propName, dur)
         {
             _start = start;
@@ -35,7 +43,15 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        public QuaternionMemberCurve(string propName, Ease ease, float dur, Quaternion start, Quaternion end, bool slerp = false)
+        public QuaternionMemberCurve(string propName, Ease ease, float dur, Quaternion start, Quaternion end)
+            : base(propName, ease, dur)
+        {
+            _start = start;
+            _end = end;
+            _useSlerp = false;
+        }
+
+        public QuaternionMemberCurve(string propName, Ease ease, float dur, Quaternion start, Quaternion end, bool slerp)
             : base( propName, ease, dur)
         {
             _start = start;
@@ -43,11 +59,11 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        protected override void ReflectiveInit(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, object option)
         {
             _start = ConvertUtil.ToQuaternion(start);
             _end = ConvertUtil.ToQuaternion(end);
-            _useSlerp = slerp;
+            _useSlerp = ConvertUtil.ToBool(option);
         }
 
         #endregion

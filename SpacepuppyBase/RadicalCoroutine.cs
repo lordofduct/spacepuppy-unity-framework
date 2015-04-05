@@ -339,7 +339,13 @@ namespace com.spacepuppy
             _currentIEnumeratorYieldValue = null;
 
             //actually operate
-            while (_stack.Count > 0 && !_stack.Peek().MoveNext()) _stack.Pop();
+            while (_stack.Count > 0 && !_stack.Peek().MoveNext())
+            {
+                if (_stack.Peek() is IPooledYieldInstruction)
+                    (_stack.Pop() as IPooledYieldInstruction).Dispose();
+                else
+                    _stack.Pop();
+            }
 
             if (_stack.Count > 0)
             {
@@ -396,14 +402,13 @@ namespace com.spacepuppy
                 }
                 else if (current is IRadicalYieldInstruction)
                 {
-                    var rad = current as IRadicalYieldInstruction;
-                    if (rad is IImmediatelyResumingYieldInstruction) (rad as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
-                    if (rad is IPausibleYieldInstruction) rad = (rad as IPausibleYieldInstruction).Validate();
+                    var instruction = current as IRadicalYieldInstruction;
+                    if (instruction is IImmediatelyResumingYieldInstruction) (instruction as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
 
-                    if (rad.MoveNext())
+                    if (instruction.MoveNext())
                     {
-                        _currentIEnumeratorYieldValue = rad.Current;
-                        _stack.Push(rad);
+                        _currentIEnumeratorYieldValue = instruction.Current;
+                        _stack.Push(instruction);
                     }
                 }
                 else if (current is IEnumerable)

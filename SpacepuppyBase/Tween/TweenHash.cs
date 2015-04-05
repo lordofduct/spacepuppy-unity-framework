@@ -198,55 +198,55 @@ namespace com.spacepuppy.Tween
 
         public TweenHash Curve(Curve curve)
         {
-            _props.Add(new PropInfo(AnimMode.Curve, null, null, curve, float.NaN));
+            _props.Add(new PropInfo(AnimMode.Curve, null, null, curve, float.NaN, null));
             return this;
         }
 
-        public TweenHash To(string memberName, object end, float dur)
+        public TweenHash To(string memberName, object end, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.To, memberName, null, end, dur));
+            _props.Add(new PropInfo(AnimMode.To, memberName, null, end, dur, option));
             return this;
         }
 
-        public TweenHash To(string memberName, Ease ease, object end, float dur)
+        public TweenHash To(string memberName, Ease ease, object end, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.To, memberName, ease, end, dur));
+            _props.Add(new PropInfo(AnimMode.To, memberName, ease, end, dur, option));
             return this;
         }
 
-        public TweenHash From(string memberName, object start, float dur)
+        public TweenHash From(string memberName, object start, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.From, memberName, null, start, dur));
+            _props.Add(new PropInfo(AnimMode.From, memberName, null, start, dur, option));
             return this;
         }
 
-        public TweenHash From(string memberName, Ease ease, object start, float dur)
+        public TweenHash From(string memberName, Ease ease, object start, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.From, memberName, ease, start, dur));
+            _props.Add(new PropInfo(AnimMode.From, memberName, ease, start, dur, option));
             return this;
         }
 
-        public TweenHash By(string memberName, object amt, float dur)
+        public TweenHash By(string memberName, object amt, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.By, memberName, null, amt, dur));
+            _props.Add(new PropInfo(AnimMode.By, memberName, null, amt, dur, option));
             return this;
         }
 
-        public TweenHash By(string memberName, Ease ease, object amt, float dur)
+        public TweenHash By(string memberName, Ease ease, object amt, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.By, memberName, ease, amt, dur));
+            _props.Add(new PropInfo(AnimMode.By, memberName, ease, amt, dur, option));
             return this;
         }
 
-        public TweenHash FromTo(string memberName, object start, object end, float dur)
+        public TweenHash FromTo(string memberName, object start, object end, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.FromTo, memberName, null, start, dur, end));
+            _props.Add(new PropInfo(AnimMode.FromTo, memberName, null, start, dur, option, end));
             return this;
         }
 
-        public TweenHash FromTo(string memberName, Ease ease, object start, object end, float dur)
+        public TweenHash FromTo(string memberName, Ease ease, object start, object end, float dur, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, start, dur, end));
+            _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, start, dur, option, end));
             return this;
         }
 
@@ -326,13 +326,13 @@ namespace com.spacepuppy.Tween
                     case AnimMode.Curve:
                         return prop.value as Curve;
                     case AnimMode.To:
-                        return MemberCurve.CreateTo(_targ, prop.name, ease, prop.value, dur);
+                        return MemberCurve.CreateTo(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.From:
-                        return MemberCurve.CreateFrom(_targ, prop.name, ease, prop.value, dur);
+                        return MemberCurve.CreateFrom(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.By:
-                        return MemberCurve.CreateBy(_targ, prop.name, ease, prop.value, dur);
+                        return MemberCurve.CreateBy(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.FromTo:
-                        return MemberCurve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur);
+                        return MemberCurve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
                 }
             }
             catch
@@ -355,9 +355,9 @@ namespace com.spacepuppy.Tween
             public object value;
             public float dur;
             public object altValue;
-            public bool slerp;
+            public object option;
 
-            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d)
+            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option)
             {
                 this.mode = mode;
                 this.name = nm;
@@ -365,10 +365,10 @@ namespace com.spacepuppy.Tween
                 this.value = v;
                 this.dur = d;
                 this.altValue = null;
-                this.slerp = false;
+                this.option = option;
             }
 
-            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object altV)
+            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option, object altV)
             {
                 this.mode = mode;
                 this.name = nm;
@@ -376,7 +376,7 @@ namespace com.spacepuppy.Tween
                 this.value = v;
                 this.dur = d;
                 this.altValue = altV;
-                this.slerp = false;
+                this.option = option;
             }
 
         }

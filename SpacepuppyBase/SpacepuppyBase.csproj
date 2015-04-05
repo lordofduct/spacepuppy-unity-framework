@@ -48,11 +48,13 @@
     <Compile Include="Collections\CooldownPool.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
+    <Compile Include="Collections\ICachePool.cs" />
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\NotificationPool.cs" />
     <Compile Include="Collections\ObjectCachePool.cs" />
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\OrderedDelegate.cs" />
+    <Compile Include="Collections\TrackablObjectCachePool.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />
     <Compile Include="Collections\WeakKeyDictionary.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="Tween\CallbackTweener.cs" />
     <Compile Include="Tween\Curves\Color32MemberCurve.cs" />
     <Compile Include="Tween\Curves\ColorMemberCurve.cs" />
+    <Compile Include="Tween\Curves\StringCurve.cs" />
     <Compile Include="Tween\CustomMemberCurveAttribute.cs" />
     <Compile Include="Tween\Curves\FloatMemberCurve.cs" />
     <Compile Include="Tween\ITweenHash.cs" />

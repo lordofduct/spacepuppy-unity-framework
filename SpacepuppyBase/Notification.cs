@@ -21,9 +21,6 @@ namespace com.spacepuppy
 
         #region Fields
 
-        private object _sender;
-        private UnityEngine.GameObject _go;
-
         #endregion
 
         #region CONSTRUCTOR
@@ -36,21 +33,6 @@ namespace com.spacepuppy
         #endregion
 
         #region Properties
-
-        public object Sender { get { return _sender; } }
-        public UnityEngine.GameObject GameObject { get { return _go; } }
-
-        internal bool AutoReceived { get; set; }
-
-        #endregion
-
-        #region Methods
-
-        internal void SetSender(object sender)
-        {
-            _sender = sender;
-            _go = com.spacepuppy.Utils.GameObjectUtil.GetGameObjectFromSource(sender);
-        }
 
         #endregion
 
@@ -150,7 +132,7 @@ namespace com.spacepuppy
             return false;
         }
 
-        internal static bool PostGlobalNotification(System.Type tp, Notification n)
+        internal static bool PostGlobalNotification(System.Type tp, object sender, Notification n)
         {
             bool bHandled = false;
 
@@ -171,7 +153,7 @@ namespace com.spacepuppy
                     var d = _unsafeGlobalHandlers[tp];
                     if(d != null)
                     {
-                        d(n);
+                        d(sender, n);
                         bHandled = true;
                     }
                 }

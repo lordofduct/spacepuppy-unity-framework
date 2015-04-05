@@ -212,16 +212,15 @@ namespace com.spacepuppy
 
         private bool PostNotification_Imp(System.Type tp, Notification n, bool bNotifyEntity)
         {
-            n.SetSender(_owner ?? this);
             bool handled = false;
 
-            handled = this.PostNotificationToJustSelf(tp, n);
+            handled = this.PostNotificationToJustSelf(tp, _owner, n);
 
             if (_ownerGameObject != null)
             {
                 if (!Object.ReferenceEquals(_owner, _ownerGameObject))
                 {
-                    if (_ownerGameObject._dispatcher.PostNotificationToJustSelf(tp, n)) handled = true;
+                    if (_ownerGameObject._dispatcher.PostNotificationToJustSelf(tp, _owner, n)) handled = true;
                 }
 
                 if (bNotifyEntity)
@@ -231,7 +230,7 @@ namespace com.spacepuppy
                     GameObjectNotificationDispatcher dispatcher;
                     if (root != _ownerGameObject.gameObject && root.GetComponent<GameObjectNotificationDispatcher>(out dispatcher))
                     {
-                        if (dispatcher._dispatcher.PostNotificationToJustSelf(tp, n)) handled = true;
+                        if (dispatcher._dispatcher.PostNotificationToJustSelf(tp, _owner, n)) handled = true;
                     }
                     //root.BroadcastMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, n, UnityEngine.SendMessageOptions.DontRequireReceiver);
                 }
@@ -242,7 +241,7 @@ namespace com.spacepuppy
             }
 
             //let anyone registered with the global hear about it
-            var globallyHandled = Notification.PostGlobalNotification(tp, n);
+            var globallyHandled = Notification.PostGlobalNotification(tp, _owner, n);
 
             //if not handled, check if we should throw an exception
             if (!(handled || globallyHandled) && System.Attribute.IsDefined(tp, typeof(RequireNotificationReceiverAttribute), false))
@@ -254,9 +253,9 @@ namespace com.spacepuppy
                     {
                         if (!requiredAttrib.GlobalObserverConsidered || !globallyHandled)
                         {
-                            if (n.GameObject != null)
+                            if (_ownerGameObject != null)
                             {
-                                var root = n.GameObject.FindRoot();
+                                var root = _ownerGameObject.FindRoot();
                                 if (_owner is GameObjectNotificationDispatcher)
                                 {
                                     throw new AbsentNotificationReceiverException(n, "A GameObject named '" + root.name + "' requires a receiver to notification of type '" + tp.Name + "'.");
@@ -283,14 +282,8 @@ namespace com.spacepuppy
             }
         }
 
-        /// <summary>
-        /// Limited posting of a notification. Only handlers registered directly with this NotificationDispatcher will be notified. 
-        /// Not even the global notification dispatcher will be signaled.
-        /// </summary>
-        /// <param name="tp"></param>
-        /// <param name="n"></param>
-        /// <returns></returns>
-        public bool PostNotificationToJustSelf(System.Type tp, Notification n)
+        
+        private bool PostNotificationToJustSelf(System.Type tp, object sender, Notification n)
         {
             bool bHandled = false;
 
@@ -302,7 +295,7 @@ namespace com.spacepuppy
                     var d = _handlers[tp];
                     if (d != null)
                     {
-                        d.DynamicInvoke(n);
+                        d.DynamicInvoke(sender, n);
                         bHandled = true;
                     }
                 }
@@ -311,7 +304,7 @@ namespace com.spacepuppy
                     var d = _unsafeHandlers[tp];
                     if (d != null)
                     {
-                        d.DynamicInvoke(n);
+                        d.DynamicInvoke(sender, n);
                         bHandled = true;
                     }
                 }
@@ -320,6 +313,22 @@ namespace com.spacepuppy
             }
 
             return bHandled;
+        }
+
+        /// <summary>
+        /// Limited posting of a notification. Only handlers registered directly with this NotificationDispatcher will be notified. 
+        /// Not even the global notification dispatcher will be signaled. This is for use if you want some special object to forward 
+        /// a notification along as if it were in its hierarchy chain.
+        /// </summary>
+        /// <param name="tp"></param>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public bool ForwardNotificationToJustSelf(object sender, Notification n)
+        {
+            if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
+            if (n == null) throw new System.ArgumentNullException("n");
+
+            return PostNotificationToJustSelf(n.GetType(), sender, n);
         }
 
         #endregion

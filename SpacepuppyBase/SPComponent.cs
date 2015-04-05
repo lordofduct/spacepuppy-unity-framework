@@ -87,11 +87,6 @@ namespace com.spacepuppy
         /// </summary>
         public bool started { get { return _started; } }
 
-        public bool isActiveAndEnabled
-        {
-            get { return this.enabled && this.gameObject.activeInHierarchy; }
-        }
-
         #endregion
 
         #region Methods

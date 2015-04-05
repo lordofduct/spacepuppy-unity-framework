@@ -28,7 +28,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static bool IsNullOrDestroyed(this System.Object obj)
         {
-            return ReferenceEquals(obj, null) || obj.Equals(null);
+            return object.ReferenceEquals(obj, null) || obj.Equals(null);
         }
 
         /// <summary>
@@ -41,6 +41,8 @@ namespace com.spacepuppy.Utils
         {
             return !ReferenceEquals(obj, null) && obj.Equals(null);
         }
+
+
 
         public static bool EqualsAny(System.Object obj, params System.Object[] others)
         {

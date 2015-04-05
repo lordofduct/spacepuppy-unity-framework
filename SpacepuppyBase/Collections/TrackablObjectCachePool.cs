@@ -4,18 +4,13 @@ using System.Linq;
 
 namespace com.spacepuppy.Collections
 {
-
-    /// <summary>
-    /// Creates a pool that will cache instances of objects for later use so that you don't have to construct them again. 
-    /// There is a max cache size, if set to 0 or less, it's considered endless in size.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class ObjectCachePool<T> where T : class
+    public class TrackablObjectCachePool<T> : ICachePool<T> where T : class
     {
 
         #region Fields
 
         private Stack<T> _inactive = new Stack<T>();
+        private List<T> _active = new List<T>();
 
         private Func<T> _constructorDelegate;
         private Action<T> _resetObjectDelegate;
@@ -24,19 +19,19 @@ namespace com.spacepuppy.Collections
 
         #region CONSTRUCTOR
 
-        public ObjectCachePool(int cacheSize)
+        public TrackablObjectCachePool(int cacheSize)
         {
             this.CacheSize = cacheSize;
             _constructorDelegate = this.SimpleConstructor;
         }
 
-        public ObjectCachePool(int cacheSize, Func<T> constructorDelegate)
+        public TrackablObjectCachePool(int cacheSize, Func<T> constructorDelegate)
         {
             this.CacheSize = cacheSize;
             _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
         }
 
-        public ObjectCachePool(int cacheSize, Func<T> constructorDelegate, Action<T> resetObjectDelegate)
+        public TrackablObjectCachePool(int cacheSize, Func<T> constructorDelegate, Action<T> resetObjectDelegate)
         {
             this.CacheSize = cacheSize;
             _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
@@ -54,6 +49,8 @@ namespace com.spacepuppy.Collections
 
         public int CacheSize { get; set; }
 
+        public IEnumerable<T> ActiveMembers { get { return _active; } }
+
         #endregion
 
         #region Methods
@@ -62,27 +59,37 @@ namespace com.spacepuppy.Collections
         {
             if(_inactive.Count > 0)
             {
-                return _inactive.Pop();
+                var o = _inactive.Pop();
+                _active.Add(o);
+                return o;
             }
             else
             {
-                return _constructorDelegate();
+                var o = _constructorDelegate();
+                _active.Add(o);
+                return o;
             }
         }
 
         public void Release(T obj)
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
+            if (!_active.Contains(obj)) throw new System.ArgumentException("ObjectCachePool does not consider this object to be an active member.", "obj");
 
-            if(this.CacheSize > 0 && _inactive.Count < this.CacheSize)
+            _active.Remove(obj);
+            if(_active.Count + _inactive.Count < this.CacheSize)
             {
                 if (_resetObjectDelegate != null) _resetObjectDelegate(obj);
                 _inactive.Push(obj);
             }
         }
 
+        public bool Manages(T obj)
+        {
+            return _active.Contains(obj) || _inactive.Contains(obj);
+        }
+
         #endregion
 
     }
-
 }

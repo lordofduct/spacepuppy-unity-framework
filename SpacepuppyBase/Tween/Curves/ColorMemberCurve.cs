@@ -40,7 +40,7 @@ namespace com.spacepuppy.Tween.Curves
             _end = end;
         }
 
-        protected override void ReflectiveInit(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, object option)
         {
             _start = ConvertUtil.ToColor(start);
             _end = ConvertUtil.ToColor(end);
