@@ -282,7 +282,7 @@ namespace com.spacepuppyeditor
 
         #region Temp Content
 
-        private static ObjectCachePool<GUIContent> _temp_text = new ObjectCachePool<GUIContent>(50);
+        private static TrackablObjectCachePool<GUIContent> _temp_text = new TrackablObjectCachePool<GUIContent>(50);
 
 
         /// <summary>

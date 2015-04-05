@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Tween
 {
     public class ObjectTweener : Tweener
@@ -44,6 +46,11 @@ namespace com.spacepuppy.Tween
 
         protected override void DoUpdate(float dt, float t)
         {
+            if (_target.IsNullOrDestroyed())
+            {
+                this.Stop();
+                return;
+            }
             _curve.Update(_target, dt, t);
         }
 

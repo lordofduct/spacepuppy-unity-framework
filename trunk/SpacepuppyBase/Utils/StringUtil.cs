@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Text;
 using System.Text.RegularExpressions;
+
+using com.spacepuppy.Collections;
 
 namespace com.spacepuppy.Utils
 {
@@ -509,6 +512,28 @@ namespace com.spacepuppy.Utils
         {
             if (value.EndsWith(end, comparison)) return value.Substring(0, value.Length - end.Length);
             else return value;
+        }
+
+        #endregion
+
+
+
+
+
+        #region StringBuilders
+
+        private static ObjectCachePool<StringBuilder> _pool = new ObjectCachePool<StringBuilder>(10, () => new StringBuilder(), (b) => b.Length = 0);
+
+        public static StringBuilder GetTempStringBuilder()
+        {
+            return _pool.GetInstance();
+        }
+
+        public static string Release(StringBuilder b)
+        {
+            var result = b.ToString();
+            _pool.Release(b);
+            return result;
         }
 
         #endregion

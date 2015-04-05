@@ -192,6 +192,62 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+
+        #region SelectionTabs
+
+        public static int SelectionTabs(int mode, string[] modes, int xCount)
+        {
+            int yCount = Mathf.CeilToInt((float)modes.Length / (float)xCount);
+            int currentRow = Mathf.FloorToInt((float)mode / (float)xCount);
+
+            var gridStyle = new GUIStyle(GUI.skin.window);
+            gridStyle.padding.bottom = -20;
+            Rect rect = GUILayoutUtility.GetRect(1, 16f * yCount);
+            rect.x += 4;
+            rect.width -= 7;
+
+            if(currentRow == yCount - 1)
+            {
+                //if selected row is last row, don't bother remapping
+                return GUI.SelectionGrid(rect, mode, modes, 2, gridStyle);
+            }
+            else
+            {
+                //remap so that selected row is the last row
+                var altModes = modes.Clone() as string[];
+                for(int i = 0; i < xCount; i++)
+                {
+                    altModes[(altModes.Length - xCount) + i] = modes[xCount * currentRow + i]; //move selected row to end
+                    altModes[xCount * currentRow + i] = modes[(modes.Length - xCount) + i]; //move last row to selected row
+                }
+                int altMode = (modes.Length - xCount) + (mode % xCount);
+                EditorGUI.BeginChangeCheck();
+                altMode = GUI.SelectionGrid(rect, altMode, altModes, 2, gridStyle);
+                if(EditorGUI.EndChangeCheck())
+                {
+                    var newRow = Mathf.FloorToInt((float)altMode / (float)xCount);
+                    if (newRow == yCount - 1)
+                    {
+                        return (currentRow * xCount) + (altMode % xCount);
+                    }
+                    else if(newRow == currentRow)
+                    {
+                        return (modes.Length - xCount) + (altMode % xCount);
+                    }
+                    else
+                    {
+                        return altMode;
+                    }
+                }
+                else
+                {
+                    return mode;
+                }
+            }
+        }
+
+        #endregion
+
     }
 
 }

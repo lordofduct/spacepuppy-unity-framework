@@ -60,7 +60,7 @@ namespace com.spacepuppy.Tween
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="slerp"></param>
-        protected abstract void ReflectiveInit(object start, object end, bool slerp);
+        protected abstract void ReflectiveInit(object start, object end, object option);
 
         #endregion
 
@@ -79,6 +79,7 @@ namespace com.spacepuppy.Tween
         public float Duration
         {
             get { return _dur; }
+            protected set { _dur = value; }
         }
 
         public float Delay
@@ -146,7 +147,7 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        private static MemberCurve Create(MemberInfo memberInfo, System.Type memberType, Ease ease, float dur, object start, object end, bool slerp = false)
+        private static MemberCurve Create(MemberInfo memberInfo, System.Type memberType, Ease ease, float dur, object start, object end, object option)
         {
             if (_memberTypeToCurveType == null) BuildDictionary();
 
@@ -159,7 +160,7 @@ namespace com.spacepuppy.Tween
                     curve.Ease = ease;
                     curve._accessor = MemberAccessorPool.Get(memberInfo);
                     if (curve is NumericMemberCurve && ConvertUtil.IsNumericType(memberType)) (curve as NumericMemberCurve).NumericType = System.Type.GetTypeCode(memberType);
-                    curve.ReflectiveInit(start, end, slerp);
+                    curve.ReflectiveInit(start, end, option);
                     return curve;
                 }
                 catch (System.Exception ex)
@@ -173,7 +174,7 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        public static Curve CreateTo(object target, string propName, Ease ease, object end, float dur)
+        public static Curve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             MemberInfo memberInfo;
@@ -182,10 +183,10 @@ namespace com.spacepuppy.Tween
 
             object start = MemberAccessorPool.Get(memberInfo).Get(target);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end);
+            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
         }
 
-        public static Curve CreateFrom(object target, string propName, Ease ease, object start, float dur)
+        public static Curve CreateFrom(object target, string propName, Ease ease, object start, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             MemberInfo memberInfo;
@@ -194,10 +195,10 @@ namespace com.spacepuppy.Tween
 
             object end = MemberAccessorPool.Get(memberInfo).Get(target);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end);
+            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
         }
 
-        public static Curve CreateBy(object target, string propName, Ease ease, object amt, float dur)
+        public static Curve CreateBy(object target, string propName, Ease ease, object amt, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             MemberInfo memberInfo;
@@ -207,17 +208,17 @@ namespace com.spacepuppy.Tween
             object start = MemberAccessorPool.Get(memberInfo).Get(target);
             object end = MemberCurve.TrySum(memberInfo, start, amt);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end);
+            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
         }
 
-        public static Curve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur)
+        public static Curve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             MemberInfo memberInfo;
             System.Type memberType;
             MemberAccessorPool.GetMember(target.GetType(), propName, out memberInfo, out memberType);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end);
+            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
         }
 
 

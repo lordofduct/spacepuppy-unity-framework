@@ -19,22 +19,13 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
-        public static bool IsEnabled(this Component comp, bool checkGameObject)
+        public static bool IsActiveAndEnabled(this Component comp)
         {
-            if(checkGameObject)
-            {
-                if (comp == null) return false;
-                if (comp is Behaviour) return (comp as Behaviour).enabled && comp.gameObject.activeInHierarchy;
-                if (comp is Collider) return (comp as Collider).enabled && comp.gameObject.activeInHierarchy;
-                return true;
-            }
-            else
-            {
-                if (comp == null) return false;
-                if (comp is Behaviour) return (comp as Behaviour).enabled;
-                if (comp is Collider) return (comp as Collider).enabled;
-                return true;
-            }
+            if (comp == null) return false;
+            if (!comp.gameObject.activeInHierarchy) return false;
+            if (comp is Behaviour) return (comp as Behaviour).enabled;
+            if (comp is Collider) return (comp as Collider).enabled;
+            return true;
         }
 
         public static void SetEnabled(this Component comp, bool enabled)
@@ -1101,6 +1092,24 @@ namespace com.spacepuppy.Utils
                     yield return comp;
                 }
             }
+        }
+
+        #endregion
+
+
+
+        #region GetHierarchyPath
+
+        public static string GetHiearchyPathName(this Transform t)
+        {
+            var builder = StringUtil.GetTempStringBuilder();
+            while(t.parent != null)
+            {
+                t = t.parent;
+                builder.Insert(0, @"\");
+                builder.Insert(0, t.name);
+            }
+            return StringUtil.Release(builder);
         }
 
         #endregion

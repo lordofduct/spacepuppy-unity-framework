@@ -27,7 +27,15 @@ namespace com.spacepuppy.Tween.Curves
 
         }
 
-        public Vector3MemberCurve(string propName, float dur, Vector3 start, Vector3 end, bool slerp = false)
+        public Vector3MemberCurve(string propName, float dur, Vector3 start, Vector3 end)
+            : base(propName, dur)
+        {
+            _start = start;
+            _end = end;
+            _useSlerp = false;
+        }
+
+        public Vector3MemberCurve(string propName, float dur, Vector3 start, Vector3 end, bool slerp)
             : base(propName, dur)
         {
             _start = start;
@@ -35,7 +43,15 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        public Vector3MemberCurve(string propName, Ease ease, float dur, Vector3 start, Vector3 end, bool slerp = false)
+        public Vector3MemberCurve(string propName, Ease ease, float dur, Vector3 start, Vector3 end)
+            : base(propName, ease, dur)
+        {
+            _start = start;
+            _end = end;
+            _useSlerp = false;
+        }
+
+        public Vector3MemberCurve(string propName, Ease ease, float dur, Vector3 start, Vector3 end, bool slerp)
             : base(propName, ease, dur)
         {
             _start = start;
@@ -43,11 +59,11 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        protected override void ReflectiveInit(object start, object end, bool slerp)
+        protected override void ReflectiveInit(object start, object end, object option)
         {
             _start = ConvertUtil.ToVector3(start);
             _end = ConvertUtil.ToVector3(end);
-            _useSlerp = slerp;
+            _useSlerp = ConvertUtil.ToBool(option);
         }
 
         #endregion

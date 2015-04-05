@@ -29,12 +29,17 @@ namespace com.spacepuppy
 
         void OnPause();
         void OnResume();
-        /// <summary>
-        /// Called whenever this instruction has been yielded. If the instruction has been 
-        /// previously used, a clone of itself should be returned.
-        /// </summary>
-        /// <returns></returns>
-        IPausibleYieldInstruction Validate();
+
+    }
+
+    /// <summary>
+    /// By implementing this interface, the RadicalCoroutine knows to call Dispose on the instruction when it is 
+    /// done yielding for its duration. The instruction can than return itself to a object cache pool during Dispose 
+    /// for reuse later.
+    /// </summary>
+    public interface IPooledYieldInstruction : IRadicalYieldInstruction, System.IDisposable
+    {
+
     }
 
     public abstract class RadicalYieldInstruction : IRadicalYieldInstruction
@@ -250,7 +255,12 @@ namespace com.spacepuppy
 
     }
 
-    public class WaitForDuration : IPausibleYieldInstruction
+    /// <summary>
+    /// Represents a duration of time to wait for that can be paused, and can use various kinds of TimeSuppliers. 
+    /// NOTE - this yield instruction is pooled, NEVER store one for reuse. The pool takes care of that for you. Instead 
+    /// use the static factory methods.
+    /// </summary>
+    public class WaitForDuration : IPausibleYieldInstruction, IPooledYieldInstruction
     {
 
         #region Fields
@@ -259,20 +269,17 @@ namespace com.spacepuppy
         private float _t;
         private float _cache;
         private float _dur;
-        private bool _used;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public WaitForDuration(float dur)
+        private WaitForDuration()
         {
-            _supplier = SPTime.Normal;
-            _dur = dur;
-            (this as System.Collections.IEnumerator).Reset();
+
         }
 
-        public WaitForDuration(float dur, ITimeSupplier supplier)
+        private void Init(float dur, ITimeSupplier supplier)
         {
             _supplier = supplier ?? SPTime.Normal;
             _dur = dur;
@@ -318,23 +325,27 @@ namespace com.spacepuppy
             _t = Time.time;
         }
 
-        IPausibleYieldInstruction IPausibleYieldInstruction.Validate()
+        #endregion
+
+        #region IPooledYieldInstruction Interface
+
+        void System.IDisposable.Dispose()
         {
-            if (!_used)
-            {
-                return this;
-            }
-            else
-            {
-                _used = true;
-                return new WaitForDuration(_dur, _supplier);
-            }
+            _pool.Release(this);
         }
 
         #endregion
 
-
         #region Static Factory
+
+        private static com.spacepuppy.Collections.ObjectCachePool<WaitForDuration> _pool = new com.spacepuppy.Collections.ObjectCachePool<WaitForDuration>(1000, () => new WaitForDuration());
+
+        public static WaitForDuration Seconds(float seconds, ITimeSupplier supplier = null)
+        {
+            var w = _pool.GetInstance();
+            w.Init(seconds, supplier);
+            return w;
+        }
 
         public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
         {
@@ -345,7 +356,9 @@ namespace com.spacepuppy
             }
             else
             {
-                return new WaitForDuration(dur);
+                var w = _pool.GetInstance();
+                w.Init(dur, SPTime.Normal);
+                return w;
             }
         }
 
@@ -369,7 +382,7 @@ namespace com.spacepuppy
 
         public T Notification { get { return _notification; } }
 
-        private void OnNotification(T n)
+        private void OnNotification(object sender, T n)
         {
             if (_ignoreCheck != null && _ignoreCheck(n)) return;
 

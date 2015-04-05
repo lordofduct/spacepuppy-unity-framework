@@ -48,7 +48,6 @@ namespace com.spacepuppy
                 if (_handlers.ContainsKey(notifType))
                 {
                     _handlers[notifType].DynamicInvoke(n);
-                    n.AutoReceived = true;
                 }
                 notifType = notifType.BaseType;
             }
