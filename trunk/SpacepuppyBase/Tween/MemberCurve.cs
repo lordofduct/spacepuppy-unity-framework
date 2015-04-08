@@ -117,8 +117,9 @@ namespace com.spacepuppy.Tween
         {
             if (t < _delay) return;
 
-            var value = GetValue(_ease(t - _delay, 0f, 1f, _dur));
-            if (_accessor == null) _accessor = MemberAccessorPool.Get(targ, _memberName);
+            t = (_dur > 0) ? _ease(t - _delay, 0f, 1f, _dur) : 1f;
+            var value = GetValue(t);
+            if (_accessor == null) _accessor = MemberAccessorPool.GetAccessor(targ.GetType(), _memberName);
             _accessor.Set(targ, value);
         }
 
@@ -147,7 +148,7 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        private static MemberCurve Create(MemberInfo memberInfo, System.Type memberType, Ease ease, float dur, object start, object end, object option)
+        private static MemberCurve Create(System.Type memberType, IMemberAccessor accessor, Ease ease, float dur, object start, object end, object option)
         {
             if (_memberTypeToCurveType == null) BuildDictionary();
 
@@ -158,7 +159,7 @@ namespace com.spacepuppy.Tween
                     var curve = System.Activator.CreateInstance(_memberTypeToCurveType[memberType], true) as MemberCurve;
                     curve._dur = dur;
                     curve.Ease = ease;
-                    curve._accessor = MemberAccessorPool.Get(memberInfo);
+                    curve._accessor = accessor;
                     if (curve is NumericMemberCurve && ConvertUtil.IsNumericType(memberType)) (curve as NumericMemberCurve).NumericType = System.Type.GetTypeCode(memberType);
                     curve.ReflectiveInit(start, end, option);
                     return curve;
@@ -177,60 +178,74 @@ namespace com.spacepuppy.Tween
         public static Curve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
-            MemberInfo memberInfo;
             System.Type memberType;
-            MemberAccessorPool.GetMember(target.GetType(), propName, out memberInfo, out memberType);
+            var accessor = MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
 
-            object start = MemberAccessorPool.Get(memberInfo).Get(target);
+            object start = accessor.Get(target);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
+            return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }
 
         public static Curve CreateFrom(object target, string propName, Ease ease, object start, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
-            MemberInfo memberInfo;
             System.Type memberType;
-            MemberAccessorPool.GetMember(target.GetType(), propName, out memberInfo, out memberType);
+            var accessor = MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
 
-            object end = MemberAccessorPool.Get(memberInfo).Get(target);
+            object end = accessor.Get(target);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
+            return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }
 
         public static Curve CreateBy(object target, string propName, Ease ease, object amt, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
-            MemberInfo memberInfo;
             System.Type memberType;
-            MemberAccessorPool.GetMember(target.GetType(), propName, out memberInfo, out memberType);
+            var accessor = MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
 
-            object start = MemberAccessorPool.Get(memberInfo).Get(target);
-            object end = MemberCurve.TrySum(memberInfo, start, amt);
+            object start = accessor.Get(target);
+            object end = MemberCurve.TrySum(memberType, start, amt);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
+            return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }
 
         public static Curve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
-            MemberInfo memberInfo;
             System.Type memberType;
-            MemberAccessorPool.GetMember(target.GetType(), propName, out memberInfo, out memberType);
+            var accessor = MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
 
-            return MemberCurve.Create(memberInfo, memberType, ease, dur, start, end, option);
+            return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
+        }
+
+        /// <summary>
+        /// Creates a curve that will animate from the current value to the end value, but will rescale the duration from how long it should have 
+        /// taken from start to end, but already animated up to current.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="propName"></param>
+        /// <param name="ease"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="dur"></param>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public static Curve CreateRedirectTo(object target, string propName, Ease ease, float start, float end, float dur, object option = null)
+        {
+            if (target == null) throw new System.ArgumentNullException("target");
+            System.Type memberType;
+            var accessor = MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
+
+            var current = accessor.Get(target);
+            dur = MathUtil.PercentageOffMinMax(ConvertUtil.ToSingle(current), end, start) * dur;
+
+            return MemberCurve.Create(memberType, accessor, ease, dur, current, ConvertUtil.ToPrim(end, memberType), option);
         }
 
 
-        private static object TrySum(System.Reflection.MemberInfo info, object a, object b)
+        private static object TrySum(System.Type tp, object a, object b)
         {
-            System.Type tp;
-            if (info is System.Reflection.FieldInfo)
-                tp = (info as System.Reflection.FieldInfo).FieldType;
-            else if (info is System.Reflection.PropertyInfo)
-                tp = (info as System.Reflection.PropertyInfo).PropertyType;
-            else
-                return b;
+            if (tp == null) return b;
 
             if (ConvertUtil.IsNumericType(tp))
             {

@@ -62,7 +62,7 @@ namespace com.spacepuppy.Async
             }
         }
 
-        object System.Collections.IEnumerator.Current
+        object IRadicalYieldInstruction.CurrentYieldObject
         {
             get
             {
@@ -82,14 +82,9 @@ namespace com.spacepuppy.Async
             }
         }
 
-        bool System.Collections.IEnumerator.MoveNext()
+        bool IRadicalYieldInstruction.ContinueBlocking()
         {
             return !this.IsComplete;
-        }
-
-        void System.Collections.IEnumerator.Reset()
-        {
-            throw new System.NotSupportedException();
         }
 
         #endregion

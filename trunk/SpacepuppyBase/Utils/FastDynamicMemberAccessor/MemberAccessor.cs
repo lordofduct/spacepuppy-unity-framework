@@ -14,6 +14,11 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
 {
     internal sealed class ChainingAccessor : IMemberAccessor
     {
+        //example:
+        //transform.position.x
+        //position is chain
+        //x is pimp
+
         readonly IMemberAccessor _pimp;
         readonly IMemberAccessor _chain;
 
@@ -30,7 +35,11 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
 
         public void Set(object target, object value)
         {
-            _pimp.Set(_chain.Get(target), value);
+            //_pimp.Set(_chain.Get(target), value);
+
+            var obj = _chain.Get(target); //get the value we modify
+            _pimp.Set(obj, value); //modify the value
+            _chain.Set(target, obj); //set it back to the target, this is so structs write correctly
         }
     }
 

@@ -59,19 +59,14 @@ namespace com.spacepuppy.Async
 
         #region IRadicalYieldInstruction Interface
 
-        object System.Collections.IEnumerator.Current
+        object IRadicalYieldInstruction.CurrentYieldObject
         {
             get { return this.CurrentYieldObject; }
         }
 
-        bool System.Collections.IEnumerator.MoveNext()
+        bool IRadicalYieldInstruction.ContinueBlocking()
         {
             return !_complete;
-        }
-
-        void System.Collections.IEnumerator.Reset()
-        {
-            throw new System.NotSupportedException();
         }
 
         #endregion

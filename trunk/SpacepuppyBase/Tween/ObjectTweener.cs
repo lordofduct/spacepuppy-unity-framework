@@ -6,13 +6,14 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Tween
 {
-    public class ObjectTweener : Tweener
+    public class ObjectTweener : Tweener, IAutoKillableTweener
     {
 
         #region Fields
 
         private object _target;
         private Curve _curve;
+        private object _tokenUid;
 
         #endregion
         
@@ -35,6 +36,12 @@ namespace com.spacepuppy.Tween
 
         public object Target { get { return _target; } }
 
+        public object AutoKillToken
+        {
+            get { return _tokenUid; }
+            set { _tokenUid = value; }
+        }
+
         #endregion
 
         #region Tweener Interface
@@ -52,6 +59,46 @@ namespace com.spacepuppy.Tween
                 return;
             }
             _curve.Update(_target, dt, t);
+        }
+
+        #endregion
+
+        #region IAutoKillableTweener Interface
+
+        object IAutoKillableTweener.Token
+        {
+            get
+            {
+                if (_tokenUid == null)
+                    return _target;
+                else
+                    return new TokenPairing(_target, _tokenUid);
+            }
+            set
+            {
+                _tokenUid = value;
+            }
+        }
+
+        void IAutoKillableTweener.Kill()
+        {
+            this.Kill();
+        }
+
+        #endregion
+
+        #region Special Types
+
+        private struct TokenPairing
+        {
+            public object Target;
+            public object TokenUid;
+
+            public TokenPairing(object targ, object uid)
+            {
+                this.Target = targ;
+                this.TokenUid = uid;
+            }
         }
 
         #endregion

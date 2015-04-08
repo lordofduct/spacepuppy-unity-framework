@@ -18,11 +18,13 @@ namespace com.spacepuppy.Tween
             To = 0,
             From = 1,
             By = 2,
-            FromTo = 3
+            FromTo = 3,
+            RedirectTo = 4
         }
 
         #region Fields
 
+        private object _id;
         private object _targ;
         private List<PropInfo> _props = new List<PropInfo>();
         private Ease _defaultEase = EaseMethods.LinearEaseNone;
@@ -31,6 +33,9 @@ namespace com.spacepuppy.Tween
         private TweenWrapMode _wrap;
         private int _wrapCount;
         private bool _reverse;
+        private float _speedScale = 1.0f;
+        private bool _autoKill;
+        private object _autoKillToken;
         private System.EventHandler _onStep;
         private System.EventHandler _onWrap;
         private System.EventHandler _onFinish;
@@ -43,6 +48,14 @@ namespace com.spacepuppy.Tween
         {
             if (targ == null) throw new System.ArgumentNullException("targ");
             _targ = targ;
+            _id = null;
+        }
+
+        public TweenHash(object targ, object id)
+        {
+            if (targ == null) throw new System.ArgumentNullException("targ");
+            _targ = targ;
+            _id = id;
         }
 
         #endregion
@@ -52,6 +65,12 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Config Methods
+
+        public TweenHash SetId(object id)
+        {
+            _id = id;
+            return this;
+        }
 
         public TweenHash Ease(Ease ease)
         {
@@ -143,6 +162,12 @@ namespace com.spacepuppy.Tween
         public TweenHash Reverse(bool reverse)
         {
             _reverse = reverse;
+            return this;
+        }
+
+        public TweenHash SpeedScale(float scale)
+        {
+            _speedScale = scale;
             return this;
         }
 
@@ -250,6 +275,77 @@ namespace com.spacepuppy.Tween
             return this;
         }
 
+        /// <summary>
+        /// Creates a curve that will animate from the current value to the end value, but will rescale the duration from how long it should have 
+        /// taken from start to end, but already animated up to current.
+        /// </summary>
+        /// <param name="memberName"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="dur"></param>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public TweenHash RedirectTo(string memberName, object start, object end, float dur, object option = null)
+        {
+            _props.Add(new PropInfo(AnimMode.RedirectTo, memberName, null, start, dur, option, end));
+            return this;
+        }
+
+        /// <summary>
+        /// Creates a curve that will animate from the current value to the end value, but will rescale the duration from how long it should have 
+        /// taken from start to end, but already animated up to current.
+        /// </summary>
+        /// <param name="memberName"></param>
+        /// <param name="ease"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="dur"></param>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public TweenHash RedirectTo(string memberName, Ease ease, object start, object end, float dur, object option = null)
+        {
+            _props.Add(new PropInfo(AnimMode.RedirectTo, memberName, ease, start, dur, option, end));
+            return this;
+        }
+
+        #endregion
+
+        #region AutoKill
+
+        /// <summary>
+        /// On play the Tweener will be flagged to auto-kill.
+        /// </summary>
+        /// <returns></returns>
+        public TweenHash AutoKill()
+        {
+            _autoKill = true;
+            _autoKillToken = null;
+            return this;
+        }
+
+        /// <summary>
+        /// On play the Tweener will be flagged to auto-kill with the included token.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public TweenHash AutoKill(object token)
+        {
+            _autoKill = true;
+            _autoKillToken = token;
+            return this;
+        }
+
+        /// <summary>
+        /// Cancel the setting of AutoKill for this hash table.
+        /// </summary>
+        /// <returns></returns>
+        public TweenHash CancelAutoKill()
+        {
+            _autoKill = false;
+            _autoKillToken = null;
+            return this;
+        }
+
         #endregion
 
         #region Play Methods
@@ -260,6 +356,11 @@ namespace com.spacepuppy.Tween
 
             var tween = this.Create();
             tween.Play();
+            if (_autoKill && tween is IAutoKillableTweener)
+            {
+                (tween as IAutoKillableTweener).Token = _autoKillToken;
+                SPTween.AutoKill(tween);
+            }
             return tween;
         }
 
@@ -304,6 +405,7 @@ namespace com.spacepuppy.Tween
             }
 
             //set props
+            tween.Id = _id;
             tween.UpdateType = _updateType;
             tween.TimeSupplier = _timeSupplier;
             tween.WrapMode = _wrap;
@@ -333,6 +435,8 @@ namespace com.spacepuppy.Tween
                         return MemberCurve.CreateBy(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.FromTo:
                         return MemberCurve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
+                    case AnimMode.RedirectTo:
+                        return MemberCurve.CreateRedirectTo(_targ, prop.name, ease, ConvertUtil.ToSingle(prop.value), ConvertUtil.ToSingle(prop.altValue), dur, prop.option);
                 }
             }
             catch
@@ -398,6 +502,11 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region ITweenHash Interface
+
+        ITweenHash ITweenHash.SetId(object id)
+        {
+            return this.SetId(id);
+        }
 
         ITweenHash ITweenHash.Ease(Ease ease)
         {
@@ -472,6 +581,11 @@ namespace com.spacepuppy.Tween
         ITweenHash ITweenHash.Reverse(bool reverse)
         {
             return this.Reverse(reverse);
+        }
+
+        ITweenHash ITweenHash.SpeedScale(float scale)
+        {
+            return this.SpeedScale(scale);
         }
 
         ITweenHash ITweenHash.OnStep(System.EventHandler d)

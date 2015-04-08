@@ -67,6 +67,12 @@ namespace com.spacepuppy.Tween
 
         #region ITweenHash Interface
 
+        ITweenHash ITweenHash.SetId(object id)
+        {
+            this.Id = id;
+            return this;
+        }
+
         ITweenHash ITweenHash.Ease(Ease ease)
         {
             _ease = ease;
@@ -157,6 +163,12 @@ namespace com.spacepuppy.Tween
         ITweenHash ITweenHash.Reverse(bool reverse)
         {
             this.Reverse = reverse;
+            return this;
+        }
+
+        ITweenHash ITweenHash.SpeedScale(float scale)
+        {
+            this.SpeedScale = scale;
             return this;
         }
 

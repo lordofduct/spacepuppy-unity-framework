@@ -38,6 +38,9 @@
     <Reference Include="UnityEngine">
       <HintPath>..\Resources\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\Resources\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Async\AsyncOperationWrapper.cs" />
@@ -45,6 +48,7 @@
     <Compile Include="Attributes.cs" />
     <Compile Include="AutoNotificationManager.cs" />
     <Compile Include="CancellableNotification.cs" />
+    <Compile Include="Collections\BiDictionary.cs" />
     <Compile Include="Collections\CooldownPool.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
@@ -60,6 +64,7 @@
     <Compile Include="Collections\WeakKeyDictionary.cs" />
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="CustomTimeSupplier.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="EventArgs.cs" />
@@ -128,6 +133,7 @@
     <Compile Include="Tween\Curves\StringCurve.cs" />
     <Compile Include="Tween\CustomMemberCurveAttribute.cs" />
     <Compile Include="Tween\Curves\FloatMemberCurve.cs" />
+    <Compile Include="Tween\IAutoKillableTweener.cs" />
     <Compile Include="Tween\ITweenHash.cs" />
     <Compile Include="Tween\MemberCurve.cs" />
     <Compile Include="Tween\Curves\NumericMemberCurve.cs" />
@@ -147,6 +153,7 @@
     <Compile Include="Tween\TweenSequence.cs" />
     <Compile Include="TypeReference.cs" />
     <Compile Include="Utils\Assertions.cs" />
+    <Compile Include="Utils\ColorUtil.cs" />
     <Compile Include="Utils\ComponentUtil.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\CoroutineUtil.cs" />
