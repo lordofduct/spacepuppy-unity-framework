@@ -7,7 +7,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
-    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction
+    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IEnumerator
     {
 
         #region Events
@@ -30,14 +30,11 @@ namespace com.spacepuppy
         {
             _stack.Clear();
             _currentIEnumeratorYieldValue = null;
-            if (_owner is MonoBehaviour)
+            try
             {
-                try
-                {
-                    (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
-                }
-                catch (System.Exception ex) { Debug.LogException(ex); }
+                _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
             }
+            catch (System.Exception ex) { Debug.LogException(ex); }
 
             var ev = System.EventArgs.Empty;
             try
@@ -78,7 +75,7 @@ namespace com.spacepuppy
         private Coroutine _token;
         private RadicalCoroutineDisableMode _disableMode;
 
-        private System.Collections.Generic.Stack<IEnumerator> _stack = new System.Collections.Generic.Stack<IEnumerator>();
+        private System.Collections.Generic.Stack<IRadicalYieldInstruction> _stack = new System.Collections.Generic.Stack<IRadicalYieldInstruction>();
         private object _currentIEnumeratorYieldValue;
 
         private RadicalCoroutineOperatingState _state;
@@ -91,13 +88,13 @@ namespace com.spacepuppy
         public RadicalCoroutine(System.Collections.IEnumerable routine)
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
-            _stack.Push(routine.GetEnumerator());
+            _stack.Push(EnumWrapper.Create(routine.GetEnumerator()));
         }
 
         public RadicalCoroutine(System.Collections.IEnumerator routine)
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
-            _stack.Push(routine);
+            _stack.Push(EnumWrapper.Create(routine));
         }
 
         #endregion
@@ -156,7 +153,7 @@ namespace com.spacepuppy
                 manager.RegisterCoroutine(behaviour, this);
             }
 
-            if (_stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnResume();
+            if (_stack.Count > 0 && _stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnResume();
         }
 
         internal void Resume(SPComponent behaviour)
@@ -168,7 +165,7 @@ namespace com.spacepuppy
             _owner = behaviour;
             _token = behaviour.StartCoroutine(this);
 
-            if (_stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnResume();
+            if (_stack.Count > 0 && _stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnResume();
         }
 
         /// <summary>
@@ -194,7 +191,7 @@ namespace com.spacepuppy
                 _owner = null;
                 _token = null;
 
-                if (_stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnPause();
+                if (_stack.Count > 0 && _stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnPause();
             }
         }
 
@@ -306,9 +303,19 @@ namespace com.spacepuppy
 
         #region IYieldInstruction/IEnumerator Interface
 
+        object IRadicalYieldInstruction.CurrentYieldObject
+        {
+            get { return _currentIEnumeratorYieldValue; }
+        }
+
         object IEnumerator.Current
         {
             get { return _currentIEnumeratorYieldValue; }
+        }
+
+        bool IRadicalYieldInstruction.ContinueBlocking()
+        {
+            return (this as IEnumerator).MoveNext();
         }
 
         bool IEnumerator.MoveNext()
@@ -339,9 +346,11 @@ namespace com.spacepuppy
             _currentIEnumeratorYieldValue = null;
 
             //actually operate
-            while (_stack.Count > 0 && !_stack.Peek().MoveNext())
+            while (_stack.Count > 0 && !_stack.Peek().ContinueBlocking())
             {
-                if (_stack.Peek() is IPooledYieldInstruction)
+                if (_stack.Peek() is EnumWrapper)
+                    EnumWrapper.Release(_stack.Pop() as EnumWrapper);
+                else if (_stack.Peek() is IPooledYieldInstruction)
                     (_stack.Pop() as IPooledYieldInstruction).Dispose();
                 else
                     _stack.Pop();
@@ -359,7 +368,7 @@ namespace com.spacepuppy
                     return false;
                 }
 
-                var current = _stack.Peek().Current;
+                var current = _stack.Peek().CurrentYieldObject;
                 if (current == null)
                 {
                     //do nothing
@@ -392,7 +401,7 @@ namespace com.spacepuppy
                         }
                         else
                         {
-                            _stack.Push(WaitUntilDone_Routine(rad));
+                            _stack.Push(EnumWrapper.Create(WaitUntilDone_Routine(rad)));
                         }
                     }
                     else
@@ -405,9 +414,9 @@ namespace com.spacepuppy
                     var instruction = current as IRadicalYieldInstruction;
                     if (instruction is IImmediatelyResumingYieldInstruction) (instruction as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
 
-                    if (instruction.MoveNext())
+                    if (instruction.ContinueBlocking())
                     {
-                        _currentIEnumeratorYieldValue = instruction.Current;
+                        _currentIEnumeratorYieldValue = instruction.CurrentYieldObject;
                         _stack.Push(instruction);
                     }
                 }
@@ -418,7 +427,7 @@ namespace com.spacepuppy
                     if (e.MoveNext())
                     {
                         _currentIEnumeratorYieldValue = e.Current;
-                        _stack.Push(e);
+                        _stack.Push(EnumWrapper.Create(e));
                     }
                 }
                 else if (current is IEnumerator)
@@ -427,7 +436,7 @@ namespace com.spacepuppy
                     if (e.MoveNext())
                     {
                         _currentIEnumeratorYieldValue = e.Current;
-                        _stack.Push(e);
+                        _stack.Push(EnumWrapper.Create(e));
                     }
                 }
                 else if (current is RadicalCoroutineEndCommand)
@@ -617,6 +626,52 @@ namespace com.spacepuppy
 
         }
 
+        private class EnumWrapper : IRadicalYieldInstruction
+        {
+
+            private static com.spacepuppy.Collections.ObjectCachePool<EnumWrapper> _pool = new com.spacepuppy.Collections.ObjectCachePool<EnumWrapper>(-1, () => new EnumWrapper());
+            public static EnumWrapper Create(IEnumerator e)
+            {
+                var w = _pool.GetInstance();
+                w._e = e;
+                return w;
+            }
+
+            public static void Release(EnumWrapper w)
+            {
+                w._e = null;
+                _pool.Release(w);
+            }
+
+
+            internal IEnumerator _e;
+
+            private EnumWrapper()
+            {
+
+            }
+
+            public bool ContinueBlocking()
+            {
+                return _e.MoveNext();
+            }
+
+            public object CurrentYieldObject
+            {
+                get { return _e.Current; }
+            }
+
+            public bool IsComplete
+            {
+                get
+                {
+                    //this should never actually be accessed
+                    return false;
+                }
+            }
+
+        }
+
         #endregion
 
         #region Editor Special Types
@@ -675,27 +730,24 @@ namespace com.spacepuppy
             }
 
 
-            private static string GetIterableID(IEnumerator e)
+            private static string GetIterableID(IRadicalYieldInstruction e)
             {
-                if (e is IRadicalYieldInstruction)
+                if (e == null) return string.Empty;
+
+                if (e is WaitForDuration)
                 {
-                    if (e is WaitForDuration)
-                    {
-                        var wait = e as WaitForDuration;
-                        return string.Format("WaitForDuration[{0:0.00}, {1:0.00}]", wait.CurrentTime, wait.Duration);
-                    }
-                    else
-                    {
-                        return e.GetType().Name;
-                    }
+                    var wait = e as WaitForDuration;
+                    return string.Format("WaitForDuration[{0:0.00}, {1:0.00}]", wait.CurrentTime, wait.Duration);
                 }
-                else if (e != null)
+                else if (e is EnumWrapper)
                 {
-                    return e.GetType().FullName.Split('.').Last();
+                    var w = e as EnumWrapper;
+                    if (w._e == null) return string.Empty;
+                    return w._e.GetType().FullName.Split('.').Last();
                 }
                 else
                 {
-                    return "";
+                    return e.GetType().Name;
                 }
             }
 

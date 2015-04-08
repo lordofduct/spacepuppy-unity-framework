@@ -88,6 +88,8 @@ namespace com.spacepuppy.Tween.Curves
 
         protected override object GetValue(float t)
         {
+            if (float.IsNaN(t)) throw new System.ArgumentException("t must be a real number.", "t");
+
             if (!_style.HasFlag(StringTweenStyle.Jumble))
             {
                 if(!_style.HasFlag(StringTweenStyle.RightToLeft))
@@ -331,7 +333,8 @@ namespace com.spacepuppy.Tween.Curves
         /// <returns></returns>
         public static float CalculateDuration(string start, string end, float charsPerSecond)
         {
-            return (float)Math.Max((start != null) ? 0 : start.Length, (end != null) ? 0 : end.Length) / charsPerSecond;
+            if (charsPerSecond <= 0f) throw new System.ArgumentException("speed must be a positive value.", "charsPerSecond");
+            return (float)Math.Max((start != null) ? start.Length : 0, (end != null) ? end.Length : 0) / charsPerSecond;
         }
 
         #endregion

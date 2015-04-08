@@ -8,6 +8,7 @@ namespace com.spacepuppy.Tween
     public interface ITweenHash
     {
 
+        ITweenHash SetId(object id);
         ITweenHash Ease(Ease ease);
         ITweenHash UseUpdate();
         ITweenHash UseFixedUpdate();
@@ -23,6 +24,7 @@ namespace com.spacepuppy.Tween
         ITweenHash Wrap(TweenWrapMode wrap, int count = -1);
         ITweenHash Reverse();
         ITweenHash Reverse(bool reverse);
+        ITweenHash SpeedScale(float scale);
         ITweenHash OnStep(System.EventHandler d);
         ITweenHash OnStep(System.Action<Tweener> d);
         ITweenHash OnWrap(System.EventHandler d);

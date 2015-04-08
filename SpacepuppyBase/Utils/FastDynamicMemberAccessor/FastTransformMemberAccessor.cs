@@ -118,7 +118,7 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
 
         #region Factory
 
-        public static FastTransformMemberAccessor Create(MemberInfo info, bool isAOT = false)
+        public static FastTransformMemberAccessor Create(MemberInfo info, bool useBasicMemberAccessor = false)
         {
             if(info == null) throw new System.ArgumentNullException("info");
             if(info.MemberType != MemberTypes.Property && info.MemberType != MemberTypes.Field) throw new System.ArgumentException("MemberInfo must be of type FieldInfo or PropertyInfo", "info");
@@ -163,7 +163,7 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
                     break;
                 default:
                     obj = new FastTransformMemberAccessor();
-                    if(isAOT)
+                    if (useBasicMemberAccessor)
                     {
                         obj._alternate = new BasicMemberAccessor(info);
                     }

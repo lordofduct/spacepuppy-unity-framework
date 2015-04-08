@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Collections;
+
 namespace com.spacepuppy.Tween
 {
 
@@ -24,6 +26,8 @@ namespace com.spacepuppy.Tween
         private List<Tweener> _toAdd = new List<Tweener>();
         private List<Tweener> _toRemove = new List<Tweener>();
         private bool _inUpdate;
+
+        private static BiDictionary<object, IAutoKillableTweener> _autoKillDict = new BiDictionary<object, IAutoKillableTweener>();
 
         #endregion
 
@@ -53,6 +57,16 @@ namespace com.spacepuppy.Tween
             {
                 if (_runningTweens.Contains(tween)) return;
                 _runningTweens.Add(tween);
+                if(tween is IAutoKillableTweener)
+                {
+                    var auto = tween as IAutoKillableTweener;
+                    var targ = auto.Token;
+                    IAutoKillableTweener old;
+                    if(_autoKillDict.TryGetValue(targ, out old))
+                    {
+                        old.Kill();
+                    }
+                }
             }
         }
 
@@ -64,15 +78,72 @@ namespace com.spacepuppy.Tween
         }
         private void RemoveReference_Imp(Tweener tween)
         {
-            if (!_runningTweens.Contains(tween)) return;
             if (_inUpdate)
             {
+                if (!_runningTweens.Contains(tween)) return;
                 if (_toRemove.Contains(tween)) return;
                 _toRemove.Add(tween);
             }
             else
             {
                 _runningTweens.Remove(tween);
+                if(tween is IAutoKillableTweener && tween.IsComplete)
+                {
+                    var auto = tween as IAutoKillableTweener;
+                    if(_autoKillDict.Reverse.ContainsKey(auto))
+                    {
+                        _autoKillDict.Reverse.Remove(auto);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Flag a Tweener that implements IAutoKillableTweener to be auto killed if another tween targeting the same object is played. 
+        /// Until the Tweener is either killed, or finished, it will be eligible for being automatically 
+        /// killed if another Tweener starts playing that tweens the same target object. Note that other tweener 
+        /// must implement IAutoKillableTweener as well (though doesn't have to be flagged to AutoKill).
+        /// </summary>
+        /// <param name="tween"></param>
+        public static void AutoKill(Tweener tween)
+        {
+            if (tween == null || !(tween is IAutoKillableTweener)) return;
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME);
+            _instance.AutoKill_Imp(tween as IAutoKillableTweener);
+        }
+        private void AutoKill_Imp(IAutoKillableTweener tween)
+        {
+            var targ = tween.Token;
+            IAutoKillableTweener old;
+            if(_autoKillDict.TryGetValue(targ, out old))
+            {
+                old.Kill();
+            }
+            _autoKillDict[targ] = tween;
+        }
+
+
+        public static void KillAll(object id)
+        {
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) return;
+
+            var arr = (from t in _instance._runningTweens where t.Id == id select t).ToArray();
+            foreach (var t in arr)
+            {
+                t.Kill();
+            }
+        }
+        public static void KillAll()
+        {
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) return;
+
+            var arr = _instance._runningTweens.ToArray();
+            foreach(var t in arr)
+            {
+                t.Kill();
             }
         }
 
@@ -118,12 +189,12 @@ namespace com.spacepuppy.Tween
 
             for(int i = 0; i < _toRemove.Count; i++)
             {
-                _runningTweens.Remove(_toRemove[i]);
+                this.RemoveReference_Imp(_toRemove[i]);
             }
             _toRemove.Clear();
             for(int i = 0; i < _toAdd.Count; i++)
             {
-                _runningTweens.Add(_toAdd[i]);
+                this.AddReference_Imp(_toAdd[i]);
             }
             _toAdd.Clear();
         }
@@ -144,63 +215,63 @@ namespace com.spacepuppy.Tween
             return new CallbackTweener(callback, dur);
         }
 
-        public static Tweener Curve(object targ, Curve curve)
+        public static Tweener PlayCurve(object targ, Curve curve)
         {
             var tween = new ObjectTweener(targ, curve);
             tween.Play();
             return tween;
         }
 
-        public static Tweener To(object targ, string propName, object end, float dur, object option = null)
+        public static Tweener PlayTo(object targ, string propName, object end, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateTo(targ, propName, EaseMethods.LinearEaseNone, end, dur, option));
             tween.Play();
             return tween;
         }
 
-        public static Tweener To(object targ, string propName, Ease ease, object end, float dur, object option = null)
+        public static Tweener PlayTo(object targ, string propName, Ease ease, object end, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateTo(targ, propName, ease, end, dur, option));
             tween.Play();
             return tween;
         }
 
-        public static Tweener From(object targ, string propName, object start, float dur, object option = null)
+        public static Tweener PlayFrom(object targ, string propName, object start, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateFrom(targ, propName, EaseMethods.LinearEaseNone, start, dur, option));
             tween.Play();
             return tween;
         }
 
-        public static Tweener From(object targ, string propName, Ease ease, object start, float dur, object option = null)
+        public static Tweener PlayFrom(object targ, string propName, Ease ease, object start, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateFrom(targ, propName, ease, start, dur, option));
             tween.Play();
             return tween;
         }
 
-        public static Tweener By(object targ, string propName, object amt, float dur, object option = null)
+        public static Tweener PlayBy(object targ, string propName, object amt, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateBy(targ, propName, EaseMethods.LinearEaseNone, amt, dur, option));
             tween.Play();
             return tween;
         }
 
-        public static Tweener By(object targ, string propName, Ease ease, object amt, float dur, object option = null)
+        public static Tweener PlayBy(object targ, string propName, Ease ease, object amt, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateBy(targ, propName, ease, amt, dur, option));
             tween.Play();
             return tween;
         }
 
-        public static Tweener FromTo(object targ, string propName, object start, object end, float dur, object option = null)
+        public static Tweener PlayFromTo(object targ, string propName, object start, object end, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, EaseMethods.LinearEaseNone, start, end, dur, option));
             tween.Play();
             return tween;
         }
 
-        public static Tweener FromTo(object targ, string propName, Ease ease, object start, object end, float dur, object option = null)
+        public static Tweener PlayFromTo(object targ, string propName, Ease ease, object start, object end, float dur, object option = null)
         {
             var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, ease, start, end, dur, option));
             tween.Play();

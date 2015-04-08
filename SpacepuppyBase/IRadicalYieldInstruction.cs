@@ -9,8 +9,12 @@ namespace com.spacepuppy
     /// <summary>
     /// Just a name for contract purposes.
     /// </summary>
-    public interface IRadicalYieldInstruction : System.Collections.IEnumerator
+    public interface IRadicalYieldInstruction
     {
+
+        bool ContinueBlocking();
+        object CurrentYieldObject { get; }
+
     }
 
     public interface IProgressingYieldInstruction : IRadicalYieldInstruction
@@ -81,20 +85,15 @@ namespace com.spacepuppy
 
         #region IRadicalYieldInstruction Interface
 
-        object IEnumerator.Current
+        object IRadicalYieldInstruction.CurrentYieldObject
         {
             get { return _current; }
         }
 
-        bool IEnumerator.MoveNext()
+        bool IRadicalYieldInstruction.ContinueBlocking()
         {
             _current = this.Tick();
             return !_complete;
-        }
-
-        void IEnumerator.Reset()
-        {
-            throw new System.NotSupportedException();
         }
 
         #endregion
@@ -125,19 +124,14 @@ namespace com.spacepuppy
                 get { return 1f; }
             }
 
-            public object Current
+            public object CurrentYieldObject
             {
                 get { return null; }
             }
 
-            public bool MoveNext()
+            public bool ContinueBlocking()
             {
                 return false;
-            }
-
-            public void Reset()
-            {
-
             }
 
             public void OnPause()
@@ -229,7 +223,7 @@ namespace com.spacepuppy
             }
         }
 
-        object System.Collections.IEnumerator.Current
+        object IRadicalYieldInstruction.CurrentYieldObject
         {
             get
             {
@@ -241,14 +235,9 @@ namespace com.spacepuppy
             }
         }
 
-        bool System.Collections.IEnumerator.MoveNext()
+        bool IRadicalYieldInstruction.ContinueBlocking()
         {
             return !this.IsComplete;
-        }
-
-        void System.Collections.IEnumerator.Reset()
-        {
-            throw new System.NotSupportedException();
         }
 
         #endregion
@@ -260,7 +249,7 @@ namespace com.spacepuppy
     /// NOTE - this yield instruction is pooled, NEVER store one for reuse. The pool takes care of that for you. Instead 
     /// use the static factory methods.
     /// </summary>
-    public class WaitForDuration : IPausibleYieldInstruction, IPooledYieldInstruction
+    public class WaitForDuration : IPausibleYieldInstruction, IPooledYieldInstruction, IProgressingYieldInstruction
     {
 
         #region Fields
@@ -283,7 +272,7 @@ namespace com.spacepuppy
         {
             _supplier = supplier ?? SPTime.Normal;
             _dur = dur;
-            (this as System.Collections.IEnumerator).Reset();
+            this.Reset();
         }
 
         #endregion
@@ -298,17 +287,27 @@ namespace com.spacepuppy
 
         #region IEnumerator Interface
 
-        object IEnumerator.Current
+        bool IProgressingYieldInstruction.IsComplete
+        {
+            get { return this.CurrentTime >= _dur; }
+        }
+
+        float IProgressingYieldInstruction.Progress
+        {
+            get { return Mathf.Clamp01(this.CurrentTime / _dur); }
+        }
+
+        object IRadicalYieldInstruction.CurrentYieldObject
         {
             get { return null; }
         }
 
-        bool IEnumerator.MoveNext()
+        bool IRadicalYieldInstruction.ContinueBlocking()
         {
             return this.CurrentTime < _dur;
         }
 
-        void IEnumerator.Reset()
+        public void Reset()
         {
             _t = _supplier.Total;
             _cache = 0f;
@@ -394,6 +393,231 @@ namespace com.spacepuppy
         protected override object Tick()
         {
             return null;
+        }
+
+    }
+
+    public class WaitForAllComplete : RadicalYieldInstruction
+    {
+
+        private MonoBehaviour _handle;
+        private System.Collections.Generic.List<object> _instructions;
+        private int _waitCount;
+
+        public WaitForAllComplete(MonoBehaviour handle, params object[] instructions)
+        {
+            _handle = handle;
+            _instructions = new System.Collections.Generic.List<object>(instructions);
+        }
+
+        protected override object Tick()
+        {
+            object current;
+            for(int i = 0; i < _instructions.Count; i++)
+            {
+                current = _instructions[i];
+                if(current == null)
+                {
+                    _instructions.RemoveAt(i);
+                    i--;
+                }
+                else if(current is YieldInstruction || current is WWW)
+                {
+                    _instructions.RemoveAt(i);
+                    i--;
+                    _handle.StartCoroutine(this.WaitForStandard(current));
+                }
+                else if(current is RadicalCoroutine)
+                {
+                    if((current as RadicalCoroutine).Complete)
+                    {
+                        _instructions.RemoveAt(i);
+                        i--;
+                    }
+                }
+                else if(current is IRadicalYieldInstruction)
+                {
+                    if((current as IRadicalYieldInstruction).ContinueBlocking())
+                    {
+                        var sub = (current as IRadicalYieldInstruction).CurrentYieldObject;
+                        if (sub != null)
+                        {
+                            _instructions[i] = _handle.StartRadicalCoroutine(this.WaitForRadical(current as IRadicalYieldInstruction));
+                        }
+                    }
+                    else
+                    {
+                        _instructions.RemoveAt(i);
+                        i--;
+                    }
+                }
+                else if(current is IEnumerable)
+                {
+                    var e = (current as IEnumerable).GetEnumerator();
+                    _instructions[i] = e;
+                    if (e.MoveNext())
+                    {
+                        if (e.Current != null) _instructions.Add(e.Current);
+                    }
+                    else
+                    {
+                        _instructions.RemoveAt(i);
+                        i--;
+                    }
+                }
+                else if(current is IEnumerator)
+                {
+                    var e = current as IEnumerator;
+                    if(e.MoveNext())
+                    {
+                        if (e.Current != null) _instructions.Add(e.Current);
+                    }
+                    else
+                    {
+                        _instructions.RemoveAt(i);
+                        i--;
+                    }
+                }
+                else
+                {
+                    _instructions[i] = null;
+                }
+            }
+
+            if (_instructions.Count == 0 && _waitCount <= 0) this.SetSignal();
+            return null;
+        }
+
+        private IEnumerator WaitForStandard(object inst)
+        {
+            _waitCount++;
+            yield return inst;
+            _waitCount--;
+        }
+
+        private IEnumerator WaitForRadical(IRadicalYieldInstruction inst)
+        {
+            yield return inst.CurrentYieldObject;
+            while(inst.ContinueBlocking())
+            {
+                yield return inst.CurrentYieldObject;
+            }
+        }
+
+    }
+
+    public class WaitForAnyComplete : RadicalYieldInstruction
+    {
+
+        private MonoBehaviour _handle;
+        private System.Collections.Generic.List<object> _instructions;
+        private System.Collections.Generic.List<object> _waitingRoutines = new System.Collections.Generic.List<object>();
+        private bool _signalNextTime;
+
+        public WaitForAnyComplete(MonoBehaviour handle, params object[] instructions)
+        {
+            _handle = handle;
+            _instructions = new System.Collections.Generic.List<object>(instructions);
+        }
+
+        protected override void SetSignal()
+        {
+            object obj;
+            for (int i = 0; i < _waitingRoutines.Count; i++)
+            {
+                obj = _waitingRoutines[i];
+                if (obj is Coroutine)
+                    _handle.StopCoroutine(obj as Coroutine);
+                else if (obj is RadicalCoroutine)
+                    (obj as RadicalCoroutine).Cancel();
+            }
+            _waitingRoutines.Clear();
+            base.SetSignal();
+        }
+
+        protected override object Tick()
+        {
+            if (this.IsComplete) return null;
+            if(_signalNextTime)
+            {
+                this.SetSignal();
+                return null;
+            }
+
+            object current;
+            for (int i = 0; i < _instructions.Count; i++)
+            {
+                current = _instructions[i];
+                if (current == null)
+                {
+                    _signalNextTime = true;
+                }
+                else if (current is YieldInstruction || current is WWW)
+                {
+                    _instructions.RemoveAt(i);
+                    i--;
+                    _waitingRoutines.Add(_handle.StartCoroutine(this.WaitForStandard(current)));
+                }
+                else if (current is RadicalCoroutine)
+                {
+                    if ((current as RadicalCoroutine).Complete)
+                    {
+                        this.SetSignal();
+                        return null;
+                    }
+                }
+                else if(current is IRadicalYieldInstruction)
+                {
+                    if ((current as IRadicalYieldInstruction).ContinueBlocking())
+                    {
+                        var sub = (current as IRadicalYieldInstruction).CurrentYieldObject;
+                        if (sub != null)
+                        {
+                            _instructions.RemoveAt(i);
+                            i--;
+                            _waitingRoutines.Add(_handle.StartRadicalCoroutine(this.WaitForRadical(current)));
+                        }
+                    }
+                    else
+                    {
+                        this.SetSignal();
+                        return null;
+                    }
+                }
+                else if (current is IEnumerator || current is IEnumerable)
+                {
+                    _instructions.RemoveAt(i);
+                    i--;
+                    _waitingRoutines.Add(_handle.StartRadicalCoroutine(this.WaitForRadical(current)));
+                }
+                else
+                {
+                    _signalNextTime = true;
+                }
+            }
+
+            return null;
+        }
+
+        private IEnumerator WaitForStandard(object inst)
+        {
+            yield return inst;
+            this.SetSignal();
+        }
+
+        private IEnumerator WaitForRadicalYield(IRadicalYieldInstruction inst)
+        {
+            yield return inst.CurrentYieldObject;
+            while(inst.ContinueBlocking())
+            {
+                yield return inst.CurrentYieldObject;
+            }
+        }
+
+        private IEnumerator WaitForRadical(object inst)
+        {
+            yield return inst;
+            this.SetSignal();
         }
 
     }

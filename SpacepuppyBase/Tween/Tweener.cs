@@ -9,7 +9,7 @@ using com.spacepuppy.Utils.FastDynamicMemberAccessor;
 namespace com.spacepuppy.Tween
 {
 
-    public abstract class Tweener
+    public abstract class Tweener : System.IDisposable, IProgressingYieldInstruction
     {
 
         #region Events
@@ -22,11 +22,13 @@ namespace com.spacepuppy.Tween
 
         #region Fields
 
+        private object _id;
         private UpdateSequence _updateType;
         private ITimeSupplier _timeSupplier = SPTime.Normal;
         private TweenWrapMode _wrap;
         private int _wrapCount;
         private bool _reverse;
+        private float _speedScale = 1.0f;
 
 
         private bool _isPlaying;
@@ -40,6 +42,12 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Configurable Properties
+
+        public object Id
+        {
+            get { return _id; }
+            set { _id = value; }
+        }
 
         public UpdateSequence UpdateType
         {
@@ -67,7 +75,7 @@ namespace com.spacepuppy.Tween
 
                 _wrap = value;
                 //normalized time is dependent on WrapMode, so we force update the play head
-                this.Scrub(0f);
+                this.MovePlayHeadPosition(0f);
             }
         }
 
@@ -87,9 +95,25 @@ namespace com.spacepuppy.Tween
             set { _reverse = value; }
         }
 
+        public float SpeedScale
+        {
+            get { return _speedScale; }
+            set
+            {
+                _speedScale = value;
+                if (_speedScale < 0f || float.IsNaN(_speedScale)) _speedScale = 0f;
+                else if (float.IsInfinity(_speedScale)) _speedScale = float.MaxValue;
+            }
+        }
+
         #endregion
 
         #region Status Properties
+
+        public bool IsDead
+        {
+            get { return float.IsNaN(_time); }
+        }
 
         public bool IsPlaying
         {
@@ -100,16 +124,17 @@ namespace com.spacepuppy.Tween
         {
             get
             {
+                if (float.IsNaN(_time)) return true;
                 switch(_wrap)
                 {
                     case TweenWrapMode.Once:
-                        return _time > this.PlayHeadLength;
+                        return _time >= this.PlayHeadLength;
                     case TweenWrapMode.Loop:
                     case TweenWrapMode.PingPong:
                         if (_wrapCount <= 0)
                             return false;
                         else
-                            return _time > (this.PlayHeadLength * _wrapCount);
+                            return _time >= (this.PlayHeadLength * _wrapCount);
                 }
                 return false;
             }
@@ -180,6 +205,7 @@ namespace com.spacepuppy.Tween
 
         public virtual void Play(float playHeadPosition)
         {
+            if (this.IsDead) throw new System.InvalidOperationException("Cannot play a dead Tweener.");
             _isPlaying = true;
             _playHeadLength = this.GetPlayHeadLength();
             SPTween.AddReference(this);
@@ -199,6 +225,12 @@ namespace com.spacepuppy.Tween
             SPTween.RemoveReference(this);
         }
 
+        public virtual void Kill()
+        {
+            this.Stop();
+            _time = float.NaN;
+        }
+
         public virtual void Reset()
         {
             this.Stop();
@@ -208,40 +240,49 @@ namespace com.spacepuppy.Tween
             _normalizedPlayHeadTime = 0f;
         }
 
-        public virtual void Scrub(float dt)
+        public bool CompleteImmediately()
         {
-            _time += Mathf.Abs(dt);
-            if (_reverse)
-                _unwrappedPlayHeadTime -= dt;
-            else
-                _unwrappedPlayHeadTime += dt;
+            if (!this.IsPlaying) return false;
 
-            var totalDur = this.PlayHeadLength;
-            if (totalDur > 0f)
+            switch (_wrap)
             {
-                switch (_wrap)
-                {
-                    case TweenWrapMode.Once:
-                        _normalizedPlayHeadTime = Mathf.Clamp(_unwrappedPlayHeadTime, 0, totalDur);
-                        break;
-                    case TweenWrapMode.Loop:
-                        _normalizedPlayHeadTime = Mathf.Repeat(_unwrappedPlayHeadTime, totalDur);
-                        break;
-                    case TweenWrapMode.PingPong:
-                        _normalizedPlayHeadTime = Mathf.PingPong(_unwrappedPlayHeadTime, totalDur);
-                        break;
-                }
+                case TweenWrapMode.Once:
+                    float odt = this.PlayHeadLength - _time;
+                    _time = this.PlayHeadLength;
+                    _normalizedPlayHeadTime = (_reverse) ? 0f : _time;
+                    _unwrappedPlayHeadTime = _normalizedPlayHeadTime;
+                    this.DoUpdate(odt, _normalizedPlayHeadTime);
+                    this.Stop();
+                    if (this.OnFinish != null) this.OnFinish(this, System.EventArgs.Empty);
+                    return true;
+                case TweenWrapMode.Loop:
+                case TweenWrapMode.PingPong:
+                    if (_wrapCount <= 0)
+                    {
+                        //this doesn't make sense... you can't complete an infinite tween
+                    }
+                    else
+                    {
+                        float pdt = (this.PlayHeadLength * _wrapCount) - _time;
+                        _time = this.PlayHeadLength * _wrapCount;
+                        _normalizedPlayHeadTime = (_reverse) ? 0f : (_wrapCount % 2 == 0) ? 0f : this.PlayHeadLength;
+                        _unwrappedPlayHeadTime = _normalizedPlayHeadTime;
+                        this.DoUpdate(pdt, _normalizedPlayHeadTime);
+                        this.Stop();
+                        if (this.OnFinish != null) this.OnFinish(this, System.EventArgs.Empty);
+                        return true;
+                    }
+                    break;
             }
-            else
-            {
-                _normalizedPlayHeadTime = 0f;
-            }
+
+            return false;
         }
 
-        internal void Update()
+        public virtual void Scrub(float dt)
         {
-            var dt = _timeSupplier.Delta;
-            this.Scrub(dt);
+            if (this.IsDead) return;
+
+            this.MovePlayHeadPosition(dt);
 
             this.DoUpdate(dt, _normalizedPlayHeadTime);
 
@@ -285,6 +326,41 @@ namespace com.spacepuppy.Tween
             }
         }
 
+        private void MovePlayHeadPosition(float dt)
+        {
+            _time += Mathf.Abs(dt);
+            if (_reverse)
+                _unwrappedPlayHeadTime -= dt;
+            else
+                _unwrappedPlayHeadTime += dt;
+
+            var totalDur = this.PlayHeadLength;
+            if (totalDur > 0f)
+            {
+                switch (_wrap)
+                {
+                    case TweenWrapMode.Once:
+                        _normalizedPlayHeadTime = Mathf.Clamp(_unwrappedPlayHeadTime, 0, totalDur);
+                        break;
+                    case TweenWrapMode.Loop:
+                        _normalizedPlayHeadTime = Mathf.Repeat(_unwrappedPlayHeadTime, totalDur);
+                        break;
+                    case TweenWrapMode.PingPong:
+                        _normalizedPlayHeadTime = Mathf.PingPong(_unwrappedPlayHeadTime, totalDur);
+                        break;
+                }
+            }
+            else
+            {
+                _normalizedPlayHeadTime = 0f;
+            }
+        }
+
+        internal void Update()
+        {
+            this.Scrub(_timeSupplier.Delta * _speedScale);
+        }
+
         #endregion
 
         #region Tweener Interface
@@ -292,6 +368,57 @@ namespace com.spacepuppy.Tween
         protected abstract float GetPlayHeadLength();
 
         protected abstract void DoUpdate(float dt, float t);
+
+        #endregion
+
+        #region IDisposable Interface
+
+        void System.IDisposable.Dispose()
+        {
+            if (this.IsDead) return;
+
+            this.Kill();
+        }
+
+        #endregion
+
+        #region IRadicalYieldInstruction Interface
+
+        bool IProgressingYieldInstruction.IsComplete
+        {
+            get { return this.IsComplete; }
+        }
+
+        float IProgressingYieldInstruction.Progress
+        {
+            get
+            {
+                if (this.IsComplete) return 1f;
+
+                switch (_wrap)
+                {
+                    case TweenWrapMode.Once:
+                        return _time / this.PlayHeadLength;
+                    case TweenWrapMode.Loop:
+                    case TweenWrapMode.PingPong:
+                        if (_wrapCount <= 0)
+                            return 0f;
+                        else
+                            return _time / (this.PlayHeadLength * _wrapCount);
+                }
+                return 0f;
+            }
+        }
+
+        bool IRadicalYieldInstruction.ContinueBlocking()
+        {
+            return !this.IsComplete;
+        }
+
+        object IRadicalYieldInstruction.CurrentYieldObject
+        {
+            get { return null; }
+        }
 
         #endregion
 
