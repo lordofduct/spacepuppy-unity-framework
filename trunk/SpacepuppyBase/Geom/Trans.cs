@@ -91,6 +91,25 @@ namespace com.spacepuppy.Geom
 
         #endregion
 
+        #region Properties
+
+        public Vector3 Forward
+        {
+            get { return this.Rotation * Vector3.forward; }
+        }
+
+        public Vector3 Up
+        {
+            get { return this.Rotation * Vector3.up; }
+        }
+
+        public Vector3 Right
+        {
+            get { return this.Rotation * Vector3.right; }
+        }
+
+        #endregion
+
         #region Methods
 
         public void Translate(Vector3 v)
