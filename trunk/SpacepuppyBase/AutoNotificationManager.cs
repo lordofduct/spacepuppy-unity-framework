@@ -39,7 +39,7 @@ namespace com.spacepuppy
             }
         }
 
-        public void OnNotification(Notification n)
+        public void OnNotification(object sender, Notification n)
         {
             var notifType = n.GetType();
             var baseNotifType = typeof(Notification);
@@ -47,7 +47,7 @@ namespace com.spacepuppy
             {
                 if (_handlers.ContainsKey(notifType))
                 {
-                    _handlers[notifType].DynamicInvoke(n);
+                    _handlers[notifType].DynamicInvoke(sender, n);
                 }
                 notifType = notifType.BaseType;
             }
