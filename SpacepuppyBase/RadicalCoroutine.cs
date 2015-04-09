@@ -185,7 +185,7 @@ namespace com.spacepuppy
                 _state = RadicalCoroutineOperatingState.Inactive;
                 try
                 {
-                    (_owner as MonoBehaviour).StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                    _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
                 }
                 catch (System.Exception ex) { Debug.LogException(ex); }
                 _owner = null;
@@ -558,9 +558,9 @@ namespace com.spacepuppy
 
         private static IEnumerator WaitUntilDone_Routine(RadicalCoroutine routine)
         {
-            if (routine._owner is MonoBehaviour)
+            if (routine._owner != null)
             {
-                (routine._owner as MonoBehaviour).AddOrGetComponent<RadicalCoroutineManager>().RegisterCoroutine(routine._owner as MonoBehaviour, routine);
+                routine._owner.AddOrGetComponent<RadicalCoroutineManager>().RegisterCoroutine(routine._owner, routine);
             }
 
             while (!routine.Finished)
