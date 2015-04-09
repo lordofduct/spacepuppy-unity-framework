@@ -348,9 +348,7 @@ namespace com.spacepuppy
             //actually operate
             while (_stack.Count > 0 && !_stack.Peek().ContinueBlocking())
             {
-                if (_stack.Peek() is EnumWrapper)
-                    EnumWrapper.Release(_stack.Pop() as EnumWrapper);
-                else if (_stack.Peek() is IPooledYieldInstruction)
+                if (_stack.Peek() is IPooledYieldInstruction)
                     (_stack.Pop() as IPooledYieldInstruction).Dispose();
                 else
                     _stack.Pop();
@@ -626,7 +624,7 @@ namespace com.spacepuppy
 
         }
 
-        private class EnumWrapper : IRadicalYieldInstruction
+        private class EnumWrapper : IRadicalYieldInstruction, IPooledYieldInstruction
         {
 
             private static com.spacepuppy.Collections.ObjectCachePool<EnumWrapper> _pool = new com.spacepuppy.Collections.ObjectCachePool<EnumWrapper>(-1, () => new EnumWrapper());
@@ -635,12 +633,6 @@ namespace com.spacepuppy
                 var w = _pool.GetInstance();
                 w._e = e;
                 return w;
-            }
-
-            public static void Release(EnumWrapper w)
-            {
-                w._e = null;
-                _pool.Release(w);
             }
 
 
@@ -670,6 +662,11 @@ namespace com.spacepuppy
                 }
             }
 
+            void System.IDisposable.Dispose()
+            {
+                _e = null;
+                _pool.Release(this);
+            }
         }
 
         #endregion
