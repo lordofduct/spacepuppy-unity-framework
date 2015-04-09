@@ -144,7 +144,7 @@ namespace com.spacepuppy
                     var d = _globalHandlers[tp];
                     if (d != null)
                     {
-                        d.DynamicInvoke(n);
+                        d.DynamicInvoke(sender, n);
                         bHandled = true;
                     }
                 }
