@@ -15,6 +15,7 @@ namespace com.spacepuppy
         event System.EventHandler ComponentDestroyed;
 
         bool enabled { get; set; }
+        bool isActiveAndEnabled { get; }
         Component component { get; }
 
     }

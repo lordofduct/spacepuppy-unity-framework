@@ -49,6 +49,7 @@
     <Compile Include="AutoNotificationManager.cs" />
     <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\BiDictionary.cs" />
+    <Compile Include="Collections\CircularQueue.cs" />
     <Compile Include="Collections\CooldownPool.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Collections\ObjectCachePool.cs" />
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\OrderedDelegate.cs" />
+    <Compile Include="Collections\SamplingStack.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />
@@ -77,12 +79,14 @@
     <Compile Include="Geom\GeomUtil.cs" />
     <Compile Include="Geom\IGeom.cs" />
     <Compile Include="Geom\Interval.cs" />
+    <Compile Include="Geom\IPlanarSurface.cs" />
     <Compile Include="Geom\Line.cs" />
     <Compile Include="Geom\Matrix2D.cs" />
     <Compile Include="Geom\PhysicsUtil.cs" />
     <Compile Include="Geom\RaycastInfo.cs" />
     <Compile Include="Geom\Sphere.cs" />
     <Compile Include="Geom\Trans.cs" />
+    <Compile Include="Geom\XYPlanarSurface.cs" />
     <Compile Include="Hooks\EarlyExecutionUpdateEventHooks.cs" />
     <Compile Include="Hooks\TardyExecutionUpdateEventHooks.cs" />
     <Compile Include="Hooks\UpdateEventHooks.cs" />

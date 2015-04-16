@@ -4,6 +4,11 @@ using System.Linq;
 
 namespace com.spacepuppy.Utils
 {
+
+    /// <summary>
+    /// A collection of vector methods. Any statements regarding the clockwise relative directions of a rotation are under the consideration of x-axis is right, and y-axis is up. 
+    /// A clockwise rotation would go from y-up to x-right.
+    /// </summary>
     public static class VectorUtil
     {
 
@@ -137,7 +142,7 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Rotate Vector2 clockwise by 'a'
+        /// Rotate Vector2 counter-clockwise by 'a'
         /// </summary>
         /// <param name="v"></param>
         /// <param name="a"></param>
@@ -153,7 +158,7 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Rotate Vector2 clockwise by 'a'
+        /// Rotate Vector2 counter-clockwise by 'a'
         /// </summary>
         /// <param name="v"></param>
         /// <param name="a"></param>
@@ -423,6 +428,16 @@ namespace com.spacepuppy.Utils
 
         #region Linq
 
+        public static Vector3 Sum(this IEnumerable<Vector3> vectors)
+        {
+            Vector3 sum = Vector3.zero;
+            foreach(var v in vectors)
+            {
+                sum += v;
+            }
+            return sum;
+        }
+
         public static Vector3 Average(this IEnumerable<Vector3> vectors)
         {
             int cnt = 0;
@@ -453,6 +468,20 @@ namespace com.spacepuppy.Utils
             return new Vector3(st * Mathf.Cos(phi), st * Mathf.Sin(phi), Mathf.Cos(theta));
         }
 
+
+
+
+
+        public static Vector2 Sum(this IEnumerable<Vector2> vectors)
+        {
+            Vector2 sum = Vector2.zero;
+            foreach (var v in vectors)
+            {
+                sum += v;
+            }
+            return sum;
+        }
+
         public static Vector2 Average(this IEnumerable<Vector2> vectors)
         {
             int cnt = 0;
@@ -469,7 +498,7 @@ namespace com.spacepuppy.Utils
         {
             int cnt = 0;
             float sum = 0f;
-            foreach(var v in vectors)
+            foreach (var v in vectors)
             {
                 cnt++;
                 sum += Mathf.Atan2(v.y, v.x);
