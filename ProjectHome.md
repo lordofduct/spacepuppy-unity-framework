@@ -1,0 +1,1 @@
+A framework intended to ease certain steps when coding for the Unity3D engine.
