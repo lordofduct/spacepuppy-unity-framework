@@ -194,6 +194,11 @@ namespace com.spacepuppy
 
             }
 
+            public Maintainer(bool maintainOnLoad)
+            {
+                _maintainOnLoad = maintainOnLoad;
+            }
+
             #endregion
 
             #region Properties
