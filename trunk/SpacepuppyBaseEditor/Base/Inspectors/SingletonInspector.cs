@@ -93,4 +93,16 @@ namespace com.spacepuppyeditor.Base
         }
 
     }
+
+    [CustomPropertyDrawer(typeof(Singleton.Maintainer))]
+    public class SingletonMaintainerPropertyDrawer : PropertyDrawer
+    {
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var prop = property.FindPropertyRelative("_maintainOnLoad");
+            EditorGUI.PropertyField(position, prop);
+        }
+
+    }
 }

@@ -16,6 +16,9 @@ namespace com.spacepuppy
 
         #region Events
 
+        public static event System.EventHandler ApplicatinQuit;
+        public static event System.EventHandler<LevelWasLoadedEventArgs> LevelWasLoaded;
+
         public static event System.EventHandler EarlyUpdate;
         public static event System.EventHandler OnUpdate;
         public static event System.EventHandler TardyUpdate;
@@ -128,6 +131,12 @@ namespace com.spacepuppy
         private void OnApplicationQuit()
         {
             _applicationClosing = true;
+            if (ApplicatinQuit != null) ApplicatinQuit(this, System.EventArgs.Empty);
+        }
+
+        private void OnLevelWasLoaded(int level)
+        {
+            if (LevelWasLoaded != null) LevelWasLoaded(this, new LevelWasLoadedEventArgs(level));
         }
 
         //Update
@@ -205,6 +214,22 @@ namespace com.spacepuppy
 
             //Track exit of update loop
             _currentSequence = UpdateSequence.None;
+        }
+
+        #endregion
+
+        #region Special Types
+
+        public class LevelWasLoadedEventArgs : System.EventArgs
+        {
+            private int _level;
+
+            public LevelWasLoadedEventArgs(int level)
+            {
+                _level = level;
+            }
+
+            public int Level { get { return _level; } }
         }
 
         #endregion
