@@ -119,6 +119,10 @@ namespace com.spacepuppy.Tween
             return null;
         }
 
+        public static float EasedLerp(Ease ease, float from, float to, float t)
+        {
+            return ease(t, from, to - from, 1f);
+        }
 
         private const float _2PI = 6.28318530717959f;
         private const float _HALF_PI = 1.5707963267949f;
