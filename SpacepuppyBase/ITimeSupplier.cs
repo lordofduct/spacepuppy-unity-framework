@@ -10,8 +10,22 @@ namespace com.spacepuppy
 
         float Total { get; }
         float Delta { get; }
-        float Scale { get; set; }
+
+    }
+
+    public interface IScalableTimeSupplier : ITimeSupplier
+    {
+
+        float Scale { get; }
         bool Paused { get; set; }
+
+
+        IEnumerable<string> ScaleIds { get; }
+
+        void SetScale(string id, float scale);
+        float GetScale(string id);
+        bool RemoveScale(string id);
+        bool HasScale(string id);
 
     }
 

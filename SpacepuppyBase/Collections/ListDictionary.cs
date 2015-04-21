@@ -46,17 +46,37 @@ namespace com.spacepuppy.Collections
         {
             get
             {
-                if (!_dict.ContainsKey(key)) throw new KeyNotFoundException();
-                var lst = _dict[key];
-                if (index < 0 || index >= lst.Count) throw new IndexOutOfRangeException();
-                return lst[index];
+                //if (!_dict.ContainsKey(key)) throw new KeyNotFoundException();
+                //var lst = _dict[key];
+                //if (index < 0 || index >= lst.Count) throw new IndexOutOfRangeException();
+                //return lst[index];
+                IList<TValue> lst;
+                if (_dict.TryGetValue(key, out lst))
+                {
+                    if (index < 0 || index >= lst.Count) throw new IndexOutOfRangeException();
+                    return lst[index];
+                }
+                else
+                {
+                    throw new KeyNotFoundException();
+                }
             }
             set
             {
-                if (!_dict.ContainsKey(key)) throw new KeyNotFoundException();
-                var lst = _dict[key];
-                if (index < 0 || index >= lst.Count) throw new IndexOutOfRangeException();
-                lst[index] = value;
+                //if (!_dict.ContainsKey(key)) throw new KeyNotFoundException();
+                //var lst = _dict[key];
+                //if (index < 0 || index >= lst.Count) throw new IndexOutOfRangeException();
+                //lst[index] = value;
+                IList<TValue> lst;
+                if (_dict.TryGetValue(key, out lst))
+                {
+                    if (index < 0 || index >= lst.Count) throw new IndexOutOfRangeException();
+                    lst[index] = value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException();
+                }
             }
         }
 
@@ -282,9 +302,21 @@ namespace com.spacepuppy.Collections
             {
                 get
                 {
-                    if (!_listDict.ContainsKey(key)) throw new KeyNotFoundException();
-                    return _listDict._dict[key];
+                    IList<TValue> result;
+                    if (_listDict._dict.TryGetValue(key, out result))
+                    {
+                        return result;
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException();
+                    }
                 }
+            }
+
+            public bool TryGetList(TKey key, out IList<TValue> lst)
+            {
+                return _listDict._dict.TryGetValue(key, out lst);
             }
 
             #region ICollection Interface

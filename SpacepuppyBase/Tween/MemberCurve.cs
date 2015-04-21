@@ -59,7 +59,7 @@ namespace com.spacepuppy.Tween
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
-        /// <param name="slerp"></param>
+        /// <param name="option"></param>
         protected abstract void ReflectiveInit(object start, object end, object option);
 
         #endregion
@@ -97,7 +97,7 @@ namespace com.spacepuppy.Tween
         /// </summary>
         /// <param name="t">The percentage of completion across the curve that the member is at.</param>
         /// <returns></returns>
-        protected abstract object GetValue(float t);
+        protected abstract object GetValueAt(float dt, float t);
 
         #endregion
 
@@ -113,12 +113,11 @@ namespace com.spacepuppy.Tween
             get { return _delay + _dur; }
         }
 
-        protected internal override void Update(object targ, float dt, float t)
+        protected internal sealed override void Update(object targ, float dt, float t)
         {
             if (t < _delay) return;
 
-            t = (_dur > 0) ? _ease(t - _delay, 0f, 1f, _dur) : 1f;
-            var value = GetValue(t);
+            var value = GetValueAt(dt, t - _delay);
             if (_accessor == null) _accessor = MemberAccessorPool.GetAccessor(targ.GetType(), _memberName);
             _accessor.Set(targ, value);
         }
@@ -175,7 +174,7 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        public static Curve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
+        public new static MemberCurve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             System.Type memberType;
@@ -186,7 +185,7 @@ namespace com.spacepuppy.Tween
             return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }
 
-        public static Curve CreateFrom(object target, string propName, Ease ease, object start, float dur, object option = null)
+        public new static MemberCurve CreateFrom(object target, string propName, Ease ease, object start, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             System.Type memberType;
@@ -197,19 +196,19 @@ namespace com.spacepuppy.Tween
             return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }
 
-        public static Curve CreateBy(object target, string propName, Ease ease, object amt, float dur, object option = null)
+        public new static MemberCurve CreateBy(object target, string propName, Ease ease, object amt, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             System.Type memberType;
             var accessor = MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
 
             object start = accessor.Get(target);
-            object end = MemberCurve.TrySum(memberType, start, amt);
+            object end = Curve.TrySum(memberType, start, amt);
 
             return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }
 
-        public static Curve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur, object option = null)
+        public new static MemberCurve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             System.Type memberType;
@@ -230,7 +229,7 @@ namespace com.spacepuppy.Tween
         /// <param name="dur"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        public static Curve CreateRedirectTo(object target, string propName, Ease ease, float start, float end, float dur, object option = null)
+        public new static MemberCurve CreateRedirectTo(object target, string propName, Ease ease, float start, float end, float dur, object option = null)
         {
             if (target == null) throw new System.ArgumentNullException("target");
             System.Type memberType;
@@ -240,43 +239,6 @@ namespace com.spacepuppy.Tween
             dur = MathUtil.PercentageOffMinMax(ConvertUtil.ToSingle(current), end, start) * dur;
 
             return MemberCurve.Create(memberType, accessor, ease, dur, current, ConvertUtil.ToPrim(end, memberType), option);
-        }
-
-
-        private static object TrySum(System.Type tp, object a, object b)
-        {
-            if (tp == null) return b;
-
-            if (ConvertUtil.IsNumericType(tp))
-            {
-                return ConvertUtil.ToPrim(ConvertUtil.ToDouble(a) + ConvertUtil.ToDouble(b), tp);
-            }
-            else if (tp == typeof(Vector2))
-            {
-                return ConvertUtil.ToVector2(a) + ConvertUtil.ToVector2(b);
-            }
-            else if (tp == typeof(Vector3))
-            {
-                return ConvertUtil.ToVector3(a) + ConvertUtil.ToVector3(b);
-            }
-            else if (tp == typeof(Vector4))
-            {
-                return ConvertUtil.ToVector4(a) + ConvertUtil.ToVector4(b);
-            }
-            else if (tp == typeof(Quaternion))
-            {
-                return ConvertUtil.ToQuaternion(a) * ConvertUtil.ToQuaternion(b);
-            }
-            else if (tp == typeof(Color))
-            {
-                return ConvertUtil.ToColor(a) + ConvertUtil.ToColor(b);
-            }
-            else if (tp == typeof(Color32))
-            {
-                return ConvertUtil.ToColor32(ConvertUtil.ToColor(a) + ConvertUtil.ToColor(b));
-            }
-
-            return b;
         }
 
         #endregion

@@ -66,9 +66,9 @@ namespace com.spacepuppy.Tween.Curves
 
         #region MemberCurve Interface
 
-        protected override object GetValue(float t)
+        protected override object GetValueAt(float dt, float t)
         {
-            return Mathf.Lerp(_start, _end, t);
+            return this.Ease(t, _start, _end - _start, this.Duration);
         }
 
         #endregion

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy
 {
 
@@ -19,7 +21,7 @@ namespace com.spacepuppy
 
         #region Properties
 
-        public static ITimeSupplier Normal { get { return _normalTime; } }
+        public static IScalableTimeSupplier Normal { get { return _normalTime; } }
 
         public static ITimeSupplier Real { get { return _realTime; } }
 
@@ -56,7 +58,7 @@ namespace com.spacepuppy
                 return DeltaTimeType.Custom;
         }
 
-        public static CustomTimeSupplier CreateCustomTime(string id, float scale = 1f)
+        public static CustomTimeSupplier CreateCustomTime(string id)
         {
             if (_customTimes == null)
             {
@@ -67,12 +69,11 @@ namespace com.spacepuppy
             if(_customTimes.ContainsKey(id))
             {
                 var ct = _customTimes[id];
-                ct.Scale = scale;
                 return ct;
             }
             else
             {
-                var ct = new CustomTimeSupplier(id, scale);
+                var ct = new CustomTimeSupplier(id);
                 _customTimes[ct.Id] = ct;
                 return ct;
             }
@@ -124,11 +125,11 @@ namespace com.spacepuppy
 
         #region Special Types
 
-        private class NormalTimeSupplier : ITimeSupplier
+        private class NormalTimeSupplier : IScalableTimeSupplier
         {
 
             private bool _paused;
-            private float _cachedTimeScale;
+            private Dictionary<string, float> _scales = new Dictionary<string, float>();
 
             public float Total
             {
@@ -140,21 +141,6 @@ namespace com.spacepuppy
                 get { return UnityEngine.Time.deltaTime; }
             }
 
-            public float Scale
-            {
-                get
-                {
-                    return (_paused) ? _cachedTimeScale : UnityEngine.Time.timeScale;
-                }
-                set
-                {
-                    if (_paused)
-                        _cachedTimeScale = value;
-                    else
-                        UnityEngine.Time.timeScale = value;
-                }
-            }
-
             public bool Paused
             {
                 get { return _paused; }
@@ -164,15 +150,83 @@ namespace com.spacepuppy
                     _paused = value;
                     if (_paused)
                     {
-                        _cachedTimeScale = UnityEngine.Time.timeScale;
                         UnityEngine.Time.timeScale = 0f;
                     }
                     else
                     {
-                        UnityEngine.Time.timeScale = _cachedTimeScale;
+                        UnityEngine.Time.timeScale = this.GetTimeScale();
                     }
                 }
             }
+
+            public float Scale
+            {
+                get
+                {
+                    return (_paused) ? this.GetTimeScale() : UnityEngine.Time.timeScale;
+                }
+            }
+
+            public IEnumerable<string> ScaleIds
+            {
+                get { return _scales.Keys; }
+            }
+
+            public void SetScale(string id, float scale)
+            {
+                _scales[id] = scale;
+                if(!_paused)
+                {
+                    Time.timeScale = this.GetTimeScale();
+                }
+            }
+
+            public float GetScale(string id)
+            {
+                float result;
+                if(_scales.TryGetValue(id, out result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return float.NaN;
+                }
+            }
+
+            public bool RemoveScale(string id)
+            {
+                if (_scales.Remove(id))
+                {
+                    if (!_paused)
+                    {
+                        Time.timeScale = this.GetTimeScale();
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            public bool HasScale(string id)
+            {
+                return _scales.ContainsKey(id);
+            }
+
+            private float GetTimeScale()
+            {
+                if(_scales.Count == 0)
+                {
+                    return 1f;
+                }
+                else
+                {
+                    return _scales.Values.Product();
+                }
+            }
+
         }
 
         private class RealTimeSupplier : ITimeSupplier
@@ -188,26 +242,6 @@ namespace com.spacepuppy
                 get { return UnityEngine.Time.unscaledDeltaTime; }
             }
 
-            public float Scale
-            {
-                get
-                {
-                    return 1.0f;
-                }
-                set
-                {
-                    //Real Time can not be scaled
-                }
-            }
-
-            public bool Paused
-            {
-                get { return false; } 
-                set {
-                    //Real Time can not be paused
-                }
-            }
-
         }
 
         private class SmoothTimeSupplier : ITimeSupplier
@@ -221,24 +255,6 @@ namespace com.spacepuppy
             public float Delta
             {
                 get { return UnityEngine.Time.smoothDeltaTime; }
-            }
-
-            public float Scale
-            {
-                get
-                {
-                    return UnityEngine.Time.timeScale;
-                }
-                set
-                {
-                    UnityEngine.Time.timeScale = value;
-                }
-            }
-
-            public bool Paused
-            {
-                get { return SPTime.Normal.Paused; }
-                set { SPTime.Normal.Paused = value; }
             }
 
         }

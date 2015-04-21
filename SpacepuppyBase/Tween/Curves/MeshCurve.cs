@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace com.spacepuppy.Tween
+namespace com.spacepuppy.Tween.Curves
 {
     public class MeshCurve : Curve
     {

@@ -135,9 +135,12 @@
     <Compile Include="Tween\Curves\Color32MemberCurve.cs" />
     <Compile Include="Tween\Curves\ColorMemberCurve.cs" />
     <Compile Include="Tween\Curves\StringCurve.cs" />
+    <Compile Include="Tween\Curves\TimeScaleCurve.cs" />
+    <Compile Include="Tween\CustomImplicitCurveAttribute.cs" />
     <Compile Include="Tween\CustomMemberCurveAttribute.cs" />
     <Compile Include="Tween\Curves\FloatMemberCurve.cs" />
     <Compile Include="Tween\IAutoKillableTweener.cs" />
+    <Compile Include="Tween\ImplicitCurve.cs" />
     <Compile Include="Tween\ITweenHash.cs" />
     <Compile Include="Tween\MemberCurve.cs" />
     <Compile Include="Tween\Curves\NumericMemberCurve.cs" />
@@ -148,7 +151,7 @@
     <Compile Include="Tween\Easing.cs" />
     <Compile Include="Tween\Enums.cs" />
     <Compile Include="Tween\Curve.cs" />
-    <Compile Include="Tween\MeshCurve.cs" />
+    <Compile Include="Tween\Curves\MeshCurve.cs" />
     <Compile Include="Tween\CurveGroup.cs" />
     <Compile Include="Tween\ObjectTweener.cs" />
     <Compile Include="Tween\TweenHash.cs" />

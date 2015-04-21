@@ -92,8 +92,9 @@ namespace com.spacepuppy.Tween.Curves
 
         #region MemberCurve Interface
 
-        protected override object GetValue(float t)
+        protected override object GetValueAt(float dt, float t)
         {
+            t = this.Ease(t, 0f, 1f, this.Duration);
             return (_useSlerp) ? Quaternion.Slerp(_start, _end, t) : Quaternion.Lerp(_start, _end, t);
         }
 

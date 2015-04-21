@@ -85,9 +85,9 @@ namespace com.spacepuppy.Tween.Curves
 
         #region MemberCurve Interface
 
-        protected override object GetValue(float t)
+        protected override object GetValueAt(float dt, float t)
         {
-            return ConvertUtil.ToPrim((double)t * (_end - _start) + _start, _numericType);
+            return ConvertUtil.ToPrim(this.Ease(t, (float)_start, (float)_end - (float)_start, this.Duration), _numericType);
         }
 
         #endregion

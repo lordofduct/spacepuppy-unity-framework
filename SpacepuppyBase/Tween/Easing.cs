@@ -384,6 +384,17 @@ namespace com.spacepuppy.Tween
         }
         #endregion
 
+        #region AnimationCurve
+
+        public static Ease FromAnimationCurve(AnimationCurve curve)
+        {
+            return (c, s, e, d) =>
+            {
+                return curve.Evaluate(c);
+            };
+        }
+
+        #endregion
 
 
         public static Vector2 EaseVector2(Ease ease, Vector2 start, Vector2 end, float t, float dur)

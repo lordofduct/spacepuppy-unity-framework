@@ -5,7 +5,7 @@ using System.Text;
 
 namespace com.spacepuppy.Collections
 {
-    public class CircularQueue<T> : IEnumerable<T>
+    public class CircularQueue<T> : IEnumerable<T>, ICollection<T>
     {
 
         #region Fields
@@ -150,6 +150,40 @@ namespace com.spacepuppy.Collections
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        #endregion
+
+        #region ICollection Interface
+
+        void ICollection<T>.Add(T item)
+        {
+            this.Enqueue(item);
+        }
+
+        public bool Contains(T item)
+        {
+            return Array.IndexOf(_values, item) >= 0;
+        }
+
+        void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+        {
+            int index = _head;
+            for(int i = 0; i < _count; i++)
+            {
+                array[arrayIndex + i] = _values[index];
+                index = (index + 1) % _values.Length;
+            }
+        }
+
+        bool ICollection<T>.IsReadOnly
+        {
+            get { return false; }
+        }
+
+        bool ICollection<T>.Remove(T item)
+        {
+            throw new System.NotSupportedException();
         }
 
         #endregion

@@ -14,6 +14,7 @@ namespace com.spacepuppy.Tween
 
         private enum AnimMode
         {
+            AnimCurve = -2,
             Curve = -1,
             To = 0,
             From = 1,
@@ -221,9 +222,24 @@ namespace com.spacepuppy.Tween
         // CURVES
         //
 
-        public TweenHash Curve(Curve curve)
+        public TweenHash UseCurve(Curve curve)
         {
             _props.Add(new PropInfo(AnimMode.Curve, null, null, curve, float.NaN, null));
+            return this;
+        }
+
+        public TweenHash UseCurve(string memberName, AnimationCurve curve, float dur, object option = null)
+        {
+            if (curve == null) throw new System.ArgumentNullException("curve");
+            _props.Add(new PropInfo(AnimMode.AnimCurve, memberName, EaseMethods.FromAnimationCurve(curve), null, dur, option));
+            return this;
+        }
+
+        public TweenHash UseCurve(string memberName, AnimationCurve curve, object option = null)
+        {
+            if (curve == null) throw new System.ArgumentNullException("curve");
+            float dur = (curve.keys.Length > 0) ? curve.keys.Last().time : 0f;
+            _props.Add(new PropInfo(AnimMode.AnimCurve, memberName, EaseMethods.FromAnimationCurve(curve), null, dur, option));
             return this;
         }
 
@@ -425,18 +441,20 @@ namespace com.spacepuppy.Tween
                 float dur = prop.dur;
                 switch (prop.mode)
                 {
+                    case AnimMode.AnimCurve:
+                        return Curve.CreateFromTo(_targ, prop.name, ease, null, null, dur, prop.option);
                     case AnimMode.Curve:
                         return prop.value as Curve;
                     case AnimMode.To:
-                        return MemberCurve.CreateTo(_targ, prop.name, ease, prop.value, dur, prop.option);
+                        return Curve.CreateTo(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.From:
-                        return MemberCurve.CreateFrom(_targ, prop.name, ease, prop.value, dur, prop.option);
+                        return Curve.CreateFrom(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.By:
-                        return MemberCurve.CreateBy(_targ, prop.name, ease, prop.value, dur, prop.option);
+                        return Curve.CreateBy(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.FromTo:
-                        return MemberCurve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
+                        return Curve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
                     case AnimMode.RedirectTo:
-                        return MemberCurve.CreateRedirectTo(_targ, prop.name, ease, ConvertUtil.ToSingle(prop.value), ConvertUtil.ToSingle(prop.altValue), dur, prop.option);
+                        return Curve.CreateRedirectTo(_targ, prop.name, ease, ConvertUtil.ToSingle(prop.value), ConvertUtil.ToSingle(prop.altValue), dur, prop.option);
                 }
             }
             catch

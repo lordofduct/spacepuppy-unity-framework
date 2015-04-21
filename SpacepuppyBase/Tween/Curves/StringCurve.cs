@@ -86,8 +86,9 @@ namespace com.spacepuppy.Tween.Curves
 
         #region MemberCurve Interface
 
-        protected override object GetValue(float t)
+        protected override object GetValueAt(float delta, float t)
         {
+            t = this.Ease(t, 0f, 1f, this.Duration);
             if (float.IsNaN(t)) throw new System.ArgumentException("t must be a real number.", "t");
 
             if (!_style.HasFlag(StringTweenStyle.Jumble))

@@ -38,7 +38,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Vector2 AngleToVector2(float a, bool useRadians = false, bool yDominant = false)
         {
-            if (!useRadians) a *= Mathf.Deg2Rad;
+            if (!useRadians) a *= MathUtil.DEG_TO_RAD;
             if (yDominant)
             {
                 return new Vector2(Mathf.Sin(a), Mathf.Cos(a));
@@ -82,7 +82,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static float Angle(Vector2 v)
         {
-            return Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg;
+            return Mathf.Atan2(v.y, v.x) * MathUtil.RAD_TO_DEG;
         }
 
         /// <summary>
@@ -93,12 +93,12 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static float Angle(float x, float y)
         {
-            return Mathf.Atan2(y, x) * Mathf.Rad2Deg;
+            return Mathf.Atan2(y, x) * MathUtil.RAD_TO_DEG;
         }
 
         public static float AngleBetween(Vector2 a, Vector2 b)
         {
-            return Mathf.Acos(Vector2.Dot(a, b) / (a.magnitude * b.magnitude)) * Mathf.Rad2Deg;
+            return Mathf.Acos(Vector2.Dot(a, b) / (a.magnitude * b.magnitude)) * MathUtil.RAD_TO_DEG;
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Vector2 RotateBy(Vector2 v, float a, bool bUseRadians = false)
         {
-            if (!bUseRadians) a *= Mathf.Deg2Rad;
+            if (!bUseRadians) a *= MathUtil.DEG_TO_RAD;
             var ca = System.Math.Cos(a);
             var sa = System.Math.Sin(a);
             var rx = v.x * ca - v.y * sa;
@@ -164,7 +164,7 @@ namespace com.spacepuppy.Utils
         /// <param name="a"></param>
         public static void RotateBy(ref Vector2 v, float a, bool bUseRadians = false)
         {
-            if (!bUseRadians) a *= Mathf.Deg2Rad;
+            if (!bUseRadians) a *= MathUtil.DEG_TO_RAD;
             var ca = System.Math.Cos(a);
             var sa = System.Math.Sin(a);
             var rx = v.x * ca - v.y * sa;
@@ -184,14 +184,14 @@ namespace com.spacepuppy.Utils
         public static Vector2 RotateToward(Vector2 from, Vector2 to, float a, bool bUseRadians = false)
         {
             //var angleBetween = Mathf.Acos(Vector2.Dot(from, to) / (from.magnitude * to.magnitude));
-            //if (!bUseRadians) a *= Mathf.Deg2Rad;
+            //if (!bUseRadians) a *= MathUtil.DEG_TO_RAD;
             //var t = angleBetween / a;
             //return Slerp(from, to, t);
 
-            if (!bUseRadians) a *= Mathf.Deg2Rad;
+            if (!bUseRadians) a *= MathUtil.DEG_TO_RAD;
             var a1 = Mathf.Atan2(from.y, from.x);
             var a2 = Mathf.Atan2(to.y, to.x);
-            a2 = MathUtil.NormalizeAngleToAnother(a2, a1, true);
+            a2 = MathUtil.ShortenAngleToAnother(a2, a1, true);
             var ra = (a2 - a1 >= 0f) ? a1 + a : a1 - a;
             var l = from.magnitude;
             return new Vector2(Mathf.Cos(ra) * l, Mathf.Sin(ra) * l);
@@ -199,10 +199,10 @@ namespace com.spacepuppy.Utils
 
         public static Vector2 RotateTowardClamped(Vector2 from, Vector2 to, float a, bool bUseRadians = false)
         {
-            if (!bUseRadians) a *= Mathf.Deg2Rad;
+            if (!bUseRadians) a *= MathUtil.DEG_TO_RAD;
             var a1 = Mathf.Atan2(from.y, from.x);
             var a2 = Mathf.Atan2(to.y, to.x);
-            a2 = MathUtil.NormalizeAngleToAnother(a2, a1, true);
+            a2 = MathUtil.ShortenAngleToAnother(a2, a1, true);
 
             var da = a2 - a1;
             var ra = a1 + Mathf.Clamp(Mathf.Abs(a), 0f, Mathf.Abs(da)) * Mathf.Sign(da);
@@ -238,7 +238,7 @@ namespace com.spacepuppy.Utils
 
         public static float AngleBetween(Vector3 a, Vector3 b)
         {
-            return Mathf.Acos(Vector3.Dot(a, b) / (a.magnitude * b.magnitude)) * Mathf.Rad2Deg;
+            return Mathf.Acos(Vector3.Dot(a, b) / (a.magnitude * b.magnitude)) * MathUtil.RAD_TO_DEG;
         }
 
         /// <summary>

@@ -10,7 +10,7 @@ namespace com.spacepuppy.Collections
     /// Represents a stack of static size. If you push a value onto the stack when it's full, the value at the bottom (oldest) of the stack is removed.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SamplingStack<T> : IEnumerable<T>
+    public class SamplingStack<T> : IEnumerable<T>, ICollection<T>
     {
 
         #region Fields
@@ -153,6 +153,40 @@ namespace com.spacepuppy.Collections
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        #endregion
+
+        #region ICollection Interface
+
+        void ICollection<T>.Add(T item)
+        {
+            this.Push(item);
+        }
+
+        public bool Contains(T item)
+        {
+            return Array.IndexOf(_values, item) >= 0;
+        }
+
+        void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+        {
+            int index = _head;
+            for (int i = 0; i < _count; i++)
+            {
+                array[arrayIndex + 1] = _values[index];
+                index = (index > 0) ? index - 1 : _values.Length - 1;
+            }
+        }
+
+        bool ICollection<T>.IsReadOnly
+        {
+            get { return false; }
+        }
+
+        bool ICollection<T>.Remove(T item)
+        {
+            throw new System.NotSupportedException();
         }
 
         #endregion

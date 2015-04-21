@@ -239,12 +239,12 @@ namespace com.spacepuppy.Utils
         /// <summary>
         /// Sums a series of numeric values passed as a param array...
         /// 
-        /// MathUtil.Summation(1,2,3,4) == 10
+        /// MathUtil.Sum(1,2,3,4) == 10
         /// </summary>
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static short Summation(params short[] arr)
+        public static short Sum(params short[] arr)
         {
             short result = 0;
 
@@ -259,12 +259,12 @@ namespace com.spacepuppy.Utils
         /// <summary>
         /// Sums a series of numeric values passed as a param array...
         /// 
-        /// MathUtil.Summation(1,2,3,4) == 10
+        /// MathUtil.Sum(1,2,3,4) == 10
         /// </summary>
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static int Summation(params int[] arr)
+        public static int Sum(params int[] arr)
         {
             int result = 0;
 
@@ -276,7 +276,7 @@ namespace com.spacepuppy.Utils
             return result;
         }
 
-        public static int Summation(int[] arr, int startIndex, int endIndex)
+        public static int Sum(int[] arr, int startIndex, int endIndex)
         {
             int result = 0;
 
@@ -288,20 +288,20 @@ namespace com.spacepuppy.Utils
             return result;
         }
 
-        public static int Summation(int[] arr, int startIndex)
+        public static int Sum(int[] arr, int startIndex)
         {
-            return Summation(arr, startIndex, int.MaxValue);
+            return Sum(arr, startIndex, int.MaxValue);
         }
 
         /// <summary>
         /// Sums a series of numeric values passed as a param array...
         /// 
-        /// MathUtil.Summation(1,2,3,4) == 10
+        /// MathUtil.Sum(1,2,3,4) == 10
         /// </summary>
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static long Summation(params long[] arr)
+        public static long Sum(params long[] arr)
         {
             long result = 0;
 
@@ -316,12 +316,12 @@ namespace com.spacepuppy.Utils
         /// <summary>
         /// Sums a series of numeric values passed as a param array...
         /// 
-        /// MathUtil.Summation(1,2,3,4) == 10
+        /// MathUtil.Sum(1,2,3,4) == 10
         /// </summary>
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static float Summation(params float[] arr)
+        public static float Sum(params float[] arr)
         {
             float result = 0;
 
@@ -337,12 +337,12 @@ namespace com.spacepuppy.Utils
         /// <summary>
         /// Multiplies a series of numeric values passed as a param array...
         /// 
-        /// MathUtil.ProductSeries(2,3,4) == 24
+        /// MathUtil.Product(2,3,4) == 24
         /// </summary>
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static float ProductSeries(params short[] arr)
+        public static float Product(params short[] arr)
         {
             if (arr == null || arr.Length == 0)
                 return float.NaN;
@@ -360,12 +360,12 @@ namespace com.spacepuppy.Utils
         /// <summary>
         /// Multiplies a series of numeric values passed as a param array...
         /// 
-        /// MathUtil.ProductSeries(2,3,4) == 24
+        /// MathUtil.Product(2,3,4) == 24
         /// </summary>
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static float ProductSeries(params int[] arr)
+        public static float Product(params int[] arr)
         {
             if (arr == null || arr.Length == 0)
                 return float.NaN;
@@ -388,7 +388,7 @@ namespace com.spacepuppy.Utils
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static float ProductSeries(params long[] arr)
+        public static float Product(params long[] arr)
         {
             if (arr == null || arr.Length == 0)
                 return float.NaN;
@@ -411,12 +411,12 @@ namespace com.spacepuppy.Utils
         /// <param name="arr"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static float ProductSeries(params float[] arr)
+        public static float Product(params float[] arr)
         {
             if (arr == null || arr.Length == 0)
                 return float.NaN;
 
-            float result = 1;
+            float result = 1f;
 
             foreach (float value in arr)
             {
@@ -426,9 +426,22 @@ namespace com.spacepuppy.Utils
             return result;
         }
 
+        public static float Product(this IEnumerable<float> coll)
+        {
+            if (coll == null) return float.NaN;
+
+            float result = 1f;
+            foreach(float value in coll)
+            {
+                result *= value;
+            }
+            return result;
+        }
+
         #endregion
 
         #region "Value interpolating and warping"
+
         /// <summary>
         /// The average of an array of values
         /// </summary>
@@ -1259,6 +1272,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region "Angular Math"
+
         /// <summary>
         /// convert radians to degrees
         /// </summary>
@@ -1324,7 +1338,7 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// normalizes independent and then sets dep to the nearest value respective to independent
+        /// Returns a value for dependant that is a value that is the shortest angle between dep and ind from ind.
         /// 
         /// 
         /// for instance if dep=-170 degrees and ind=170 degrees then 190 degrees will be returned as an alternative to -170 degrees
@@ -1334,9 +1348,46 @@ namespace com.spacepuppy.Utils
         /// <param name="ind"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static float NormalizeAngleToAnother(float dep, float ind, bool useRadians)
+        public static float ShortenAngleToAnother(float dep, float ind, bool useRadians)
         {
             return ind + NearestAngleBetween(ind, dep, useRadians);
+        }
+
+        /// <summary>
+        /// Returns a value for dependant that is the shortest angle counter-clockwise from ind.
+        /// 
+        /// for instance if dep=-170 degrees, and ind=10 degrees, then 200 degrees will be returned as an alternative to -160. The shortest 
+        /// path from 10 to -160 moving counter-clockwise is 190 degrees away.
+        /// </summary>
+        /// <param name="dep"></param>
+        /// <param name="ind"></param>
+        /// <param name="useRadians"></param>
+        /// <returns></returns>
+        public static float NormalizeAngleToAnother(float dep, float ind, bool useRadians)
+        {
+            if(useRadians)
+            {
+                if(dep < ind)
+                {
+                    while (dep < ind) dep += MathUtil.TWO_PI;
+                }
+                else if(dep - ind > MathUtil.TWO_PI)
+                {
+                    while(dep - ind > MathUtil.TWO_PI) dep -= MathUtil.TWO_PI;
+                }
+            }
+            else
+            {
+                if (dep < ind)
+                {
+                    while (dep < ind) dep += 360f;
+                }
+                else if (dep - ind > 360f)
+                {
+                    while (dep - ind > MathUtil.TWO_PI) dep -= 360f;
+                }
+            }
+            return dep;
         }
 
         /// <summary>
@@ -1350,7 +1401,7 @@ namespace com.spacepuppy.Utils
         public static float InterpolateAngle(float a1, float a2, float weight, bool useRadians)
         {
             a1 = NormalizeAngle(a1, useRadians);
-            a2 = NormalizeAngleToAnother(a2, a1, useRadians);
+            a2 = ShortenAngleToAnother(a2, a1, useRadians);
 
             return Interpolate(a1, a2, weight);
         }
@@ -1378,6 +1429,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region "Advanced Math"
+
         /// <summary>
         /// Compute the logarithm of any value of any base
         /// </summary>
