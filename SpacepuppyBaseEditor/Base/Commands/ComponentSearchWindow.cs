@@ -10,6 +10,9 @@ namespace com.spacepuppyeditor.Base.Commands
     public class ComponentSearchWindow : EditorWindow
     {
 
+        public const string MENU_NAME = SPMenu.MENU_NAME_ROOT + "/Find References To Scripts";
+        public const int MENU_PRIORITY = SPMenu.MENU_PRIORITY_GROUP2;
+
         #region Singleton
 
         private static ComponentSearchWindow _window;
@@ -29,7 +32,7 @@ namespace com.spacepuppyeditor.Base.Commands
 
         #region Menu Entries
 
-        [MenuItem("Spacepuppy/Find References To Scripts", priority = 3)]
+        [MenuItem(MENU_NAME, priority = MENU_PRIORITY)]
         private static void OpenFromMenu()
         {
             if(_window == null)

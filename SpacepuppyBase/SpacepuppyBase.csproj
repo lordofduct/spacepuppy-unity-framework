@@ -107,6 +107,7 @@
     <Compile Include="Scenes\ISceneBehaviourLoadOptions.cs" />
     <Compile Include="Scenes\ModifiedLoadedSceneContainerException.cs" />
     <Compile Include="Scenes\Scene.cs" />
+    <Compile Include="Scenes\SceneBehaviourLoadOptionsWithLoadScreen.cs" />
     <Compile Include="Scenes\SceneBehaviourSequence.cs" />
     <Compile Include="Scenes\SceneContainer.cs" />
     <Compile Include="Scenes\SceneLoadingEventArgs.cs" />

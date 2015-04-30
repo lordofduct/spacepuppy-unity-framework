@@ -6,13 +6,17 @@ namespace com.spacepuppy.Geom
     /// Represents an interval on some axis. This is useful for projection of geometry on an axis. The axis is stored for token 
     /// purposes only and is not used for any actions with other intervals.
     /// </summary>
+    [System.Serializable()]
     public struct AxisInterval
     {
 
         #region Fields
 
+        [SerializeField()]
         private Vector3 _axis;
+        [SerializeField()]
         private float _min;
+        [SerializeField()]
         private float _max;
 
         #endregion

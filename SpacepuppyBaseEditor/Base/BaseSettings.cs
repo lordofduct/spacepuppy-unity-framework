@@ -10,14 +10,15 @@ namespace com.spacepuppyeditor.Base
 
         #region Consts
 
-        public const int MENU_PRIORITY = -1000;
+        public const string MENU_NAME = SPMenu.MENU_NAME_SETTINGS + "/Base Settings";
+        public const int MENU_PRIORITY = SPMenu.MENU_PRIORITY_SETTINGS;
         public const string SETTING_ADVANCEDANIMINSPECTOR_ACTIVE = "AdvancedAnimationInspector.Active";
 
         #endregion
 
         #region Menu Entries
 
-        [MenuItem("Spacepuppy/Settings/Base Settings", priority = BaseSettings.MENU_PRIORITY)]
+        [MenuItem(MENU_NAME, priority = MENU_PRIORITY)]
         public static void OpenBaseSettings()
         {
             if (_openWindow == null)

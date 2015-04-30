@@ -9,7 +9,9 @@ namespace com.spacepuppy.Geom
 
         #region Fields
 
+        [SerializeField()]
         private Vector3 _center;
+        [SerializeField()]
         private Vector3 _size;
 
         #endregion

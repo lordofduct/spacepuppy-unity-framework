@@ -59,6 +59,7 @@
     <Compile Include="Base\Inspectors\ReorderableArrayPropertyDrawer.cs" />
     <Compile Include="Components\IComponentChoiceSelector.cs" />
     <Compile Include="Components\SelectableComponentPropertyDrawer.cs" />
+    <Compile Include="EditorGame.cs" />
     <Compile Include="IconHelper.cs" />
     <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Base\Modifiers\InsertButtonModifier.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorGUI.cs" />
     <Compile Include="SPEditorGUILayout.cs" />
+    <Compile Include="SPMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">

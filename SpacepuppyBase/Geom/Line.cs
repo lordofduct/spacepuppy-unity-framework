@@ -2,10 +2,14 @@
 
 namespace com.spacepuppy.Geom
 {
+
+    [System.Serializable()]
     public struct Line
     {
 
+        [SerializeField()]
         private Vector3 _pnt;
+        [SerializeField()]
         private Vector3 _dir;
 
         public Line(Vector3 p, Vector3 d)

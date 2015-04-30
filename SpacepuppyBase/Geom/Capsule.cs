@@ -9,8 +9,11 @@ namespace com.spacepuppy.Geom
 
         #region Fields
 
+        [SerializeField()]
         private Vector3 _start;
+        [SerializeField()]
         private Vector3 _end;
+        [SerializeField()]
         private float _rad;
 
         #endregion

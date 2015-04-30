@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace com.spacepuppy.Geom
 {
+
+    [System.Serializable()]
     public struct Matrix2D
     {
 
@@ -18,11 +20,17 @@ namespace com.spacepuppy.Geom
 
         #region Fields
 
+        [SerializeField()]
         public float a;
+        [SerializeField()]
         public float b;
+        [SerializeField()]
         public float c;
+        [SerializeField()]
         public float d;
+        [SerializeField()]
         public float tx;
+        [SerializeField()]
         public float ty; 
 
         #endregion

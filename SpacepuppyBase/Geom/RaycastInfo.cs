@@ -2,10 +2,16 @@
 
 namespace com.spacepuppy.Geom
 {
+
+    [System.Serializable()]
     public struct RaycastInfo
     {
+
+        [SerializeField()]
         private Vector3 _origin;
+        [SerializeField()]
         private Vector3 _dir;
+        [SerializeField()]
         private float _dist;
 
         #region CONSTRUCTOR

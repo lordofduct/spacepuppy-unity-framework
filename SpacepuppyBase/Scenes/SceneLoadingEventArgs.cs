@@ -12,6 +12,9 @@ namespace com.spacepuppy.Scenes
         private ISceneBehaviour _scene;
         private ISceneBehaviourLoadOptions _options;
 
+        private bool _stall;
+        private object _instruction;
+
         public SceneLoadingEventArgs(SceneManager manager, ISceneBehaviour scene, ISceneBehaviourLoadOptions loadOptions)
         {
             _manager = manager;
@@ -24,6 +27,20 @@ namespace com.spacepuppy.Scenes
         public ISceneBehaviour Scene { get { return _scene; } }
 
         public ISceneBehaviourLoadOptions LoadOptions { get { return _options; } }
+
+
+        public void RequestManagerToStall(object instruction)
+        {
+            _stall = true;
+            if (_instruction == null)
+                _instruction = instruction;
+            //TODO!!!!!
+        }
+
+        internal void PurgeYieldInstructions()
+        {
+
+        }
 
     }
 

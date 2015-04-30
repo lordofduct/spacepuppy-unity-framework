@@ -5,10 +5,15 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Geom
 {
 
+    [System.Serializable()]
     public struct Trans
     {
+
+        [SerializeField()]
         public Vector3 Position;
+        [SerializeField()]
         public Quaternion Rotation;
+        [SerializeField()]
         public Vector3 Scale;
 
         public Matrix4x4 Matrix

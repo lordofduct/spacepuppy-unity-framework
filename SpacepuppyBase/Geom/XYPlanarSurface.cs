@@ -5,10 +5,12 @@ using System.Text;
 
 namespace com.spacepuppy.Geom
 {
+
+    [System.Serializable()]
     public class XYPlanarSurface : IPlanarSurface
     {
 
-        #region Singleton
+        #region Default Entry
 
         private static XYPlanarSurface _surface = new XYPlanarSurface();
 
@@ -18,6 +20,7 @@ namespace com.spacepuppy.Geom
 
         #region Fields
 
+        [SerializeField()]
         private float _zdepth;
 
         #endregion
