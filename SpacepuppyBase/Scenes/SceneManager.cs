@@ -163,6 +163,7 @@ namespace com.spacepuppy.Scenes
                 _loadOp = _scene.LoadScene();
                 yield return _loadOp;
                 _manager.OnSceneLoaded(args);
+                yield return null; //wait one last frame to actually begin the scene
                 _scene.BeginScene();
                 this.SetSignal();
                 _manager.OnSceneStarted(args);

@@ -402,7 +402,10 @@ namespace com.spacepuppy.Tween
             {
                 var curve = this.CreateCurve(_props[0]);
                 if (curve == null)
+                {
                     Debug.LogWarning("Failed to create tween for property '" + _props[0].name + "' on target.", _targ as Object);
+                    return new ObjectTweener(_targ, Curve.Null);
+                }
                 else
                     tween = new ObjectTweener(_targ, curve);
             }
@@ -442,19 +445,19 @@ namespace com.spacepuppy.Tween
                 switch (prop.mode)
                 {
                     case AnimMode.AnimCurve:
-                        return Curve.CreateFromTo(_targ, prop.name, ease, null, null, dur, prop.option);
+                        return MemberCurve.CreateFromTo(_targ, prop.name, ease, null, null, dur, prop.option);
                     case AnimMode.Curve:
                         return prop.value as Curve;
                     case AnimMode.To:
-                        return Curve.CreateTo(_targ, prop.name, ease, prop.value, dur, prop.option);
+                        return MemberCurve.CreateTo(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.From:
-                        return Curve.CreateFrom(_targ, prop.name, ease, prop.value, dur, prop.option);
+                        return MemberCurve.CreateFrom(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.By:
-                        return Curve.CreateBy(_targ, prop.name, ease, prop.value, dur, prop.option);
+                        return MemberCurve.CreateBy(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.FromTo:
-                        return Curve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
+                        return MemberCurve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
                     case AnimMode.RedirectTo:
-                        return Curve.CreateRedirectTo(_targ, prop.name, ease, ConvertUtil.ToSingle(prop.value), ConvertUtil.ToSingle(prop.altValue), dur, prop.option);
+                        return MemberCurve.CreateRedirectTo(_targ, prop.name, ease, ConvertUtil.ToSingle(prop.value), ConvertUtil.ToSingle(prop.altValue), dur, prop.option);
                 }
             }
             catch

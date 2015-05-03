@@ -19,6 +19,21 @@ namespace com.spacepuppy.Utils
         public static Vector2 NegInfVector2 { get { return new Vector2(float.NegativeInfinity, float.NegativeInfinity); } }
         public static Vector3 NegInfVector3 { get { return new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity); } }
 
+        public static bool IsNaN(Vector2 v)
+        {
+            return float.IsNaN(v.sqrMagnitude);
+        }
+
+        public static bool IsNaN(Vector3 v)
+        {
+            return float.IsNaN(v.sqrMagnitude);
+        }
+
+        public static bool IsNaN(Vector4 v)
+        {
+            return float.IsNaN(v.sqrMagnitude);
+        }
+
         #region Vector Convert
 
         public static string Stringify(Vector2 v)

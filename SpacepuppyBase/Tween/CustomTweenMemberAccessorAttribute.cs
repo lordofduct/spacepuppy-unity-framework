@@ -6,14 +6,14 @@ namespace com.spacepuppy.Tween
 {
 
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-    public class CustomImplicitCurveAttribute : System.Attribute
+    public class CustomTweenMemberAccessorAttribute : System.Attribute
     {
-
+        
         private System.Type _targetType;
         private string _propName;
         public int priority;
 
-        public CustomImplicitCurveAttribute(System.Type targetType, string propName)
+        public CustomTweenMemberAccessorAttribute(System.Type targetType, string propName)
         {
             _targetType = targetType;
             _propName = propName;
@@ -24,5 +24,4 @@ namespace com.spacepuppy.Tween
         public string HandledPropName { get { return _propName; } }
 
     }
-
 }

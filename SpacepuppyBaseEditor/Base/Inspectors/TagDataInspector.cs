@@ -21,37 +21,20 @@ namespace com.spacepuppyeditor.Base
 
         static TagDataInspector()
         {
-            //SceneView.onSceneGUIDelegate -= OnSceneGUI;
-            //SceneView.onSceneGUIDelegate += OnSceneGUI;
+            _lastUpdate = System.DateTime.Now;
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
+            SceneView.onSceneGUIDelegate += OnSceneGUI;
         }
 
-        //private static void OnSceneGUI(SceneView scene)
-        //{
-        //    if ((System.DateTime.Now - _lastUpdate).TotalSeconds < 1.0d) return;
-
-        //    if (!Application.isPlaying)
-        //    {
-        //        SyncTags();
-        //    }
-        //}
-
-        public static void SyncTags()
+        private static void OnSceneGUI(SceneView scene)
         {
-            //var tagData = (TagData)AssetDatabase.LoadAssetAtPath(@"Assets/Resources/TagData.asset", typeof(TagData));
-            //if(tagData == null)
-            //{
-            //    tagData = ScriptableObjectHelper.CreateAsset<TagData>(@"Assets/Resources/TagData.asset");
-            //}
+            if ((System.DateTime.Now - _lastUpdate).TotalSeconds < 1.0d) return;
 
-            //if(!tagData.SimilarTo(UnityEditorInternal.InternalEditorUtility.tags))
-            //{
-            //    var helper = new TagData.EditorHelper(tagData);
-            //    helper.UpdateTags(UnityEditorInternal.InternalEditorUtility.tags);
-            //    EditorUtility.SetDirty(tagData);
-            //    AssetDatabase.SaveAssets();
-            //}
-
-            //_lastUpdate = System.DateTime.Now;
+            if (!Application.isPlaying)
+            {
+                SPMenu.SyncTagData();
+                _lastUpdate = System.DateTime.Now;
+            }
         }
 
         #endregion
@@ -80,7 +63,9 @@ namespace com.spacepuppyeditor.Base
 
             if(GUILayout.Button("Sync Tags"))
             {
-                TagDataInspector.SyncTags();
+                _helper.UpdateTags(UnityEditorInternal.InternalEditorUtility.tags);
+                EditorUtility.SetDirty(this.target);
+                AssetDatabase.SaveAssets();
             }
         }
 

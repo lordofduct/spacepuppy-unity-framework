@@ -32,7 +32,7 @@ namespace com.spacepuppy
             _currentIEnumeratorYieldValue = null;
             try
             {
-                _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                if (_owner != null) _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
             }
             catch (System.Exception ex) { Debug.LogException(ex); }
 

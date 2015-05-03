@@ -9,48 +9,44 @@ namespace com.spacepuppy.Utils
     public static class IEnumerableExtensionMethods
     {
 
-        //public static System.Array ToArray(this IEnumerable lst)
-        //{
-        //    var result = new List<object>();
-        //    foreach (var obj in lst) result.Add(obj);
-        //    return result.ToArray();
-        //}
-
-        //public static T[] ToArray<T>(this IEnumerable<T> lst)
-        //{
-        //    var result = new List<T>();
-        //    foreach (var obj in lst) result.Add(obj);
-        //    return result.ToArray();
-        //}
-
-        //public static int Count(this IEnumerable lst)
-        //{
-        //    int cnt = 0;
-        //    var enr = lst.GetEnumerator();
-        //    while(enr.MoveNext())
-        //    {
-        //        cnt++;	
-        //    }
-
-        //    return cnt;
-        //}
-
-        //public static int Count<T>(this IEnumerable<T> lst)
-        //{
-        //    int cnt = 0;
-
-        //    var enr = lst.GetEnumerator();
-        //    while(enr.MoveNext())
-        //    {
-        //        cnt++;
-        //    }
-
-        //    return cnt;
-        //}
-
         public static bool IsEmpty(this IEnumerable lst)
         {
             return !lst.GetEnumerator().MoveNext();
+        }
+
+        /// <summary>
+        /// Get how deep into the enumerable the first instance of the object is.
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static int Depth(this IEnumerable lst, object obj)
+        {
+            int i = 0;
+            foreach(var o in lst)
+            {
+                if (object.Equals(o, obj)) return i;
+                i++;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Get how deep into the enumerable the first instance of the value is.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="lst"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int Depth<T>(this IEnumerable<T> lst, T value)
+        {
+            int i = 0;
+            foreach (var v in lst)
+            {
+                if (object.Equals(v, value)) return i;
+                i++;
+            }
+            return -1;
         }
 
         public static IEnumerable<T> Like<T>(this IEnumerable lst)

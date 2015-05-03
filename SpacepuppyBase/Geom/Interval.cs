@@ -72,6 +72,11 @@ namespace com.spacepuppy.Geom
             }
         }
 
+        public float GetPercentage(float p)
+        {
+            return (_max - _min) * p + _min;
+        }
+
         /// <summary>
         /// Tests if Min and Max intersects.
         /// </summary>

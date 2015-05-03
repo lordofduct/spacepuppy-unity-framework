@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor
 {
+
+    [InitializeOnLoad()]
     public static class SPMenu
     {
 
@@ -24,9 +27,29 @@ namespace com.spacepuppyeditor
 
         public const int MENU_PRIORITY_SINGLETON = 1000000;
 
-
-
         #region Special Menu Entries
+
+        [MenuItem(SPMenu.MENU_NAME_SETTINGS + "/Sync TagData", priority = MENU_PRIORITY_SETTINGS)]
+        public static void SyncTagData()
+        {
+            var tagData = (TagData)AssetDatabase.LoadAssetAtPath(@"Assets/Resources/TagData.asset", typeof(TagData));
+            if (tagData == null)
+            {
+                if(!System.IO.Directory.Exists(Application.dataPath + "/Resources"))
+                {
+                    System.IO.Directory.CreateDirectory(Application.dataPath + "/Resources");
+                }
+                tagData = ScriptableObjectHelper.CreateAsset<TagData>(@"Assets/Resources/TagData.asset");
+            }
+
+            if (!tagData.SimilarTo(UnityEditorInternal.InternalEditorUtility.tags))
+            {
+                var helper = new TagData.EditorHelper(tagData);
+                helper.UpdateTags(UnityEditorInternal.InternalEditorUtility.tags);
+                EditorUtility.SetDirty(tagData);
+                AssetDatabase.SaveAssets();
+            }
+        }
 
         [MenuItem(SPMenu.MENU_NAME_ROOT + "/Create SingletonSource", priority = MENU_PRIORITY_SINGLETON)]
         public static void CreateSingletonSource()
@@ -53,6 +76,8 @@ namespace com.spacepuppyeditor
             if (Application.isPlaying) return false;
             return !Singleton.HasInstance<GameLoopEntry>();
         }
+
+        
 
         #endregion
 

@@ -7,19 +7,40 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenes
 {
 
-    public class SceneBehaviourSequence : SPComponent, ISceneSequenceBehaviour
+    /// <summary>
+    /// Handles loading a sequence of SceneBehaviours one after the other.
+    /// </summary>
+    public class SceneBehaviourSequence : ISceneSequenceBehaviour
     {
 
         #region Fields
 
+        private ISceneSequenceBehaviour _owner;
+        private bool _storeSceneBehavioursOnChildGameObject;
+
         private bool _isCurrentlyLoaded;
 
         private Queue<System.Type> _scenes = new Queue<System.Type>();
+
+        private int _currentSceneCount;
         private ISceneBehaviour _currentScene;
 
         #endregion
 
+        #region CONSTRUCTOR
+
+        public SceneBehaviourSequence(ISceneSequenceBehaviour owner, bool storeSceneBehaviourOnChildGameObject)
+        {
+            if (owner == null) throw new System.ArgumentNullException("owner");
+            _owner = owner;
+            _storeSceneBehavioursOnChildGameObject = storeSceneBehaviourOnChildGameObject;
+        }
+
+        #endregion
+
         #region Properties
+
+        public ISceneSequenceBehaviour Owner { get { return _owner; } }
 
         public IEnumerable<System.Type> SceneQueue { get { return _scenes; } }
 
@@ -50,22 +71,13 @@ namespace com.spacepuppy.Scenes
 
         #endregion
 
+
         #region ISceneSequenceBehaviour Interface
 
-        IProgressingYieldInstruction ISceneBehaviour.LoadScene()
+        public IProgressingYieldInstruction LoadScene()
         {
             _isCurrentlyLoaded = true;
             return this.LoadNextScene();
-        }
-
-        void ISceneBehaviour.BeginScene()
-        {
-            _currentScene.BeginScene();
-        }
-
-        void ISceneBehaviour.EndScene()
-        {
-            _currentScene.EndScene();
         }
 
         public IProgressingYieldInstruction LoadNextScene()
@@ -73,20 +85,87 @@ namespace com.spacepuppy.Scenes
             if (!_isCurrentlyLoaded) throw new System.InvalidOperationException("This SceneBehaviour must first be loaded before it can continue to the next scene.");
             if (_scenes.Count == 0) throw new System.InvalidOperationException("Scene queue is empty.");
 
+
             if (_currentScene != null)
             {
                 _currentScene.EndScene();
-                Object.Destroy(_currentScene.component);
+                if (_storeSceneBehavioursOnChildGameObject)
+                    Object.Destroy(_currentScene.gameObject);
+                else
+                    Object.Destroy(_currentScene.component);
                 _currentScene = null;
             }
 
-            _currentScene = this.AddComponent(_scenes.Dequeue()) as ISceneBehaviour;
+            _currentSceneCount++;
+            if (_storeSceneBehavioursOnChildGameObject)
+            {
+                var go = new GameObject("Scene_" + _currentSceneCount.ToString("00"));
+                this.transform.AddChild(go);
+                _currentScene = go.AddComponent(_scenes.Dequeue()) as ISceneBehaviour;
+            }
+            else
+            {
+                _currentScene = this.gameObject.AddComponent(_scenes.Dequeue()) as ISceneBehaviour;
+            }
+
             var op = new LoadSubSceneOperation();
             op.Start(_currentScene);
             return op;
         }
 
+        public void BeginScene()
+        {
+            if (_currentScene == null) return;
+            _currentScene.BeginScene();
+        }
+
+        public void EndScene()
+        {
+            if (_currentScene == null) return;
+            _currentScene.EndScene();
+        }
+
         #endregion
+
+        #region IComponent Interface
+
+        public event System.EventHandler ComponentDestroyed;
+
+        public bool enabled
+        {
+            get
+            {
+                return _owner.enabled;
+            }
+            set
+            {
+                _owner.enabled = value;
+            }
+        }
+
+        public bool isActiveAndEnabled
+        {
+            get { return _owner.isActiveAndEnabled; }
+        }
+
+        public Component component
+        {
+            get { return _owner.component; }
+        }
+
+        public GameObject gameObject
+        {
+            get { return _owner.gameObject; }
+        }
+
+        public Transform transform
+        {
+            get { return _owner.transform; }
+        }
+
+        #endregion
+
+
 
         #region Special Types
 
@@ -107,7 +186,9 @@ namespace com.spacepuppy.Scenes
             {
                 _innerOp = _scene.LoadScene();
                 yield return _innerOp;
+                yield return null;
                 _scene.BeginScene();
+                this.SetSignal();
             }
 
 
@@ -130,5 +211,4 @@ namespace com.spacepuppy.Scenes
         #endregion
 
     }
-
 }

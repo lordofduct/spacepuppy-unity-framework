@@ -60,67 +60,35 @@ namespace com.spacepuppy.Tween
 
         #region Factory
 
+        private static NullCurve _null;
+        public static Curve Null
+        {
+            get
+            {
+                if (_null == null) _null = new NullCurve();
+                return _null;
+            }
+        }
+
+
+
         public static Curve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur, object option = null)
         {
-            try
-            {
-                var curve = ImplicitCurve.CreateFromTo(target, propName, ease, start, end, dur, option);
-                if (curve != null) return curve;
-            }
-            catch(System.Exception ex)
-            {
-                Debug.LogWarning("Failed to create ImplicitCurve, see following exception for more details.");
-                Debug.LogException(ex);
-            }
-
             return MemberCurve.CreateFromTo(target, propName, ease, start, end, dur, option);
         }
 
         public static Curve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
         {
-            try
-            {
-                var curve = ImplicitCurve.CreateTo(target, propName, ease, end, dur, option);
-                if (curve != null) return curve;
-            }
-            catch(System.Exception ex)
-            {
-                Debug.LogWarning("Failed to create ImplicitCurve, see following exception for more details.");
-                Debug.LogException(ex);
-            }
-
             return MemberCurve.CreateTo(target, propName, ease, end, dur, option);
         }
 
         public static Curve CreateFrom(object target, string propName, Ease ease, object start, float dur, object option = null)
         {
-            try
-            {
-                var curve = ImplicitCurve.CreateFrom(target, propName, ease, start, dur, option);
-                if (curve != null) return curve;
-            }
-            catch(System.Exception ex)
-            {
-                Debug.LogWarning("Failed to create ImplicitCurve, see following exception for more details.");
-                Debug.LogException(ex);
-            }
-
             return MemberCurve.CreateFrom(target, propName, ease, start, dur, option);
         }
 
         public static Curve CreateBy(object target, string propName, Ease ease, object amt, float dur, object option = null)
         {
-            try
-            {
-                var curve = ImplicitCurve.CreateBy(target, propName, ease, amt, dur, option);
-                if (curve != null) return curve;
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogWarning("Failed to create ImplicitCurve, see following exception for more details.");
-                Debug.LogException(ex);
-            }
-
             return MemberCurve.CreateBy(target, propName, ease, amt, dur, option);
         }
 
@@ -138,17 +106,6 @@ namespace com.spacepuppy.Tween
         /// <returns></returns>
         public static Curve CreateRedirectTo(object target, string propName, Ease ease, float start, float end, float dur, object option = null)
         {
-            try
-            {
-                var curve = ImplicitCurve.CreateRedirectTo(target, propName, ease, start, end, dur, option);
-                if (curve != null) return curve;
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogWarning("Failed to create ImplicitCurve, see following exception for more details.");
-                Debug.LogException(ex);
-            }
-
             return MemberCurve.CreateRedirectTo(target, propName, ease, start, end, dur, option);
         }
 
@@ -191,6 +148,29 @@ namespace com.spacepuppy.Tween
             }
 
             return b;
+        }
+
+        #endregion
+
+
+        #region Special Types
+
+        private class NullCurve : Curve
+        {
+
+            protected internal override void Init(Tweener twn)
+            {
+                //don't init
+            }
+
+            public override float TotalTime
+            {
+                get { return 0f; }
+            }
+
+            protected internal override void Update(object targ, float dt, float t)
+            {
+            }
         }
 
         #endregion
