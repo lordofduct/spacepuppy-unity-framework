@@ -410,6 +410,7 @@ namespace com.spacepuppy
                 else if (current is IRadicalYieldInstruction)
                 {
                     var instruction = current as IRadicalYieldInstruction;
+                    if (instruction is IResettingYieldInstruction) (instruction as IResettingYieldInstruction).Reset();
                     if (instruction is IImmediatelyResumingYieldInstruction) (instruction as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
 
                     if (instruction.ContinueBlocking())

@@ -16,26 +16,26 @@ namespace com.spacepuppyeditor.Base
 
         #region Static Interface
 
-        private static System.DateTime _lastUpdate;
+        //private static System.DateTime _lastUpdate;
 
 
-        static TagDataInspector()
-        {
-            _lastUpdate = System.DateTime.Now;
-            SceneView.onSceneGUIDelegate -= OnSceneGUI;
-            SceneView.onSceneGUIDelegate += OnSceneGUI;
-        }
+        //static TagDataInspector()
+        //{
+        //    _lastUpdate = System.DateTime.Now;
+        //    SceneView.onSceneGUIDelegate -= OnSceneGUI;
+        //    SceneView.onSceneGUIDelegate += OnSceneGUI;
+        //}
 
-        private static void OnSceneGUI(SceneView scene)
-        {
-            if ((System.DateTime.Now - _lastUpdate).TotalSeconds < 1.0d) return;
+        //private static void OnSceneGUI(SceneView scene)
+        //{
+        //    if ((System.DateTime.Now - _lastUpdate).TotalSeconds < 1.0d) return;
 
-            if (!Application.isPlaying)
-            {
-                SPMenu.SyncTagData();
-                _lastUpdate = System.DateTime.Now;
-            }
-        }
+        //    if (!Application.isPlaying)
+        //    {
+        //        SPMenu.SyncTagData();
+        //        _lastUpdate = System.DateTime.Now;
+        //    }
+        //}
 
         #endregion
 

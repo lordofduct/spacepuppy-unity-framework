@@ -171,6 +171,97 @@ namespace com.spacepuppyeditor
         }
 
 
+        public static void SetEnumValue<T>(this SerializedProperty prop, T value) where T : struct
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+            if (prop.propertyType != SerializedPropertyType.Enum) throw new System.ArgumentException("SerializedProperty is not an enum type.", "prop");
+
+            var tp = typeof(T);
+            if(tp.IsEnum)
+            {
+                prop.enumValueIndex = prop.enumNames.IndexOf(System.Enum.GetName(tp, value));
+            }
+            else
+            {
+                int i = ConvertUtil.ToInt(value);
+                if (i < 0 || i >= prop.enumNames.Length) i = 0;
+                prop.enumValueIndex = i;
+            }
+        }
+
+        public static void SetEnumValue(this SerializedProperty prop, System.Enum value)
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+            if (prop.propertyType != SerializedPropertyType.Enum) throw new System.ArgumentException("SerializedProperty is not an enum type.", "prop");
+
+            if (value == null)
+            {
+                prop.enumValueIndex = 0;
+                return;
+            }
+
+            int i = prop.enumNames.IndexOf(System.Enum.GetName(value.GetType(), value));
+            if (i < 0) i = 0;
+            prop.enumValueIndex = i;
+        }
+
+        public static void SetEnumValue(this SerializedProperty prop, object value)
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+            if (prop.propertyType != SerializedPropertyType.Enum) throw new System.ArgumentException("SerializedProperty is not an enum type.", "prop");
+
+            if(value == null)
+            {
+                prop.enumValueIndex = 0;
+                return;
+            }
+
+            var tp = value.GetType();
+            if (tp.IsEnum)
+            {
+                int i = prop.enumNames.IndexOf(System.Enum.GetName(tp, value));
+                if (i < 0) i = 0;
+                prop.enumValueIndex = i;
+            }
+            else
+            {
+                int i = ConvertUtil.ToInt(value);
+                if (i < 0 || i >= prop.enumNames.Length) i = 0;
+                prop.enumValueIndex = i;
+            }
+        }
+
+        public static T GetEnumValue<T>(this SerializedProperty prop) where T : struct, System.IConvertible
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+
+            try
+            {
+                var name = prop.enumNames[prop.enumValueIndex];
+                return ConvertUtil.ToEnum<T>(name);
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+
+        public static System.Enum GetEnumValue(this SerializedProperty prop, System.Type tp)
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+            if (tp == null) throw new System.ArgumentNullException("tp");
+            if (!tp.IsEnum) throw new System.ArgumentException("Type must be an enumerated type.");
+
+            try
+            {
+                var name = prop.enumNames[prop.enumValueIndex];
+                return System.Enum.Parse(tp, name) as System.Enum;
+            }
+            catch
+            {
+                return System.Enum.GetValues(tp).Cast<System.Enum>().First();
+            }
+        }
 
         public static void SetPropertyValue(SerializedProperty prop, object value)
         {
@@ -200,7 +291,8 @@ namespace com.spacepuppyeditor
                     prop.intValue = (value is LayerMask) ? ((LayerMask)value).value : ConvertUtil.ToInt(value);
                     break;
                 case SerializedPropertyType.Enum:
-                    prop.enumValueIndex = ConvertUtil.ToInt(value);
+                    //prop.enumValueIndex = ConvertUtil.ToInt(value);
+                    prop.SetEnumValue(value);
                     break;
                 case SerializedPropertyType.Vector2:
                     prop.vector2Value = (Vector2)value;

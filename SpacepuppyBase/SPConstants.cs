@@ -5,6 +5,7 @@ namespace com.spacepuppy
     public class SPConstants
     {
 
+        public const int LAYER_DEFAULT = 0;
         public const int LAYER_WATER = 4;
 
 

@@ -116,13 +116,77 @@ namespace com.spacepuppyeditor
         {
             if(allowDefault)
             {
-                return (WrapMode)EditorGUI.Popup(position, label, (int)mode, new GUIContent[] { EditorHelper.TempContent("Default"), EditorHelper.TempContent("Once|Clamp"), EditorHelper.TempContent("Loop"), EditorHelper.TempContent("PingPong"), EditorHelper.TempContent("ClampForever") });
+                int i = 0;
+                switch(mode)
+                {
+                    case WrapMode.Default:
+                        i = 0;
+                        break;
+                    case WrapMode.Once:
+                    //case WrapMode.Clamp: //same as once
+                        i = 1;
+                        break;
+                    case WrapMode.Loop:
+                        i = 2;
+                        break;
+                    case WrapMode.PingPong:
+                        i = 3;
+                        break;
+                    case WrapMode.ClampForever:
+                        i = 4;
+                        break;
+                }
+                i = EditorGUI.Popup(position, label, i, new GUIContent[] { EditorHelper.TempContent("Default"), EditorHelper.TempContent("Once|Clamp"), EditorHelper.TempContent("Loop"), EditorHelper.TempContent("PingPong"), EditorHelper.TempContent("ClampForever") });
+                switch(i)
+                {
+                    case 0:
+                        return WrapMode.Default;
+                    case 1:
+                        return WrapMode.Once;
+                    case 2:
+                        return WrapMode.Loop;
+                    case 3:
+                        return WrapMode.PingPong;
+                    case 4:
+                        return WrapMode.ClampForever;
+                    default:
+                        return WrapMode.Default;
+                }
             }
             else
             {
-                if (mode == WrapMode.Default) mode = WrapMode.Once;
-                var i = EditorGUI.Popup(position, label, ((int)mode - 1), new GUIContent[] {EditorHelper.TempContent("Once|Clamp"), EditorHelper.TempContent("Loop"), EditorHelper.TempContent("PingPong"), EditorHelper.TempContent("ClampForever") });
-                return (WrapMode)(i + 1);
+                int i = 0;
+                switch (mode)
+                {
+                    case WrapMode.Default:
+                    case WrapMode.Once:
+                        //case WrapMode.Clamp: //same as once
+                        i = 0;
+                        break;
+                    case WrapMode.Loop:
+                        i = 1;
+                        break;
+                    case WrapMode.PingPong:
+                        i = 2;
+                        break;
+                    case WrapMode.ClampForever:
+                        i = 3;
+                        break;
+                }
+                i = EditorGUI.Popup(position, label, i, new GUIContent[] {EditorHelper.TempContent("Once|Clamp"), EditorHelper.TempContent("Loop"), EditorHelper.TempContent("PingPong"), EditorHelper.TempContent("ClampForever") });
+                switch (i)
+                {
+                    case 0:
+                        return WrapMode.Once;
+                    case 1:
+                        return WrapMode.Loop;
+                    case 2:
+                        return WrapMode.PingPong;
+                    case 3:
+                        return WrapMode.ClampForever;
+                    default:
+                        return WrapMode.Default;
+                }
             }
         }
 
