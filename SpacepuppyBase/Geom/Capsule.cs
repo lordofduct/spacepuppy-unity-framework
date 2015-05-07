@@ -273,67 +273,118 @@ namespace com.spacepuppy.Geom
 
         #region Static Interface
 
-        public static Capsule FromCollider(CharacterController cap)
+        public static Capsule FromCollider(CharacterController cap, bool local = false)
         {
-            var cent = cap.transform.position + cap.center;
-            var hsc = Mathf.Max(cap.transform.lossyScale.x, cap.transform.lossyScale.y);
-            var vsc = cap.transform.lossyScale.y;
-
-            return new Capsule(cent, Vector3.up, cap.height * vsc, cap.radius * hsc);
-        }
-
-        public static Capsule FromCollider(CapsuleCollider cap)
-        {
-            Vector3 axis;
-            float hsc;
-            float vsc;
-            switch (cap.direction)
+            if(local)
             {
-                case 0:
-                    axis = cap.transform.right;
-                    hsc = Mathf.Max(cap.transform.lossyScale.x, cap.transform.lossyScale.y);
-                    vsc = cap.transform.lossyScale.x;
-                    break;
-                case 1:
-                    axis = cap.transform.up;
-                    hsc = Mathf.Max(cap.transform.lossyScale.x, cap.transform.lossyScale.y);
-                    vsc = cap.transform.lossyScale.y;
-                    break;
-                case 2:
-                    axis = cap.transform.forward;
-                    hsc = Mathf.Max(cap.transform.lossyScale.z, cap.transform.lossyScale.y);
-                    vsc = cap.transform.lossyScale.z;
-                    break;
-                default:
-                    return new Capsule();
+                float r = cap.radius;
+                float h = Mathf.Max(r, cap.height);
+                return new Capsule(cap.center, Vector3.up, h, r);
             }
+            else
+            {
+                var cent = cap.transform.position + cap.center;
+                var hsc = Mathf.Max(cap.transform.lossyScale.x, cap.transform.lossyScale.y);
+                var vsc = cap.transform.lossyScale.y;
 
-            var cent = cap.center;
-
-            cent = cap.transform.TransformPoint(cent);
-            return new Capsule(cent, axis, cap.height * vsc, cap.radius * hsc);
+                return new Capsule(cent, Vector3.up, cap.height * vsc, cap.radius * hsc);
+            }
         }
 
-        public static Capsule FromCollider(SphereCollider sph)
+        public static Capsule FromCollider(CapsuleCollider cap, bool local = false)
+        {
+            if(local)
+            {
+                float r = cap.radius;
+                float h = Mathf.Max(r, cap.height);
+                Vector3 ax;
+                switch (cap.direction)
+                {
+                    case 0:
+                        ax = Vector3.right;
+                        break;
+                    case 1:
+                        ax = Vector3.up;
+                        break;
+                    case 2:
+                        ax = Vector3.right;
+                        break;
+                    default:
+                        ax = Vector3.up;
+                        break;
+                }
+                return new Capsule(cap.center, ax, h, r);
+            }
+            else
+            {
+                Vector3 axis;
+                float hsc;
+                float vsc;
+                switch (cap.direction)
+                {
+                    case 0:
+                        axis = cap.transform.right;
+                        hsc = Mathf.Max(cap.transform.lossyScale.x, cap.transform.lossyScale.y);
+                        vsc = cap.transform.lossyScale.x;
+                        break;
+                    case 1:
+                        axis = cap.transform.up;
+                        hsc = Mathf.Max(cap.transform.lossyScale.x, cap.transform.lossyScale.y);
+                        vsc = cap.transform.lossyScale.y;
+                        break;
+                    case 2:
+                        axis = cap.transform.forward;
+                        hsc = Mathf.Max(cap.transform.lossyScale.z, cap.transform.lossyScale.y);
+                        vsc = cap.transform.lossyScale.z;
+                        break;
+                    default:
+                        return new Capsule();
+                }
+
+                var cent = cap.center;
+
+                cent = cap.transform.TransformPoint(cent);
+                return new Capsule(cent, axis, cap.height * vsc, cap.radius * hsc);
+            }
+        }
+
+        public static Capsule FromCollider(SphereCollider sph, bool local = false)
         {
             var cent = sph.transform.TransformPoint(sph.center);
             return new Capsule(cent, cent, sph.radius);
         }
 
-        public static Capsule FromCollider(Collider c)
+        public static Capsule FromCollider(Collider c, bool local = false)
         {
             if (c is SphereCollider)
             {
-                return FromCollider(c as SphereCollider);
+                return FromCollider(c as SphereCollider, local);
             }
             else if (c is CapsuleCollider)
             {
-                return FromCollider(c as CapsuleCollider);
+                return FromCollider(c as CapsuleCollider, local);
             }
             else
             {
-                var bounds = c.bounds;
-                return new Capsule(bounds.center, bounds.center, bounds.extents.magnitude);
+                var s = Sphere.FromCollider(c, local);
+                return new Capsule(s.Center, s.Center, s.Radius);
+            }
+        }
+
+        public static Capsule FromCollider(Collider c, BoundingSphereAlgorithm algorithm, bool local = false)
+        {
+            if (c is SphereCollider)
+            {
+                return FromCollider(c as SphereCollider, local);
+            }
+            else if (c is CapsuleCollider)
+            {
+                return FromCollider(c as CapsuleCollider, local);
+            }
+            else
+            {
+                var s = Sphere.FromCollider(c, algorithm, local);
+                return new Capsule(s.Center, s.Center, s.Radius);
             }
         }
 

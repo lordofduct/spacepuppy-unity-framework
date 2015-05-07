@@ -153,5 +153,115 @@ namespace com.spacepuppy.Geom
         #endregion
 
 
+        #region Static Interface
+
+        public static AABBox FromCollider(BoxCollider c, bool local = false)
+        {
+            if(local)
+            {
+                return new AABBox(c.center, c.size);
+            }
+            else
+            {
+                return new AABBox(c.bounds);
+            }
+        }
+
+        public static AABBox FromCollider(Collider c, bool local = false)
+        {
+            if(c == null) return new AABBox();
+
+            if(local)
+            {
+                if (c is CharacterController)
+                {
+                    var cap = c as CharacterController;
+                    float r = cap.radius;
+                    float d = r * 2f;
+                    float h = Mathf.Max(r, cap.height);
+                    return new AABBox(cap.center, new Vector3(d, h, d));
+                }
+                if (c is CapsuleCollider)
+                {
+                    var cap = c as CapsuleCollider;
+                    float r = cap.radius;
+                    float d = r * 2f;
+                    float h = Mathf.Max(r, cap.height);
+                    Vector3 sz;
+                    switch (cap.direction)
+                    {
+                        case 0:
+                            sz = new Vector3(h, d, d);
+                            break;
+                        case 1:
+                            sz = new Vector3(d, h, d);
+                            break;
+                        case 2:
+                            sz = new Vector3(d, d, h);
+                            break;
+                        default:
+                            sz = Vector3.zero;
+                            break;
+                    }
+                    return new AABBox(cap.center, sz);
+                }
+                else if (c is BoxCollider)
+                {
+                    var box = c as BoxCollider;
+                    return new AABBox(box.center, box.size);
+                }
+                else if (c is SphereCollider)
+                {
+                    var s = c as SphereCollider;
+                    return new AABBox(s.center, Vector3.one * s.radius * 2f);
+                }
+                else if (c is MeshCollider)
+                {
+                    return new AABBox((c as MeshCollider).sharedMesh.bounds);
+                }
+                else
+                {
+                    //otherwise just return bounds as AABBox
+                    var bounds = c.bounds;
+                    var cent = c.transform.InverseTransformPoint(bounds.center);
+                    var size = c.transform.InverseTransformDirection(bounds.size);
+                    return new AABBox(cent, size);
+                }
+            }
+            else
+            {
+                return new AABBox(c.bounds);
+            }
+        }
+
+        public static AABBox FromPoints(Vector3[] points)
+        {
+            float minx, miny, minz;
+            minx = miny = minz = float.PositiveInfinity;
+            float maxx, maxy, maxz;
+            maxx = maxy = maxz = float.NegativeInfinity;
+
+            foreach(var v in points)
+            {
+                if (v.x < minx) minx = v.x;
+                if (v.y < miny) miny = v.y;
+                if (v.z < minz) minz = v.z;
+
+                if (v.x > maxx) maxx = v.x;
+                if (v.y > maxy) maxy = v.y;
+                if (v.z > maxz) maxz = v.z;
+            }
+
+            var size = new Vector3((maxx - minx),
+                                   (maxy - miny),
+                                   (maxz - minz));
+            var cent = new Vector3(size.x / 2f + minx,
+                                   size.y / 2f + miny,
+                                   size.z / 2f + minz);
+            return new AABBox(cent, size);
+        }
+
+        #endregion
+
     }
 }

@@ -54,7 +54,8 @@ namespace com.spacepuppyeditor
         [MenuItem(SPMenu.MENU_NAME_ROOT + "/Create SingletonSource", priority = MENU_PRIORITY_SINGLETON)]
         public static void CreateSingletonSource()
         {
-            Singleton.CreateSpecialInstance<SingletonManager>(Singleton.GAMEOBJECT_NAME);
+            //Singleton.CreateSpecialInstance<SingletonManager>(Singleton.GAMEOBJECT_NAME);
+            Singleton.GetInstance<SingletonManager>();
         }
 
         [MenuItem(SPMenu.MENU_NAME_ROOT + "/Create SingletonSource", validate = true)]

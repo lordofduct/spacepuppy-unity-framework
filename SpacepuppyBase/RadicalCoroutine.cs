@@ -683,15 +683,7 @@ namespace com.spacepuppy
                 var r = routine._stack.Last(); //the bottom of the stack is the actual routine
                 if (r is IRadicalYieldInstruction)
                 {
-                    if (r is WaitForDuration)
-                    {
-                        var wait = r as WaitForDuration;
-                        return string.Format("WaitForDuration[{0:0.00}, {1:0.00}]", wait.CurrentTime, wait.Duration);
-                    }
-                    else
-                    {
-                        return r.GetType().Name;
-                    }
+                    return GetIterableID(r as IRadicalYieldInstruction);
                 }
                 else
                 {

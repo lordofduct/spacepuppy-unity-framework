@@ -75,6 +75,7 @@
     <Compile Include="GameTime.cs" />
     <Compile Include="Geom\AABBox.cs" />
     <Compile Include="Geom\AxisInterval.cs" />
+    <Compile Include="Geom\BoundingSphereAlgorithm.cs" />
     <Compile Include="Geom\Capsule.cs" />
     <Compile Include="Geom\GeomUtil.cs" />
     <Compile Include="Geom\IGeom.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Geom\Matrix2D.cs" />
     <Compile Include="Geom\PhysicsUtil.cs" />
     <Compile Include="Geom\RaycastInfo.cs" />
+    <Compile Include="Geom\RigidbodyBounds.cs" />
     <Compile Include="Geom\Sphere.cs" />
     <Compile Include="Geom\Trans.cs" />
     <Compile Include="Geom\XYPlanarSurface.cs" />
@@ -107,7 +109,6 @@
     <Compile Include="Scenes\ISceneBehaviourLoadOptions.cs" />
     <Compile Include="Scenes\ModifiedLoadedSceneContainerException.cs" />
     <Compile Include="Scenes\Scene.cs" />
-    <Compile Include="Scenes\SceneBehaviourLoadOptionsWithLoadScreen.cs" />
     <Compile Include="Scenes\SceneContainer.cs" />
     <Compile Include="Scenes\SceneLoadingEventArgs.cs" />
     <Compile Include="Scenes\SceneManager.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Utils\ComponentUtil.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\CoroutineUtil.cs" />
+    <Compile Include="Utils\Dynamic\ObjectStateCache.cs" />
     <Compile Include="Utils\Dynamic\TypeAccessWrapper.cs" />
     <Compile Include="Utils\EnumUtil.cs" />
     <Compile Include="Utils\FastDynamicMemberAccessor\BasicMemberAccessor.cs" />

@@ -12,8 +12,7 @@ namespace com.spacepuppy.Scenes
         private ISceneBehaviour _scene;
         private ISceneBehaviourLoadOptions _options;
 
-        private bool _stall;
-        private object _instruction;
+        private List<object> _stallInstructions;
 
         public SceneLoadingEventArgs(SceneManager manager, ISceneBehaviour scene, ISceneBehaviourLoadOptions loadOptions)
         {
@@ -28,18 +27,37 @@ namespace com.spacepuppy.Scenes
 
         public ISceneBehaviourLoadOptions LoadOptions { get { return _options; } }
 
-
         public void RequestManagerToStall(object instruction)
         {
-            _stall = true;
-            if (_instruction == null)
-                _instruction = instruction;
-            //TODO!!!!!
+            if (_stallInstructions != null && _stallInstructions.Count > 0)
+            {
+                if(_stallInstructions[0] == null)
+                {
+                    _stallInstructions[0] = instruction;
+                }
+                else if(instruction != null)
+                {
+                    _stallInstructions.Add(instruction);
+                }
+            }
+            else
+            {
+                if (_stallInstructions == null) _stallInstructions = new List<object>();
+                _stallInstructions.Add(instruction);
+            }
         }
 
-        internal void PurgeYieldInstructions()
+        internal bool ShouldStall(out object[] yieldInstructions)
         {
+            if (_stallInstructions == null || _stallInstructions.Count == 0)
+            {
+                yieldInstructions = null;
+                return false;
+            }
 
+            yieldInstructions = _stallInstructions.ToArray();
+            _stallInstructions.Clear();
+            return true;
         }
 
     }

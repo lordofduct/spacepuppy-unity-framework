@@ -12,11 +12,11 @@ namespace com.spacepuppy.Scenes
 
         System.Type SceneBehaviourType { get; }
 
-        void OnBeforeSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour);
+        void OnBeforeSceneLoaded(SceneManager manager, SceneLoadingEventArgs e);
 
-        void OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour);
+        void OnSceneLoaded(SceneManager manager, SceneLoadingEventArgs e);
 
-        void OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour);
+        void OnSceneStarted(SceneManager manager, SceneLoadingEventArgs e);
 
     }
 
@@ -42,23 +42,23 @@ namespace com.spacepuppy.Scenes
 
         #region Methods
 
-        public event System.Action<ISceneBehaviour> BeforeSceneCreated;
-        public event System.Action<ISceneBehaviour> SceneLoaded;
-        public event System.Action<ISceneBehaviour> SceneStarted;
+        public event System.Action<SceneLoadingEventArgs> BeforeSceneLoaded;
+        public event System.Action<SceneLoadingEventArgs> SceneLoaded;
+        public event System.Action<SceneLoadingEventArgs> SceneStarted;
 
-        protected virtual void OnBeforeSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
+        protected virtual void OnBeforeSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
         {
-            if (this.BeforeSceneCreated != null) this.BeforeSceneCreated(sceneBehaviour);
+            if (this.BeforeSceneLoaded != null) this.BeforeSceneLoaded(e);
         }
 
-        protected virtual void OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
+        protected virtual void OnSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
         {
-            if (this.SceneLoaded != null) this.SceneLoaded(sceneBehaviour);
+            if (this.SceneLoaded != null) this.SceneLoaded(e);
         }
 
-        protected virtual void OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour)
+        protected virtual void OnSceneStarted(SceneManager manager, SceneLoadingEventArgs e)
         {
-            if (this.SceneStarted != null) this.SceneStarted(sceneBehaviour);
+            if (this.SceneStarted != null) this.SceneStarted(e);
         }
 
         #endregion
@@ -70,74 +70,19 @@ namespace com.spacepuppy.Scenes
             get { return _sceneBehaviourType; }
         }
 
-        void ISceneBehaviourLoadOptions.OnBeforeSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnBeforeSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
         {
-            this.OnBeforeSceneLoaded(manager, sceneBehaviour);
+            this.OnBeforeSceneLoaded(manager, e);
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
         {
-            this.OnSceneLoaded(manager, sceneBehaviour);
+            this.OnSceneLoaded(manager, e);
         }
 
-        void ISceneBehaviourLoadOptions.OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour)
+        void ISceneBehaviourLoadOptions.OnSceneStarted(SceneManager manager, SceneLoadingEventArgs e)
         {
-            this.OnSceneStarted(manager, sceneBehaviour);
-        }
-
-        #endregion
-
-    }
-
-    public class SceneBehaviourLoadOptions<T> : ISceneBehaviourLoadOptions where T : class, ISceneBehaviour
-    {
-
-        #region Methods
-
-        public event System.Action<T> BeforeSceneLoaded;
-        public event System.Action<T> SceneLoaded;
-        public event System.Action<T> SceneStarted;
-
-        protected virtual void OnBeforeSceneLoaded(SceneManager manager, T sceneBehaviour)
-        {
-            if (this.BeforeSceneLoaded != null) this.BeforeSceneLoaded(sceneBehaviour);
-        }
-
-        protected virtual void OnSceneLoaded(SceneManager manager, T sceneBehaviour)
-        {
-            if (this.SceneLoaded != null) this.SceneLoaded(sceneBehaviour);
-        }
-
-        protected virtual void OnSceneStarted(SceneManager manager, T sceneBehaviour)
-        {
-            if (this.SceneStarted != null) this.SceneStarted(sceneBehaviour);
-        }
-
-        #endregion
-
-        #region ISceneLoadOptions Interface
-
-        System.Type ISceneBehaviourLoadOptions.SceneBehaviourType
-        {
-            get { return typeof(T); }
-        }
-
-        void ISceneBehaviourLoadOptions.OnBeforeSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
-        {
-            if (!(sceneBehaviour is T)) return;
-            this.OnBeforeSceneLoaded(manager, sceneBehaviour as T);
-        }
-
-        void ISceneBehaviourLoadOptions.OnSceneLoaded(SceneManager manager, ISceneBehaviour sceneBehaviour)
-        {
-            if (!(sceneBehaviour is T)) return;
-            this.OnSceneLoaded(manager, sceneBehaviour as T);
-        }
-
-        void ISceneBehaviourLoadOptions.OnSceneStarted(SceneManager manager, ISceneBehaviour sceneBehaviour)
-        {
-            if (!(sceneBehaviour is T)) return;
-            this.OnSceneStarted(manager, sceneBehaviour as T);
+            this.OnSceneStarted(manager, e);
         }
 
         #endregion

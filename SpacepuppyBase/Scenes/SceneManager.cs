@@ -61,7 +61,7 @@ namespace com.spacepuppy.Scenes
 
         public IProgressingYieldInstruction LoadScene<T>() where T : class, ISceneBehaviour
         {
-            return this.LoadScene(new SceneBehaviourLoadOptions<T>());
+            return this.LoadScene(new SceneBehaviourLoadOptions(typeof(T)));
         }
 
         public IProgressingYieldInstruction LoadScene(System.Type tp)
@@ -96,7 +96,7 @@ namespace com.spacepuppy.Scenes
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
-            e.LoadOptions.OnBeforeSceneLoaded(this, e.Scene);
+            e.LoadOptions.OnBeforeSceneLoaded(this, e);
             if (this.SceneCreated != null) this.SceneCreated(this, e);
         }
 
@@ -104,7 +104,7 @@ namespace com.spacepuppy.Scenes
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
-            e.LoadOptions.OnSceneLoaded(this, e.Scene);
+            e.LoadOptions.OnSceneLoaded(this, e);
             if (this.SceneLoaded != null) this.SceneLoaded(this, e);
         }
 
@@ -112,7 +112,7 @@ namespace com.spacepuppy.Scenes
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
-            e.LoadOptions.OnSceneStarted(this, e.Scene);
+            e.LoadOptions.OnSceneStarted(this, e);
             if (this.SceneStarted != null) this.SceneStarted(this, e);
         }
 
@@ -158,15 +158,22 @@ namespace com.spacepuppy.Scenes
             private System.Collections.IEnumerator DoLoad()
             {
                 var args = new SceneLoadingEventArgs(_manager, _scene, _options);
+                object[] instructions;
 
                 _manager.OnBeforeSceneLoaded(args);
+                if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
+                
                 _loadOp = _scene.LoadScene();
                 yield return _loadOp;
+
                 _manager.OnSceneLoaded(args);
-                yield return null; //wait one last frame to actually begin the scene
+                if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
+                else yield return null; //wait one last frame to actually begin the scene
+
                 _scene.BeginScene();
-                this.SetSignal();
                 _manager.OnSceneStarted(args);
+                if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
+                this.SetSignal();
             }
 
             protected override object Tick()
