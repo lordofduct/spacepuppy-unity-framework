@@ -8,6 +8,9 @@ I usually create a folder Assets/3rdParty/SpaceuppyUnityFramework. The Spacepupp
 You will also want to go to the PlayerSettings and set the Api compatability level to .Net 2.0, and not 2.0 subset.
 
 Lastly you'll want to set the execution order of 3 classes in the framework. Of course, if you have meta files turned on, you could just include the supplied SpacepuppyUnityFramework.dll.meta file instead. Those 3 classes are:
+
 com.spacepuppy.GameLoopEntry : -32000
+
 com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks : -31999
+
 com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks : 32000
