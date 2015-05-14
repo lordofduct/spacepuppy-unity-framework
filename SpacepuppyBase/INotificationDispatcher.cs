@@ -79,9 +79,10 @@ namespace com.spacepuppy
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
             var tp = typeof(T);
-            if (_handlers.ContainsKey(tp))
+            System.Delegate d;
+            if (_handlers.TryGetValue(tp, out d))
             {
-                _handlers[tp] = System.Delegate.Combine(_handlers[tp], handler);
+                _handlers[tp] = System.Delegate.Combine(d, handler);
             }
             else
             {
@@ -93,9 +94,9 @@ namespace com.spacepuppy
         {
             if (handler == null) throw new System.ArgumentNullException("handler");
             var tp = typeof(T);
-            if (_handlers.ContainsKey(tp))
+            System.Delegate d;
+            if (_handlers.TryGetValue(tp, out d))
             {
-                var d = _handlers[tp];
                 d = System.Delegate.Remove(d, handler);
                 if (d != null)
                 {
@@ -125,9 +126,10 @@ namespace com.spacepuppy
             if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            if (_unsafeHandlers.ContainsKey(notificationType))
+            NotificationHandler d;
+            if (_unsafeHandlers.TryGetValue(notificationType, out d))
             {
-                _unsafeHandlers[notificationType] += handler;
+                _unsafeHandlers[notificationType] = d + handler;
             }
             else
             {
@@ -140,9 +142,9 @@ namespace com.spacepuppy
             if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            if (_handlers.ContainsKey(notificationType))
+            NotificationHandler d;
+            if (_unsafeHandlers.TryGetValue(notificationType, out d))
             {
-                var d = _unsafeHandlers[notificationType];
                 d -= handler;
                 if (d != null)
                 {
@@ -288,23 +290,24 @@ namespace com.spacepuppy
             bool bHandled = false;
 
             var baseType = typeof(Notification);
+            System.Delegate d;
+            NotificationHandler ud;
             while (baseType.IsAssignableFrom(tp))
             {
-                if (_handlers.ContainsKey(tp))
+                if (_handlers.TryGetValue(tp, out d))
                 {
-                    var d = _handlers[tp];
                     if (d != null)
                     {
                         d.DynamicInvoke(sender, n);
                         bHandled = true;
                     }
                 }
-                if (_unsafeHandlers.ContainsKey(tp))
+                if (_unsafeHandlers.TryGetValue(tp, out ud))
                 {
-                    var d = _unsafeHandlers[tp];
-                    if (d != null)
+                    if (ud != null)
                     {
-                        d.DynamicInvoke(sender, n);
+                        //ud.DynamicInvoke(sender, n);
+                        ud(sender, n);
                         bHandled = true;
                     }
                 }

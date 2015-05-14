@@ -24,9 +24,9 @@ namespace com.spacepuppy.Geom
             }
             set
             {
-                Position = GeomUtil.MatrixToTranslation(value);
-                Rotation = GeomUtil.MatrixToRotation(value);
-                Scale = GeomUtil.MatrixToScale(value);
+                Position = TransformUtil.MatrixToTranslation(value);
+                Rotation = TransformUtil.MatrixToRotation(value);
+                Scale = TransformUtil.MatrixToScale(value);
             }
         }
 
@@ -137,14 +137,18 @@ namespace com.spacepuppy.Geom
             Rotation *= Quaternion.Euler(eulerRot);
         }
 
-        public void RotateAround(Vector3 point, Vector3 axis, float angle)
+        public void RotateAround(Vector3 point, float angle, Vector3 axis)
         {
-            //TODO
+            var v = this.Position - point;
+            var q = Quaternion.AngleAxis(angle, axis);
+            v = q * v;
+            this.Position = point + v;
+            this.Rotation *= q;
         }
 
         public void LookAt(Vector3 point, Vector3 up)
         {
-            //TODO
+            this.Rotation = Quaternion.LookRotation(point - this.Position, up);
         }
 
         public Vector3 TransformPoint(Vector3 v)

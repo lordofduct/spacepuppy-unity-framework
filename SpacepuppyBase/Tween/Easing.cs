@@ -17,46 +17,45 @@ namespace com.spacepuppy.Tween
     /// <returns></returns>
     public delegate float Ease(float current, float initialValue, float totalChange, float duration);
 
-    public enum EaseStyle
+    public enum EaseStyle : int
     {
-        None = 0,
-        BackEaseIn = 1,
-        BackEaseOut = 2,
-        BackEaseInOut = 3,
-        BounceEaseIn = 4,
-        BounceEaseOut = 5,
-        BounceEaseInOut = 6,
-        CircleEaseIn = 7,
-        CircleEaseOut = 8,
-        CircleEaseInOut = 9,
-        CubicEaseIn = 10,
-        CubicEaseOut = 11,
-        CubicEaseInOut = 12,
-        ElasticEaseIn = 13,
-        ElasticEaseOut = 14,
-        ElasticEaseInOut = 15,
-        ExpoEaseIn = 16,
-        ExpoEaseOut = 17,
-        ExpoEaseInOut = 18,
-        LinearEaseNone = 19,
-        LinearEaseIn = 20,
-        LinearEaseOut = 21,
-        LinearEaseInOut = 22,
-        QuadEaseIn = 23,
-        QuadEaseOut = 24,
-        QuadEaseInOut = 25,
-        QuartEaseIn = 26,
-        QuartEaseOut = 27,
-        QuartEaseInOut = 28,
-        QuintEaseIn = 29,
-        QuintEaseOut = 30,
-        QuintEaseInOut = 31,
-        SineEaseIn = 32,
-        SineEaseOut = 33,
-        SineEaseInOut = 34,
-        StrongEaseIn = 35,
-        StrongEaseOut = 36,
-        StrongEaseInOut = 37,
+        Linear = 0,
+        LinearEaseIn = 1,
+        LinearEaseOut = 2,
+        LinearEaseInOut = 3,
+        BackEaseIn = 4,
+        BackEaseOut = 5,
+        BackEaseInOut = 6,
+        BounceEaseIn = 7,
+        BounceEaseOut = 8,
+        BounceEaseInOut = 9,
+        CircleEaseIn = 10,
+        CircleEaseOut = 11,
+        CircleEaseInOut = 12,
+        CubicEaseIn = 13,
+        CubicEaseOut = 14,
+        CubicEaseInOut = 15,
+        ElasticEaseIn = 16,
+        ElasticEaseOut = 17,
+        ElasticEaseInOut = 18,
+        ExpoEaseIn = 19,
+        ExpoEaseOut = 20,
+        ExpoEaseInOut = 21,
+        QuadEaseIn = 22,
+        QuadEaseOut = 23,
+        QuadEaseInOut = 24,
+        QuartEaseIn = 25,
+        QuartEaseOut = 26,
+        QuartEaseInOut = 27,
+        QuintEaseIn = 28,
+        QuintEaseOut = 29,
+        QuintEaseInOut = 30,
+        SineEaseIn = 31,
+        SineEaseOut = 32,
+        SineEaseInOut = 33,
+        StrongEaseIn = 34,
+        StrongEaseOut = 35,
+        StrongEaseInOut = 36,
     }
 
     public static class EaseMethods
@@ -66,6 +65,11 @@ namespace com.spacepuppy.Tween
         {
             switch (style)
             {
+                case EaseStyle.Linear: return EaseMethods.LinearEaseNone;
+                case EaseStyle.LinearEaseIn: return EaseMethods.LinearEaseIn;
+                case EaseStyle.LinearEaseOut: return EaseMethods.LinearEaseOut;
+                case EaseStyle.LinearEaseInOut: return EaseMethods.LinearEaseInOut;
+
                 case EaseStyle.BackEaseIn : return EaseMethods.BackEaseIn;
                 case EaseStyle.BackEaseOut: return EaseMethods.BackEaseOut;
                 case EaseStyle.BackEaseInOut: return EaseMethods.BackEaseInOut;
@@ -89,11 +93,6 @@ namespace com.spacepuppy.Tween
                 case EaseStyle.ExpoEaseIn: return EaseMethods.ExpoEaseIn;
                 case EaseStyle.ExpoEaseOut: return EaseMethods.ExpoEaseOut;
                 case EaseStyle.ExpoEaseInOut: return EaseMethods.ExpoEaseInOut;
-
-                case EaseStyle.LinearEaseNone: return EaseMethods.LinearEaseNone;
-                case EaseStyle.LinearEaseIn: return EaseMethods.LinearEaseIn;
-                case EaseStyle.LinearEaseOut: return EaseMethods.LinearEaseOut;
-                case EaseStyle.LinearEaseInOut: return EaseMethods.LinearEaseInOut;
 
                 case EaseStyle.QuadEaseIn: return EaseMethods.QuadEaseIn;
                 case EaseStyle.QuadEaseOut: return EaseMethods.QuadEaseOut;

@@ -48,9 +48,10 @@ namespace com.spacepuppy
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             var tp = typeof(T);
-            if (_globalHandlers.ContainsKey(tp))
+            System.Delegate d;
+            if (_globalHandlers.TryGetValue(tp, out d))
             {
-                _globalHandlers[tp] = System.Delegate.Combine(_globalHandlers[tp], handler);
+                _globalHandlers[tp] = System.Delegate.Combine(d, handler);
             }
             else
             {
@@ -63,9 +64,10 @@ namespace com.spacepuppy
             if (handler == null) throw new System.ArgumentNullException("handler");
 
             var tp = typeof(T);
-            if (_globalHandlers.ContainsKey(tp))
+            System.Delegate d;
+            if(_globalHandlers.TryGetValue(tp, out d))
             {
-                var d = System.Delegate.Remove(_globalHandlers[tp], handler);
+                d = System.Delegate.Remove(d, handler);
                 if (d == null)
                 {
                     _globalHandlers.Remove(tp);
@@ -82,9 +84,10 @@ namespace com.spacepuppy
             if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            if (_unsafeGlobalHandlers.ContainsKey(notificationType))
+            NotificationHandler d;
+            if (_unsafeGlobalHandlers.TryGetValue(notificationType, out d))
             {
-                _unsafeGlobalHandlers[notificationType] += handler;
+                _unsafeGlobalHandlers[notificationType] = d + handler;
             }
             else
             {
@@ -97,9 +100,9 @@ namespace com.spacepuppy
             if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            if (_unsafeGlobalHandlers.ContainsKey(notificationType))
+            NotificationHandler d;
+            if (_unsafeGlobalHandlers.TryGetValue(notificationType, out d))
             {
-                var d = _unsafeGlobalHandlers[notificationType];
                 d -= handler;
                 if (d != null)
                 {

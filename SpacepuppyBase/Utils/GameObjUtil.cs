@@ -1122,18 +1122,6 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static Vector3 ParentTransformPoint(this Transform t, Vector3 pnt)
-        {
-            if (t.parent == null) return pnt;
-            return t.parent.TransformPoint(pnt);
-        }
-
-        public static Vector3 ParentInverseTransformPoint(this Transform t, Vector3 pnt)
-        {
-            if (t.parent == null) return pnt;
-            return t.parent.InverseTransformPoint(pnt);
-        }
-
         #endregion
 
 

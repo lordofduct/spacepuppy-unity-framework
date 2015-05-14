@@ -28,7 +28,7 @@ namespace com.spacepuppy
 
         private void OnFinish(bool cancelled)
         {
-            _stack.Clear();
+            this.ClearStack();
             _currentIEnumeratorYieldValue = null;
             try
             {
@@ -301,6 +301,29 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Private Methods
+
+        private IRadicalYieldInstruction PopStack()
+        {
+            var r = _stack.Pop();
+            if (r is IPooledYieldInstruction) (r as IPooledYieldInstruction).Dispose();
+            if (r is IImmediatelyResumingYieldInstruction) (r as IImmediatelyResumingYieldInstruction).Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
+            return r;
+        }
+
+        private void ClearStack()
+        {
+            foreach(var r in _stack)
+            {
+                if (r is IPooledYieldInstruction) (r as IPooledYieldInstruction).Dispose();
+                if (r is IImmediatelyResumingYieldInstruction) (r as IImmediatelyResumingYieldInstruction).Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
+            }
+            _stack.Clear();
+        }
+
+        #endregion
+
+
         #region IYieldInstruction/IEnumerator Interface
 
         object IRadicalYieldInstruction.CurrentYieldObject
@@ -348,10 +371,7 @@ namespace com.spacepuppy
             //actually operate
             while (_stack.Count > 0 && !_stack.Peek().ContinueBlocking())
             {
-                if (_stack.Peek() is IPooledYieldInstruction)
-                    (_stack.Pop() as IPooledYieldInstruction).Dispose();
-                else
-                    _stack.Pop();
+                this.PopStack();
             }
 
             if (_stack.Count > 0)
@@ -505,9 +525,16 @@ namespace com.spacepuppy
         private void OnImmediatelyResumingYieldInstructionSignaled(object sender, System.EventArgs e)
         {
             var instruction = sender as IImmediatelyResumingYieldInstruction;
-            if (instruction != null) instruction.Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
-
-            this.ForceTick();
+            if (instruction == null) return;
+            if(_stack.Peek() == instruction)
+            {
+                this.PopStack();
+                this.ForceTick();
+            }
+            else
+            {
+                instruction.Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
+            }
         }
 
         #endregion
