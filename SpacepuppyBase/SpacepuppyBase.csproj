@@ -70,6 +70,7 @@
     <Compile Include="Collections\WeakKeyDictionary.cs" />
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="ConfigurableForce.cs" />
     <Compile Include="CustomTimeSupplier.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Enums.cs" />
@@ -97,7 +98,9 @@
     <Compile Include="Hooks\TardyExecutionUpdateEventHooks.cs" />
     <Compile Include="Hooks\UpdateEventHooks.cs" />
     <Compile Include="IComponent.cs" />
+    <Compile Include="IForceReceiver.cs" />
     <Compile Include="IGameObjectSource.cs" />
+    <Compile Include="IIgnorableCollision.cs" />
     <Compile Include="ITimeSupplier.cs" />
     <Compile Include="KillableEntity.cs" />
     <Compile Include="INotificationDispatcher.cs" />
@@ -200,7 +203,8 @@
     <Compile Include="Utils\ComponentUtil.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\CoroutineUtil.cs" />
-    <Compile Include="Utils\Dynamic\ObjectStateCache.cs" />
+    <Compile Include="Utils\Dynamic\IDynamic.cs" />
+    <Compile Include="Utils\Dynamic\StateToken.cs" />
     <Compile Include="Utils\Dynamic\TypeAccessWrapper.cs" />
     <Compile Include="Utils\EnumUtil.cs" />
     <Compile Include="Utils\FastDynamicMemberAccessor\BasicMemberAccessor.cs" />
@@ -219,6 +223,7 @@
     <Compile Include="Utils\ObjUtil.cs" />
     <Compile Include="Utils\PrimitiveUtil.cs" />
     <Compile Include="Utils\QuaternionUtil.cs" />
+    <Compile Include="Utils\RandomUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="Utils\TransformUtil.cs" />
     <Compile Include="Utils\TypeUtil.cs" />
