@@ -17,4 +17,4 @@ com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks : 32000
 
 
 #Future Plans
-In the future I plan to make something to ease the pipeline of building the game. And probably a .unitypackage for importing the latest version into your project quickly and easily.
+In the future I plan to make something to ease the pipeline of building the framework. And probably a .unitypackage for importing the latest version into your project quickly and easily.
