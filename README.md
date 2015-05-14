@@ -7,7 +7,7 @@ You'll need to create a folder in Assets for the dll's, I personally use Assets/
 
 You will also want to go to the PlayerSettings and set the Api compatability level to .Net 2.0, and not 2.0 subset.
 
-Lastly you'll want to set the execution order of 3 classes in the framework. Of course, if you have meta files turned on, you could just include the supplied SpacepuppyUnityFramework.dll.meta file instead (found in the Resources folder). Those 3 classes are:
+Lastly you'll want to set the execution order of 3 classes in the framework. Of course, if you have meta files turned on, you could just include the supplied SpacepuppyUnityFramework.dll.meta file instead (found in the Resources folder, just place in the same folder as the dll). Those 3 classes are:
 
 com.spacepuppy.GameLoopEntry : -32000
 
