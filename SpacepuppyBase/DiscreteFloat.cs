@@ -5,6 +5,11 @@ using System.Text;
 
 namespace com.spacepuppy
 {
+
+    /// <summary>
+    /// Stores a whole number as a floating point value. You get the range of a float, as well as infinity representations. 
+    /// Implicit conversion between float and int is defined.
+    /// </summary>
     [System.Serializable()]
     public struct DiscreteFloat
     {

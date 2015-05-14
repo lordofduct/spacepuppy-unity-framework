@@ -5,6 +5,14 @@ using System.Linq;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// A TimeSupplier that allows for individual scaling. You may have to scale the world time to 0 for pause 
+    /// or other various effects, but you still want time to tick normally for other aspects like the menu or 
+    /// something. BUT, lets say you want to be able to scale that time as well for various effects, independent 
+    /// of the world time. By using a custom TimeSupplier you can scale that time independent of the world time. 
+    /// 
+    /// Furthermore you can stack time scales, just like described in com.spacepuppy.SPTime.
+    /// </summary>
     public class CustomTimeSupplier : IScalableTimeSupplier, System.IDisposable
     {
 

@@ -5,6 +5,9 @@ using System.Linq;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// Flagging enum to define how a Coroutine should deal with its operating MonoBehaviour is disabled or deactivated.
+    /// </summary>
     [System.Flags()]
     public enum RadicalCoroutineDisableMode
     {
@@ -23,6 +26,9 @@ namespace com.spacepuppy
         Pauses = 14
     }
 
+    /// <summary>
+    /// When ending a coroutine you can yield one of these to tell the RadicalCoroutine how to clean up the routine.
+    /// </summary>
     [System.Flags()]
     public enum RadicalCoroutineEndCommand
     {
@@ -31,6 +37,9 @@ namespace com.spacepuppy
         StallImmediateResume = 2
     }
 
+    /// <summary>
+    /// Represents the operating state of a RadicalCoroutine.
+    /// </summary>
     public enum RadicalCoroutineOperatingState
     {
         Cancelled = -2,
@@ -41,6 +50,9 @@ namespace com.spacepuppy
         Complete = 3
     }
 
+    /// <summary>
+    /// An enum for describing the different parts of the update pipeline.
+    /// </summary>
     public enum UpdateSequence
     {
         None = -1,
@@ -49,6 +61,10 @@ namespace com.spacepuppy
         LateUpdate = 2
     }
 
+    /// <summary>
+    /// An enum for representing the different TimeSuppliers out there. Useful for 
+    /// components that need to serialize which TimeSupplier to use.
+    /// </summary>
     public enum DeltaTimeType
     {
         Normal = 0,
@@ -57,6 +73,9 @@ namespace com.spacepuppy
         Custom = 3
     }
 
+    /// <summary>
+    /// Used with the TypeReference class to define how the inspector should show the types in the drop down.
+    /// </summary>
     public enum TypeDropDownListingStyle
     {
         Namespace = 0,
@@ -64,6 +83,9 @@ namespace com.spacepuppy
         ComponentMenu = 2
     }
 
+    /// <summary>
+    /// Describe an axis in cartesian coordinates, Useful for components that need to serialize which axis to use in some fashion.
+    /// </summary>
     public enum CartesianAxis
     {
         X = 0,
@@ -71,6 +93,9 @@ namespace com.spacepuppy
         Z = 2
     }
 
+    /// <summary>
+    /// Enum used by InfoboxAttribute to define which message box type to display as.
+    /// </summary>
     public enum InfoBoxMessageType
     {
         None = 0,

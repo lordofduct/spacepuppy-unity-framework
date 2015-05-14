@@ -5,6 +5,10 @@ using System.Text;
 
 namespace com.spacepuppy
 {
+
+    /// <summary>
+    /// Represents an object that supplies the current game time. See com.spacepuppy.SPTime.
+    /// </summary>
     public interface ITimeSupplier
     {
 
@@ -13,6 +17,9 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// A ITimeSupplier that has a scale property (this gives things like Time.timeScale an object identity).  See com.spacepuppy.SPTime.
+    /// </summary>
     public interface IScalableTimeSupplier : ITimeSupplier
     {
 

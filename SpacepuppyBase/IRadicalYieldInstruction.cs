@@ -7,7 +7,8 @@ namespace com.spacepuppy
 {
 
     /// <summary>
-    /// Just a name for contract purposes.
+    /// Just a name for contract purposes. You should probably inherit from RadicalYieldInstruciton, or composite it, unless 
+    /// you know what you're doing.
     /// </summary>
     public interface IRadicalYieldInstruction
     {
@@ -17,17 +18,30 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// Implement this if your RadicalYieldInstruction should have a progress property.
+    /// </summary>
     public interface IProgressingYieldInstruction : IRadicalYieldInstruction
     {
         bool IsComplete { get; }
         float Progress { get; }
     }
 
+    /// <summary>
+    /// Implement this if the coroutine should immediately resume on complete instead of waiting to the next frame. This is used 
+    /// in situations that are similar to WaitForFixedUpdate, where we want to wait for some section of the update pipeline and 
+    /// need to operate immediately.
+    /// </summary>
     public interface IImmediatelyResumingYieldInstruction : IRadicalYieldInstruction
     {
         event System.EventHandler Signal;
     }
 
+    /// <summary>
+    /// Receive a signal that the yielding RadicalCoroutine was paused, so that the instruction can deal with that state accordingly 
+    /// if it must do something special. For example WaitForDuration wants to store the time so that when the coroutine resumes 
+    /// it starts counting from the appropriate time instead of appearing finished.
+    /// </summary>
     public interface IPausibleYieldInstruction : IRadicalYieldInstruction
     {
 
@@ -57,6 +71,11 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// Base abstract class that implements IRadicalYieldInstruction. It implements IRadicalYieldInstruction in the most 
+    /// commonly used setup. You should only ever implement IRadicalYieldInstruction directly if you can't inherit from this 
+    /// in your inheritance chain, or you want none standard behaviour.
+    /// </summary>
     public abstract class RadicalYieldInstruction : IRadicalYieldInstruction
     {
 
@@ -163,6 +182,10 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// Base abstract class that implement IImmediatelyResumingYieldInstruction. Inherit from this instead of directly implementing 
+    /// IImmediatelyResumingYieldInstruction, unless you can't otherwise.
+    /// </summary>
     public abstract class ImmediatelyResumingYieldInstruction : RadicalYieldInstruction, IImmediatelyResumingYieldInstruction
     {
 
@@ -182,6 +205,10 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// Base abstract class that implements IProgressingYieldInstruction. Inherit from this instead of directly implementing 
+    /// IProgressingYieldInstruction, unless you can't otherwise.
+    /// </summary>
     public class ProgressingYieldInstructionQueue : IProgressingYieldInstruction
     {
         
@@ -381,6 +408,10 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// Blocks until the dispatcher fires some notification. See the notification system in com.spacepuppy.Notification.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class WaitForNotification<T> : ImmediatelyResumingYieldInstruction where T : Notification
     {
 
@@ -413,6 +444,9 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// A composite yield instruction that waits for multiple instructions to all complete before continuing.
+    /// </summary>
     public class WaitForAllComplete : RadicalYieldInstruction
     {
 
@@ -522,6 +556,9 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// A composite yield instruction that waits for any one of multiple instruction to complete before continuing.
+    /// </summary>
     public class WaitForAnyComplete : RadicalYieldInstruction
     {
 

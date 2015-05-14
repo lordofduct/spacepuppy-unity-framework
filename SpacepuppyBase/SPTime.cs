@@ -7,6 +7,23 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// A static entry point to the various ITimeSuppliers in existance. An ITimeSupplier gives object identity 
+    /// to the varous kinds of time out there: normal (UnityEngine.Time.time), real (UnityEngine.Time.unscaledTime), smooth (Time.smoothDeltaTime), custom (no unity parrallel). 
+    /// 
+    /// With the objects in hand you can than swap out what time is used when updating objects.
+    /// 
+    /// For example the com.spacepuppy.Tween namespace containers tweeners that can update on any of the existing times in 
+    /// unity. These objects can be passed in to allow updating at any one of those times. Lets say for instance you've set 
+    /// the time scale of Normal time to 0 (to pause the game), but you still need the menu to tween and update appropriately. 
+    /// Well, you'd use the 'RealTime' or a 'Custom' time object to update the tween with instead of 'Normal'.
+    /// 
+    /// An added feature includes stacking TimeScales. The Normal and Custom TimeSuppliers allow naming your time scales so that you can compound them together. 
+    /// This way time scales don't overlap. Lets say you have an effect where when swinging the sword that halves the time speed to look cool, but you also have a slomo effect 
+    /// when an item is picked up for a duration of time. You expect the swords half speed to be half of the slomo effect, not half of normal time, so that the sword looks right 
+    /// either way. This allows you to combine those 2 with out having to test if one or the other is currently playing (or the scale of it playing). Which is SUPER extra handy 
+    /// when tweening the time scale.
+    /// </summary>
     public static class SPTime
     {
 
@@ -21,16 +38,30 @@ namespace com.spacepuppy
 
         #region Properties
 
+        /// <summary>
+        /// Represents the normal update time, ala Time.time & Time.deltaTime.
+        /// </summary>
         public static IScalableTimeSupplier Normal { get { return _normalTime; } }
 
+        /// <summary>
+        /// Represents the real update time, ala Time.unscaledTime.
+        /// </summary>
         public static ITimeSupplier Real { get { return _realTime; } }
 
+        /// <summary>
+        /// Represents smooth delta time, ala Time.smoothDeltaTime.
+        /// </summary>
         public static ITimeSupplier Smooth { get { return _smoothTime; } }
 
         #endregion
 
         #region Methods
 
+        /// <summary>
+        /// Retrieve the ITimeSupplier for a specific DeltaTimeType, see com.spacepuppy.DeltaTimeType.
+        /// </summary>
+        /// <param name="etp"></param>
+        /// <returns></returns>
         public static ITimeSupplier GetTime(DeltaTimeType etp)
         {
             switch(etp)
@@ -46,6 +77,11 @@ namespace com.spacepuppy
             }
         }
 
+        /// <summary>
+        /// Reverse lookup for DeltaTimeType from an object.
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
         public static DeltaTimeType GetDeltaType(ITimeSupplier time)
         {
             if (time == _normalTime)
@@ -58,6 +94,11 @@ namespace com.spacepuppy
                 return DeltaTimeType.Custom;
         }
 
+        /// <summary>
+        /// Create a named CustomTimeSupplier for individual time scaling.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static CustomTimeSupplier CreateCustomTime(string id)
         {
             if (_customTimes == null)
@@ -79,12 +120,22 @@ namespace com.spacepuppy
             }
         }
 
+        /// <summary>
+        /// Removes a CustomTimeSupplier from the update pool by name.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static bool RemoveCustomTime(string id)
         {
             if (_customTimes != null) return _customTimes.Remove(id);
             else return false;
         }
 
+        /// <summary>
+        /// Removes a CustomTimeSupplier from the update pool by reference.
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
         public static bool RemoveCustomTime(CustomTimeSupplier time)
         {
             if(_customTimes != null)
@@ -104,6 +155,11 @@ namespace com.spacepuppy
             }
         }
 
+        /// <summary>
+        /// Retrieve a CustomTimeSupplier by name.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static CustomTimeSupplier Custom(string id)
         {
             if (_customTimes == null) return null;
