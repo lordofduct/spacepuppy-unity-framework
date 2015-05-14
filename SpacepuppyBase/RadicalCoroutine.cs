@@ -37,6 +37,11 @@ namespace com.spacepuppy
     /// 
     /// *Manual Override
     /// Tick the operation of a coroutine manually. Won't be needed really ever, but that one time you want it, it's a life saver.
+    /// 
+    /// *Coroutine Manager
+    /// A GameObject that is operating coroutines has a RadicalCoroutineManager attached. This is what tracks and maintains automatic pausing/cancelling/resuming 
+    /// of coroutines. As well as gives an inspector view of what coroutines are operating on what components and the name of the function being operated. Great 
+    /// for debugging.
     /// </summary>
     public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IEnumerator
     {
