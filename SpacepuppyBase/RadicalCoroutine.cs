@@ -7,6 +7,37 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// Acts just like Coroutine, but with an expanded feature set.
+    /// 
+    /// *Custom Yield Instructions
+    /// IYieldInstruction - ability to define reusable yield instructions as objects.
+    /// IProgessingYieldInstruction - a customizable yield instruction that has a progress property
+    /// IImmediatelyResumingYieldInstruction - a customizable yield instruction that will return to operation of the coroutine immediately on complete
+    /// IPausibleYieldInstruction - a yield instruction should implement this if it needs to deal with a coroutine pausing in any special way
+    /// IPooledYieldInstruction - a yield instruction should implement this if when complete it needs to be returned to a pool
+    /// IResettingYieldInstruction - a yield instruction should implement this if when complete it should be signaled so its state can be reset
+    /// 
+    /// *Events
+    /// Register for events when the state of a coroutine changes.
+    /// OnComplete
+    /// OnCancelled
+    /// OnFinished
+    /// 
+    /// *State
+    /// Poll the state of the coroutine, if it's finished/active/cancelled, what MonoBehaviour is operating the coroutine, etc.
+    /// 
+    /// *Start/Pause/Resume/Cancel
+    /// RadicalCoroutines can be paused and restarted later (they can not be reset). When starting a RadicalCoroutine you can include an enum value 
+    /// that determines what should be done with the coroutine when the operating MonoBehaviour is disabled, automatically pausing or cancelling the 
+    /// coroutine as desired.
+    /// 
+    /// *Scheduling
+    /// Schedule a coroutine to run when a current coroutine is complete.
+    /// 
+    /// *Manual Override
+    /// Tick the operation of a coroutine manually. Won't be needed really ever, but that one time you want it, it's a life saver.
+    /// </summary>
     public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IEnumerator
     {
 
