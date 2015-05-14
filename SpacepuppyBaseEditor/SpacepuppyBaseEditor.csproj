@@ -96,6 +96,11 @@
     <Compile Include="PrefabHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReorderableListHelper.cs" />
+    <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />
+    <Compile Include="Scenario\TriggerableTargetObjectInspector.cs" />
+    <Compile Include="Scenario\TriggerComponentInspector.cs" />
+    <Compile Include="Scenario\TriggerPropertyDrawer.cs" />
+    <Compile Include="Scenario\TriggerTargetPropertyDrawer.cs" />
     <Compile Include="ScriptableObjectHelper.cs" />
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorGUI.cs" />
