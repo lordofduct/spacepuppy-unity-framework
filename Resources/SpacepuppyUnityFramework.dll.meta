@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 4654fa4c6e0ce3e4f9e580c4c5bbd96e
+MonoAssemblyImporter:
+  serializedVersion: 1
+  iconMap: {}
+  executionOrder:
+    com.spacepuppy.GameInputManager: -31999
+    com.spacepuppy.GameLoopEntry: -32000
+    com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks: -31998
+    com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks: 32000
+  userData: 
