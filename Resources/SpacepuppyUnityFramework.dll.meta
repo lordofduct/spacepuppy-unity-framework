@@ -4,7 +4,6 @@ MonoAssemblyImporter:
   serializedVersion: 1
   iconMap: {}
   executionOrder:
-    com.spacepuppy.GameInputManager: -31999
     com.spacepuppy.GameLoopEntry: -32000
     com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks: -31998
     com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks: 32000

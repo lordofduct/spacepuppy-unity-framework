@@ -121,8 +121,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\Editor\
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Base.dll" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.Base.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Base.pdb" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.Base.pdb"</PostBuildEvent>
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Base.dll" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Base.pdb" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
