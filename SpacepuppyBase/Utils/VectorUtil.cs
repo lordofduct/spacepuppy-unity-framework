@@ -288,7 +288,7 @@ namespace com.spacepuppy.Utils
 
         #region Vector2 Mod
 
-        public static Vector2 Normalize(Vector2 v)
+        public static Vector2 Normalize(this Vector2 v)
         {
             return v.normalized;
         }
@@ -299,14 +299,14 @@ namespace com.spacepuppy.Utils
             return new Vector2(x / l, y / l);
         }
 
-        public static Vector2 ClampToAxis(Vector2 v, Vector2 axis)
+        public static Vector2 ClampToAxis(this Vector2 v, Vector2 axis)
         {
             var n = new Vector2(-axis.y, axis.x);
             n.Normalize();
             return v - n * Vector2.Dot(v, n);
         }
 
-        public static Vector2 SetLengthOnAxis(Vector2 v, Vector2 axis, float len)
+        public static Vector2 SetLengthOnAxis(this Vector2 v, Vector2 axis, float len)
         {
             //var n = new Vector2(-axis.y, axis.x);
             //n.Normalize();
@@ -332,7 +332,7 @@ namespace com.spacepuppy.Utils
             return new Vector3(x / l, y / l, z / l);
         }
 
-        public static Vector3 SetLengthOnAxis(Vector3 v, Vector3 axis, float len)
+        public static Vector3 SetLengthOnAxis(this Vector3 v, Vector3 axis, float len)
         {
             axis.Normalize();
             var d = len - Vector3.Dot(v, axis);
@@ -389,12 +389,12 @@ namespace com.spacepuppy.Utils
             return MathUtil.FuzzyEqual(Mathf.Abs(Vector3.Dot(a.normalized, b.normalized)), 1.0f, epsilon);
         }
 
-        public static bool NearZeroVector(Vector3 v)
+        public static bool NearZeroVector(this Vector3 v)
         {
             return MathUtil.FuzzyEqual(v.sqrMagnitude, 0f, MathUtil.EPSILON_SQR);
         }
 
-        public static bool NearZeroVector(Vector2 v)
+        public static bool NearZeroVector(this Vector2 v)
         {
             return MathUtil.FuzzyEqual(v.sqrMagnitude, 0f, MathUtil.EPSILON_SQR);
         }
