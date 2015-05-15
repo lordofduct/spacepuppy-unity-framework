@@ -79,7 +79,7 @@ namespace com.spacepuppy.Utils
                 {
                     foreach (var t in assemb.GetTypes())
                     {
-                        if (string.Equals(t.FullName, typeName, e)) return t;
+                        if (string.Equals(t.Name, typeName, e) || string.Equals(t.FullName, typeName, e)) return t;
                     }
                 }
             }
@@ -108,7 +108,7 @@ namespace com.spacepuppy.Utils
                 {
                     foreach (var t in assemb.GetTypes())
                     {
-                        if (baseType.IsAssignableFrom(t) && string.Equals(t.FullName, typeName, e)) return t;
+                        if (baseType.IsAssignableFrom(t) && (string.Equals(t.Name, typeName, e) || string.Equals(t.FullName, typeName, e))) return t;
                     }
                 }
             }

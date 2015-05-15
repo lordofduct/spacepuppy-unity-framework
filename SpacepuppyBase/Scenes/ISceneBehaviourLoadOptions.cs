@@ -40,6 +40,12 @@ namespace com.spacepuppy.Scenes
 
         #endregion
 
+        #region Properties
+
+        public System.Type SceneBehaviourType { get { return _sceneBehaviourType; } }
+
+        #endregion
+
         #region Methods
 
         public event System.Action<SceneLoadingEventArgs> BeforeSceneLoaded;
