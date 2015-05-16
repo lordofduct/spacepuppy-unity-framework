@@ -48,6 +48,7 @@
     <Compile Include="Base\Commands\TransformCopyMenu.cs" />
     <Compile Include="Base\Inspectors\EnumPopupExcludingPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\RadicalCoroutineManagerInspector.cs" />
+    <Compile Include="Base\Inspectors\UnitVectorPropertyDrawer.cs" />
     <Compile Include="ComponentHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireComponentInEntityHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireLayerHeaderDrawer.cs" />

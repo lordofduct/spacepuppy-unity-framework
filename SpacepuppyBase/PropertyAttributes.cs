@@ -193,6 +193,17 @@ namespace com.spacepuppy
         }
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple=false)]
+    public class UnitVectorAttribute : SPPropertyAttribute
+    {
+
+        public UnitVectorAttribute() : base(false)
+        {
+
+        }
+
+    }
+
     #endregion
 
     #region ModifierDrawer Attributes
