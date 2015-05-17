@@ -7,13 +7,17 @@ You'll need to create a folder in Assets for the dll's, I personally use Assets/
 
 You will also want to go to the PlayerSettings and set the Api compatability level to .Net 2.0, and not 2.0 subset.
 
-Lastly you'll want to set the execution order of 3 classes in the framework. Of course, if you have meta files turned on, you could just include the supplied SpacepuppyUnityFramework.dll.meta file instead (found in the Resources folder, just place in the same folder as the dll). Those 3 classes are:
+Next you'll want to set the execution order of 3 classes in the framework. Of course, if you have meta files turned on, you could just include the supplied SpacepuppyUnityFramework.dll.meta file instead (found in the Resources folder, just place in the same folder as the dll). Those 3 classes are:
 
 com.spacepuppy.GameLoopEntry : -32000
 
 com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks : -31999
 
 com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks : 32000
+
+Lastly, you need to add 2 tags to the tag manager: 'MultiTag' and 'Root'. Once you've done that select the menu dropdown Spacepuppy->Settings->Sync TagData.
+
+Now you're fully set up.
 
 
 #Future Plans
