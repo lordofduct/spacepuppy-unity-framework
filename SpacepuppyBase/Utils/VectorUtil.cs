@@ -399,6 +399,26 @@ namespace com.spacepuppy.Utils
             return MathUtil.FuzzyEqual(v.sqrMagnitude, 0f, MathUtil.EPSILON_SQR);
         }
 
+        public static bool FuzzyEquals(this Vector2 a, Vector2 b)
+        {
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), MathUtil.EPSILON_SQR);
+        }
+
+        public static bool FuzzyEquals(this Vector2 a, Vector2 b, float epsilon)
+        {
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), epsilon);
+        }
+
+        public static bool FuzzyEquals(this Vector3 a, Vector3 b)
+        {
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), MathUtil.EPSILON_SQR);
+        }
+
+        public static bool FuzzyEquals(this Vector3 a, Vector3 b, float epsilon)
+        {
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), epsilon);
+        }
+
         #endregion
 
         #region Lerp Like

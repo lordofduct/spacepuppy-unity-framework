@@ -115,23 +115,25 @@ namespace com.spacepuppy.Utils
             return behaviour.StartCoroutine(InvokeRedirect(method, delay));
         }
 
-        public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, System.Action method, float delay, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
+        public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, System.Action method, float delay, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (method == null) throw new System.ArgumentNullException("method");
 
-            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay), disableMode);
+            return StartRadicalCoroutine(behaviour, RadicalInvokeRedirect(method, delay, -1f, time), disableMode);
         }
 
-        public static RadicalCoroutine InvokeRepeatingRadical(this MonoBehaviour behaviour, System.Action method, float delay, float repeatRate, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
+        public static RadicalCoroutine InvokeRepeatingRadical(this MonoBehaviour behaviour, System.Action method, float delay, float repeatRate, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (method == null) throw new System.ArgumentNullException("method");
 
-            return StartRadicalCoroutine(behaviour, InvokeRedirect(method, delay), disableMode);
+            return StartRadicalCoroutine(behaviour, RadicalInvokeRedirect(method, delay, repeatRate, time), disableMode);
         }
 
-        internal static System.Collections.IEnumerator InvokeRedirect(System.Action method, float delay, float repeatRate = -1f)
+
+
+        private static System.Collections.IEnumerator InvokeRedirect(System.Action method, float delay, float repeatRate = -1f, ITimeSupplier time = null)
         {
             yield return new WaitForSeconds(delay);
             if (repeatRate < 0f)
@@ -153,6 +155,31 @@ namespace com.spacepuppy.Utils
                 {
                     method();
                     yield return w;
+                }
+            }
+        }
+
+        internal static System.Collections.IEnumerator RadicalInvokeRedirect(System.Action method, float delay, float repeatRate = -1f, ITimeSupplier time = null)
+        {
+            yield return WaitForDuration.Seconds(delay, time);
+            if (repeatRate < 0f)
+            {
+                method();
+            }
+            else if (repeatRate == 0f)
+            {
+                while (true)
+                {
+                    method();
+                    yield return null;
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    method();
+                    yield return WaitForDuration.Seconds(repeatRate, time);
                 }
             }
         }

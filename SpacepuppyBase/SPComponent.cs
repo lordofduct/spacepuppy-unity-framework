@@ -137,14 +137,14 @@ namespace com.spacepuppy
         {
             if (method == null) throw new System.ArgumentNullException("method");
 
-            return this.StartRadicalCoroutine(CoroutineUtil.InvokeRedirect(method, delay), disableMode);
+            return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay), disableMode);
         }
 
         public RadicalCoroutine InvokeRepeatingRadical(System.Action method, float delay, float repeatRate, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (method == null) throw new System.ArgumentNullException("method");
 
-            return this.StartRadicalCoroutine(CoroutineUtil.InvokeRedirect(method, delay), disableMode);
+            return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay), disableMode);
         }
 
         #endregion

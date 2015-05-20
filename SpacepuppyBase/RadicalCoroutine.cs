@@ -405,9 +405,28 @@ namespace com.spacepuppy
             _currentIEnumeratorYieldValue = null;
 
             //actually operate
-            while (_stack.Count > 0 && !_stack.Peek().ContinueBlocking())
+            //while (_stack.Count > 0 && !_stack.Peek().ContinueBlocking())
+            //{
+            //    this.PopStack();
+            //}
+            while(_stack.Count > 0)
             {
-                this.PopStack();
+                try
+                {
+                    if(!_stack.Peek().ContinueBlocking())
+                    {
+                        this.PopStack();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                catch(System.Exception ex)
+                {
+                    Debug.LogException(ex);
+                    this.PopStack();
+                }
             }
 
             if (_stack.Count > 0)
