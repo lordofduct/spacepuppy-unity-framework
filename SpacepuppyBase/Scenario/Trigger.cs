@@ -94,7 +94,7 @@ namespace com.spacepuppy.Scenario
         
         public void ActivateRandomTrigger(bool considerWeights)
         {
-            TriggerTarget trig = (considerWeights) ? _targets.PickRandom() : _targets.PickRandom((t) => { return t.Weight; });
+            TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
             trig.Trigger();
 
             if (_owner != null)
@@ -105,7 +105,7 @@ namespace com.spacepuppy.Scenario
 
         public void ActivateRandomTrigger(object arg, bool considerWeights)
         {
-            TriggerTarget trig = (considerWeights) ? _targets.PickRandom() : _targets.PickRandom((t) => { return t.Weight; });
+            TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
             trig.Trigger();
 
             if (_owner != null)
