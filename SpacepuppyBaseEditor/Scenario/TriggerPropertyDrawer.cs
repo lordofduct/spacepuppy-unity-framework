@@ -176,7 +176,7 @@ namespace com.spacepuppyeditor.Scenario
 
                 EditorGUI.LabelField(labelRect, labelContent);
                 weightProp.floatValue = EditorGUI.FloatField(weightRect, weight);
-                float p = (_totalWeight > 0f) ? ((index == 0) ? 100f : 0f) : (100f * weight / _totalWeight);
+                float p = (_totalWeight > 0f) ? (100f * weight / _totalWeight) : ((index == 0) ? 100f : 0f);
                 EditorGUI.LabelField(percRect, string.Format("{0:0.##}%", p));
             }
             else
