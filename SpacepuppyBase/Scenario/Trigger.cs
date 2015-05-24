@@ -56,20 +56,6 @@ namespace com.spacepuppy.Scenario
             return targ;
         }
 
-        public TriggerTarget AddNew(ITriggerableMechanism mechanism, object arg = null, bool triggerAllOnTarget = true)
-        {
-            if (mechanism == null) throw new System.ArgumentNullException("mechanism");
-
-            var targ = this.AddNew();
-            targ.Triggerable = mechanism.component;
-            targ.TriggerableArgs = new VariantReference[1] { new VariantReference() {
-                                                                Value = arg
-                                                            }
-            };
-
-            return targ;
-        }
-
         public void ActivateTrigger()
         {
             if (_targets.Count == 0) return;
@@ -99,6 +85,28 @@ namespace com.spacepuppy.Scenario
                     targ.Trigger(arg);
                 }
             }
+
+            if (_owner != null)
+            {
+                _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
+            }
+        }
+        
+        public void ActivateRandomTrigger(bool considerWeights)
+        {
+            TriggerTarget trig = (considerWeights) ? _targets.PickRandom() : _targets.PickRandom((t) => { return t.Weight; });
+            trig.Trigger();
+
+            if (_owner != null)
+            {
+                _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
+            }
+        }
+
+        public void ActivateRandomTrigger(object arg, bool considerWeights)
+        {
+            TriggerTarget trig = (considerWeights) ? _targets.PickRandom() : _targets.PickRandom((t) => { return t.Weight; });
+            trig.Trigger();
 
             if (_owner != null)
             {
@@ -153,6 +161,21 @@ namespace com.spacepuppy.Scenario
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return _targets.GetEnumerator();
+        }
+
+        #endregion
+
+
+        #region Special Types
+
+        public class ConfigAttribute : System.Attribute
+        {
+            public bool Weighted;
+
+            public ConfigAttribute(bool weighted)
+            {
+                this.Weighted = weighted;
+            }
         }
 
         #endregion

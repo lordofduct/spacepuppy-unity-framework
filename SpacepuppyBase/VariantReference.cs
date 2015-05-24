@@ -52,6 +52,22 @@ namespace com.spacepuppy
 
         }
 
+        public VariantReference(object value)
+        {
+            if(value == null)
+            {
+                _value = null;
+                _type = VariantType.Null;
+            }
+            else
+            {
+                var tp = value.GetType();
+                if (!AcceptableType(tp)) throw new System.ArgumentException(string.Format("The Type of the value '{0}' is not supported by VariantReference.", tp.FullName), "value");
+                _value = value;
+                _type = GetVariantType(tp);
+            }
+        }
+
         #endregion
 
         #region Properties

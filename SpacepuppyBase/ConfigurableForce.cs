@@ -69,7 +69,7 @@ namespace com.spacepuppy
                 case ForceDirection.Relative:
                     return (forceTarget.Position - forceOrigin.Position).normalized * _strength;
                 case ForceDirection.Random:
-                    return RandomUtil.OnUnitSphere() * _strength;
+                    return RandomUtil.Standard.OnUnitSphere() * _strength;
                 case ForceDirection.Forward:
                     return forceOrigin.Forward * _strength;
             }
@@ -83,7 +83,7 @@ namespace com.spacepuppy
                 case ForceDirection.Relative:
                     return (forceTarget.position - forceOrigin.position).normalized * _strength;
                 case ForceDirection.Random:
-                    return RandomUtil.OnUnitSphere() * _strength;
+                    return RandomUtil.Standard.OnUnitSphere() * _strength;
                 case ForceDirection.Forward:
                     return forceOrigin.forward * _strength;
             }
@@ -119,7 +119,7 @@ namespace com.spacepuppy
                 case ForceDirection.Relative:
                     return (forceTarget.position - forceOrigin.position).normalized;
                 case ForceDirection.Random:
-                    return RandomUtil.OnUnitSphere();
+                    return RandomUtil.Standard.OnUnitSphere();
                 case ForceDirection.Forward:
                     return forceOrigin.forward;
             }
@@ -133,7 +133,7 @@ namespace com.spacepuppy
                 case ForceDirection.Relative:
                     return (forceTarget.Position - forceOrigin.Position).normalized;
                 case ForceDirection.Random:
-                    return RandomUtil.OnUnitSphere();
+                    return RandomUtil.Standard.OnUnitSphere();
                 case ForceDirection.Forward:
                     return forceOrigin.Forward;
             }
@@ -148,7 +148,7 @@ namespace com.spacepuppy
                 case ForceDirection.Relative:
                     return surface.ProjectVectorTo2D(forceOrigin.position, (forceTarget.position - forceOrigin.position)).normalized;
                 case ForceDirection.Random:
-                    return RandomUtil.OnUnitCircle();
+                    return RandomUtil.Standard.OnUnitCircle();
                 case ForceDirection.Forward:
                     return surface.ProjectVectorTo2D(forceOrigin.position, forceOrigin.forward).normalized;
             }
@@ -163,7 +163,7 @@ namespace com.spacepuppy
                 case ForceDirection.Relative:
                     return surface.ProjectVectorTo2D(forceOrigin.Position, (forceTarget.Position - forceOrigin.Position)).normalized;
                 case ForceDirection.Random:
-                    return RandomUtil.OnUnitCircle();
+                    return RandomUtil.Standard.OnUnitCircle();
                 case ForceDirection.Forward:
                     return surface.ProjectVectorTo2D(forceOrigin.Position, forceOrigin.Forward).normalized;
             }

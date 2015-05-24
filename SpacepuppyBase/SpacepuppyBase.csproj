@@ -101,6 +101,7 @@
     <Compile Include="IForceReceiver.cs" />
     <Compile Include="IGameObjectSource.cs" />
     <Compile Include="IIgnorableCollision.cs" />
+    <Compile Include="IRandom.cs" />
     <Compile Include="ITimeSupplier.cs" />
     <Compile Include="KillableEntity.cs" />
     <Compile Include="INotificationDispatcher.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="Scenario\ITriggerable.cs" />
     <Compile Include="Scenario\i_AddComponent.cs" />
     <Compile Include="Scenario\i_Trigger.cs" />
+    <Compile Include="Scenario\i_TriggerRandom.cs" />
     <Compile Include="Scenario\ObservableTargetData.cs" />
     <Compile Include="Scenario\ScenarioActivatorMask.cs" />
     <Compile Include="Scenario\Trigger.cs" />

@@ -128,6 +128,22 @@ namespace com.spacepuppy.Utils
             return System.Enum.Parse(enumType, System.Convert.ToString(value), true) as System.Enum;
         }
 
+        public static bool TryToEnum<T>(object val, out T result) where T : struct, System.IConvertible
+        {
+            if (!typeof(T).IsEnum) throw new System.ArgumentException("T must be an enumerated type");
+
+            try
+            {
+                result = (T)System.Enum.Parse(typeof(T), System.Convert.ToString(val), true);
+                return true;
+            }
+            catch
+            {
+                result = default(T);
+                return false;
+            }
+        }
+
         #endregion
 
         #region ConvertToUInt

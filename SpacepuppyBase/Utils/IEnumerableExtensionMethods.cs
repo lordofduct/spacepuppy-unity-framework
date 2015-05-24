@@ -9,6 +9,8 @@ namespace com.spacepuppy.Utils
     public static class IEnumerableExtensionMethods
     {
 
+        #region General Methods
+
         public static bool IsEmpty(this IEnumerable lst)
         {
             return !lst.GetEnumerator().MoveNext();
@@ -63,26 +65,6 @@ namespace com.spacepuppy.Utils
             {
                 if (TypeUtil.IsType(obj.GetType(), tp)) yield return obj;
             }
-        }
-
-        public static T PickRandom<T>(this IEnumerable<T> lst)
-        {
-            return lst.PickRandom(1).FirstOrDefault();
-        }
-
-        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> lst, int count)
-        {
-            return lst.Shuffle().Take(count);
-        }
-
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst)
-        {
-            //return lst.OrderBy(x => System.Guid.NewGuid());
-
-            //var r = new System.Random();
-            //return lst.OrderBy(x => r.Next());
-
-            return lst.OrderBy(x => Random.value);
         }
 
         public static bool Compare<T>(this IEnumerable<T> first, IEnumerable<T> second)
@@ -167,6 +149,93 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        #endregion
+
+        #region Random Methods
+
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst)
+        {
+            if (lst == null) throw new System.ArgumentNullException("lst");
+            return lst.ShuffleIterator(RandomUtil.Standard);
+        }
+
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst, IRandom rng)
+        {
+            if (lst == null) throw new System.ArgumentNullException("lst");
+            if (rng == null) throw new System.ArgumentNullException("rng");
+            return lst.ShuffleIterator(rng);
+        }
+
+        private static IEnumerable<T> ShuffleIterator<T>(this IEnumerable<T> lst, IRandom rng)
+        {
+            var buffer = lst.ToList();
+            int j;
+            for (int i = 0; i < buffer.Count; i++)
+            {
+                j = rng.Next(i, buffer.Count);
+                yield return buffer[j];
+                buffer[j] = buffer[i];
+            }
+        }
+
+
+        public static T PickRandom<T>(this IEnumerable<T> lst)
+        {
+            //return lst.PickRandom(1).FirstOrDefault();
+            if (lst is IList<T>)
+            {
+                var a = lst as IList<T>;
+                if (a.Count == 0) return default(T);
+                return a[Random.Range(0, a.Count)];
+            }
+            else
+            {
+                return lst.PickRandom(1).FirstOrDefault();
+            }
+        }
+
+        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> lst, int count)
+        {
+            return lst.Shuffle().Take(count);
+        }
+
+        public static T PickRandom<T>(this IEnumerable<T> lst, System.Func<T, float> weightPredicate)
+        {
+            var arr = (lst is IList<T>) ? lst as IList<T> : lst.ToList();
+            var weights = (from o in lst select weightPredicate(o)).ToArray();
+            var total = weights.Sum();
+            float r = Random.value;
+            float s = 0f;
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                s += weights[i] / total;
+                if (s >= r)
+                {
+                    return arr[i];
+                }
+            }
+
+            //should never get here
+            return lst.Last();
+        }
+
+        public static object PickRandom(this System.Array lst)
+        {
+            if (lst.Length == 0) return null;
+            //return lst.GetValue(RandomUtil.Range(lst.Length, 0));
+            return lst.GetValue(Random.Range(0, lst.Length));
+        }
+
+        public static T PickRandom<T>(this T[] lst)
+        {
+            if (lst.Length == 0) return default(T);
+            //return lst[RandomUtil.Range(lst.Length, 0)];
+            return lst[Random.Range(0, lst.Length)];
+        }
+
+        #endregion
+
         #region Array Methods
 
         public static int IndexOf(this System.Array lst, object obj)
@@ -182,20 +251,6 @@ namespace com.spacepuppy.Utils
         public static bool InBounds(this System.Array arr, int index)
         {
             return index >= 0 && index <= arr.Length - 1;
-        }
-
-        public static object GetAny(this System.Array lst)
-        {
-            if (lst.Length == 0) return null;
-            //return lst.GetValue(RandomUtil.Range(lst.Length, 0));
-            return lst.GetValue(Random.Range(0, lst.Length));
-        }
-
-        public static T GetAny<T>(this T[] lst)
-        {
-            if (lst.Length == 0) return default(T);
-            //return lst[RandomUtil.Range(lst.Length, 0)];
-            return lst[Random.Range(0, lst.Length)];
         }
 
         #endregion

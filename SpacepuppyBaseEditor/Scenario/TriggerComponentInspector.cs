@@ -163,10 +163,7 @@ namespace com.spacepuppyeditor.Scenario
             var obj = EditorHelper.GetTargetObjectOfProperty(lst.serializedProperty.GetArrayElementAtIndex(lst.index)) as TriggerTarget;
             if (obj != null)
             {
-                obj.Triggerable = null;
-                obj.TriggerableArgs = new VariantReference[0];
-                obj.ActivationType = TriggerActivationType.TriggerAllOnTarget;
-                obj.MethodName = null;
+                obj.Clear();
                 lst.serializedProperty.serializedObject.Update();
             }
         }

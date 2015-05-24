@@ -3,42 +3,41 @@ using System.Collections.Generic;
 
 namespace com.spacepuppy.Utils
 {
-    public class RandomUtil
+    public static class RandomUtil
     {
 
         #region Static Fields
+
+        private static UnityRNG _unityRNG = new UnityRNG();
+
+        public static IRandom Standard { get { return _unityRNG; } }
+
+        public static IRandom CreateRNG(int seed)
+        {
+            return new MicrosoftRNG(seed);
+        }
 
         #endregion
 
         #region Static Properties
 
-        public static int Next()
+        public static float Angle(this IRandom rng)
         {
-            return (int)(Random.value * 10000f);
-        }
-
-        public static float Value()
-        {
-            return Random.value;
-        }
-
-        public static float Angle()
-        {
-            return Random.value * MathUtil.TWO_PI;
+            return rng.Next() * MathUtil.TWO_PI;
         }
 
         /// <summary>
         /// Return 0 or 1. Numeric version of Bool.
         /// </summary>
         /// <returns></returns>
-        public static int Pop()
+        public static int Pop(this IRandom rng)
         {
-            return Next() % 2;
+            return rng.Next(1000) % 2;
         }
 
-        public static int Sign()
+        public static int Sign(this IRandom rng)
         {
-            int n = Next() % 2;
+            int n = rng.Next(1000) % 2;
             return n + n - 1;
         }
 
@@ -46,25 +45,25 @@ namespace com.spacepuppy.Utils
         /// Return a true randomly.
         /// </summary>
         /// <returns></returns>
-        public static bool Bool()
+        public static bool Bool(this IRandom rng)
         {
-            return (Next() % 2 != 0);
+            return (rng.Next(1000) % 2 != 0);
         }
 
         /// <summary>
         /// Return -1, 0, 1 randomly. This can be used for bizarre things like randomizing an array.
         /// </summary>
         /// <returns></returns>
-        public static int Shift()
+        public static int Shift(this IRandom rng)
         {
-            return (Next() % 3) - 1;
+            return (rng.Next(999) % 3) - 1;
         }
 
-        public static UnityEngine.Vector3 OnUnitSphere()
+        public static UnityEngine.Vector3 OnUnitSphere(this IRandom rng)
         {
             //uniform, using angles
-            var a = Random.value * MathUtil.TWO_PI;
-            var b = Random.value * MathUtil.TWO_PI;
+            var a = rng.Next() * MathUtil.TWO_PI;
+            var b = rng.Next() * MathUtil.TWO_PI;
             var sa = Mathf.Sin(a);
             return new Vector3(sa * Mathf.Cos(b), sa * Mathf.Sin(b), Mathf.Cos(a));
 
@@ -75,45 +74,102 @@ namespace com.spacepuppy.Utils
                 */
         }
 
-        public static UnityEngine.Vector2 OnUnitCircle()
+        public static UnityEngine.Vector2 OnUnitCircle(this IRandom rng)
         {
             //uniform, using angles
-            var a = Random.value * MathUtil.TWO_PI;
+            var a = rng.Next() * MathUtil.TWO_PI;
             return new Vector2(Mathf.Sin(a), Mathf.Cos(a));
         }
 
-        public static UnityEngine.Vector3 InsideUnitSphere()
+        public static UnityEngine.Vector3 InsideUnitSphere(this IRandom rng)
         {
-            return OnUnitSphere() * Value();
+            return rng.OnUnitSphere() * rng.Next();
         }
 
-        public static UnityEngine.Vector2 InsideUnitCircle()
+        public static UnityEngine.Vector2 InsideUnitCircle(this IRandom rng)
         {
-            return OnUnitCircle() * Value();
+            return rng.OnUnitCircle() * rng.Next();
         }
 
-        public static UnityEngine.Quaternion Rotation()
+        public static UnityEngine.Quaternion Rotation(this IRandom rng)
         {
-            return UnityEngine.Quaternion.AngleAxis(RandomUtil.Angle(), RandomUtil.OnUnitSphere());
+            return UnityEngine.Quaternion.AngleAxis(rng.Angle(), rng.OnUnitSphere());
         }
 
         #endregion
 
         #region Methods
 
-        public static float Range(float max, float min = 0.0f)
+        public static float Range(this IRandom rng, float max, float min = 0.0f)
         {
-            return Random.value * (max - min) + min;
+            return (float)(rng.NextDouble() * (max - min)) + min;
         }
 
-        public static int Range(int max, int min = 0)
+        public static int Range(this IRandom rng, int max, int min = 0)
         {
-            return (int)(Random.value * (float)(max - min)) + min;
+            return rng.Next(max, min);
         }
 
-        public static void Shuffle<T>(T[] arr)
+        #endregion
+
+
+
+
+        #region Special Types
+
+        private class UnityRNG : IRandom
         {
-            System.Array.Sort(arr, delegate(T a, T b) { return Shift(); });
+
+            public float Next()
+            {
+                return Random.value;
+            }
+
+            public double NextDouble()
+            {
+                return (double)Random.value;
+            }
+
+            public int Next(int size)
+            {
+                return (int)Random.value;
+            }
+
+
+            public int Next(int low, int high)
+            {
+                return (int)(Random.value * (high - low)) + low;
+            }
+        }
+
+        private class MicrosoftRNG : System.Random, IRandom
+        {
+
+            public MicrosoftRNG(int seed) : base(seed)
+            {
+
+            }
+
+
+            float IRandom.Next()
+            {
+                return (float)this.Next();
+            }
+
+            double IRandom.NextDouble()
+            {
+                return this.NextDouble();
+            }
+
+            int IRandom.Next(int size)
+            {
+                return this.Next(size);
+            }
+
+            int IRandom.Next(int low, int high)
+            {
+                return this.Next(low, high);
+            }
         }
 
         #endregion

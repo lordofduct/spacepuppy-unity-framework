@@ -22,6 +22,7 @@ namespace com.spacepuppyeditor.Scenario
         private const string PROP_TRIGGERABLEARGS = "TriggerableArgs";
         private const string PROP_ACTIVATIONTYPE = "ActivationType";
         private const string PROP_METHODNAME = "MethodName";
+        private const string PROP_WEIGHT = "_weight";
 
         #region Fields
 
@@ -31,6 +32,9 @@ namespace com.spacepuppyeditor.Scenario
         private ReorderableList _targetList;
         private bool _foldoutTargetExtra;
         private TriggerTargetPropertyDrawer _triggerTargetDrawer;
+
+        private bool _drawWeight;
+        private float _totalWeight;
 
         #endregion
 
@@ -46,6 +50,9 @@ namespace com.spacepuppyeditor.Scenario
             _triggerTargetDrawer = new TriggerTargetPropertyDrawer();
 
             _initialized = true;
+
+            var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
+            if (attribs != null && attribs.Length > 0) _drawWeight = attribs[0].Weighted;
         }
 
         #endregion
@@ -118,6 +125,8 @@ namespace com.spacepuppyeditor.Scenario
             EditorGUI.EndProperty();
         }
 
+
+        
 
 
 
@@ -198,10 +207,7 @@ namespace com.spacepuppyeditor.Scenario
             var obj = EditorHelper.GetTargetObjectOfProperty(lst.serializedProperty.GetArrayElementAtIndex(lst.index)) as TriggerTarget;
             if (obj != null)
             {
-                obj.Triggerable = null;
-                obj.TriggerableArgs = new VariantReference[0];
-                obj.ActivationType = TriggerActivationType.TriggerAllOnTarget;
-                obj.MethodName = null;
+                obj.Clear();
                 lst.serializedProperty.serializedObject.Update();
             }
         }
