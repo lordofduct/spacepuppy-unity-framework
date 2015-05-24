@@ -34,7 +34,7 @@ namespace com.spacepuppyeditor.Scenario
         private TriggerTargetPropertyDrawer _triggerTargetDrawer;
 
         private bool _drawWeight;
-        private float _totalWeight;
+        private float _totalWeight = 0f;
 
         #endregion
 
@@ -53,6 +53,7 @@ namespace com.spacepuppyeditor.Scenario
 
             var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
             if (attribs != null && attribs.Length > 0) _drawWeight = attribs[0].Weighted;
+            _triggerTargetDrawer.DrawWeight = _drawWeight;
         }
 
         #endregion
@@ -84,6 +85,7 @@ namespace com.spacepuppyeditor.Scenario
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (!_initialized) this.Init(property);
+            if (_drawWeight) this.CalculateTotalWeight();
 
             _propertyLabel = label;
             GUI.Box(position, GUIContent.none);
@@ -91,7 +93,7 @@ namespace com.spacepuppyeditor.Scenario
             EditorGUI.BeginProperty(position, label, property);
 
             var listRect = new Rect(position.xMin, position.yMin, position.width, _targetList.GetHeight());
-
+            
             EditorGUI.BeginChangeCheck();
             _targetList.DoList(listRect);
             if (EditorGUI.EndChangeCheck())
@@ -126,7 +128,14 @@ namespace com.spacepuppyeditor.Scenario
         }
 
 
-        
+        private void CalculateTotalWeight()
+        {
+            _totalWeight = 0f;
+            for(int i = 0; i < _targetList.serializedProperty.arraySize; i++)
+            {
+                _totalWeight += _targetList.serializedProperty.GetArrayElementAtIndex(i).FindPropertyRelative(PROP_WEIGHT).floatValue;
+            }
+        }
 
 
 
@@ -147,25 +156,55 @@ namespace com.spacepuppyeditor.Scenario
             var act = actProp.GetEnumValue<TriggerActivationType>();
 
             const float MARGIN = 1.0f;
+            const float SMALL_LABEL_WIDTH = 120f;
+            const float WEIGHT_FIELD_WIDTH = 60f;
+            const float PERC_FIELD_WIDTH = 45f;
+
+            Rect trigRect;
+            GUIContent labelContent = (act == TriggerActivationType.TriggerAllOnTarget) ? EditorHelper.TempContent("Target") : EditorHelper.TempContent("Advanced Target", "A target is not set, see advanced settings section to set a target.");
+            if (_drawWeight && area.width > SMALL_LABEL_WIDTH)
+            {
+                var totalwidth = area.width - SMALL_LABEL_WIDTH;
+                var top = area.yMin + MARGIN;
+                var labelRect = new Rect(area.xMin, top, SMALL_LABEL_WIDTH, EditorGUIUtility.singleLineHeight);
+                var weightRect = new Rect(labelRect.xMax, top, Mathf.Min(totalwidth, WEIGHT_FIELD_WIDTH), EditorGUIUtility.singleLineHeight);
+                var percRect = new Rect(weightRect.xMax, top, Mathf.Min(totalwidth - weightRect.width, PERC_FIELD_WIDTH), EditorGUIUtility.singleLineHeight);
+                trigRect = new Rect(percRect.xMax, top, Mathf.Max(0f, totalwidth - weightRect.width - percRect.width), EditorGUIUtility.singleLineHeight);
+
+                var weightProp = element.FindPropertyRelative(PROP_WEIGHT);
+                float weight = weightProp.floatValue;
+
+                EditorGUI.LabelField(labelRect, labelContent);
+                weightProp.floatValue = EditorGUI.FloatField(weightRect, weight);
+                float p = (_totalWeight > 0f) ? ((index == 0) ? 100f : 0f) : (100f * weight / _totalWeight);
+                EditorGUI.LabelField(percRect, string.Format("{0:0.##}%", p));
+            }
+            else
+            {
+                //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
+                var top = area.yMin + MARGIN;
+                var labelRect = new Rect(area.xMin, top, Mathf.Min(area.width, EditorGUIUtility.labelWidth), EditorGUIUtility.singleLineHeight);
+                trigRect = new Rect(labelRect.xMax, top, Mathf.Max(0f, area.width - labelRect.width), EditorGUIUtility.singleLineHeight);
+
+                EditorGUI.LabelField(labelRect, labelContent);
+            }
+
             if (act == TriggerActivationType.TriggerAllOnTarget)
             {
                 //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
-                var trigRect = new Rect(area.xMin, area.yMin + MARGIN, area.width, EditorGUIUtility.singleLineHeight);
-                var trigLabel = new GUIContent("Target");
-                EditorGUI.BeginProperty(trigRect, trigLabel, trigProp);
-                trigProp.objectReferenceValue = SPEditorGUI.ComponentField(trigRect,
-                                                                           trigLabel,
-                                                                           TriggerTargetPropertyDrawer.ValidateTriggerableTargAsMechanism(trigProp.objectReferenceValue) as Component,
-                                                                           typeof(ITriggerableMechanism),
-                                                                           true);
+                EditorGUI.BeginProperty(trigRect, GUIContent.none, trigProp);
+                var targGo = GameObjectUtil.GetGameObjectFromSource(trigProp.objectReferenceValue);
+                var newTargGo = EditorGUI.ObjectField(trigRect, GUIContent.none, targGo, typeof(GameObject), true) as GameObject;
+                if (newTargGo != targGo)
+                {
+                    targGo = newTargGo;
+                    trigProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
+                }
                 EditorGUI.EndProperty();
             }
             else
             {
                 //Draw Triggerable - this forces the user to use the advanced settings, not for newbs
-                var trigRect = new Rect(area.xMin, area.yMin + MARGIN, area.width, EditorGUIUtility.singleLineHeight);
-                var trigLabel = new GUIContent("Advanced Target", "A target is not set, see advanced settings section to set a target.");
-
                 if (trigProp.objectReferenceValue != null)
                 {
                     var go = GameObjectUtil.GetGameObjectFromSource(trigProp.objectReferenceValue);
@@ -186,11 +225,11 @@ namespace com.spacepuppyeditor.Scenario
                             extraLabel = GUIContent.none;
                             break;
                     }
-                    EditorGUI.LabelField(trigRect, trigLabel, extraLabel);
+                    EditorGUI.LabelField(trigRect, extraLabel);
                 }
                 else
                 {
-                    EditorGUI.LabelField(trigRect, trigLabel, new GUIContent("No Target"), new GUIStyle("Label") { alignment = TextAnchor.MiddleCenter });
+                    EditorGUI.LabelField(trigRect, EditorHelper.TempContent("No Target"), new GUIStyle("Label") { alignment = TextAnchor.MiddleCenter });
                 }
             }
 

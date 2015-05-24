@@ -23,6 +23,8 @@ namespace com.spacepuppyeditor.Scenario
 
         private const float ARG_BTN_WIDTH = 18f;
 
+        public bool DrawWeight;
+
         private GUIContent _defaultArgLabel = new GUIContent("Triggerable Arg");
         private GUIContent _undefinedArgLabel = new GUIContent("Undefined Arg", "The argument is not explicitly defined unless the trigger's event defines it.");
         private GUIContent _messageArgLabel = new GUIContent("Message Arg", "A parameter to be passed to the message if one is desired.");
@@ -98,11 +100,18 @@ namespace com.spacepuppyeditor.Scenario
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
             var targProp = property.FindPropertyRelative(PROP_TRIGGERABLETARG);
             var targLabel = new GUIContent("Triggerable Target");
-            targProp.objectReferenceValue = SPEditorGUI.ComponentField(targRect,
-                                                                       targLabel,
-                                                                        ValidateTriggerableTargAsMechanism(targProp.objectReferenceValue),
-                                                                        typeof(ITriggerableMechanism),
-                                                                        true);
+            //targProp.objectReferenceValue = SPEditorGUI.ComponentField(targRect,
+            //                                                           targLabel,
+            //                                                            ValidateTriggerableTargAsMechanism(targProp.objectReferenceValue),
+            //                                                            typeof(Transform),
+            //                                                            true);
+            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
+            var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
+            if (newTargGo != targGo)
+            {
+                targGo = newTargGo;
+                targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
+            }
 
 
             //Draw Triggerable Arg
