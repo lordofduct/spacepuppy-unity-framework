@@ -64,10 +64,69 @@ namespace com.spacepuppyeditor.Base
     public class SingletonMaintainerPropertyDrawer : PropertyDrawer
     {
 
+        private string _message;
+        private MessageType _messageType;
+
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (property.serializedObject.isEditingMultipleObjects) return 0f;
+
+            if (property.serializedObject.targetObject is ISingleton && MultipleExist(property.serializedObject.targetObject.GetType()))
+            {
+                _message = "Multiple Singletons of this type exist, you should purge the scene of duplicates!";
+                _messageType = MessageType.Error;
+                return EditorGUIUtility.singleLineHeight * 2f;
+            }
+
+            var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+            if (object.ReferenceEquals(go, null))
+            {
+                _message = "This Singleton appears to not be attached to a GameObject.";
+                _messageType = MessageType.Error;
+                return EditorGUIUtility.singleLineHeight * 2f;
+            }
+
+            if (go.HasComponent<SingletonManager>())
+            {
+                property.FindPropertyRelative("_maintainOnLoad").boolValue = false;
+                _message = "This Singleton is managed by a SingletonManager.";
+                _messageType = MessageType.Info;
+                return EditorGUIUtility.singleLineHeight * 2f;
+            }
+            else if (go.GetLikeComponents<ISingleton>().Count() > 1)
+            {
+                _message = "A GameObject with multiple Singletons on it should have a SingletonManager attached!";
+                _messageType = MessageType.Warning;
+                return EditorGUIUtility.singleLineHeight * 2f;
+            }
+            else
+            {
+                _message = null;
+                _messageType = MessageType.None;
+                return EditorGUIUtility.singleLineHeight;
+            }
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var prop = property.FindPropertyRelative("_maintainOnLoad");
-            EditorGUI.PropertyField(position, prop);
+            if (property.serializedObject.isEditingMultipleObjects) return;
+
+            if(_message != null)
+            {
+                EditorGUI.HelpBox(position, _message, _messageType);
+            }
+            else
+            {
+                EditorGUI.PropertyField(position, property.FindPropertyRelative("_maintainOnLoad"));
+            }
+        }
+
+
+
+        private static bool MultipleExist(System.Type tp)
+        {
+            return GameObject.FindObjectsOfType(tp).Length > 1;
         }
 
     }

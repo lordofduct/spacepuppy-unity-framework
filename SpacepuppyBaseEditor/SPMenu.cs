@@ -54,15 +54,22 @@ namespace com.spacepuppyeditor
         [MenuItem(SPMenu.MENU_NAME_ROOT + "/Create SingletonSource", priority = MENU_PRIORITY_SINGLETON)]
         public static void CreateSingletonSource()
         {
-            //Singleton.CreateSpecialInstance<SingletonManager>(Singleton.GAMEOBJECT_NAME);
-            Singleton.GetInstance<SingletonManager>();
+            var mainSrc = Singleton.GameObjectSource;
+            if(mainSrc == null)
+            {
+                mainSrc = new GameObject(Singleton.GAMEOBJECT_NAME);
+            }
+            if(!mainSrc.HasComponent<SingletonManager>())
+            {
+                mainSrc.AddComponent<SingletonManager>();
+            }
         }
 
         [MenuItem(SPMenu.MENU_NAME_ROOT + "/Create SingletonSource", validate = true)]
         public static bool CreateSingletonSource_Validate()
         {
             if (Application.isPlaying) return false;
-            return !Singleton.HasInstance<SingletonManager>();
+            return true;
         }
 
         [MenuItem(SPMenu.MENU_NAME_ROOT + "/Create GameLoopEntry", priority = MENU_PRIORITY_SINGLETON)]

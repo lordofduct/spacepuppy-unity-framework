@@ -28,16 +28,24 @@ namespace com.spacepuppy
         {
             get
             {
-                if (object.ReferenceEquals(_gameObject, null) && !GameLoopEntry.ApplicationClosing)
+                if(Application.isPlaying)
                 {
-                    _gameObject = GameObject.Find(GAMEOBJECT_NAME);
-                    if (_gameObject == null)
+                    if (object.ReferenceEquals(_gameObject, null) && !GameLoopEntry.ApplicationClosing)
                     {
-                        _gameObject = new GameObject(GAMEOBJECT_NAME);
-                        _gameObject.AddComponent<SingletonManager>();
+                        _gameObject = GameObject.Find(GAMEOBJECT_NAME);
+                        if (_gameObject == null)
+                        {
+                            _gameObject = new GameObject(GAMEOBJECT_NAME);
+                            _gameObject.AddComponent<SingletonManager>();
+                        }
                     }
+                    return _gameObject;
                 }
-                return _gameObject;
+                else
+                {
+                    _gameObject = null;
+                    return GameObject.Find(GAMEOBJECT_NAME);
+                }
             }
         }
 
@@ -175,7 +183,7 @@ namespace com.spacepuppy
 
             [SerializeField()]
             [Tooltip("Should this Singleton be maintained when a new scene is loaded.")]
-            private bool _maintainOnLoad = true;
+            private bool _maintainOnLoad;
 
 
             [System.NonSerialized()]
@@ -226,6 +234,14 @@ namespace com.spacepuppy
                 if (object.ReferenceEquals(target, null)) throw new System.ArgumentNullException("target");
                 _target = target;
 
+                //first test if we have the appropriate configuration
+                if (_target.component.GetLikeComponents<ISingleton>().Count() > 1 && !_target.component.HasComponent<SingletonManager>())
+                {
+                    Debug.LogWarning("Gameobject with multiple Singletons exists without a SingletonManager attached, adding a SingletonManager with default destroy settings.", target.component);
+                    _target.component.AddComponent<SingletonManager>();
+                }
+
+                //now set up singleton reference
                 if (_target.component.IsActiveAndEnabled())
                 {
                     this.EnforceThisAsSingleton();
@@ -237,6 +253,7 @@ namespace com.spacepuppy
                     //remove self if it were added
                     this.RemoveThisAsSingleton();
                 }
+
             }
 
             public void OnStart()
@@ -279,11 +296,12 @@ namespace com.spacepuppy
             {
                 if (_maintainOnLoad) return;
                 if (_target.component == null) return;
+                if (_target.component.HasComponent<SingletonManager>()) return; //let the manager take care of this
 
                 //OnLevelWasLoaded gets called in between Awake and Start, we haven't started at that point, so ignore this
                 if (_target.isActiveAndEnabled && !_started) return;
 
-                Object.Destroy(_target.component);
+                Object.Destroy(_target.gameObject);
             }
 
             private void EnforceThisAsSingleton()
@@ -293,9 +311,16 @@ namespace com.spacepuppy
                 {
                     _singletonRefs[_target.GetType()] = _target;
                 }
-                else
+                else if(_target.component != null)
                 {
-                    Object.Destroy(_target.component);
+                    if (_target.component.HasComponent<SingletonManager>())
+                    {
+                        Object.Destroy(_target.component);
+                    }
+                    else
+                    {
+                        Object.Destroy(_target.gameObject);
+                    }
                     throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
                 }
 
@@ -317,9 +342,10 @@ namespace com.spacepuppy
             private void UpdateMaintainOnLoadStatus()
             {
                 if (_target.component == null) return;
+                if (_target.component.HasComponent<SingletonManager>()) return;
 
                 //for singletons not on the primary singleton source
-                if (!_flaggedSelfMaintaining && _target.gameObject != Singleton.GameObjectSource && _maintainOnLoad)
+                if (!_flaggedSelfMaintaining && _maintainOnLoad)
                 {
                     GameObject.DontDestroyOnLoad(_target.gameObject);
                     _flaggedSelfMaintaining = true;
@@ -334,16 +360,62 @@ namespace com.spacepuppy
 
     }
 
-    public sealed class SingletonManager : Singleton
+    /// <summary>
+    /// Attach to a component that has more than one Singleton on it, it handles group management of Singletons on the same GameObject.
+    /// </summary>
+    public sealed class SingletonManager : SPComponent
     {
+
+        #region Fields
+
+        [SerializeField()]
+        private bool _maintainOnLoad = false;
+        [System.NonSerialized()]
+        private bool _flaggedSelfMaintaining;
+
+        #endregion
+
+        #region CONSTRUCTOR
 
         protected override void Awake()
         {
             base.Awake();
 
-            if(this.gameObject == Singleton.GameObjectSource)
+            this.UpdateMaintainOnLoadStatus();
+        }
+
+        #endregion
+
+        #region Properties
+
+        public bool MaintainOnLoad
+        {
+            get { return _maintainOnLoad; }
+            set
             {
-                Object.DontDestroyOnLoad(this.gameObject);
+                if (_maintainOnLoad == value) return;
+                _maintainOnLoad = value;
+
+                if (!_flaggedSelfMaintaining && _maintainOnLoad) this.UpdateMaintainOnLoadStatus();
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        public IEnumerable<ISingleton> GetSingletons()
+        {
+            return this.GetLikeComponents<ISingleton>();
+        }
+
+        private void UpdateMaintainOnLoadStatus()
+        {
+            //for singletons not on the primary singleton source
+            if (Application.isPlaying && !_flaggedSelfMaintaining && _maintainOnLoad)
+            {
+                GameObject.DontDestroyOnLoad(this.gameObject);
+                _flaggedSelfMaintaining = true;
             }
         }
 
@@ -356,6 +428,8 @@ namespace com.spacepuppy
 
             Object.Destroy(this.gameObject);
         }
+
+        #endregion
 
     }
 
