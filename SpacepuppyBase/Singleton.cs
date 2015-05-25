@@ -356,6 +356,16 @@ namespace com.spacepuppy
 
         }
 
+        public class ConfigAttribute : System.Attribute
+        {
+            public bool ExcludeFromSingletonManager;
+
+            public ConfigAttribute(bool excludeFromSingletonManager)
+            {
+                this.ExcludeFromSingletonManager = excludeFromSingletonManager;
+            }
+        }
+
         #endregion
 
     }

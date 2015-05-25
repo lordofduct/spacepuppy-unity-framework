@@ -20,10 +20,10 @@ namespace com.spacepuppyeditor.Scenario
     {
 
         private const string PROP_TARGETS = "_targets";
-        private const string PROP_TRIGGERABLETARG = "Triggerable";
-        private const string PROP_TRIGGERABLEARGS = "TriggerableArgs";
-        private const string PROP_ACTIVATIONTYPE = "ActivationType";
-        private const string PROP_METHODNAME = "MethodName";
+        private const string PROP_TRIGGERABLETARG = "_triggerable";
+        private const string PROP_TRIGGERABLEARGS = "_triggerableArgs";
+        private const string PROP_ACTIVATIONTYPE = "_activationType";
+        private const string PROP_METHODNAME = "_methodName";
 
         private ReorderableList _targetList;
         private bool _foldoutTargetExtra;

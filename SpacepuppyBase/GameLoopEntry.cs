@@ -11,6 +11,7 @@ namespace com.spacepuppy
     /// <summary>
     /// This class is really only for internal use by com.spacepuppy, avoid using it outside of it.
     /// </summary>
+    [Singleton.Config(true)]
     public class GameLoopEntry : Singleton
     {
 
@@ -52,7 +53,7 @@ namespace com.spacepuppy
         {
             if (_instance != null) return;
 
-            _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntry");
+            _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntry", true);
             //_instance = Singleton.GetInstance<GameLoopEntry>();
         }
 

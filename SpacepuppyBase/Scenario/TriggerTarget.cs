@@ -21,14 +21,21 @@ namespace com.spacepuppy.Scenario
          * name. So to ensure backwards compatability we must keep these names.
          */
 
+        [UnityEngine.Serialization.FormerlySerializedAs("Triggerable")]
         [SerializeField()]
-        private Component Triggerable;
+        private Component _triggerable;
+
+        [UnityEngine.Serialization.FormerlySerializedAs("TriggerableArgs")]
         [SerializeField()]
-        private VariantReference[] TriggerableArgs;
+        private VariantReference[] _triggerableArgs;
+
+        [UnityEngine.Serialization.FormerlySerializedAs("ActivationType")]
         [SerializeField()]
-        private TriggerActivationType ActivationType;
+        private TriggerActivationType _activationType;
+
+        [UnityEngine.Serialization.FormerlySerializedAs("MethodName")]
         [SerializeField()]
-        private string MethodName;
+        private string _methodName;
 
         #endregion
 
@@ -43,9 +50,9 @@ namespace com.spacepuppy.Scenario
             set { _weight = value; }
         }
 
-        public GameObject Target { get { return (this.Triggerable != null) ? Triggerable.gameObject : null; } }
+        public GameObject Target { get { return (this._triggerable != null) ? _triggerable.gameObject : null; } }
 
-        public TriggerActivationType ActivationMode { get { return this.ActivationType; } }
+        public TriggerActivationType ActivationType { get { return this._activationType; } }
 
         #endregion
 
@@ -53,90 +60,90 @@ namespace com.spacepuppy.Scenario
 
         public void Clear()
         {
-            this.Triggerable = null;
-            this.TriggerableArgs = null;
-            this.ActivationType = TriggerActivationType.TriggerAllOnTarget;
-            this.MethodName = null;
+            this._triggerable = null;
+            this._triggerableArgs = null;
+            this._activationType = TriggerActivationType.TriggerAllOnTarget;
+            this._methodName = null;
         }
 
         public void ConfigureTriggerAll(GameObject targ, object arg = null)
         {
             if (targ == null) throw new System.ArgumentNullException("targ");
-            this.Triggerable = targ.transform;
+            this._triggerable = targ.transform;
             if(arg == null)
             {
-                this.TriggerableArgs = null;
+                this._triggerableArgs = null;
             }
             else
             {
-                this.TriggerableArgs = new VariantReference[] { new VariantReference(arg) };
+                this._triggerableArgs = new VariantReference[] { new VariantReference(arg) };
             }
-            this.ActivationType = TriggerActivationType.TriggerAllOnTarget;
-            this.MethodName = null;
+            this._activationType = TriggerActivationType.TriggerAllOnTarget;
+            this._methodName = null;
         }
 
         public void ConfigureTriggerAll(ITriggerableMechanism mechanism, object arg = null)
         {
             if (mechanism == null) throw new System.ArgumentNullException("mechanism");
-            this.Triggerable = mechanism.transform;
+            this._triggerable = mechanism.transform;
             if (arg == null)
             {
-                this.TriggerableArgs = null;
+                this._triggerableArgs = null;
             }
             else
             {
-                this.TriggerableArgs = new VariantReference[] { new VariantReference(arg) };
+                this._triggerableArgs = new VariantReference[] { new VariantReference(arg) };
             }
-            this.ActivationType = TriggerActivationType.TriggerAllOnTarget;
-            this.MethodName = null;
+            this._activationType = TriggerActivationType.TriggerAllOnTarget;
+            this._methodName = null;
         }
 
         public void ConfigureTriggerTarget(ITriggerableMechanism mechanism, object arg = null)
         {
             if (mechanism == null) throw new System.ArgumentNullException("mechanism");
-            this.Triggerable = mechanism.component;
+            this._triggerable = mechanism.component;
             if (arg == null)
             {
-                this.TriggerableArgs = null;
+                this._triggerableArgs = null;
             }
             else
             {
-                this.TriggerableArgs = new VariantReference[] { new VariantReference(arg) };
+                this._triggerableArgs = new VariantReference[] { new VariantReference(arg) };
             }
-            this.ActivationType = TriggerActivationType.TriggerSelectedTarget;
-            this.MethodName = null;
+            this._activationType = TriggerActivationType.TriggerSelectedTarget;
+            this._methodName = null;
         }
 
         public void ConfigureSendMessage(GameObject targ, string message, object arg = null)
         {
             if (targ == null) throw new System.ArgumentNullException("targ");
-            this.Triggerable = targ.transform;
+            this._triggerable = targ.transform;
             if (arg == null)
             {
-                this.TriggerableArgs = null;
+                this._triggerableArgs = null;
             }
             else
             {
-                this.TriggerableArgs = new VariantReference[] { new VariantReference(arg) };
+                this._triggerableArgs = new VariantReference[] { new VariantReference(arg) };
             }
-            this.MethodName = message;
-            this.ActivationType = TriggerActivationType.SendMessage;
+            this._methodName = message;
+            this._activationType = TriggerActivationType.SendMessage;
         }
 
         public void ConfigureCallMethod(GameObject targ, string methodName, params object[] args)
         {
             if (targ == null) throw new System.ArgumentNullException("targ");
-            this.Triggerable = targ.transform;
+            this._triggerable = targ.transform;
             if (args == null || args.Length == 0)
             {
-                this.TriggerableArgs = null;
+                this._triggerableArgs = null;
             }
             else
             {
-                this.TriggerableArgs = (from a in args select new VariantReference(a)).ToArray();
+                this._triggerableArgs = (from a in args select new VariantReference(a)).ToArray();
             }
-            this.MethodName = methodName;
-            this.ActivationType = TriggerActivationType.CallMethodOnSelectedTarget;
+            this._methodName = methodName;
+            this._activationType = TriggerActivationType.CallMethodOnSelectedTarget;
         }
 
         #endregion
@@ -145,36 +152,36 @@ namespace com.spacepuppy.Scenario
 
         public void Trigger()
         {
-            if (this.Triggerable == null) return;
+            if (this._triggerable == null) return;
 
-            var arg0 = (this.TriggerableArgs != null && this.TriggerableArgs.Length > 0) ? this.TriggerableArgs[0].Value : null;
-            switch (this.ActivationType)
+            var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : null;
+            switch (this._activationType)
             {
                 case TriggerActivationType.TriggerAllOnTarget:
-                    foreach (var t in (from t in this.Triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
+                    foreach (var t in (from t in this._triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
                     {
                         t.Trigger(arg0);
                     }
                     break;
                 case TriggerActivationType.TriggerSelectedTarget:
-                    if (this.Triggerable is ITriggerableMechanism)
+                    if (this._triggerable is ITriggerableMechanism)
                     {
-                        (this.Triggerable as ITriggerableMechanism).Trigger(arg0);
+                        (this._triggerable as ITriggerableMechanism).Trigger(arg0);
                     }
                     break;
                 case TriggerActivationType.SendMessage:
-                    var go = GameObjectUtil.GetGameObjectFromSource(this.Triggerable);
-                    if (go != null && this.MethodName != null)
+                    var go = GameObjectUtil.GetGameObjectFromSource(this._triggerable);
+                    if (go != null && this._methodName != null)
                     {
-                        go.SendMessage(this.MethodName, arg0, SendMessageOptions.DontRequireReceiver);
+                        go.SendMessage(this._methodName, arg0, SendMessageOptions.DontRequireReceiver);
                     }
                     break;
                 case TriggerActivationType.CallMethodOnSelectedTarget:
-                    if (this.MethodName != null)
+                    if (this._methodName != null)
                     {
                         //CallMethod does not support using the passed in arg
-                        var args = (this.TriggerableArgs != null) ? (from a in this.TriggerableArgs select (a != null) ? a.Value : null).ToArray() : null;
-                        ObjUtil.CallMethod(this.Triggerable, this.MethodName, args);
+                        var args = (this._triggerableArgs != null) ? (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray() : null;
+                        ObjUtil.CallMethod(this._triggerable, this._methodName, args);
                     }
                     break;
             }
@@ -182,36 +189,36 @@ namespace com.spacepuppy.Scenario
 
         public void Trigger(object arg)
         {
-            if (this.Triggerable == null) return;
+            if (this._triggerable == null) return;
 
-            var arg0 = (this.TriggerableArgs != null && this.TriggerableArgs.Length > 0) ? this.TriggerableArgs[0].Value : arg;
-            switch (this.ActivationType)
+            var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : arg;
+            switch (this._activationType)
             {
                 case TriggerActivationType.TriggerAllOnTarget:
-                    foreach (var t in (from t in this.Triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
+                    foreach (var t in (from t in this._triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
                     {
                         t.Trigger(arg0);
                     }
                     break;
                 case TriggerActivationType.TriggerSelectedTarget:
-                    if (this.Triggerable is ITriggerableMechanism)
+                    if (this._triggerable is ITriggerableMechanism)
                     {
-                        (this.Triggerable as ITriggerableMechanism).Trigger(arg0);
+                        (this._triggerable as ITriggerableMechanism).Trigger(arg0);
                     }
                     break;
                 case TriggerActivationType.SendMessage:
-                    var go = GameObjectUtil.GetGameObjectFromSource(this.Triggerable);
-                    if (go != null && this.MethodName != null)
+                    var go = GameObjectUtil.GetGameObjectFromSource(this._triggerable);
+                    if (go != null && this._methodName != null)
                     {
-                        go.SendMessage(this.MethodName, arg0, SendMessageOptions.DontRequireReceiver);
+                        go.SendMessage(this._methodName, arg0, SendMessageOptions.DontRequireReceiver);
                     }
                     break;
                 case TriggerActivationType.CallMethodOnSelectedTarget:
-                    if (this.MethodName != null)
+                    if (this._methodName != null)
                     {
                         //CallMethod does not support using the passed in arg
-                        var args = (from a in this.TriggerableArgs select (a != null) ? a.Value : null).ToArray();
-                        ObjUtil.CallMethod(this.Triggerable, this.MethodName, args);
+                        var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
+                        ObjUtil.CallMethod(this._triggerable, this._methodName, args);
                     }
                     break;
             }

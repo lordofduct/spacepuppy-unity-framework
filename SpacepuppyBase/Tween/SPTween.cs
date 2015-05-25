@@ -7,6 +7,7 @@ using com.spacepuppy.Collections;
 namespace com.spacepuppy.Tween
 {
 
+    [Singleton.Config(true)]
     public class SPTween : Singleton
     {
 
@@ -43,7 +44,7 @@ namespace com.spacepuppy.Tween
         internal static void AddReference(Tweener tween)
         {
             if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME);
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, true);
             _instance.AddReference_Imp(tween);
         }
         private void AddReference_Imp(Tweener tween)
@@ -109,7 +110,7 @@ namespace com.spacepuppy.Tween
         {
             if (tween == null || !(tween is IAutoKillableTweener)) return;
             if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME);
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, true);
             _instance.AutoKill_Imp(tween as IAutoKillableTweener);
         }
         private void AutoKill_Imp(IAutoKillableTweener tween)

@@ -13,24 +13,33 @@ namespace com.spacepuppyeditor.Base
     public class SingletonInspector : SPEditor
     {
 
+        private static System.Type[] IgnoredSpecialSingletonTypes;
+        static SingletonInspector()
+        {
+            var lst = new List<System.Type>();
+            foreach(var tp in TypeUtil.GetTypesAssignableFrom(typeof(ISingleton)))
+            {
+                var attribs = tp.GetCustomAttributes(typeof(Singleton.ConfigAttribute), false) as Singleton.ConfigAttribute[];
+                if(attribs != null && attribs.Length > 0)
+                {
+                    if (attribs[0].ExcludeFromSingletonManager) lst.Add(tp);
+                }
+            }
+            IgnoredSpecialSingletonTypes = lst.ToArray();
+        }
+
         protected override void OnSPInspectorGUI()
         {
             this.DrawDefaultInspector();
 
             //var selectedTypes = (from c in (this.target as SingletonManager).GetComponents<Singleton>() select c.GetType()).ToArray();
-            var selectedTypes = (from c in Singleton.AllSingletons select c.GetType()).ToArray();
+            //var selectedTypes = (from c in Singleton.AllSingletons select c.GetType()).ToArray();
 
             var singletonType = typeof(Singleton);
-            //var types = (from a in System.AppDomain.CurrentDomain.GetAssemblies()
-            //             from t in a.GetTypes()
-            //             where singletonType.IsAssignableFrom(t) &&
-            //             t != singletonType &&
-            //             !selectedTypes.Contains(t)
-            //             select t
-            //             ).ToArray();
             var types = (from t in TypeUtil.GetTypesAssignableFrom(singletonType)
                          where t != singletonType &&
-                         !selectedTypes.Contains(t)
+                         !IgnoredSpecialSingletonTypes.Contains(t) && 
+                         SingletonCount(t) == 0 //!selectedTypes.Contains(t)
                          select t
                         ).ToArray();
             var typeNames = (from t in types select t.Name).ToArray();
@@ -58,6 +67,11 @@ namespace com.spacepuppyeditor.Base
             }
         }
 
+        internal static int SingletonCount(System.Type tp)
+        {
+            return GameObject.FindObjectsOfType(tp).Length;
+        }
+
     }
 
     [CustomPropertyDrawer(typeof(Singleton.Maintainer))]
@@ -72,7 +86,7 @@ namespace com.spacepuppyeditor.Base
         {
             if (property.serializedObject.isEditingMultipleObjects) return 0f;
 
-            if (property.serializedObject.targetObject is ISingleton && MultipleExist(property.serializedObject.targetObject.GetType()))
+            if (property.serializedObject.targetObject is ISingleton && SingletonInspector.SingletonCount(property.serializedObject.targetObject.GetType()) > 1)
             {
                 _message = "Multiple Singletons of this type exist, you should purge the scene of duplicates!";
                 _messageType = MessageType.Error;
@@ -120,13 +134,6 @@ namespace com.spacepuppyeditor.Base
             {
                 EditorGUI.PropertyField(position, property.FindPropertyRelative("_maintainOnLoad"));
             }
-        }
-
-
-
-        private static bool MultipleExist(System.Type tp)
-        {
-            return GameObject.FindObjectsOfType(tp).Length > 1;
         }
 
     }
