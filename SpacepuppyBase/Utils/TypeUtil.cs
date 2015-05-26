@@ -41,6 +41,17 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
+        public static object GetDefaultValue(this System.Type tp)
+        {
+            if (tp == null) throw new System.ArgumentNullException("tp");
+
+            if (tp.IsValueType)
+                return System.Activator.CreateInstance(tp);
+            else
+                return null;
+        }
+
+
         public static System.Type ParseType(string assembName, string typeName)
         {
             var assemb = (from a in System.AppDomain.CurrentDomain.GetAssemblies()

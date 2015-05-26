@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
-using com.spacepuppy.Utils.Dynamic;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Internal

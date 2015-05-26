@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
@@ -777,7 +778,7 @@ namespace com.spacepuppy
             {
                 if (routine._currentIEnumeratorYieldValue is WaitForSeconds)
                 {
-                    float dur = ConvertUtil.ToSingle(ObjUtil.GetValue(routine._currentIEnumeratorYieldValue, "m_Seconds"));
+                    float dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(routine._currentIEnumeratorYieldValue, "m_Seconds"));
                     return string.Format("WaitForSeconds[{0:0.00}]", dur);
                 }
                 else if (routine._currentIEnumeratorYieldValue is YieldInstruction)

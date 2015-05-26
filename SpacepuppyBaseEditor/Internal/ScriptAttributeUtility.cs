@@ -6,7 +6,7 @@ using System.Reflection;
 
 using com.spacepuppy;
 using com.spacepuppy.Utils;
-using com.spacepuppy.Utils.Dynamic;
+using com.spacepuppy.Dynamic;
 
 namespace com.spacepuppyeditor.Internal
 {

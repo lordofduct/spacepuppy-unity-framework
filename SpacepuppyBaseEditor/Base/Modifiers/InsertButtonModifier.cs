@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Modifiers
@@ -37,7 +38,7 @@ namespace com.spacepuppyeditor.Modifiers
             if(GUILayout.Button(attrib.Label))
             {
                 var obj = EditorHelper.GetTargetObjectWithProperty(property);
-                ObjUtil.CallMethod(obj, attrib.OnClick);
+                DynamicUtil.InvokeMethod(obj, attrib.OnClick);
             }
         }
 

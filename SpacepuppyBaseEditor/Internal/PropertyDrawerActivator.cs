@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Internal
@@ -25,8 +26,8 @@ namespace com.spacepuppyeditor.Internal
         public static void InitializePropertyDrawer(PropertyDrawer drawer, PropertyAttribute attrib, System.Reflection.FieldInfo fieldInfo)
         {
             if (drawer == null) throw new System.ArgumentNullException("drawer");
-            ObjUtil.SetValue(drawer, "m_Attribute", attrib);
-            ObjUtil.SetValue(drawer, "m_FieldInfo", fieldInfo);
+            DynamicUtil.SetValue(drawer, "m_Attribute", attrib);
+            DynamicUtil.SetValue(drawer, "m_FieldInfo", fieldInfo);
         }
 
 

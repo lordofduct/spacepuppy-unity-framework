@@ -20,17 +20,13 @@ namespace com.spacepuppyeditor.Scenario
     {
 
         private const string PROP_TARGETS = "_targets";
-        private const string PROP_TRIGGERABLETARG = "_triggerable";
-        private const string PROP_TRIGGERABLEARGS = "_triggerableArgs";
-        private const string PROP_ACTIVATIONTYPE = "_activationType";
-        private const string PROP_METHODNAME = "_methodName";
 
         private ReorderableList _targetList;
         private bool _foldoutTargetExtra;
 
         void OnEnable()
         {
-            _targetList = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty("_targets"), true, true, true, true);
+            _targetList = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_TARGETS), true, true, true, true);
             _targetList.drawHeaderCallback = _targetList_DrawHeader;
             _targetList.drawElementCallback = _targetList_DrawElement;
             _targetList.onAddCallback = _targetList_OnAdd;
@@ -46,7 +42,7 @@ namespace com.spacepuppyeditor.Scenario
 
             this.DrawTargets();
 
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, "_targets");
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_TARGETS);
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -97,8 +93,8 @@ namespace com.spacepuppyeditor.Scenario
         {
             var element = _targetList.serializedProperty.GetArrayElementAtIndex(index);
 
-            var trigProp = element.FindPropertyRelative(PROP_TRIGGERABLETARG);
-            var actProp = element.FindPropertyRelative(PROP_ACTIVATIONTYPE);
+            var trigProp = element.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
+            var actProp = element.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
 
@@ -136,7 +132,7 @@ namespace com.spacepuppyeditor.Scenario
                             extraLabel = new GUIContent("(TriggerSelectedTarget) " + go.name + " -> " + trigType.Name);
                             break;
                         case TriggerActivationType.CallMethodOnSelectedTarget:
-                            extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + go.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(PROP_METHODNAME).stringValue);
+                            extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + go.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME).stringValue);
                             break;
                         default:
                             extraLabel = GUIContent.none;

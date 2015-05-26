@@ -6,6 +6,7 @@ using System.Reflection;
 
 using com.spacepuppy;
 using com.spacepuppy.Collections;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor
@@ -86,7 +87,7 @@ namespace com.spacepuppyeditor
                     //arr[index] = value;
                     var elementName = element.Substring(0, element.IndexOf("["));
                     var index = System.Convert.ToInt32(element.Substring(element.IndexOf("[")).Replace("[", "").Replace("]", ""));
-                    var arr = ObjUtil.GetValue(element, elementName) as System.Collections.IList;
+                    var arr = DynamicUtil.GetValue(element, elementName) as System.Collections.IList;
                     if (arr != null) arr[index] = value;
                 }
                 else
@@ -97,7 +98,7 @@ namespace com.spacepuppyeditor
                     //{
                     //    field.SetValue(obj, value);
                     //}
-                    ObjUtil.SetValue(obj, element, value);
+                    DynamicUtil.SetValue(obj, element, value);
                 }
 
             }

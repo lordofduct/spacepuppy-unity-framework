@@ -361,10 +361,10 @@ namespace com.spacepuppy
                     case VariantType.Vector3:
                     case VariantType.Quaternion:
                     case VariantType.Color:
-                        //info.SetValue("vector", _vectorStore.x.ToString() + "," + _vectorStore.y.ToString() + "," + _vectorStore.z.ToString() + "," + _vectorStore.w);
+                        //info.AddValue("vector", _vectorStore.x.ToString() + "," + _vectorStore.y.ToString() + "," + _vectorStore.z.ToString() + "," + _vectorStore.w);
                         break;
                     default:
-                        info.SetValue("value", _valueReference);
+                        info.AddValue("value", _valueReference);
                         break;
                 }
                 _valueReference = null;

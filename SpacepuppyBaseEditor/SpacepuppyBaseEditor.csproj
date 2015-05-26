@@ -48,6 +48,7 @@
     <Compile Include="Base\Commands\TransformCopyMenu.cs" />
     <Compile Include="Base\Inspectors\EnumPopupExcludingPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\RadicalCoroutineManagerInspector.cs" />
+    <Compile Include="Base\Inspectors\SingletonProxyInspector.cs" />
     <Compile Include="Base\Inspectors\UnitVectorPropertyDrawer.cs" />
     <Compile Include="ComponentHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireComponentInEntityHeaderDrawer.cs" />
@@ -97,11 +98,13 @@
     <Compile Include="PrefabHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReorderableListHelper.cs" />
+    <Compile Include="Scenario\i_SetValueInspector.cs" />
     <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerableTargetObjectInspector.cs" />
     <Compile Include="Scenario\TriggerComponentInspector.cs" />
     <Compile Include="Scenario\TriggerPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerTargetPropertyDrawer.cs" />
+    <Compile Include="Scenario\TriggerTargetProps.cs" />
     <Compile Include="ScriptableObjectHelper.cs" />
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorGUI.cs" />

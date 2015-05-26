@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace com.spacepuppy.Utils.Dynamic
+namespace com.spacepuppy.Dynamic
 {
 
     /// <summary>

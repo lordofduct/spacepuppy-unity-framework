@@ -16,10 +16,6 @@ namespace com.spacepuppyeditor.Scenario
     [CustomPropertyDrawer(typeof(TriggerTarget))]
     public class TriggerTargetPropertyDrawer : PropertyDrawer
     {
-        private const string PROP_TRIGGERABLETARG = "Triggerable";
-        private const string PROP_TRIGGERABLEARGS = "TriggerableArgs";
-        private const string PROP_ACTIVATIONTYPE = "ActivationType";
-        private const string PROP_METHODNAME = "MethodName";
 
         private const float ARG_BTN_WIDTH = 18f;
 
@@ -36,7 +32,7 @@ namespace com.spacepuppyeditor.Scenario
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            var actProp = property.FindPropertyRelative(PROP_ACTIVATIONTYPE);
+            var actProp = property.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
 
@@ -67,7 +63,7 @@ namespace com.spacepuppyeditor.Scenario
 
             //Draw ActivationType Popup
             var r0 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
-            var actProp = property.FindPropertyRelative(PROP_ACTIVATIONTYPE);
+            var actProp = property.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
             EditorGUI.PropertyField(r0, actProp);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
@@ -98,7 +94,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(PROP_TRIGGERABLETARG);
+            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
             var targLabel = new GUIContent("Triggerable Target");
             //targProp.objectReferenceValue = SPEditorGUI.ComponentField(targRect,
             //                                                           targLabel,
@@ -117,7 +113,7 @@ namespace com.spacepuppyeditor.Scenario
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, targRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+            var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
             if(argArrayProp.arraySize == 0)
             {
                 EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
@@ -149,7 +145,7 @@ namespace com.spacepuppyeditor.Scenario
 
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(PROP_TRIGGERABLETARG);
+            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
             var targLabel = new GUIContent("Triggerable Target");
             var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
             var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
@@ -183,7 +179,7 @@ namespace com.spacepuppyeditor.Scenario
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+            var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
             if (argArrayProp.arraySize == 0)
             {
                 EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
@@ -214,7 +210,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(PROP_TRIGGERABLETARG);
+            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
             var targLabel = new GUIContent("Triggerable Target");
             var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
             var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
@@ -234,12 +230,12 @@ namespace com.spacepuppyeditor.Scenario
 
             //Draw MessageName
             var msgRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            EditorGUI.PropertyField(msgRect, property.FindPropertyRelative(PROP_METHODNAME), new GUIContent("Message", "Name of the message that should be sent."), false);
+            EditorGUI.PropertyField(msgRect, property.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME), new GUIContent("Message", "Name of the message that should be sent."), false);
 
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, msgRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+            var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
             if (argArrayProp.arraySize == 0)
             {
                 EditorGUI.LabelField(argRect, _messageArgLabel, _undefinedArgLabel);
@@ -270,7 +266,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(PROP_TRIGGERABLETARG);
+            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
             var targLabel = new GUIContent("Triggerable Target");
             var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
             var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
@@ -302,19 +298,20 @@ namespace com.spacepuppyeditor.Scenario
 
             //Draw Method Name
             var methNameRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            System.Reflection.MethodInfo selectedMethod = null;
+            System.Reflection.MemberInfo selectedMember = null;
             if (targProp.objectReferenceValue != null)
             {
-                var methProp = property.FindPropertyRelative(PROP_METHODNAME);
+                var methProp = property.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME);
 
-                var tp = targProp.objectReferenceValue.GetType();
-                var methods = GetAvailableMethods(tp).ToArray();
-                var methodNames = methods.Select((m) => m.Name).ToArray();
+                //var tp = targProp.objectReferenceValue.GetType();
+                //var members = GetAvailableMethods(tp).ToArray();
+                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targProp.objectReferenceValue, System.Reflection.MemberTypes.Method).ToArray();
+                var memberNames = members.Select((m) => m.Name).ToArray();
 
-                int index = System.Array.IndexOf(methodNames, methProp.stringValue);
-                index = EditorGUI.Popup(methNameRect, new GUIContent("Method", "The method on the target to call."), index, (from n in methodNames select new GUIContent(n)).ToArray());
-                methProp.stringValue = (index >= 0) ? methodNames[index] : null;
-                selectedMethod = (index >= 0) ? methods[index] : null;
+                int index = System.Array.IndexOf(memberNames, methProp.stringValue);
+                index = EditorGUI.Popup(methNameRect, new GUIContent("Method", "The method on the target to call."), index, (from n in memberNames select new GUIContent(n)).ToArray());
+                methProp.stringValue = (index >= 0) ? memberNames[index] : null;
+                selectedMember = (index >= 0) ? members[index] : null;
             }
             else
             {
@@ -324,14 +321,14 @@ namespace com.spacepuppyeditor.Scenario
             property.serializedObject.ApplyModifiedProperties();
 
             //Draw Triggerable Arg
-            var parr = (selectedMethod != null) ? selectedMethod.GetParameters() : null;
+            var parr = (selectedMember != null) ? com.spacepuppy.Dynamic.DynamicUtil.GetParameters(selectedMember) : null;
             if (parr == null || parr.Length == 0)
             {
                 //NO PARAMETERS
                 _callMethodModeExtraLines = 1;
 
                 var argRect = new Rect(area.xMin, methNameRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+                var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
                 if(argArrayProp.arraySize > 0)
                 {
                     argArrayProp.arraySize = 0;
@@ -347,7 +344,7 @@ namespace com.spacepuppyeditor.Scenario
                 //MULTIPLE PARAMETERS - special case, does not support trigger event arg
                 _callMethodModeExtraLines = parr.Length;
 
-                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
+                var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
 
                 if (argArrayProp.arraySize != parr.Length)
                 {
@@ -356,11 +353,11 @@ namespace com.spacepuppyeditor.Scenario
                 }
                 for (int i = 0; i < parr.Length; i++)
                 {
-                    var param = parr[i];
+                    var paramType = parr[i];
                     var argRect = new Rect(area.xMin, methNameRect.yMax + i * EditorGUIUtility.singleLineHeight, area.width, EditorGUIUtility.singleLineHeight);
                     var argProp = argArrayProp.GetArrayElementAtIndex(i);
 
-                    if (param.ParameterType == typeof(object))
+                    if (paramType == typeof(object))
                     {
                         //draw the default variant as the method accepts anything
                         //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
@@ -371,7 +368,7 @@ namespace com.spacepuppyeditor.Scenario
                     else
                     {
                         var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
-                        var argType = VariantReference.GetVariantType(param.ParameterType);
+                        var argType = VariantReference.GetVariantType(paramType);
 
                         if (variantRef.ValueType != argType)
                         {
@@ -380,7 +377,7 @@ namespace com.spacepuppyeditor.Scenario
                         }
 
                         _variantDrawer.RestrictVariantType = true;
-                        _variantDrawer.ForcedComponentType = (TypeUtil.IsType(param.ParameterType, typeof(Component))) ? param.ParameterType : null;
+                        _variantDrawer.ForcedComponentType = (TypeUtil.IsType(paramType, typeof(Component))) ? paramType : null;
                         _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
                     }
                 }
@@ -465,45 +462,6 @@ namespace com.spacepuppyeditor.Scenario
 
             if (value is ITriggerableMechanism) return value as Component;
             else return (value as Component).GetFirstLikeComponent<ITriggerableMechanism>() as Component;
-        }
-
-        private static IEnumerable<System.Reflection.MethodInfo> GetAvailableMethods(System.Type tp)
-        {
-            if (tp == null) throw new System.ArgumentNullException("tp");
-
-            var methods = tp.GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-            foreach (var m in methods)
-            {
-                if (m.IsSpecialName) continue;
-                if (m.IsGenericMethod) continue;
-                if (m.DeclaringType.IsAssignableFrom(typeof(MonoBehaviour))) continue;
-
-                var parr = m.GetParameters();
-                if (parr.Length == 0)
-                {
-                    yield return m;
-                }
-                else
-                {
-                    bool pass = true;
-                    foreach(var p in parr)
-                    {
-                        if(!(VariantReference.AcceptableType(p.ParameterType) || p.ParameterType == typeof(object)))
-                        {
-                            pass = false;
-                            break;
-                        }
-                    }
-                    if (pass) yield return m;
-                }
-                //else if (parr.Length == 1)
-                //{
-                //    if (VariantReference.AcceptableType(parr[0].ParameterType))
-                //        yield return m;
-                //    else if (parr[0].ParameterType == typeof(object))
-                //        yield return m;
-                //}
-            }
         }
 
         #endregion

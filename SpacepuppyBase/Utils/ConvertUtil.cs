@@ -2502,6 +2502,20 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
+        public static bool TryToPrim(object value, System.Type tp, ref object output)
+        {
+            try
+            {
+                output = ToPrim(value, tp);
+                return true;
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
         public static object ToPrim(object value, System.TypeCode code)
         {
             return ToPrim(value, null, code);

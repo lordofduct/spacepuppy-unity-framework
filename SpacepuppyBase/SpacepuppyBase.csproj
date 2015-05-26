@@ -115,6 +115,7 @@
     <Compile Include="Scenario\IObservableTrigger.cs" />
     <Compile Include="Scenario\ITriggerable.cs" />
     <Compile Include="Scenario\i_AddComponent.cs" />
+    <Compile Include="Scenario\i_SetValue.cs" />
     <Compile Include="Scenario\i_Trigger.cs" />
     <Compile Include="Scenario\i_TriggerRandom.cs" />
     <Compile Include="Scenario\ObservableTargetData.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="SingletonProxy.cs" />
     <Compile Include="SPComponent.cs" />
     <Compile Include="SPConstants.cs" />
     <Compile Include="SPNotifyingComponent.cs" />
@@ -205,9 +207,9 @@
     <Compile Include="Utils\ComponentUtil.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\CoroutineUtil.cs" />
-    <Compile Include="Utils\Dynamic\IDynamic.cs" />
-    <Compile Include="Utils\Dynamic\StateToken.cs" />
-    <Compile Include="Utils\Dynamic\TypeAccessWrapper.cs" />
+    <Compile Include="Dynamic\IDynamic.cs" />
+    <Compile Include="Dynamic\StateToken.cs" />
+    <Compile Include="Dynamic\TypeAccessWrapper.cs" />
     <Compile Include="Utils\EnumUtil.cs" />
     <Compile Include="Utils\FastDynamicMemberAccessor\BasicMemberAccessor.cs" />
     <Compile Include="Utils\FastDynamicMemberAccessor\FastTransformMemberAccessor.cs" />

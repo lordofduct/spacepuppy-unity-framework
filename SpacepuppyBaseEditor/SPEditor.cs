@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Internal;
@@ -96,7 +97,7 @@ namespace com.spacepuppyeditor
                             if(TypeUtil.IsType(dtp, typeof(DecoratorDrawer)))
                             {
                                 var decorator = System.Activator.CreateInstance(dtp) as DecoratorDrawer;
-                                ObjUtil.SetValue(decorator, "m_Attribute", attrib);
+                                DynamicUtil.SetValue(decorator, "m_Attribute", attrib);
                                 _headerDrawers.Add(decorator);
                             }
                             else if (TypeUtil.IsType(dtp, typeof(ComponentHeaderDrawer)))

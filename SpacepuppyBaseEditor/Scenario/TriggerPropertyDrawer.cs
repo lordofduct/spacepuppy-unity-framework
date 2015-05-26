@@ -18,10 +18,6 @@ namespace com.spacepuppyeditor.Scenario
         private const float MARGIN = 2.0f;
 
         private const string PROP_TARGETS = "_targets";
-        private const string PROP_TRIGGERABLETARG = "Triggerable";
-        private const string PROP_TRIGGERABLEARGS = "TriggerableArgs";
-        private const string PROP_ACTIVATIONTYPE = "ActivationType";
-        private const string PROP_METHODNAME = "MethodName";
         private const string PROP_WEIGHT = "_weight";
 
         #region Fields
@@ -42,7 +38,7 @@ namespace com.spacepuppyeditor.Scenario
 
         private void Init(SerializedProperty prop)
         {
-            _targetList = new ReorderableList(prop.serializedObject, prop.FindPropertyRelative("_targets"), true, true, true, true);
+            _targetList = new ReorderableList(prop.serializedObject, prop.FindPropertyRelative(PROP_TARGETS), true, true, true, true);
             _targetList.drawHeaderCallback = _targetList_DrawHeader;
             _targetList.drawElementCallback = _targetList_DrawElement;
             _targetList.onAddCallback = _targetList_OnAdd;
@@ -150,8 +146,8 @@ namespace com.spacepuppyeditor.Scenario
         {
             var element = _targetList.serializedProperty.GetArrayElementAtIndex(index);
 
-            var trigProp = element.FindPropertyRelative(PROP_TRIGGERABLETARG);
-            var actProp = element.FindPropertyRelative(PROP_ACTIVATIONTYPE);
+            var trigProp = element.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
+            var actProp = element.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
 
@@ -219,7 +215,7 @@ namespace com.spacepuppyeditor.Scenario
                             extraLabel = new GUIContent("(TriggerSelectedTarget) " + go.name + " -> " + trigType.Name);
                             break;
                         case TriggerActivationType.CallMethodOnSelectedTarget:
-                            extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + go.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(PROP_METHODNAME).stringValue);
+                            extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + go.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME).stringValue);
                             break;
                         default:
                             extraLabel = GUIContent.none;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
@@ -181,7 +182,7 @@ namespace com.spacepuppy.Scenario
                     {
                         //CallMethod does not support using the passed in arg
                         var args = (this._triggerableArgs != null) ? (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray() : null;
-                        ObjUtil.CallMethod(this._triggerable, this._methodName, args);
+                        DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
                     }
                     break;
             }
@@ -218,7 +219,7 @@ namespace com.spacepuppy.Scenario
                     {
                         //CallMethod does not support using the passed in arg
                         var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
-                        ObjUtil.CallMethod(this._triggerable, this._methodName, args);
+                        DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
                     }
                     break;
             }

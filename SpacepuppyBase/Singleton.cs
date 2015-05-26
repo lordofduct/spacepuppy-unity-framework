@@ -109,6 +109,11 @@ namespace com.spacepuppy
             return _singletonRefs.ContainsKey(tp);
         }
 
+        public static bool HasInstance(System.Type tp, out ISingleton instance)
+        {
+            return _singletonRefs.TryGetValue(tp, out instance);
+        }
+
         public static IEnumerable<ISingleton> AllSingletons
         {
             get

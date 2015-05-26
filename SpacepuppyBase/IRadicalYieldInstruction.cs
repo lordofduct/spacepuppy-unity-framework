@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
@@ -391,7 +392,7 @@ namespace com.spacepuppy
 
         public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
         {
-            var dur = ConvertUtil.ToSingle(ObjUtil.GetValue(wait, "m_Seconds"));
+            var dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(wait, "m_Seconds"));
             if (returnNullIfZero && dur <= 0f)
             {
                 return null;
