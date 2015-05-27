@@ -39,18 +39,13 @@ namespace com.spacepuppyeditor.Scenario
                 targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
             }
 
-            if (targProp.objectReferenceValue != null)
+            if (targGo != null)
             {
-                var selectedType = targProp.objectReferenceValue.GetType();
-                var availableMechanismTypes = (from c in targGo.GetComponents<Component>() select c.GetType()).ToArray();
-                var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => tp.Name).ToArray();
-
-                var index = System.Array.IndexOf(availableMechanismTypes, selectedType);
                 EditorGUI.BeginChangeCheck();
-                index = EditorGUILayout.Popup("Target Component", index, availableMechanismTypeNames);
+                var selectedComp = SPEditorGUILayout.SelectComponentFromSourceField("Target Component", targGo, targProp.objectReferenceValue as Component);
                 if (EditorGUI.EndChangeCheck())
                 {
-                    targProp.objectReferenceValue = (index >= 0) ? targGo.GetComponent(availableMechanismTypes[index]) : null;
+                    targProp.objectReferenceValue = selectedComp;
                 }
             }
             else

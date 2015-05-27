@@ -13,7 +13,7 @@ namespace com.spacepuppy
 
         #region Fields
 
-        [TypeReference.Config(typeof(ISingleton), dropDownStyle=TypeDropDownListingStyle.Flat)]
+        [TypeReference.Config(typeof(ISingleton), allowAbstractClasses = false, allowInterfaces = false, dropDownStyle = TypeDropDownListingStyle.Flat)]
         [SerializeField()]
         private TypeReference _singletonType;
 

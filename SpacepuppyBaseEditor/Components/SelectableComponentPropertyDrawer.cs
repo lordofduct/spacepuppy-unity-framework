@@ -18,6 +18,8 @@ namespace com.spacepuppyeditor.Components
         public const float DEFAULT_POPUP_WIDTH_SCALE = 0.4f;
 
         public bool AllowSceneObject;
+        public bool ForceOnlySelf;
+        public bool SearchChildren;
         public float PopupWidthScale = DEFAULT_POPUP_WIDTH_SCALE;
         public IComponentChoiceSelector ChoiceSelector;
 
@@ -48,7 +50,15 @@ namespace com.spacepuppyeditor.Components
 
             if (this.attribute != null && this.attribute is SelectableComponentAttribute)
             {
-                this.AllowSceneObject = (this.attribute as SelectableComponentAttribute).AllowSceneObjects;
+                var attrib = (this.attribute as SelectableComponentAttribute);
+                this.AllowSceneObject = attrib.AllowSceneObjects;
+                this.ForceOnlySelf = attrib.ForceOnlySelf;
+                SearchChildren = attrib.SearchChildren;
+            }
+
+            if (this.ChoiceSelector == null)
+            {
+                this.ChoiceSelector = new DefaultComponentChoiceSelector();
             }
         }
 
@@ -62,57 +72,94 @@ namespace com.spacepuppyeditor.Components
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            this.Init();
-
             if (property.propertyType != SerializedPropertyType.ObjectReference || !TypeUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
             {
                 this.DrawAsMismatchedAttribute(position, property, label);
                 return;
             }
 
-            if (this.ChoiceSelector == null)
+            this.Init();
+
+            if(this.ForceOnlySelf)
             {
-                this.ChoiceSelector = new DefaultComponentChoiceSelector();
+                var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                if(targGo == null)
+                {
+                    this.DrawAsMismatchedAttribute(position, property, label);
+                    return;
+                }
+
+                if(property.objectReferenceValue == null)
+                {
+                    property.objectReferenceValue = targGo.GetFirstLikeComponent(_restrictionType);
+                }
             }
 
-            this.ChoiceSelector.BeforeGUI(property, _restrictionType);
-
-            if(property.objectReferenceValue == null)
+            if (!this.ForceOnlySelf && property.objectReferenceValue == null)
             {
                 //SPEditorGUI.DefaultPropertyField(position, property, label);
                 this.DrawObjectRefField(position, property, label);
             }
             else
             {
+                this.ChoiceSelector.BeforeGUI(this, property, _restrictionType);
+
                 float w = (label == GUIContent.none) ? position.width : Mathf.Max(position.width - EditorGUIUtility.labelWidth, 0);
-                var ra = new Rect(position.xMin, position.yMin, w * this.PopupWidthScale, position.height);
-                var rb = new Rect(ra.xMax, position.yMin, w - ra.width, position.height);
+                var ra = new Rect(position.xMin, position.yMin, w * this.PopupWidthScale + EditorGUIUtility.labelWidth, position.height);
+                var rb = new Rect(ra.xMax, position.yMin, position.width - ra.width, position.height);
 
                 var components = this.ChoiceSelector.GetComponents();
                 var names = this.ChoiceSelector.GetPopupEntries();
                 int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
                 int ni = EditorGUI.Popup(ra, label, oi, names);
-                if(oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
+                if (oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
 
                 this.DrawObjectRefField(rb, property, GUIContent.none);
-            }
 
-            this.ChoiceSelector.GUIComplete(property);
+                this.ChoiceSelector.GUIComplete(property);
+            }
+            
         }
 
         private void DrawObjectRefField(Rect position, SerializedProperty property, GUIContent label)
         {
-            if(TypeUtil.IsType(_restrictionType, typeof(Component)))
+            if (TypeUtil.IsType(_restrictionType, typeof(Component)))
             {
-                property.objectReferenceValue = EditorGUI.ObjectField(position, label, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
+                var obj = EditorGUI.ObjectField(position, label, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
+                if(this.ForceOnlySelf)
+                {
+                    var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                    var ngo = GameObjectUtil.GetGameObjectFromSource(obj);
+                    if(targGo == ngo ||
+                       (this.SearchChildren && targGo.IsParentOf(ngo)))
+                    {
+                        property.objectReferenceValue = obj;
+                    }
+                }
+                else
+                {
+                    property.objectReferenceValue = obj;
+                }
             }
             else
             {
                 var ogo = GameObjectUtil.GetGameObjectFromSource(property.objectReferenceValue);
                 var ngo = EditorGUI.ObjectField(position, label, ogo, typeof(GameObject), this.AllowSceneObject) as GameObject;
-                if(ogo != ngo)
+                if (ogo != ngo)
                 {
-                    property.objectReferenceValue = (ngo == null) ? null : ngo.GetFirstLikeComponent(_restrictionType);
+                    if(this.ForceOnlySelf)
+                    {
+                        var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                        if (targGo == ngo ||
+                            (this.SearchChildren && targGo.IsParentOf(ngo)))
+                        {
+                            property.objectReferenceValue = ngo.GetFirstLikeComponent(_restrictionType);
+                        }
+                    }
+                    else
+                    {
+                        property.objectReferenceValue = (ngo == null) ? null : ngo.GetFirstLikeComponent(_restrictionType);
+                    }
                 }
             }
         }

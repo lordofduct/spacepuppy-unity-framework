@@ -192,6 +192,22 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Component Selection From Source
+
+        public static Component SelectComponentFromSourceField(string label, GameObject source, Component selectedComp, System.Predicate<Component> filter = null)
+        {
+            var position = EditorGUILayout.GetControlRect(true);
+            return SPEditorGUI.SelectComponentFromSourceField(position, EditorHelper.TempContent(label), source, selectedComp, filter);
+        }
+
+        public static Component SelectComponentFromSourceField(GUIContent label, GameObject source, Component selectedComp, System.Predicate<Component> filter = null)
+        {
+            var position = EditorGUILayout.GetControlRect(true);
+            return SPEditorGUI.SelectComponentFromSourceField(position, label, source, selectedComp, filter);
+        }
+
+        #endregion
+
 
         #region SelectionTabs
 

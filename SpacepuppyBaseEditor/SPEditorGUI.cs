@@ -359,5 +359,31 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Component Selection From Source
+
+        public static Component SelectComponentFromSourceField(Rect position, string label, GameObject source, Component selectedComp, System.Predicate<Component> filter = null)
+        {
+            return SelectComponentFromSourceField(position, EditorHelper.TempContent(label), source, selectedComp, filter);
+        }
+
+        public static Component SelectComponentFromSourceField(Rect position, GUIContent label, GameObject source, Component selectedComp, System.Predicate<Component> filter = null)
+        {
+            if (source == null) throw new System.ArgumentNullException("source");
+
+            var selectedType = (selectedComp != null) ? source.GetType() : null;
+            System.Type[] availableMechanismTypes;
+            if (filter != null)
+                availableMechanismTypes = (from c in source.GetComponents<Component>() where filter(c) select c.GetType()).ToArray();
+            else
+                availableMechanismTypes = (from c in source.GetComponents<Component>() select c.GetType()).ToArray();
+            var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => EditorHelper.TempContent(tp.Name)).ToArray();
+
+            var index = System.Array.IndexOf(availableMechanismTypes, selectedType);
+            index = EditorGUI.Popup(position, label, index, availableMechanismTypeNames);
+            return (index >= 0) ? source.GetComponent(availableMechanismTypes[index]) : null;
+        }
+
+        #endregion
+
     }
 }

@@ -220,6 +220,7 @@
     <Compile Include="Utils\FastDynamicMemberAccessor\MemberAccessorPool.cs" />
     <Compile Include="Utils\FastDynamicMemberAccessor\PropertyAccessor.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
+    <Compile Include="Utils\Gizmo\GizmoGhost.cs" />
     <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
     <Compile Include="Utils\LayerUtil.cs" />
     <Compile Include="Utils\MathUtil.cs" />

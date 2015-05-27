@@ -169,6 +169,8 @@ namespace com.spacepuppy
     public class SelectableComponentAttribute : SPPropertyAttribute
     {
         public bool AllowSceneObjects = true;
+        public bool ForceOnlySelf = false;
+        public bool SearchChildren = false;
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
