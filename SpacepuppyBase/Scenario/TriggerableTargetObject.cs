@@ -35,19 +35,19 @@ namespace com.spacepuppy.Scenario
 
         #region Methods
 
-        public T GetTarget<T>(object triggerArg, bool searchEntity = true) where T : UnityEngine.Object
+        public T GetTarget<T>(object triggerArg, bool searchEntity = true) where T : class
         {
             return GetTarget_Imp(typeof(T), triggerArg, searchEntity) as T;
         }
 
-        public UnityEngine.Object GetTarget(System.Type tp, object triggerArg, bool searchEntity = true)
+        public object GetTarget(System.Type tp, object triggerArg, bool searchEntity = true)
         {
             if (tp == null || !TypeUtil.IsType(tp, typeof(UnityEngine.Object))) throw new TypeArgumentMismatchException(tp, typeof(UnityEngine.Object), "tp");
 
             return GetTarget_Imp(tp, triggerArg, searchEntity);
         }
 
-        private UnityEngine.Object GetTarget_Imp(System.Type tp, object triggerArg, bool searchEntity = true)
+        private object GetTarget_Imp(System.Type tp, object triggerArg, bool searchEntity = true)
         {
             var targ = this.ReduceTarget(triggerArg);
 
@@ -81,6 +81,17 @@ namespace com.spacepuppy.Scenario
                             return null;
                         }
                     }
+                    else if (TypeUtil.IsType(tp, typeof(IComponent)))
+                    {
+                        if (GameObjectUtil.IsGameObjectSource(targ))
+                        {
+                            return GameObjectUtil.GetGameObjectFromSource(targ).FindLikeComponent(tp);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
                     else
                     {
                         return null;
@@ -104,6 +115,17 @@ namespace com.spacepuppy.Scenario
                         if (GameObjectUtil.IsGameObjectSource(targ))
                         {
                             return GameObjectUtil.GetGameObjectFromSource(targ).GetComponent(tp);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    else if (TypeUtil.IsType(tp, typeof(IComponent)))
+                    {
+                        if (GameObjectUtil.IsGameObjectSource(targ))
+                        {
+                            return GameObjectUtil.GetGameObjectFromSource(targ).GetFirstLikeComponent(tp);
                         }
                         else
                         {
@@ -157,7 +179,8 @@ namespace com.spacepuppy.Scenario
 
             public ConfigAttribute(System.Type targetType)
             {
-                if (targetType == null || !TypeUtil.IsType(targetType, typeof(UnityEngine.Object))) throw new TypeArgumentMismatchException(targetType, typeof(UnityEngine.Object), "targetType");
+                if (targetType == null || 
+                    (!TypeUtil.IsType(targetType, typeof(UnityEngine.Object)) && !TypeUtil.IsType(targetType, typeof(IComponent)))) throw new TypeArgumentMismatchException(targetType, typeof(UnityEngine.Object), "targetType");
 
                 this.TargetType = targetType;
             }

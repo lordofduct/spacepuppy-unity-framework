@@ -371,7 +371,14 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Path
 
+        public static string GetFullPathForAssetPath(string assetPath)
+        {
+            return Application.dataPath.EnsureNotEndsWith("Assets") + "/" + assetPath.EnsureNotStartWith("/");
+        }
+
+        #endregion
 
         #region Temp Content
 

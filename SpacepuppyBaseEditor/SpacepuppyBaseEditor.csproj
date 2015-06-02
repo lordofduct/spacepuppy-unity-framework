@@ -100,7 +100,7 @@
     <Compile Include="ReorderableListHelper.cs" />
     <Compile Include="Scenario\i_SetValueInspector.cs" />
     <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />
-    <Compile Include="Scenario\TriggerableTargetObjectInspector.cs" />
+    <Compile Include="Scenario\TriggerableTargetObjectPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerComponentInspector.cs" />
     <Compile Include="Scenario\TriggerPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerTargetPropertyDrawer.cs" />

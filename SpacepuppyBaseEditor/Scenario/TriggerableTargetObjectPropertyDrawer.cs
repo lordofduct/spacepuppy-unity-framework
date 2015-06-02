@@ -11,7 +11,7 @@ namespace com.spacepuppyeditor.Scenario
 {
 
     [CustomPropertyDrawer(typeof(TriggerableTargetObject))]
-    public class TriggerableTargetObjectInspector : PropertyDrawer
+    public class TriggerableTargetObjectPropertyDrawer : PropertyDrawer
     {
 
         private TriggerableTargetObject.ConfigAttribute _configAttrib;
@@ -53,6 +53,17 @@ namespace com.spacepuppyeditor.Scenario
                             return null;
                         }
                     }
+                    else if(TypeUtil.IsType(_configAttrib.TargetType, typeof(IComponent)))
+                    {
+                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
+                        {
+                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).GetFirstLikeComponent(_configAttrib.TargetType);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
                     else if(TypeUtil.IsType(property.serializedObject.targetObject.GetType(), _configAttrib.TargetType))
                     {
                         return property.serializedObject.targetObject as UnityEngine.Object;
@@ -78,7 +89,18 @@ namespace com.spacepuppyeditor.Scenario
                     {
                         if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
                         {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindComponent(_configAttrib.TargetType);
+                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetComponent(_configAttrib.TargetType);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    else if(TypeUtil.IsType(_configAttrib.TargetType, typeof(IComponent)))
+                    {
+                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
+                        {
+                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetFirstLikeComponent(_configAttrib.TargetType);
                         }
                         else
                         {
@@ -92,6 +114,61 @@ namespace com.spacepuppyeditor.Scenario
 
                 default:
                     return null;
+            }
+        }
+
+        private bool PropertyIsComplex(SerializedProperty property)
+        {
+            if (_configAttrib == null) this.Init(property);
+
+            var sourceProp = property.FindPropertyRelative("_source");
+            var targetProp = property.FindPropertyRelative("_target");
+
+            var esrc = sourceProp.GetEnumValue<TriggerableTargetObject.TargetSource>();
+            var go = GameObjectUtil.GetGameObjectFromSource(targetProp.objectReferenceValue);
+            if (go == null) return false;
+
+            switch(esrc)
+            {
+                case TriggerableTargetObject.TargetSource.Self:
+                case TriggerableTargetObject.TargetSource.Root:
+                case TriggerableTargetObject.TargetSource.Configurable:
+                    {
+                        if (TypeUtil.IsType(_configAttrib.TargetType, typeof(Component)))
+                        {
+                            return go.GetComponents(_configAttrib.TargetType).Length > 1;
+                        }
+                        else if (TypeUtil.IsType(_configAttrib.TargetType, typeof(IComponent)))
+                        {
+                            return go.GetLikeComponents(_configAttrib.TargetType).Count() > 1;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                case TriggerableTargetObject.TargetSource.TriggerArg:
+                    return false;
+            }
+
+            return false;
+        }
+
+
+
+
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (_configAttrib == null) this.Init(property);
+
+            if (this.PropertyIsComplex(property))
+            {
+                return EditorGUIUtility.singleLineHeight * 2f;
+            }
+            else
+            {
+                return EditorGUIUtility.singleLineHeight;
             }
         }
 
@@ -133,6 +210,24 @@ namespace com.spacepuppyeditor.Scenario
                     {
                         //sourceProp.enumValueIndex = (int)TriggerableTargetObject.TargetSource.Configurable;
                         sourceProp.SetEnumValue(TriggerableTargetObject.TargetSource.Configurable);
+                    }
+                }
+
+                if(this.PropertyIsComplex(property))
+                {
+                    var r2 = new Rect(r1.xMin, r1.yMax, r1.width, r1.height);
+                    var go = GameObjectUtil.GetGameObjectFromSource(targetProp.objectReferenceValue);
+
+                    var selectedType = targetProp.objectReferenceValue.GetType();
+                    var availableTypes = (from c in go.GetLikeComponents(_configAttrib.TargetType) select c.GetType()).ToArray();
+                    var availableTypeNames = availableTypes.Select((tp) => EditorHelper.TempContent(tp.Name)).ToArray();
+
+                    var index = System.Array.IndexOf(availableTypes, selectedType);
+                    EditorGUI.BeginChangeCheck();
+                    index = EditorGUI.Popup(r2, GUIContent.none, index, availableTypeNames);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        targetProp.objectReferenceValue = (index >= 0) ? go.GetComponent(availableTypes[index]) : null;
                     }
                 }
             }

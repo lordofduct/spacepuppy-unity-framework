@@ -16,14 +16,17 @@ namespace com.spacepuppyeditor
         public const string MENU_NAME_ROOT = "Spacepuppy";
         public const string MENU_NAME_SETTINGS = MENU_NAME_ROOT + "/Settings";
         public const string MENU_NAME_MODELS = MENU_NAME_ROOT + "/Models";
+        public const string MENU_NAME_TOOLS = MENU_NAME_ROOT + "/Tools";
 
         public const int MENU_GAP = 1000;
 
         public const int MENU_PRIORITY_GROUP1 = 0;
         public const int MENU_PRIORITY_GROUP2 = MENU_PRIORITY_GROUP1 + MENU_GAP;
         public const int MENU_PRIORITY_GROUP3 = MENU_PRIORITY_GROUP2 + MENU_GAP;
+        public const int MENU_PRIORITY_GROUP4 = MENU_PRIORITY_GROUP3 + MENU_GAP;
         public const int MENU_PRIORITY_SETTINGS = MENU_PRIORITY_GROUP1 - 1;
         public const int MENU_PRIORITY_MODELS = MENU_PRIORITY_GROUP3 - 1;
+        public const int MENU_PRIORITY_TOOLS = MENU_PRIORITY_GROUP4 - 1;
 
         public const int MENU_PRIORITY_SINGLETON = 1000000;
 
