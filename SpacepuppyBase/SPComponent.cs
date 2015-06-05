@@ -147,6 +147,16 @@ namespace com.spacepuppy
             return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay), disableMode);
         }
 
+        public new void StopAllCoroutines()
+        {
+            RadicalCoroutineManager manager;
+            if(this.GetComponent<RadicalCoroutineManager>(out manager))
+            {
+                manager.PurgeCoroutines(this);
+            }
+            base.StopAllCoroutines();
+        }
+
         #endregion
 
         #region IComponent Interface

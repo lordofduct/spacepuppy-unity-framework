@@ -117,6 +117,7 @@
     <Compile Include="Scenario\i_AddComponent.cs" />
     <Compile Include="Scenario\i_SetValue.cs" />
     <Compile Include="Scenario\i_Trigger.cs" />
+    <Compile Include="Scenario\i_TriggerChildren.cs" />
     <Compile Include="Scenario\i_TriggerRandom.cs" />
     <Compile Include="Scenario\ObservableTargetData.cs" />
     <Compile Include="Scenario\ScenarioActivatorMask.cs" />

@@ -43,6 +43,10 @@ namespace com.spacepuppy
     /// A GameObject that is operating coroutines has a RadicalCoroutineManager attached. This is what tracks and maintains automatic pausing/cancelling/resuming 
     /// of coroutines. As well as gives an inspector view of what coroutines are operating on what components and the name of the function being operated. Great 
     /// for debugging.
+    /// 
+    /// *WARNING
+    /// When using RadicalCoroutine with SPComponent, NEVER call StopCoroutine, and instead use the 'Cancel' method on the routine. StopAllCoroutines works correctly on the SPComponent though.
+    /// When using RadicalCoroutine with MonoBehaviour, several features no longer exist (namely tracking and pausing), but you're free to use the Stop* methods for coroutines.
     /// </summary>
     public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IEnumerator
     {
@@ -183,11 +187,11 @@ namespace com.spacepuppy
             _token = behaviour.StartCoroutine(this);
 
             _disableMode = disableMode;
-            if (_disableMode > RadicalCoroutineDisableMode.Default && _disableMode != RadicalCoroutineDisableMode.ResumeOnEnable)
+            if (behaviour is SPComponent && _disableMode > RadicalCoroutineDisableMode.Default && _disableMode != RadicalCoroutineDisableMode.ResumeOnEnable)
             {
                 //no point in managing the routine if it acts in default mode... a flag of 'ResumeOnEnable' is a redundant mode to default
                 var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
-                manager.RegisterCoroutine(behaviour, this);
+                manager.RegisterCoroutine(behaviour as SPComponent, this);
             }
 
             if (_stack.Count > 0 && _stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnResume();
@@ -640,10 +644,10 @@ namespace com.spacepuppy
 
         private static IEnumerator WaitUntilDone_Routine(RadicalCoroutine routine)
         {
-            if (routine._owner != null)
-            {
-                routine._owner.AddOrGetComponent<RadicalCoroutineManager>().RegisterCoroutine(routine._owner, routine);
-            }
+            //if (routine._owner != null && routine._owner is SPComponent)
+            //{
+            //    routine._owner.AddOrGetComponent<RadicalCoroutineManager>().RegisterCoroutine(routine._owner as SPComponent, routine);
+            //}
 
             while (!routine.Finished)
             {
