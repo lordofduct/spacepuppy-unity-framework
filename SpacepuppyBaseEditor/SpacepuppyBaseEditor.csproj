@@ -47,6 +47,8 @@
     <Compile Include="Base\Commands\ComponentSearchWindow.cs" />
     <Compile Include="Base\Commands\TransformCopyMenu.cs" />
     <Compile Include="Base\Inspectors\EnumPopupExcludingPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\MaxRangePropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\MinRangePropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\RadicalCoroutineManagerInspector.cs" />
     <Compile Include="Base\Inspectors\SingletonProxyInspector.cs" />
     <Compile Include="Base\Inspectors\UnitVectorPropertyDrawer.cs" />

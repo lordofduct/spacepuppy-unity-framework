@@ -51,24 +51,27 @@ namespace com.spacepuppy
 
         public static T GetInstance<T>() where T : Component, ISingleton
         {
-            if (_singletonRefs.ContainsKey(typeof(T))) return _singletonRefs[typeof(T)] as T;
+            ISingleton single;
+            if (_singletonRefs.TryGetValue(typeof(T), out single)) return single as T;
             if (GameLoopEntry.ApplicationClosing) return null;
 
-            var single = Singleton.GameObjectSource.GetComponent<T>();
+            single = Singleton.GameObjectSource.GetComponent<T>();
             if (single == null)
             {
                 single = Singleton.GameObjectSource.AddComponent<T>();
             }
-            return single;
+            return single as T;
         }
 
         public static ISingleton GetInstance(System.Type tp)
         {
             if (!typeof(ISingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(ISingleton), "tp");
-            if (_singletonRefs.ContainsKey(tp)) return _singletonRefs[tp];
+
+            ISingleton single;
+            if (_singletonRefs.TryGetValue(tp, out single)) return single;
             if (GameLoopEntry.ApplicationClosing) return null;
 
-            var single = Singleton.GameObjectSource.GetComponent(tp) as ISingleton;
+            single = Singleton.GameObjectSource.GetComponent(tp) as ISingleton;
             if (single == null)
             {
                 single = Singleton.GameObjectSource.AddComponent(tp) as ISingleton;
@@ -78,23 +81,26 @@ namespace com.spacepuppy
 
         public static T CreateSpecialInstance<T>(string gameObjectName, bool maintainOnLoad = true) where T : Component, ISingleton
         {
-            if (_singletonRefs.ContainsKey(typeof(T))) return _singletonRefs[typeof(T)] as T;
+            ISingleton single;
+            if (_singletonRefs.TryGetValue(typeof(T), out single)) return single as T;
             if (GameLoopEntry.ApplicationClosing) return null;
 
             var go = new GameObject(gameObjectName);
-            var single = go.AddComponent<T>();
+            single = go.AddComponent<T>();
             single.MaintainOnLoad = maintainOnLoad;
-            return single;
+            return single as T;
         }
 
         public static ISingleton CreateSpecialInstance(System.Type tp, string gameObjectName, bool maintainOnLoad = true)
         {
             if (!typeof(ISingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(ISingleton), "tp");
-            if (_singletonRefs.ContainsKey(tp)) return _singletonRefs[tp];
+
+            ISingleton single;
+            if (_singletonRefs.TryGetValue(tp, out single)) return single;
             if (GameLoopEntry.ApplicationClosing) return null;
 
             var go = new GameObject(gameObjectName);
-            var single = go.AddComponent(tp) as ISingleton;
+            single = go.AddComponent(tp) as ISingleton;
             single.MaintainOnLoad = maintainOnLoad;
             return single;
         }

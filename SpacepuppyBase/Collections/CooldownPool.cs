@@ -11,8 +11,6 @@ namespace com.spacepuppy.Collections
         #region Fields
 
         private List<CooldownInfo> _lst = new List<CooldownInfo>();
-        private bool _autoUpdate;
-        private bool _currentlyAutoUpdating;
         private ITimeSupplier _time;
 
         #endregion
@@ -23,37 +21,13 @@ namespace com.spacepuppy.Collections
         {
         }
 
-        public CooldownPool(bool autoUpdate)
-        {
-            _autoUpdate = autoUpdate;
-        }
-
         #endregion
 
         #region Properties
 
         public int Count { get { return _lst.Count; } }
 
-        public bool AutoUpdate
-        {
-            get { return _autoUpdate; }
-            set
-            {
-                if (_autoUpdate == value) return;
-
-                _autoUpdate = value;
-                if(_autoUpdate && _lst.Count > 0)
-                {
-                    this.StartAutoUpdate();
-                }
-                else
-                {
-                    this.StopAutoUpdate();
-                }
-            }
-        }
-
-        public ITimeSupplier AutoUpdateTimeSupplier
+        public ITimeSupplier UpdateTimeSupplier
         {
             get
             {
@@ -82,9 +56,8 @@ namespace com.spacepuppy.Collections
                 }
             }
 
-            var info = new CooldownInfo(obj, duration);
+            var info = new CooldownInfo(obj, this.UpdateTimeSupplier.Total, duration);
             _lst.Add(info);
-            if (_autoUpdate && _lst.Count > 0 && !_currentlyAutoUpdating) this.StartAutoUpdate();
         }
 
         public bool Contains(T obj)
@@ -96,11 +69,14 @@ namespace com.spacepuppy.Collections
             return false;
         }
 
-        public void Update(float dt)
+        public void Update()
         {
+            var t = this.UpdateTimeSupplier.Total;
+            CooldownInfo info;
             for(int i = 0; i < _lst.Count; i++)
             {
-                if(_lst[i].Update(dt))
+                info = _lst[i];
+                if(info.Object == null || t - info.StartTime > info.Duration)
                 {
                     _lst.RemoveAt(i);
                     i--;
@@ -111,32 +87,6 @@ namespace com.spacepuppy.Collections
         public void Clear()
         {
             _lst.Clear();
-            this.StopAutoUpdate();
-        }
-
-
-
-        private void StartAutoUpdate()
-        {
-            if(_autoUpdate)
-            {
-                if (_time == null) _time = SPTime.Normal;
-                GameLoopEntry.EarlyUpdate -= this.OnEarlyUpdate;
-                GameLoopEntry.EarlyUpdate += this.OnEarlyUpdate;
-                _currentlyAutoUpdating = true;
-            }
-        }
-
-        private void StopAutoUpdate()
-        {
-            GameLoopEntry.EarlyUpdate -= this.OnEarlyUpdate;
-            _currentlyAutoUpdating = false;
-        }
-
-        private void OnEarlyUpdate(object sender, System.EventArgs e)
-        {
-            this.Update(_time.Delta);
-            if (_lst.Count == 0) this.StopAutoUpdate();
         }
 
         #endregion
@@ -159,29 +109,28 @@ namespace com.spacepuppy.Collections
         public class CooldownInfo
         {
             private T _obj;
+            private float _startTime;
             private float _dur;
-            private float _t;
 
-            public CooldownInfo(T obj, float dur)
+            public CooldownInfo(T obj, float startTime, float dur)
             {
                 _obj = obj;
+                _startTime = startTime;
                 _dur = dur;
-                _t = 0f;
             }
 
             public T Object { get { return _obj; } }
+            public float StartTime
+            {
+                get { return _startTime; }
+                set { _startTime = value; }
+            }
             public float Duration
             {
                 get { return _dur; }
                 internal set { _dur = value; }
             }
-            public float CurrentTime { get { return _t; } }
 
-            internal bool Update(float dt)
-            {
-                _t += dt;
-                return _t >= _dur;
-            }
         }
 
         #endregion

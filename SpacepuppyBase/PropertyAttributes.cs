@@ -178,6 +178,7 @@ namespace com.spacepuppy
     {
 
         public string ElementLabelFormatString = null;
+        public bool DisallowFoldout;
 
         public ReorderableArrayAttribute() : base(true)
         {
@@ -204,6 +205,34 @@ namespace com.spacepuppy
 
         }
 
+    }
+
+    /// <summary>
+    /// Restrict a value to be no lesser than min.
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class MinRangeAttribute : SPPropertyAttribute
+    {
+        public float Min;
+
+        public MinRangeAttribute(float min)
+        {
+            this.Min = min;
+        }
+    }
+
+    /// <summary>
+    /// Restrict a value to be no greater than max.
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class MaxRangeAttribute : SPPropertyAttribute
+    {
+        public float Max;
+
+        public MaxRangeAttribute(float max)
+        {
+            this.Max = max;
+        }
     }
 
     #endregion

@@ -18,6 +18,7 @@ namespace com.spacepuppyeditor.Base
 
         public string Label;
         private ReorderableList _lst;
+        private bool _disallowFoldout;
 
         #endregion
 
@@ -37,7 +38,16 @@ namespace com.spacepuppyeditor.Base
                 _lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(property) + 1;
             }
             if (_lst.serializedProperty != null && _lst.index >= _lst.count) _lst.index = -1;
+
+            var attrib = this.attribute as ReorderableArrayAttribute;
+            if (attrib != null) _disallowFoldout = attrib.DisallowFoldout;
         }
+
+        #endregion
+
+        #region Properties
+
+        
 
         #endregion
 
@@ -49,7 +59,14 @@ namespace com.spacepuppyeditor.Base
             {
                 this.Init(property);
 
-                return _lst.GetHeight();
+                if (_disallowFoldout || property.isExpanded)
+                {
+                    return _lst.GetHeight();
+                }
+                else
+                {
+                    return EditorGUIUtility.singleLineHeight;
+                }
             }
             else
             {
@@ -63,7 +80,23 @@ namespace com.spacepuppyeditor.Base
             {
                 this.Init(property);
 
-                _lst.DoList(position);
+                if(_disallowFoldout)
+                {
+                    _lst.DoList(position);
+                }
+                else
+                {
+                    const float WIDTH_FOLDOUT = 5f;
+                    property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
+                    if (property.isExpanded)
+                    {
+                        _lst.DoList(position);
+                    }
+                    else
+                    {
+                        ReorderableListHelper.DrawRetractedHeader(position, label);
+                    }
+                }
             }
             else
             {
