@@ -370,17 +370,42 @@ namespace com.spacepuppyeditor
         {
             if (source == null) throw new System.ArgumentNullException("source");
 
-            var selectedType = (selectedComp != null) ? source.GetType() : null;
-            System.Type[] availableMechanismTypes;
+            //var selectedType = (selectedComp != null) ? selectedComp.GetType() : null;
+            //System.Type[] availableMechanismTypes;
+            //if (filter != null)
+            //    availableMechanismTypes = (from c in source.GetComponents<Component>() where filter(c) select c.GetType()).ToArray();
+            //else
+            //    availableMechanismTypes = (from c in source.GetComponents<Component>() select c.GetType()).ToArray();
+            //var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => EditorHelper.TempContent(tp.Name)).ToArray();
+
+            //var index = System.Array.IndexOf(availableMechanismTypes, selectedType);
+            //index = EditorGUI.Popup(position, label, index, availableMechanismTypeNames);
+            //return (index >= 0) ? source.GetComponent(availableMechanismTypes[index]) : null;
+
+            Component[] components;
             if (filter != null)
-                availableMechanismTypes = (from c in source.GetComponents<Component>() where filter(c) select c.GetType()).ToArray();
+                components = (from c in source.GetComponents<Component>() where filter(c) select c).ToArray();
             else
-                availableMechanismTypes = (from c in source.GetComponents<Component>() select c.GetType()).ToArray();
+                components = source.GetComponents<Component>();
+
+            return SelectComponentField(position, label, components, selectedComp);
+        }
+
+        public static Component SelectComponentField(Rect position, string label, Component[] components, Component selectedComp)
+        {
+            return SelectComponentField(position, EditorHelper.TempContent(label), components, selectedComp);
+        }
+
+        public static Component SelectComponentField(Rect position, GUIContent label, Component[] components, Component selectedComp)
+        {
+            if (components == null) throw new System.ArgumentNullException("source");
+
+            System.Type[] availableMechanismTypes = (from c in components select c.GetType()).ToArray();
             var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => EditorHelper.TempContent(tp.Name)).ToArray();
 
-            var index = System.Array.IndexOf(availableMechanismTypes, selectedType);
+            var index = System.Array.IndexOf(components, selectedComp);
             index = EditorGUI.Popup(position, label, index, availableMechanismTypeNames);
-            return (index >= 0) ? source.GetComponent(availableMechanismTypes[index]) : null;
+            return (index >= 0) ? components[index] : null;
         }
 
         #endregion

@@ -928,40 +928,6 @@ namespace com.spacepuppy.Utils
         }
 
         // ##############
-        // Contains Child
-        // ##########
-
-        public static bool ContainsAsChild(this GameObject obj, GameObject child)
-        {
-            return ContainsAsChild(obj.transform, child.transform);
-        }
-
-        public static bool ContainsAsChild(this GameObject obj, Transform child)
-        {
-            return ContainsAsChild(obj.transform, child);
-        }
-
-        public static bool ContainsAsChild(this Transform obj, GameObject child)
-        {
-            return ContainsAsChild(obj, child.transform);
-        }
-
-        public static bool ContainsAsChild(this Transform obj, Transform child)
-        {
-            foreach (Transform trans in obj.transform)
-            {
-                if (trans == child) return true;
-            }
-
-            foreach (Transform trans in obj.transform)
-            {
-                if (ContainsAsChild(trans, child)) return true;
-            }
-
-            return false;
-        }
-
-        // ##############
         // Is Parent
         // ##########
 

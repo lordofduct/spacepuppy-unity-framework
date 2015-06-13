@@ -154,11 +154,12 @@
     <Compile Include="SPNotifyingComponent.cs" />
     <Compile Include="DiscreteFloat.cs" />
     <Compile Include="SPTime.cs" />
-    <Compile Include="StateMachine\ComponentStateMachine.cs" />
+    <Compile Include="StateMachine\ComponentStateSupplier.cs" />
     <Compile Include="StateMachine\GenericStateStack.cs" />
     <Compile Include="StateMachine\IStateMachine.cs" />
     <Compile Include="StateMachine\IStateStack.cs" />
-    <Compile Include="StateMachine\ParentComponentStateMachine.cs" />
+    <Compile Include="StateMachine\IStateSupplier.cs" />
+    <Compile Include="StateMachine\ParentComponentStateSupplier.cs" />
     <Compile Include="StateMachine\StateChangedEventArgs.cs" />
     <Compile Include="StateMachine\StateMachine.cs" />
     <Compile Include="StateMachine\TypedStateMachine.cs" />

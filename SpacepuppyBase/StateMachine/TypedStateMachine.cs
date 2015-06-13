@@ -11,159 +11,120 @@ namespace com.spacepuppy.StateMachine
     /// Acts as a base state machine that only needs triggers wired up. The states are type driven and only one state of a given type can exist for that type.
     /// </summary>
     /// <typeparam name="TBase"></typeparam>
-    public class TypedStateMachine<TBase> : ITypedStateMachine<TBase> where TBase : class
+    public class TypedStateMachine<T> : ITypedStateMachine<T> where T : class
     {
         
         #region Fields
 
-        private ComponentCollection<TBase> _states = new ComponentCollection<TBase>();
-        private TBase _current;
+        private ITypedStateSupplier<T> _states;
+        private T _current;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public TypedStateMachine()
+        public TypedStateMachine(ITypedStateSupplier<T> supplier)
         {
-
+            if (supplier == null) throw new System.ArgumentNullException("supplier");
+            _states = supplier;
         }
 
         #endregion
 
         #region Properties
 
-        public int Count
-        {
-            get { return _states.Count; }
-        }
+        public ITypedStateSupplier<T> StateSupplier { get { return _states; } }
 
         #endregion
 
         #region Methods
 
-        public bool Add<T>(T state) where T : class, TBase
-        {
-            if (_states.Has<T>()) throw new ArgumentException("Can not add a state for a type that already exists.");
-
-            _states.Add<T>(state);
-            return true;
-        }
-
-        public bool Remove(TBase state)
-        {
-            if (_states.Remove(state))
-            {
-                if (_current == state)
-                {
-                    this.GotoNullState();
-                }
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool Remove<T>() where T : class, TBase
-        {
-            var state = _states.Get<T>();
-            if (state == null) return false;
-            return this.Remove(state);
-        }
-
-        public bool Contains(TBase state)
-        {
-            return _states.Contains(state);
-        }
-
         public void GotoNullState()
         {
             if (_current == null) return;
 
-            this.ChangeState((TBase)null);
+            this.ChangeState((T)null);
         }
 
-        #endregion
-
-        #region ITypedStateMachine Interface
-
-        public bool Contains<T>() where T : class, TBase
+        private T ChangeState_Imp(T newState)
         {
-            return _states.Has<T>();
-        }
+            if (object.Equals(newState, _current)) return _current;
 
-        public bool Contains(System.Type tp)
-        {
-            return _states.Has(tp);
-        }
-
-        public T GetState<T>() where T : class, TBase
-        {
-            return _states.Get<T>();
-        }
-
-        public TBase GetState(System.Type tp)
-        {
-            return _states.Get(tp);
-        }
-
-        public T ChangeState<T>() where T : class, TBase
-        {
-            var newState = this.GetState<T>();
-            if (Object.Equals(newState, _current)) return _current as T;
-
-            this.ChangeState(newState);
-
-            return newState;
-        }
-
-        public TBase ChangeState(System.Type tp)
-        {
-            var newState = this.GetState(tp);
-            if (Object.Equals(newState, _current)) return _current;
-
-            this.ChangeState(newState);
-
-            return newState;
-        }
-
-        #endregion
-
-        #region IStateMachine Interface
-
-        public event StateChangedEventHandler<TBase> StateChanged;
-        protected void OnStateChanged(StateChangedEventArgs<TBase> e)
-        {
-            if (this.StateChanged != null) this.StateChanged(this, e);
-        }
-
-        public TBase Current
-        {
-            get { return _current; }
-        }
-
-        bool IStateMachine<TBase>.Contains(TBase state)
-        {
-            return this.Contains(state);
-        }
-
-        public TBase ChangeState(TBase newState)
-        {
-            if (!_states.Contains(newState)) throw new ArgumentException("State is not a member of this StateMachine.");
             var oldState = _current;
             _current = newState;
 
-            this.OnStateChanged(new StateChangedEventArgs<TBase>(oldState, newState));
+            this.OnStateChanged(new StateChangedEventArgs<T>(oldState, newState));
 
             return _current;
         }
 
         #endregion
 
+        #region ITypedStateMachine Interface
+
+        public bool Contains<TSub>() where TSub : class, T
+        {
+            return _states.Contains<TSub>();
+        }
+
+        public bool Contains(System.Type tp)
+        {
+            return _states.Contains(tp);
+        }
+
+        public TSub GetState<TSub>() where TSub : class, T
+        {
+            return _states.GetState<TSub>();
+        }
+
+        public T GetState(System.Type tp)
+        {
+            return _states.GetState(tp);
+        }
+
+        public TSub ChangeState<TSub>() where TSub : class, T
+        {
+            var newState = this.GetState<TSub>();
+            return this.ChangeState_Imp(newState) as TSub;
+        }
+
+        public T ChangeState(System.Type tp)
+        {
+            var newState = this.GetState(tp);
+            return this.ChangeState_Imp(newState);
+        }
+
+        #endregion
+
+        #region IStateMachine Interface
+
+        public event StateChangedEventHandler<T> StateChanged;
+        protected void OnStateChanged(StateChangedEventArgs<T> e)
+        {
+            if (this.StateChanged != null) this.StateChanged(this, e);
+        }
+
+        public T Current
+        {
+            get { return _current; }
+        }
+
+        public bool Contains(T state)
+        {
+            return _states.Contains(state);
+        }
+
+        public T ChangeState(T newState)
+        {
+            if (!_states.Contains(newState)) throw new ArgumentException("State is not a member of this StateMachine.");
+            return this.ChangeState_Imp(newState);
+        }
+
+        #endregion
+
         #region IEnumerable Interface
 
-        public IEnumerator<TBase> GetEnumerator()
+        public IEnumerator<T> GetEnumerator()
         {
             return _states.GetEnumerator();
         }
@@ -171,6 +132,21 @@ namespace com.spacepuppy.StateMachine
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return _states.GetEnumerator();
+        }
+
+        #endregion
+
+
+        #region Static Factory
+
+        public static TypedStateMachine<T> CreateFromComponentSource(UnityEngine.GameObject source)
+        {
+            return new TypedStateMachine<T>(new ComponentStateSupplier<T>(source));
+        }
+
+        public static TypedStateMachine<T> CreateFromParentComponentSource(UnityEngine.GameObject source, bool includeStatesOnContainer)
+        {
+            return new TypedStateMachine<T>(new ParentComponentStateSupplier<T>(source, includeStatesOnContainer));
         }
 
         #endregion

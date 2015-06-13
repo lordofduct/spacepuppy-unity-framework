@@ -9,44 +9,41 @@ namespace com.spacepuppy.StateMachine
     /// <summary>
     /// Acts as a basic base state machine that manages a single state at a time. All one must do is wire up the triggers.
     /// </summary>
-    public class StateMachine<T> : IStateMachine<T>
+    public class StateMachine<T> : IStateMachine<T> where T : class
     {
 
         #region Fields
 
-        private UniqueList<T> _states = new UniqueList<T>();
+        private IStateSupplier<T> _states;
         private T _current;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public StateMachine()
+        public StateMachine(IStateSupplier<T> supplier)
         {
-
+            if (supplier == null) throw new System.ArgumentNullException("supplier");
+            _states = supplier;
         }
 
         #endregion
 
         #region Properties
 
-        public int Count { get { return _states.Count; } }
-
-        public T Current { get { return _current; } }
+        public IStateSupplier<T> StateSupplier { get { return _states; } }
 
         #endregion
 
-        #region Methods
+        #region IStateMachine Interface
 
-        public void Add(T state)
+        public event StateChangedEventHandler<T> StateChanged;
+        protected void OnStateChanged(StateChangedEventArgs<T> e)
         {
-            _states.Add(state);
+            if (this.StateChanged != null) this.StateChanged(this, e);
         }
 
-        public bool Remove(T state)
-        {
-            return _states.Remove(state);
-        }
+        public T Current { get { return _current; } }
 
         public bool Contains(T state)
         {
@@ -63,31 +60,6 @@ namespace com.spacepuppy.StateMachine
             this.OnStateChanged(new StateChangedEventArgs<T>(oldState, newState));
 
             return _current;
-        }
-
-        #endregion
-
-        #region IStateMachine Interface
-
-        public event StateChangedEventHandler<T> StateChanged;
-        protected void OnStateChanged(StateChangedEventArgs<T> e)
-        {
-            if (this.StateChanged != null) this.StateChanged(this, e);
-        }
-
-        T IStateMachine<T>.Current
-        {
-            get { return this.Current; }
-        }
-
-        bool IStateMachine<T>.Contains(T state)
-        {
-            return this.Contains(state);
-        }
-
-        T IStateMachine<T>.ChangeState(T state)
-        {
-            return this.ChangeState(state);
         }
 
         #endregion

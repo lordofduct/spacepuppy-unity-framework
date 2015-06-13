@@ -11,6 +11,29 @@ namespace com.spacepuppyeditor
     public static class ReorderableListHelper
     {
 
+        #region Fields
+
+        private static ReorderableList.Defaults s_Defaults;
+        public static ReorderableList.Defaults DefaultBehaviours
+        {
+            get
+            {
+                if(ReorderableList.defaultBehaviours == null)
+                {
+                    if (s_Defaults == null) s_Defaults = new ReorderableList.Defaults();
+                    return s_Defaults;
+                }
+                else
+                {
+                    return ReorderableList.defaultBehaviours;
+                }
+            }
+        }
+
+        #endregion
+
+
+
         public static bool IsRightClickingDraggableArea(this ReorderableList lst, Rect area)
         {
             if (!lst.draggable) return false;
@@ -45,7 +68,7 @@ namespace com.spacepuppyeditor
         {
             var rbg = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
             if (Event.current.type == EventType.Repaint)
-                ReorderableList.defaultBehaviours.headerBackground.Draw(rbg, false, false, false, false);
+                ReorderableListHelper.DefaultBehaviours.headerBackground.Draw(rbg, false, false, false, false);
 
             var rlbl = rbg;
             rlbl.xMin += 6f;
