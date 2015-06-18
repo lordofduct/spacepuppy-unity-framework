@@ -149,25 +149,89 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        public static T GetValueAfter<T>(this IEnumerable<T> lst, T element, bool loop = false)
+        {
+            if(lst is IList<T>)
+            {
+                var arr = lst as IList<T>;
+                if (arr.Count == 0) return default(T);
+
+                int i = arr.IndexOf(element) + 1;
+                if (loop) i = i % arr.Count;
+                else if (i >= arr.Count) return default(T);
+                return arr[i];
+            }
+            else
+            {
+                var e = lst.GetEnumerator();
+                e.MoveNext();
+                var first = e.Current;
+                if (object.Equals(e.Current, element))
+                {
+                    if (e.MoveNext())
+                    {
+                        return e.Current;
+                    }
+                    else if(loop)
+                    {
+                        return first;
+                    }
+                    else
+                    {
+                        return default(T);
+                    }
+                }
+
+                while (e.MoveNext())
+                {
+                    if (object.Equals(e.Current, element))
+                    {
+                        if (e.MoveNext())
+                        {
+                            return e.Current;
+                        }
+                        else if (loop)
+                        {
+                            return first;
+                        }
+                        else
+                        {
+                            return default(T);
+                        }
+                    }
+                }
+                return default(T);
+            }
+        }
+
+        public static IEnumerable<T> Except<T>(this IEnumerable<T> lst, T element)
+        {
+            if (lst == null) throw new System.ArgumentNullException("lst");
+            foreach(var e in lst)
+            {
+                if (!object.Equals(e, element)) yield return e;
+            }
+        }
+
+        public static IEnumerable<T> Except<T>(this IEnumerable<T> lst, T element, IEqualityComparer<T> comparer)
+        {
+            if (lst == null) throw new System.ArgumentNullException("lst");
+            if (comparer == null) throw new System.ArgumentNullException("comparer");
+            foreach (var e in lst)
+            {
+                if (!comparer.Equals(e, element)) yield return e;
+            }
+        }
+
         #endregion
 
         #region Random Methods
 
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst)
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst, IRandom rng = null)
         {
             if (lst == null) throw new System.ArgumentNullException("lst");
-            return lst.ShuffleIterator(RandomUtil.Standard);
-        }
+            if (rng == null) rng = RandomUtil.Standard;
 
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst, IRandom rng)
-        {
-            if (lst == null) throw new System.ArgumentNullException("lst");
-            if (rng == null) throw new System.ArgumentNullException("rng");
-            return lst.ShuffleIterator(rng);
-        }
-
-        private static IEnumerable<T> ShuffleIterator<T>(this IEnumerable<T> lst, IRandom rng)
-        {
             var buffer = lst.ToList();
             int j;
             for (int i = 0; i < buffer.Count; i++)
@@ -178,33 +242,35 @@ namespace com.spacepuppy.Utils
             }
         }
 
-
-        public static T PickRandom<T>(this IEnumerable<T> lst)
+        public static T PickRandom<T>(this IEnumerable<T> lst, IRandom rng = null)
         {
             //return lst.PickRandom(1).FirstOrDefault();
             if (lst is IList<T>)
             {
+                if (rng == null) rng = RandomUtil.Standard;
                 var a = lst as IList<T>;
                 if (a.Count == 0) return default(T);
-                return a[Random.Range(0, a.Count)];
+                return a[rng.Range(0, a.Count)];
             }
             else
             {
-                return lst.PickRandom(1).FirstOrDefault();
+                return lst.PickRandom(1, rng).FirstOrDefault();
             }
         }
 
-        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> lst, int count)
+        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> lst, int count, IRandom rng = null)
         {
-            return lst.Shuffle().Take(count);
+            return lst.Shuffle(rng).Take(count);
         }
 
-        public static T PickRandom<T>(this IEnumerable<T> lst, System.Func<T, float> weightPredicate)
+        public static T PickRandom<T>(this IEnumerable<T> lst, System.Func<T, float> weightPredicate, IRandom rng = null)
         {
             var arr = (lst is IList<T>) ? lst as IList<T> : lst.ToList();
+            if (arr.Count == 0) return default(T);
             var weights = (from o in lst select weightPredicate(o)).ToArray();
             var total = weights.Sum();
-            float r = Random.value;
+            if (rng == null) rng = RandomUtil.Standard;
+            float r = rng.Next();
             float s = 0f;
 
             for (int i = 0; i < weights.Length; i++)
@@ -220,19 +286,21 @@ namespace com.spacepuppy.Utils
             return lst.Last();
         }
 
-        public static object PickRandom(this System.Array lst)
-        {
-            if (lst.Length == 0) return null;
-            //return lst.GetValue(RandomUtil.Range(lst.Length, 0));
-            return lst.GetValue(Random.Range(0, lst.Length));
-        }
+        //public static object PickRandom(this System.Array lst, IRandom rng = null)
+        //{
+        //    if (lst.Length == 0) return null;
+        //    //return lst.GetValue(RandomUtil.Range(lst.Length, 0));
+        //    if (rng == null) rng = RandomUtil.Standard;
+        //    return lst.GetValue(rng.Range(0, lst.Length));
+        //}
 
-        public static T PickRandom<T>(this T[] lst)
-        {
-            if (lst.Length == 0) return default(T);
-            //return lst[RandomUtil.Range(lst.Length, 0)];
-            return lst[Random.Range(0, lst.Length)];
-        }
+        //public static T PickRandom<T>(this T[] lst, IRandom rng = null)
+        //{
+        //    if (lst.Length == 0) return default(T);
+        //    //return lst[RandomUtil.Range(lst.Length, 0)];
+        //    if (rng == null) rng = RandomUtil.Standard;
+        //    return lst[rng.Range(0, lst.Length)];
+        //}
 
         #endregion
 

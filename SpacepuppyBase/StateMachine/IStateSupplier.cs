@@ -11,6 +11,7 @@ namespace com.spacepuppy.StateMachine
     {
 
         bool Contains(T state);
+        T GetNext(T current);
 
     }
 
@@ -106,6 +107,13 @@ namespace com.spacepuppy.StateMachine
             return null;
         }
 
+        public T GetNext(T current)
+        {
+            if (this.Count == 0) return null;
+            int i = (this.IndexOf(current) + 1) % this.Count;
+            return this[i];
+        }
+
         #endregion
 
     }
@@ -159,6 +167,13 @@ namespace com.spacepuppy.StateMachine
         public T GetState(System.Type tp)
         {
             return this.Get(tp, _allowIndirectHit);
+        }
+
+        public T GetNext(T current)
+        {
+            if (this.Count == 0) return null;
+
+            return this.GetValueAfter(current, true);
         }
 
         #endregion

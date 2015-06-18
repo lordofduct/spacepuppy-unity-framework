@@ -91,6 +91,16 @@ namespace com.spacepuppy.StateMachine
                 return null;
         }
 
+        public T GetNext(T current)
+        {
+            if (_container == null) return null;
+            return this.GetValueAfter(current, true);
+        }
+
+        #endregion
+
+        #region IEnumerable Interface
+
         public IEnumerator<T> GetEnumerator()
         {
             if (_container == null) return System.Linq.Enumerable.Empty<T>().GetEnumerator();

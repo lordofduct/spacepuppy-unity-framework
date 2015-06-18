@@ -62,29 +62,23 @@ namespace com.spacepuppy.Async
             }
         }
 
-        object IRadicalYieldInstruction.CurrentYieldObject
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
         {
-            get
+            if (_recentOperation == null || _recentOperation.isDone)
             {
-                if (_recentOperation == null || _recentOperation.isDone)
+                for (int i = 0; i < _operations.Length; i++)
                 {
-                    for (int i = 0; i < _operations.Length; i++)
+                    if (!_operations[i].isDone)
                     {
-                        if (!_operations[i].isDone)
-                        {
-                            _recentOperation = _operations[i];
-                            return _recentOperation;
-                        }
+                        _recentOperation = _operations[i];
+                        yieldObject = _recentOperation;
+                        return true;
                     }
                 }
-
-                return null;
             }
-        }
 
-        bool IRadicalYieldInstruction.ContinueBlocking()
-        {
-            return !this.IsComplete;
+            yieldObject = null;
+            return false;
         }
 
         #endregion

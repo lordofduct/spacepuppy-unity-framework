@@ -235,6 +235,33 @@ namespace com.spacepuppy
         }
     }
 
+    public class DisplayNestedPropertyAttribute : SPPropertyAttribute
+    {
+
+        public readonly string InnerPropName;
+        public readonly string Label;
+        public readonly string Tooltip;
+
+        public DisplayNestedPropertyAttribute(string innerPropName)
+        {
+            InnerPropName = innerPropName;
+        }
+
+        public DisplayNestedPropertyAttribute(string innerPropName, string label)
+        {
+            InnerPropName = innerPropName;
+            Label = label;
+        }
+
+        public DisplayNestedPropertyAttribute(string innerPropName, string label, string tooltip)
+        {
+            InnerPropName = innerPropName;
+            Label = label;
+            Tooltip = tooltip;
+        }
+
+    }
+
     #endregion
 
     #region ModifierDrawer Attributes

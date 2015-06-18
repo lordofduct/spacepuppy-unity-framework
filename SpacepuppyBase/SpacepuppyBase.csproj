@@ -55,6 +55,7 @@
     <Compile Include="Collections\CircularQueue.cs" />
     <Compile Include="Collections\ComponentCollection.cs" />
     <Compile Include="Collections\CooldownPool.cs" />
+    <Compile Include="Collections\Deque.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
     <Compile Include="Collections\ICachePool.cs" />

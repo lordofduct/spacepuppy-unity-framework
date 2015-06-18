@@ -367,19 +367,30 @@ namespace com.spacepuppy
 
         #region IYieldInstruction/IEnumerator Interface
 
-        object IRadicalYieldInstruction.CurrentYieldObject
-        {
-            get { return _currentIEnumeratorYieldValue; }
-        }
+        bool IRadicalYieldInstruction.IsComplete { get { return this.Finished; } }
 
         object IEnumerator.Current
         {
             get { return _currentIEnumeratorYieldValue; }
         }
 
-        bool IRadicalYieldInstruction.ContinueBlocking()
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
         {
-            return (this as IEnumerator).MoveNext();
+            if(this.Finished)
+            {
+                yieldObject = null;
+                return false;
+            }
+            else if ((this as IEnumerator).MoveNext())
+            {
+                yieldObject = _currentIEnumeratorYieldValue;
+                return true;
+            }
+            else
+            {
+                yieldObject = null;
+                return false;
+            }
         }
 
         bool IEnumerator.MoveNext()
@@ -409,16 +420,12 @@ namespace com.spacepuppy
 
             _currentIEnumeratorYieldValue = null;
 
-            //actually operate
-            //while (_stack.Count > 0 && !_stack.Peek().ContinueBlocking())
-            //{
-            //    this.PopStack();
-            //}
+            //clear completed entries
             while(_stack.Count > 0)
             {
                 try
                 {
-                    if(!_stack.Peek().ContinueBlocking())
+                    if(_stack.Peek().IsComplete)
                     {
                         this.PopStack();
                     }
@@ -436,7 +443,44 @@ namespace com.spacepuppy
 
             if (_stack.Count > 0)
             {
-                if (this.Cancelled)
+                //operate
+                object current;
+                var r = _stack.Peek();
+                if (!r.Tick(out current))
+                {
+                    //the tick may have forced a tick, which could have popped this yieldinstruction already, this usually means it was an IImmediatelyResumingYieldInstruction
+                    //deal with accordingly
+                    if (_stack.Count > 0 && _stack.Peek() == r) this.PopStack();
+                    if(_forcedTick)
+                    {
+                        _forcedTick = false;
+                        if (this.Cancelled)
+                        {
+                            if (_state == RadicalCoroutineOperatingState.Cancelling)
+                            {
+                                this.OnFinish(true);
+                            }
+                            return false;
+                        }
+                        else if (this.Complete)
+                        {
+                            if (_state == RadicalCoroutineOperatingState.Completing)
+                            {
+                                this.OnFinish(false);
+                            }
+                            return false;
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        current = null;
+                    }
+                }
+                else if (this.Cancelled)
                 {
                     //routine cancelled itself
                     if (_state == RadicalCoroutineOperatingState.Cancelling)
@@ -446,7 +490,8 @@ namespace com.spacepuppy
                     return false;
                 }
 
-                var current = _stack.Peek().CurrentYieldObject;
+
+                //deal with the current yieldObject
                 if (current == null)
                 {
                     //do nothing
@@ -493,9 +538,10 @@ namespace com.spacepuppy
                     if (instruction is IResettingYieldInstruction) (instruction as IResettingYieldInstruction).Reset();
                     if (instruction is IImmediatelyResumingYieldInstruction) (instruction as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
 
-                    if (instruction.ContinueBlocking())
+                    object yieldObject;
+                    if (instruction.Tick(out yieldObject))
                     {
-                        _currentIEnumeratorYieldValue = instruction.CurrentYieldObject;
+                        _currentIEnumeratorYieldValue = yieldObject;
                         _stack.Push(instruction);
                     }
                 }
@@ -703,11 +749,6 @@ namespace com.spacepuppy
                 }
             }
 
-            protected override object Tick()
-            {
-                return null;
-            }
-
             #endregion
 
         }
@@ -725,28 +766,33 @@ namespace com.spacepuppy
 
 
             internal IEnumerator _e;
+            private bool _complete;
 
             private EnumWrapper()
             {
 
             }
 
-            public bool ContinueBlocking()
+            public bool Tick(out object yieldObject)
             {
-                return _e.MoveNext();
-            }
-
-            public object CurrentYieldObject
-            {
-                get { return _e.Current; }
+                if(_e.MoveNext())
+                {
+                    yieldObject = _e.Current;
+                    return true;
+                }
+                else
+                {
+                    _complete = true;
+                    yieldObject = null;
+                    return false;
+                }
             }
 
             public bool IsComplete
             {
                 get
                 {
-                    //this should never actually be accessed
-                    return false;
+                    return _complete;
                 }
             }
 

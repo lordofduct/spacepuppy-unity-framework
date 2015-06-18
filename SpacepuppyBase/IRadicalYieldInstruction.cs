@@ -13,9 +13,16 @@ namespace com.spacepuppy
     /// </summary>
     public interface IRadicalYieldInstruction
     {
+        bool IsComplete { get; }
 
-        bool ContinueBlocking();
-        object CurrentYieldObject { get; }
+        ///// <summary>
+        ///// This method is called every tick of the RadicalCoroutine that is handling it.
+        ///// </summary>
+        ///// <returns>Return if the RadicalCoroutine should continue blocking (IsComplete should be false if this returns true)</returns>
+        //bool ContinueBlocking();
+        //object CurrentYieldObject { get; }
+
+        bool Tick(out object yieldObject);
 
     }
 
@@ -24,7 +31,6 @@ namespace com.spacepuppy
     /// </summary>
     public interface IProgressingYieldInstruction : IRadicalYieldInstruction
     {
-        bool IsComplete { get; }
         float Progress { get; }
     }
 
@@ -72,6 +78,13 @@ namespace com.spacepuppy
 
     }
 
+    public interface IRadicalWaitHandle : IRadicalYieldInstruction
+    {
+
+        void OnComplete(System.Action<IRadicalWaitHandle> callback);
+
+    }
+
     /// <summary>
     /// Base abstract class that implements IRadicalYieldInstruction. It implements IRadicalYieldInstruction in the most 
     /// commonly used setup. You should only ever implement IRadicalYieldInstruction directly if you can't inherit from this 
@@ -82,7 +95,6 @@ namespace com.spacepuppy
 
         #region Fields
 
-        private object _current;
         private bool _complete;
 
         #endregion
@@ -105,31 +117,25 @@ namespace com.spacepuppy
             _complete = false;
         }
 
-        protected abstract object Tick();
-
-        protected virtual void OnPause()
+        protected virtual bool Tick(out object yieldObject)
         {
-
-        }
-
-        protected virtual void OnResume()
-        {
-
+            yieldObject = null;
+            return !_complete;
         }
 
         #endregion
 
         #region IRadicalYieldInstruction Interface
 
-        object IRadicalYieldInstruction.CurrentYieldObject
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
         {
-            get { return _current; }
-        }
+            if(_complete)
+            {
+                yieldObject = null;
+                return false;
+            }
 
-        bool IRadicalYieldInstruction.ContinueBlocking()
-        {
-            _current = this.Tick();
-            return !_complete;
+            return this.Tick(out yieldObject);
         }
 
         #endregion
@@ -138,44 +144,63 @@ namespace com.spacepuppy
 
         #region Static Interface
 
-        private static IProgressingYieldInstruction _null = new NullYieldInstruction();
         public static IProgressingYieldInstruction Null
         {
             get
             {
-                return _null;
+                return NullYieldInstruction.Null;
             }
         }
 
-        private class NullYieldInstruction : IProgressingYieldInstruction
+        #endregion
+
+    }
+
+    public class NullYieldInstruction : IProgressingYieldInstruction, IRadicalWaitHandle
+    {
+
+        #region COSNTRUCTOR
+
+        private NullYieldInstruction()
         {
 
-            public bool IsComplete
-            {
-                get { return true; }
-            }
+        }
 
-            public float Progress
-            {
-                get { return 1f; }
-            }
+        #endregion
 
-            public object CurrentYieldObject
-            {
-                get { return null; }
-            }
+        #region IRadicalYieldInstruction Interface
 
-            public bool ContinueBlocking()
-            {
-                return false;
-            }
+        bool IRadicalYieldInstruction.IsComplete
+        {
+            get { return true; }
+        }
 
-            public void OnPause()
-            {
-            }
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
+        {
+            yieldObject = null;
+            return false;
+        }
 
-            public void OnResume()
+        float IProgressingYieldInstruction.Progress
+        {
+            get { return 1f; }
+        }
+
+        void IRadicalWaitHandle.OnComplete(System.Action<IRadicalWaitHandle> callback)
+        {
+            //do nothing
+        }
+
+        #endregion
+
+        #region Static Interface
+
+        private static NullYieldInstruction _null = new NullYieldInstruction();
+        public static NullYieldInstruction Null
+        {
+            get
             {
+                return _null;
             }
         }
 
@@ -212,7 +237,7 @@ namespace com.spacepuppy
     /// </summary>
     public class ProgressingYieldInstructionQueue : IProgressingYieldInstruction
     {
-        
+
         #region Fields
 
         private IProgressingYieldInstruction[] _operations;
@@ -267,21 +292,86 @@ namespace com.spacepuppy
             }
         }
 
-        object IRadicalYieldInstruction.CurrentYieldObject
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
+        {
+            for (int i = 0; i < _operations.Length; i++)
+            {
+                if (!_operations[i].IsComplete)
+                {
+                    return _operations[i].Tick(out yieldObject);
+                }
+            }
+            yieldObject = null;
+            return false;
+        }
+
+        #endregion
+
+    }
+
+    public class RadicalWaitHandle : IRadicalWaitHandle
+    {
+
+        #region Fields
+
+        private bool _complete;
+        private System.Action<IRadicalWaitHandle> _callback;
+
+        #endregion
+
+        #region Methods
+
+        public void SignalComplete()
+        {
+            if (_complete) return;
+
+            _complete = true;
+            if (_callback != null) _callback(this);
+        }
+
+        protected virtual bool Tick(out object yieldObject)
+        {
+            yieldObject = null;
+            return !_complete;
+        }
+
+        #endregion
+
+        #region IRadicalWaitHandle Interface
+
+        public bool IsComplete
+        {
+            get { return _complete; }
+        }
+
+        public void OnComplete(System.Action<IRadicalWaitHandle> callback)
+        {
+            if (callback == null) throw new System.ArgumentNullException("callback");
+            if (_complete) throw new System.InvalidOperationException("Can not wait for complete on an already completed IRadicalWaitHandle.");
+            _callback += callback;
+        }
+
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
+        {
+            if(_complete)
+            {
+                yieldObject = null;
+                return false;
+            }
+
+            return this.Tick(out yieldObject);
+        }
+
+        #endregion
+
+        #region Static Interface
+
+        public static IRadicalWaitHandle Null
         {
             get
             {
-                for (int i = 0; i < _operations.Length; i++)
-                {
-                    if (!_operations[i].IsComplete) return _operations[i];
-                }
-                return null;
+                return NullYieldInstruction.Null;
             }
-        }
-
-        bool IRadicalYieldInstruction.ContinueBlocking()
-        {
-            return !this.IsComplete;
         }
 
         #endregion
@@ -331,7 +421,7 @@ namespace com.spacepuppy
 
         #region IEnumerator Interface
 
-        bool IProgressingYieldInstruction.IsComplete
+        bool IRadicalYieldInstruction.IsComplete
         {
             get { return this.CurrentTime >= _dur; }
         }
@@ -341,13 +431,9 @@ namespace com.spacepuppy
             get { return Mathf.Clamp01(this.CurrentTime / _dur); }
         }
 
-        object IRadicalYieldInstruction.CurrentYieldObject
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
         {
-            get { return null; }
-        }
-
-        bool IRadicalYieldInstruction.ContinueBlocking()
-        {
+            yieldObject = null;
             return this.CurrentTime < _dur;
         }
 
@@ -438,11 +524,6 @@ namespace com.spacepuppy
             this.SetSignal();
         }
 
-        protected override object Tick()
-        {
-            return null;
-        }
-
     }
 
     /// <summary>
@@ -461,36 +542,42 @@ namespace com.spacepuppy
             _instructions = new System.Collections.Generic.List<object>(instructions);
         }
 
-        protected override object Tick()
+        protected override bool Tick(out object yieldObject)
         {
+            if(this.IsComplete)
+            {
+                yieldObject = null;
+                return false;
+            }
+
             object current;
-            for(int i = 0; i < _instructions.Count; i++)
+            for (int i = 0; i < _instructions.Count; i++)
             {
                 current = _instructions[i];
-                if(current == null)
+                if (current == null)
                 {
                     _instructions.RemoveAt(i);
                     i--;
                 }
-                else if(current is YieldInstruction || current is WWW)
+                else if (current is YieldInstruction || current is WWW)
                 {
                     _instructions.RemoveAt(i);
                     i--;
                     _handle.StartCoroutine(this.WaitForStandard(current));
                 }
-                else if(current is RadicalCoroutine)
+                else if (current is RadicalCoroutine)
                 {
-                    if((current as RadicalCoroutine).Complete)
+                    if ((current as RadicalCoroutine).Complete)
                     {
                         _instructions.RemoveAt(i);
                         i--;
                     }
                 }
-                else if(current is IRadicalYieldInstruction)
+                else if (current is IRadicalYieldInstruction)
                 {
-                    if((current as IRadicalYieldInstruction).ContinueBlocking())
+                    object sub;
+                    if ((current as IRadicalYieldInstruction).Tick(out sub))
                     {
-                        var sub = (current as IRadicalYieldInstruction).CurrentYieldObject;
                         if (sub != null)
                         {
                             _instructions[i] = _handle.StartRadicalCoroutine(this.WaitForRadical(current as IRadicalYieldInstruction));
@@ -502,7 +589,7 @@ namespace com.spacepuppy
                         i--;
                     }
                 }
-                else if(current is IEnumerable)
+                else if (current is IEnumerable)
                 {
                     var e = (current as IEnumerable).GetEnumerator();
                     _instructions[i] = e;
@@ -516,10 +603,10 @@ namespace com.spacepuppy
                         i--;
                     }
                 }
-                else if(current is IEnumerator)
+                else if (current is IEnumerator)
                 {
                     var e = current as IEnumerator;
-                    if(e.MoveNext())
+                    if (e.MoveNext())
                     {
                         if (e.Current != null) _instructions.Add(e.Current);
                     }
@@ -535,8 +622,17 @@ namespace com.spacepuppy
                 }
             }
 
-            if (_instructions.Count == 0 && _waitCount <= 0) this.SetSignal();
-            return null;
+            if (_instructions.Count == 0 && _waitCount <= 0)
+            {
+                this.SetSignal();
+                yieldObject = null;
+                return false;
+            }
+            else
+            {
+                yieldObject = null;
+                return true;
+            }
         }
 
         private IEnumerator WaitForStandard(object inst)
@@ -548,10 +644,10 @@ namespace com.spacepuppy
 
         private IEnumerator WaitForRadical(IRadicalYieldInstruction inst)
         {
-            yield return inst.CurrentYieldObject;
-            while(inst.ContinueBlocking())
+            object yieldObject;
+            while (inst.Tick(out yieldObject))
             {
-                yield return inst.CurrentYieldObject;
+                yield return yieldObject;
             }
         }
 
@@ -589,13 +685,14 @@ namespace com.spacepuppy
             base.SetSignal();
         }
 
-        protected override object Tick()
+        protected override bool Tick(out object yieldObject)
         {
-            if (this.IsComplete) return null;
-            if(_signalNextTime)
+            yieldObject = null;
+            if (this.IsComplete) return false;
+            if (_signalNextTime)
             {
                 this.SetSignal();
-                return null;
+                return false;
             }
 
             object current;
@@ -617,14 +714,14 @@ namespace com.spacepuppy
                     if ((current as RadicalCoroutine).Complete)
                     {
                         this.SetSignal();
-                        return null;
+                        return false;
                     }
                 }
-                else if(current is IRadicalYieldInstruction)
+                else if (current is IRadicalYieldInstruction)
                 {
-                    if ((current as IRadicalYieldInstruction).ContinueBlocking())
+                    object sub;
+                    if ((current as IRadicalYieldInstruction).Tick(out sub))
                     {
-                        var sub = (current as IRadicalYieldInstruction).CurrentYieldObject;
                         if (sub != null)
                         {
                             _instructions.RemoveAt(i);
@@ -635,7 +732,7 @@ namespace com.spacepuppy
                     else
                     {
                         this.SetSignal();
-                        return null;
+                        return false;
                     }
                 }
                 else if (current is IEnumerator || current is IEnumerable)
@@ -650,7 +747,7 @@ namespace com.spacepuppy
                 }
             }
 
-            return null;
+            return true;
         }
 
         private IEnumerator WaitForStandard(object inst)
@@ -661,10 +758,10 @@ namespace com.spacepuppy
 
         private IEnumerator WaitForRadicalYield(IRadicalYieldInstruction inst)
         {
-            yield return inst.CurrentYieldObject;
-            while(inst.ContinueBlocking())
+            object yieldObject;
+            while (inst.Tick(out yieldObject))
             {
-                yield return inst.CurrentYieldObject;
+                yield return yieldObject;
             }
         }
 

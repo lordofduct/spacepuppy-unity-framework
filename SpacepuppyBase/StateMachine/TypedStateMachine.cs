@@ -116,7 +116,7 @@ namespace com.spacepuppy.StateMachine
 
         public T ChangeState(T newState)
         {
-            if (!_states.Contains(newState)) throw new ArgumentException("State is not a member of this StateMachine.");
+            if (newState != null && !_states.Contains(newState)) throw new ArgumentException("State is not a member of this StateMachine.");
             return this.ChangeState_Imp(newState);
         }
 

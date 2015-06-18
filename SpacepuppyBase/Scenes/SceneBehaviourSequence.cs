@@ -199,11 +199,6 @@ namespace com.spacepuppy.Scenes
                 get { return (_innerOp != null) ? _innerOp.Progress : 0f; }
             }
 
-            protected override object Tick()
-            {
-                return null;
-            }
-
             #endregion
 
         }

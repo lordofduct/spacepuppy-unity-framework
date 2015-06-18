@@ -24,16 +24,6 @@ namespace com.spacepuppy.Async
 
         #region Properties
 
-        public bool IsComplete
-        {
-            get { return _complete; }
-        }
-
-        protected virtual object CurrentYieldObject
-        {
-            get { return null; }
-        }
-
         #endregion
 
         #region Methods
@@ -55,18 +45,30 @@ namespace com.spacepuppy.Async
             _complete = true;
         }
 
+        protected virtual bool Tick(out object yieldObject)
+        {
+            yieldObject = null;
+            return !_complete;
+        }
+
         #endregion
 
         #region IRadicalYieldInstruction Interface
 
-        object IRadicalYieldInstruction.CurrentYieldObject
+        public bool IsComplete
         {
-            get { return this.CurrentYieldObject; }
+            get { return _complete; }
         }
 
-        bool IRadicalYieldInstruction.ContinueBlocking()
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
         {
-            return !_complete;
+            if(_complete)
+            {
+                yieldObject = null;
+                return false;
+            }
+
+            return this.Tick(out yieldObject);
         }
 
         #endregion

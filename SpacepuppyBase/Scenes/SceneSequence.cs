@@ -90,9 +90,18 @@ namespace com.spacepuppy.Scenes
                 this.SetSignal();
             }
 
-            protected override object Tick()
+            protected override bool Tick(out object yieldObject)
             {
-                return _routine;
+                if(_routine == null || _routine.Finished)
+                {
+                    yieldObject = null;
+                    return false;
+                }
+                else
+                {
+                    yieldObject = _routine;
+                    return true;
+                }
             }
 
             public float Progress

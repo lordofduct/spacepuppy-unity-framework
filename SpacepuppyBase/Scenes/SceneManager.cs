@@ -176,11 +176,6 @@ namespace com.spacepuppy.Scenes
                 this.SetSignal();
             }
 
-            protected override object Tick()
-            {
-                return null;
-            }
-
             #endregion
 
             #region IProgressAsyncOperation Interface

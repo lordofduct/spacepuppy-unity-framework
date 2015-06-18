@@ -384,7 +384,7 @@ namespace com.spacepuppy.Tween
 
         #region IRadicalYieldInstruction Interface
 
-        bool IProgressingYieldInstruction.IsComplete
+        bool IRadicalYieldInstruction.IsComplete
         {
             get { return this.IsComplete; }
         }
@@ -410,14 +410,10 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        bool IRadicalYieldInstruction.ContinueBlocking()
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
         {
+            yieldObject = null;
             return !this.IsComplete;
-        }
-
-        object IRadicalYieldInstruction.CurrentYieldObject
-        {
-            get { return null; }
         }
 
         #endregion
