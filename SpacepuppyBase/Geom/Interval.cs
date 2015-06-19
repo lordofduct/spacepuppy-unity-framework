@@ -72,6 +72,11 @@ namespace com.spacepuppy.Geom
             }
         }
 
+        /// <summary>
+        /// Gets a value a percentage of length from min towards max.
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
         public float GetPercentage(float p)
         {
             return (_max - _min) * p + _min;

@@ -149,9 +149,9 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static T GetValueAfter<T>(this IEnumerable<T> lst, T element, bool loop = false)
+        public static T GetValueAfterOrDefault<T>(this IEnumerable<T> lst, T element, bool loop = false)
         {
-            if(lst is IList<T>)
+            if (lst is IList<T>)
             {
                 var arr = lst as IList<T>;
                 if (arr.Count == 0) return default(T);
@@ -164,7 +164,7 @@ namespace com.spacepuppy.Utils
             else
             {
                 var e = lst.GetEnumerator();
-                e.MoveNext();
+                if (!e.MoveNext()) return default(T);
                 var first = e.Current;
                 if (object.Equals(e.Current, element))
                 {
@@ -172,7 +172,7 @@ namespace com.spacepuppy.Utils
                     {
                         return e.Current;
                     }
-                    else if(loop)
+                    else if (loop)
                     {
                         return first;
                     }
@@ -269,11 +269,14 @@ namespace com.spacepuppy.Utils
             if (arr.Count == 0) return default(T);
             var weights = (from o in lst select weightPredicate(o)).ToArray();
             var total = weights.Sum();
+            if (total <= 0) return arr[0];
+
             if (rng == null) rng = RandomUtil.Standard;
             float r = rng.Next();
             float s = 0f;
 
-            for (int i = 0; i < weights.Length; i++)
+            int i;
+            for (i = 0; i < weights.Length; i++)
             {
                 s += weights[i] / total;
                 if (s >= r)
@@ -282,25 +285,11 @@ namespace com.spacepuppy.Utils
                 }
             }
 
-            //should never get here
-            return lst.Last();
+            //should only get here if last element had a zero weight, and the r was large
+            i = arr.Count - 1;
+            while (i > 0 || weights[i] <= 0f) i--;
+            return arr[i];
         }
-
-        //public static object PickRandom(this System.Array lst, IRandom rng = null)
-        //{
-        //    if (lst.Length == 0) return null;
-        //    //return lst.GetValue(RandomUtil.Range(lst.Length, 0));
-        //    if (rng == null) rng = RandomUtil.Standard;
-        //    return lst.GetValue(rng.Range(0, lst.Length));
-        //}
-
-        //public static T PickRandom<T>(this T[] lst, IRandom rng = null)
-        //{
-        //    if (lst.Length == 0) return default(T);
-        //    //return lst[RandomUtil.Range(lst.Length, 0)];
-        //    if (rng == null) rng = RandomUtil.Standard;
-        //    return lst[rng.Range(0, lst.Length)];
-        //}
 
         #endregion
 

@@ -173,7 +173,7 @@ namespace com.spacepuppy.StateMachine
         {
             if (this.Count == 0) return null;
 
-            return this.GetValueAfter(current, true);
+            return this.GetValueAfterOrDefault(current, true);
         }
 
         #endregion

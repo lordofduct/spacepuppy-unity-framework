@@ -132,7 +132,7 @@ namespace com.spacepuppy.Utils
 
             public int Next(int size)
             {
-                return (int)Random.value;
+                return (int)(size * Random.value);
             }
 
 

@@ -71,7 +71,7 @@ namespace com.spacepuppy.StateMachine
         public T GetNext(T current)
         {
             if (_container == null) return null;
-            return this.GetValueAfter(current, true);
+            return this.GetValueAfterOrDefault(current, true);
         }
 
         #endregion
