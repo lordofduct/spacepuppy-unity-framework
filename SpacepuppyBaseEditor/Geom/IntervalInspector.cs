@@ -32,10 +32,23 @@ namespace com.spacepuppyeditor.Geom
 
             EditorGUI.BeginChangeCheck();
             float min = EditorGUI.FloatField(r1, targ.Min);
+            if(EditorGUI.EndChangeCheck())
+            {
+                if (targ.Max < min)
+                    targ.SetExtents(min, min);
+                else
+                    targ.SetExtents(min, targ.Max);
+                EditorHelper.SetTargetObjectOfProperty(property, targ);
+            }
+
+            EditorGUI.BeginChangeCheck();
             float max = EditorGUI.FloatField(r2, targ.Max);
             if(EditorGUI.EndChangeCheck())
             {
-                targ.SetExtents(min, max);
+                if (targ.Min > max)
+                    targ.SetExtents(max, max);
+                else
+                    targ.SetExtents(targ.Min, max);
                 EditorHelper.SetTargetObjectOfProperty(property, targ);
             }
             
