@@ -18,19 +18,21 @@ namespace com.spacepuppyeditor.Base
 
         public string Label;
         private ReorderableList _lst;
+        private GUIContent _label;
         private bool _disallowFoldout;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        private void Init(SerializedProperty property)
+        private void StartOnGUI(SerializedProperty property, GUIContent label)
         {
             if(_lst == null)
             {
                 _lst = new ReorderableList(null, property, true, true, true, true);
                 _lst.drawHeaderCallback = this._maskList_DrawHeader;
                 _lst.drawElementCallback = this._maskList_DrawElement;
+                _lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(property) + 1;
             }
             else
             {
@@ -41,6 +43,14 @@ namespace com.spacepuppyeditor.Base
 
             var attrib = this.attribute as ReorderableArrayAttribute;
             if (attrib != null) _disallowFoldout = attrib.DisallowFoldout;
+
+            _label = label;
+        }
+        
+        private void EndOnGUI(SerializedProperty property, GUIContent label)
+        {
+            _lst.serializedProperty = null;
+            _label = null;
         }
 
         #endregion
@@ -57,7 +67,7 @@ namespace com.spacepuppyeditor.Base
         {
             if(property.isArray)
             {
-                this.Init(property);
+                this.StartOnGUI(property, label);
 
                 if (_disallowFoldout || property.isExpanded)
                 {
@@ -78,7 +88,7 @@ namespace com.spacepuppyeditor.Base
         {
             if(property.isArray)
             {
-                this.Init(property);
+                this.StartOnGUI(property, label);
 
                 if(_disallowFoldout)
                 {
@@ -97,6 +107,8 @@ namespace com.spacepuppyeditor.Base
                         ReorderableListHelper.DrawRetractedHeader(position, label);
                     }
                 }
+
+                this.EndOnGUI(property, label);
             }
             else
             {
@@ -110,7 +122,14 @@ namespace com.spacepuppyeditor.Base
 
         private void _maskList_DrawHeader(Rect area)
         {
-            EditorGUI.LabelField(area, this.Label ?? _lst.serializedProperty.displayName);
+            if(this.Label != null)
+            {
+                EditorGUI.LabelField(area, this.Label ?? _lst.serializedProperty.displayName);
+            }
+            else
+            {
+                EditorGUI.LabelField(area, _label ?? EditorHelper.TempContent(_lst.serializedProperty.displayName));
+            }
         }
 
         private void _maskList_DrawElement(Rect area, int index, bool isActive, bool isFocused)

@@ -157,6 +157,7 @@ namespace com.spacepuppy
     {
         public System.Type InheritsFromType;
         public TypeDropDownListingStyle MenuListingStyle = TypeDropDownListingStyle.ComponentMenu;
+        public bool HideTypeDropDown;
 
         public ComponentTypeRestrictionAttribute(System.Type inheritsFromType)
         {

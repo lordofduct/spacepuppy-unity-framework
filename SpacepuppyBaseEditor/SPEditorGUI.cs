@@ -408,6 +408,26 @@ namespace com.spacepuppyeditor
             return (index >= 0) ? components[index] : null;
         }
 
+        public static Component SelectComponentField(Rect position, string label, Component[] components, string[] componentLabels, Component selectedComp)
+        {
+            if (components == null) throw new System.ArgumentNullException("source");
+            if (componentLabels == null || componentLabels.Length != components.Length) throw new System.ArgumentException("Component Labels collection must be the same size as the component collection.", "componentLabels");
+
+            var index = System.Array.IndexOf(components, selectedComp);
+            index = EditorGUI.Popup(position, label, index, componentLabels);
+            return (index >= 0) ? components[index] : null;
+        }
+
+        public static Component SelectComponentField(Rect position, GUIContent label, Component[] components, GUIContent[] componentLabels, Component selectedComp)
+        {
+            if (components == null) throw new System.ArgumentNullException("source");
+            if (componentLabels == null || componentLabels.Length != components.Length) throw new System.ArgumentException("Component Labels collection must be the same size as the component collection.", "componentLabels");
+
+            var index = System.Array.IndexOf(components, selectedComp);
+            index = EditorGUI.Popup(position, label, index, componentLabels);
+            return (index >= 0) ? components[index] : null;
+        }
+
         #endregion
 
     }

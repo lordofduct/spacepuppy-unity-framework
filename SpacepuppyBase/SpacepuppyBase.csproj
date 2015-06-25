@@ -74,6 +74,7 @@
     <Compile Include="ConfigurableForce.cs" />
     <Compile Include="CustomTimeSupplier.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="Dynamic\DynamicPropertyInfo.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Exceptions.cs" />
@@ -213,6 +214,7 @@
     <Compile Include="Dynamic\IDynamic.cs" />
     <Compile Include="Dynamic\StateToken.cs" />
     <Compile Include="Dynamic\TypeAccessWrapper.cs" />
+    <Compile Include="Utils\Diminish\DiminishingWeightOverDuration.cs" />
     <Compile Include="Utils\EnumUtil.cs" />
     <Compile Include="Utils\FastDynamicMemberAccessor\BasicMemberAccessor.cs" />
     <Compile Include="Utils\FastDynamicMemberAccessor\FastTransformMemberAccessor.cs" />
@@ -236,6 +238,7 @@
     <Compile Include="Utils\TransformUtil.cs" />
     <Compile Include="Utils\TypeUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />
+    <Compile Include="VariantCollection.cs" />
     <Compile Include="VariantReference.cs" />
   </ItemGroup>
   <ItemGroup>

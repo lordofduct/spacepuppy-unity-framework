@@ -53,7 +53,9 @@ namespace com.spacepuppyeditor.Components
         {
             if (this.ValidateFieldType())
             {
-                if (property.isExpanded)
+                var attrib = this.attribute as ComponentTypeRestrictionAttribute;
+
+                if (!attrib.HideTypeDropDown && property.isExpanded)
                 {
                     return 3f * EditorGUIUtility.singleLineHeight + 2f;
                 }
@@ -80,41 +82,51 @@ namespace com.spacepuppyeditor.Components
             EditorGUI.BeginProperty(position, label, property);
 
             //get base type
-            var inheritsFromType = (this.attribute as ComponentTypeRestrictionAttribute).InheritsFromType ?? typeof(Component);
+            var attrib = this.attribute as ComponentTypeRestrictionAttribute;
+            var inheritsFromType = attrib.InheritsFromType ?? typeof(Component);
             
             bool isArray = this.fieldInfo.FieldType.IsListType();
             var fieldType = (isArray) ? this.fieldInfo.FieldType.GetElementTypeOfListType() : this.fieldInfo.FieldType;
 
-            //draw
-            var h = EditorGUIUtility.singleLineHeight;
-            var r0 = new Rect(position.xMin, position.yMin, position.width, h);
-            bool isExpanded = property.isExpanded;
-            property.isExpanded = EditorGUI.Foldout(r0, isExpanded, this.GetHeaderLabel(property, label, inheritsFromType));
-
-            if (isExpanded)
+            if (attrib.HideTypeDropDown)
             {
-                EditorGUI.indentLevel += 1;
-
-                var r1 = new Rect(position.xMin, position.yMin + h + 1f, position.width, h);
-                var r2 = new Rect(position.xMin, position.yMin + (2f * h) + 2f, position.width, h);
-
-                //draw component type selector
-                if (!_overrideBaseTypeDict.ContainsKey(label.text) || _overrideBaseTypeDict[label.text] == null)
-                {
-                    if (property.objectReferenceValue != null)
-                        _overrideBaseTypeDict[label.text] = property.objectReferenceValue.GetType();
-                    else
-                        _overrideBaseTypeDict[label.text] = inheritsFromType;
-                }
-                _overrideBaseTypeDict[label.text] = SPEditorGUI.TypeDropDown(r1, new GUIContent("Restrict Type"), inheritsFromType, _overrideBaseTypeDict[label.text], true, true, inheritsFromType, (this.attribute as ComponentTypeRestrictionAttribute).MenuListingStyle);
-                inheritsFromType = _overrideBaseTypeDict[label.text];
-
                 //draw object field
-                var refLabel = new GUIContent("Reference");
-                property.objectReferenceValue = SPEditorGUI.ComponentField(r2, refLabel, property.objectReferenceValue as Component, inheritsFromType, true, fieldType);
+                property.objectReferenceValue = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, inheritsFromType, true, fieldType);
                 property.serializedObject.ApplyModifiedProperties();
+            }
+            else
+            {
+                //draw
+                var h = EditorGUIUtility.singleLineHeight;
+                var r0 = new Rect(position.xMin, position.yMin, position.width, h);
+                bool isExpanded = property.isExpanded;
+                property.isExpanded = EditorGUI.Foldout(r0, isExpanded, this.GetHeaderLabel(property, label, inheritsFromType));
 
-                EditorGUI.indentLevel -= 1;
+                if (isExpanded)
+                {
+                    EditorGUI.indentLevel += 1;
+
+                    var r1 = new Rect(position.xMin, position.yMin + h + 1f, position.width, h);
+                    var r2 = new Rect(position.xMin, position.yMin + (2f * h) + 2f, position.width, h);
+
+                    //draw component type selector
+                    if (!_overrideBaseTypeDict.ContainsKey(label.text) || _overrideBaseTypeDict[label.text] == null)
+                    {
+                        if (property.objectReferenceValue != null)
+                            _overrideBaseTypeDict[label.text] = property.objectReferenceValue.GetType();
+                        else
+                            _overrideBaseTypeDict[label.text] = inheritsFromType;
+                    }
+                    _overrideBaseTypeDict[label.text] = SPEditorGUI.TypeDropDown(r1, new GUIContent("Restrict Type"), inheritsFromType, _overrideBaseTypeDict[label.text], true, true, inheritsFromType, (this.attribute as ComponentTypeRestrictionAttribute).MenuListingStyle);
+                    inheritsFromType = _overrideBaseTypeDict[label.text];
+
+                    //draw object field
+                    var refLabel = new GUIContent("Reference");
+                    property.objectReferenceValue = SPEditorGUI.ComponentField(r2, refLabel, property.objectReferenceValue as Component, inheritsFromType, true, fieldType);
+                    property.serializedObject.ApplyModifiedProperties();
+
+                    EditorGUI.indentLevel -= 1;
+                }
             }
 
             EditorGUI.EndProperty();

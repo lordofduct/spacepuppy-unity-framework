@@ -218,6 +218,18 @@ namespace com.spacepuppyeditor
             return SPEditorGUI.SelectComponentField(position, label, components, selectedComp);
         }
 
+        public static Component SelectComponentField(string label, Component[] components, string[] componentLabels, Component selectedComp)
+        {
+            var position = EditorGUILayout.GetControlRect(true);
+            return SPEditorGUI.SelectComponentField(position, label, components, componentLabels, selectedComp);
+        }
+
+        public static Component SelectComponentField(GUIContent label, Component[] components, GUIContent[] componentLabels, Component selectedComp)
+        {
+            var position = EditorGUILayout.GetControlRect(true);
+            return SPEditorGUI.SelectComponentField(position, label, components, componentLabels, selectedComp);
+        }
+
         #endregion
 
 

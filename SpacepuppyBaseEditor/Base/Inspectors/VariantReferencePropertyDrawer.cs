@@ -45,9 +45,23 @@ namespace com.spacepuppyeditor.Base
             }
 
             var totalRect = EditorGUI.PrefixLabel(position, label);
+            this.DrawValueField(totalRect, property);
 
-            var r0 = new Rect(totalRect.xMin, totalRect.yMin, 90.0f, EditorGUIUtility.singleLineHeight);
-            var r1 = new Rect(r0.xMax, totalRect.yMin, totalRect.xMax - r0.xMax, EditorGUIUtility.singleLineHeight);
+            EditorGUI.EndProperty();
+            if (EditorGUI.EndChangeCheck()) property.serializedObject.Update();
+        }
+
+
+
+        public void DrawValueField(Rect position, SerializedProperty property)
+        {
+            this.DrawValueField(position, property.serializedObject, EditorHelper.GetTargetObjectOfProperty(property) as VariantReference);
+        }
+
+        public void DrawValueField(Rect position, SerializedObject serializedObject, VariantReference variant)
+        {
+            var r0 = new Rect(position.xMin, position.yMin, 90.0f, EditorGUIUtility.singleLineHeight);
+            var r1 = new Rect(r0.xMax, position.yMin, position.xMax - r0.xMax, EditorGUIUtility.singleLineHeight);
 
             var bCache = GUI.enabled;
             if (this.RestrictVariantType) GUI.enabled = false;
@@ -110,9 +124,9 @@ namespace com.spacepuppyeditor.Base
                             variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _selectedComponentType, true) as Component;
 
                             //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                            if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
+                            if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
                             {
-                                var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
+                                var go = GameObjectUtil.GetGameObjectFromSource(serializedObject);
                                 variant.ComponentValue = go.GetComponent(_selectedComponentType);
                             }
                         }
@@ -128,9 +142,9 @@ namespace com.spacepuppyeditor.Base
                         variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _forcedComponentType, true) as Component;
 
                         //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                        if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
+                        if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
                         {
-                            var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
+                            var go = GameObjectUtil.GetGameObjectFromSource(serializedObject);
                             variant.ComponentValue = go.GetComponent(_forcedComponentType);
                         }
                     }
@@ -140,11 +154,7 @@ namespace com.spacepuppyeditor.Base
                     variant.ObjectValue = EditorGUI.ObjectField(r1, variant.ObjectValue, typeof(UnityEngine.Object), true);
                     break;
             }
-
-            EditorGUI.EndProperty();
-            if (EditorGUI.EndChangeCheck()) property.serializedObject.Update();
         }
-
 
     }
 }
