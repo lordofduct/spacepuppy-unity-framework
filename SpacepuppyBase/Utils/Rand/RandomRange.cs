@@ -25,6 +25,7 @@ namespace com.spacepuppy.Utils.Rand
 
         public static int Range(this IRandom rng, params IntRange[] ranges)
         {
+            if (rng == null) throw new System.ArgumentNullException("rng");
             if (ranges.Length == 0) throw new System.ArgumentException("At least one range must be included.");
             if (ranges.Length == 1) return rng.Range(ranges[0].Max, ranges[0].Min);
 
@@ -33,7 +34,7 @@ namespace com.spacepuppy.Utils.Rand
 
             float r = rng.Next();
             float s = 0f;
-            float t;
+            //float t;
 
             int cnt = ranges.Length - 1;
             for (int i = 0; i < cnt; i++)
@@ -41,18 +42,21 @@ namespace com.spacepuppy.Utils.Rand
                 s += ranges[i].Weight / total;
                 if (s >= r)
                 {
-                    float s2 = (s + ranges[i + 1].Weight) / total;
-                    t = (r - s) / (s2 - s);
-                    return (int)((ranges[i].Max - ranges[i].Min) * t) + ranges[i].Min;
+                    //float s2 = (s + ranges[i + 1].Weight) / total;
+                    //t = (r - s) / (s2 - s);
+                    //return (int)((ranges[i].Max - ranges[i].Min) * t) + ranges[i].Min;
+                    return rng.Range(ranges[i].Max, ranges[i].Min);
                 }
             }
 
-            t = (r - s) / (1f - s);
-            return (int)((ranges[cnt].Max - ranges[cnt].Min) * t) + ranges[cnt].Min;
+            //t = (r - s) / (1f - s);
+            //return (int)((ranges[cnt].Max - ranges[cnt].Min) * t) + ranges[cnt].Min;
+            return rng.Range(ranges[cnt].Max, ranges[cnt].Min);
         }
 
         public static float Range(this IRandom rng, params FloatRange[] ranges)
         {
+            if (rng == null) throw new System.ArgumentNullException("rng");
             if (ranges.Length == 0) throw new System.ArgumentException("At least one range must be included.");
             if (ranges.Length == 1) return rng.Range(ranges[0].Max, ranges[0].Min);
 
@@ -61,7 +65,7 @@ namespace com.spacepuppy.Utils.Rand
 
             float r = rng.Next();
             float s = 0f;
-            float t;
+            //float t;
 
             int cnt = ranges.Length - 1;
             for (int i = 0; i < cnt; i++)
@@ -69,14 +73,16 @@ namespace com.spacepuppy.Utils.Rand
                 s += ranges[i].Weight / total;
                 if (s >= r)
                 {
-                    float s2 = (s + ranges[i + 1].Weight) / total;
-                    t = (r - s) / (s2 - s);
-                    return (ranges[i].Max - ranges[i].Min) * t + ranges[i].Min;
+                    //float s2 = (s + ranges[i + 1].Weight) / total;
+                    //t = (r - s) / (s2 - s);
+                    //return (ranges[i].Max - ranges[i].Min) * t + ranges[i].Min;
+                    return rng.Range(ranges[i].Max, ranges[i].Min);
                 }
             }
 
-            t = (r - s) / (1f - s);
-            return (ranges[cnt].Max - ranges[cnt].Min) * t + ranges[cnt].Min;
+            //t = (r - s) / (1f - s);
+            //return (ranges[cnt].Max - ranges[cnt].Min) * t + ranges[cnt].Min;
+            return rng.Range(ranges[cnt].Max, ranges[cnt].Min);
         }
 
 
