@@ -43,12 +43,12 @@ namespace com.spacepuppy.Utils.Rand
                 {
                     float s2 = (s + ranges[i + 1].Weight) / total;
                     t = (r - s) / (s2 - s);
-                    return Mathf.FloorToInt((ranges[i].Max - ranges[i].Min) * t) + ranges[i].Min;
+                    return (int)((ranges[i].Max - ranges[i].Min) * t) + ranges[i].Min;
                 }
             }
 
             t = (r - s) / (1f - s);
-            return Mathf.FloorToInt((ranges[cnt].Max - ranges[cnt].Min) * t) + ranges[cnt].Min;
+            return (int)((ranges[cnt].Max - ranges[cnt].Min) * t) + ranges[cnt].Min;
         }
 
         public static float Range(this IRandom rng, params FloatRange[] ranges)
@@ -78,6 +78,11 @@ namespace com.spacepuppy.Utils.Rand
             t = (r - s) / (1f - s);
             return (ranges[cnt].Max - ranges[cnt].Min) * t + ranges[cnt].Min;
         }
+
+
+
+
+
 
     }
 
