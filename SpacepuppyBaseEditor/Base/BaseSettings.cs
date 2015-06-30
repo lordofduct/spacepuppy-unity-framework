@@ -13,6 +13,7 @@ namespace com.spacepuppyeditor.Base
         public const string MENU_NAME = SPMenu.MENU_NAME_SETTINGS + "/Base Settings";
         public const int MENU_PRIORITY = SPMenu.MENU_PRIORITY_SETTINGS;
         public const string SETTING_ADVANCEDANIMINSPECTOR_ACTIVE = "AdvancedAnimationInspector.Active";
+        public const string SETTING_HIERARCHYDRAWER_ACTIVE = "EditorHierarchyEventsActive";
 
         #endregion
 
@@ -55,6 +56,14 @@ namespace com.spacepuppyeditor.Base
             EditorGUI.BeginChangeCheck();
             bool useAdvancedAnimInspector = EditorGUILayout.Toggle("Use Advanced Animation Inspector", EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_ADVANCEDANIMINSPECTOR_ACTIVE, true));
             if (EditorGUI.EndChangeCheck()) EditorProjectPrefs.Local.SetBool(BaseSettings.SETTING_ADVANCEDANIMINSPECTOR_ACTIVE, useAdvancedAnimInspector);
+
+            EditorGUI.BeginChangeCheck();
+            bool hierarchyDrawerActive = EditorGUILayout.Toggle("Use Hierarchy Drawers", EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_HIERARCHYDRAWER_ACTIVE, true));
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorProjectPrefs.Local.SetBool(BaseSettings.SETTING_HIERARCHYDRAWER_ACTIVE, hierarchyDrawerActive);
+                EditorHierarchyDrawerEvents.SetActive(hierarchyDrawerActive);
+            }
         }
 
         #endregion

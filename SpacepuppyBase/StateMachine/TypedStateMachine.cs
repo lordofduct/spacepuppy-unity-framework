@@ -144,9 +144,9 @@ namespace com.spacepuppy.StateMachine
             return new TypedStateMachine<T>(new ComponentStateSupplier<T>(source));
         }
 
-        public static TypedStateMachine<T> CreateFromParentComponentSource(UnityEngine.GameObject source, bool includeStatesOnContainer)
+        public static TypedStateMachine<T> CreateFromParentComponentSource(UnityEngine.GameObject source, bool includeStatesOnContainer, bool isStatic)
         {
-            return new TypedStateMachine<T>(new ParentComponentStateSupplier<T>(source, includeStatesOnContainer));
+            return new TypedStateMachine<T>(new ParentComponentStateSupplier<T>(source, includeStatesOnContainer, isStatic));
         }
 
         #endregion

@@ -67,6 +67,8 @@
     <Compile Include="Components\IComponentChoiceSelector.cs" />
     <Compile Include="Components\SelectableComponentPropertyDrawer.cs" />
     <Compile Include="EditorGame.cs" />
+    <Compile Include="EditorHierarchyDrawerEvents.cs" />
+    <Compile Include="HierarchyDrawer.cs" />
     <Compile Include="IconHelper.cs" />
     <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Base\Modifiers\InsertButtonModifier.cs" />

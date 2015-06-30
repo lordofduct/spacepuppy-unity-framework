@@ -80,13 +80,13 @@ namespace com.spacepuppy.StateMachine
 
         public IEnumerator<T> GetEnumerator()
         {
-            if (_container == null) return System.Linq.Enumerable.Empty<T>().GetEnumerator();
+            if (_container == null) return Enumerable.Empty<T>().GetEnumerator();
             return _container.GetLikeComponents<T>().GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            if (_container == null) return System.Linq.Enumerable.Empty<T>().GetEnumerator();
+            if (_container == null) return Enumerable.Empty<T>().GetEnumerator();
             return _container.GetLikeComponents<T>().GetEnumerator();
         }
 
