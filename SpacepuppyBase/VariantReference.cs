@@ -80,7 +80,17 @@ namespace com.spacepuppy
             }
             set
             {
-                _value = Convert(_value, _type);
+                //_value = Convert(_value, _type);
+                if(value == null)
+                {
+                    _value = null;
+                    _type = VariantType.Null;
+                }
+                else
+                {
+                    _type = GetVariantType(value.GetType());
+                    _value = (_type == VariantType.Null) ? null : value;
+                }
             }
         }
 

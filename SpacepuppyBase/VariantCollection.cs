@@ -31,9 +31,13 @@ namespace com.spacepuppy
             {
                 VariantReference v;
                 if (_table.TryGetValue(key, out v))
+                {
                     return v.Value;
+                }
                 else
+                {
                     return null;
+                }
             }
             set
             {
