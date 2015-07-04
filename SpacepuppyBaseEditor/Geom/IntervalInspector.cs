@@ -13,7 +13,9 @@ namespace com.spacepuppyeditor.Geom
     [CustomPropertyDrawer(typeof(Interval))]
     public class IntervalInspector : PropertyDrawer
     {
-
+        private GUIContent[] _defaultLabels = new GUIContent[] { new GUIContent("Min"), new GUIContent("Max") };
+        private GUIContent[] _reverseLabels = new GUIContent[] { new GUIContent("Max"), new GUIContent("Min") };
+        private float[] _values = new float[2];
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -24,32 +26,36 @@ namespace com.spacepuppyeditor.Geom
         {
             var targ = (Interval)EditorHelper.GetTargetObjectOfProperty(property);
 
+            var attrib = this.fieldInfo.GetCustomAttributes(typeof(Interval.ConfigAttribute), false).Cast<Interval.ConfigAttribute>().FirstOrDefault();
+            bool reverse = (attrib != null) ? attrib.Reverse : false;
 
-            var r = EditorGUI.PrefixLabel(position, label);
-            var w = r.width / 2.0f;
-            var r1 = new Rect(r.xMin, r.yMin, w, r.height);
-            var r2 = new Rect(r.xMin + w, r.yMin, w, r.height);
-
-            EditorGUI.BeginChangeCheck();
-            float min = EditorGUI.FloatField(r1, targ.Min);
-            if(EditorGUI.EndChangeCheck())
+            if(reverse)
             {
-                if (targ.Max < min)
-                    targ.SetExtents(min, min);
-                else
-                    targ.SetExtents(min, targ.Max);
-                EditorHelper.SetTargetObjectOfProperty(property, targ);
+                var subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MaxLabel), EditorHelper.TempContent(attrib.MinLabel) } : _defaultLabels;
+                float labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
+                _values[1] = targ.Min;
+                _values[0] = targ.Max;
+                EditorGUI.BeginChangeCheck();
+                SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    targ.SetExtents(_values[1], _values[0]);
+                    EditorHelper.SetTargetObjectOfProperty(property, targ);
+                }
             }
-
-            EditorGUI.BeginChangeCheck();
-            float max = EditorGUI.FloatField(r2, targ.Max);
-            if(EditorGUI.EndChangeCheck())
+            else
             {
-                if (targ.Min > max)
-                    targ.SetExtents(max, max);
-                else
-                    targ.SetExtents(targ.Min, max);
-                EditorHelper.SetTargetObjectOfProperty(property, targ);
+                var subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MinLabel), EditorHelper.TempContent(attrib.MaxLabel) } : _defaultLabels;
+                float labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
+                _values[0] = targ.Min;
+                _values[1] = targ.Max;
+                EditorGUI.BeginChangeCheck();
+                SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    targ.SetExtents(_values[0], _values[1]);
+                    EditorHelper.SetTargetObjectOfProperty(property, targ);
+                }
             }
             
         }

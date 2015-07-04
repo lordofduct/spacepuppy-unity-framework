@@ -19,7 +19,13 @@ namespace com.spacepuppyeditor.Base
             var valueProp = property.FindPropertyRelative("_value");
             var value = EditorGUI.FloatField(position, label, valueProp.floatValue);
             //if the value increased ever so much, ceil the value, good for the mouse scroll
-            valueProp.floatValue = (value != valueProp.floatValue && MathUtil.Shear(value) == valueProp.floatValue) ? Mathf.Ceil(value) : Mathf.Floor(value);
+            valueProp.floatValue = NormalizeValue(valueProp.floatValue, value);
+        }
+
+
+        public static float NormalizeValue(float oldValue, float newValue)
+        {
+            return (newValue != oldValue && MathUtil.Shear(newValue) == oldValue) ? Mathf.Ceil(newValue) : Mathf.Floor(newValue);
         }
 
     }

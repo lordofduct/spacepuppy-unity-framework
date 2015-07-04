@@ -14,6 +14,8 @@ namespace com.spacepuppy.Utils.Diminish
         [SerializeField()]
         private float _weight = 1f;
         [SerializeField()]
+        private DiscreteFloat _maxCount = DiscreteFloat.PositiveInfinity;
+        [SerializeField()]
         private float _diminishRate = 1.0f;
         [SerializeField()]
         private float _diminishPeriodDuration = 1f;
@@ -77,7 +79,7 @@ namespace com.spacepuppy.Utils.Diminish
 
         public void Signal()
         {
-            var dt = this.TimeSupplier.Total;
+            var dt = this.TimeSupplier.Total - _lastTime;
             int cnt = Mathf.FloorToInt(dt / _diminishPeriodDuration);
             if (cnt > 0)
             {
@@ -85,16 +87,23 @@ namespace com.spacepuppy.Utils.Diminish
                 _lastTime += cnt * _diminishPeriodDuration;
             }
 
-            _lastTime = this.TimeSupplier.Total;
-            _count++;
+            if(_count == 0)
+            {
+                _lastTime = this.TimeSupplier.Total;
+                _count = 1;
+            }
+            else
+            {
+                _count++;
+            }
         }
 
         public float GetAdjustedWeight()
         {
-            if (MathUtil.FuzzyEqual(_diminishRate, 1f)) return _weight;
-            if (_count == 0) return _weight;
+            if (_count >= _maxCount) return 0f;
+            if (_count == 0 || MathUtil.FuzzyEqual(_diminishRate, 1f)) return _weight;
 
-            var dt = this.TimeSupplier.Total;
+            var dt = this.TimeSupplier.Total - _lastTime;
             int cnt = Mathf.FloorToInt(dt / _diminishPeriodDuration);
             if (cnt > 0)
             {

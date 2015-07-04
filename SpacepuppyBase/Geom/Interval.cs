@@ -18,6 +18,12 @@ namespace com.spacepuppy.Geom
 
         #region CONSTRUCTOR
 
+        public Interval(float a)
+        {
+            _min = a;
+            _max = a;
+        }
+
         public Interval(float a, float b)
         {
             _min = a;
@@ -92,6 +98,16 @@ namespace com.spacepuppy.Geom
             if (_max < inter.Min) return false;
             if (_min > inter.Max) return false;
             return true;
+        }
+
+        public bool Intersects(float value)
+        {
+            return value >= _min && value <= _max;
+        }
+
+        public bool IntersectsSqr(float value)
+        {
+            return value > _min * _min && value <= _max * _max;
         }
 
         /// <summary>
@@ -177,6 +193,55 @@ namespace com.spacepuppy.Geom
         public static Interval MinMax(float min, float max)
         {
             return new Interval(min, max);
+        }
+
+        public static Interval Concat(Interval a, Interval b)
+        {
+            var min = Mathf.Min(a.Min, b.Min);
+            var max = Mathf.Max(a.Max, b.Max);
+            return new Interval(min, max);
+        }
+
+        #endregion
+
+        #region Operators
+
+        public static implicit operator Interval(float value)
+        {
+            return new Interval(value);
+        }
+
+        public static implicit operator Interval(double value)
+        {
+            return new Interval((float)value);
+        }
+
+        public static implicit operator Interval(int value)
+        {
+            return new Interval((float)value);
+        }
+
+        public static Interval operator +(Interval a, Interval b)
+        {
+            return Concat(a, b);
+        }
+
+        #endregion
+
+
+        #region Config Attribute
+
+        public class ConfigAttribute : System.Attribute
+        {
+            public bool Reverse;
+            public string MinLabel = "Min";
+            public string MaxLabel = "Max";
+            public float LabelWidth = 30f;
+            
+            public ConfigAttribute()
+            {
+
+            }
         }
 
         #endregion
