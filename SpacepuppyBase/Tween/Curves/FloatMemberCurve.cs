@@ -68,6 +68,7 @@ namespace com.spacepuppy.Tween.Curves
 
         protected override object GetValueAt(float dt, float t)
         {
+            if (this.Duration == 0f) return _end;
             return this.Ease(t, _start, _end - _start, this.Duration);
         }
 

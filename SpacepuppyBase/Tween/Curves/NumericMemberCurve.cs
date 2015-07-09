@@ -87,6 +87,7 @@ namespace com.spacepuppy.Tween.Curves
 
         protected override object GetValueAt(float dt, float t)
         {
+            if (this.Duration == 0) return ConvertUtil.ToPrim(_end, _numericType);
             return ConvertUtil.ToPrim(this.Ease(t, (float)_start, (float)_end - (float)_start, this.Duration), _numericType);
         }
 

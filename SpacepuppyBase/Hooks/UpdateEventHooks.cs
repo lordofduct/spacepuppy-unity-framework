@@ -15,17 +15,17 @@ namespace com.spacepuppy.Hooks
         // Update is called once per frame
         void Update()
         {
-            if (this.UpdateHook != null) this.UpdateHook(this.gameObject, System.EventArgs.Empty);
+            if (this.UpdateHook != null) this.UpdateHook(this, System.EventArgs.Empty);
         }
 
         void FixedUpdate()
         {
-            if (this.FixedUpdateHook != null) this.FixedUpdateHook(this.gameObject, System.EventArgs.Empty);
+            if (this.FixedUpdateHook != null) this.FixedUpdateHook(this, System.EventArgs.Empty);
         }
 
         void LateUpdate()
         {
-            if (this.LateUpdateHook != null) this.LateUpdateHook(this.gameObject, System.EventArgs.Empty);
+            if (this.LateUpdateHook != null) this.LateUpdateHook(this, System.EventArgs.Empty);
         }
 
         protected override void OnDestroy()
