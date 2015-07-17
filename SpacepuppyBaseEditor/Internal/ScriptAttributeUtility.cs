@@ -68,32 +68,28 @@ namespace com.spacepuppyeditor.Internal
 
             //TEST FOR SPECIAL CASE HANDLER
             var fieldInfo = ScriptAttributeUtility.GetFieldInfoFromProperty(property);
-            //if (fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(SPPropertyAttribute)))
-            //{
-            //    var attribs = fieldInfo.GetCustomAttributes(typeof(SPPropertyAttribute), false).Cast<SPPropertyAttribute>().ToArray();
-            //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs[0]);
-            //    _handlerCache.SetHandler(property, result);
-            //    return result;
-            //}
             if(fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(PropertyAttribute)))
             {
                 var attribs = fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), false) as PropertyAttribute[];
-                //if(attribs.Length > 1)
+                //if (attribs.Length > 1)
                 //{
-                //    result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
-                //    _handlerCache.SetHandler(property, result);
-                //    return result;
+                //    if (attribs.Any((a) => a is SPPropertyAttribute))
+                //    {
+                //        result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
+                //        _handlerCache.SetHandler(property, result);
+                //        return result;
+                //    }
                 //}
-                //else if(attribs[0] is SPPropertyAttribute)
+                //else if (attribs[0] is SPPropertyAttribute)
                 //{
                 //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs[0] as SPPropertyAttribute);
                 //    _handlerCache.SetHandler(property, result);
                 //    return result;
                 //}
 
-                if (attribs[0] is SPPropertyAttribute)
+                if (attribs.Any((a) => a is SPPropertyAttribute))
                 {
-                    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs[0] as SPPropertyAttribute);
+                    result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
                     _handlerCache.SetHandler(property, result);
                     return result;
                 }

@@ -6,19 +6,12 @@ namespace com.spacepuppy
 
     public abstract class SPPropertyAttribute : PropertyAttribute
     {
-        private bool _handlesEntireArray;
 
         public SPPropertyAttribute()
         {
 
         }
 
-        public SPPropertyAttribute(bool handlesEntireArray)
-        {
-            _handlesEntireArray = handlesEntireArray;
-        }
-
-        public bool HandlesEntireArray { get { return _handlesEntireArray; } }
     }
 
 
@@ -193,7 +186,7 @@ namespace com.spacepuppy
         public bool DisallowFoldout;
         public bool RemoveBackgroundWhenCollapsed;
 
-        public ReorderableArrayAttribute() : base(true)
+        public ReorderableArrayAttribute()
         {
 
         }
@@ -203,7 +196,7 @@ namespace com.spacepuppy
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple=false)]
     public class OneOrManyAttribute : SPPropertyAttribute
     {
-        public OneOrManyAttribute() : base(true)
+        public OneOrManyAttribute()
         {
 
         }
@@ -213,7 +206,7 @@ namespace com.spacepuppy
     public class UnitVectorAttribute : SPPropertyAttribute
     {
 
-        public UnitVectorAttribute() : base(false)
+        public UnitVectorAttribute() : base()
         {
 
         }

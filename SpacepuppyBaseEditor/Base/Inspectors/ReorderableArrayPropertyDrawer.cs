@@ -13,7 +13,7 @@ namespace com.spacepuppyeditor.Base
 {
 
     [CustomPropertyDrawer(typeof(ReorderableArrayAttribute))]
-    public class ReorderableArrayPropertyDrawer : PropertyDrawer
+    public class ReorderableArrayPropertyDrawer : PropertyDrawer, IArrayHandlingPropertyDrawer
     {
 
         #region Fields
@@ -24,22 +24,34 @@ namespace com.spacepuppyeditor.Base
         private bool _disallowFoldout;
         private bool _removeBackgroundWhenCollapsed;
 
+        private PropertyDrawer _internalDrawer;
+
         #endregion
 
         #region CONSTRUCTOR
 
-        private CachedReorderableList GetList(SerializedProperty property)
+        private CachedReorderableList GetList(SerializedProperty property, GUIContent label)
         {
             var lst = CachedReorderableList.GetListDrawer(property);
             lst.drawHeaderCallback = this._maskList_DrawHeader;
             lst.drawElementCallback = this._maskList_DrawElement;
-            lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(property) + 1;
+
+            if(property.arraySize > 0)
+            {
+                var pchild = property.GetArrayElementAtIndex(0);
+                lst.elementHeight = (_internalDrawer != null) ? _internalDrawer.GetPropertyHeight(pchild, label) : SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1;
+            }
+            else
+            {
+                lst.elementHeight = EditorGUIUtility.singleLineHeight;
+            }
+
             return lst;
         }
 
         private void StartOnGUI(SerializedProperty property, GUIContent label)
         {
-            _lst = this.GetList(property);
+            _lst = this.GetList(property, label);
             if (_lst.index >= _lst.count) _lst.index = -1;
 
             var attrib = this.attribute as ReorderableArrayAttribute;
@@ -74,7 +86,7 @@ namespace com.spacepuppyeditor.Base
             {
                 if (_disallowFoldout || property.isExpanded)
                 {
-                    return this.GetList(property).GetHeight();
+                    return this.GetList(property, label).GetHeight();
                 }
                 else
                 {
@@ -160,12 +172,40 @@ namespace com.spacepuppyeditor.Base
             {
                 label = GUIContent.none;
             }
-            SPEditorGUI.DefaultPropertyField(area, element, label);
+
+            if(_internalDrawer != null)
+            {
+                _internalDrawer.OnGUI(area, element, label);
+            }
+            else
+            {
+                SPEditorGUI.DefaultPropertyField(area, element, label);
+            }
 
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_lst, area, index, isActive, isFocused);
         }
 
         #endregion
+
+
+
+
+        #region IArrayHandlingPropertyDrawer Interface
+
+        PropertyDrawer IArrayHandlingPropertyDrawer.InternalDrawer
+        {
+            get
+            {
+                return _internalDrawer;
+            }
+            set
+            {
+                _internalDrawer = value;
+            }
+        }
+
+        #endregion
+
 
     }
 }

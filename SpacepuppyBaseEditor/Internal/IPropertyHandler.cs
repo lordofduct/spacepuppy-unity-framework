@@ -9,7 +9,7 @@ namespace com.spacepuppyeditor.Internal
     internal interface IPropertyHandler
     {
 
-        float GetHeight(SerializedProperty property, GUIContent label);
+        float GetHeight(SerializedProperty property, GUIContent label, bool includeChildren);
 
         bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren);
 

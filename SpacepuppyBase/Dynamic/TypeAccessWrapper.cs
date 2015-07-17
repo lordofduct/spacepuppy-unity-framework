@@ -105,7 +105,23 @@ namespace com.spacepuppy.Dynamic
 
             var invokeMeth = delegShape.GetMethod("Invoke");
             var paramTypes = (from p in invokeMeth.GetParameters() select p.ParameterType).ToArray();
-            var meth = _wrappedType.GetMethod(name, binding, null, paramTypes, null);
+            MethodInfo meth = null;
+            try
+            {
+                meth = _wrappedType.GetMethod(name, binding, null, paramTypes, null);
+            }
+            catch
+            {
+                try
+                {
+                    meth = _wrappedType.GetMethod(name, binding);
+                }
+                catch
+                {
+
+                }
+            }
+            
 
             if (meth != null)
             {
@@ -122,7 +138,7 @@ namespace com.spacepuppy.Dynamic
             {
                 throw new InvalidOperationException("A method matching the name and shape requested could not be found.");
             }
-
+            
         }
 
         public object CallMethod(string name, System.Type delegShape, params object[] args)

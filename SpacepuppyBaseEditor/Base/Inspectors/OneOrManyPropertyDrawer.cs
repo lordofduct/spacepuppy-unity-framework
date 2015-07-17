@@ -13,25 +13,34 @@ namespace com.spacepuppyeditor.Base
     /// Currently only works with builtin unity types.
     /// </summary>
     [CustomPropertyDrawer(typeof(OneOrManyAttribute))]
-    public class OneOrManyPropertyDrawer : PropertyDrawer
+    public class OneOrManyPropertyDrawer : PropertyDrawer, IArrayHandlingPropertyDrawer
     {
         private const float BTN_WIDTH = 42f;
         private const float SIZE_WIDTH = 50f;
         private GUIContent _moreBtnLabel = new GUIContent("Many", "Change between accepting a configured argument or not.");
         private GUIContent _oneBtnLabel = new GUIContent("One", "Change between accepting a configured argument or not.");
 
+        private PropertyDrawer _internalDrawer;
+
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if (!property.isArray) return EditorGUIUtility.singleLineHeight;
 
             if (property.arraySize == 0) property.arraySize = 1;
+
             if (property.arraySize == 1)
             {
-                return EditorGUIUtility.singleLineHeight;
+                return (_internalDrawer != null) ? _internalDrawer.GetPropertyHeight(property.GetArrayElementAtIndex(0), EditorHelper.TempContent("Element 0")) : EditorGUIUtility.singleLineHeight;
             }
             else
             {
-                return (property.arraySize + 1) * EditorGUIUtility.singleLineHeight;
+                var h = EditorGUIUtility.singleLineHeight;
+                var lbl = EditorHelper.TempContent("Element 0");
+                for (int i = 0; i < property.arraySize; i++)
+                {
+                    h += (_internalDrawer != null) ? _internalDrawer.GetPropertyHeight(property.GetArrayElementAtIndex(i), lbl) : EditorGUIUtility.singleLineHeight;
+                }
+                return h;
             }
         }
 
@@ -44,12 +53,17 @@ namespace com.spacepuppyeditor.Base
             }
 
             if (property.arraySize == 0) property.arraySize = 1;
+
             if (property.arraySize == 1)
             {
-                var propArea = new Rect(position.xMin, position.yMin, Mathf.Max(0f, position.width - BTN_WIDTH), EditorGUIUtility.singleLineHeight);
+                var elementHeight = (_internalDrawer != null) ? _internalDrawer.GetPropertyHeight(property.GetArrayElementAtIndex(0), label) : EditorGUIUtility.singleLineHeight;
+                var propArea = new Rect(position.xMin, position.yMin, Mathf.Max(0f, position.width - BTN_WIDTH), elementHeight);
                 var btnArea = new Rect(propArea.xMax, position.yMin, Mathf.Min(BTN_WIDTH, position.width), EditorGUIUtility.singleLineHeight);
 
-                SPEditorGUI.DefaultPropertyField(propArea, property.GetArrayElementAtIndex(0), label);
+                if (_internalDrawer != null)
+                    _internalDrawer.OnGUI(propArea, property.GetArrayElementAtIndex(0), label);
+                else
+                    SPEditorGUI.DefaultPropertyField(propArea, property.GetArrayElementAtIndex(0), label);
                 if (GUI.Button(btnArea, _moreBtnLabel))
                 {
                     property.arraySize = 2;
@@ -74,12 +88,34 @@ namespace com.spacepuppyeditor.Base
                 EditorGUI.indentLevel++;
                 for(int i = 0; i < property.arraySize; i++)
                 {
-                    elementArea = new Rect(position.xMin, elementArea.yMax, position.width, EditorGUIUtility.singleLineHeight);
-                    SPEditorGUI.DefaultPropertyField(elementArea, property.GetArrayElementAtIndex(i), EditorHelper.TempContent("Element " + i.ToString()));
+                    var lbl = EditorHelper.TempContent("Element " + i.ToString());
+                    var elementHeight = (_internalDrawer != null) ? _internalDrawer.GetPropertyHeight(property.GetArrayElementAtIndex(i), lbl) : EditorGUIUtility.singleLineHeight;
+                    elementArea = new Rect(position.xMin, elementArea.yMax, position.width, elementHeight);
+
+                    if (_internalDrawer != null)
+                        _internalDrawer.OnGUI(elementArea, property.GetArrayElementAtIndex(i), lbl);
+                    else
+                        SPEditorGUI.DefaultPropertyField(elementArea, property.GetArrayElementAtIndex(i), lbl);
                 }
                 EditorGUI.indentLevel--;
             }
         }
+
+        #region IArrayHandlingPropertyDrawer Interface
+
+        PropertyDrawer IArrayHandlingPropertyDrawer.InternalDrawer
+        {
+            get
+            {
+                return _internalDrawer;
+            }
+            set
+            {
+                _internalDrawer = value;
+            }
+        }
+
+        #endregion
 
     }
 

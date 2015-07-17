@@ -98,22 +98,27 @@ namespace com.spacepuppyeditor
 
         public static float GetDefaultPropertyHeight(SerializedProperty property)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.GetHeight(property, GUIContent.none);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.GetHeight(property, GUIContent.none, true);
         }
 
         public static float GetDefaultPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.GetHeight(property, label);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.GetHeight(property, label, true);
+        }
+
+        public static float GetDefaultPropertyHeight(SerializedProperty property, GUIContent label, bool includeChildren)
+        {
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.GetHeight(property, label, includeChildren);
         }
 
         public static bool DefaultPropertyField(Rect position, SerializedProperty property)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, GUIContent.none, false);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, GUIContent.none, true);
         }
 
         public static bool DefaultPropertyField(Rect position, SerializedProperty property, GUIContent label)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, label, false);
+            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, label, true);
         }
 
         public static bool DefaultPropertyField(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)

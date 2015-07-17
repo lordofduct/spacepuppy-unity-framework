@@ -68,7 +68,6 @@ namespace com.spacepuppyeditor.Modifiers
                 }
 
                 SPEditorGUI.DefaultPropertyField(position, property, label, includeChildren);
-                
             }
 
             this.OnPostGUI(property);

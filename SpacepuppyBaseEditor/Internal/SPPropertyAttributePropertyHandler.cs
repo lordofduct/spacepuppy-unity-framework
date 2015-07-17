@@ -50,21 +50,21 @@ namespace com.spacepuppyeditor.Internal
 
         #region IPropertyHandler Interface
 
-        public float GetHeight(SerializedProperty property, GUIContent label)
+        public float GetHeight(SerializedProperty property, GUIContent label, bool includeChildren)
         {
             if (_visibleDrawer == null) this.Init();
 
             property = property.Copy();
             if (label == null) label = EditorHelper.TempContent(property.displayName);
 
-            if (_attrib.HandlesEntireArray && property.isArray)
+            if (_visibleDrawer is IArrayHandlingPropertyDrawer || !property.isArray)
             {
                 return _visibleDrawer.GetPropertyHeight(property, label);
             }
             else
             {
                 float h = SPEditorGUI.GetSinglePropertyHeight(property, label);
-                if (!property.isExpanded) return h;
+                if (!includeChildren || !property.isExpanded) return h;
 
                 h += EditorGUIUtility.singleLineHeight + 2f;
 
@@ -84,7 +84,7 @@ namespace com.spacepuppyeditor.Internal
             property = property.Copy();
             if (label == null) label = EditorHelper.TempContent(property.displayName);
 
-            if (_attrib.HandlesEntireArray && property.isArray)
+            if (_visibleDrawer is IArrayHandlingPropertyDrawer || !property.isArray)
             {
                 _visibleDrawer.OnGUI(position, property, label);
                 PropertyHandlerValidationUtility.AddAsHandled(property, this);
@@ -92,7 +92,7 @@ namespace com.spacepuppyeditor.Internal
             }
             else
             {
-                if(property.isExpanded)
+                if (includeChildren && property.isExpanded)
                 {
                     var rect = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
                     property.isExpanded = EditorGUI.Foldout(rect, property.isExpanded, label);
@@ -112,11 +112,13 @@ namespace com.spacepuppyeditor.Internal
                     }
 
                     EditorGUI.indentLevel--;
+                    PropertyHandlerValidationUtility.AddAsHandled(property, this);
                     return true;
                 }
                 else
                 {
                     property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, label);
+                    PropertyHandlerValidationUtility.AddAsHandled(property, this);
                     return false;
                 }
             }
@@ -129,7 +131,7 @@ namespace com.spacepuppyeditor.Internal
             property = property.Copy();
             if (label == null) label = EditorHelper.TempContent(property.displayName);
 
-            if (_attrib.HandlesEntireArray && property.isArray)
+            if (_visibleDrawer is IArrayHandlingPropertyDrawer || !property.isArray)
             {
                 if (label == null) label = EditorHelper.TempContent(property.displayName);
                 var rect = EditorGUILayout.GetControlRect(true, _visibleDrawer.GetPropertyHeight(property, label), options);
@@ -139,7 +141,7 @@ namespace com.spacepuppyeditor.Internal
             }
             else
             {
-                if (property.isExpanded)
+                if (includeChildren && property.isExpanded)
                 {
                     var rect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
                     property.isExpanded = EditorGUI.Foldout(rect, property.isExpanded, label);
@@ -159,11 +161,13 @@ namespace com.spacepuppyeditor.Internal
                     }
 
                     EditorGUI.indentLevel--;
+                    PropertyHandlerValidationUtility.AddAsHandled(property, this);
                     return true;
                 }
                 else
                 {
                     property.isExpanded = EditorGUILayout.Foldout(property.isExpanded, label);
+                    PropertyHandlerValidationUtility.AddAsHandled(property, this);
                     return false;
                 }
             }
@@ -176,7 +180,7 @@ namespace com.spacepuppyeditor.Internal
                 property = property.Copy();
 
                 var modifier = _visibleDrawer as PropertyModifier;
-                if (_attrib.HandlesEntireArray && property.isArray)
+                if (_visibleDrawer is IArrayHandlingPropertyDrawer || !property.isArray)
                 {
                     modifier.OnValidate(property);
                 }
