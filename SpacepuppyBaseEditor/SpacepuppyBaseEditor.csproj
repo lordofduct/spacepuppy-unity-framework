@@ -46,6 +46,7 @@
     <Compile Include="Base\BaseSettings.cs" />
     <Compile Include="Base\Commands\ComponentSearchWindow.cs" />
     <Compile Include="Base\Commands\TransformCopyMenu.cs" />
+    <Compile Include="Base\Inspectors\ComparisonOperatorPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DisplayNestedPropertyPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\EnumPopupExcludingPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\MaxRangePropertyDrawer.cs" />

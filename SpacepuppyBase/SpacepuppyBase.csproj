@@ -33,6 +33,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
@@ -147,6 +149,14 @@
     <Compile Include="Scenes\SceneBehaviourSequence.cs" />
     <Compile Include="Scenes\SceneSequence.cs" />
     <Compile Include="Scenes\SimpleScene.cs" />
+    <Compile Include="Serialization\IUnityData.cs" />
+    <Compile Include="Serialization\IUnitySerializable.cs" />
+    <Compile Include="Serialization\SerializationHelper.cs" />
+    <Compile Include="Serialization\UnityData.cs" />
+    <Compile Include="Serialization\UnityDataFormatter.cs" />
+    <Compile Include="Serialization\UnityDataScriptableObject.cs" />
+    <Compile Include="Serialization\UnitySerializationInfo.cs" />
+    <Compile Include="Serialization\UnitySerializationSurrogate.cs" />
     <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="Singleton.cs" />
@@ -208,6 +218,7 @@
     <Compile Include="TypeReference.cs" />
     <Compile Include="Utils\Assertions.cs" />
     <Compile Include="Utils\ColorUtil.cs" />
+    <Compile Include="Utils\CompareUtil.cs" />
     <Compile Include="Utils\ComponentUtil.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\CoroutineUtil.cs" />
@@ -235,6 +246,7 @@
     <Compile Include="Utils\QuaternionUtil.cs" />
     <Compile Include="Utils\RandomUtil.cs" />
     <Compile Include="Utils\Rand\RandomRange.cs" />
+    <Compile Include="Utils\StreamUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="Utils\TransformUtil.cs" />
     <Compile Include="Utils\TypeUtil.cs" />

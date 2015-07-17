@@ -28,6 +28,9 @@ namespace com.spacepuppyeditor.Geom
 
             var attrib = this.fieldInfo.GetCustomAttributes(typeof(Interval.ConfigAttribute), false).Cast<Interval.ConfigAttribute>().FirstOrDefault();
             bool reverse = (attrib != null) ? attrib.Reverse : false;
+            float minValue = (attrib != null) ? attrib.MinValue : float.NegativeInfinity;
+            float maxValue = (attrib != null) ? attrib.MaxValue : float.PositiveInfinity;
+            bool discreteValuesOnly = (attrib != null) ? attrib.DiscreteValuesOnly : false;
 
             if(reverse)
             {
@@ -39,6 +42,11 @@ namespace com.spacepuppyeditor.Geom
                 SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    _values[0] = Mathf.Clamp(_values[0], minValue, maxValue);
+                    _values[1] = Mathf.Clamp(_values[1], minValue, maxValue);
+                    if (discreteValuesOnly) _values[0] = Mathf.Round(_values[0]);
+                    if (discreteValuesOnly) _values[1] = Mathf.Round(_values[1]);
+
                     targ.SetExtents(_values[1], _values[0]);
                     EditorHelper.SetTargetObjectOfProperty(property, targ);
                 }
@@ -53,6 +61,11 @@ namespace com.spacepuppyeditor.Geom
                 SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    _values[0] = Mathf.Clamp(_values[0], minValue, maxValue);
+                    _values[1] = Mathf.Clamp(_values[1], minValue, maxValue);
+                    if (discreteValuesOnly) _values[0] = Mathf.Round(_values[0]);
+                    if (discreteValuesOnly) _values[1] = Mathf.Round(_values[1]);
+
                     targ.SetExtents(_values[0], _values[1]);
                     EditorHelper.SetTargetObjectOfProperty(property, targ);
                 }

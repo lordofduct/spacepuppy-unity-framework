@@ -48,7 +48,7 @@ namespace com.spacepuppy
     /// When using RadicalCoroutine with SPComponent, NEVER call StopCoroutine, and instead use the 'Cancel' method on the routine. StopAllCoroutines works correctly on the SPComponent though.
     /// When using RadicalCoroutine with MonoBehaviour, several features no longer exist (namely tracking and pausing), but you're free to use the Stop* methods for coroutines.
     /// </summary>
-    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IEnumerator
+    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator
     {
 
         #region Events
@@ -645,6 +645,14 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IRadicalWaitHandle Interface
+
+        void IRadicalWaitHandle.OnComplete(System.Action<IRadicalWaitHandle> callback)
+        {
+            this.OnFinished += (s,e) => { callback(this); };
+        }
+
+        #endregion
 
 
         #region Static Utils
@@ -878,6 +886,8 @@ namespace com.spacepuppy
 
         #endregion
 
+
+        
     }
 
 }

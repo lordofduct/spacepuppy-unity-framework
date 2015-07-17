@@ -68,18 +68,22 @@ namespace com.spacepuppyeditor.Internal
 
             //TEST FOR SPECIAL CASE HANDLER
             var fieldInfo = ScriptAttributeUtility.GetFieldInfoFromProperty(property);
-            if (fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(SPPropertyAttribute)))
+            //if (fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(SPPropertyAttribute)))
+            //{
+            //    var attribs = fieldInfo.GetCustomAttributes(typeof(SPPropertyAttribute), false).Cast<SPPropertyAttribute>().ToArray();
+            //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
+            //    _handlerCache.SetHandler(property, result);
+            //    return result;
+            //}
+            if(fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(PropertyAttribute)))
             {
-                var attribs = fieldInfo.GetCustomAttributes(typeof(SPPropertyAttribute), false).Cast<SPPropertyAttribute>().ToArray();
-                //if (attribs[0].HandlesEntireArray)
-                //{
-                //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
-                //    _handlerCache.SetHandler(property, result);
-                //    return result;
-                //}
-                result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
-                _handlerCache.SetHandler(property, result);
-                return result;
+                var attribs = fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), false) as PropertyAttribute[];
+                if(attribs.Length > 1 || attribs[0] is SPPropertyAttribute)
+                {
+                    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
+                    _handlerCache.SetHandler(property, result);
+                    return result;
+                }
             }
 
             //USE STANDARD HANDLER if none was found

@@ -91,14 +91,14 @@ namespace com.spacepuppyeditor.Internal
         #region Fields
 
         private System.Reflection.FieldInfo _fieldInfo;
-        private SPPropertyAttribute[] _attribs;
+        private PropertyAttribute[] _attribs;
         private PropertyDrawer _visibleDrawer;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public SPPropertyAttributePropertyHandler(System.Reflection.FieldInfo fieldInfo, SPPropertyAttribute[] attribs)
+        public SPPropertyAttributePropertyHandler(System.Reflection.FieldInfo fieldInfo, PropertyAttribute[] attribs)
         {
             _fieldInfo = fieldInfo;
             _attribs = attribs;

@@ -237,6 +237,9 @@ namespace com.spacepuppy.Geom
             public string MinLabel = "Min";
             public string MaxLabel = "Max";
             public float LabelWidth = 30f;
+            public float MinValue = float.NegativeInfinity;
+            public float MaxValue = float.PositiveInfinity;
+            public bool DiscreteValuesOnly = false;
             
             public ConfigAttribute()
             {
