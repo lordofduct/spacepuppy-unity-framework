@@ -49,12 +49,12 @@ namespace com.spacepuppyeditor
             if(EditorGUI.EndChangeCheck())
             {
                 //do call onValidate
-                SPPropertyAttributePropertyHandler.OnInspectorGUIComplete(this.serializedObject, true);
+                PropertyHandlerValidationUtility.OnInspectorGUIComplete(this.serializedObject, true);
                 this.OnValidate();
             }
             else
             {
-                SPPropertyAttributePropertyHandler.OnInspectorGUIComplete(this.serializedObject, false);
+                PropertyHandlerValidationUtility.OnInspectorGUIComplete(this.serializedObject, false);
             }
         }
 

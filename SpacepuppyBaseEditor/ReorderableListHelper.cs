@@ -32,7 +32,11 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region CONSTRUCTOR
 
+        #endregion
+
+        #region Public Util Methods
 
         public static bool IsRightClickingDraggableArea(this ReorderableList lst, Rect area)
         {
@@ -66,9 +70,14 @@ namespace com.spacepuppyeditor
 
         public static void DrawRetractedHeader(Rect position, GUIContent label)
         {
+            DrawRetractedHeader(position, label, ReorderableListHelper.DefaultBehaviours.headerBackground);
+        }
+
+        public static void DrawRetractedHeader(Rect position, GUIContent label, GUIStyle backgroundStyle)
+        {
             var rbg = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
-            if (Event.current.type == EventType.Repaint)
-                ReorderableListHelper.DefaultBehaviours.headerBackground.Draw(rbg, false, false, false, false);
+            if (Event.current.type == EventType.Repaint && backgroundStyle != null)
+                backgroundStyle.Draw(rbg, false, false, false, false);
 
             var rlbl = rbg;
             rlbl.xMin += 6f;
@@ -76,6 +85,8 @@ namespace com.spacepuppyeditor
             rlbl.y += 1f;
             EditorGUI.LabelField(rlbl, label);
         }
+
+        #endregion
 
     }
 }

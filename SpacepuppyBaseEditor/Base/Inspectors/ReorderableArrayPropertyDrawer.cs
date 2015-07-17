@@ -7,6 +7,8 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Base
 {
 
@@ -20,29 +22,32 @@ namespace com.spacepuppyeditor.Base
         private ReorderableList _lst;
         private GUIContent _label;
         private bool _disallowFoldout;
+        private bool _removeBackgroundWhenCollapsed;
 
         #endregion
 
         #region CONSTRUCTOR
 
+        private CachedReorderableList GetList(SerializedProperty property)
+        {
+            var lst = CachedReorderableList.GetListDrawer(property);
+            lst.drawHeaderCallback = this._maskList_DrawHeader;
+            lst.drawElementCallback = this._maskList_DrawElement;
+            lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(property) + 1;
+            return lst;
+        }
+
         private void StartOnGUI(SerializedProperty property, GUIContent label)
         {
-            if(_lst == null)
-            {
-                _lst = new ReorderableList(null, property, true, true, true, true);
-                _lst.drawHeaderCallback = this._maskList_DrawHeader;
-                _lst.drawElementCallback = this._maskList_DrawElement;
-                _lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(property) + 1;
-            }
-            else
-            {
-                _lst.serializedProperty = property;
-                _lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(property) + 1;
-            }
-            if (_lst.serializedProperty != null && _lst.index >= _lst.count) _lst.index = -1;
+            _lst = this.GetList(property);
+            if (_lst.index >= _lst.count) _lst.index = -1;
 
             var attrib = this.attribute as ReorderableArrayAttribute;
-            if (attrib != null) _disallowFoldout = attrib.DisallowFoldout;
+            if (attrib != null)
+            {
+                _disallowFoldout = attrib.DisallowFoldout;
+                _removeBackgroundWhenCollapsed = attrib.RemoveBackgroundWhenCollapsed;
+            }
 
             _label = label;
         }
@@ -67,11 +72,9 @@ namespace com.spacepuppyeditor.Base
         {
             if(property.isArray)
             {
-                this.StartOnGUI(property, label);
-
                 if (_disallowFoldout || property.isExpanded)
                 {
-                    return _lst.GetHeight();
+                    return this.GetList(property).GetHeight();
                 }
                 else
                 {
@@ -88,27 +91,36 @@ namespace com.spacepuppyeditor.Base
         {
             if(property.isArray)
             {
-                this.StartOnGUI(property, label);
-
                 if(_disallowFoldout)
                 {
+                    this.StartOnGUI(property, label);
                     _lst.DoList(position);
+                    this.EndOnGUI(property, label);
                 }
                 else
                 {
                     const float WIDTH_FOLDOUT = 5f;
-                    property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
                     if (property.isExpanded)
                     {
+                        this.StartOnGUI(property, label);
+                        property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
                         _lst.DoList(position);
+                        this.EndOnGUI(property, label);
                     }
                     else
                     {
-                        ReorderableListHelper.DrawRetractedHeader(position, label);
+                        if(_removeBackgroundWhenCollapsed)
+                        {
+                            property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, label);
+                        }
+                        else
+                        {
+                            property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
+                            ReorderableListHelper.DrawRetractedHeader(position, label);
+                        }
                     }
                 }
 
-                this.EndOnGUI(property, label);
             }
             else
             {

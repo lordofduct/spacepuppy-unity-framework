@@ -71,23 +71,38 @@ namespace com.spacepuppyeditor.Internal
             //if (fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(SPPropertyAttribute)))
             //{
             //    var attribs = fieldInfo.GetCustomAttributes(typeof(SPPropertyAttribute), false).Cast<SPPropertyAttribute>().ToArray();
-            //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
+            //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs[0]);
             //    _handlerCache.SetHandler(property, result);
             //    return result;
             //}
             if(fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(PropertyAttribute)))
             {
                 var attribs = fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), false) as PropertyAttribute[];
-                if(attribs.Length > 1 || attribs[0] is SPPropertyAttribute)
+                //if(attribs.Length > 1)
+                //{
+                //    result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
+                //    _handlerCache.SetHandler(property, result);
+                //    return result;
+                //}
+                //else if(attribs[0] is SPPropertyAttribute)
+                //{
+                //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs[0] as SPPropertyAttribute);
+                //    _handlerCache.SetHandler(property, result);
+                //    return result;
+                //}
+
+                if (attribs[0] is SPPropertyAttribute)
                 {
-                    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs);
+                    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs[0] as SPPropertyAttribute);
                     _handlerCache.SetHandler(property, result);
                     return result;
                 }
             }
 
             //USE STANDARD HANDLER if none was found
-            return StandardPropertyHandler.Instance;
+            var handler = StandardPropertyHandler.Instance;
+            _handlerCache.SetHandler(property, handler);
+            return handler;
         }
 
         //#######################

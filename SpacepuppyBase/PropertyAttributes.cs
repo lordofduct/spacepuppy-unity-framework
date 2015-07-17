@@ -169,9 +169,20 @@ namespace com.spacepuppy
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class SelectableComponentAttribute : SPPropertyAttribute
     {
+        public System.Type InheritsFromType;
         public bool AllowSceneObjects = true;
         public bool ForceOnlySelf = false;
         public bool SearchChildren = false;
+
+        public SelectableComponentAttribute()
+        {
+
+        }
+
+        public SelectableComponentAttribute(System.Type inheritsFromType)
+        {
+            this.InheritsFromType = inheritsFromType;
+        }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
@@ -180,6 +191,7 @@ namespace com.spacepuppy
 
         public string ElementLabelFormatString = null;
         public bool DisallowFoldout;
+        public bool RemoveBackgroundWhenCollapsed;
 
         public ReorderableArrayAttribute() : base(true)
         {

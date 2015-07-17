@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,94 +15,23 @@ namespace com.spacepuppyeditor.Internal
     internal class SPPropertyAttributePropertyHandler : IPropertyHandler
     {
 
-        #region Static PollUsedHandlersForSerializedObject
-
-        private struct HandlerInfo
-        {
-            public string propPath;
-            public SPPropertyAttributePropertyHandler handler;
-
-            public HandlerInfo(string path, SPPropertyAttributePropertyHandler handler)
-            {
-                this.propPath = path;
-                this.handler = handler;
-            }
-        }
-
-        private static ListDictionary<int, HandlerInfo> _usedHandlers = new ListDictionary<int, HandlerInfo>();
-
-        internal static void OnInspectorGUIComplete(SerializedObject obj, bool validate)
-        {
-            if (obj == null || obj.targetObject == null) return;
-
-            int id = obj.targetObject.GetInstanceID();
-            if (_usedHandlers.ContainsKey(id))
-            {
-                var lst = _usedHandlers.Lists[id];
-                if(validate)
-                {
-                    for (int i = 0; i < lst.Count; i++)
-                    {
-                        var info = lst[i];
-                        if (info.handler._visibleDrawer is PropertyModifier)
-                        {
-                            var prop = obj.FindProperty(info.propPath);
-                            (info.handler._visibleDrawer as PropertyModifier).OnValidate(prop);
-                        }
-                    }
-                }
-                lst.Clear();
-            }
-        }
-
-        private static void AddAsHandled(SerializedProperty property, SPPropertyAttributePropertyHandler handler)
-        {
-            if (property.serializedObject.targetObject != null)
-            {
-                _usedHandlers.Add(property.serializedObject.targetObject.GetInstanceID(), new HandlerInfo(property.propertyPath, handler));
-            }
-        }
-
-        private static System.DateTime _lastPurge;
-        private static System.TimeSpan OLD_AGE = System.TimeSpan.FromMinutes(1.0);
-        private static void OnGUIHandler(SceneView view)
-        {
-            if (System.DateTime.Now - _lastPurge > OLD_AGE)
-            {
-                _usedHandlers.Purge();
-            }
-
-            foreach(var lst in _usedHandlers.Lists)
-            {
-                lst.Clear();
-            }
-        }
-
-        static SPPropertyAttributePropertyHandler()
-        {
-            _lastPurge = System.DateTime.Now;
-            SceneView.onSceneGUIDelegate -= OnGUIHandler;
-            SceneView.onSceneGUIDelegate += OnGUIHandler;
-        }
-
-        #endregion
-
-
-
         #region Fields
 
         private System.Reflection.FieldInfo _fieldInfo;
-        private PropertyAttribute[] _attribs;
+        private SPPropertyAttribute _attrib;
         private PropertyDrawer _visibleDrawer;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public SPPropertyAttributePropertyHandler(System.Reflection.FieldInfo fieldInfo, PropertyAttribute[] attribs)
+        public SPPropertyAttributePropertyHandler(System.Reflection.FieldInfo fieldInfo, SPPropertyAttribute attrib)
         {
+            if (fieldInfo == null) throw new System.ArgumentNullException("fieldInfo");
+            if (attrib == null) throw new System.ArgumentNullException("attrib");
+
             _fieldInfo = fieldInfo;
-            _attribs = attribs;
+            _attrib = attrib;
         }
 
         #endregion
@@ -110,8 +40,8 @@ namespace com.spacepuppyeditor.Internal
 
         private void Init()
         {
-            var dtp = ScriptAttributeUtility.GetDrawerTypeForType(_attribs[0].GetType());
-            var drawer = PropertyDrawerActivator.Create(dtp, _attribs[0], _fieldInfo);
+            var dtp = ScriptAttributeUtility.GetDrawerTypeForType(_attrib.GetType());
+            var drawer = PropertyDrawerActivator.Create(dtp, _attrib, _fieldInfo);
             if (drawer is PropertyModifier) (drawer as PropertyModifier).Init(true);
             _visibleDrawer = drawer;
         }
@@ -124,27 +54,140 @@ namespace com.spacepuppyeditor.Internal
         {
             if (_visibleDrawer == null) this.Init();
 
-            return _visibleDrawer.GetPropertyHeight(property, label);
+            property = property.Copy();
+            if (label == null) label = EditorHelper.TempContent(property.displayName);
+
+            if (_attrib.HandlesEntireArray && property.isArray)
+            {
+                return _visibleDrawer.GetPropertyHeight(property, label);
+            }
+            else
+            {
+                float h = SPEditorGUI.GetSinglePropertyHeight(property, label);
+                if (!property.isExpanded) return h;
+
+                h += EditorGUIUtility.singleLineHeight + 2f;
+
+                for(int i = 0; i < property.arraySize; i++)
+                {
+                    var pchild = property.GetArrayElementAtIndex(i);
+                    h += _visibleDrawer.GetPropertyHeight(pchild, EditorHelper.TempContent(pchild.displayName)) + 2f;
+                }
+                return h;
+            }
         }
 
         public bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
             if (_visibleDrawer == null) this.Init();
 
-            _visibleDrawer.OnGUI(position, property, label);
-            SPPropertyAttributePropertyHandler.AddAsHandled(property, this);
-            return false;
+            property = property.Copy();
+            if (label == null) label = EditorHelper.TempContent(property.displayName);
+
+            if (_attrib.HandlesEntireArray && property.isArray)
+            {
+                _visibleDrawer.OnGUI(position, property, label);
+                PropertyHandlerValidationUtility.AddAsHandled(property, this);
+                return !includeChildren && property.isExpanded;
+            }
+            else
+            {
+                if(property.isExpanded)
+                {
+                    var rect = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
+                    property.isExpanded = EditorGUI.Foldout(rect, property.isExpanded, label);
+
+                    EditorGUI.indentLevel++;
+                    rect = new Rect(rect.xMin, rect.yMax + 2f, rect.width, EditorGUIUtility.singleLineHeight);
+                    property.arraySize = Mathf.Max(0, EditorGUI.IntField(rect, "Size", property.arraySize));
+
+                    var lbl = EditorHelper.TempContent("");
+                    for (int i = 0; i < property.arraySize; i++)
+                    {
+                        var pchild = property.GetArrayElementAtIndex(i);
+                        lbl.text = pchild.displayName;
+                        var h = _visibleDrawer.GetPropertyHeight(pchild, lbl);
+                        rect = new Rect(rect.xMin, rect.yMax + 2f, rect.width, h);
+                        _visibleDrawer.OnGUI(rect, pchild, lbl);
+                    }
+
+                    EditorGUI.indentLevel--;
+                    return true;
+                }
+                else
+                {
+                    property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, label);
+                    return false;
+                }
+            }
         }
 
         public bool OnGUILayout(SerializedProperty property, GUIContent label, bool includeChildren, GUILayoutOption[] options)
         {
             if (_visibleDrawer == null) this.Init();
 
+            property = property.Copy();
             if (label == null) label = EditorHelper.TempContent(property.displayName);
-            var rect = EditorGUILayout.GetControlRect(true, _visibleDrawer.GetPropertyHeight(property, label), options);
-            _visibleDrawer.OnGUI(rect, property, label);
-            SPPropertyAttributePropertyHandler.AddAsHandled(property, this);
-            return false;
+
+            if (_attrib.HandlesEntireArray && property.isArray)
+            {
+                if (label == null) label = EditorHelper.TempContent(property.displayName);
+                var rect = EditorGUILayout.GetControlRect(true, _visibleDrawer.GetPropertyHeight(property, label), options);
+                _visibleDrawer.OnGUI(rect, property, label);
+                PropertyHandlerValidationUtility.AddAsHandled(property, this);
+                return !includeChildren && property.isExpanded;
+            }
+            else
+            {
+                if (property.isExpanded)
+                {
+                    var rect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
+                    property.isExpanded = EditorGUI.Foldout(rect, property.isExpanded, label);
+
+                    EditorGUI.indentLevel++;
+                    rect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
+                    property.arraySize = Mathf.Max(0, EditorGUI.IntField(rect, "Size", property.arraySize));
+
+                    var lbl = EditorHelper.TempContent("");
+                    for (int i = 0; i < property.arraySize; i++)
+                    {
+                        var pchild = property.GetArrayElementAtIndex(i);
+                        lbl.text = pchild.displayName;
+                        var h = _visibleDrawer.GetPropertyHeight(pchild, lbl);
+                        rect = EditorGUILayout.GetControlRect(true, h);
+                        _visibleDrawer.OnGUI(rect, pchild, lbl);
+                    }
+
+                    EditorGUI.indentLevel--;
+                    return true;
+                }
+                else
+                {
+                    property.isExpanded = EditorGUILayout.Foldout(property.isExpanded, label);
+                    return false;
+                }
+            }
+        }
+
+        public void OnValidate(SerializedProperty property)
+        {
+            if (_visibleDrawer is PropertyModifier)
+            {
+                property = property.Copy();
+
+                var modifier = _visibleDrawer as PropertyModifier;
+                if (_attrib.HandlesEntireArray && property.isArray)
+                {
+                    modifier.OnValidate(property);
+                }
+                else
+                {
+                    for (int i = 0; i < property.arraySize; i++)
+                    {
+                        modifier.OnValidate(property.GetArrayElementAtIndex(i));
+                    }
+                }
+            }
         }
 
         #endregion

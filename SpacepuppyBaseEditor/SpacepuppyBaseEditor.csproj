@@ -71,6 +71,9 @@
     <Compile Include="EditorHierarchyDrawerEvents.cs" />
     <Compile Include="HierarchyDrawer.cs" />
     <Compile Include="IconHelper.cs" />
+    <Compile Include="Internal\CachedReorderableList.cs" />
+    <Compile Include="Internal\MultiPropertyAttributePropertyHandler.cs" />
+    <Compile Include="Internal\PropertyHandlerValidationUtility.cs" />
     <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Base\Modifiers\InsertButtonModifier.cs" />
     <Compile Include="EditorHelper.cs" />

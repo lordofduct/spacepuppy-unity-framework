@@ -9,19 +9,13 @@ namespace com.spacepuppyeditor.Internal
     internal interface IPropertyHandler
     {
 
-        #region Properties
-
-        #endregion
-
-        #region Methods
-
         float GetHeight(SerializedProperty property, GUIContent label);
 
         bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren);
 
         bool OnGUILayout(SerializedProperty property, GUIContent label, bool includeChildren, GUILayoutOption[] options);
 
-        #endregion
+        void OnValidate(SerializedProperty property);
 
     }
 

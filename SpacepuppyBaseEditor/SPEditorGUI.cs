@@ -22,6 +22,7 @@ namespace com.spacepuppyeditor
 
         private static System.Func<Rect, int, GUIContent, int, Rect> _imp_MultiFieldPrefixLabel;
         private static System.Action<Rect, GUIContent[], float[], float> _imp_MultiFloatField_01;
+        private static System.Func<SerializedProperty, GUIContent, float> _imp_GetSinglePropertyHeight;
 
         #endregion
 
@@ -37,6 +38,26 @@ namespace com.spacepuppyeditor
 
 
         #region Internal EditorGUI Methods
+
+        public static float GetSinglePropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (_imp_GetSinglePropertyHeight == null) _imp_GetSinglePropertyHeight = _accessWrapper.GetStaticMethod("GetSinglePropertyHeight", typeof(System.Func<SerializedProperty, GUIContent, float>)) as System.Func<SerializedProperty, GUIContent, float>;
+            return _imp_GetSinglePropertyHeight(property, label);
+        }
+
+        public static bool HasVisibleChildFields(SerializedProperty property)
+        {
+            switch (property.propertyType)
+            {
+                case SerializedPropertyType.Vector2:
+                case SerializedPropertyType.Vector3:
+                case SerializedPropertyType.Rect:
+                case SerializedPropertyType.Bounds:
+                    return false;
+                default:
+                    return property.hasVisibleChildren;
+            }
+        }
 
         internal static Rect MultiFieldPrefixLabel(Rect totalPosition, int id, GUIContent label, int columns)
         {

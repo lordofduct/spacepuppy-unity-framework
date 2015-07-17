@@ -50,10 +50,12 @@ namespace com.spacepuppyeditor.Components
 
             if (this.attribute != null && this.attribute is SelectableComponentAttribute)
             {
+                //created as part as a PropertyHandler
                 var attrib = (this.attribute as SelectableComponentAttribute);
                 this.AllowSceneObject = attrib.AllowSceneObjects;
                 this.ForceOnlySelf = attrib.ForceOnlySelf;
-                SearchChildren = attrib.SearchChildren;
+                this.SearchChildren = attrib.SearchChildren;
+                if (attrib.InheritsFromType != null) _restrictionType = attrib.InheritsFromType;
             }
 
             if (this.ChoiceSelector == null)
@@ -72,7 +74,8 @@ namespace com.spacepuppyeditor.Components
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.propertyType != SerializedPropertyType.ObjectReference || !TypeUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
+            //if (property.propertyType != SerializedPropertyType.ObjectReference || !TypeUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
+            if (property.propertyType != SerializedPropertyType.ObjectReference || !(TypeUtil.IsType(_restrictionType, typeof(Component)) || _restrictionType.IsInterface))
             {
                 this.DrawAsMismatchedAttribute(position, property, label);
                 return;

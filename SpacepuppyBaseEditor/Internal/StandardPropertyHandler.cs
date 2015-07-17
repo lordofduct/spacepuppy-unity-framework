@@ -46,7 +46,14 @@ namespace com.spacepuppyeditor.Internal
             return EditorGUILayout.PropertyField(property, label, includeChildren, options);
         }
 
+        public void OnValidate(SerializedProperty property)
+        {
+            //do nothing
+        }
+
         #endregion
+
+
 
 
     }
@@ -174,7 +181,14 @@ namespace com.spacepuppyeditor.Internal
             }
         }
 
+        public void OnValidate(SerializedProperty property)
+        {
+            //do nothing
+        }
+
         #endregion
+
+
 
     }
 

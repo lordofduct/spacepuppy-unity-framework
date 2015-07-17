@@ -3,6 +3,11 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy;
+using com.spacepuppy.Utils;
+
+using com.spacepuppyeditor.Modifiers;
+
 namespace com.spacepuppyeditor.Internal
 {
     internal class PropertyHandlerCache
