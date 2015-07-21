@@ -406,8 +406,8 @@ namespace com.spacepuppy.Tween
                 var t = c / d;
                 var it = 1f - t;
                 var r = (Mathf.Pow(it, 3f) * p0)
-                      + (3 * Mathf.Pow(it, 2f) * t * p1)
-                      + (3 * it * Mathf.Pow(t, 2f) * p2)
+                      + (3f * Mathf.Pow(it, 2f) * t * p1)
+                      + (3f * it * Mathf.Pow(t, 2f) * p2)
                       + (Mathf.Pow(t, 3f) * p3);
                 return s + e * r;
             };
