@@ -205,6 +205,7 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Cubic Ease
+
         public static float CubicEaseIn(float t, float b, float c, float d)
         {
             return c * (t /= d) * t * t + b;
@@ -218,6 +219,7 @@ namespace com.spacepuppy.Tween
             if ((t /= d / 2) < 1) return c / 2 * t * t * t + b;
             return c / 2 * ((t -= 2) * t * t + 2) + b;
         }
+
         #endregion
 
         #region Elastic Ease
@@ -394,6 +396,25 @@ namespace com.spacepuppy.Tween
         }
 
         #endregion
+
+        #region Configurable Cubic Bezier
+
+        public static Ease CubicBezier(float p0, float p1, float p2, float p3)
+        {
+            return (c, s, e, d) =>
+            {
+                var t = c / d;
+                var it = 1f - t;
+                var r = (Mathf.Pow(it, 3f) * p0)
+                      + (3 * Mathf.Pow(it, 2f) * t * p1)
+                      + (3 * it * Mathf.Pow(t, 2f) * p2)
+                      + (Mathf.Pow(t, 3f) * p3);
+                return s + e * r;
+            };
+        }
+
+        #endregion
+
 
 
         public static Vector2 EaseVector2(Ease ease, Vector2 start, Vector2 end, float t, float dur)
