@@ -23,35 +23,36 @@ namespace com.spacepuppyeditor.Scenario
             this.serializedObject.Update();
 
             this.DrawDefaultInspectorExcept("_target", "_memberName", "_value", "_mode");
+            this.DrawPropertyField("_target");
 
             var targProp = this.serializedObject.FindProperty("_target");
             var memberProp = this.serializedObject.FindProperty("_memberName");
             var valueProp = this.serializedObject.FindProperty("_value");
             var modeProp = this.serializedObject.FindProperty("_mode");
 
-            //TARGET
-            var targLabel = EditorHelper.TempContent("Target Object");
-            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
-            var newTargGo = EditorGUILayout.ObjectField(targLabel, targGo, typeof(GameObject), true) as GameObject;
-            if (newTargGo != targGo)
-            {
-                targGo = newTargGo;
-                targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
-            }
+            ////TARGET
+            //var targLabel = EditorHelper.TempContent("Target Object");
+            //var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
+            //var newTargGo = EditorGUILayout.ObjectField(targLabel, targGo, typeof(GameObject), true) as GameObject;
+            //if (newTargGo != targGo)
+            //{
+            //    targGo = newTargGo;
+            //    targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
+            //}
 
-            if (targGo != null)
-            {
-                EditorGUI.BeginChangeCheck();
-                var selectedComp = SPEditorGUILayout.SelectComponentFromSourceField("Target Component", targGo, targProp.objectReferenceValue as Component);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    targProp.objectReferenceValue = selectedComp;
-                }
-            }
-            else
-            {
-                EditorGUILayout.LabelField("Target Component", "(First Select a Target)");
-            }
+            //if (targGo != null)
+            //{
+            //    EditorGUI.BeginChangeCheck();
+            //    var selectedComp = SPEditorGUILayout.SelectComponentFromSourceField("Target Component", targGo, targProp.objectReferenceValue as Component);
+            //    if (EditorGUI.EndChangeCheck())
+            //    {
+            //        targProp.objectReferenceValue = selectedComp;
+            //    }
+            //}
+            //else
+            //{
+            //    EditorGUILayout.LabelField("Target Component", "(First Select a Target)");
+            //}
 
             //SELECT MEMBER
             System.Reflection.MemberInfo selectedMember = null;

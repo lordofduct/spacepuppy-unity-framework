@@ -21,6 +21,7 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField()]
+        [SelectableComponent()]
         private Component _target;
         [SerializeField()]
         private string _memberName;
