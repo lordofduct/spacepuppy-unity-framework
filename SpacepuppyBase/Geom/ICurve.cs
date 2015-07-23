@@ -94,10 +94,10 @@ namespace com.spacepuppy.Geom
         public float GetPosition(float t)
         {
             var it = 1f - t;
-            return (Mathf.Pow(it, 3f) * _p0)
-                 + (3f * Mathf.Pow(it, 2f) * t * _p1)
-                 + (3f * it * Mathf.Pow(t, 2f) * _p2)
-                 + (Mathf.Pow(t, 3f) * _p3);
+            return (it * it * it * _p0)
+                 + (3f * it * it * t * _p1)
+                 + (3f * it * t * t * _p2)
+                 + (t * t * t * _p3);
         }
 
         public float Ease(float c, float s, float e, float d)
