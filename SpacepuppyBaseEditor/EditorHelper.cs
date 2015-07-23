@@ -17,6 +17,36 @@ namespace com.spacepuppyeditor
 
         public const string PROP_SCRIPT = "m_Script";
 
+
+        private static Texture2D s_WhiteTexture;
+        public static Texture2D WhiteTexture
+        {
+            get
+            {
+                if (s_WhiteTexture == null)
+                {
+                    s_WhiteTexture = new Texture2D(1, 1);
+                    s_WhiteTexture.SetPixel(0, 0, Color.white);
+                    s_WhiteTexture.Apply();
+                }
+                return s_WhiteTexture;
+            }
+        }
+        private static GUIStyle s_WhiteTextureStyle;
+        public static GUIStyle WhiteTextureStyle
+        {
+            get
+            {
+                if(s_WhiteTextureStyle == null)
+                {
+                    s_WhiteTextureStyle = new GUIStyle();
+                    s_WhiteTextureStyle.normal.background = EditorHelper.WhiteTexture;
+                }
+                return s_WhiteTextureStyle;
+            }
+        }
+
+
         static EditorHelper()
         {
             SceneView.onSceneGUIDelegate -= OnSceneGUI;

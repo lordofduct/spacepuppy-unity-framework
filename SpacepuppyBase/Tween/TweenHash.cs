@@ -222,7 +222,7 @@ namespace com.spacepuppy.Tween
         // CURVES
         //
 
-        public TweenHash UseCurve(Curve curve)
+        public TweenHash UseCurve(TweenCurve curve)
         {
             _props.Add(new PropInfo(AnimMode.Curve, null, null, curve, float.NaN, null));
             return this;
@@ -404,14 +404,14 @@ namespace com.spacepuppy.Tween
                 if (curve == null)
                 {
                     Debug.LogWarning("Failed to create tween for property '" + _props[0].name + "' on target.", _targ as Object);
-                    return new ObjectTweener(_targ, Curve.Null);
+                    return new ObjectTweener(_targ, TweenCurve.Null);
                 }
                 else
                     tween = new ObjectTweener(_targ, curve);
             }
             else
             {
-                var grp = new CurveGroup();
+                var grp = new TweenCurveGroup();
                 for (int i = 0; i < _props.Count; i++)
                 {
                     var curve = this.CreateCurve(_props[i]);
@@ -436,7 +436,7 @@ namespace com.spacepuppy.Tween
 
             return tween;
         }
-        private Curve CreateCurve(PropInfo prop)
+        private TweenCurve CreateCurve(PropInfo prop)
         {
             try
             {
@@ -447,7 +447,7 @@ namespace com.spacepuppy.Tween
                     case AnimMode.AnimCurve:
                         return MemberCurve.CreateFromTo(_targ, prop.name, ease, null, null, dur, prop.option);
                     case AnimMode.Curve:
-                        return prop.value as Curve;
+                        return prop.value as TweenCurve;
                     case AnimMode.To:
                         return MemberCurve.CreateTo(_targ, prop.name, ease, prop.value, dur, prop.option);
                     case AnimMode.From:
@@ -506,7 +506,7 @@ namespace com.spacepuppy.Tween
 
         }
 
-        private class NullCurve : Curve
+        private class NullCurve : TweenCurve
         {
 
             public override float TotalTime

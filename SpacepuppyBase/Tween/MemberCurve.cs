@@ -16,7 +16,7 @@ namespace com.spacepuppy.Tween
     /// If the member curve is a CustomMemberCurve that should be buildable by the MemberCurve.Create factory method, 
     /// it MUST contain a 0 parameter constructor.
     /// </summary>
-    public abstract class MemberCurve : Curve
+    public abstract class MemberCurve : TweenCurve
     {
 
         #region Fields
@@ -285,7 +285,7 @@ namespace com.spacepuppy.Tween
             var accessor = MemberCurve.GetAccessor(target, propName, out memberType);
 
             object start = accessor.Get(target);
-            object end = Curve.TrySum(memberType, start, amt);
+            object end = TweenCurve.TrySum(memberType, start, amt);
 
             return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }

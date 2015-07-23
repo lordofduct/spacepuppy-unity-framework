@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween
 {
 
-    public abstract class Curve
+    public abstract class TweenCurve
     {
 
         #region Fields
@@ -17,7 +17,7 @@ namespace com.spacepuppy.Tween
 
         #region CONSTRUCTOR
 
-        public Curve()
+        public TweenCurve()
         {
 
         }
@@ -61,7 +61,7 @@ namespace com.spacepuppy.Tween
         #region Factory
 
         private static NullCurve _null;
-        public static Curve Null
+        public static TweenCurve Null
         {
             get
             {
@@ -72,22 +72,22 @@ namespace com.spacepuppy.Tween
 
 
 
-        public static Curve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur, object option = null)
+        public static TweenCurve CreateFromTo(object target, string propName, Ease ease, object start, object end, float dur, object option = null)
         {
             return MemberCurve.CreateFromTo(target, propName, ease, start, end, dur, option);
         }
 
-        public static Curve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
+        public static TweenCurve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
         {
             return MemberCurve.CreateTo(target, propName, ease, end, dur, option);
         }
 
-        public static Curve CreateFrom(object target, string propName, Ease ease, object start, float dur, object option = null)
+        public static TweenCurve CreateFrom(object target, string propName, Ease ease, object start, float dur, object option = null)
         {
             return MemberCurve.CreateFrom(target, propName, ease, start, dur, option);
         }
 
-        public static Curve CreateBy(object target, string propName, Ease ease, object amt, float dur, object option = null)
+        public static TweenCurve CreateBy(object target, string propName, Ease ease, object amt, float dur, object option = null)
         {
             return MemberCurve.CreateBy(target, propName, ease, amt, dur, option);
         }
@@ -104,7 +104,7 @@ namespace com.spacepuppy.Tween
         /// <param name="dur"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        public static Curve CreateRedirectTo(object target, string propName, Ease ease, float start, float end, float dur, object option = null)
+        public static TweenCurve CreateRedirectTo(object target, string propName, Ease ease, float start, float end, float dur, object option = null)
         {
             return MemberCurve.CreateRedirectTo(target, propName, ease, start, end, dur, option);
         }
@@ -155,7 +155,7 @@ namespace com.spacepuppy.Tween
 
         #region Special Types
 
-        private class NullCurve : Curve
+        private class NullCurve : TweenCurve
         {
 
             protected internal override void Init(Tweener twn)

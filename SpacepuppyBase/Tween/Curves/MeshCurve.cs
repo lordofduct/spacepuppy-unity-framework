@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Tween.Curves
 {
-    public class MeshCurve : Curve
+    public class MeshCurve : TweenCurve
     {
 
         #region Fields

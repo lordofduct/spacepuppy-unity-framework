@@ -87,6 +87,7 @@
     <Compile Include="Geom\BoundingSphereAlgorithm.cs" />
     <Compile Include="Geom\Capsule.cs" />
     <Compile Include="Geom\GeomUtil.cs" />
+    <Compile Include="Geom\ICurve.cs" />
     <Compile Include="Geom\IGeom.cs" />
     <Compile Include="Geom\Interval.cs" />
     <Compile Include="Geom\IPlanarSurface.cs" />
@@ -207,9 +208,9 @@
     <Compile Include="Tween\Curves\Vector4MemberCurve.cs" />
     <Compile Include="Tween\Easing.cs" />
     <Compile Include="Tween\Enums.cs" />
-    <Compile Include="Tween\Curve.cs" />
+    <Compile Include="Tween\TweenCurve.cs" />
     <Compile Include="Tween\Curves\MeshCurve.cs" />
-    <Compile Include="Tween\CurveGroup.cs" />
+    <Compile Include="Tween\TweenCurveGroup.cs" />
     <Compile Include="Tween\ObjectTweener.cs" />
     <Compile Include="Tween\TweenHash.cs" />
     <Compile Include="Tween\SPTween.cs" />

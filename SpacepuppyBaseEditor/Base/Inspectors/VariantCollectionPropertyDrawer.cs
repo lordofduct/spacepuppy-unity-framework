@@ -18,6 +18,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
         private VariantReferencePropertyDrawer _variantDrawer = new VariantReferencePropertyDrawer();
         private VariantCollection.EditorHelper _helper = new VariantCollection.EditorHelper();
+
         private ReorderableList _lst;
         private GUIContent _label;
         private SerializedProperty _currentProp;

@@ -32,9 +32,7 @@ namespace com.spacepuppyeditor.Base
 
         private CachedReorderableList GetList(SerializedProperty property, GUIContent label)
         {
-            var lst = CachedReorderableList.GetListDrawer(property);
-            lst.drawHeaderCallback = this._maskList_DrawHeader;
-            lst.drawElementCallback = this._maskList_DrawElement;
+            var lst = CachedReorderableList.GetListDrawer(property, _maskList_DrawHeader, _maskList_DrawElement);
 
             if(property.arraySize > 0)
             {

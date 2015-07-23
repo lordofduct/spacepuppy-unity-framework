@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy.Tween
 {
 
-    public class CurveGroup : Curve
+    public class TweenCurveGroup : TweenCurve
     {
 
         #region Fields
@@ -16,7 +16,7 @@ namespace com.spacepuppy.Tween
 
         #region CONSTRUCTOR
 
-        public CurveGroup()
+        public TweenCurveGroup()
         {
             _curves = new CurveGroupCollection(this);
         }
@@ -25,7 +25,7 @@ namespace com.spacepuppy.Tween
 
         #region Properties
 
-        public ICollection<Curve> Curves { get { return _curves; } }
+        public ICollection<TweenCurve> Curves { get { return _curves; } }
 
         #endregion
 
@@ -72,19 +72,19 @@ namespace com.spacepuppy.Tween
 
         #region Special Types
 
-        private class CurveGroupCollection : ICollection<Curve>
+        private class CurveGroupCollection : ICollection<TweenCurve>
         {
 
             #region Fields
 
-            private CurveGroup _owner;
-            internal List<Curve> _lst = new List<Curve>();
+            private TweenCurveGroup _owner;
+            internal List<TweenCurve> _lst = new List<TweenCurve>();
 
             #endregion
 
             #region CONSTRUCTOR
 
-            internal CurveGroupCollection(CurveGroup owner)
+            internal CurveGroupCollection(TweenCurveGroup owner)
             {
                 _owner = owner;
             }
@@ -93,7 +93,7 @@ namespace com.spacepuppy.Tween
 
             #region ICollection Interface
 
-            public void Add(Curve item)
+            public void Add(TweenCurve item)
             {
                 if (_lst.Contains(item)) return;
                 _lst.Add(item);
@@ -104,12 +104,12 @@ namespace com.spacepuppy.Tween
                 _lst.Clear();
             }
 
-            public bool Contains(Curve item)
+            public bool Contains(TweenCurve item)
             {
                 return _lst.Contains(item);
             }
 
-            public void CopyTo(Curve[] array, int arrayIndex)
+            public void CopyTo(TweenCurve[] array, int arrayIndex)
             {
                 _lst.CopyTo(array, arrayIndex);
             }
@@ -124,12 +124,12 @@ namespace com.spacepuppy.Tween
                 get { return false; }
             }
 
-            public bool Remove(Curve item)
+            public bool Remove(TweenCurve item)
             {
                 return _lst.Remove(item);
             }
 
-            public IEnumerator<Curve> GetEnumerator()
+            public IEnumerator<TweenCurve> GetEnumerator()
             {
                 return _lst.GetEnumerator();
             }

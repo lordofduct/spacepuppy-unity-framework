@@ -43,6 +43,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
+    <Compile Include="Geom\CubicBezierCurvePropertyDrawer.cs" />
     <Compile Include="IArrayHandlingPropertyDrawer.cs" />
     <Compile Include="Base\BaseSettings.cs" />
     <Compile Include="Base\Commands\ComponentSearchWindow.cs" />

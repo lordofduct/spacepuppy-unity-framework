@@ -1151,14 +1151,29 @@ namespace com.spacepuppy.Utils
             return (float)Math.Round(value / interval) * interval;
         }
 
+        public static float RoundToInterval(float value, float interval, float mean)
+        {
+            return (float)Math.Round((value - mean) / interval) * interval + mean;
+        }
+
         public static float FloorToInterval(float value, float interval)
         {
             return (float)Math.Floor(value / interval) * interval;
         }
 
+        public static float FloorToInterval(float value, float interval, float mean)
+        {
+            return (float)Math.Floor((value - mean) / interval) * interval + mean;
+        }
+
         public static float CeilToInterval(float value, float interval)
         {
             return (float)Math.Ceiling(value / interval) * interval;
+        }
+
+        public static float CeilToInterval(float value, float interval, float mean)
+        {
+            return (float)Math.Ceiling((value - mean) / interval) * interval + mean;
         }
 
         #endregion

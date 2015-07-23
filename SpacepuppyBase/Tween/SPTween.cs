@@ -216,7 +216,7 @@ namespace com.spacepuppy.Tween
             return new CallbackTweener(callback, dur);
         }
 
-        public static Tweener PlayCurve(object targ, Curve curve)
+        public static Tweener PlayCurve(object targ, TweenCurve curve)
         {
             var tween = new ObjectTweener(targ, curve);
             tween.Play();

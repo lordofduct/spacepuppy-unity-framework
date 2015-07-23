@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Geom;
 using com.spacepuppy.Utils;
 using com.spacepuppy.Dynamic;
 
@@ -515,6 +516,62 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Curve Swatch
+
+        public static void DrawCurveSwatch(Rect position, ICurve curve, Color color, Color bgColor)
+        {
+            if (Event.current.type != EventType.Repaint)
+                return;
+            int previewWidth = (int)position.width;
+            int previewHeight = (int)position.height;
+            Color color1 = GUI.color;
+            GUI.color = bgColor;
+            EditorHelper.WhiteTextureStyle.Draw(position, false, false, false, false);
+            GUI.color = color1;
+
+            if (curve == null) return;
+
+            Texture2D tex = GetCurveTexture(Mathf.RoundToInt(position.width), Mathf.RoundToInt(position.height), curve, color);
+            GUIStyle basicTextureStyle = GetCurveTextureStyle(tex);
+            position.width = (float)tex.width;
+            position.height = (float)tex.height;
+            basicTextureStyle.Draw(position, false, false, false, false);
+        }
+
+
+        private static Texture2D s_CurveTexture;
+        private static GUIStyle s_CurveTextureStyle;
+        private static Texture2D GetCurveTexture(int width, int height, ICurve curve, Color color)
+        {
+            if (s_CurveTexture == null)
+                s_CurveTexture = new Texture2D(width, height);
+            else
+                s_CurveTexture.Resize(width, height);
+
+            var c = new Color(1f, 1f, 1f, 0f);
+            var pixels = s_CurveTexture.GetPixels();
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = c;
+            s_CurveTexture.SetPixels(pixels);
+
+            for (int i = 0; i < s_CurveTexture.width; i++)
+            {
+                var t = (float)i / (float)width;
+                int j = (int)(curve.GetPosition(t) * height);
+                s_CurveTexture.SetPixel(i, j, color);
+            }
+
+            s_CurveTexture.Apply();
+            return s_CurveTexture;
+        }
+        private static GUIStyle GetCurveTextureStyle(Texture2D tex)
+        {
+            if (s_CurveTextureStyle == null)
+                s_CurveTextureStyle = new GUIStyle();
+            s_CurveTextureStyle.normal.background = tex;
+            return s_CurveTextureStyle;
+        }
+
+        #endregion
 
     }
 }

@@ -8,6 +8,8 @@ using com.spacepuppy;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Scenario
 {
 
@@ -22,12 +24,10 @@ namespace com.spacepuppyeditor.Scenario
 
         #region Fields
 
-        private bool _initialized;
-
-        private GUIContent _propertyLabel;
+        private GUIContent _currentLabel;
         private ReorderableList _targetList;
         private bool _foldoutTargetExtra;
-        private TriggerTargetPropertyDrawer _triggerTargetDrawer;
+        private TriggerTargetPropertyDrawer _triggerTargetDrawer = new TriggerTargetPropertyDrawer();
 
         private bool _drawWeight;
         private float _totalWeight = 0f;
@@ -36,16 +36,11 @@ namespace com.spacepuppyeditor.Scenario
 
         #region CONSTRUCTOR
 
-        private void Init(SerializedProperty prop)
+        private void Init(SerializedProperty prop, GUIContent label)
         {
-            _targetList = new ReorderableList(prop.serializedObject, prop.FindPropertyRelative(PROP_TARGETS), true, true, true, true);
-            _targetList.drawHeaderCallback = _targetList_DrawHeader;
-            _targetList.drawElementCallback = _targetList_DrawElement;
-            _targetList.onAddCallback = _targetList_OnAdd;
+            _currentLabel = label;
 
-            _triggerTargetDrawer = new TriggerTargetPropertyDrawer();
-
-            _initialized = true;
+            _targetList = CachedReorderableList.GetListDrawer(prop.FindPropertyRelative(PROP_TARGETS), _targetList_DrawHeader, _targetList_DrawElement, _targetList_OnAdd);
 
             var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
             if (attribs != null && attribs.Length > 0) _drawWeight = attribs[0].Weighted;
@@ -58,7 +53,7 @@ namespace com.spacepuppyeditor.Scenario
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (!_initialized) this.Init(property);
+            this.Init(property, label);
 
             var h = MARGIN * 2f;
             h += _targetList.GetHeight();
@@ -80,10 +75,9 @@ namespace com.spacepuppyeditor.Scenario
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (!_initialized) this.Init(property);
+            this.Init(property, label);
             if (_drawWeight) this.CalculateTotalWeight();
 
-            _propertyLabel = label;
             GUI.Box(position, GUIContent.none);
             position = new Rect(position.xMin + MARGIN, position.yMin + MARGIN, position.width - MARGIN * 2f, position.height - MARGIN * 2f);
             EditorGUI.BeginProperty(position, label, property);
@@ -139,7 +133,7 @@ namespace com.spacepuppyeditor.Scenario
 
         private void _targetList_DrawHeader(Rect area)
         {
-            EditorGUI.LabelField(area, _propertyLabel, new GUIContent("Trigger Targets"));
+            EditorGUI.LabelField(area, _currentLabel, new GUIContent("Trigger Targets"));
         }
 
         private void _targetList_DrawElement(Rect area, int index, bool isActive, bool isFocused)

@@ -23,6 +23,11 @@ namespace com.spacepuppy.Utils
 
         public static float Angle(this IRandom rng)
         {
+            return rng.Next() * 360f;
+        }
+
+        public static float Radian(this IRandom rng)
+        {
             return rng.Next() * MathUtil.TWO_PI;
         }
 

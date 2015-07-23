@@ -12,14 +12,14 @@ namespace com.spacepuppy.Tween
         #region Fields
 
         private object _target;
-        private Curve _curve;
+        private TweenCurve _curve;
         private object _tokenUid;
 
         #endregion
         
         #region CONSTRUCTOR
 
-        public ObjectTweener(object targ, Curve curve)
+        public ObjectTweener(object targ, TweenCurve curve)
         {
             if (targ == null) throw new System.ArgumentNullException("targ");
             if (curve == null) throw new System.ArgumentNullException("curve");
