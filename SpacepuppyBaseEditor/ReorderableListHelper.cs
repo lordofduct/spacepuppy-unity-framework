@@ -73,6 +73,11 @@ namespace com.spacepuppyeditor
             DrawRetractedHeader(position, label, ReorderableListHelper.DefaultBehaviours.headerBackground);
         }
 
+        public static void DrawRetractedHeader(Rect position, GUIContent label, GUIContent label2)
+        {
+            DrawRetractedHeader(position, label, label2, ReorderableListHelper.DefaultBehaviours.headerBackground);
+        }
+
         public static void DrawRetractedHeader(Rect position, GUIContent label, GUIStyle backgroundStyle)
         {
             var rbg = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
@@ -84,6 +89,19 @@ namespace com.spacepuppyeditor
             rlbl.xMax -= 6f;
             rlbl.y += 1f;
             EditorGUI.LabelField(rlbl, label);
+        }
+
+        public static void DrawRetractedHeader(Rect position, GUIContent label, GUIContent label2, GUIStyle backgroundStyle)
+        {
+            var rbg = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
+            if (Event.current.type == EventType.Repaint && backgroundStyle != null)
+                backgroundStyle.Draw(rbg, false, false, false, false);
+
+            var rlbl = rbg;
+            rlbl.xMin += 6f;
+            rlbl.xMax -= 6f;
+            rlbl.y += 1f;
+            EditorGUI.LabelField(rlbl, label, label2);
         }
 
         #endregion

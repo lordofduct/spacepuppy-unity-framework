@@ -55,66 +55,89 @@ namespace com.spacepuppyeditor.Scenario
         {
             this.Init(property, label);
 
-            var h = MARGIN * 2f;
-            h += _targetList.GetHeight();
-            h += EditorGUIUtility.singleLineHeight;
-            if(_foldoutTargetExtra)
+            if(property.isExpanded)
             {
-                if(_targetList.index >= 0)
+                var h = MARGIN * 2f;
+                h += _targetList.GetHeight();
+                h += EditorGUIUtility.singleLineHeight;
+                if (_foldoutTargetExtra)
                 {
-                    var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
-                    h += _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none);
+                    if (_targetList.index >= 0)
+                    {
+                        var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
+                        h += _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none);
+                    }
+                    else
+                    {
+                        h += EditorGUIUtility.singleLineHeight * 3.0f;
+                    }
                 }
-                else
-                {
-                    h += EditorGUIUtility.singleLineHeight * 3.0f;
-                }
+                return h;
             }
-            return h;
+            else
+            {
+                return EditorGUIUtility.singleLineHeight;
+            }
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             this.Init(property, label);
-            if (_drawWeight) this.CalculateTotalWeight();
 
-            GUI.Box(position, GUIContent.none);
-            position = new Rect(position.xMin + MARGIN, position.yMin + MARGIN, position.width - MARGIN * 2f, position.height - MARGIN * 2f);
-            EditorGUI.BeginProperty(position, label, property);
+            const float WIDTH_FOLDOUT = 5f;
+            property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
 
-            var listRect = new Rect(position.xMin, position.yMin, position.width, _targetList.GetHeight());
-            
-            EditorGUI.BeginChangeCheck();
-            _targetList.DoList(listRect);
-            if (EditorGUI.EndChangeCheck())
-                property.serializedObject.ApplyModifiedProperties();
-            if (_targetList.index >= _targetList.count) _targetList.index = -1;
-
-            const float FOLDOUT_MRG = 12f;
-            var foldoutRect = new Rect(position.xMin + FOLDOUT_MRG, listRect.yMax, position.width - FOLDOUT_MRG, EditorGUIUtility.singleLineHeight); //for some reason the foldout needs to be pushed in an extra amount for the arrow...
-            _foldoutTargetExtra = EditorGUI.Foldout(foldoutRect, _foldoutTargetExtra, "Advanced Target Settings");
-            if (_foldoutTargetExtra)
+            if(property.isExpanded)
             {
-                //EditorGUI.indentLevel++;
+                if (_drawWeight) this.CalculateTotalWeight();
 
-                if(_targetList.index >= 0)
+                GUI.Box(position, GUIContent.none);
+
+                position = new Rect(position.xMin + MARGIN, position.yMin + MARGIN, position.width - MARGIN * 2f, position.height - MARGIN * 2f);
+                EditorGUI.BeginProperty(position, label, property);
+
+                var listRect = new Rect(position.xMin, position.yMin, position.width, _targetList.GetHeight());
+
+                EditorGUI.BeginChangeCheck();
+                _targetList.DoList(listRect);
+                if (EditorGUI.EndChangeCheck())
+                    property.serializedObject.ApplyModifiedProperties();
+                if (_targetList.index >= _targetList.count) _targetList.index = -1;
+
+                const float FOLDOUT_MRG = 12f;
+                var foldoutRect = new Rect(position.xMin + FOLDOUT_MRG, listRect.yMax, position.width - FOLDOUT_MRG, EditorGUIUtility.singleLineHeight); //for some reason the foldout needs to be pushed in an extra amount for the arrow...
+                _foldoutTargetExtra = EditorGUI.Foldout(foldoutRect, _foldoutTargetExtra, "Advanced Target Settings");
+                if (_foldoutTargetExtra)
                 {
-                    var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
-                    const float INDENT_MRG = 14f;
-                    var settingsRect = new Rect(position.xMin + INDENT_MRG, foldoutRect.yMax, position.width - INDENT_MRG, _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none));
-                    _triggerTargetDrawer.OnGUI(settingsRect, element, GUIContent.none);
-                }
-                else
-                {
-                    var helpRect = new Rect(position.xMin, foldoutRect.yMax, position.width, EditorGUIUtility.singleLineHeight * 3.0f);
-                    EditorGUI.HelpBox(helpRect, "Select a target to edit.", MessageType.Info);
+                    //EditorGUI.indentLevel++;
+
+                    if (_targetList.index >= 0)
+                    {
+                        var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
+                        const float INDENT_MRG = 14f;
+                        var settingsRect = new Rect(position.xMin + INDENT_MRG, foldoutRect.yMax, position.width - INDENT_MRG, _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none));
+                        _triggerTargetDrawer.OnGUI(settingsRect, element, GUIContent.none);
+                    }
+                    else
+                    {
+                        var helpRect = new Rect(position.xMin, foldoutRect.yMax, position.width, EditorGUIUtility.singleLineHeight * 3.0f);
+                        EditorGUI.HelpBox(helpRect, "Select a target to edit.", MessageType.Info);
+                    }
+
+                    //EditorGUI.indentLevel--;
                 }
 
-                //EditorGUI.indentLevel--;
+
+                EditorGUI.EndProperty();
             }
+            else
+            {
+                EditorGUI.BeginProperty(position, label, property);
 
+                ReorderableListHelper.DrawRetractedHeader(position, label, EditorHelper.TempContent("Trigger Targets"));
 
-            EditorGUI.EndProperty();
+                EditorGUI.EndProperty();
+            }
         }
 
 
@@ -133,7 +156,7 @@ namespace com.spacepuppyeditor.Scenario
 
         private void _targetList_DrawHeader(Rect area)
         {
-            EditorGUI.LabelField(area, _currentLabel, new GUIContent("Trigger Targets"));
+            EditorGUI.LabelField(area, _currentLabel, EditorHelper.TempContent("Trigger Targets"));
         }
 
         private void _targetList_DrawElement(Rect area, int index, bool isActive, bool isFocused)

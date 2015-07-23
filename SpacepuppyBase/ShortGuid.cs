@@ -2,6 +2,7 @@
 
 namespace com.spacepuppy
 {
+
     /// <summary>
     /// Represents a globally unique identifier (GUID) with a
     /// shorter string value. Sguid
@@ -264,4 +265,5 @@ namespace com.spacepuppy
 
         #endregion
     }
+
 }

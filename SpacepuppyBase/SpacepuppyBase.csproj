@@ -186,6 +186,7 @@
     <Compile Include="Timers\SystemTimers.cs" />
     <Compile Include="Timers\Timer.cs" />
     <Compile Include="Timers\TimerCollection.cs" />
+    <Compile Include="TinyUid.cs" />
     <Compile Include="Tuple.cs" />
     <Compile Include="Tween\Accessors\GeneralMoveAccessor.cs" />
     <Compile Include="Tween\Accessors\RigidbodyMovePositionAccessor.cs" />
