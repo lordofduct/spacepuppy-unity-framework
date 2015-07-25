@@ -508,14 +508,15 @@ namespace com.spacepuppy.Utils
                     yield return go;
                 }
 
-                MultiTag comp;
-                foreach (var go in GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG))
-                {
-                    if (go.GetComponent<MultiTag>(out comp))
-                    {
-                        if (comp.ContainsTag(tag)) yield return go;
-                    }
-                }
+                //MultiTag comp;
+                //foreach (var go in GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG))
+                //{
+                //    if (go.GetComponent<MultiTag>(out comp))
+                //    {
+                //        if (comp.ContainsTag(tag)) yield return go;
+                //    }
+                //}
+                foreach (var c in MultiTag.FindAll(tag)) yield return c.gameObject;
             }
         }
 
@@ -530,28 +531,27 @@ namespace com.spacepuppy.Utils
                 var directHit = GameObject.FindWithTag(tag);
                 if (directHit != null) return directHit;
 
-                MultiTag comp;
-                foreach (var go in GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG))
-                {
-                    if (go.GetComponent<MultiTag>(out comp))
-                    {
-                        if (comp.ContainsTag(tag)) return go;
-                    }
-                }
+                //MultiTag comp;
+                //foreach (var go in GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG))
+                //{
+                //    if (go.GetComponent<MultiTag>(out comp))
+                //    {
+                //        if (comp.ContainsTag(tag)) return go;
+                //    }
+                //}
+
+                var comp = MultiTag.Find(tag);
+                return (comp != null) ? comp.gameObject : null;
             }
-            
-            return null;
         }
 
         public static GameObject FindWithMultiTag(this GameObject go, string tag)
         {
-            if (go.tag == tag) return go;
-            if (go.HasComponent<MultiTag>() && go.GetComponent<MultiTag>().ContainsTag(tag)) return go;
+            if (MultiTagHelper.HasTag(go, tag)) return go;
 
             foreach (var child in go.transform.GetAllChildren())
             {
-                if (child.tag == tag) return go;
-                if (child.HasComponent<MultiTag>() && child.GetComponent<MultiTag>().ContainsTag(tag)) return child.gameObject;
+                if (MultiTagHelper.HasTag(child.gameObject, tag)) return child.gameObject;
             }
 
             return null;
@@ -559,11 +559,11 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<GameObject> FindAllWithMultiTag(this GameObject go, string tag)
         {
-            if (go.tag == tag || (go.HasComponent<MultiTag>() && go.GetComponent<MultiTag>().ContainsTag(tag))) yield return go;
+            if (MultiTagHelper.HasTag(go)) yield return go;
 
-            foreach (var child in go.transform.GetAllChildren())
+            foreach(var child in go.transform.GetAllChildren())
             {
-                if (child.tag == tag || (child.HasComponent<MultiTag>() && child.GetComponent<MultiTag>().ContainsTag(tag))) yield return child.gameObject;
+                if (MultiTagHelper.HasTag(child.gameObject, tag)) yield return child.gameObject;
             }
         }
 
@@ -585,19 +585,10 @@ namespace com.spacepuppy.Utils
 
         public static GameObject FindParentWithTag(this Transform t, string stag)
         {
-            if (t.tag == stag) return t.gameObject;
-            MultiTag multitag = t.GetComponent<MultiTag>();
-            if (multitag != null && multitag.ContainsTag(stag)) return t.gameObject;
-
-            Transform p = t.parent;
-            while (p != null)
+            while(t != null)
             {
-                if (p.tag == stag) return p.gameObject;
-
-                multitag = p.GetComponent<MultiTag>();
-                if (multitag != null && multitag.ContainsTag(stag)) return p.gameObject;
-
-                p = p.parent;
+                if (MultiTagHelper.HasTag(t, stag)) return t.gameObject;
+                t = t.parent;
             }
 
             return null;
@@ -656,13 +647,10 @@ namespace com.spacepuppy.Utils
         {
             if (go == null) return false;
 
-            if (go.tag == SPConstants.TAG_ROOT) return true;
-            if (go.HasComponent<MultiTag>() && go.GetComponent<MultiTag>().ContainsTag(SPConstants.TAG_ROOT)) return true;
-
-            foreach (var p in go.GetParents())
+            var t = go.transform;
+            while(t != null)
             {
-                if (p.tag == SPConstants.TAG_ROOT) return true;
-                if (p.HasComponent<MultiTag>() && p.GetComponent<MultiTag>().ContainsTag(SPConstants.TAG_ROOT)) return true;
+                if (MultiTagHelper.HasTag(t.gameObject, SPConstants.TAG_ROOT)) return true;
             }
 
             return false;
@@ -679,27 +667,12 @@ namespace com.spacepuppy.Utils
             root = null;
             if (go == null) return false;
 
-            if (go.tag == SPConstants.TAG_ROOT)
+            var t = go.transform;
+            while(t != null)
             {
-                root = go;
-                return true;
-            }
-            if (go.HasComponent<MultiTag>() && go.GetComponent<MultiTag>().ContainsTag(SPConstants.TAG_ROOT))
-            {
-                root = go;
-                return true;
-            }
-
-            foreach (var p in go.GetParents())
-            {
-                if (p.tag == SPConstants.TAG_ROOT)
+                if(MultiTagHelper.HasTag(t.gameObject, SPConstants.TAG_ROOT))
                 {
-                    root = p.gameObject;
-                    return true;
-                }
-                if (p.HasComponent<MultiTag>() && p.GetComponent<MultiTag>().ContainsTag(SPConstants.TAG_ROOT))
-                {
-                    root = p.gameObject;
+                    root = t.gameObject;
                     return true;
                 }
             }

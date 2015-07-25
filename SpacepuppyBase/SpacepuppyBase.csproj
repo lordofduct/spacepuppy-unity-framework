@@ -64,6 +64,7 @@
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\NotificationPool.cs" />
     <Compile Include="Collections\ObjectCachePool.cs" />
+    <Compile Include="Collections\ObjectInstanceIDEqualityComparer.cs" />
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\OrderedDelegate.cs" />
     <Compile Include="Collections\SamplingStack.cs" />
