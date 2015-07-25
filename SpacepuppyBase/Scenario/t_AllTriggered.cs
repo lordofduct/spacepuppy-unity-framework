@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
@@ -20,7 +19,7 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private bool _resetOnTriggered;
 
-        private UniqueList<ObservableTargetData> _activatedTriggers = new UniqueList<ObservableTargetData>();
+        private HashSet<ObservableTargetData> _activatedTriggers = new HashSet<ObservableTargetData>();
         [System.NonSerialized()]
         private bool _triggered;
 
@@ -99,8 +98,9 @@ namespace com.spacepuppy.Scenario
         {
             if (_triggered) return;
 
-            foreach (var targ in _observedTargets.Except(_activatedTriggers))
+            foreach (var targ in _observedTargets)
             {
+                if (_activatedTriggers.Contains(targ)) continue;
                 if (object.Equals(targ.Trigger, n.Trigger) && (!n.Trigger.IsComplex || n.Trigger.GetComplexIds().Contains(targ.TriggerId)))
                 {
                     _activatedTriggers.Add(targ);
@@ -108,7 +108,7 @@ namespace com.spacepuppy.Scenario
                 }
             }
 
-            if(_activatedTriggers.SimilarTo(_observedTargets))
+            if(_activatedTriggers.SetEquals(_observedTargets))
             {
                 _activatedTriggers.Clear();
                 if (this._resetOnTriggered)

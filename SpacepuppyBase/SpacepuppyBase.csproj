@@ -107,6 +107,7 @@
     <Compile Include="IGameObjectSource.cs" />
     <Compile Include="IIgnorableCollision.cs" />
     <Compile Include="IRandom.cs" />
+    <Compile Include="SPEntity.cs" />
     <Compile Include="ITimeSupplier.cs" />
     <Compile Include="KillableEntity.cs" />
     <Compile Include="INotificationDispatcher.cs" />

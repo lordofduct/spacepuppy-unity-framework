@@ -48,7 +48,12 @@ namespace com.spacepuppy
     /// When using RadicalCoroutine with SPComponent, NEVER call StopCoroutine, and instead use the 'Cancel' method on the routine. StopAllCoroutines works correctly on the SPComponent though.
     /// When using RadicalCoroutine with MonoBehaviour, several features no longer exist (namely tracking and pausing), but you're free to use the Stop* methods for coroutines.
     /// </summary>
-    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator
+    /// <notes>
+    /// 
+    /// TODO - We should set up a RadicalCoroutine pool to reduce garbage collection
+    /// 
+    /// </notes>
+    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator, System.IDisposable
     {
 
         #region Events
@@ -136,6 +141,11 @@ namespace com.spacepuppy
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
             _stack.Push(EnumWrapper.Create(routine));
+        }
+
+        private RadicalCoroutine()
+        {
+            //was created for recycling
         }
 
         #endregion
@@ -395,6 +405,8 @@ namespace com.spacepuppy
 
         bool IEnumerator.MoveNext()
         {
+            if (_state == RadicalCoroutineOperatingState.Inactive) return false;
+
             if (this.Cancelled)
             {
                 if (_state == RadicalCoroutineOperatingState.Cancelling)
@@ -654,6 +666,24 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IDisposable Interface
+
+        public void Dispose()
+        {
+            _state = RadicalCoroutineOperatingState.Inactive;
+            _disableMode = RadicalCoroutineDisableMode.Default;
+            _stack.Clear();
+            _currentIEnumeratorYieldValue = null;
+            _forcedTick = false;
+            this.OnComplete = null;
+            this.OnCancelled = null;
+            this.OnFinished = null;
+
+            _pool.Release(this);
+        }
+
+        #endregion
+
 
         #region Static Utils
 
@@ -707,6 +737,35 @@ namespace com.spacepuppy
             {
                 yield return null;
             }
+        }
+
+        #endregion
+
+        #region Static Pool
+
+        private static com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine>(1000, 
+                                                                                                                                                            () =>
+                                                                                                                                                            {
+                                                                                                                                                                return new RadicalCoroutine();
+                                                                                                                                                            }, 
+                                                                                                                                                            (r) =>
+                                                                                                                                                            {
+                                                                                                                                                                r._state = RadicalCoroutineOperatingState.Inactive;
+                                                                                                                                                                r._disableMode = RadicalCoroutineDisableMode.Default;
+                                                                                                                                                                r._currentIEnumeratorYieldValue = null;
+                                                                                                                                                                r._forcedTick = false;
+                                                                                                                                                                r.OnComplete = null;
+                                                                                                                                                                r.OnCancelled = null;
+                                                                                                                                                                r.OnFinished = null;
+                                                                                                                                                            },
+                                                                                                                                                            true);
+
+        internal RadicalCoroutine CreatePooledRoutine(IEnumerator e)
+        {
+            if (e == null) throw new System.ArgumentNullException("routine");
+            var routine = _pool.GetInstance();
+            routine._stack.Push(EnumWrapper.Create(e));
+            return routine;
         }
 
         #endregion

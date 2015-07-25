@@ -358,4 +358,20 @@ namespace com.spacepuppy
 
     #endregion
 
+    #region NonSerialized Property Drawer Attributes
+
+    public class ShowNonSerializedPropertyAttribute : System.Attribute
+    {
+        public string Label;
+        public string Tooltip;
+        public bool Readonly;
+
+        public ShowNonSerializedPropertyAttribute(string label)
+        {
+            this.Label = label;
+        }
+    }
+
+    #endregion
+
 }

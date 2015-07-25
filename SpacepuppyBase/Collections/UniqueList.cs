@@ -33,11 +33,6 @@ namespace com.spacepuppy.Collections
         {
         }
 
-        public UniqueList(IList<T> lst, bool bWrap = false)
-            : this(lst, bWrap, null as IEqualityComparer<T>)
-        {
-        }
-
         public UniqueList(IEqualityComparer<T> comparer)
         {
             _lst = new List<T>();
@@ -56,20 +51,6 @@ namespace com.spacepuppy.Collections
             _comparer = (comparer == null) ? EqualityComparer<T>.Default : comparer;
 
             this.AddRange(collection);
-        }
-
-        public UniqueList(IList<T> lst, bool bWrap, IEqualityComparer<T> comparer)
-        {
-            _comparer = (comparer == null) ? EqualityComparer<T>.Default : comparer;
-            if (bWrap)
-            {
-                _lst = lst;
-            }
-            else
-            {
-                _lst = new List<T>();
-                this.AddRange(lst);
-            }
         }
 
         #endregion

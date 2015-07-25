@@ -7,12 +7,13 @@ using com.spacepuppy;
 using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Base;
 using com.spacepuppyeditor.Internal;
 
 namespace com.spacepuppyeditor
 {
 
-    [CustomEditor(typeof(SPComponent), true)]
+    [CustomEditor(typeof(MonoBehaviour), true)]
     [CanEditMultipleObjects()]
     public class SPEditor : Editor
     {
@@ -21,13 +22,31 @@ namespace com.spacepuppyeditor
 
         private List<GUIDrawer> _headerDrawers;
 
+        private List<ShownPropertyInfo> _shownFields;
+
         #endregion
 
         #region CONSTRUCTOR
 
         protected virtual void OnEnable()
         {
-
+            var tp = this.target.GetType();
+            var fields = tp.GetFields();
+            foreach(var f in fields)
+            {
+                var attribs = f.GetCustomAttributes(typeof(ShowNonSerializedPropertyAttribute), false) as ShowNonSerializedPropertyAttribute[];
+                if(attribs != null && attribs.Length > 0)
+                {
+                    if (_shownFields == null) _shownFields = new List<ShownPropertyInfo>();
+                    var attrib = attribs[0];
+                    _shownFields.Add(new ShownPropertyInfo()
+                    {
+                        Attrib = attrib,
+                        FieldInfo = f,
+                        Label = new GUIContent(attrib.Label ?? f.Name, attrib.Tooltip)
+                    });
+                }
+            }
         }
 
         protected virtual void OnDisable()
@@ -41,6 +60,12 @@ namespace com.spacepuppyeditor
 
         public sealed override void OnInspectorGUI()
         {
+            if (!(this.target is SPComponent) && !EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_SPEDITOR_ISDEFAULT_ACTIVE, true))
+            {
+                base.OnInspectorGUI();
+                return;
+            }
+
             //draw header infobox if needed
             this.DrawDefaultInspectorHeader();
 
@@ -55,6 +80,26 @@ namespace com.spacepuppyeditor
             else
             {
                 PropertyHandlerValidationUtility.OnInspectorGUIComplete(this.serializedObject, false);
+            }
+
+            if(_shownFields != null && UnityEngine.Application.isPlaying)
+            {
+                GUILayout.Label("Runtime Values", EditorStyles.boldLabel);
+
+                foreach(var info in _shownFields)
+                {
+                    GUI.enabled = !info.Attrib.Readonly;
+
+                    var value = info.FieldInfo.GetValue(this.target);
+                    EditorGUI.BeginChangeCheck();
+                    value = SPEditorGUILayout.DefaultPropertyField(info.Label, value, info.FieldInfo.FieldType);
+                    if(EditorGUI.EndChangeCheck())
+                    {
+                        info.FieldInfo.SetValue(this.target, value);
+                    }
+
+                    GUI.enabled = true;
+                }
             }
         }
 
@@ -131,6 +176,12 @@ namespace com.spacepuppyeditor
             }
         }
 
+
+        public override bool RequiresConstantRepaint()
+        {
+            return base.RequiresConstantRepaint() || (Application.isPlaying && _shownFields != null);
+        }
+
         #endregion
 
         #region Draw Methods
@@ -197,6 +248,21 @@ namespace com.spacepuppyeditor
                 }
             }
             return EditorGUI.EndChangeCheck();
+        }
+
+        #endregion
+
+
+
+        #region Special Types
+
+        private class ShownPropertyInfo
+        {
+
+            public ShowNonSerializedPropertyAttribute Attrib;
+            public System.Reflection.FieldInfo FieldInfo;
+            public GUIContent Label;
+
         }
 
         #endregion

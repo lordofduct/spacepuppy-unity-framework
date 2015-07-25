@@ -23,6 +23,16 @@ namespace com.spacepuppyeditor
         {
             return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, label, false, null);
         }
+        
+        public static object DefaultPropertyField(string label, object value, System.Type valueType)
+        {
+            return SPEditorGUI.DefaultPropertyField(EditorGUILayout.GetControlRect(true), EditorHelper.TempContent(label), value, valueType);
+        }
+
+        public static object DefaultPropertyField(GUIContent label, object value, System.Type valueType)
+        {
+            return SPEditorGUI.DefaultPropertyField(EditorGUILayout.GetControlRect(true), label, value, valueType);
+        }
 
         #endregion
 

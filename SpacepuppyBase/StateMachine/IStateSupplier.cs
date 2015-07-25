@@ -26,18 +26,13 @@ namespace com.spacepuppy.StateMachine
 
     }
 
-    public class StateSupplierCollection<T> : com.spacepuppy.Collections.UniqueList<T>, ITypedStateSupplier<T> where T : class
+    public class StateSupplierCollection<T> : System.Collections.Generic.HashSet<T>, ITypedStateSupplier<T> where T : class
     {
 
         #region CONSTRUCTOR
-        
+
         public StateSupplierCollection()
             : base(null as IEqualityComparer<T>)
-        {
-        }
-
-        public StateSupplierCollection(int capacity)
-            : base(capacity, null as IEqualityComparer<T>)
         {
         }
 
@@ -48,11 +43,6 @@ namespace com.spacepuppy.StateMachine
 
         public StateSupplierCollection(IEqualityComparer<T> comparer)
             : base(comparer)
-        {
-        }
-
-        public StateSupplierCollection(int capacity, IEqualityComparer<T> comparer)
-            : base(capacity, comparer)
         {
         }
 
@@ -67,19 +57,25 @@ namespace com.spacepuppy.StateMachine
 
         public bool Contains<TSub>() where TSub : class, T
         {
-            for(int i = 0; i < this.Count; i++)
+            if (this.Count == 0) return false;
+
+            var e = this.GetEnumerator();
+            while(e.MoveNext())
             {
-                if (this[i] is TSub) return true;
+                if (e.Current is TSub) return true;
             }
             return false;
         }
 
         public bool Contains(System.Type tp)
         {
+            if (this.Count == 0) return false;
+
+            var e = this.GetEnumerator();
             T obj;
-            for (int i = 0; i < this.Count; i++)
+            while (e.MoveNext())
             {
-                obj = this[i];
+                obj = e.Current;
                 if (obj != null && TypeUtil.IsType(obj.GetType(), tp)) return true;
             }
             return false;
@@ -87,21 +83,25 @@ namespace com.spacepuppy.StateMachine
 
         public TSub GetState<TSub>() where TSub : class, T
         {
-            T obj;
-            for (int i = 0; i < this.Count; i++)
+            if (this.Count == 0) return null;
+
+            var e = this.GetEnumerator();
+            while (e.MoveNext())
             {
-                obj = this[i];
-                if (obj is TSub) return obj as TSub;
+                if (e.Current is TSub) return e.Current as TSub;
             }
             return null;
         }
 
         public T GetState(System.Type tp)
         {
+            if (this.Count == 0) return null;
+
+            var e = this.GetEnumerator();
             T obj;
-            for (int i = 0; i < this.Count; i++)
+            while (e.MoveNext())
             {
-                obj = this[i];
+                obj = e.Current;
                 if (obj != null && TypeUtil.IsType(obj.GetType(), tp)) return obj;
             }
             return null;
@@ -110,8 +110,28 @@ namespace com.spacepuppy.StateMachine
         public T GetNext(T current)
         {
             if (this.Count == 0) return null;
-            int i = (this.IndexOf(current) + 1) % this.Count;
-            return this[i];
+
+            //NOTE - if current doesn't exist in collection, we return the first entry
+
+            HashSet<T>.Enumerator e;
+            if (this.Contains(current))
+            {
+                e = this.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (this.Comparer.Equals(current, e.Current))
+                    {
+                        if (e.MoveNext())
+                            return e.Current;
+                        else
+                            break;
+                    }
+                }
+            }
+
+            e = this.GetEnumerator();
+            e.MoveNext();
+            return e.Current;
         }
 
         #endregion
@@ -126,7 +146,7 @@ namespace com.spacepuppy.StateMachine
         private bool _allowIndirectHit;
 
         #endregion
-        
+
         #region CONSTRUCTOR
 
         public TypeStateSupplierCollection()

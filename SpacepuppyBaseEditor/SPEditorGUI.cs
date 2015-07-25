@@ -24,6 +24,7 @@ namespace com.spacepuppyeditor
         private static System.Func<Rect, int, GUIContent, int, Rect> _imp_MultiFieldPrefixLabel;
         private static System.Action<Rect, GUIContent[], float[], float> _imp_MultiFloatField_01;
         private static System.Func<SerializedProperty, GUIContent, float> _imp_GetSinglePropertyHeight;
+        private static System.Func<GUIContent, Rect, Gradient, Gradient> _imp_GradientField;
 
         #endregion
 
@@ -126,6 +127,188 @@ namespace com.spacepuppyeditor
         {
             return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUI(position, property, label, includeChildren);
         }
+        
+        public static object DefaultPropertyField(Rect position, string label, object value, System.Type valueType)
+        {
+            return DefaultPropertyField(position, EditorHelper.TempContent(label), value, valueType);
+        }
+
+        public static object DefaultPropertyField(Rect position, GUIContent label, object value, System.Type valueType)
+        {
+            var propertyType = (valueType != null) ? EditorHelper.GetPropertyType(valueType) : SerializedPropertyType.Generic;
+
+            switch (propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    EditorGUI.BeginChangeCheck();
+                    int num1 = EditorGUI.IntField(position, label, ConvertUtil.ToInt(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return num1;
+                    }
+                    else
+                        break;
+                case SerializedPropertyType.Boolean:
+                    EditorGUI.BeginChangeCheck();
+                    bool flag2 = EditorGUI.Toggle(position, label, ConvertUtil.ToBool(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return flag2;
+                    }
+                    else
+                        break;
+                case SerializedPropertyType.Float:
+                    EditorGUI.BeginChangeCheck();
+                    float num2 = EditorGUI.FloatField(position, label, ConvertUtil.ToSingle(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return num2;
+                    }
+                    else
+                        break;
+                case SerializedPropertyType.String:
+                    EditorGUI.BeginChangeCheck();
+                    string str1 = EditorGUI.TextField(position, label, ConvertUtil.ToString(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return str1;
+                    }
+                    else
+                        break;
+                case SerializedPropertyType.Color:
+                    EditorGUI.BeginChangeCheck();
+                    Color color = EditorGUI.ColorField(position, label, ConvertUtil.ToColor(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return color;
+                    }
+                    else
+                        break;
+                case SerializedPropertyType.ObjectReference:
+                    EditorGUI.BeginChangeCheck();
+                    object obj = EditorGUI.ObjectField(position, label, value as UnityEngine.Object, valueType, true);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return obj;
+                    }
+                    break;
+                case SerializedPropertyType.LayerMask:
+                    EditorGUI.BeginChangeCheck();
+                    LayerMask mask = (value is LayerMask) ? (LayerMask)value : (LayerMask)ConvertUtil.ToInt(value);
+                    mask = SPEditorGUI.LayerMaskField(position, label, mask);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return mask;
+                    }
+                    break;
+                case SerializedPropertyType.Enum:
+                    if (valueType.GetCustomAttributes(typeof(System.FlagsAttribute), false).Any())
+                    {
+                        EditorGUI.BeginChangeCheck();
+                        var e = SPEditorGUI.EnumFlagField(position, label, ConvertUtil.ToEnumOfType(valueType, value));
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            return e;
+                        }
+                    }
+                    else
+                    {
+                        EditorGUI.BeginChangeCheck();
+                        var e = SPEditorGUI.EnumPopupExcluding(position, label, ConvertUtil.ToEnumOfType(valueType, value));
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            return e;
+                        }
+                    }
+                    break;
+                case SerializedPropertyType.Vector2:
+                    EditorGUI.BeginChangeCheck();
+                    var v2 = EditorGUI.Vector2Field(position, label, ConvertUtil.ToVector2(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return v2;
+                    }
+                    break;
+                case SerializedPropertyType.Vector3:
+                    EditorGUI.BeginChangeCheck();
+                    var v3 = EditorGUI.Vector3Field(position, label, ConvertUtil.ToVector3(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return v3;
+                    }
+                    break;
+                case SerializedPropertyType.Vector4:
+                    EditorGUI.BeginChangeCheck();
+                    var v4 = EditorGUI.Vector4Field(position, label.text, ConvertUtil.ToVector4(value));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return v4;
+                    }
+                    break;
+                case SerializedPropertyType.Rect:
+                    EditorGUI.BeginChangeCheck();
+                    Rect rect = (value is Rect) ? (Rect)value : new Rect();
+                    rect = EditorGUI.RectField(position, label, rect);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return rect;
+                    }
+                    break;
+                case SerializedPropertyType.ArraySize:
+                    EditorGUI.BeginChangeCheck();
+                    int num3 = EditorGUI.IntField(position, label, ConvertUtil.ToInt(value), EditorStyles.numberField);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return num3;
+                    }
+                    break;
+                case SerializedPropertyType.Character:
+                    bool changed = GUI.changed;
+                    GUI.changed = false;
+                    string str2 = EditorGUI.TextField(position, label, new string(ConvertUtil.ToChar(value), 1));
+                    if (GUI.changed)
+                    {
+                        if (str2.Length == 1)
+                            return str2[0];
+                        else
+                            GUI.changed = false;
+                    }
+                    GUI.changed = GUI.changed | changed;
+                    break;
+                case SerializedPropertyType.AnimationCurve:
+                    EditorGUI.BeginChangeCheck();
+                    AnimationCurve curve = value as AnimationCurve;
+                    curve = EditorGUI.CurveField(position, label, curve);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return curve;
+                    }
+                    break;
+                case SerializedPropertyType.Bounds:
+                    EditorGUI.BeginChangeCheck();
+                    Bounds bnds = (value is Bounds) ? (Bounds)value : new Bounds();
+                    bnds = EditorGUI.BoundsField(position, label, bnds);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return bnds;
+                    }
+                    break;
+                case SerializedPropertyType.Gradient:
+                    EditorGUI.BeginChangeCheck();
+                    Gradient grad = value as Gradient;
+                    grad = SPEditorGUI.GradientField(position, label, grad);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        return grad;
+                    }
+                    break;
+                default:
+                    EditorGUI.PrefixLabel(position, label);
+                    break;
+            }
+
+            return value;
+        }
 
         #endregion
 
@@ -148,6 +331,26 @@ namespace com.spacepuppyeditor
         public static LayerMask LayerMaskField(Rect position, string label, int selectedMask)
         {
             return EditorGUI.MaskField(position, label, selectedMask, LayerUtil.GetAllLayerNames());
+        }
+
+        public static LayerMask LayerMaskField(Rect position, GUIContent label, int selectedMask)
+        {
+            return EditorGUI.MaskField(position, label, selectedMask, LayerUtil.GetAllLayerNames());
+        }
+
+        #endregion
+
+        #region GradientField
+
+        public static Gradient GradientField(Rect position, string label, Gradient gradient)
+        {
+            return GradientField(position, EditorHelper.TempContent(label), gradient);
+        }
+
+        public static Gradient GradientField(Rect position, GUIContent label, Gradient gradient)
+        {
+            if (_imp_GradientField == null) _imp_GradientField = _accessWrapper.GetStaticMethod("GradientField", typeof(System.Func<GUIContent, Rect, Gradient, Gradient>)) as System.Func<GUIContent, Rect, Gradient, Gradient>;
+            return _imp_GradientField(label, position, gradient);
         }
 
         #endregion
@@ -572,6 +775,7 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
+
 
     }
 }

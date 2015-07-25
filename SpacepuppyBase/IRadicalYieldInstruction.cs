@@ -309,13 +309,22 @@ namespace com.spacepuppy
 
     }
 
-    public class RadicalWaitHandle : IRadicalWaitHandle
+    public class RadicalWaitHandle : IRadicalWaitHandle, IPooledYieldInstruction
     {
 
         #region Fields
 
         private bool _complete;
         private System.Action<IRadicalWaitHandle> _callback;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        protected RadicalWaitHandle()
+        {
+
+        }
 
         #endregion
 
@@ -364,7 +373,23 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IPooledYieldInstruction Interface
+
+        void System.IDisposable.Dispose()
+        {
+            if(this.GetType() == typeof(RadicalWaitHandle))
+            {
+                _complete = false;
+                _callback = null;
+                _pool.Release(this);
+            }
+        }
+
+        #endregion
+
         #region Static Interface
+
+        private static com.spacepuppy.Collections.ObjectCachePool<RadicalWaitHandle> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalWaitHandle>(1000, () => new RadicalWaitHandle());
 
         public static IRadicalWaitHandle Null
         {
@@ -372,6 +397,11 @@ namespace com.spacepuppy
             {
                 return NullYieldInstruction.Null;
             }
+        }
+
+        public static RadicalWaitHandle Create()
+        {
+            return _pool.GetInstance();
         }
 
         #endregion

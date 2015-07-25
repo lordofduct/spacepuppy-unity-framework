@@ -4,6 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace com.spacepuppy.Collections
 {
+
+    /// <summary>
+    /// Tests for equality based solely on if the references are equal. This is useful for UnityEngine.Objects that overrides the default Equals 
+    /// operator returning false if it's been destroyed.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ObjectReferenceEqualityComparer<T> : EqualityComparer<T> where T : class
     {
         private static IEqualityComparer<T> _defaultComparer;

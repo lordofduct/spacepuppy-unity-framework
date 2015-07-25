@@ -15,10 +15,12 @@ namespace com.spacepuppy.Collections
 
         #region Fields
 
-        private Stack<T> _inactive = new Stack<T>();
+        private HashSet<T> _inactive = new HashSet<T>();
 
+        private int _cacheSize;
         private Func<T> _constructorDelegate;
         private Action<T> _resetObjectDelegate;
+        private bool _resetOnGet;
 
         #endregion
 
@@ -26,21 +28,29 @@ namespace com.spacepuppy.Collections
 
         public ObjectCachePool(int cacheSize)
         {
-            this.CacheSize = cacheSize;
+            _cacheSize = cacheSize;
             _constructorDelegate = this.SimpleConstructor;
         }
 
         public ObjectCachePool(int cacheSize, Func<T> constructorDelegate)
         {
-            this.CacheSize = cacheSize;
+            _cacheSize = cacheSize;
             _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
         }
 
         public ObjectCachePool(int cacheSize, Func<T> constructorDelegate, Action<T> resetObjectDelegate)
         {
-            this.CacheSize = cacheSize;
+            _cacheSize = cacheSize;
             _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
             _resetObjectDelegate = resetObjectDelegate;
+        }
+
+        public ObjectCachePool(int cacheSize, Func<T> constructorDelegate, Action<T> resetObjectDelegate, bool resetOnGet)
+        {
+            _cacheSize = cacheSize;
+            _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
+            _resetObjectDelegate = resetObjectDelegate;
+            _resetOnGet = resetOnGet;
         }
 
         private T SimpleConstructor()
@@ -52,7 +62,17 @@ namespace com.spacepuppy.Collections
 
         #region Properties
 
-        public int CacheSize { get; set; }
+        public int CacheSize
+        {
+            get { return _cacheSize; }
+            set { _cacheSize = value; }
+        }
+
+        public bool ResetOnGet
+        {
+            get { return _resetOnGet; }
+            set { _resetOnGet = value; }
+        }
 
         #endregion
 
@@ -60,9 +80,12 @@ namespace com.spacepuppy.Collections
 
         public T GetInstance()
         {
-            if(_inactive.Count > 0)
+            var e = _inactive.GetEnumerator();
+            if (e.MoveNext())
             {
-                return _inactive.Pop();
+                if(_resetOnGet && _resetObjectDelegate != null)
+                    _resetObjectDelegate(e.Current);
+                return e.Current;
             }
             else
             {
@@ -74,11 +97,16 @@ namespace com.spacepuppy.Collections
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
 
-            if(this.CacheSize > 0 && _inactive.Count < this.CacheSize)
+            if (_cacheSize > 0 && _inactive.Count < _cacheSize)
             {
-                if (_resetObjectDelegate != null) _resetObjectDelegate(obj);
-                _inactive.Push(obj);
+                if (!_resetOnGet && _resetObjectDelegate != null) _resetObjectDelegate(obj);
+                _inactive.Add(obj);
             }
+        }
+
+        public bool IsTreatedAsInactive(T obj)
+        {
+            return _inactive.Contains(obj);
         }
 
         #endregion
