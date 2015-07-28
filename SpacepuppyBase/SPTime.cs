@@ -9,20 +9,24 @@ namespace com.spacepuppy
 
     /// <summary>
     /// A static entry point to the various ITimeSuppliers in existance. An ITimeSupplier gives object identity 
-    /// to the varous kinds of time out there: normal (UnityEngine.Time.time), real (UnityEngine.Time.unscaledTime), smooth (Time.smoothDeltaTime), custom (no unity parrallel). 
+    /// to the varous kinds of time out there: normal (UnityEngine.Time.time), real (UnityEngine.Time.unscaledTime), 
+    /// smooth (Time.smoothDeltaTime), custom (no unity parrallel). 
     /// 
     /// With the objects in hand you can than swap out what time is used when updating objects.
     /// 
-    /// For example the com.spacepuppy.Tween namespace containers tweeners that can update on any of the existing times in 
-    /// unity. These objects can be passed in to allow updating at any one of those times. Lets say for instance you've set 
-    /// the time scale of Normal time to 0 (to pause the game), but you still need the menu to tween and update appropriately. 
-    /// Well, you'd use the 'RealTime' or a 'Custom' time object to update the tween with instead of 'Normal'.
+    /// For example the com.spacepuppy.Tween namespace containers tweeners that can update on any of the existing 
+    /// times in unity. These objects can be passed in to allow updating at any one of those times. Lets say for 
+    /// instance you've set the time scale of Normal time to 0 (to pause the game), but you still need the menu to 
+    /// tween and update appropriately. Well, you'd use the 'RealTime' or a 'Custom' time object to update the 
+    /// tween with instead of 'Normal'.
     /// 
-    /// An added feature includes stacking TimeScales. The Normal and Custom TimeSuppliers allow naming your time scales so that you can compound them together. 
-    /// This way time scales don't overlap. Lets say you have an effect where when swinging the sword that halves the time speed to look cool, but you also have a slomo effect 
-    /// when an item is picked up for a duration of time. You expect the swords half speed to be half of the slomo effect, not half of normal time, so that the sword looks right 
-    /// either way. This allows you to combine those 2 with out having to test if one or the other is currently playing (or the scale of it playing). Which is SUPER extra handy 
-    /// when tweening the time scale.
+    /// An added feature includes stacking TimeScales. The Normal and Custom TimeSuppliers allow naming your time 
+    /// scales so that you can compound them together. This way time scales don't overlap. Lets say you have an 
+    /// effect where when swinging the sword that halves the time speed to look cool, but you also have a slomo effect 
+    /// when an item is picked up for a duration of time. You expect the swords half speed to be half of the slomo 
+    /// effect, not half of normal time, so that the sword looks right either way. This allows you to combine those 
+    /// 2 with out having to test if one or the other is currently playing (or the scale of it playing). Which is 
+    /// SUPER extra handy when tweening the time scale.
     /// </summary>
     public static class SPTime
     {
