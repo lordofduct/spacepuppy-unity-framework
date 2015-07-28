@@ -828,6 +828,7 @@ namespace com.spacepuppy
             {
                 var w = _pool.GetInstance();
                 w._e = e;
+                w._complete = false;
                 return w;
             }
 
