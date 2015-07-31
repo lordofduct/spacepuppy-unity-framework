@@ -64,13 +64,6 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static Vector3 RotateAroundAxis(Vector3 v, float a, Vector3 axis, bool bUseRadians = false)
-        {
-            if (bUseRadians) a *= MathUtil.RAD_TO_DEG;
-            var q = Quaternion.AngleAxis(a, axis);
-            return q * v;
-        }
-
         public static Vector3 Clamp(Vector3 input, Vector3 max, Vector3 min)
         {
             input.x = MathUtil.Clamp(input.x, max.x, min.x);
@@ -282,6 +275,13 @@ namespace com.spacepuppy.Utils
             Vector2 v2 = new Vector2(Vector3.Dot(v, forward), Vector3.Dot(v, right));
             v2.Normalize();
             return VectorUtil.Angle(v2);
+        }
+
+        public static Vector3 RotateAroundAxis(Vector3 v, float a, Vector3 axis, bool bUseRadians = false)
+        {
+            if (bUseRadians) a *= MathUtil.RAD_TO_DEG;
+            var q = Quaternion.AngleAxis(a, axis);
+            return q * v;
         }
 
         #endregion

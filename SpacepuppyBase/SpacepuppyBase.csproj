@@ -98,6 +98,7 @@
     <Compile Include="Geom\RaycastInfo.cs" />
     <Compile Include="Geom\RigidbodyBounds.cs" />
     <Compile Include="Geom\Sphere.cs" />
+    <Compile Include="Geom\TrajectoryUtil.cs" />
     <Compile Include="Geom\Trans.cs" />
     <Compile Include="Geom\XYPlanarSurface.cs" />
     <Compile Include="Hooks\EarlyExecutionUpdateEventHooks.cs" />
@@ -241,7 +242,7 @@
     <Compile Include="Utils\FastDynamicMemberAccessor\PropertyAccessor.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
     <Compile Include="Utils\Gizmo\GizmoGhost.cs" />
-    <Compile Include="Utils\IEnumerableExtensionMethods.cs" />
+    <Compile Include="Utils\ArrayUtil.cs" />
     <Compile Include="Utils\LayerUtil.cs" />
     <Compile Include="Utils\MathUtil.cs" />
     <Compile Include="Utils\MouseUtil.cs" />

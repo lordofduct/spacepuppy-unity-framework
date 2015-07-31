@@ -27,5 +27,8 @@ namespace com.spacepuppy
         //sent by Notification to all members of some entity
         public const string MSG_AUTONOTIFICATIONMESSAGEHANDLER = "AutoNotificationMessageHandler";
 
+
+        public static Quaternion ROT_3DSMAX_TO_UNITY = Quaternion.LookRotation(Vector3.left, Vector3.forward);
+
     }
 }

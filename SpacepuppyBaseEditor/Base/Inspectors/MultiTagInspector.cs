@@ -20,6 +20,16 @@ namespace com.spacepuppyeditor.Base
 
         #endregion
 
+        protected override void OnBeforeSPInspectorGUI()
+        {
+            var mtag = this.target as MultiTag;
+            if (mtag != null && !mtag.CompareTag(SPConstants.TAG_MULTITAG))
+            {
+                mtag.tag = SPConstants.TAG_MULTITAG;
+                EditorUtility.SetDirty(mtag);
+            }
+        }
+
         protected override void OnSPInspectorGUI()
         {
             //this may change in later releases...

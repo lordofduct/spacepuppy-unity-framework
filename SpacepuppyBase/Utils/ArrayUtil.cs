@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Utils
 {
-    public static class IEnumerableExtensionMethods
+    public static class ArrayUtil
     {
 
         #region General Methods
@@ -295,6 +295,11 @@ namespace com.spacepuppy.Utils
 
         #region Array Methods
 
+        public static T[] Empty<T>()
+        {
+            return EmptyArray<T>.Instance;
+        }
+
         public static int IndexOf(this System.Array lst, object obj)
         {
             return System.Array.IndexOf(lst, obj);
@@ -308,6 +313,27 @@ namespace com.spacepuppy.Utils
         public static bool InBounds(this System.Array arr, int index)
         {
             return index >= 0 && index <= arr.Length - 1;
+        }
+
+        #endregion
+
+
+
+
+        #region Special Types
+
+        private class EmptyArray<T>
+        {
+            private static volatile T[] _instance;
+
+            public static T[] Instance
+            {
+                get
+                {
+                    if (_instance == null) _instance = new T[0];
+                    return _instance;
+                }
+            }
         }
 
         #endregion

@@ -923,6 +923,7 @@ namespace com.spacepuppy.Utils
                     yield return c;
                 }
             }
+            //return root.GetComponentsInChildren<T>();
         }
         public static IEnumerable<T> FindComponents<T>(this Component c) where T : Component
         {
@@ -939,6 +940,7 @@ namespace com.spacepuppy.Utils
                     yield return c;
                 }
             }
+            //return root.GetComponentsInChildren(tp);
         }
         public static IEnumerable<Component> FindComponents(this Component c, System.Type tp)
         {

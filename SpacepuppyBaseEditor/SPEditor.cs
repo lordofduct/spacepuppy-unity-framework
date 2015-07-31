@@ -66,6 +66,8 @@ namespace com.spacepuppyeditor
                 return;
             }
 
+            this.OnBeforeSPInspectorGUI();
+
             //draw header infobox if needed
             this.DrawDefaultInspectorHeader();
 
@@ -101,6 +103,11 @@ namespace com.spacepuppyeditor
                     GUI.enabled = true;
                 }
             }
+        }
+
+        protected virtual void OnBeforeSPInspectorGUI()
+        {
+
         }
 
         protected virtual void OnSPInspectorGUI()

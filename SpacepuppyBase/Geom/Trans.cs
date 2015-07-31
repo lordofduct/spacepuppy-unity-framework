@@ -24,13 +24,20 @@ namespace com.spacepuppy.Geom
             }
             set
             {
-                Position = TransformUtil.MatrixToTranslation(value);
-                Rotation = TransformUtil.MatrixToRotation(value);
-                Scale = TransformUtil.MatrixToScale(value);
+                Position = TransformUtil.GetTranslation(value);
+                Rotation = TransformUtil.GetRotation(value);
+                Scale = TransformUtil.GetScale(value);
             }
         }
 
         #region CONSTRUCTORS
+
+        public Trans(Vector3 pos, Quaternion rot)
+        {
+            this.Position = pos;
+            this.Rotation = rot;
+            this.Scale = Vector3.one;
+        }
 
         public Trans(Vector3 pos, Quaternion rot, Vector3 sc)
         {
@@ -87,6 +94,11 @@ namespace com.spacepuppy.Geom
             var t = new Trans();
             t.Matrix = mat;
             return t;
+        }
+
+        public static Trans Transform(Vector3 pos, Quaternion rot)
+        {
+            return new Trans(pos, rot);
         }
 
         public static Trans Transform(Vector3 pos, Quaternion rot, Vector3 sc)

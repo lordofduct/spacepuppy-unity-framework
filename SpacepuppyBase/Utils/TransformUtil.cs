@@ -9,9 +9,33 @@ namespace com.spacepuppy.Utils
     public static class TransformUtil
     {
         
-        public static Trans ToTrans(this Transform trans, bool local = false)
+        public static Trans ToTrans(this Transform trans)
         {
-            return (local) ? Trans.GetLocal(trans) : Trans.GetGlobal(trans);
+            return Trans.GetGlobal(trans);
+        }
+
+        public static Trans ToRelativeTrans(this Transform trans, Transform relativeTo)
+        {
+            var m = trans.localToWorldMatrix;
+            m *= relativeTo.worldToLocalMatrix;
+            return Trans.Transform(m);
+        }
+
+        public static Trans ToLocalTrans(this Transform trans)
+        {
+            return Trans.GetLocal(trans);
+        }
+
+        public static Matrix4x4 GetMatrix(this Transform trans)
+        {
+            return trans.localToWorldMatrix;
+        }
+
+        public static Matrix4x4 GetRelativeMatrix(this Transform trans, Transform relativeTo)
+        {
+            var m = trans.localToWorldMatrix;
+            m *= relativeTo.worldToLocalMatrix;
+            return m;
         }
 
         public static Matrix4x4 GetLocalMatrix(this Transform trans)
@@ -19,15 +43,17 @@ namespace com.spacepuppy.Utils
             return Matrix4x4.TRS(trans.localPosition, trans.localRotation, trans.localScale);
         }
 
+
+
         #region Matrix Methods
 
-        public static Vector3 MatrixToTranslation(Matrix4x4 m)
+        public static Vector3 GetTranslation(this Matrix4x4 m)
         {
             var col = m.GetColumn(3);
             return new Vector3(col.x, col.y, col.z);
         }
 
-        public static Quaternion MatrixToRotation(Matrix4x4 m)
+        public static Quaternion GetRotation(this Matrix4x4 m)
         {
             // Adapted from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
             Quaternion q = new Quaternion();
@@ -41,7 +67,7 @@ namespace com.spacepuppy.Utils
             return q;
         }
 
-        public static Vector3 MatrixToScale(Matrix4x4 m)
+        public static Vector3 GetScale(this Matrix4x4 m)
         {
             //var xs = m.GetColumn(0);
             //var ys = m.GetColumn(1);
@@ -142,7 +168,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Vector3 ScaleVector(this Matrix4x4 m, Vector3 v)
         {
-            var sc = MatrixToScale(m);
+            var sc = m.GetScale();
             return Matrix4x4.Scale(sc).MultiplyPoint(v);
         }
 
@@ -153,7 +179,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector3 ScaleVector(this Transform t, Vector3 v)
         {
-            var sc = MatrixToScale(t.localToWorldMatrix);
+            var sc = t.localToWorldMatrix.GetScale();
             return Matrix4x4.Scale(sc).MultiplyPoint(v);
         }
 
@@ -165,20 +191,62 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Vector3 InverseScaleVector(this Matrix4x4 m, Vector3 v)
         {
-            var sc = MatrixToScale(m.inverse);
+            var sc = m.inverse.GetScale();
             return Matrix4x4.Scale(sc).MultiplyPoint(v);
         }
 
         public static Vector3 InvserScaleVector(this Trans t, Vector3 v)
         {
-            var sc = MatrixToScale(t.Matrix.inverse);
+            var sc = t.Matrix.inverse.GetScale();
             return Matrix4x4.Scale(sc).MultiplyPoint(v);
         }
 
         public static Vector3 InvserScaleVector(this Transform t, Vector3 v)
         {
-            var sc = MatrixToScale(t.worldToLocalMatrix);
+            var sc = t.worldToLocalMatrix.GetScale();
             return Matrix4x4.Scale(sc).MultiplyPoint(v);
+        }
+
+        /// <summary>
+        /// Apply a transform to a Trans.
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static Trans TransformTrans(this Matrix4x4 m, Trans t)
+        {
+            t.Matrix *= m;
+            return t;
+        }
+
+        public static Trans TransformTrans(this Trans t, Trans t2)
+        {
+            t2.Matrix *= t.Matrix;
+            return t2;
+        }
+
+        public static Trans TransformTrans(this Transform t, Trans t2)
+        {
+            t2.Matrix *= t.localToWorldMatrix;
+            return t2;
+        }
+
+        public static Trans InverseTransformTrans(this Matrix4x4 m, Trans t)
+        {
+            t.Matrix *= m.inverse;
+            return t;
+        }
+
+        public static Trans InverseTransformTrans(this Trans t, Trans t2)
+        {
+            t2.Matrix *= t.Matrix.inverse;
+            return t2;
+        }
+
+        public static Trans InverseTransformTrans(this Transform t, Trans t2)
+        {
+            t2.Matrix *= t.worldToLocalMatrix;
+            return t2;
         }
 
         /// <summary>
@@ -233,7 +301,7 @@ namespace com.spacepuppy.Utils
         public static RaycastInfo TransformRayCastInfo(this Matrix4x4 m, RaycastInfo r)
         {
             float dist = r.Distance;
-            var sc = MatrixToScale(m);
+            var sc = m.GetScale();
             if (sc.sqrMagnitude != 1.0f)
             {
                 var v = r.Direction * r.Distance;
@@ -247,7 +315,7 @@ namespace com.spacepuppy.Utils
         public static RaycastInfo TransformRayCastInfo(this Trans t, RaycastInfo r)
         {
             float dist = r.Distance;
-            var sc = MatrixToScale(t.Matrix);
+            var sc = t.Scale;
             if (sc.sqrMagnitude != 1.0f)
             {
                 var v = r.Direction * r.Distance;
@@ -261,7 +329,7 @@ namespace com.spacepuppy.Utils
         public static RaycastInfo TransformRayCastInfo(this Transform t, RaycastInfo r)
         {
             float dist = r.Distance;
-            var sc = MatrixToScale(t.localToWorldMatrix);
+            var sc = t.localToWorldMatrix.GetScale();
             if (sc.sqrMagnitude != 1.0f)
             {
                 var v = r.Direction * r.Distance;
@@ -276,6 +344,54 @@ namespace com.spacepuppy.Utils
 
         #region Transpose Methods
 
+        /// <summary>
+        /// Set the position and rotation of a Transform as if its origin were that of 'anchor'. 
+        /// Anchor should be in world space.
+        /// </summary>
+        /// <param name="trans">The transform to transpose.</param>
+        /// <param name="anchor">The point around which to transpose in world space.</param>
+        /// <param name="position">The new position in world space.</param>
+        /// <param name="rotation">The new rotation in world space.</param>
+        public static void TransposeAroundGlobalAnchor(this Transform trans, Vector3 anchor, Vector3 position, Quaternion rotation)
+        {
+            anchor = trans.InverseTransformPoint(anchor);
+            if (trans.parent != null)
+            {
+                position = trans.parent.InverseTransformPoint(position);
+                rotation = trans.parent.InverseTransformRotation(rotation);
+            }
+
+            LocalTransposeAroundAnchor(trans, anchor, position, rotation);
+        }
+
+        /// <summary>
+        /// Set the position and rotation of a Transform as if its origin were that of 'anchor'. 
+        /// Anchor should be in world space.
+        /// </summary>
+        /// <param name="trans">The transform to transpose.</param>
+        /// <param name="anchor">The point around which to transpose in world space.</param>
+        /// <param name="position">The new position in world space.</param>
+        /// <param name="rotation">The new rotation in world space.</param>
+        public static void TransposeAroundGlobalAnchor(this Transform trans, Trans anchor, Vector3 position, Quaternion rotation)
+        {
+            anchor.Matrix *= trans.worldToLocalMatrix;
+            if (trans.parent != null)
+            {
+                position = trans.parent.InverseTransformPoint(position);
+                rotation = trans.parent.InverseTransformRotation(rotation);
+            }
+
+            LocalTransposeAroundAnchor(trans, anchor, position, rotation);
+        }
+
+        /// <summary>
+        /// Set the position and rotation of a Transform as if its origin were that of 'anchor'. 
+        /// Anchor should be local to the Transform where <0,0,0> would be the same as its true origin.
+        /// </summary>
+        /// <param name="trans">The transform to transpose.</param>
+        /// <param name="anchor">The point around which to transpose in world space.</param>
+        /// <param name="position">The new position in world space.</param>
+        /// <param name="rotation">The new rotation in world space.</param>
         public static void TransposeAroundAnchor(this Transform trans, Vector3 anchor, Vector3 position, Quaternion rotation)
         {
             if(trans.parent != null)
@@ -287,6 +403,52 @@ namespace com.spacepuppy.Utils
             LocalTransposeAroundAnchor(trans, anchor, position, rotation);
         }
 
+        /// <summary>
+        /// Set the position and rotation of a Transform as if its origin were that of 'anchor'. 
+        /// Anchor should be local to the Transform where <0,0,0> would be the same as its true origin.
+        /// </summary>
+        /// <param name="trans">The transform to transpose.</param>
+        /// <param name="anchor">The point around which to transpose in world space.</param>
+        /// <param name="position">The new position in world space.</param>
+        /// <param name="rotation">The new rotation in world space.</param>
+        public static void TransposeAroundAnchor(this Transform trans, Trans anchor, Vector3 position, Quaternion rotation)
+        {
+            if (trans.parent != null)
+            {
+                position = trans.parent.InverseTransformPoint(position);
+                rotation = trans.parent.InverseTransformRotation(rotation);
+            }
+
+            LocalTransposeAroundAnchor(trans, anchor, position, rotation);
+        }
+
+        /// <summary>
+        /// Set the position and rotation of a Transform as if its origin were that of 'anchor'. 
+        /// Anchor should be local to the Transform where <0,0,0> would be the same as its true origin.
+        /// </summary>
+        /// <param name="trans">The transform to transpose.</param>
+        /// <param name="anchor">The point around which to transpose in world space.</param>
+        /// <param name="position">The new position in world space.</param>
+        /// <param name="rotation">The new rotation in world space.</param>
+        public static void TransposeAroundAnchor(this Transform trans, Transform anchor, Vector3 position, Quaternion rotation)
+        {
+            if (trans.parent != null)
+            {
+                position = trans.parent.InverseTransformPoint(position);
+                rotation = trans.parent.InverseTransformRotation(rotation);
+            }
+
+            LocalTransposeAroundAnchor(trans, anchor.ToRelativeTrans(trans), position, rotation);
+        }
+
+        /// <summary>
+        /// Set the localPosition and localRotation of a Transform as if its origin were that of 'anchor'. 
+        /// Anchor should be local to the Transform where <0,0,0> would be the same as its true origin.
+        /// </summary>
+        /// <param name="trans">The transform to transpose.</param>
+        /// <param name="anchor">The point around which to transpose relative to the transform.</param>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
         public static void LocalTransposeAroundAnchor(this Transform trans, Vector3 anchor, Vector3 position, Quaternion rotation)
         {
             anchor = rotation * Vector3.Scale(anchor, trans.localScale);
@@ -294,12 +456,20 @@ namespace com.spacepuppy.Utils
             trans.localRotation = rotation;
         }
 
-        public static void LocalTransposeAroundAnchor(this Transform trans, Vector3 anchor, Vector3 position, Quaternion rotation, Vector3 scale)
+        public static void LocalTransposeAroundAnchor(this Transform trans, Trans anchor, Vector3 position, Quaternion rotation)
         {
-            anchor = rotation * Vector3.Scale(anchor, scale);
-            trans.localPosition = position - anchor;
-            trans.localRotation = rotation;
-            trans.localScale = scale;
+            var anchorPos = rotation * Vector3.Scale(anchor.Position, trans.localScale);
+            trans.localPosition = position - anchorPos;
+            trans.localRotation = anchor.Rotation * rotation;
+        }
+
+        public static void LocalTransposeAroundAnchor(this Transform trans, Transform anchor, Vector3 position, Quaternion rotation)
+        {
+            var m = anchor.GetRelativeMatrix(anchor);
+
+            var anchorPos = rotation * Vector3.Scale(m.GetTranslation(), trans.localScale);
+            trans.localPosition = position - anchorPos;
+            trans.localRotation = m.GetRotation() * rotation;
         }
 
         #endregion
