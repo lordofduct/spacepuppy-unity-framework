@@ -34,7 +34,7 @@ namespace com.spacepuppy
     /// *Start/Pause/Resume/Cancel
     /// RadicalCoroutines can be paused and restarted later (they can not be reset). When starting a RadicalCoroutine you can 
     /// include an enum value that determines what should be done with the coroutine when the operating MonoBehaviour is disabled, 
-    /// automatically pausing or cancelling the coroutine as desired.
+    /// automatically pausing or cancelling the coroutine as desired, and automatically resuming it when re-enabled.
     /// 
     /// *Scheduling
     /// Schedule a coroutine to run when a current coroutine is complete.
@@ -54,7 +54,7 @@ namespace com.spacepuppy
     /// </summary>
     /// <notes>
     /// 
-    /// TODO - We should set up a RadicalCoroutine pool to reduce garbage collection
+    /// TODO - #100 - We should set up a RadicalCoroutine pool to reduce garbage collection
     /// 
     /// </notes>
     public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator, System.IDisposable
@@ -181,15 +181,18 @@ namespace com.spacepuppy
         #region Methods
 
         /// <summary>
-        /// Starts the coroutine, one should always call this method or the StartRadicalCoroutine extension method. Never pass the RadicalCoroutine into the 'StartCoroutine' method.
+        /// Starts the coroutine, one should always call this method or the StartRadicalCoroutine extension method. Never pass 
+        /// the RadicalCoroutine into the 'StartCoroutine' method.
         /// </summary>
         /// <param name="behaviour">A reference to the MonoBehaviour that should be handling the coroutine.</param>
         /// <param name="disableMode">A disableMode other than Default is only supported if the behaviour is an SPComponent.</param>
         /// <remarks>
-        /// Disable modes allow you to decide how the coroutine is dealt with when the component/gameobject are disabled. Note that 'CancelOnDeactivate' is a specical case flag, 
-        /// it only takes effect if NO OTHER flag is set (it's a 0 flag actually). What this results in is that Deactivate and Disable are pausible... but a routine can only play 
-        /// through Disable, not Deactivate. This is due to the default behaviour of coroutine in unity. In default mode, coroutines continue playing when a component gets disabled, 
-        /// but when deactivated the coroutine gets cancelled. This means we can not play through a deactivation.
+        /// Disable modes allow you to decide how the coroutine is dealt with when the component/gameobject are disabled. Note that 
+        /// 'CancelOnDeactivate' is a specical case flag, it only takes effect if NO OTHER flag is set (it's a 0 flag actually). 
+        /// What this results in is that Deactivate and Disable are pausible... but a routine can only play through Disable, not 
+        /// Deactivate. This is due to the default behaviour of coroutine in unity. In default mode, coroutines continue playing 
+        /// when a component gets disabled, but when deactivated the coroutine gets cancelled. This means we can not play through 
+        /// a deactivation.
         /// </remarks>
         public void Start(MonoBehaviour behaviour, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
@@ -683,7 +686,8 @@ namespace com.spacepuppy
             this.OnCancelled = null;
             this.OnFinished = null;
 
-            _pool.Release(this);
+            //TODO - #100 - allow releasing when we've fully implemented coroutine object caching 
+            //_pool.Release(this);
         }
 
         #endregion
