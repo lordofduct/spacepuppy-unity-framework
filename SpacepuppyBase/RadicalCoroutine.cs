@@ -15,7 +15,7 @@ namespace com.spacepuppy
     /// IYieldInstruction - ability to define reusable yield instructions as objects.
     /// IProgessingYieldInstruction - a customizable yield instruction that has a progress property
     /// IImmediatelyResumingYieldInstruction - a customizable yield instruction that will return to operation of the coroutine 
-    ///     immediately on complete
+    ///     immediately on complete (i.e. return during FixedUpdate)
     /// IPausibleYieldInstruction - a yield instruction should implement this if it needs to deal with a coroutine pausing in 
     ///     any special way
     /// IPooledYieldInstruction - a yield instruction should implement this if when complete it needs to be returned to a pool
