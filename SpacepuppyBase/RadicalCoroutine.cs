@@ -14,10 +14,13 @@ namespace com.spacepuppy
     /// *Custom Yield Instructions
     /// IYieldInstruction - ability to define reusable yield instructions as objects.
     /// IProgessingYieldInstruction - a customizable yield instruction that has a progress property
-    /// IImmediatelyResumingYieldInstruction - a customizable yield instruction that will return to operation of the coroutine immediately on complete
-    /// IPausibleYieldInstruction - a yield instruction should implement this if it needs to deal with a coroutine pausing in any special way
+    /// IImmediatelyResumingYieldInstruction - a customizable yield instruction that will return to operation of the coroutine 
+    ///     immediately on complete
+    /// IPausibleYieldInstruction - a yield instruction should implement this if it needs to deal with a coroutine pausing in 
+    ///     any special way
     /// IPooledYieldInstruction - a yield instruction should implement this if when complete it needs to be returned to a pool
-    /// IResettingYieldInstruction - a yield instruction should implement this if when complete it should be signaled so its state can be reset
+    /// IResettingYieldInstruction - a yield instruction should implement this if when complete it should be signaled so its 
+    ///     state can be reset
     /// 
     /// *Events
     /// Register for events when the state of a coroutine changes.
@@ -29,9 +32,9 @@ namespace com.spacepuppy
     /// Poll the state of the coroutine, if it's finished/active/cancelled, what MonoBehaviour is operating the coroutine, etc.
     /// 
     /// *Start/Pause/Resume/Cancel
-    /// RadicalCoroutines can be paused and restarted later (they can not be reset). When starting a RadicalCoroutine you can include an enum value 
-    /// that determines what should be done with the coroutine when the operating MonoBehaviour is disabled, automatically pausing or cancelling the 
-    /// coroutine as desired.
+    /// RadicalCoroutines can be paused and restarted later (they can not be reset). When starting a RadicalCoroutine you can 
+    /// include an enum value that determines what should be done with the coroutine when the operating MonoBehaviour is disabled, 
+    /// automatically pausing or cancelling the coroutine as desired.
     /// 
     /// *Scheduling
     /// Schedule a coroutine to run when a current coroutine is complete.
@@ -40,13 +43,14 @@ namespace com.spacepuppy
     /// Tick the operation of a coroutine manually. Won't be needed really ever, but that one time you want it, it's a life saver.
     /// 
     /// *Coroutine Manager
-    /// A GameObject that is operating coroutines has a RadicalCoroutineManager attached. This is what tracks and maintains automatic pausing/cancelling/resuming 
-    /// of coroutines. As well as gives an inspector view of what coroutines are operating on what components and the name of the function being operated. Great 
-    /// for debugging.
+    /// A GameObject that is operating coroutines has a RadicalCoroutineManager attached. This is what tracks and maintains 
+    /// automatic pausing/cancelling/resuming of coroutines. As well as gives an inspector view of what coroutines are operating 
+    /// on what components and the name of the function being operated. Great for debugging.
     /// 
     /// *WARNING
-    /// When using RadicalCoroutine with SPComponent, NEVER call StopCoroutine, and instead use the 'Cancel' method on the routine. StopAllCoroutines works correctly on the SPComponent though.
-    /// When using RadicalCoroutine with MonoBehaviour, several features no longer exist (namely tracking and pausing), but you're free to use the Stop* methods for coroutines.
+    /// When using RadicalCoroutine with SPComponent, NEVER call StopCoroutine, and instead use the 'Cancel' method on the routine. 
+    /// StopAllCoroutines works correctly on the SPComponent though. When using RadicalCoroutine with MonoBehaviour, several 
+    /// features no longer exist (namely tracking and pausing), but you're free to use the Stop* methods for coroutines.
     /// </summary>
     /// <notes>
     /// 

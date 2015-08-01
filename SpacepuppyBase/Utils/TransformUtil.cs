@@ -17,8 +17,7 @@ namespace com.spacepuppy.Utils
         public static Trans ToRelativeTrans(this Transform trans, Transform relativeTo)
         {
             var m = trans.localToWorldMatrix;
-            m *= relativeTo.worldToLocalMatrix;
-            return Trans.Transform(m);
+            return Trans.Transform(relativeTo.worldToLocalMatrix * m);
         }
 
         public static Trans ToLocalTrans(this Transform trans)
@@ -34,8 +33,7 @@ namespace com.spacepuppy.Utils
         public static Matrix4x4 GetRelativeMatrix(this Transform trans, Transform relativeTo)
         {
             var m = trans.localToWorldMatrix;
-            m *= relativeTo.worldToLocalMatrix;
-            return m;
+            return relativeTo.worldToLocalMatrix * m;
         }
 
         public static Matrix4x4 GetLocalMatrix(this Transform trans)
@@ -374,7 +372,8 @@ namespace com.spacepuppy.Utils
         /// <param name="rotation">The new rotation in world space.</param>
         public static void TransposeAroundGlobalAnchor(this Transform trans, Trans anchor, Vector3 position, Quaternion rotation)
         {
-            anchor.Matrix *= trans.worldToLocalMatrix;
+            //anchor.Matrix *= trans.worldToLocalMatrix;
+            anchor.Matrix = trans.worldToLocalMatrix * anchor.Matrix;
             if (trans.parent != null)
             {
                 position = trans.parent.InverseTransformPoint(position);
@@ -465,7 +464,7 @@ namespace com.spacepuppy.Utils
 
         public static void LocalTransposeAroundAnchor(this Transform trans, Transform anchor, Vector3 position, Quaternion rotation)
         {
-            var m = anchor.GetRelativeMatrix(anchor);
+            var m = anchor.GetRelativeMatrix(trans);
 
             var anchorPos = rotation * Vector3.Scale(m.GetTranslation(), trans.localScale);
             trans.localPosition = position - anchorPos;
