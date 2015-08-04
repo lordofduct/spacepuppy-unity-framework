@@ -14,12 +14,11 @@ namespace com.spacepuppyeditor
     public static class EditorHierarchyAlternateContextMenuEvents
     {
 
+        public const string MENU_PREFIX_ALTCONTEXT = "CONTEXT/ALT/";
+
         #region Static Fields
 
         private static bool _isActive;
-
-        private static GameObject _currentGO;
-        private static Vector2 _menuPos;
 
         #endregion
 
@@ -67,30 +66,22 @@ namespace com.spacepuppyeditor
 
         private static void OnHierarchyItemGUI(int instanceID, Rect selectionRect)
         {
-            if (_currentGO == null)
+            var ev = Event.current;
+            if (ev != null && selectionRect.Contains(ev.mousePosition)
+                && ev.button == 1 && ev.control && Event.current.type <= EventType.mouseUp)
             {
-                var ev = Event.current;
-                if (ev != null && selectionRect.Contains(ev.mousePosition)
-                    && ev.button == 1 && ev.control && Event.current.type <= EventType.mouseUp)
+                // Find what object this is
+                GameObject clickedObject = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
+
+                if (clickedObject != null)
                 {
-                    // Find what object this is
-                    GameObject clickedObject = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
-
-                    if (clickedObject != null)
-                    {
-                        _currentGO = clickedObject;
-                        _menuPos = ev.mousePosition;
-                        ev.Use();
-                    }
+                    var mpos = ev.mousePosition;
+                    var rect = new Rect(mpos.x, mpos.y, 0f, 0f);
+                    var cmnd = new MenuCommand(clickedObject, instanceID);
+                    Selection.activeGameObject = clickedObject;
+                    EditorUtility.DisplayPopupMenu(rect, MENU_PREFIX_ALTCONTEXT, cmnd);
+                    ev.Use();
                 }
-
-            }
-
-
-            if(_currentGO != null)
-            {
-                var rect = new Rect(_menuPos.x, _menuPos.y, 0f, 0f);
-                EditorUtility.DisplayPopupMenu(rect, "Assets/", null);
             }
         }
 
