@@ -15,6 +15,7 @@ namespace com.spacepuppyeditor.Base
         public const string SETTING_SPEDITOR_ISDEFAULT_ACTIVE = "UseSPEditor.IsDefault.Active";
         public const string SETTING_ADVANCEDANIMINSPECTOR_ACTIVE = "AdvancedAnimationInspector.Active";
         public const string SETTING_HIERARCHYDRAWER_ACTIVE = "EditorHierarchyEvents.Active";
+        public const string SETTING_HIEARCHYALTERNATECONTEXTMENU_ACTIVE = "EditorHierarchyAlternateContextMenu.Active";
 
         #endregion
 
@@ -73,6 +74,14 @@ namespace com.spacepuppyeditor.Base
             {
                 EditorProjectPrefs.Local.SetBool(BaseSettings.SETTING_HIERARCHYDRAWER_ACTIVE, hierarchyDrawerActive);
                 EditorHierarchyDrawerEvents.SetActive(hierarchyDrawerActive);
+            }
+
+            EditorGUI.BeginChangeCheck();
+            bool hierarchCustomContextMenu = EditorGUILayout.ToggleLeft("Use Alternate Hierarchy Context Menu", EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_HIEARCHYALTERNATECONTEXTMENU_ACTIVE, true));
+            if(EditorGUI.EndChangeCheck())
+            {
+                EditorProjectPrefs.Local.SetBool(BaseSettings.SETTING_HIEARCHYALTERNATECONTEXTMENU_ACTIVE, hierarchCustomContextMenu);
+                EditorHierarchyAlternateContextMenuEvents.SetActive(hierarchCustomContextMenu);
             }
 
             //EditorGUIUtility.labelWidth = labelWidthCache;

@@ -199,10 +199,40 @@ namespace com.spacepuppy.Utils
             return Matrix4x4.Scale(sc).MultiplyPoint(v);
         }
 
-        public static Vector3 InvserScaleVector(this Transform t, Vector3 v)
+        public static Vector3 InverseScaleVector(this Transform t, Vector3 v)
         {
             var sc = t.worldToLocalMatrix.GetScale();
             return Matrix4x4.Scale(sc).MultiplyPoint(v);
+        }
+
+        public static Quaternion TranformRotation(this Matrix4x4 m, Quaternion rot)
+        {
+            return rot * m.GetRotation();
+        }
+
+        public static Quaternion TransformRotation(Trans t, Quaternion rot)
+        {
+            return rot * t.Rotation;
+        }
+
+        public static Quaternion TransformRotation(this Transform t, Quaternion rot)
+        {
+            return rot * t.rotation;
+        }
+
+        public static Quaternion InverseTranformRotation(this Matrix4x4 m, Quaternion rot)
+        {
+            return rot * Quaternion.Inverse(m.GetRotation());
+        }
+
+        public static Quaternion InverseTransformRotation(Trans t, Quaternion rot)
+        {
+            return rot * Quaternion.Inverse(t.Rotation);
+        }
+
+        public static Quaternion InverseTransformRotation(this Transform t, Quaternion rot)
+        {
+            return rot * Quaternion.Inverse(t.rotation);
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace com.spacepuppyeditor
 
         static EditorHierarchyDrawerEvents()
         {
-            SetActive(EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_HIERARCHYDRAWER_ACTIVE));
+            SetActive(EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_HIERARCHYDRAWER_ACTIVE, true));
         }
 
         #endregion

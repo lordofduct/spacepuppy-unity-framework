@@ -52,29 +52,31 @@ namespace com.spacepuppy.Utils
             return Quaternion.LookRotation(dir) * Quaternion.FromToRotation(Vector3.forward, forwardAxis);
         }
 
-        /// <summary>
-        /// Transforms rotation from local space to world space.
-        /// </summary>
-        /// <param name="t"></param>
-        /// <param name="local"></param>
-        /// <returns></returns>
-        public static Quaternion TransformRotation(this Transform t, Quaternion local)
-        {
-            if (t == null) throw new System.ArgumentNullException("transform");
-            return t.rotation * local;
-        }
+        //DEPRECATED - moved to TransformUtil
 
-        /// <summary>
-        /// Transforms rotation from world space to local space.
-        /// </summary>
-        /// <param name="t"></param>
-        /// <param name="global"></param>
-        /// <returns></returns>
-        public static Quaternion InverseTransformRotation(this Transform t, Quaternion global)
-        {
-            if (t == null) throw new System.ArgumentNullException("transform");
-            return Quaternion.Inverse(t.rotation) * global;
-        }
+        ///// <summary>
+        ///// Transforms rotation from local space to world space.
+        ///// </summary>
+        ///// <param name="t"></param>
+        ///// <param name="local"></param>
+        ///// <returns></returns>
+        //public static Quaternion TransformRotation(this Transform t, Quaternion local)
+        //{
+        //    if (t == null) throw new System.ArgumentNullException("transform");
+        //    return t.rotation * local;
+        //}
+
+        ///// <summary>
+        ///// Transforms rotation from world space to local space.
+        ///// </summary>
+        ///// <param name="t"></param>
+        ///// <param name="global"></param>
+        ///// <returns></returns>
+        //public static Quaternion InverseTransformRotation(this Transform t, Quaternion global)
+        //{
+        //    if (t == null) throw new System.ArgumentNullException("transform");
+        //    return Quaternion.Inverse(t.rotation) * global;
+        //}
 
 
         /// <summary>

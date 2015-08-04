@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\Inspectors\SPEntityInspector.cs" />
+    <Compile Include="EditorHierarchyAlternateContextMenuEvents.cs" />
     <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
     <Compile Include="Geom\CubicBezierCurvePropertyDrawer.cs" />
     <Compile Include="IArrayHandlingPropertyDrawer.cs" />
