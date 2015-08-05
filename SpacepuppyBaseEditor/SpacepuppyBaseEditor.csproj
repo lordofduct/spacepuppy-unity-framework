@@ -43,6 +43,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\Commands\FindReferencesToObjectMenu.cs" />
     <Compile Include="Base\Inspectors\SPEntityInspector.cs" />
     <Compile Include="EditorHierarchyAlternateContextMenuEvents.cs" />
     <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
