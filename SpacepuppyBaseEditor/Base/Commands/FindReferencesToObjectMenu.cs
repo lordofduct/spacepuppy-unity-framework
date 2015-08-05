@@ -30,6 +30,11 @@ namespace com.spacepuppyeditor.Base.Commands
             int iid = cmnd.context.GetInstanceID();
             var arr = _defaultSearchTool.Search_Imp(iid);
             Selection.objects = arr;
+
+            //foreach(var obj in arr)
+            //{
+            //    EditorGUIUtility.PingObject(obj.GetInstanceID());
+            //}
         }
 
         #endregion
@@ -78,7 +83,6 @@ namespace com.spacepuppyeditor.Base.Commands
                     if (TestField(instanceId, field, c))
                     {
                         _hits.Add(c.gameObject);
-                        //EditorGUIUtility.PingObject(c.gameObject.GetInstanceID());
                         break;
                     }
                 }
@@ -109,9 +113,10 @@ namespace com.spacepuppyeditor.Base.Commands
             var ftp = field.FieldType;
             var fieldValue = field.GetValue(obj);
 
-            //Debug.Log(field.DeclaringType.Name + "." + field.Name + " : " + field.FieldType.Name + " = " + System.Convert.ToString(fieldValue));
-
             if (fieldValue == null) return false;
+            if (_referenceLoopHits.Contains(fieldValue)) return false;
+
+            _referenceLoopHits.Add(fieldValue);
             if (ftp.IsListType() && fieldValue is System.Collections.IEnumerable)
             {
                 ftp = ftp.GetElementTypeOfListType();
@@ -119,6 +124,8 @@ namespace com.spacepuppyeditor.Base.Commands
                 foreach (var v in e)
                 {
                     fieldValue = v;
+                    if (_referenceLoopHits.Contains(fieldValue)) continue;
+                    _referenceLoopHits.Add(fieldValue);
                     try
                     {
                         GameObject go = GameObjectUtil.GetGameObjectFromSource(fieldValue);
@@ -131,7 +138,7 @@ namespace com.spacepuppyeditor.Base.Commands
                     {
                     }
 
-                    if (fieldValue != null && !(fieldValue is UnityEngine.Object))
+                    if (fieldValue != null)
                     {
                         var infos = GetRelevantFieldInfos(ftp);
                         foreach (var subfield in infos)
@@ -155,7 +162,7 @@ namespace com.spacepuppyeditor.Base.Commands
                 {
                 }
 
-                if (fieldValue != null && !(fieldValue is UnityEngine.Object))
+                if (fieldValue != null)
                 {
                     var infos = GetRelevantFieldInfos(ftp);
                     foreach (var subfield in infos)
