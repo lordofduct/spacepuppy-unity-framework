@@ -123,52 +123,39 @@ namespace com.spacepuppyeditor.Base.Commands
                 var e = fieldValue as System.Collections.IEnumerable;
                 foreach (var v in e)
                 {
-                    fieldValue = v;
-                    if (_referenceLoopHits.Contains(fieldValue)) continue;
-                    _referenceLoopHits.Add(fieldValue);
-                    try
-                    {
-                        GameObject go = GameObjectUtil.GetGameObjectFromSource(fieldValue);
-                        if (go != null && go.GetInstanceID() == instanceIdToFind)
-                        {
-                            return true;
-                        }
-                    }
-                    catch
-                    {
-                    }
-
-                    if (fieldValue != null)
-                    {
-                        var infos = GetRelevantFieldInfos(ftp);
-                        foreach (var subfield in infos)
-                        {
-                            if (TestField(instanceIdToFind, subfield, fieldValue)) return true;
-                        }
-                    }
+                    if (_referenceLoopHits.Contains(v)) continue;
+                    _referenceLoopHits.Add(v);
+                    if (TestFieldValue(instanceIdToFind, ftp, v)) return true;
                 }
             }
             else
             {
-                try
-                {
-                    GameObject go = GameObjectUtil.GetGameObjectFromSource(fieldValue);
-                    if (go != null && go.GetInstanceID() == instanceIdToFind)
-                    {
-                        return true;
-                    }
-                }
-                catch
-                {
-                }
+                if (TestFieldValue(instanceIdToFind, ftp, fieldValue)) return true;
+            }
 
-                if (fieldValue != null)
+            return false;
+        }
+
+        private bool TestFieldValue(int instanceIdToFind, System.Type ftp, object fieldValue)
+        {
+            try
+            {
+                GameObject go = GameObjectUtil.GetGameObjectFromSource(fieldValue);
+                if (go != null && go.GetInstanceID() == instanceIdToFind)
                 {
-                    var infos = GetRelevantFieldInfos(ftp);
-                    foreach (var subfield in infos)
-                    {
-                        if (TestField(instanceIdToFind, subfield, fieldValue)) return true;
-                    }
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            if (fieldValue != null)
+            {
+                var infos = GetRelevantFieldInfos(ftp);
+                foreach (var subfield in infos)
+                {
+                    if (TestField(instanceIdToFind, subfield, fieldValue)) return true;
                 }
             }
 
