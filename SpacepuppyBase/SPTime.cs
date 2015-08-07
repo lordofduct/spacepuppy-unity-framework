@@ -171,7 +171,7 @@ namespace com.spacepuppy
         }
 
         /// <summary>
-        /// Returns the scale relative to NormalTime that would cause make something updating by normal time appear at the scale of 'supplier'.
+        /// Returns the scale relative to NormalTime that would cause something updating by normal time appear at the scale of 'supplier'.
         /// Basically if you have an Animation/Animator, which animates relative to Time.timeScale, and you want to set the 'speed' property of it 
         /// to a value so that it appeared at the speed that is defined in 'supplier', you'd set it to this value.
         /// </summary>
