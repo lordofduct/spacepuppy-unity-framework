@@ -170,6 +170,20 @@ namespace com.spacepuppy
             return _customTimes[id];
         }
 
+        /// <summary>
+        /// Returns the scale relative to NormalTime that would cause make something updating by normal time appear at the scale of 'supplier'.
+        /// Basically if you have an Animation/Animator, which animates relative to Time.timeScale, and you want to set the 'speed' property of it 
+        /// to a value so that it appeared at the speed that is defined in 'supplier', you'd set it to this value.
+        /// </summary>
+        /// <param name="supplier"></param>
+        /// <returns></returns>
+        public static float GetInverseScale(IScalableTimeSupplier supplier)
+        {
+            if (supplier is NormalTimeSupplier) return 1f;
+
+            return supplier.Scale / Time.timeScale;
+        }
+
         private static void Update(bool isFixed)
         {
             if(_customTimes.Count > 0)

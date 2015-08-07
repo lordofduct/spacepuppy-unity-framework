@@ -1,0 +1,14 @@
+﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace com.spacepuppy.Hooks
+{
+
+    public delegate void OnCollisionCallback(GameObject sender, Collision collision);
+
+    public delegate void OnTriggerCallback(GameObject sender, Collider otherCollider);
+
+    public delegate void OnStrikeCallback(GameObject sender, Collider otherCollider);
+
+}

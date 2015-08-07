@@ -74,12 +74,15 @@
     <Compile Include="Collections\WeakKeyDictionary.cs" />
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="Hooks\Callbacks.cs" />
+    <Compile Include="Hooks\CollisionHooks.cs" />
+    <Compile Include="Hooks\ControllerColliderHitEventHooks.cs" />
+    <Compile Include="Hooks\TriggerHooks.cs" />
     <Compile Include="ConfigurableForce.cs" />
     <Compile Include="CustomTimeSupplier.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Dynamic\DynamicPropertyInfo.cs" />
     <Compile Include="Enums.cs" />
-    <Compile Include="EventArgs.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="GameLoopEntry.cs" />
     <Compile Include="GameTime.cs" />
@@ -87,6 +90,7 @@
     <Compile Include="Geom\AxisInterval.cs" />
     <Compile Include="Geom\BoundingSphereAlgorithm.cs" />
     <Compile Include="Geom\Capsule.cs" />
+    <Compile Include="Hooks\CollisionSignalSource.cs" />
     <Compile Include="Geom\GeomUtil.cs" />
     <Compile Include="Geom\ICurve.cs" />
     <Compile Include="Geom\IGeom.cs" />

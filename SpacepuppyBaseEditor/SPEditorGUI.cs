@@ -314,6 +314,21 @@ namespace com.spacepuppyeditor
 
         #region PropertyFields
 
+        public static float GetPropertyHeight(SerializedProperty property)
+        {
+            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.GetHandler(property).GetHeight(property, GUIContent.none, false);
+        }
+
+        public static float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.GetHandler(property).GetHeight(property, label, false);
+        }
+
+        public static float GetPropertyHeight(SerializedProperty property, GUIContent label, bool includeChildren)
+        {
+            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.GetHandler(property).GetHeight(property, label, includeChildren);
+        }
+
         public static bool PropertyField(Rect position, SerializedProperty property, bool includeChildren = false)
         {
             return PropertyField(position, property, (GUIContent)null, includeChildren);
