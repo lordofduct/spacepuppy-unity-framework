@@ -26,6 +26,20 @@ namespace com.spacepuppy.Utils
             q.z = (float)((double)q.z / mag);
             return q;
         }
+        
+        /// <summary>
+        /// A cleaner version of FromToRotation, Quaternion.FromToRotation for some reason can only handle down to #.## precision.
+        /// This will result in true 7 digits of precision down to depths of 0.00000# (depth tested so far).
+        /// </summary>
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        /// <returns></returns>
+        public static Quaternion FromToRotation(Vector3 v1, Vector3 v2)
+        {
+            var a = Vector3.Cross(v1, v2);
+            var w = Mathf.Sqrt(v1.sqrMagnitude * v2.sqrMagnitude) + Vector3.Dot(v1, v2);
+            return new Quaternion(a.x, a.y, a.z, w);
+        }
 
         /// <summary>
         /// Get the rotation that would be applied to 'start' to end up at 'end'.
