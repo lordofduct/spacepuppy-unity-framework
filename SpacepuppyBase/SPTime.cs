@@ -297,6 +297,14 @@ namespace com.spacepuppy
                 }
                 else
                 {
+                    float result = 1f;
+                    var e = _scales.Values.GetEnumerator();
+                    while(e.MoveNext())
+                    {
+                        result *= e.Current;
+                    }
+                    return result;
+
                     return _scales.Values.Product();
                 }
             }

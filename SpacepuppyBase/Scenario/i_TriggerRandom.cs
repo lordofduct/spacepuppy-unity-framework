@@ -38,7 +38,7 @@ namespace com.spacepuppy.Scenario
 
         #region ITriggerableMechanism Interface
 
-        public override object Trigger(object arg)
+        public override bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
 
@@ -53,6 +53,7 @@ namespace com.spacepuppy.Scenario
             {
                 this.DoTriggerNext(arg);
             }
+
             return true;
         }
 

@@ -29,7 +29,7 @@ namespace com.spacepuppy.Scenario
             get { return this.IsActiveAndEnabled(); }
         }
 
-        public abstract object Trigger(object arg);
+        public abstract bool Trigger(object arg);
 
         #endregion
 

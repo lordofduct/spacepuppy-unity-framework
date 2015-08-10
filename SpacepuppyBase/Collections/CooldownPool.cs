@@ -5,12 +5,18 @@ using System.Text;
 
 namespace com.spacepuppy.Collections
 {
+
+    /// <summary>
+    /// Used to store temporary references for a duration of time. Call Update to update the pool 
+    /// releasing objects that are old enough. Always call Update on the unity main thread!
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class CooldownPool<T> : IEnumerable<CooldownPool<T>.CooldownInfo> where T : class
     {
 
         #region Fields
 
-        private List<CooldownInfo> _lst = new List<CooldownInfo>();
+        private Dictionary<T, CooldownInfo> _table = new Dictionary<T, CooldownInfo>();
         private ITimeSupplier _time;
 
         #endregion
@@ -25,7 +31,7 @@ namespace com.spacepuppy.Collections
 
         #region Properties
 
-        public int Count { get { return _lst.Count; } }
+        public int Count { get { return _table.Count; } }
 
         public ITimeSupplier UpdateTimeSupplier
         {
@@ -47,46 +53,52 @@ namespace com.spacepuppy.Collections
 
         public void Add(T obj, float duration)
         {
-            for(int i = 0; i < _lst.Count; i++)
+            CooldownInfo info;
+            if(_table.TryGetValue(obj, out info))
             {
-                if(_lst[i].Object == obj)
-                {
-                    _lst[i].Duration += duration;
-                    return;
-                }
+                info.Duration += duration;
             }
-
-            var info = new CooldownInfo(obj, this.UpdateTimeSupplier.Total, duration);
-            _lst.Add(info);
+            else
+            {
+                _table[obj] = new CooldownInfo(obj, this.UpdateTimeSupplier.Total, duration);
+            }
         }
 
         public bool Contains(T obj)
         {
-            for(int i = 0; i < _lst.Count; i++)
-            {
-                if (_lst[i].Object == obj) return true;
-            }
-            return false;
+            return _table.ContainsKey(obj);
         }
 
         public void Update()
         {
             var t = this.UpdateTimeSupplier.Total;
             CooldownInfo info;
-            for(int i = 0; i < _lst.Count; i++)
+
+            var toRemove = TempCollection<T>.GetCollection();
+            var e1 = _table.GetEnumerator();
+            while(e1.MoveNext())
             {
-                info = _lst[i];
+                info = e1.Current.Value;
                 if(info.Object == null || t - info.StartTime > info.Duration)
                 {
-                    _lst.RemoveAt(i);
-                    i--;
+                    toRemove.Add(info.Object);
                 }
             }
+
+            if (toRemove.Count > 0)
+            {
+                var e2 = toRemove.GetEnumerator();
+                while(e2.MoveNext())
+                {
+                    _table.Remove(e2.Current);
+                }
+            }
+            toRemove.Release();
         }
 
         public void Clear()
         {
-            _lst.Clear();
+            _table.Clear();
         }
 
         #endregion
@@ -94,19 +106,19 @@ namespace com.spacepuppy.Collections
         #region IEnumerable Interface
         public IEnumerator<CooldownPool<T>.CooldownInfo> GetEnumerator()
         {
-            return _lst.GetEnumerator();
+            return _table.Values.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _lst.GetEnumerator();
+            return _table.Values.GetEnumerator();
         }
 
         #endregion
 
         #region Special Types
 
-        public class CooldownInfo
+        public struct CooldownInfo
         {
             private T _obj;
             private float _startTime;
@@ -123,7 +135,7 @@ namespace com.spacepuppy.Collections
             public float StartTime
             {
                 get { return _startTime; }
-                set { _startTime = value; }
+                internal set { _startTime = value; }
             }
             public float Duration
             {

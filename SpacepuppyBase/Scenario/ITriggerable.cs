@@ -7,7 +7,7 @@ namespace com.spacepuppy.Scenario
     {
         int Order { get; }
         bool CanTrigger { get; }
-        object Trigger(object arg);
+        bool Trigger(object arg);
     }
 
 }

@@ -40,11 +40,15 @@ namespace com.spacepuppy.Hooks
 
         private void OnTriggerEnter(Collider otherCollider)
         {
+            if (!this.isActiveAndEnabled) return;
+
             if (_onEnter != null) _onEnter(this.gameObject, otherCollider);
         }
 
         private void OnTriggerExit(Collider otherCollider)
         {
+            if (!this.isActiveAndEnabled) return;
+
             if (_onExit != null) _onExit(this.gameObject, otherCollider);
         }
 
@@ -77,6 +81,8 @@ namespace com.spacepuppy.Hooks
 
         private void OnTriggerStay(Collider otherCollider)
         {
+            if (!this.isActiveAndEnabled) return;
+
             if (_onStay != null) _onStay(this.gameObject, otherCollider);
         }
 

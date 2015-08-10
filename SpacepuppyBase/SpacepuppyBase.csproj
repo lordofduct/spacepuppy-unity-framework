@@ -68,6 +68,7 @@
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\OrderedDelegate.cs" />
     <Compile Include="Collections\SamplingStack.cs" />
+    <Compile Include="Collections\TempCollection.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />

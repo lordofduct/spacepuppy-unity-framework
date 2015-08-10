@@ -319,7 +319,6 @@ namespace com.spacepuppy.Utils
 
 
 
-
         #region Special Types
 
         private class EmptyArray<T>

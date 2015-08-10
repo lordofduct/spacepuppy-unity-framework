@@ -43,7 +43,7 @@ namespace com.spacepuppy.Scenario
             }
         }
 
-        public override object Trigger(object arg)
+        public override bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
 

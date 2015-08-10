@@ -41,11 +41,15 @@ namespace com.spacepuppy.Hooks
 
         private void OnCollisionEnter(Collision collision)
         {
+            if (!this.isActiveAndEnabled) return;
+
             if (_onEnter != null) _onEnter(this.gameObject, collision);
         }
 
         private void OnCollisionExit(Collision collision)
         {
+            if (!this.isActiveAndEnabled) return;
+
             if (_onExit != null) _onExit(this.gameObject, collision);
         }
 
@@ -78,6 +82,8 @@ namespace com.spacepuppy.Hooks
 
         private void OnCollisionStay(Collision collision)
         {
+            if (!this.isActiveAndEnabled) return;
+
             if (_onStay != null) _onStay(this.gameObject, collision);
         }
 

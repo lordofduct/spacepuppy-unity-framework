@@ -43,7 +43,7 @@ namespace com.spacepuppy.Scenario
             get { return this.enabled; }
         }
 
-        public new object Trigger(object arg)
+        public new bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
 
@@ -58,6 +58,7 @@ namespace com.spacepuppy.Scenario
             {
                 this.DoTriggerNext(arg);
             }
+
             return true;
         }
 

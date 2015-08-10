@@ -27,7 +27,7 @@ namespace com.spacepuppy.Scenario
 
         #region TriggerableMechanism Interface
 
-        public override object Trigger(object arg)
+        public override bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
 
@@ -39,13 +39,13 @@ namespace com.spacepuppy.Scenario
                 if (!this.AddMultipleIfExists && targ.HasComponent(_componentType.Type)) return false;
 
                 var comp = targ.AddComponent(_componentType.Type);
+                return true;
             }
             catch
             {
-                return false;
             }
 
-            return true;
+            return false;
         }
 
         #endregion
