@@ -7,6 +7,11 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// An object identity for 2 Colliders or IIgnorableCollision objects ignoring one another. 
+    /// This also allows you to not have to track ignore relationships. If 2 objects are flagged to ignore in 2 different segments 
+    /// of code, this will track them stacking, and won't unignore until BOTH places call to stop the ignoring.
+    /// </summary>
     public class CollisionExclusion : System.IDisposable
     {
 
@@ -26,6 +31,33 @@ namespace com.spacepuppy
             if (b == null) throw new System.ArgumentNullException("b");
 
             _collA = IgnorableCollider.GetIgnorableCollider(a);
+            _collB = IgnorableCollider.GetIgnorableCollider(b);
+        }
+
+        public CollisionExclusion(IIgnorableCollision a, IIgnorableCollision b)
+        {
+            if (a == null) throw new System.ArgumentNullException("a");
+            if (b == null) throw new System.ArgumentNullException("b");
+
+            _collA = a;
+            _collB = b;
+        }
+
+        public CollisionExclusion(Collider a, IIgnorableCollision b)
+        {
+            if (a == null) throw new System.ArgumentNullException("a");
+            if (b == null) throw new System.ArgumentNullException("b");
+
+            _collA = IgnorableCollider.GetIgnorableCollider(a);
+            _collB = b;
+        }
+
+        public CollisionExclusion(IIgnorableCollision a, Collider b)
+        {
+            if (a == null) throw new System.ArgumentNullException("a");
+            if (b == null) throw new System.ArgumentNullException("b");
+
+            _collA = a;
             _collB = IgnorableCollider.GetIgnorableCollider(b);
         }
 
@@ -94,6 +126,21 @@ namespace com.spacepuppy
                 }
             }
             _active = false;
+        }
+
+        public void ForceEndExclusion()
+        {
+            var token = new PairToken(_collA, _collB);
+            if (token.IsDead)
+            {
+                _table.Remove(token);
+                return;
+            }
+
+            if(_table.Remove(token))
+            {
+                _collA.IgnoreCollision(_collB, false);
+            }
         }
 
         #endregion
