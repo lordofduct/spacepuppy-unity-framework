@@ -75,6 +75,7 @@
     <Compile Include="Collections\WeakKeyDictionary.cs" />
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="CollisionExclusion.cs" />
     <Compile Include="Hooks\Callbacks.cs" />
     <Compile Include="Hooks\CollisionHooks.cs" />
     <Compile Include="Hooks\ControllerColliderHitEventHooks.cs" />

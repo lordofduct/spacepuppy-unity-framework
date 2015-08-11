@@ -28,7 +28,16 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static bool IsNullOrDestroyed(this System.Object obj)
         {
-            return object.ReferenceEquals(obj, null) || obj.Equals(null);
+            if (object.ReferenceEquals(obj, null)) return true;
+
+            if (obj is UnityEngine.Object)
+                return obj.Equals(null);
+            else if (obj is IComponent)
+                return (obj as IComponent).component == null;
+            else if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).gameObject == null;
+
+            return false;
         }
 
         /// <summary>
@@ -39,7 +48,16 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static bool IsDestroyed(this System.Object obj)
         {
-            return !ReferenceEquals(obj, null) && obj.Equals(null);
+            if (object.ReferenceEquals(obj, null)) return false;
+
+            if (obj is UnityEngine.Object)
+                return obj.Equals(null);
+            else if (obj is IComponent)
+                return (obj as IComponent).component == null;
+            else if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).gameObject == null;
+
+            return false;
         }
 
 

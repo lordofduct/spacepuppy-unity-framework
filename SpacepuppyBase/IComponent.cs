@@ -12,7 +12,6 @@ namespace com.spacepuppy
     /// </summary>
     public interface IComponent : IGameObjectSource
     {
-        event System.EventHandler ComponentDestroyed;
 
         bool enabled { get; set; }
         bool isActiveAndEnabled { get; }

@@ -129,8 +129,6 @@ namespace com.spacepuppy.Scenes
 
         #region IComponent Interface
 
-        public event System.EventHandler ComponentDestroyed;
-
         public bool enabled
         {
             get

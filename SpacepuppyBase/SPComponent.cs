@@ -14,6 +14,7 @@ namespace com.spacepuppy
 
         public event System.EventHandler OnEnabled;
         public event System.EventHandler OnDisabled;
+        public event System.EventHandler ComponentDestroyed;
 
         #endregion
 
@@ -167,8 +168,6 @@ namespace com.spacepuppy
         #endregion
 
         #region IComponent Interface
-
-        public event System.EventHandler ComponentDestroyed;
 
         bool IComponent.enabled
         {

@@ -10,6 +10,8 @@ namespace com.spacepuppy
     public interface ISingleton : IComponent
     {
 
+        event System.EventHandler ComponentDestroyed;
+
         bool MaintainOnLoad { get; set; }
 
     }
