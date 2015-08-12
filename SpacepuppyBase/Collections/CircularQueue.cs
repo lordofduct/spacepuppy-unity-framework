@@ -15,6 +15,8 @@ namespace com.spacepuppy.Collections
         private int _head;
         private int _rear;
 
+        private IEqualityComparer<T> _comparer;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -26,6 +28,17 @@ namespace com.spacepuppy.Collections
             _count = 0;
             _head = 0;
             _rear = 0;
+            _comparer = EqualityComparer<T>.Default;
+        }
+
+        public CircularQueue(int size, IEqualityComparer<T> comparer)
+        {
+            if (size < 0) throw new System.ArgumentException("Size must be non-negative.", "size");
+            _values = new T[size];
+            _count = 0;
+            _head = 0;
+            _rear = 0;
+            _comparer = comparer ?? EqualityComparer<T>.Default;
         }
 
         #endregion
@@ -163,7 +176,15 @@ namespace com.spacepuppy.Collections
 
         public bool Contains(T item)
         {
-            return Array.IndexOf(_values, item) >= 0;
+            int cnt = _count;
+            int index = _head;
+            for (int i = 0; i < cnt; i++)
+            {
+                if (_comparer.Equals(_values[index], item)) return true;
+                index = (index + 1) % _values.Length;
+            }
+
+            return false;
         }
 
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
