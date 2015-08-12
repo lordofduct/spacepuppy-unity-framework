@@ -5,6 +5,12 @@ using System.Text;
 
 namespace com.spacepuppy.Collections
 {
+
+    /// <summary>
+    /// Represents a queue of static length. As entries are pushed onto the collection and reach the length of the queue, 
+    /// they are automatically removed from the collection. 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class CircularQueue<T> : IEnumerable<T>, ICollection<T>
     {
 
@@ -16,6 +22,7 @@ namespace com.spacepuppy.Collections
         private int _rear;
 
         private IEqualityComparer<T> _comparer;
+        private int _version;
 
         #endregion
 
@@ -63,6 +70,7 @@ namespace com.spacepuppy.Collections
                 _head = (_head + 1) % _values.Length;
             _rear = (_rear + 1) % _values.Length;
             _count = Math.Min(_count + 1, _values.Length);
+            _version++;
         }
 
         public T Dequeue()
@@ -73,6 +81,7 @@ namespace com.spacepuppy.Collections
             _values[_head] = default(T);
             _head = (_head + 1) % _values.Length;
             _count--;
+            _version++;
 
             return result;
         }
@@ -92,6 +101,7 @@ namespace com.spacepuppy.Collections
             T result = _values[_rear];
             _values[_rear] = default(T);
             _count--;
+            _version++;
 
             return result;
         }
@@ -132,6 +142,8 @@ namespace com.spacepuppy.Collections
                 _head = 0;
                 _rear = _count;
             }
+
+            _version++;
         }
 
         public void Clear()
@@ -143,21 +155,21 @@ namespace com.spacepuppy.Collections
             _count = 0;
             _head = 0;
             _rear = 0;
+            _version++;
         }
 
         #endregion
 
         #region IEnumerable Interface
 
-        public IEnumerator<T> GetEnumerator()
+        public Enumerator GetEnumerator()
         {
-            int cnt = _count;
-            int index = _head;
-            for (int i = 0; i < cnt; i++)
-            {
-                yield return _values[index];
-                index = (index + 1) % _values.Length;
-            }
+            return new Enumerator(this);
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -176,9 +188,8 @@ namespace com.spacepuppy.Collections
 
         public bool Contains(T item)
         {
-            int cnt = _count;
             int index = _head;
-            for (int i = 0; i < cnt; i++)
+            for (int i = 0; i < _count; i++)
             {
                 if (_comparer.Equals(_values[index], item)) return true;
                 index = (index + 1) % _values.Length;
@@ -205,6 +216,74 @@ namespace com.spacepuppy.Collections
         bool ICollection<T>.Remove(T item)
         {
             throw new System.NotSupportedException();
+        }
+
+        #endregion
+
+        #region Special Types
+
+        public struct Enumerator : IEnumerator<T>
+        {
+
+            #region Fields
+
+            private CircularQueue<T> _que;
+            private int _index;
+            private int _ver;
+            private T _current;
+
+            #endregion
+
+            #region CONSTRUCTOR
+
+            public Enumerator(CircularQueue<T> que)
+            {
+                _que = que;
+                _index = que._head;
+                _ver = que._version;
+                _current = default(T);
+            }
+
+            #endregion
+
+            #region IEnumerator Interface
+
+            public T Current
+            {
+                get { return _current; }
+            }
+
+            object System.Collections.IEnumerator.Current
+            {
+                get { return _current; }
+            }
+
+            public bool MoveNext()
+            {
+                if (_ver != _que._version) throw new System.InvalidOperationException("CirculeQueue was modified while enumerating.");
+                if (_index >= _que._count)
+                {
+                    _current = default(T);
+                    return false;
+                }
+                _current = _que._values[_index];
+                _index = (_index + 1) % _que._values.Length;
+                return true;
+            }
+
+            public void Reset()
+            {
+                if (_ver != _que._version) throw new System.InvalidOperationException("CirculeQueue was modified while enumerating.");
+                _index = _que._head;
+                _current = default(T);
+            }
+
+            public void Dispose()
+            {
+            }
+
+            #endregion
+
         }
 
         #endregion
