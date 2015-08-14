@@ -32,45 +32,42 @@ namespace com.spacepuppyeditor.Geom
             float maxValue = (attrib != null) ? attrib.MaxValue : float.PositiveInfinity;
             bool discreteValuesOnly = (attrib != null) ? attrib.DiscreteValuesOnly : false;
 
-            if(reverse)
+
+            GUIContent[] subLabels;
+            float labelWidth;
+
+            if (reverse)
             {
-                var subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MaxLabel), EditorHelper.TempContent(attrib.MinLabel) } : _defaultLabels;
-                float labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
+                subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MaxLabel), EditorHelper.TempContent(attrib.MinLabel) } : _defaultLabels;
+                labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
                 _values[1] = targ.Min;
                 _values[0] = targ.Max;
-                EditorGUI.BeginChangeCheck();
-                SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    _values[0] = Mathf.Clamp(_values[0], minValue, maxValue);
-                    _values[1] = Mathf.Clamp(_values[1], minValue, maxValue);
-                    if (discreteValuesOnly) _values[0] = Mathf.Round(_values[0]);
-                    if (discreteValuesOnly) _values[1] = Mathf.Round(_values[1]);
-
-                    targ.SetExtents(_values[1], _values[0]);
-                    EditorHelper.SetTargetObjectOfProperty(property, targ);
-                }
             }
             else
             {
-                var subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MinLabel), EditorHelper.TempContent(attrib.MaxLabel) } : _defaultLabels;
-                float labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
+                subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MinLabel), EditorHelper.TempContent(attrib.MaxLabel) } : _defaultLabels;
+                labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
                 _values[0] = targ.Min;
                 _values[1] = targ.Max;
-                EditorGUI.BeginChangeCheck();
-                SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    _values[0] = Mathf.Clamp(_values[0], minValue, maxValue);
-                    _values[1] = Mathf.Clamp(_values[1], minValue, maxValue);
-                    if (discreteValuesOnly) _values[0] = Mathf.Round(_values[0]);
-                    if (discreteValuesOnly) _values[1] = Mathf.Round(_values[1]);
-
-                    targ.SetExtents(_values[0], _values[1]);
-                    EditorHelper.SetTargetObjectOfProperty(property, targ);
-                }
             }
-            
+
+            EditorGUI.BeginProperty(position, label, property);
+            EditorGUI.BeginChangeCheck();
+            SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
+            if (EditorGUI.EndChangeCheck())
+            {
+                _values[0] = Mathf.Clamp(_values[0], minValue, maxValue);
+                _values[1] = Mathf.Clamp(_values[1], minValue, maxValue);
+                if (discreteValuesOnly) _values[0] = Mathf.Round(_values[0]);
+                if (discreteValuesOnly) _values[1] = Mathf.Round(_values[1]);
+
+                if (reverse)
+                    targ.SetExtents(_values[1], _values[0]);
+                else
+                    targ.SetExtents(_values[0], _values[1]);
+                EditorHelper.SetTargetObjectOfProperty(property, targ);
+            }
+            EditorGUI.EndProperty();
         }
 
     }

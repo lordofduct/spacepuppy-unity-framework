@@ -103,17 +103,6 @@ namespace com.spacepuppy
 
         public static bool IsEntitySource(object obj)
         {
-            //if (obj is SPComponent)
-            //{
-            //    return (obj as SPComponent).entityRoot.HasComponent<SPEntity>();
-            //}
-            //else if (GameObjectUtil.IsGameObjectSource(obj))
-            //{
-            //    return GameObjectUtil.GetGameObjectFromSource(obj).FindRoot().HasComponent<SPEntity>();
-            //}
-
-            //return false;
-
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go == null) return false;
 
@@ -124,17 +113,6 @@ namespace com.spacepuppy
 
         public static bool IsEntitySource<T>(object obj) where T : SPEntity
         {
-            //if (obj is SPComponent)
-            //{
-            //    return (obj as SPComponent).entityRoot.HasComponent<T>();
-            //}
-            //else if (GameObjectUtil.IsGameObjectSource(obj))
-            //{
-            //    return GameObjectUtil.GetGameObjectFromSource(obj).FindRoot().HasComponent<T>();
-            //}
-
-            //return false;
-
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go == null) return false;
 
@@ -146,17 +124,6 @@ namespace com.spacepuppy
 
         public static SPEntity GetEntityFromSource(object obj)
         {
-            //if (obj is SPComponent)
-            //{
-            //    return (obj as SPComponent).entityRoot.GetComponent<SPEntity>();
-            //}
-            //else if (GameObjectUtil.IsGameObjectSource(obj))
-            //{
-            //    return GameObjectUtil.GetGameObjectFromSource(obj).FindRoot().GetComponent<SPEntity>();
-            //}
-
-            //return null;
-
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go == null) return null;
 
@@ -169,17 +136,6 @@ namespace com.spacepuppy
 
         public static T GetEntityFromSource<T>(object obj) where T : SPEntity
         {
-            //if (obj is SPComponent)
-            //{
-            //    return (obj as SPComponent).entityRoot.GetComponent<T>();
-            //}
-            //else if (GameObjectUtil.IsGameObjectSource(obj))
-            //{
-            //    return GameObjectUtil.GetGameObjectFromSource(obj).FindRoot().GetComponent<T>();
-            //}
-
-            //return null;
-
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go == null) return null;
 
@@ -199,22 +155,6 @@ namespace com.spacepuppy
 
         public static bool GetEntityFromSource(object obj, out SPEntity entity)
         {
-            //if (obj is SPComponent)
-            //{
-            //    entity = (obj as SPComponent).entityRoot.GetComponent<SPEntity>();
-            //    return entity != null;
-            //}
-            //else if (GameObjectUtil.IsGameObjectSource(obj))
-            //{
-            //    entity = GameObjectUtil.GetGameObjectFromSource(obj).FindRoot().GetComponent<SPEntity>();
-            //    return entity != null;
-            //}
-            //else
-            //{
-            //    entity = null;
-            //    return false;
-            //}
-
             entity = null;
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go == null) return false;
@@ -236,22 +176,6 @@ namespace com.spacepuppy
 
         public static bool GetEntityFromSource<T>(object obj, out T entity) where T : SPEntity
         {
-            //if (obj is SPComponent)
-            //{
-            //    entity = (obj as SPComponent).entityRoot.GetComponent<T>();
-            //    return entity != null;
-            //}
-            //else if (GameObjectUtil.IsGameObjectSource(obj))
-            //{
-            //    entity = GameObjectUtil.GetGameObjectFromSource(obj).FindRoot().GetComponent<T>();
-            //    return entity != null;
-            //}
-            //else
-            //{
-            //    entity = null;
-            //    return false;
-            //}
-
             entity = null;
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go == null) return false;

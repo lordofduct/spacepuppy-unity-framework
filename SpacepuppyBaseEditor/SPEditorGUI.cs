@@ -69,18 +69,40 @@ namespace com.spacepuppyeditor
 
         public static void MultiFloatField(Rect position, GUIContent[] subLabels, float[] values)
         {
-            EditorGUI.MultiFloatField(position, subLabels, values);
+            //EditorGUI.MultiFloatField(position, subLabels, values);
+            SPEditorGUI.MultiFloatField(position, subLabels, values, 13f);
         }
 
         public static void MultiFloatField(Rect position, GUIContent[] subLabels, float[] values, float labelWidth)
         {
-            if (_imp_MultiFloatField_01 == null) _imp_MultiFloatField_01 = _accessWrapper.GetStaticMethod("MultiFloatField", typeof(System.Action<Rect, GUIContent[], float[], float>)) as System.Action<Rect, GUIContent[], float[], float>;
-            _imp_MultiFloatField_01(position, subLabels, values, labelWidth);
+            //if (_imp_MultiFloatField_01 == null) _imp_MultiFloatField_01 = _accessWrapper.GetStaticMethod("MultiFloatField", typeof(System.Action<Rect, GUIContent[], float[], float>)) as System.Action<Rect, GUIContent[], float[], float>;
+            //_imp_MultiFloatField_01(position, subLabels, values, labelWidth);
+
+            int length = values.Length;
+            float num = (position.width - (float)(length - 1) * 2f) / (float)length;
+            Rect position1 = new Rect(position);
+            position1.width = num;
+            float labelWidthCache = EditorGUIUtility.labelWidth;
+            int indentLevelCache = EditorGUI.indentLevel;
+            EditorGUIUtility.labelWidth = labelWidth;
+            EditorGUI.indentLevel = 0;
+            for (int index = 0; index < values.Length; ++index)
+            {
+                values[index] = EditorGUI.FloatField(position1, subLabels[index], values[index]);
+                position1.x += num + 2f;
+            }
+            EditorGUIUtility.labelWidth = labelWidthCache;
+            EditorGUI.indentLevel = indentLevelCache;
         }
 
         public static void MultiFloatField(Rect position, GUIContent label, GUIContent[] subLabels, float[] values)
         {
-            EditorGUI.MultiFloatField(position, label, subLabels, values);
+            //EditorGUI.MultiFloatField(position, label, subLabels, values);
+
+            int controlId = GUIUtility.GetControlID(SPEditorGUI.s_FoldoutHash, EditorGUIUtility.native, position);
+            position = SPEditorGUI.MultiFieldPrefixLabel(position, controlId, label, subLabels.Length);
+            position.height = EditorGUIUtility.singleLineHeight;
+            SPEditorGUI.MultiFloatField(position, subLabels, values);
         }
 
         public static void MultiFloatField(Rect position, GUIContent label, GUIContent[] subLabels, float[] values, float labelWidth)
@@ -790,7 +812,6 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
-
 
     }
 }

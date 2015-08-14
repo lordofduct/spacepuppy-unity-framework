@@ -185,9 +185,6 @@ namespace com.spacepuppy
 
         #endregion
 
-
-
-
     }
 
 }
