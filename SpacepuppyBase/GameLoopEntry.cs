@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Hooks;
 using com.spacepuppy.Utils;
 
@@ -42,8 +44,7 @@ namespace com.spacepuppy
         private UpdateEventHooks _updateHook;
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
-        private static System.Action _invoking;
-        private static object _invokeLock = new object();
+        private static com.spacepuppy.Async.InvokePump _invokePump;
 
         #endregion
 
@@ -72,6 +73,8 @@ namespace com.spacepuppy
 
             _updateHook.LateUpdateHook += _updateHook_LateUpdate;
             _tardyUpdateHook.LateUpdateHook += _tardyUpdateHook_LateUpdate;
+
+            _invokePump = new com.spacepuppy.Async.InvokePump(10);
         }
 
         /// <summary>
@@ -107,6 +110,14 @@ namespace com.spacepuppy
         public static UpdateSequence CurrentSequence { get { return _currentSequence; } }
 
         /// <summary>
+        /// Returns true if we're not on the main Unity thread.
+        /// </summary>
+        public static bool InvokeRequired
+        {
+            get { return _invokePump != null ? _invokePump.InvokeRequired : false; }
+        }
+
+        /// <summary>
         /// Returns true if the OnApplicationQuit message has been received.
         /// </summary>
         public static bool ApplicationClosing { get { return _applicationClosing; } }
@@ -115,13 +126,14 @@ namespace com.spacepuppy
 
         #region Methods
 
-        public static void InvokeNextUpdate(System.Action action)
+        public static void Invoke(System.Action action)
         {
-            if(action == null) throw new System.ArgumentNullException("action");
-            lock (_invokeLock)
-            {
-                _invoking += action;
-            }
+            _invokePump.Invoke(action);
+        }
+
+        public static void BeginInvoke(System.Action action)
+        {
+            _invokePump.BeginInvoke(action);
         }
 
         #endregion
@@ -147,23 +159,15 @@ namespace com.spacepuppy
             _currentSequence = UpdateSequence.Update;
 
             if (_internalEarlyUpdate != null) _internalEarlyUpdate(false);
+
+            _invokePump.Update();
+
             if (EarlyUpdate != null) EarlyUpdate(this, System.EventArgs.Empty);
         }
 
         private void _updateHook_Update(object sender, System.EventArgs e)
         {
             if (OnUpdate != null) OnUpdate(this, e);
-
-            if (_invoking != null)
-            {
-                System.Action act;
-                lock(_invokeLock)
-                {
-                    act = _invoking;
-                    _invoking = null;
-                }
-                act();
-            }
         }
 
         private void _tardyUpdateHook_Update(object sender, System.EventArgs e)

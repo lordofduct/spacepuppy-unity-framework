@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Async\AsyncOperationWrapper.cs" />
+    <Compile Include="Async\InvokePump.cs" />
     <Compile Include="Async\RadicalAsyncOperation.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Audio\AudioGroup.cs" />
