@@ -112,41 +112,13 @@ namespace com.spacepuppy
         public static UpdateSequence CurrentSequence { get { return _currentSequence; } }
 
         /// <summary>
-        /// Returns true if we're not on the main Unity thread.
-        /// </summary>
-        public static bool InvokeRequired
-        {
-            get { return _invokePump != null ? _invokePump.InvokeRequired : false; }
-        }
-
-        /// <summary>
         /// Returns true if the OnApplicationQuit message has been received.
         /// </summary>
         public static bool ApplicationClosing { get { return _applicationClosing; } }
 
-        #endregion
+        public static com.spacepuppy.Async.InvokePump UpdatePump { get { return _invokePump; } }
 
-        #region Methods
-
-        public static void Invoke(System.Action action)
-        {
-            _invokePump.Invoke(action);
-        }
-
-        public static void BeginInvoke(System.Action action)
-        {
-            _invokePump.BeginInvoke(action);
-        }
-
-        public static void InvokeOnFixedUpdate(System.Action action)
-        {
-            _fixedInvokePump.Invoke(action);
-        }
-
-        public static void BeginInvokeOnFixedUpdate(System.Action action)
-        {
-            _fixedInvokePump.Invoke(action);
-        }
+        public static com.spacepuppy.Async.InvokePump FixedUpdatePump { get { return _fixedInvokePump; } }
 
         #endregion
 

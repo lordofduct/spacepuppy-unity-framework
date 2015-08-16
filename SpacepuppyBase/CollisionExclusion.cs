@@ -190,7 +190,7 @@ namespace com.spacepuppy
 
         private static void PurgeWhenCan(IIgnorableCollision a, IIgnorableCollision b)
         {
-            GameLoopEntry.BeginInvoke(() =>
+            GameLoopEntry.UpdatePump.BeginInvoke(() =>
                 {
                     var token = new PairToken(a, b);
                     if (token.IsDead)
@@ -410,7 +410,7 @@ namespace com.spacepuppy
 
         private static void PurgeWhenCan(Collider a, Collider b)
         {
-            GameLoopEntry.BeginInvoke(() =>
+            GameLoopEntry.UpdatePump.BeginInvoke(() =>
             {
                 var token = new PairToken(a, b);
                 if (token.IsDead)
