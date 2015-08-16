@@ -45,6 +45,7 @@ namespace com.spacepuppy
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
         private static com.spacepuppy.Async.InvokePump _invokePump;
+        private static com.spacepuppy.Async.InvokePump _fixedInvokePump;
 
         #endregion
 
@@ -75,6 +76,7 @@ namespace com.spacepuppy
             _tardyUpdateHook.LateUpdateHook += _tardyUpdateHook_LateUpdate;
 
             _invokePump = new com.spacepuppy.Async.InvokePump(10);
+            _fixedInvokePump = new com.spacepuppy.Async.InvokePump(10);
         }
 
         /// <summary>
@@ -136,6 +138,16 @@ namespace com.spacepuppy
             _invokePump.BeginInvoke(action);
         }
 
+        public static void InvokeOnFixedUpdate(System.Action action)
+        {
+            _fixedInvokePump.Invoke(action);
+        }
+
+        public static void BeginInvokeOnFixedUpdate(System.Action action)
+        {
+            _fixedInvokePump.Invoke(action);
+        }
+
         #endregion
 
         #region Event Handlers
@@ -183,6 +195,9 @@ namespace com.spacepuppy
             _currentSequence = UpdateSequence.FixedUpdate;
 
             if (_internalEarlyUpdate != null) _internalEarlyUpdate(true);
+
+            _fixedInvokePump.Update();
+
             if (EarlyFixedUpdate != null) EarlyFixedUpdate(this, System.EventArgs.Empty);
         }
 
