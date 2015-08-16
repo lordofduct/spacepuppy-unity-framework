@@ -60,6 +60,9 @@ namespace com.spacepuppy.Async
 
         #region Properties
 
+        /// <summary>
+        /// Returns true if on a thread other than the one that owns this pump.
+        /// </summary>
         public bool InvokeRequired
         {
             get { return _threadId != 0 && Thread.CurrentThread.ManagedThreadId != _threadId; }
