@@ -62,6 +62,7 @@ namespace com.spacepuppy.Async
         public void Invoke(Action action)
         {
             if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            if (Thread.CurrentThread.ManagedThreadId == _threadId) throw new System.InvalidOperationException("Never call WaitOne on an InvokePump from the thread that owns it, this will freeze that thread indefinitely.");
             if (action == null) throw new System.ArgumentNullException("action");
 
             lock (_invokeLock)
