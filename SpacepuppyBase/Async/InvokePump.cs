@@ -12,7 +12,7 @@ namespace com.spacepuppy.Async
     /// <summary>
     /// Queue actions up to be called during some other threads update pump.
     /// </summary>
-    public class InvokePump
+    public class InvokePump : WaitHandle
     {
 
         #region Fields
@@ -21,39 +21,22 @@ namespace com.spacepuppy.Async
 
         private Action _invoking;
         private object _invokeLock = new object();
-        private InvokeWaitHandle _head;
-        private ObjectCachePool<InvokeWaitHandle> _waitHandlePool;
+        private EventWaitHandle _waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private EventWaitHandle _waitHandleAlt = new EventWaitHandle(false, EventResetMode.AutoReset);
 
         #endregion
 
         #region CONSTRUCTOR
-
+        
         public InvokePump()
-            : this(null, 10)
+            : this(null)
         {
-        }
 
-        public InvokePump(int handleCount)
-            : this(null, handleCount)
-        {
         }
 
         public InvokePump(Thread ownerThread)
-            : this(ownerThread, 10)
         {
-        }
-
-        public InvokePump(Thread ownerThread, int handleCount)
-        {
-            if (handleCount < 1) throw new System.ArgumentException("handleCount must be positive and non-zero.", "handleCount");
-
             _threadId = (ownerThread != null) ? ownerThread.ManagedThreadId : System.Threading.Thread.CurrentThread.ManagedThreadId;
-            _waitHandlePool = new ObjectCachePool<InvokeWaitHandle>(handleCount, InvokeWaitHandleConstructor);
-        }
-
-        private InvokeWaitHandle InvokeWaitHandleConstructor()
-        {
-            return new InvokeWaitHandle();
         }
 
         #endregion
@@ -78,19 +61,14 @@ namespace com.spacepuppy.Async
         /// <param name="action"></param>
         public void Invoke(Action action)
         {
+            if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
             if (action == null) throw new System.ArgumentNullException("action");
 
-            InvokeWaitHandle handle;
             lock (_invokeLock)
             {
-                handle = _waitHandlePool.GetInstance();
                 _invoking += action;
-
-                handle.NextNode = _head;
-                _head = handle;
             }
-
-            handle.WaitOne(); //block until it's called
+            _waitHandle.WaitOne(); //block until it's called
         }
 
         /// <summary>
@@ -99,6 +77,7 @@ namespace com.spacepuppy.Async
         /// <param name="action"></param>
         public void BeginInvoke(Action action)
         {
+            if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
             if (action == null) throw new System.ArgumentNullException("action");
 
             lock (_invokeLock)
@@ -112,66 +91,84 @@ namespace com.spacepuppy.Async
         /// </summary>
         public void Update()
         {
+            if (_threadId == 0) return; //we're destroyed
             if (this.InvokeRequired) throw new System.InvalidOperationException("InvokePump.Update can only be updated on the thread that was designated its owner.");
 
             if (_invoking != null)
             {
                 Action act;
-                InvokeWaitHandle node;
+                EventWaitHandle handle;
                 lock (_invokeLock)
                 {
                     act = _invoking;
-                    node = _head;
+                    handle = _waitHandle;
                     _invoking = null;
-                    _head = null;
+                    _waitHandle = _waitHandleAlt;
+                    _waitHandleAlt = handle;
                 }
 
                 //call delegate
                 act();
 
-                //release wait handles
-                if(node != null)
-                {
-                    InvokeWaitHandle tnode;
-                    while (node != null)
-                    {
-                        node.Set();
-                        tnode = node;
-                        node = node.NextNode;
-
-                        tnode.Clean();
-                        _waitHandlePool.Release(tnode);
-                    }
-                }
+                //release waits
+                handle.Set();
             }
         }
 
         #endregion
 
-        #region Special Types
+        #region Overrides
 
-        private class InvokeWaitHandle : EventWaitHandle
+        public override void Close()
         {
+            base.Close();
 
-            #region Fields
-
-            public InvokeWaitHandle NextNode;
-
-            #endregion
-
-            public InvokeWaitHandle() : base(false, EventResetMode.AutoReset)
-            {
-
-            }
-
-
-            public void Clean()
-            {
-                this.NextNode = null;
-                this.Reset();
-            }
-
+            if (_threadId == 0) return; //already was destroyed
+            _waitHandle.Close();
+            _waitHandleAlt.Close();
+            _threadId = 0;
         }
+
+        protected override void Dispose(bool explicitDisposing)
+        {
+            base.Dispose(explicitDisposing);
+
+            if (_threadId == 0) return; //already was destroyed
+            (_waitHandle as IDisposable).Dispose();
+            (_waitHandleAlt as IDisposable).Dispose();
+            _threadId = 0;
+        }
+
+        public override bool WaitOne()
+        {
+            if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            return _waitHandle.WaitOne();
+        }
+
+        public override bool WaitOne(int millisecondsTimeout)
+        {
+            if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            return _waitHandle.WaitOne(millisecondsTimeout);
+        }
+
+        public override bool WaitOne(int millisecondsTimeout, bool exitContext)
+        {
+            if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            return _waitHandle.WaitOne(millisecondsTimeout, exitContext);
+        }
+
+        public override bool WaitOne(TimeSpan timeout)
+        {
+            if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            return _waitHandle.WaitOne(timeout);
+        }
+
+        public override bool WaitOne(TimeSpan timeout, bool exitContext)
+        {
+            if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            return _waitHandle.WaitOne(timeout, exitContext);
+        }
+
 
         #endregion
 

@@ -75,8 +75,8 @@ namespace com.spacepuppy
             _updateHook.LateUpdateHook += _updateHook_LateUpdate;
             _tardyUpdateHook.LateUpdateHook += _tardyUpdateHook_LateUpdate;
 
-            _invokePump = new com.spacepuppy.Async.InvokePump(10);
-            _fixedInvokePump = new com.spacepuppy.Async.InvokePump(10);
+            _invokePump = new com.spacepuppy.Async.InvokePump();
+            _fixedInvokePump = new com.spacepuppy.Async.InvokePump();
         }
 
         /// <summary>
