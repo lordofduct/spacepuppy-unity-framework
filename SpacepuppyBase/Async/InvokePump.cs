@@ -8,6 +8,10 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Async
 {
+
+    /// <summary>
+    /// Queue actions up to be called during some other threads update pump.
+    /// </summary>
     public class InvokePump
     {
 
@@ -65,6 +69,10 @@ namespace com.spacepuppy.Async
 
         #region Methods
 
+        /// <summary>
+        /// Queues an action to be invoked next time Update is called. This method will block until that occurs.
+        /// </summary>
+        /// <param name="action"></param>
         public void Invoke(Action action)
         {
             if (action == null) throw new System.ArgumentNullException("action");
@@ -82,6 +90,10 @@ namespace com.spacepuppy.Async
             handle.WaitOne(); //block until it's called
         }
 
+        /// <summary>
+        /// Queues an action to be invoked next time Update is called. This method does not block.
+        /// </summary>
+        /// <param name="action"></param>
         public void BeginInvoke(Action action)
         {
             if (action == null) throw new System.ArgumentNullException("action");
@@ -92,6 +104,9 @@ namespace com.spacepuppy.Async
             }
         }
 
+        /// <summary>
+        /// Can only be called by the thread that owns this InvokePump, this will run all queued actions.
+        /// </summary>
         public void Update()
         {
             if (this.InvokeRequired) throw new System.InvalidOperationException("InvokePump.Update can only be updated on the thread that was designated its owner.");
