@@ -142,30 +142,35 @@ namespace com.spacepuppy.Async
         public override bool WaitOne()
         {
             if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            if (Thread.CurrentThread.ManagedThreadId == _threadId) throw new System.InvalidOperationException("Never call WaitOne on an InvokePump from the thread that owns it, this will freeze that thread indefinitely.");
             return _waitHandle.WaitOne();
         }
 
         public override bool WaitOne(int millisecondsTimeout)
         {
             if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            if (Thread.CurrentThread.ManagedThreadId == _threadId) throw new System.InvalidOperationException("Never call WaitOne on an InvokePump from the thread that owns it, this will freeze that thread indefinitely.");
             return _waitHandle.WaitOne(millisecondsTimeout);
         }
 
         public override bool WaitOne(int millisecondsTimeout, bool exitContext)
         {
             if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            if (Thread.CurrentThread.ManagedThreadId == _threadId) throw new System.InvalidOperationException("Never call WaitOne on an InvokePump from the thread that owns it, this will freeze that thread indefinitely.");
             return _waitHandle.WaitOne(millisecondsTimeout, exitContext);
         }
 
         public override bool WaitOne(TimeSpan timeout)
         {
             if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            if (Thread.CurrentThread.ManagedThreadId == _threadId) throw new System.InvalidOperationException("Never call WaitOne on an InvokePump from the thread that owns it, this will freeze that thread indefinitely.");
             return _waitHandle.WaitOne(timeout);
         }
 
         public override bool WaitOne(TimeSpan timeout, bool exitContext)
         {
             if (_threadId == 0) throw new System.InvalidOperationException("InvokePump has been closed.");
+            if (Thread.CurrentThread.ManagedThreadId == _threadId) throw new System.InvalidOperationException("Never call WaitOne on an InvokePump from the thread that owns it, this will freeze that thread indefinitely.");
             return _waitHandle.WaitOne(timeout, exitContext);
         }
 
