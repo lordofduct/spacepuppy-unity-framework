@@ -183,7 +183,7 @@ namespace com.spacepuppy.StateMachine
         {
             if (includeComponentsOnContainer)
             {
-                foreach (var s in container.GetLikeComponents<T>())
+                foreach (var s in container.GetComponentsAlt<T>())
                 {
                     yield return s;
                 }
@@ -191,7 +191,7 @@ namespace com.spacepuppy.StateMachine
 
             foreach (Transform t in container.transform)
             {
-                foreach (var s in t.GetLikeComponents<T>())
+                foreach (var s in t.GetComponentsAlt<T>())
                 {
                     yield return s;
                 }
@@ -202,7 +202,7 @@ namespace com.spacepuppy.StateMachine
         {
             if (includeComponentsOnContainer)
             {
-                foreach (var s in container.GetLikeComponents<TSub>())
+                foreach (var s in container.GetComponentsAlt<TSub>())
                 {
                     yield return s;
                 }
@@ -210,7 +210,7 @@ namespace com.spacepuppy.StateMachine
 
             foreach (Transform t in container.transform)
             {
-                foreach (var s in t.GetLikeComponents<TSub>())
+                foreach (var s in t.GetComponentsAlt<TSub>())
                 {
                     yield return s;
                 }
@@ -223,7 +223,7 @@ namespace com.spacepuppy.StateMachine
 
             if (includeComponentsOnContainer)
             {
-                foreach (var s in container.GetLikeComponents(tp))
+                foreach (var s in container.GetComponents(tp))
                 {
                     yield return s as T;
                 }
@@ -231,7 +231,7 @@ namespace com.spacepuppy.StateMachine
 
             foreach (Transform t in container.transform)
             {
-                foreach (var s in t.GetLikeComponents(tp))
+                foreach (var s in t.GetComponents(tp))
                 {
                     yield return s as T;
                 }

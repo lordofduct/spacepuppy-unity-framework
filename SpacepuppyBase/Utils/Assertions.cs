@@ -75,7 +75,7 @@ namespace com.spacepuppy.Utils
 
         public static bool AssertHasLikeComponent(GameObject go, System.Type tp)
         {
-            if (!go.HasLikeComponent(tp))
+            if (!go.HasComponent(tp))
             {
                 Assert(System.String.Format("(GameObject:{1}) GameObject requires a component of type {0}.", tp.Name, go.name), go);
                 return true;
@@ -102,7 +102,7 @@ namespace com.spacepuppy.Utils
                 RequireLikeComponentAttribute attrib = obj as RequireLikeComponentAttribute;
                 foreach (var reqType in attrib.Types)
                 {
-                    if (!comp.HasLikeComponent(reqType))
+                    if (!comp.HasComponent(reqType))
                     {
                         missingCompType = reqType;
                         if(!silent) Assert(System.String.Format("(GameObject:{2}) Component type {0} requires the gameobject to also have a component of type {1}.", tp.Name, reqType.Name, comp.gameObject.name), comp);

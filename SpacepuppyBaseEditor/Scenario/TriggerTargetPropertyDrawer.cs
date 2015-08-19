@@ -152,14 +152,14 @@ namespace com.spacepuppyeditor.Scenario
             if (newTargGo != targGo)
             {
                 targGo = newTargGo;
-                targProp.objectReferenceValue = (targGo != null) ? targGo.GetFirstLikeComponent<ITriggerableMechanism>() as Component : null;
+                targProp.objectReferenceValue = (targGo != null) ? targGo.GetComponentAlt<ITriggerableMechanism>() as Component : null;
             }
 
             var targCompPopupRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
             if (targProp.objectReferenceValue != null)
             {
                 var selectedType = targProp.objectReferenceValue.GetType();
-                var availableMechanismTypes = (from c in targGo.GetLikeComponents<ITriggerableMechanism>() select c.GetType()).ToArray();
+                var availableMechanismTypes = (from c in targGo.GetComponentsAlt<ITriggerableMechanism>() select c.GetType()).ToArray();
                 var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => tp.Name).ToArray();
 
                 var index = System.Array.IndexOf(availableMechanismTypes, selectedType);
@@ -456,7 +456,7 @@ namespace com.spacepuppyeditor.Scenario
             if (!(value is Component)) return null;
 
             if (value is ITriggerableMechanism) return value as Component;
-            else return (value as Component).GetFirstLikeComponent<ITriggerableMechanism>() as Component;
+            else return (value as Component).GetComponentAlt<ITriggerableMechanism>() as Component;
         }
 
         #endregion

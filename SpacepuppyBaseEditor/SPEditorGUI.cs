@@ -645,7 +645,7 @@ namespace com.spacepuppyeditor
                 var go = GameObjectUtil.GetGameObjectFromSource(value);
                 if (go != null)
                 {
-                    return go.GetFirstLikeComponent(inheritsFromType);
+                    return go.GetComponent(inheritsFromType);
                 }
             }
 
@@ -670,7 +670,7 @@ namespace com.spacepuppyeditor
                 var go = GameObjectUtil.GetGameObjectFromSource(value);
                 if (go != null)
                 {
-                    foreach (var c in go.GetLikeComponents(inheritsFromType))
+                    foreach (var c in go.GetComponents(inheritsFromType))
                     {
                         if (TypeUtil.IsType(c.GetType(), targetComponentType))
                         {

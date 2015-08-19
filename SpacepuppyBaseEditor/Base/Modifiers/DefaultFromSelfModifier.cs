@@ -26,11 +26,11 @@ namespace com.spacepuppyeditor.Modifiers
                     var componentType = (restrictAttrib != null && restrictAttrib.InheritsFromType != null) ? restrictAttrib.InheritsFromType : this.fieldInfo.FieldType;
                     if (bUseEntity)
                     {
-                        property.objectReferenceValue = targ.FindLikeComponent(componentType);
+                        property.objectReferenceValue = targ.FindComponent(componentType);
                     }
                     else
                     {
-                        property.objectReferenceValue = targ.GetFirstLikeComponent(componentType);
+                        property.objectReferenceValue = targ.GetComponent(componentType);
                     }
                     property.serializedObject.ApplyModifiedProperties();
                 }

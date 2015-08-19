@@ -85,7 +85,7 @@ namespace com.spacepuppy.Scenario
                     {
                         if (GameObjectUtil.IsGameObjectSource(targ))
                         {
-                            return GameObjectUtil.GetGameObjectFromSource(targ).FindLikeComponent(tp);
+                            return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
                         }
                         else
                         {
@@ -125,7 +125,7 @@ namespace com.spacepuppy.Scenario
                     {
                         if (GameObjectUtil.IsGameObjectSource(targ))
                         {
-                            return GameObjectUtil.GetGameObjectFromSource(targ).GetFirstLikeComponent(tp);
+                            return GameObjectUtil.GetGameObjectFromSource(targ).GetComponent(tp);
                         }
                         else
                         {

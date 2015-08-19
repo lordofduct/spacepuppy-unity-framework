@@ -77,7 +77,7 @@ namespace com.spacepuppy.Utils
             //{
             //    return comp.IsDead;
             //}
-            foreach(var c in obj.GetLikeComponents<IKillableEntity>())
+            foreach (var c in obj.GetComponentsAlt<IKillableEntity>())
             {
                 if (c.IsDead) return true;
             }
@@ -99,7 +99,7 @@ namespace com.spacepuppy.Utils
             //{
             //    return comp.IsDead;
             //}
-            foreach (var c in obj.GetLikeComponents<IKillableEntity>())
+            foreach (var c in obj.GetComponentsAlt<IKillableEntity>())
             {
                 if (c.IsDead) return true;
             }
@@ -125,7 +125,7 @@ namespace com.spacepuppy.Utils
             //{
             //    obj.DestroyAll();
             //}
-            var comps = obj.GetLikeComponents<IKillableEntity>().ToArray();
+            var comps = obj.GetComponentsAlt<IKillableEntity>().ToArray();
             if(comps.Length > 0)
             {
                 for(int i = 0; i < comps.Length; i++)
@@ -158,7 +158,7 @@ namespace com.spacepuppy.Utils
             //{
             //    root.DestroyAll();
             //}
-            var comps = obj.FindLikeComponents<IKillableEntity>().ToArray();
+            var comps = obj.FindComponents<IKillableEntity>().ToArray();
             if (comps.Length > 0)
             {
                 for (int i = 0; i < comps.Length; i++)

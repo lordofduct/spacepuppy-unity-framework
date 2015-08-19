@@ -248,7 +248,7 @@ namespace com.spacepuppy
                 _target = target;
 
                 //first test if we have the appropriate configuration
-                if (_target.component.GetLikeComponents<ISingleton>().Count() > 1 && !_target.component.HasComponent<SingletonManager>())
+                if (_target.component.GetComponentsAlt<ISingleton>().Count() > 1 && !_target.component.HasComponent<SingletonManager>())
                 {
                     Debug.LogWarning("Gameobject with multiple Singletons exists without a SingletonManager attached, adding a SingletonManager with default destroy settings.", target.component);
                     _target.component.AddComponent<SingletonManager>();
@@ -429,7 +429,7 @@ namespace com.spacepuppy
 
         public IEnumerable<ISingleton> GetSingletons()
         {
-            return this.GetLikeComponents<ISingleton>();
+            return this.GetComponentsAlt<ISingleton>();
         }
 
         private void UpdateMaintainOnLoadStatus()

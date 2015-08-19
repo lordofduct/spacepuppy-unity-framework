@@ -462,7 +462,7 @@ namespace com.spacepuppy
 
         public static void PurgeHandlers(UnityEngine.GameObject go)
         {
-            foreach (var c in go.GetLikeComponents<INotificationDispatcher>())
+            foreach (var c in go.GetComponentsAlt<INotificationDispatcher>())
             {
                 c.PurgeHandlers();
             }

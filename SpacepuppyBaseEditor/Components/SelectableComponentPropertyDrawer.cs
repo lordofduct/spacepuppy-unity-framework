@@ -94,7 +94,7 @@ namespace com.spacepuppyeditor.Components
 
                 if(property.objectReferenceValue == null)
                 {
-                    property.objectReferenceValue = targGo.GetFirstLikeComponent(_restrictionType);
+                    property.objectReferenceValue = targGo.GetComponent(_restrictionType);
                 }
             }
 
@@ -156,12 +156,12 @@ namespace com.spacepuppyeditor.Components
                         if (targGo == ngo ||
                             (this.SearchChildren && targGo.IsParentOf(ngo)))
                         {
-                            property.objectReferenceValue = ngo.GetFirstLikeComponent(_restrictionType);
+                            property.objectReferenceValue = ngo.GetComponent(_restrictionType);
                         }
                     }
                     else
                     {
-                        property.objectReferenceValue = (ngo == null) ? null : ngo.GetFirstLikeComponent(_restrictionType);
+                        property.objectReferenceValue = (ngo == null) ? null : ngo.GetComponent(_restrictionType);
                     }
                 }
             }

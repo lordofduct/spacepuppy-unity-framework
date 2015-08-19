@@ -40,13 +40,13 @@ namespace com.spacepuppy.StateMachine
         public bool Contains<TSub>() where TSub : class, T
         {
             if (_container == null) return false;
-            return _container.HasLikeComponent<TSub>();
+            return _container.HasComponent<TSub>();
         }
 
         public bool Contains(System.Type tp)
         {
             if (_container == null) return false;
-            return _container.HasLikeComponent(tp);
+            return _container.HasComponent(tp);
         }
 
         public bool Contains(T state)
@@ -58,14 +58,14 @@ namespace com.spacepuppy.StateMachine
         public TSub GetState<TSub>() where TSub : class, T
         {
             if (_container == null) return null;
-            return _container.GetFirstLikeComponent<TSub>();
+            return _container.GetComponentAlt<TSub>();
         }
 
         public T GetState(System.Type tp)
         {
             if (!TypeUtil.IsType(tp, typeof(T))) return default(T);
             if (_container == null) return default(T);
-            return _container.GetFirstLikeComponent<T>();
+            return _container.GetComponent(tp) as T;
         }
 
         public T GetNext(T current)
@@ -81,13 +81,13 @@ namespace com.spacepuppy.StateMachine
         public IEnumerator<T> GetEnumerator()
         {
             if (_container == null) return Enumerable.Empty<T>().GetEnumerator();
-            return _container.GetLikeComponents<T>().GetEnumerator();
+            return (_container.GetComponentsAlt<T>() as IEnumerable<T>).GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             if (_container == null) return Enumerable.Empty<T>().GetEnumerator();
-            return _container.GetLikeComponents<T>().GetEnumerator();
+            return _container.GetComponentsAlt<T>().GetEnumerator();
         }
 
         #endregion
@@ -96,19 +96,19 @@ namespace com.spacepuppy.StateMachine
 
         public static IEnumerable<T> GetComponentsOnTarg(GameObject container)
         {
-            return container.GetLikeComponents<T>();
+            return container.GetComponentsAlt<T>();
         }
 
         public static IEnumerable<TSub> GetComponentsOnTarg<TSub>(GameObject container) where TSub : class, T
         {
-            return container.GetLikeComponents<TSub>();
+            return container.GetComponentsAlt<TSub>();
         }
 
         public static IEnumerable<T> GetComponentsOnTarg(System.Type tp, GameObject container)
         {
             if (!TypeUtil.IsType(tp, typeof(T))) throw new TypeArgumentMismatchException(tp, typeof(T), "tp");
 
-            return container.GetLikeComponents(tp).Cast<T>();
+            return container.GetComponents(tp).Cast<T>();
         }
 
         #endregion

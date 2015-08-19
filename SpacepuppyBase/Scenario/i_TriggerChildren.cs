@@ -48,7 +48,7 @@ namespace com.spacepuppy.Scenario
                 var child = this.transform.FindChild(_specificTargetName);
                 if (child != null && child.gameObject.activeInHierarchy)
                 {
-                    foreach (var t in (from t in child.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
+                    foreach (var t in (from t in child.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t))
                     {
                         if (_passAlongTriggerArg)
                             t.Trigger(arg);
@@ -63,7 +63,7 @@ namespace com.spacepuppy.Scenario
                 {
                     if(child != null && child.gameObject.activeInHierarchy)
                     {
-                        foreach (var t in (from t in child.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
+                        foreach (var t in (from t in child.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t))
                         {
                             if (_passAlongTriggerArg)
                                 t.Trigger(arg);

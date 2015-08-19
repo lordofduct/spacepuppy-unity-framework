@@ -57,7 +57,7 @@ namespace com.spacepuppyeditor.Scenario
                     {
                         if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
                         {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).GetFirstLikeComponent(_configAttrib.TargetType);
+                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).GetComponent(_configAttrib.TargetType);
                         }
                         else
                         {
@@ -100,7 +100,7 @@ namespace com.spacepuppyeditor.Scenario
                     {
                         if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
                         {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetFirstLikeComponent(_configAttrib.TargetType);
+                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetComponent(_configAttrib.TargetType);
                         }
                         else
                         {
@@ -140,7 +140,7 @@ namespace com.spacepuppyeditor.Scenario
                         }
                         else if (TypeUtil.IsType(_configAttrib.TargetType, typeof(IComponent)))
                         {
-                            return go.GetLikeComponents(_configAttrib.TargetType).Count() > 1;
+                            return go.GetComponents(_configAttrib.TargetType).Length > 1;
                         }
                         else
                         {
@@ -219,7 +219,7 @@ namespace com.spacepuppyeditor.Scenario
                     var go = GameObjectUtil.GetGameObjectFromSource(targetProp.objectReferenceValue);
 
                     var selectedType = targetProp.objectReferenceValue.GetType();
-                    var availableTypes = (from c in go.GetLikeComponents(_configAttrib.TargetType) select c.GetType()).ToArray();
+                    var availableTypes = (from c in go.GetComponents(_configAttrib.TargetType) select c.GetType()).ToArray();
                     var availableTypeNames = availableTypes.Select((tp) => EditorHelper.TempContent(tp.Name)).ToArray();
 
                     var index = System.Array.IndexOf(availableTypes, selectedType);

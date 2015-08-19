@@ -159,7 +159,7 @@ namespace com.spacepuppy.Scenario
             switch (this._activationType)
             {
                 case TriggerActivationType.TriggerAllOnTarget:
-                    foreach (var t in (from t in this._triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
+                    foreach (var t in (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t))
                     {
                         t.Trigger(arg0);
                     }
@@ -196,7 +196,7 @@ namespace com.spacepuppy.Scenario
             switch (this._activationType)
             {
                 case TriggerActivationType.TriggerAllOnTarget:
-                    foreach (var t in (from t in this._triggerable.GetLikeComponents<ITriggerableMechanism>() orderby t.Order ascending select t))
+                    foreach (var t in (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t))
                     {
                         t.Trigger(arg0);
                     }

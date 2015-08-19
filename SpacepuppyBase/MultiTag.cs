@@ -432,7 +432,7 @@ namespace com.spacepuppy
 
             if (bDestroyMultiTagComponent)
             {
-                go.RemoveComponent<MultiTag>();
+                go.RemoveComponents<MultiTag>();
                 if (MultiTag.IsValidMultiTag(stag))
                 {
                     go.tag = stag;

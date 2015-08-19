@@ -108,7 +108,7 @@ namespace com.spacepuppyeditor.Base
                 _messageType = MessageType.Info;
                 return EditorGUIUtility.singleLineHeight * 2f;
             }
-            else if (go.GetLikeComponents<ISingleton>().Count() > 1)
+            else if (go.GetComponentsAlt<ISingleton>().Count() > 1)
             {
                 _message = "A GameObject with multiple Singletons on it should have a SingletonManager attached!";
                 _messageType = MessageType.Warning;

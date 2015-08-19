@@ -95,7 +95,7 @@ namespace com.spacepuppy.Collections
         {
             if (go == null) throw new System.ArgumentNullException("go");
 
-            foreach (var d in go.GetLikeComponents<INotificationDispatcher>())
+            foreach (var d in go.GetComponentsAlt<INotificationDispatcher>())
             {
                 if (this.Contains(d)) return true;
             }
@@ -106,7 +106,7 @@ namespace com.spacepuppy.Collections
         {
             if (go == null) throw new System.ArgumentNullException("go");
 
-            foreach (var d in go.GetLikeComponents<INotificationDispatcher>())
+            foreach (var d in go.GetComponentsAlt<INotificationDispatcher>())
             {
                 if (_lst.Contains(d)) this.Remove(d);
             }
