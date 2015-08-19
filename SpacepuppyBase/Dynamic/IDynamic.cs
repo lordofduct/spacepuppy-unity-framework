@@ -144,7 +144,6 @@ namespace com.spacepuppy.Dynamic
 
 
 
-
         public static bool SetValueDirect(object obj, string sprop, object value)
         {
             return SetValueDirect(obj, sprop, value, (object[])null);

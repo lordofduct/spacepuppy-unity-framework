@@ -153,14 +153,20 @@ namespace com.spacepuppy.Scenario
             return _targets.Remove(item);
         }
 
-        public IEnumerator<TriggerTarget> GetEnumerator()
+        public Enumerator GetEnumerator()
         {
-            return _targets.GetEnumerator();
+            //return _targets.GetEnumerator();
+            return new Enumerator(this);
+        }
+
+        IEnumerator<TriggerTarget> IEnumerable<TriggerTarget>.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _targets.GetEnumerator();
+            return this.GetEnumerator();
         }
 
         #endregion
@@ -176,6 +182,43 @@ namespace com.spacepuppy.Scenario
             {
                 this.Weighted = weighted;
             }
+        }
+
+        public struct Enumerator : IEnumerator<TriggerTarget>
+        {
+
+            private List<TriggerTarget>.Enumerator _e;
+
+            public Enumerator(Trigger t)
+            {
+                _e = t._targets.GetEnumerator();
+            }
+
+            public TriggerTarget Current
+            {
+                get { return _e.Current; }
+            }
+
+            object System.Collections.IEnumerator.Current
+            {
+                get { return _e.Current; }
+            }
+
+            public bool MoveNext()
+            {
+                return _e.MoveNext();
+            }
+
+            void System.Collections.IEnumerator.Reset()
+            {
+                (_e as IEnumerator<TriggerTarget>).Reset();
+            }
+
+            public void Dispose()
+            {
+                _e.Dispose();
+            }
+
         }
 
         #endregion
