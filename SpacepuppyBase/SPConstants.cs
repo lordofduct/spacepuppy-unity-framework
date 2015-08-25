@@ -26,6 +26,10 @@ namespace com.spacepuppy
 
         //sent by Notification to all members of some entity
         public const string MSG_AUTONOTIFICATIONMESSAGEHANDLER = "AutoNotificationMessageHandler";
+        
+        //Broadcasted to all children when AddChild or RemoveFromParent is called for a GameObject, allows scripts in that hierarchy to react to the add/remove
+        //Calling addchild/RemoveFromParent during this message can result in a stack overflow if the hierarchies intersect
+        public const string MSG_ONTRANSFORMHIERARCHYCHANGED = "OnTransformHierarchyChanged";
 
 
         public static Quaternion ROT_3DSMAX_TO_UNITY = Quaternion.LookRotation(Vector3.left, Vector3.forward);

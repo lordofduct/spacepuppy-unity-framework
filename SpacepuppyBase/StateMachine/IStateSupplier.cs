@@ -138,7 +138,7 @@ namespace com.spacepuppy.StateMachine
 
     }
 
-    public class TypeStateSupplierCollection<T> : com.spacepuppy.Collections.ComponentCollection<T>, ITypedStateSupplier<T> where T : class
+    public class TypedStateSupplierCollection<T> : com.spacepuppy.Collections.ComponentCollection<T>, ITypedStateSupplier<T> where T : class
     {
 
         #region Fields
@@ -149,12 +149,12 @@ namespace com.spacepuppy.StateMachine
 
         #region CONSTRUCTOR
 
-        public TypeStateSupplierCollection()
+        public TypedStateSupplierCollection()
         {
 
         }
 
-        public TypeStateSupplierCollection(bool allowIndirectHit)
+        public TypedStateSupplierCollection(bool allowIndirectHit)
         {
             _allowIndirectHit = allowIndirectHit;
         }

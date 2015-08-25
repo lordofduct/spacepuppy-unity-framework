@@ -31,13 +31,13 @@ namespace com.spacepuppy
 
         protected virtual void Awake()
         {
-            this.SyncEntityRoot();
+            //this.SyncEntityRoot();
         }
 
         protected virtual void Start()
         {
             _started = true;
-            this.SyncEntityRoot();
+            //this.SyncEntityRoot();
             this.OnStartOrEnable();
         }
 
@@ -64,6 +64,14 @@ namespace com.spacepuppy
             if (this.OnDisabled != null) this.OnDisabled(this, System.EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Occurs if this gameobject or one of its parents is moved in the hierarchy using 'GameObjUtil.AddChild' or 'GameObjUtil.RemoveFromParent'
+        /// </summary>
+        protected virtual void OnTransformHierarchyChanged()
+        {
+            _entityRoot = null;
+        }
+
         protected virtual void OnDespawn()
         {
         }
@@ -81,14 +89,22 @@ namespace com.spacepuppy
 
         #region Properties
 
-        public GameObject entityRoot { get { return _entityRoot; } }
+        public GameObject entityRoot
+        {
+            get
+            {
+                if (object.ReferenceEquals(_entityRoot, null)) _entityRoot = this.FindRoot();
+                return _entityRoot;
+            }
+        }
 
         /// <summary>
         /// Start has been called on this component.
         /// </summary>
         public bool started { get { return _started; } }
 
-        public bool isActiveAndEnabled { get { return this.gameObject.activeInHierarchy && this.enabled; } }
+        //OBSOLETE - unity added this in latest version of unity
+        //public bool isActiveAndEnabled { get { return this.gameObject.activeInHierarchy && this.enabled; } }
 
         #endregion
 

@@ -124,11 +124,9 @@ namespace com.spacepuppy
 
         public static SPEntity GetEntityFromSource(object obj)
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return null;
 
-            go = go.FindTrueRoot();
-            if (go == null) return null;
             SPEntity e;
             if (_pool.TryGetValue(go, out e)) return e;
             else return go.GetComponent<SPEntity>();
@@ -136,31 +134,26 @@ namespace com.spacepuppy
 
         public static T GetEntityFromSource<T>(object obj) where T : SPEntity
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return null;
 
-            go = go.FindTrueRoot();
-            if (go == null) return null;
             SPEntity e;
-            if (_pool.TryGetValue(go, out e))
+            if (_pool.TryGetValue(go, out e) && e is T)
             {
-                if (e is T) return e as T;
+                return e as T;
             }
             else
             {
                 return go.GetComponent<T>();
             }
-            return null;
         }
 
         public static bool GetEntityFromSource(object obj, out SPEntity entity)
         {
             entity = null;
-            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return false;
 
-            go = go.FindTrueRoot();
-            if (go == null) return false;
             SPEntity e;
             if (_pool.TryGetValue(go, out e))
             {
@@ -177,26 +170,20 @@ namespace com.spacepuppy
         public static bool GetEntityFromSource<T>(object obj, out T entity) where T : SPEntity
         {
             entity = null;
-            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return false;
 
-            go = go.FindTrueRoot();
-            if (go == null) return false;
             SPEntity e;
-            if (_pool.TryGetValue(go, out e))
+            if (_pool.TryGetValue(go, out e) && e is T)
             {
-                if (e is T)
-                {
-                    entity = e as T;
-                    return true;
-                }
+                entity = e as T;
+                return true;
             }
             else
             {
                 entity = go.GetComponent<T>();
                 return entity != null;
             }
-            return false;
         }
 
         #endregion

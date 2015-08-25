@@ -28,6 +28,8 @@ namespace com.spacepuppy.Utils
             return go;
         }
 
+        #region Get*FromSource
+
         public static bool IsGameObjectSource(object obj)
         {
             return (obj is GameObject || obj is Component || obj is IGameObjectSource);
@@ -60,6 +62,58 @@ namespace com.spacepuppy.Utils
 
             return null;
         }
+
+        public static GameObject GetRootFromSource(object obj)
+        {
+            if (obj.IsNullOrDestroyed()) return null;
+
+            if (obj is IComponent) obj = (obj as IComponent).component;
+
+            if (obj is Transform)
+                return (obj as Transform).FindRoot();
+            else if (obj is GameObject)
+                return (obj as GameObject).FindRoot();
+            else if (obj is SPComponent)
+            {
+                return (obj as SPComponent).entityRoot;
+            }
+            else if (obj is Component)
+                return (obj as Component).FindRoot();
+            else if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).gameObject.FindRoot();
+
+            return null;
+        }
+
+        public static GameObject GetTrueRootFromSource(object obj)
+        {
+            if (obj.IsNullOrDestroyed()) return null;
+
+            if (obj is IComponent) obj = (obj as IComponent).component;
+
+            if (obj is Transform)
+                return (obj as Transform).FindTrueRoot();
+            else if (obj is GameObject)
+                return (obj as GameObject).FindTrueRoot();
+            else if (obj is SPComponent)
+            {
+                var r = (obj as SPComponent).entityRoot;
+                if (r.HasTag(SPConstants.TAG_ROOT))
+                    return r;
+                else
+                    return null;
+            }
+            else if (obj is Component)
+                return (obj as Component).FindTrueRoot();
+            else if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).gameObject.FindTrueRoot();
+
+            return null;
+        }
+
+        #endregion
+
+
 
         #region Kill Extension Methods
 
@@ -937,59 +991,99 @@ namespace com.spacepuppy.Utils
         // Add Child
         // ##########
 
-        public static void AddChild(this GameObject obj, GameObject child)
+        /// <summary>
+        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
+        /// to child and all its children signaling it that the change occurred, unless suppressed by the suppress parameter. 
+        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
+        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="child"></param>
+        /// <param name="suppressChangeHierarchyMessage"></param>
+        public static void AddChild(this GameObject obj, GameObject child, bool suppressChangeHierarchyMessage = false)
         {
-            child.transform.parent = obj.transform;
+            var p = (obj != null) ? obj.transform : null;
+            var t = (child != null) ? child.transform : null;
+            AddChild(p, t, suppressChangeHierarchyMessage);
+        }
+        
+        /// <summary>
+        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
+        /// to child and all its children signaling it that the change occurred, unless suppressed by the suppress parameter. 
+        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
+        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="child"></param>
+        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
+        public static void AddChild(this GameObject obj, Transform child, bool suppressChangeHierarchyMessage = false)
+        {
+            var p = (obj != null) ? obj.transform : null;
+            AddChild(p, child, suppressChangeHierarchyMessage);
         }
 
-        public static void AddChild(this GameObject obj, Transform child)
+        /// <summary>
+        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
+        /// to child and all its children signaling it that the change occurred, unless suppressed by the suppress parameter. 
+        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
+        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="child"></param>
+        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
+        public static void AddChild(this Transform obj, GameObject child, bool suppressChangeHierarchyMessage = false)
         {
-            child.parent = obj.transform;
+            var t = (child != null) ? child.transform : null;
+            AddChild(obj, t, suppressChangeHierarchyMessage);
         }
 
-        public static void AddChild(this Transform obj, GameObject child)
+        /// <summary>
+        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
+        /// to child and all its children signaling it that the change occurred, unless the new child is already a child of the GameObject. 
+        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
+        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="child"></param>
+        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
+        public static void AddChild(this Transform obj, Transform child, bool suppressChangeHierarchyMessage = false)
         {
-            child.transform.parent = obj;
-        }
+            if (child == null) throw new System.ArgumentNullException("child");
 
-        public static void AddChild(this Transform obj, Transform child)
-        {
+            if (child.parent == obj) return;
             child.parent = obj;
+            if (!suppressChangeHierarchyMessage) child.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED);
         }
 
-        public static void PlaceInGlobalSpace(this GameObject go, bool bSetScale = false)
+        /// <summary>
+        /// Sets the parent property of this GameObject to null. The 'OnTrasformHieararchyChanged' message will be 
+        /// broadcasted to it and all of its children signaling this change occurred, unless the parent is already null.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
+        public static void RemoveFromParent(this GameObject obj, bool suppressChangeHierarchyMessage = false)
         {
-            var trans = Trans.GetGlobal(go.transform);
-            go.transform.parent = null;
-            trans.SetToGlobal(go.transform, bSetScale);
+            if (obj == null) throw new System.ArgumentNullException("obj");
+
+            var t = obj.transform;
+            if (t.parent == null) return;
+            t.parent = null;
+            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED);
         }
 
-        public static void AddChildAdjusted(this GameObject obj, GameObject child, bool bSetScale = false)
+        /// <summary>
+        /// Sets the parent property of this GameObject to null. The 'OnTrasformHieararchyChanged' message will be 
+        /// broadcasted to it and all of its children signaling this change occurred, unless the parent is already null.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
+        public static void RemoveFromParent(this Transform obj, bool suppressChangeHierarchyMessage = false)
         {
-            var trans = Trans.GetGlobal(child.transform);
-            child.transform.parent = obj.transform;
-            trans.SetToGlobal(child.transform, bSetScale);
-        }
+            if (obj == null) throw new System.ArgumentNullException("t");
 
-        public static void AddChildAdjusted(this GameObject obj, Transform child, bool bSetScale = false)
-        {
-            var trans = Trans.GetGlobal(child.transform);
-            child.parent = obj.transform;
-            trans.SetToGlobal(child.transform, bSetScale);
-        }
-
-        public static void AddChildAdjusted(this Transform obj, GameObject child, bool bSetScale = false)
-        {
-            var trans = Trans.GetGlobal(child.transform);
-            child.transform.parent = obj;
-            trans.SetToGlobal(child.transform, bSetScale);
-        }
-
-        public static void AddChildAdjusted(this Transform obj, Transform child, bool bSetScale = false)
-        {
-            var trans = Trans.GetGlobal(child.transform);
-            child.parent = obj;
-            trans.SetToGlobal(child.transform, bSetScale);
+            if (obj.parent == null) return;
+            obj.parent = null;
+            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED);
         }
 
         #endregion

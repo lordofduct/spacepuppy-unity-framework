@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 #pragma warning disable 0168 // variable declared but not used.
@@ -9,15 +8,45 @@ namespace com.spacepuppy.Utils
     public static class ObjUtil
     {
 
-        public static void SmartDestroy(Object obj)
+        #region Fields
+
+        private static System.Func<UnityEngine.Object, UnityEngine.Object, bool> _compareBaseObjects;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        static ObjUtil()
         {
-            if(Application.isPlaying)
+            try
             {
-                Object.Destroy(obj);
+                var tp = typeof(UnityEngine.Object);
+                var meth = tp.GetMethod("CompareBaseObjectsInternal", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                _compareBaseObjects = System.Delegate.CreateDelegate(typeof(System.Func<UnityEngine.Object, UnityEngine.Object, bool>), meth) as System.Func<UnityEngine.Object, UnityEngine.Object, bool>;
+            }
+            catch
+            {
+                //incase there was a change to the UnityEngine.dll
+                _compareBaseObjects = (a, b) => a == b;
+                UnityEngine.Debug.LogWarning("This version of Spacepuppy Framework does not support the version of Unity it's being used with.");
+                //throw new System.InvalidOperationException("This version of Spacepuppy Framework does not support the version of Unity it's being used with.");
+            }
+        }
+
+        #endregion
+
+
+
+
+        public static void SmartDestroy(UnityEngine.Object obj)
+        {
+            if (UnityEngine.Application.isPlaying)
+            {
+                UnityEngine.Object.Destroy(obj);
             }
             else
             {
-                Object.DestroyImmediate(obj);
+                UnityEngine.Object.DestroyImmediate(obj);
             }
         }
 
@@ -31,11 +60,11 @@ namespace com.spacepuppy.Utils
             if (object.ReferenceEquals(obj, null)) return true;
 
             if (obj is UnityEngine.Object)
-                return obj.Equals(null);
+                return _compareBaseObjects(obj as UnityEngine.Object, null);
             else if (obj is IComponent)
-                return (obj as IComponent).component == null;
+                return _compareBaseObjects((obj as IComponent).component, null);
             else if (obj is IGameObjectSource)
-                return (obj as IGameObjectSource).gameObject == null;
+                return _compareBaseObjects((obj as IGameObjectSource).gameObject, null);
 
             return false;
         }
@@ -51,13 +80,27 @@ namespace com.spacepuppy.Utils
             if (object.ReferenceEquals(obj, null)) return false;
 
             if (obj is UnityEngine.Object)
-                return obj.Equals(null);
+                return _compareBaseObjects(obj as UnityEngine.Object, null);
             else if (obj is IComponent)
-                return (obj as IComponent).component == null;
+                return _compareBaseObjects((obj as IComponent).component, null);
             else if (obj is IGameObjectSource)
-                return (obj as IGameObjectSource).gameObject == null;
+                return _compareBaseObjects((obj as IGameObjectSource).gameObject, null);
 
             return false;
+        }
+
+        public static bool IsAlive(this System.Object obj)
+        {
+            if (object.ReferenceEquals(obj, null)) return false;
+
+            if (obj is UnityEngine.Object)
+                return !_compareBaseObjects(obj as UnityEngine.Object, null);
+            else if (obj is IComponent)
+                return !_compareBaseObjects((obj as IComponent).component, null);
+            else if (obj is IGameObjectSource)
+                return !_compareBaseObjects((obj as IGameObjectSource).gameObject, null);
+
+            return true;
         }
 
 

@@ -243,7 +243,7 @@ namespace com.spacepuppy
                 _state = RadicalCoroutineOperatingState.Inactive;
                 try
                 {
-                    _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                    if (_owner != null) _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
                 }
                 catch (System.Exception ex) { Debug.LogException(ex); }
                 _owner = null;
@@ -326,10 +326,14 @@ namespace com.spacepuppy
         /// <returns></returns>
         public bool ManualTick(MonoBehaviour handle)
         {
-            if (_owner != null) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated on.");
+            if (_owner != null || _state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operating.");
             if (handle == null) throw new System.ArgumentNullException("handle");
 
-            if ((this as IEnumerator).MoveNext())
+            _state = RadicalCoroutineOperatingState.Active;
+            bool result = (this as IEnumerator).MoveNext();
+            if (_state == RadicalCoroutineOperatingState.Active) _state = RadicalCoroutineOperatingState.Inactive;
+
+            if (result)
             {
                 var current = _currentIEnumeratorYieldValue;
                 _currentIEnumeratorYieldValue = null;
@@ -340,12 +344,9 @@ namespace com.spacepuppy
                     _stack.Push(wait);
                     wait.Start();
                 }
-                return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return result;
         }
 
         public void ForceTick()

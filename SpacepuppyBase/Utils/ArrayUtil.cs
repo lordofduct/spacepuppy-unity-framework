@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Utils
 {
+
     public static class ArrayUtil
     {
 
@@ -317,7 +318,23 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
+        #region HashSet Methods
 
+        public static T Pop<T>(this HashSet<T> set)
+        {
+            if (set == null) throw new System.ArgumentNullException("set");
+
+            var e = set.GetEnumerator();
+            if(e.MoveNext())
+            {
+                set.Remove(e.Current);
+                return e.Current;
+            }
+
+            throw new System.ArgumentException("HashSet must not be empty.");
+        }
+
+        #endregion
 
         #region Special Types
 
@@ -338,5 +355,6 @@ namespace com.spacepuppy.Utils
         #endregion
 
     }
+
 }
 

@@ -18,14 +18,14 @@ namespace com.spacepuppy.Collections
     /// this.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TempCollection<T> : ICollection<T>, IDisposable
+    public class TempCollection<T> : IList<T>, IDisposable
     {
 
         private const int MAX_SIZE_INBYTES = 1024;
 
         #region Fields
 
-        private List<T> _coll = new List<T>();
+        private List<T> _coll;
         private int _maxCapacityOnRelease;
         private int _version;
 
@@ -39,11 +39,31 @@ namespace com.spacepuppy.Collections
             int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
             _version = 1;
+            _coll = new List<T>();
+        }
+
+        private TempCollection(IEnumerable<T> e)
+        {
+            var tp = typeof(T);
+            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+            _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
+            _version = 1;
+            _coll = new List<T>(e);
         }
 
         #endregion
 
         #region Methods
+
+        public void Sort(Comparison<T> comparison)
+        {
+            _coll.Sort(comparison);
+        }
+
+        public void Sort(IComparer<T> comparer)
+        {
+            _coll.Sort(comparer);
+        }
 
         public void Release()
         {
@@ -126,6 +146,37 @@ namespace com.spacepuppy.Collections
 
         #endregion
 
+        #region IList Interface
+
+        public int IndexOf(T item)
+        {
+            return _coll.IndexOf(item);
+        }
+
+        public void Insert(int index, T item)
+        {
+            _coll.Insert(index, item);
+        }
+
+        public void RemoveAt(int index)
+        {
+            _coll.RemoveAt(index);
+        }
+
+        public T this[int index]
+        {
+            get
+            {
+                return _coll[index];
+            }
+            set
+            {
+                _coll[index] = value;
+            }
+        }
+
+        #endregion
+
         #region Special Types
 
         public struct Enumerator : IEnumerator<T>
@@ -182,6 +233,21 @@ namespace com.spacepuppy.Collections
             {
                 var coll = _instance;
                 _instance = null;
+                return coll;
+            }
+        }
+
+        public static TempCollection<T> GetCollection(IEnumerable<T> e)
+        {
+            if(_instance == null)
+            {
+                return new TempCollection<T>(e);
+            }
+            else
+            {
+                var coll = _instance;
+                _instance = null;
+                coll._coll.AddRange(e);
                 return coll;
             }
         }

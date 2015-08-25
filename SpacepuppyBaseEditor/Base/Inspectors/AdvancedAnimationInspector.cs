@@ -36,6 +36,10 @@ namespace com.spacepuppyeditor.Base
             _animList.drawElementCallback = this._animList_DrawElement;
             _animList.onAddCallback = this._animList_OnAdded;
             _animList.onRemoveCallback = this._animList_OnRemoved;
+
+            _animList.draggable = !Application.isPlaying;
+            _animList.displayAdd = !Application.isPlaying;
+            _animList.displayRemove = !Application.isPlaying;
         }
 
         protected override void OnSPInspectorGUI()
@@ -81,6 +85,11 @@ namespace com.spacepuppyeditor.Base
             this.serializedObject.FindProperty(PROP_PLAYAUTOMATICALLY).boolValue = animToPlayProp.objectReferenceValue != null;
         }
 
+        public override bool RequiresConstantRepaint()
+        {
+            return Application.isPlaying;
+        }
+
         #endregion
 
         #region Anim ReorderableList Handlers
@@ -94,9 +103,29 @@ namespace com.spacepuppyeditor.Base
         {
             var element = _animList.serializedProperty.GetArrayElementAtIndex(index);
 
-            EditorGUI.PropertyField(area, element, new GUIContent("Anim " + index.ToString("00")));
+            GUIContent label;
+            if (Application.isPlaying && !this.serializedObject.isEditingMultipleObjects)
+            {
+                var targ = this.target as Animation;
+                var clip = element.objectReferenceValue as AnimationClip;
+                if (targ.IsPlaying(clip.name))
+                {
+                    label = EditorHelper.TempContent("Anim " + index.ToString("00") + " : (Playing)");
+                }
+                else
+                {
+                    label = EditorHelper.TempContent("Anim " + index.ToString("00"));
+                }
+            }
+            else
+            {
+                label = EditorHelper.TempContent("Anim " + index.ToString("00"));
+            }
+
+            EditorGUI.PropertyField(area, element, label);
 
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_animList, area, index, isActive, isFocused);
+
         }
 
         private void _animList_OnAdded(ReorderableList lst)
