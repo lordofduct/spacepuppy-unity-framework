@@ -99,11 +99,11 @@ namespace com.spacepuppy
         }
 
         /// <summary>
-        /// Create a named CustomTimeSupplier for individual time scaling.
+        /// Retrieve a CustomTimeSupplier by name. If no time exists of that name, one is created.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static CustomTimeSupplier CreateCustomTime(string id)
+        public static CustomTimeSupplier Custom(string id)
         {
             if (_customTimes == null)
             {
@@ -111,7 +111,7 @@ namespace com.spacepuppy
                 GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
             }
 
-            if(_customTimes.ContainsKey(id))
+            if (_customTimes.ContainsKey(id))
             {
                 var ct = _customTimes[id];
                 return ct;
@@ -122,6 +122,12 @@ namespace com.spacepuppy
                 _customTimes[ct.Id] = ct;
                 return ct;
             }
+        }
+
+        public static bool HasCustom(string id)
+        {
+            if (_customTimes == null) return false;
+            return _customTimes.ContainsKey(id);
         }
 
         /// <summary>
@@ -142,9 +148,9 @@ namespace com.spacepuppy
         /// <returns></returns>
         public static bool RemoveCustomTime(CustomTimeSupplier time)
         {
-            if(_customTimes != null)
+            if (_customTimes != null)
             {
-                if(_customTimes.ContainsKey(time.Id) && _customTimes[time.Id] == time)
+                if (_customTimes.ContainsKey(time.Id) && _customTimes[time.Id] == time)
                 {
                     return _customTimes.Remove(time.Id);
                 }
@@ -157,17 +163,6 @@ namespace com.spacepuppy
             {
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Retrieve a CustomTimeSupplier by name.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static CustomTimeSupplier Custom(string id)
-        {
-            if (_customTimes == null) return null;
-            return _customTimes[id];
         }
 
         /// <summary>
