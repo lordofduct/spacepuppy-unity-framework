@@ -108,10 +108,12 @@ namespace com.spacepuppy.Utils
 
         public static T AddComponent<T>(this Component c) where T : Component
         {
+            if (c == null) return null;
             return c.gameObject.AddComponent<T>();
         }
         public static Component AddComponent(this Component c, System.Type tp)
         {
+            if (c == null) return null;
             return c.gameObject.AddComponent(tp);
         }
 
@@ -231,32 +233,54 @@ namespace com.spacepuppy.Utils
 
         public static T GetComponentAlt<T>(this GameObject obj) where T : class
         {
+            if (obj == null) return null;
             return obj.GetComponent(typeof(T)) as T;
         }
 
         public static T GetComponentAlt<T>(this Component obj) where T : class
         {
+            if (obj == null) return null;
             return obj.GetComponent(typeof(T)) as T;
         }
 
         public static bool GetComponent<T>(this GameObject obj, out T comp) where T : class
         {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
             comp = obj.GetComponent(typeof(T)) as T;
             return (comp != null);
         }
         public static bool GetComponent<T>(this Component obj, out T comp) where T : class
         {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
             comp = obj.GetComponent(typeof(T)) as T;
             return (comp != null);
         }
 
         public static bool GetComponent(this GameObject obj, System.Type tp, out Component comp)
         {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
             comp = obj.GetComponent(tp);
             return (comp != null);
         }
         public static bool GetComponent(this Component obj, System.Type tp, out Component comp)
         {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
             comp = obj.GetComponent(tp);
             return (comp != null);
         }
@@ -332,6 +356,7 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<T> GetChildComponents<T>(this GameObject obj, bool bIncludeSelf = false, bool bIncludeInactive = false) where T : class
         {
+            if (obj == null) return Enumerable.Empty<T>();
             if(bIncludeSelf)
             {
                 return obj.GetComponentsInChildren(typeof(T), bIncludeInactive).Cast<T>();
@@ -355,6 +380,7 @@ namespace com.spacepuppy.Utils
         public static void GetChildComponents<T>(this GameObject obj, ICollection<T> coll, bool bIncludeSelf = false, bool bIncludeInactive = false) where T : class
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
+            if (obj == null) return;
 
             if (bIncludeSelf)
             {
@@ -389,6 +415,8 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<Component> GetChildComponents(this GameObject obj, System.Type tp, bool bIncludeSelf = false, bool bIncludeInactive = false)
         {
+            if (obj == null) return Enumerable.Empty<Component>();
+
             if (bIncludeSelf)
             {
                 return obj.GetComponentsInChildren(tp, bIncludeInactive);
@@ -412,6 +440,7 @@ namespace com.spacepuppy.Utils
         public static void GetChildComponents(this GameObject obj, System.Type tp, ICollection<Component> coll, bool bIncludeSelf = false, bool bIncludeInactive = false)
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
+            if (obj == null) return;
 
             if (bIncludeSelf)
             {
@@ -485,6 +514,7 @@ namespace com.spacepuppy.Utils
 
         public static void RemoveComponents(this GameObject obj, System.Type tp)
         {
+            if (obj == null) return;
             var arr = obj.GetComponents(tp);
             for (int i = 0; i < arr.Length; i++)
             {
@@ -494,6 +524,7 @@ namespace com.spacepuppy.Utils
 
         public static void RemoveComponents(this Component obj, System.Type tp)
         {
+            if (obj == null) return;
             var arr = obj.GetComponents(tp);
             for (int i = 0; i < arr.Length; i++)
             {
@@ -526,6 +557,7 @@ namespace com.spacepuppy.Utils
 
         public static bool EntityHasComponent(this GameObject obj, System.Type tp, bool testIfEnabled = false)
         {
+            if (obj == null) return false;
             var root = obj.FindRoot();
 
             //foreach (var t in root.GetAllChildrenAndSelf())
@@ -557,18 +589,10 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static T FindComponent<T>(this GameObject go) where T : class
         {
+            if (go == null) return null;
+
             var root = go.FindRoot();
-
             var tp = typeof(T);
-
-            //T c = null;
-            //foreach (var t in root.GetAllChildrenAndSelf())
-            //{
-            //    c = t.GetComponent(tp) as T;
-            //    if (c != null) return c;
-            //}
-            //return null;
-
             return root.GetComponentInChildren(tp) as T;
         }
 
@@ -581,6 +605,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static T FindComponent<T>(this Component c) where T : class
         {
+            if (c == null) return null;
             return FindComponent<T>(c.gameObject);
         }
 
@@ -592,6 +617,11 @@ namespace com.spacepuppy.Utils
 
         public static bool FindComponent<T>(this Component c, out T comp) where T : class
         {
+            if (c == null)
+            {
+                comp = null;
+                return false;
+            }
             comp = FindComponent<T>(c.gameObject);
             return comp != null;
         }
@@ -605,6 +635,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Component FindComponent(this GameObject go, System.Type tp)
         {
+            if (go == null) return null;
             var root = go.FindRoot();
 
             //Component c = null;
@@ -627,6 +658,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Component FindComponent(this Component c, System.Type tp)
         {
+            if (c == null) return null;
             return FindComponent(c.gameObject, tp);
         }
 
@@ -638,6 +670,11 @@ namespace com.spacepuppy.Utils
 
         public static bool FindComponent(this Component c, System.Type tp, out Component comp)
         {
+            if (c == null)
+            {
+                comp = null;
+                return false;
+            }
             comp = FindComponent(c.gameObject, tp);
             return comp != null;
         }
@@ -648,62 +685,50 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<T> FindComponents<T>(this GameObject go, bool bIncludeInactive = false) where T : class
         {
+            if (go == null) return Enumerable.Empty<T>();
+
             var tp = typeof(T);
             var root = go.FindRoot();
-
-            //foreach (var t in root.GetAllChildrenAndSelf())
-            //{
-            //    foreach (var c in t.GetComponents(tp))
-            //    {
-            //        yield return c as T;
-            //    }
-            //}
-
             return root.GetComponentsInChildren(tp, bIncludeInactive).Cast<T>();
         }
         public static IEnumerable<T> FindComponents<T>(this Component c, bool bIncludeInactive = false) where T : class
         {
+            if (c == null) return Enumerable.Empty<T>();
             return FindComponents<T>(c.gameObject, bIncludeInactive);
         }
 
         public static IEnumerable<Component> FindComponents(this GameObject go, System.Type tp, bool bIncludeInactive = false)
         {
-            var root = go.FindRoot();
-            //foreach (var t in root.GetAllChildrenAndSelf())
-            //{
-            //    foreach (var c in t.GetComponents(tp))
-            //    {
-            //        yield return c;
-            //    }
-            //}
-            return root.GetComponentsInChildren(tp, bIncludeInactive);
+            if (go == null) return Enumerable.Empty<Component>();
+            return go.FindRoot().GetComponentsInChildren(tp, bIncludeInactive);
         }
         public static IEnumerable<Component> FindComponents(this Component c, System.Type tp, bool bIncludeInactive = false)
         {
+            if (c == null) return Enumerable.Empty<Component>();
             return FindComponents(c.gameObject, tp, bIncludeInactive);
         }
 
 
         public static void FindComponents<T>(this GameObject go, ICollection<T> coll, bool bIncludeInactive = false) where T : class
         {
-            var root = go.FindRoot();
-            GetChildComponents<T>(root, coll, true, bIncludeInactive);
+            if (go == null) return;
+            GetChildComponents<T>(go.FindRoot(), coll, true, bIncludeInactive);
         }
         public static void FindComponents<T>(this Component c, ICollection<T> coll, bool bIncludeInactive = false) where T : class
         {
-            var root = c.FindRoot();
-            GetChildComponents<T>(root, coll, true, bIncludeInactive);
+            if (c == null) return;
+            GetChildComponents<T>(c.FindRoot(), coll, true, bIncludeInactive);
         }
 
         public static void FindComponents(this GameObject go, System.Type tp, ICollection<Component> coll, bool bIncludeInactive = false)
         {
-            var root = go.FindRoot();
-            GetChildComponents(root, coll, true, bIncludeInactive);
+            if (go == null) return;
+            GetChildComponents(go.FindRoot(), coll, true, bIncludeInactive);
         }
         public static void FindComponents(this Component c, System.Type tp, ICollection<Component> coll, bool bIncludeInactive = false)
         {
-            var root = c.FindRoot();
-            GetChildComponents(root, coll, true, bIncludeInactive);
+            if (c == null) return;
+            GetChildComponents(c.FindRoot(), coll, true, bIncludeInactive);
         }
 
         #endregion

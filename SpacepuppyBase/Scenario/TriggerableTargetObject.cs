@@ -61,36 +61,19 @@ namespace com.spacepuppy.Scenario
                 {
                     if (tp == typeof(GameObject))
                     {
-                        if (GameObjectUtil.IsGameObjectSource(targ))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(targ).FindRoot();
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        return GameObjectUtil.GetRootFromSource(targ);
+                    }
+                    else if(TypeUtil.IsType(tp, typeof(SPEntity)))
+                    {
+                        return SPEntity.GetEntityFromSource(targ);
                     }
                     else if (TypeUtil.IsType(tp, typeof(Component)))
                     {
-                        if (GameObjectUtil.IsGameObjectSource(targ))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
                     }
                     else if (TypeUtil.IsType(tp, typeof(IComponent)))
                     {
-                        if (GameObjectUtil.IsGameObjectSource(targ))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
                     }
                     else
                     {
@@ -101,36 +84,27 @@ namespace com.spacepuppy.Scenario
                 {
                     if (tp == typeof(GameObject))
                     {
-                        if (GameObjectUtil.IsGameObjectSource(targ))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(targ);
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        return GameObjectUtil.GetGameObjectFromSource(targ);
+                    }
+                    else if (TypeUtil.IsType(tp, typeof(SPEntity)))
+                    {
+                        return SPEntity.GetEntityFromSource(targ);
                     }
                     else if (TypeUtil.IsType(tp, typeof(Component)))
                     {
-                        if (GameObjectUtil.IsGameObjectSource(targ))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(targ).GetComponent(tp);
-                        }
+                        var go = GameObjectUtil.GetGameObjectFromSource(targ);
+                        if (go != null)
+                            return go.GetComponent(tp);
                         else
-                        {
                             return null;
-                        }
                     }
                     else if (TypeUtil.IsType(tp, typeof(IComponent)))
                     {
-                        if (GameObjectUtil.IsGameObjectSource(targ))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(targ).GetComponent(tp);
-                        }
+                        var go = GameObjectUtil.GetGameObjectFromSource(targ);
+                        if (go != null)
+                            return go.GetComponent(tp);
                         else
-                        {
                             return null;
-                        }
                     }
                     else
                     {
