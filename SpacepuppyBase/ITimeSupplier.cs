@@ -15,6 +15,8 @@ namespace com.spacepuppy
         float Total { get; }
         float Delta { get; }
 
+        double TotalPrecise { get; }
+
     }
 
     /// <summary>

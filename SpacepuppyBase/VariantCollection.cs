@@ -118,9 +118,10 @@ namespace com.spacepuppy
 
         IEnumerable<System.Reflection.MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
         {
+            var tp = this.GetType();
             foreach(var key in _table.Keys)
             {
-                yield return new DynamicPropertyInfo(key);
+                yield return new DynamicPropertyInfo(key, tp);
             }
         }
 

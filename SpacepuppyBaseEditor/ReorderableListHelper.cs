@@ -61,8 +61,13 @@ namespace com.spacepuppyeditor
                 var menu = new GenericMenu();
                 menu.AddItem(new GUIContent("Delete"), false, () =>
                 {
-                    lst.serializedProperty.DeleteArrayElementAtIndex(index);
-                    lst.serializedProperty.serializedObject.ApplyModifiedProperties();
+                    //lst.serializedProperty.DeleteArrayElementAtIndex(index);
+                    //lst.serializedProperty.serializedObject.ApplyModifiedProperties();
+                    lst.index = index;
+                    if (lst.onRemoveCallback == null)
+                        ReorderableList.defaultBehaviours.DoRemoveButton(lst);
+                    else
+                        lst.onRemoveCallback(lst);
                 });
                 menu.ShowAsContext();
             }

@@ -19,6 +19,7 @@ namespace com.spacepuppy
                 if (!_loaded)
                 {
                     _instance = Resources.Load(@"TagData") as TagData;
+                    if (_instance == null) _instance = ScriptableObject.CreateInstance<TagData>();
                     _loaded = true;
                 }
                 return (_instance != null) ? _instance._readonlyTags : null;

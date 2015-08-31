@@ -124,6 +124,49 @@ namespace com.spacepuppy
             }
         }
 
+        public static CustomTimeSupplier Custom(string id, bool createIfNotExists)
+        {
+            if (_customTimes == null)
+            {
+                if (createIfNotExists)
+                {
+                    _customTimes = new Dictionary<string, CustomTimeSupplier>();
+                    GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
+                    var ct = new CustomTimeSupplier(id);
+                    _customTimes[ct.Id] = ct;
+                    return ct;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                CustomTimeSupplier ct;
+                if (_customTimes.TryGetValue(id, out ct))
+                {
+                    return ct;
+                }
+                else if (createIfNotExists)
+                {
+                    ct = new CustomTimeSupplier(id);
+                    _customTimes[ct.Id] = ct;
+                    return ct;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public static CustomTimeSupplier[] GetAllCustom()
+        {
+            if (_customTimes == null) return ArrayUtil.Empty<CustomTimeSupplier>();
+            return _customTimes.Values.ToArray();
+        }
+
         public static bool HasCustom(string id)
         {
             if (_customTimes == null) return false;
@@ -203,6 +246,11 @@ namespace com.spacepuppy
             public float Total
             {
                 get { return UnityEngine.Time.time; }
+            }
+
+            public double TotalPrecise
+            {
+                get { return (double)UnityEngine.Time.time; }
             }
 
             public float Delta
@@ -314,6 +362,11 @@ namespace com.spacepuppy
                 get { return UnityEngine.Time.unscaledTime; }
             }
 
+            public double TotalPrecise
+            {
+                get { return (double)UnityEngine.Time.unscaledTime; }
+            }
+
             public float Delta
             {
                 get { return UnityEngine.Time.unscaledDeltaTime; }
@@ -327,6 +380,11 @@ namespace com.spacepuppy
             public float Total
             {
                 get { return UnityEngine.Time.time; }
+            }
+
+            public double TotalPrecise
+            {
+                get { return (double)UnityEngine.Time.time; }
             }
 
             public float Delta

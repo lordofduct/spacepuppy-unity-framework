@@ -15,7 +15,8 @@ namespace com.spacepuppy.Scenario
         {
             Set = 0,
             Increment = 1,
-            Decrement = 2
+            Decrement = 2,
+            Toggle = 3
         }
 
         #region Fields
@@ -53,14 +54,20 @@ namespace com.spacepuppy.Scenario
                     return DynamicUtil.SetValue(_target, _memberName, _value.Value);
                 case SetMode.Increment:
                     {
-                        var v = DynamicUtil.GetValue(_target, _memberName, _value.Value);
-                        v = com.spacepuppy.Dynamic.DynamicUtil.TrySum(v, _value.Value);
+                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        v = DynamicUtil.TrySum(v, _value.Value);
                         return DynamicUtil.SetValue(_target, _memberName, v);
                     }
                 case SetMode.Decrement:
                     {
-                        var v = DynamicUtil.GetValue(_target, _memberName, _value.Value);
-                        v = com.spacepuppy.Dynamic.DynamicUtil.TryDifference(v, _value.Value);
+                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        v = DynamicUtil.TryDifference(v, _value.Value);
+                        return DynamicUtil.SetValue(_target, _memberName, v);
+                    }
+                case SetMode.Toggle:
+                    {
+                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        v = DynamicUtil.TryToggle(v);
                         return DynamicUtil.SetValue(_target, _memberName, v);
                     }
             }

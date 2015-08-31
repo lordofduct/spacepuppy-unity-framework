@@ -340,7 +340,7 @@ namespace com.spacepuppy
 
                 if (current is YieldInstruction || current is WWW)
                 {
-                    var wait = new ManualWaitForGeneric(this, handle, current);
+                    var wait = ManualWaitForGeneric.Create(this, handle, current);
                     _stack.Push(wait);
                     wait.Start();
                 }
@@ -588,31 +588,14 @@ namespace com.spacepuppy
                 {
                     var cmd = (RadicalCoroutineEndCommand)current;
 
-                    if (cmd.HasFlag(RadicalCoroutineEndCommand.Cancel))
+                    switch((RadicalCoroutineEndCommand)current)
                     {
-                        this.Cancel();
-                        if (cmd.HasFlag(RadicalCoroutineEndCommand.StallImmediateResume))
-                        {
-                            _currentIEnumeratorYieldValue = null;
-                        }
-                        else
-                        {
-                            this.OnFinish(true);
+                        case RadicalCoroutineEndCommand.Stop:
+                            this.Stop();
                             return false;
-                        }
-                    }
-                    else
-                    {
-                        if (cmd.HasFlag(RadicalCoroutineEndCommand.StallImmediateResume))
-                        {
-                            _state = RadicalCoroutineOperatingState.Completing;
-                            _currentIEnumeratorYieldValue = null;
-                        }
-                        else
-                        {
-                            this.OnFinish(false);
+                        case RadicalCoroutineEndCommand.Cancel:
+                            this.Cancel();
                             return false;
-                        }
                     }
                 }
                 else
@@ -696,24 +679,96 @@ namespace com.spacepuppy
 
         #region Static Utils
 
-        public static System.Collections.IEnumerable Ticker(System.Func<object> f)
+        /// <summary>
+        /// A radical coroutine that when running will repeadtly call an action and yield null. Simulating the Update function.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        public static RadicalCoroutine UpdateTicker(System.Action a)
         {
-            if (f == null) yield break;
+            var e = UpdateTickerIterator(a);
+            e.MoveNext(); //we want to get the ticker up to the first yield statement, this way the action doesn't get called until RadicalCoroutine.Start is called.
+            return new RadicalCoroutine(e);
+        }
 
+        /// <summary>
+        /// Calls the action and yields null over and over. Simulates an 'Update'.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        public static System.Collections.IEnumerator UpdateTickerIterator(System.Action a)
+        {
+            if (a == null) throw new System.ArgumentNullException("a");
+
+            yield return null;
             while (true)
             {
-                var r = f();
-                if (r is bool)
-                {
-                    if ((bool)r)
-                        yield break;
-                    else
-                        yield return null;
-                }
-                else
-                {
-                    yield return r;
-                }
+                a();
+                yield return null;
+            }
+        }
+
+        public static RadicalCoroutine FixedUpdateTicker(System.Action a)
+        {
+            return new RadicalCoroutine(FixedUpdateTickerIterator(a));
+        }
+
+        public static System.Collections.IEnumerator FixedUpdateTickerIterator(System.Action a)
+        {
+            if (a == null) throw new System.ArgumentNullException("a");
+
+            var wait = new WaitForFixedUpdate();
+            yield return wait;
+            while (true)
+            {
+                a();
+                yield return wait;
+            }
+        }
+
+        public static RadicalCoroutine LateUpdateTicker(System.Action a)
+        {
+            return new RadicalCoroutine(LateUpdateTickerIterator(a));
+        }
+
+        public static System.Collections.IEnumerator LateUpdateTickerIterator(System.Action a)
+        {
+            if (a == null) throw new System.ArgumentNullException("a");
+
+            var wait = new WaitForEndOfFrame();
+            yield return wait;
+            while (true)
+            {
+                a();
+                yield return wait;
+            }
+        }
+
+
+        /// <summary>
+        /// A radical coroutine that when running will repeatedly call a function and yield the object returned by it. 
+        /// Return a RadicalCoroutineEndCommand to stop the RadicalCoroutine from within the function.
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public static RadicalCoroutine Ticker(System.Func<object> f)
+        {
+            return new RadicalCoroutine(TickerIterator(f));
+        }
+
+        /// <summary>
+        /// Calls the function, and yields the object returned. Return a RadicalCoroutineEndCommand to have 
+        /// the running RadicalCoroutine cancel the action.
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public static System.Collections.IEnumerator TickerIterator(System.Func<object> f)
+        {
+            if (f == null) throw new System.ArgumentNullException("f");
+
+            while(true)
+            {
+                yield return f();
             }
         }
 
@@ -783,7 +838,7 @@ namespace com.spacepuppy
 
         #region Special Types
 
-        private class ManualWaitForGeneric : RadicalYieldInstruction
+        private class ManualWaitForGeneric : IPooledYieldInstruction, System.Collections.IEnumerator
         {
 
             #region Fields
@@ -791,16 +846,15 @@ namespace com.spacepuppy
             private RadicalCoroutine _owner;
             private MonoBehaviour _handle;
             private object _yieldObject;
+            private object _enumCurrentValue;
 
             #endregion
 
             #region CONSTRUCTOR
 
-            public ManualWaitForGeneric(RadicalCoroutine owner, MonoBehaviour handle, object yieldObj)
+            public ManualWaitForGeneric()
             {
-                _owner = owner;
-                _handle = handle;
-                _yieldObject = yieldObj;
+
             }
 
             #endregion
@@ -809,20 +863,78 @@ namespace com.spacepuppy
 
             public void Start()
             {
-                _handle.StartCoroutine(this.WaitRoutine());
+                _handle.StartCoroutine(this);
             }
 
-            private System.Collections.IEnumerator WaitRoutine()
+            #endregion
+
+            #region IResettingYieldInstruction Interface
+
+            public bool IsComplete
             {
-                yield return _yieldObject;
-                this.SetSignal();
-                if (_owner._stack.Peek() == this)
+                get { return _yieldObject != null; }
+            }
+
+            public bool Tick(out object yieldObject)
+            {
+                if (_enumCurrentValue == null)
                 {
-                    if (_yieldObject is WaitForEndOfFrame || _yieldObject is WaitForFixedUpdate)
-                    {
-                        _owner.ManualTick(_handle);
-                    }
+                    yieldObject = _yieldObject;
+                    return true;
                 }
+                else
+                {
+                    yieldObject = null;
+                    if (_owner._stack.Peek() == this)
+                    {
+                        if (_yieldObject is WaitForEndOfFrame || _yieldObject is WaitForFixedUpdate)
+                        {
+                            _owner.ManualTick(_handle);
+                        }
+                    }
+                    return false;
+                }
+            }
+
+            #endregion
+
+            #region IEnumerator Interface
+
+            public object Current
+            {
+                get { return _enumCurrentValue; }
+            }
+
+            public bool MoveNext()
+            {
+                return this.Tick(out _enumCurrentValue);
+            }
+
+            void System.Collections.IEnumerator.Reset()
+            {
+                _enumCurrentValue = null;
+            }
+
+            #endregion
+
+            #region IDisposable Interface
+
+            private static com.spacepuppy.Collections.ObjectCachePool<ManualWaitForGeneric> _pool = new com.spacepuppy.Collections.ObjectCachePool<ManualWaitForGeneric>(-1, () => new ManualWaitForGeneric());
+            public static ManualWaitForGeneric Create(RadicalCoroutine owner, MonoBehaviour handle, object yieldObj)
+            {
+                var w = _pool.GetInstance();
+                w._owner = owner;
+                w._handle = handle;
+                w._yieldObject = yieldObj;
+                return w;
+            }
+
+            void System.IDisposable.Dispose()
+            {
+                _owner = null;
+                _handle = null;
+                _yieldObject = null;
+                _enumCurrentValue = null;
             }
 
             #endregion

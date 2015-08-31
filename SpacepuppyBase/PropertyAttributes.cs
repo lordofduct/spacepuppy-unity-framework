@@ -241,6 +241,7 @@ namespace com.spacepuppy
         }
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class DisplayNestedPropertyAttribute : SPPropertyAttribute
     {
 

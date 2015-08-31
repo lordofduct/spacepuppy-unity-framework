@@ -18,7 +18,7 @@ namespace com.spacepuppy.Utils.Gizmo
         {
             get
             {
-                if (_instance == null) _instance = Singleton.CreateSpecialInstance<GizmoGhost>("Spacepuppy.GizmoGhost");
+                if (_instance == null) _instance = Singleton.CreateSpecialInstance<GizmoGhost>("Spacepuppy.GizmoGhost", SingletonLifeCycleRule.LivesForever);
                 return _instance;
             }
         }

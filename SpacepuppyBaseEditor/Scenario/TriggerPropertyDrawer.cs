@@ -19,7 +19,7 @@ namespace com.spacepuppyeditor.Scenario
 
         private const float MARGIN = 2.0f;
 
-        private const string PROP_TARGETS = "_targets";
+        public const string PROP_TARGETS = "_targets";
         private const string PROP_WEIGHT = "_weight";
 
         #region Fields
@@ -42,14 +42,15 @@ namespace com.spacepuppyeditor.Scenario
 
             _targetList = CachedReorderableList.GetListDrawer(prop.FindPropertyRelative(PROP_TARGETS), _targetList_DrawHeader, _targetList_DrawElement, _targetList_OnAdd);
 
-            var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
-            if (attribs != null && attribs.Length > 0) _drawWeight = attribs[0].Weighted;
+            if(this.fieldInfo != null)
+            {
+                var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
+                if (attribs != null && attribs.Length > 0) _drawWeight = attribs[0].Weighted;
+            }
             _triggerTargetDrawer.DrawWeight = _drawWeight;
         }
 
         #endregion
-
-
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -87,7 +88,7 @@ namespace com.spacepuppyeditor.Scenario
             const float WIDTH_FOLDOUT = 5f;
             property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
 
-            if(property.isExpanded)
+            if (property.isExpanded)
             {
                 if (_drawWeight) this.CalculateTotalWeight();
 

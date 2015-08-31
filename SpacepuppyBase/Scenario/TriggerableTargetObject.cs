@@ -33,6 +33,15 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
+        #region Properties
+
+        public TargetSource Source
+        {
+            get { return _source; }
+        }
+
+        #endregion
+
         #region Methods
 
         public T GetTarget<T>(object triggerArg, bool searchEntity = true) where T : class

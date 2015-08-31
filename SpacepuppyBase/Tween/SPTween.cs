@@ -44,7 +44,7 @@ namespace com.spacepuppy.Tween
         internal static void AddReference(Tweener tween)
         {
             if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, true);
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
             _instance.AddReference_Imp(tween);
         }
         private void AddReference_Imp(Tweener tween)
@@ -110,7 +110,7 @@ namespace com.spacepuppy.Tween
         {
             if (tween == null || !(tween is IAutoKillableTweener)) return;
             if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, true);
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
             _instance.AutoKill_Imp(tween as IAutoKillableTweener);
         }
         private void AutoKill_Imp(IAutoKillableTweener tween)

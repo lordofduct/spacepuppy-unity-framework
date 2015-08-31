@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Reflection;
+
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Dynamic
 {
 
-    public class DynamicPropertyInfo : System.Reflection.PropertyInfo
+    public class DynamicPropertyInfo : PropertyInfo
     {
 
         #region Fields
 
         private string _name;
+        private Type _declaringType;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public DynamicPropertyInfo(string name)
+        public DynamicPropertyInfo(string name, Type declaringType)
         {
             _name = name;
+            _declaringType = declaringType;
         }
 
         #endregion
@@ -33,7 +37,7 @@ namespace com.spacepuppy.Dynamic
 
         public override System.Reflection.PropertyAttributes Attributes
         {
-            get { return System.Reflection.PropertyAttributes.None; }
+            get { return PropertyAttributes.None; }
         }
 
         public override bool CanRead
@@ -53,12 +57,12 @@ namespace com.spacepuppy.Dynamic
 
         public override Type DeclaringType
         {
-            get { return typeof(StateToken); }
+            get { return _declaringType; }
         }
 
         public override Type ReflectedType
         {
-            get { return typeof(StateToken); }
+            get { return _declaringType; }
         }
 
 
@@ -83,19 +87,19 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        public override System.Reflection.MethodInfo[] GetAccessors(bool nonPublic)
+        public override MethodInfo[] GetAccessors(bool nonPublic)
         {
-            return new System.Reflection.MethodInfo[] { };
+            return ArrayUtil.Empty<MethodInfo>();
         }
 
-        public override System.Reflection.MethodInfo GetGetMethod(bool nonPublic)
+        public override MethodInfo GetGetMethod(bool nonPublic)
         {
             return null;
         }
 
-        public override System.Reflection.ParameterInfo[] GetIndexParameters()
+        public override ParameterInfo[] GetIndexParameters()
         {
-            return new System.Reflection.ParameterInfo[] { };
+            return ArrayUtil.Empty<ParameterInfo>();
         }
 
         public override System.Reflection.MethodInfo GetSetMethod(bool nonPublic)
@@ -105,12 +109,12 @@ namespace com.spacepuppy.Dynamic
 
         public override object[] GetCustomAttributes(Type attributeType, bool inherit)
         {
-            return new object[] { };
+            return ArrayUtil.Empty<object>();
         }
 
         public override object[] GetCustomAttributes(bool inherit)
         {
-            return new object[] { };
+            return ArrayUtil.Empty<object>();
         }
 
         public override bool IsDefined(Type attributeType, bool inherit)

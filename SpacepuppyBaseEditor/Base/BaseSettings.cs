@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 using System.Collections.Generic;
 using System.Linq;
+
+using com.spacepuppy;
 
 namespace com.spacepuppyeditor.Base
 {
@@ -40,6 +43,10 @@ namespace com.spacepuppyeditor.Base
 
         private static BaseSettings _openWindow;
 
+
+        private CustomTimeLayersData.EditorHelper _timeLayersHelper;
+        private ReorderableList _timeLayersListDrawer;
+
         private void OnEnable()
         {
             if (_openWindow == null)
@@ -48,6 +55,9 @@ namespace com.spacepuppyeditor.Base
                 Object.DestroyImmediate(this);
 
             this.title = "Base Settings";
+
+            var timeLayersData = (CustomTimeLayersData)AssetDatabase.LoadAssetAtPath(@"Assets/Resources/CustomTimeLayersData.asset", typeof(CustomTimeLayersData));
+            if (timeLayersData != null) _timeLayersHelper = new CustomTimeLayersData.EditorHelper(timeLayersData);
         }
 
         private void OnDisable()
@@ -84,7 +94,67 @@ namespace com.spacepuppyeditor.Base
                 EditorHierarchyAlternateContextMenuEvents.SetActive(hierarchCustomContextMenu);
             }
 
+            if (_timeLayersHelper == null)
+            {
+                var rect = EditorGUILayout.GetControlRect();
+                rect.width = Mathf.Min(rect.width, 275f);
+                if(GUI.Button(rect, "Create Custom Time Layers Data Resource"))
+                {
+                    if (!System.IO.Directory.Exists(Application.dataPath + "/Resources"))
+                    {
+                        System.IO.Directory.CreateDirectory(Application.dataPath + "/Resources");
+                    }
+                    var timeLayersData = ScriptableObjectHelper.CreateAsset<CustomTimeLayersData>(@"Assets/Resources/CustomTimeLayersData.asset");
+                    if (timeLayersData != null) _timeLayersHelper = new CustomTimeLayersData.EditorHelper(timeLayersData);
+                }
+            }
+            else
+            {
+                if(_timeLayersListDrawer == null)
+                {
+                    _timeLayersListDrawer = new ReorderableList(_timeLayersHelper.Layers, typeof(string));
+                    _timeLayersListDrawer.drawHeaderCallback = _timeLayersList_DrawHeader;
+                    _timeLayersListDrawer.drawElementCallback = _timeLayers_DrawElement;
+                    _timeLayersListDrawer.onAddCallback = _timeLayers_AddElement;
+                }
+
+                EditorGUI.BeginChangeCheck();
+                _timeLayersListDrawer.DoLayoutList();
+                if(EditorGUI.EndChangeCheck())
+                {
+                    EditorUtility.SetDirty(_timeLayersHelper.Data);
+                    AssetDatabase.SaveAssets();
+                }
+            }
+
             //EditorGUIUtility.labelWidth = labelWidthCache;
+        }
+
+
+        #endregion
+
+        #region Time Layers Draw Callback
+
+        private void _timeLayersList_DrawHeader(Rect area)
+        {
+            EditorGUI.LabelField(area, "Custom Time Layers");
+        }
+
+        private void _timeLayers_AddElement(ReorderableList lst)
+        {
+            _timeLayersHelper.Layers.Add(null);
+        }
+
+        private void _timeLayers_DrawElement(Rect area, int index, bool isActive, bool isFocused)
+        {
+            string layerName = _timeLayersHelper.Layers[index] as string;
+
+            EditorGUI.BeginChangeCheck();
+            layerName = EditorGUI.TextField(area, layerName);
+            if (EditorGUI.EndChangeCheck())
+                _timeLayersHelper.Layers[index] = layerName;
+
+            if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_timeLayersListDrawer, area, index, isActive, isFocused);
         }
 
         #endregion

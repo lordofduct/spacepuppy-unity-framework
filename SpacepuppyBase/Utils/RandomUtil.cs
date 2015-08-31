@@ -96,6 +96,19 @@ namespace com.spacepuppy.Utils
             return rng.OnUnitCircle() * rng.Next();
         }
 
+        public static UnityEngine.Vector3 AroundAxis(this IRandom rng, Vector3 axis)
+        {
+            var a = rng.Angle();
+            if(VectorUtil.NearSameAxis(axis, Vector3.forward))
+            {
+                return Quaternion.AngleAxis(a, axis) * VectorUtil.GetForwardTangent(Vector3.up, axis);
+            }
+            else
+            {
+                return Quaternion.AngleAxis(a, axis) * VectorUtil.GetForwardTangent(Vector3.forward, axis);
+            }
+        }
+
         public static UnityEngine.Quaternion Rotation(this IRandom rng)
         {
             return UnityEngine.Quaternion.AngleAxis(rng.Angle(), rng.OnUnitSphere());

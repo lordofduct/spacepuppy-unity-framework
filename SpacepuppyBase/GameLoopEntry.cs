@@ -55,7 +55,7 @@ namespace com.spacepuppy
         {
             if (_instance != null) return;
 
-            _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntry", true);
+            _instance = Singleton.CreateSpecialInstance<GameLoopEntry>("SpacePuppy.GameLoopEntry", SingletonLifeCycleRule.LivesForever);
             //_instance = Singleton.GetInstance<GameLoopEntry>();
         }
 

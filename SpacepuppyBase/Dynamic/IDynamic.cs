@@ -99,7 +99,7 @@ namespace com.spacepuppy.Dynamic
             {
                 try
                 {
-                    return (obj as IDynamic).SetValue(name, args);
+                    return (obj as IDynamic).InvokeMethod(name, args);
                 }
                 catch
                 {
@@ -151,6 +151,7 @@ namespace com.spacepuppy.Dynamic
 
         public static bool SetValueDirect(object obj, string sprop, object value, params object[] index)
         {
+            /*
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             if (obj == null) return false;
 
@@ -235,6 +236,36 @@ namespace com.spacepuppy.Dynamic
                     }
 
                     tp = tp.BaseType;
+                }
+            }
+            catch
+            {
+
+            }
+
+            return false;
+             */
+
+            if (obj == null) return false;
+            var vtp = (value != null) ? value.GetType() : null;
+            var member = GetValueSetterMemberDirect(obj.GetType(), sprop, vtp, false);
+            if (member == null) return false;
+
+            try
+            {
+                switch(member.MemberType)
+                {
+                    case MemberTypes.Field:
+                        (member as FieldInfo).SetValue(obj, value);
+                        return true;
+                    case MemberTypes.Property:
+                        (member as PropertyInfo).SetValue(obj, value, index);
+                        return true;
+                    case MemberTypes.Method:
+                        var arr = ArrayUtil.Temp(value);
+                        (member as MethodInfo).Invoke(obj, arr);
+                        ArrayUtil.ReleaseTemp(arr);
+                        return true;
                 }
             }
             catch
@@ -331,6 +362,127 @@ namespace com.spacepuppy.Dynamic
             return GetMembers(obj.GetType(), includeNonPublic);
         }
 
+        public static MemberInfo GetValueSetterMemberDirect(Type tp, string sprop, Type valueType, bool includeNonPublic)
+        {
+            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            if (tp == null) throw new ArgumentNullException("tp");
+
+            try
+            {
+                while (tp != null)
+                {
+                    var members = tp.GetMember(sprop, BINDING);
+                    if (members == null || members.Length == 0) return null;
+
+                    if(valueType != null)
+                    {
+                        //first strict test
+                        foreach (var member in members)
+                        {
+                            switch (member.MemberType)
+                            {
+                                case System.Reflection.MemberTypes.Field:
+                                    var field = member as System.Reflection.FieldInfo;
+                                    if (valueType == null || field.FieldType == valueType)
+                                    {
+                                        return field;
+                                    }
+
+                                    break;
+                                case System.Reflection.MemberTypes.Property:
+                                    var prop = member as System.Reflection.PropertyInfo;
+                                    if (prop.CanWrite && (valueType == null || prop.PropertyType == valueType) && prop.GetIndexParameters().Length == 0)
+                                    {
+                                        return prop;
+                                    }
+                                    break;
+                                case System.Reflection.MemberTypes.Method:
+                                    {
+                                        var meth = member as System.Reflection.MethodInfo;
+                                        var paramInfos = meth.GetParameters();
+                                        if (paramInfos.Length == 1 && paramInfos[0].ParameterType.IsAssignableFrom(valueType)) return meth;
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+
+                    //now weak test
+                    foreach (var member in members)
+                    {
+                        switch (member.MemberType)
+                        {
+                            case System.Reflection.MemberTypes.Field:
+                                return member;
+                            case System.Reflection.MemberTypes.Property:
+                                var prop = member as System.Reflection.PropertyInfo;
+                                if (prop.CanWrite)
+                                {
+                                    return prop;
+                                }
+                                break;
+                            case System.Reflection.MemberTypes.Method:
+                                {
+                                    var meth = member as System.Reflection.MethodInfo;
+                                    var paramInfos = meth.GetParameters();
+                                    if (paramInfos.Length == 1) return meth;
+                                }
+                                break;
+                        }
+                    }
+
+                    tp = tp.BaseType;
+                }
+            }
+            catch
+            {
+
+            }
+
+            return null;
+        }
+
+        public static MemberInfo GetValueGetterMemberDirect(Type tp, string sprop, bool includeNonPublic)
+        {
+            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            try
+            {
+                while (tp != null)
+                {
+                    var members = tp.GetMember(sprop, BINDING);
+                    if (members == null || members.Length == 0) return null;
+
+                    foreach (var member in members)
+                    {
+                        switch (member.MemberType)
+                        {
+                            case System.Reflection.MemberTypes.Field:
+                                return member;
+
+                            case System.Reflection.MemberTypes.Property:
+                                {
+                                    var prop = member as System.Reflection.PropertyInfo;
+                                    if (prop.CanRead && prop.GetIndexParameters().Length == 0) return prop;
+                                    break;
+                                }
+                            case System.Reflection.MemberTypes.Method:
+                                {
+                                    var meth = member as System.Reflection.MethodInfo;
+                                    if (meth.GetParameters().Length == 0) return meth;
+                                    break;
+                                }
+                        }
+                    }
+
+                    tp = tp.BaseType;
+                }
+            }
+            catch
+            {
+
+            }
+            return null;
+        }
 
 
         public static bool HasMember(System.Type tp, string name, bool includeNonPublic)
@@ -529,6 +681,37 @@ namespace com.spacepuppy.Dynamic
             else
             {
                 return b;
+            }
+        }
+
+        public static object TryToggle(object value)
+        {
+            if (value == null) return null;
+
+            var tp = value.GetType();
+            if (ConvertUtil.IsNumericType(tp))
+            {
+                return ConvertUtil.ToPrim(ConvertUtil.ToDouble(value) * -1.0, tp);
+            }
+            else if (tp == typeof(UnityEngine.Vector2))
+            {
+                return ConvertUtil.ToVector2(value) * -1f;
+            }
+            else if (tp == typeof(UnityEngine.Vector3))
+            {
+                return ConvertUtil.ToVector3(value) * -1f;
+            }
+            else if (tp == typeof(UnityEngine.Vector4))
+            {
+                return ConvertUtil.ToVector4(value) * -1f;
+            }
+            else if (tp == typeof(UnityEngine.Quaternion))
+            {
+                return UnityEngine.Quaternion.Inverse(ConvertUtil.ToQuaternion(value));
+            }
+            else
+            {
+                return value;
             }
         }
 

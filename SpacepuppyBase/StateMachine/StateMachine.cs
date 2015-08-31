@@ -78,5 +78,19 @@ namespace com.spacepuppy.StateMachine
 
         #endregion
 
+        #region Static Factory
+
+        public static StateMachine<T> CreateFromComponentSource(UnityEngine.GameObject source)
+        {
+            return new StateMachine<T>(new ComponentStateSupplier<T>(source));
+        }
+
+        public static StateMachine<T> CreateFromParentComponentSource(UnityEngine.GameObject source, bool includeStatesOnContainer, bool isStatic)
+        {
+            return new StateMachine<T>(new ParentComponentStateSupplier<T>(source, includeStatesOnContainer, isStatic));
+        }
+
+        #endregion
+
     }
 }

@@ -131,12 +131,12 @@ namespace com.spacepuppyeditor
 
         public static System.Enum EnumPopupExcluding(string label, System.Enum enumValue, params System.Enum[] ignoredValues)
         {
-            return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(true), enumValue, ignoredValues);
+            return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(true), EditorHelper.TempContent(label), enumValue, ignoredValues);
         }
 
         public static System.Enum EnumPopupExcluding(GUIContent label, System.Enum enumValue, params System.Enum[] ignoredValues)
         {
-            return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(label != null && label != GUIContent.none), enumValue, ignoredValues);
+            return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(label != null && label != GUIContent.none), label, enumValue, ignoredValues);
         }
 
         #endregion

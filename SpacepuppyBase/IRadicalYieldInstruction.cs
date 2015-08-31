@@ -419,8 +419,8 @@ namespace com.spacepuppy
         #region Fields
 
         private ITimeSupplier _supplier;
-        private float _t;
-        private float _cache;
+        private double _t;
+        private double _cache;
         private float _dur;
 
         #endregion
@@ -445,7 +445,7 @@ namespace com.spacepuppy
 
         public float Duration { get { return _dur; } }
 
-        public float CurrentTime { get { return (float.IsNaN(_t)) ? _cache : (_supplier.Total - _t) + _cache; } }
+        public double CurrentTime { get { return (double.IsNaN(_t)) ? _cache : (_supplier.Total - _t) + _cache; } }
 
         #endregion
 
@@ -458,7 +458,7 @@ namespace com.spacepuppy
 
         float IProgressingYieldInstruction.Progress
         {
-            get { return Mathf.Clamp01(this.CurrentTime / _dur); }
+            get { return Mathf.Clamp01((float)(this.CurrentTime / _dur)); }
         }
 
         bool IRadicalYieldInstruction.Tick(out object yieldObject)
@@ -469,19 +469,19 @@ namespace com.spacepuppy
 
         public void Reset()
         {
-            _t = _supplier.Total;
+            _t = _supplier.TotalPrecise;
             _cache = 0f;
         }
 
         void IPausibleYieldInstruction.OnPause()
         {
-            _cache = (_supplier.Total - _t) + _cache;
+            _cache = (_supplier.TotalPrecise - _t) + _cache;
             _t = float.NaN;
         }
 
         void IPausibleYieldInstruction.OnResume()
         {
-            _t = Time.time;
+            _t = _supplier.TotalPrecise;
         }
 
         #endregion
@@ -519,6 +519,13 @@ namespace com.spacepuppy
                 w.Init(dur, SPTime.Normal);
                 return w;
             }
+        }
+
+        public static WaitForDuration Period(TimePeriod period)
+        {
+            var w = _pool.GetInstance();
+            w.Init((float)period.Seconds, period.TimeSupplier);
+            return w;
         }
 
         #endregion

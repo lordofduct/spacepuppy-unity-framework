@@ -9,7 +9,7 @@ namespace com.spacepuppy.Scenario
 {
 
     [System.Serializable()]
-    public sealed class Trigger : ICollection<TriggerTarget>
+    public class Trigger : ICollection<TriggerTarget>
     {
 
         #region Fields

@@ -298,8 +298,38 @@ namespace com.spacepuppy.Utils
 
         public static T[] Empty<T>()
         {
-            return EmptyArray<T>.Instance;
+            return TempArray<T>.Empty;
         }
+
+        public static T[] Temp<T>(T value)
+        {
+            return TempArray<T>.Temp(value);
+        }
+
+        public static T[] Temp<T>(T value1, T value2)
+        {
+            return TempArray<T>.Temp(value1, value2);
+        }
+
+        public static T[] Temp<T>(T value1, T value2, T value3)
+        {
+            return TempArray<T>.Temp(value1, value2, value3);
+        }
+
+        public static T[] Temp<T>(T value1, T value2, T value3, T value4)
+        {
+            return TempArray<T>.Temp(value1, value2, value3, value4);
+        }
+
+        public static void ReleaseTemp<T>(T[] arr)
+        {
+            TempArray<T>.Release(arr);
+        }
+
+
+
+
+
 
         public static int IndexOf(this System.Array lst, object obj)
         {
@@ -314,6 +344,12 @@ namespace com.spacepuppy.Utils
         public static bool InBounds(this System.Array arr, int index)
         {
             return index >= 0 && index <= arr.Length - 1;
+        }
+
+        public static void Clear(this System.Array arr)
+        {
+            if (arr == null) return;
+            System.Array.Clear(arr, 0, arr.Length);
         }
 
         #endregion
@@ -338,16 +374,135 @@ namespace com.spacepuppy.Utils
 
         #region Special Types
 
-        private class EmptyArray<T>
+        private class TempArray<T>
         {
-            private static volatile T[] _instance;
 
-            public static T[] Instance
+            private static object _lock = new object();
+            private static volatile T[] _empty;
+            private static volatile T[] _oneArray;
+            private static volatile T[] _twoArray;
+            private static volatile T[] _threeArray;
+            private static volatile T[] _fourArray;
+
+            public static T[] Empty
             {
                 get
                 {
-                    if (_instance == null) _instance = new T[0];
-                    return _instance;
+                    if (_empty == null) _empty = new T[0];
+                    return _empty;
+                }
+            }
+
+            public static T[] Temp(T value)
+            {
+                T[] arr;
+
+                lock (_lock)
+                {
+                    if(_oneArray != null)
+                    {
+                        arr = _oneArray;
+                        _oneArray = null;
+                    }
+                    else
+                    {
+                        arr = new T[1];
+                    }
+                }
+
+                arr[0] = value;
+                return arr;
+            }
+
+            public static T[] Temp(T value1, T value2)
+            {
+                T[] arr;
+
+                lock (_lock)
+                {
+                    if (_oneArray != null)
+                    {
+                        arr = _twoArray;
+                        _twoArray = null;
+                    }
+                    else
+                    {
+                        arr = new T[2];
+                    }
+                }
+
+                arr[0] = value1;
+                arr[1] = value2;
+                return arr;
+            }
+
+            public static T[] Temp(T value1, T value2, T value3)
+            {
+                T[] arr;
+
+                lock (_lock)
+                {
+                    if (_oneArray != null)
+                    {
+                        arr = _threeArray;
+                        _threeArray = null;
+                    }
+                    else
+                    {
+                        arr = new T[3];
+                    }
+                }
+
+                arr[0] = value1;
+                arr[1] = value2;
+                arr[2] = value3;
+                return arr;
+            }
+
+            public static T[] Temp(T value1, T value2, T value3, T value4)
+            {
+                T[] arr;
+
+                lock (_lock)
+                {
+                    if (_oneArray != null)
+                    {
+                        arr = _fourArray;
+                        _fourArray = null;
+                    }
+                    else
+                    {
+                        arr = new T[4];
+                    }
+                }
+
+                arr[0] = value1;
+                arr[1] = value2;
+                arr[2] = value3;
+                arr[3] = value4;
+                return arr;
+            }
+
+
+            public static void Release(T[] arr)
+            {
+                if (arr == null) return;
+                System.Array.Clear(arr, 0, arr.Length);
+
+                switch (arr.Length)
+                {
+                    case 1:
+                        _oneArray = arr;
+                        break;
+                    case 2:
+                        _twoArray = arr;
+                        break;
+                    case 3:
+                        _threeArray = arr;
+                        break;
+                    case 4:
+                        _fourArray = arr;
+                        break;
                 }
             }
         }

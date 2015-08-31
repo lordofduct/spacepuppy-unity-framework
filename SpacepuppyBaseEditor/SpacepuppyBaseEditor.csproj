@@ -41,10 +41,15 @@
     <Reference Include="UnityEngine">
       <HintPath>..\Resources\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\Resources\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\Commands\FindReferencesToObjectMenu.cs" />
+    <Compile Include="Base\Inspectors\CustomTimeLayersDataInspector.cs" />
     <Compile Include="Base\Inspectors\SPEntityInspector.cs" />
+    <Compile Include="Base\Inspectors\TimePeriodPropertyDrawer.cs" />
     <Compile Include="EditorHierarchyAlternateContextMenuEvents.cs" />
     <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
     <Compile Include="Geom\CubicBezierCurvePropertyDrawer.cs" />
@@ -123,6 +128,7 @@
     <Compile Include="Scenario\TriggerPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerTargetPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerTargetProps.cs" />
+    <Compile Include="Scenario\t_OnEventTriggerInspector.cs" />
     <Compile Include="ScriptableObjectHelper.cs" />
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorGUI.cs" />

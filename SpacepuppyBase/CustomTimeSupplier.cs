@@ -16,9 +16,13 @@ namespace com.spacepuppy
     public class CustomTimeSupplier : IScalableTimeSupplier, System.IDisposable
     {
 
+        private const long SECONDS_TO_TICKS = 10000000; //10 million, same as ticks, allows  ~554 554 530 millenia of accuracy
+        private const double TICKS_TO_SECONDS = 1E-07;
+
         #region Fields
 
         private string _id;
+        private double _startTime;
         private double _t;
         private double _ft;
         private double _dt;
@@ -41,25 +45,36 @@ namespace com.spacepuppy
 
         public string Id { get { return _id; } }
 
+        public bool Valid { get { return _id != null; } }
+
+        public double StartTime
+        {
+            get { return _startTime; }
+            set
+            {
+                _startTime = value;
+            }
+        }
+
         /// <summary>
         /// The total time passed since the CustomTime was created. Value is relative to the Update sequence.
         /// </summary>
-        public float UpdateTotal { get { return (float)_t; } }
+        public double UpdateTotal { get { return _t + _startTime; } }
 
         /// <summary>
         /// The total time passed since the CustomTime was created. Value is relative to the FixedUpdate sequence;
         /// </summary>
-        public float FixedTotal { get { return (float)_ft; } }
+        public double FixedTotal { get { return _ft + _startTime; } }
 
         /// <summary>
         /// The delta time since the call to standard update. This will always return the delta since last update, regardless of if you call it in update/fixedupdate.
         /// </summary>
-        public float UpdateDelta { get { return (float)_dt; } }
+        public double UpdateDelta { get { return _dt; } }
 
         /// <summary>
         /// The delta time since the call to fixed update. This will always return the delta since last fixedupdate, regardless of if you call it in update/fixedupdate.
         /// </summary>
-        public float FixedDelta { get { return Time.fixedDeltaTime * (float)_scale; } }
+        public double FixedDelta { get { return Time.fixedDeltaTime * _scale; } }
 
         #endregion
 
@@ -82,7 +97,15 @@ namespace com.spacepuppy
 
         public bool Destroy()
         {
-            return SPTime.RemoveCustomTime(this);
+            if( SPTime.RemoveCustomTime(this))
+            {
+                _id = null;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private double GetTimeScale()
@@ -90,11 +113,28 @@ namespace com.spacepuppy
             if (_scales.Count == 0) return 1f;
 
             double result = 1f;
-            foreach(var value in _scales.Values)
+            var e = _scales.Values.GetEnumerator();
+            while(e.MoveNext())
             {
-                result *= value;
+                result *= e.Current;
             }
             return result;
+        }
+
+        public void Reset()
+        {
+            _startTime = 0.0;
+            _t = 0.0;
+            _ft = 0.0;
+            _dt = 0.0;
+        }
+
+        public void Reset(double startTime)
+        {
+            _startTime = startTime;
+            _t = 0.0;
+            _ft = 0.0;
+            _dt = 0.0;
         }
 
         #endregion
@@ -104,7 +144,35 @@ namespace com.spacepuppy
         /// <summary>
         /// The total time passed since thie CustomTime was created. Value is dependent on the UpdateSequence being accessed from.
         /// </summary>
-        public float Total { get { return (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate) ? (float)_ft : (float)_t; } }
+        public float Total
+        {
+            get
+            {
+                if(GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
+                {
+                    return (float)(_ft + _startTime);
+                }
+                else
+                {
+                    return (float)(_t + _startTime);
+                }
+            }
+        }
+
+        public double TotalPrecise
+        {
+            get
+            {
+                if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
+                {
+                    return (_ft + _startTime);
+                }
+                else
+                {
+                    return (_t + _startTime);
+                }
+            }
+        }
 
         /// <summary>
         /// The delta time since the last call to update/fixedupdate, relative to in which update/fixedupdate you call.
@@ -148,7 +216,7 @@ namespace com.spacepuppy
 
         public bool RemoveScale(string id)
         {
-            if(_scales.Remove(id))
+            if (_scales.Remove(id))
             {
                 _scale = this.GetTimeScale();
                 return true;

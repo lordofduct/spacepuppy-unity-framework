@@ -17,6 +17,12 @@ namespace com.spacepuppyeditor.Scenario
     public class TriggerTargetPropertyDrawer : PropertyDrawer
     {
 
+        public const string PROP_TRIGGERABLE = "_triggerable";
+        public const string PROP_TRIGGERABLEARGS = "_triggerableArgs";
+        public const string PROP_ACTIVATIONTYPE = "_activationType";
+        public const string PROP_METHODNAME = "_methodName";
+
+
         private const float ARG_BTN_WIDTH = 18f;
 
         public bool DrawWeight;

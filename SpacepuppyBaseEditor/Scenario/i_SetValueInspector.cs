@@ -77,37 +77,51 @@ namespace com.spacepuppyeditor.Scenario
             if(selectedMember != null)
             {
                 var propType = com.spacepuppy.Dynamic.DynamicUtil.GetParameters(selectedMember).FirstOrDefault();
-
-                if(propType == typeof(object))
+                var emode = modeProp.GetEnumValue<i_SetValue.SetMode>();
+                if(emode == i_SetValue.SetMode.Toggle)
                 {
-                    //draw the default variant as the method accepts anything
-                    _variantDrawer.RestrictVariantType = false;
-                    _variantDrawer.ForcedComponentType = null;
-                    _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
+                    //EditorGUILayout.LabelField(EditorHelper.TempContent(valueProp.displayName), EditorHelper.TempContent(propType.Name));
+                    var evtp = VariantReference.GetVariantType(propType);
+                    GUI.enabled = false;
+                    EditorGUILayout.EnumPopup(EditorHelper.TempContent(valueProp.displayName), evtp);
+                    GUI.enabled = true;
                 }
                 else
                 {
-                    var variantRef = EditorHelper.GetTargetObjectOfProperty(valueProp) as VariantReference;
-                    var argType = VariantReference.GetVariantType(propType);
-                    if (variantRef.ValueType != argType)
+                    if (propType == typeof(object))
                     {
-                        variantRef.ValueType = argType;
-                        this.serializedObject.Update();
+                        //draw the default variant as the method accepts anything
+                        _variantDrawer.RestrictVariantType = false;
+                        _variantDrawer.ForcedComponentType = null;
+                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
                     }
+                    else
+                    {
+                        var variantRef = EditorHelper.GetTargetObjectOfProperty(valueProp) as VariantReference;
+                        var argType = VariantReference.GetVariantType(propType);
+                        if (variantRef.ValueType != argType)
+                        {
+                            variantRef.ValueType = argType;
+                            this.serializedObject.Update();
+                        }
 
-                    _variantDrawer.RestrictVariantType = true;
-                    _variantDrawer.ForcedComponentType = (TypeUtil.IsType(propType, typeof(Component))) ? propType : null;
-                    _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
+                        _variantDrawer.RestrictVariantType = true;
+                        _variantDrawer.ForcedComponentType = (TypeUtil.IsType(propType, typeof(Component))) ? propType : null;
+                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
+                    }
                 }
 
-
-                if(com.spacepuppy.Dynamic.DynamicUtil.WillArithmeticallyCompute(propType))
+                if (com.spacepuppy.Dynamic.DynamicUtil.WillArithmeticallyCompute(propType))
                 {
                     EditorGUILayout.PropertyField(modeProp);
                 }
                 else
                 {
-                    modeProp.SetEnumValue(i_SetValue.SetMode.Set);
+                    //modeProp.SetEnumValue(i_SetValue.SetMode.Set);
+                    EditorGUI.BeginChangeCheck();
+                    emode = (i_SetValue.SetMode)SPEditorGUILayout.EnumPopupExcluding(EditorHelper.TempContent(modeProp.displayName), emode, i_SetValue.SetMode.Decrement, i_SetValue.SetMode.Increment);
+                    if (EditorGUI.EndChangeCheck())
+                        modeProp.SetEnumValue(emode);
                 }
             }
             else

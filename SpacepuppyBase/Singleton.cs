@@ -12,11 +12,23 @@ namespace com.spacepuppy
 
         event System.EventHandler ComponentDestroyed;
 
-        bool MaintainOnLoad { get; set; }
+        SingletonLifeCycleRule LifeCycle { get; set; }
 
     }
 
-    public class Singleton : SPNotifyingComponent, ISingleton
+    /// <summary>
+    /// A base class that any script that should act like a Singleton can inherit from.
+    /// 
+    /// Singletons are granted a 'LifeCycle' which controls if the Singleton gets destroyed 
+    /// when a new level is loaded, as well what to do if a second Singleton is loaded 
+    /// when a previous one already existed.
+    /// 
+    /// LivesForDurationOfScene - the singleton will be destroyed when the next level is loaded
+    /// LivesForever - the singleton will exist indefinitely, even on load
+    /// AlwaysReplace - if a singleton of this type already exists when this singleton starts, it will replace the older one
+    /// LiveForeverAndAlwaysReplace - acts like LivesForever and AlwaysReplace
+    /// </summary>
+    public abstract class Singleton : SPNotifyingComponent, ISingleton
     {
 
         #region Static Interface
@@ -57,12 +69,7 @@ namespace com.spacepuppy
             if (_singletonRefs.TryGetValue(typeof(T), out single)) return single as T;
             if (GameLoopEntry.ApplicationClosing) return null;
 
-            single = Singleton.GameObjectSource.GetComponent<T>();
-            if (single == null)
-            {
-                single = Singleton.GameObjectSource.AddComponent<T>();
-            }
-            return single as T;
+            return Singleton.GameObjectSource.AddOrGetComponent<T>();
         }
 
         public static ISingleton GetInstance(System.Type tp)
@@ -73,15 +80,38 @@ namespace com.spacepuppy
             if (_singletonRefs.TryGetValue(tp, out single)) return single;
             if (GameLoopEntry.ApplicationClosing) return null;
 
-            single = Singleton.GameObjectSource.GetComponent(tp) as ISingleton;
-            if (single == null)
-            {
-                single = Singleton.GameObjectSource.AddComponent(tp) as ISingleton;
-            }
-            return single;
+            return Singleton.GameObjectSource.AddOrGetComponent(tp) as ISingleton;
         }
 
-        public static T CreateSpecialInstance<T>(string gameObjectName, bool maintainOnLoad = true) where T : Component, ISingleton
+        public static T GetInstance<T>(bool bDoNotCreateIfNotExist) where T : Component, ISingleton
+        {
+            ISingleton single;
+            if (_singletonRefs.TryGetValue(typeof(T), out single)) return single as T;
+            if (GameLoopEntry.ApplicationClosing) return null;
+
+            if (bDoNotCreateIfNotExist)
+                return Singleton.GameObjectSource.GetComponent<T>();
+            else
+                return Singleton.GameObjectSource.AddOrGetComponent<T>();
+        }
+
+        public static ISingleton GetInstance(System.Type tp, bool bDoNotCreateIfNotExist)
+        {
+            if (!typeof(ISingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(ISingleton), "tp");
+
+            ISingleton single;
+            if (_singletonRefs.TryGetValue(tp, out single)) return single;
+            if (GameLoopEntry.ApplicationClosing) return null;
+
+            if (bDoNotCreateIfNotExist)
+                return Singleton.GameObjectSource.GetComponent(tp) as ISingleton;
+            else
+                return Singleton.GameObjectSource.AddOrGetComponent(tp) as ISingleton;
+        }
+
+
+
+        public static T CreateSpecialInstance<T>(string gameObjectName, SingletonLifeCycleRule lifeCycle) where T : Component, ISingleton
         {
             ISingleton single;
             if (_singletonRefs.TryGetValue(typeof(T), out single)) return single as T;
@@ -89,11 +119,11 @@ namespace com.spacepuppy
 
             var go = new GameObject(gameObjectName);
             single = go.AddComponent<T>();
-            single.MaintainOnLoad = maintainOnLoad;
+            single.LifeCycle = lifeCycle;
             return single as T;
         }
 
-        public static ISingleton CreateSpecialInstance(System.Type tp, string gameObjectName, bool maintainOnLoad = true)
+        public static ISingleton CreateSpecialInstance(System.Type tp, string gameObjectName, SingletonLifeCycleRule lifeCycle)
         {
             if (!typeof(ISingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(ISingleton), "tp");
 
@@ -103,7 +133,7 @@ namespace com.spacepuppy
 
             var go = new GameObject(gameObjectName);
             single = go.AddComponent(tp) as ISingleton;
-            single.MaintainOnLoad = maintainOnLoad;
+            single.LifeCycle = lifeCycle;
             return single;
         }
 
@@ -175,12 +205,12 @@ namespace com.spacepuppy
 
         #endregion
 
-        public bool MaintainOnLoad
+        public SingletonLifeCycleRule LifeCycle
         {
-            get { return _maintainer.MaintainOnLoad; }
+            get { return _maintainer.LifeCycle; }
             set
             {
-                _maintainer.MaintainOnLoad = value;
+                _maintainer.LifeCycle = value;
             }
         }
 
@@ -196,7 +226,7 @@ namespace com.spacepuppy
 
             [SerializeField()]
             [Tooltip("Should this Singleton be maintained when a new scene is loaded.")]
-            private bool _maintainOnLoad;
+            private SingletonLifeCycleRule _lifeCycle;
 
 
             [System.NonSerialized()]
@@ -215,9 +245,9 @@ namespace com.spacepuppy
 
             }
 
-            public Maintainer(bool maintainOnLoad)
+            public Maintainer(SingletonLifeCycleRule lifeCycle)
             {
-                _maintainOnLoad = maintainOnLoad;
+                _lifeCycle = lifeCycle;
             }
 
             #endregion
@@ -226,15 +256,15 @@ namespace com.spacepuppy
 
             public ISingleton Target { get { return _target; } }
 
-            public bool MaintainOnLoad
+            public SingletonLifeCycleRule LifeCycle
             {
-                get { return _maintainOnLoad; }
+                get { return _lifeCycle; }
                 set
                 {
-                    if (_maintainOnLoad == value) return;
-                    _maintainOnLoad = value;
+                    if (_lifeCycle == value) return;
+                    _lifeCycle = value;
 
-                    if (!_flaggedSelfMaintaining && _maintainOnLoad) this.UpdateMaintainOnLoadStatus();
+                    if (!_flaggedSelfMaintaining && _lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)) this.UpdateMaintainOnLoadStatus();
                 }
             }
 
@@ -297,7 +327,7 @@ namespace com.spacepuppy
                     if (_target.gameObject != null && _target.gameObject != Singleton.GameObjectSource)
                     {
                         var others = _target.gameObject.GetComponents<Singleton>();
-                        if (!(others.Length > 1 && !(from s in others select s.MaintainOnLoad).Any()))
+                        if (!(others.Length > 1 && !(from s in others select s.LifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)).Any()))
                         {
                             ObjUtil.SmartDestroy(_target.gameObject);
                         }
@@ -307,7 +337,7 @@ namespace com.spacepuppy
 
             private void OnLevelWasLoaded(object sender, GameLoopEntry.LevelWasLoadedEventArgs e)
             {
-                if (_maintainOnLoad) return;
+                if (_lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)) return;
                 if (_target.component == null) return;
                 if (_target.component.HasComponent<SingletonManager>()) return; //let the manager take care of this
 
@@ -326,15 +356,30 @@ namespace com.spacepuppy
                 }
                 else if(_target.component != null)
                 {
-                    if (_target.component.HasComponent<SingletonManager>())
+                    if(_lifeCycle.HasFlag(SingletonLifeCycleRule.AlwaysReplace))
                     {
-                        Object.Destroy(_target.component);
+                        _singletonRefs[_target.GetType()] = _target;
+                        if (_target.component.HasComponent<SingletonManager>())
+                        {
+                            Object.Destroy(c.component);
+                        }
+                        else
+                        {
+                            Object.Destroy(c.gameObject);
+                        }
                     }
                     else
                     {
-                        Object.Destroy(_target.gameObject);
+                        if (_target.component.HasComponent<SingletonManager>())
+                        {
+                            Object.Destroy(_target.component);
+                        }
+                        else
+                        {
+                            Object.Destroy(_target.gameObject);
+                        }
+                        throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
                     }
-                    throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
                 }
 
                 this.UpdateMaintainOnLoadStatus();
@@ -358,7 +403,7 @@ namespace com.spacepuppy
                 if (_target.component.HasComponent<SingletonManager>()) return;
 
                 //for singletons not on the primary singleton source
-                if (!_flaggedSelfMaintaining && _maintainOnLoad)
+                if (!_flaggedSelfMaintaining && _lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever))
                 {
                     GameObject.DontDestroyOnLoad(_target.gameObject);
                     _flaggedSelfMaintaining = true;

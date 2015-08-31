@@ -57,7 +57,7 @@ namespace com.spacepuppyeditor.Base
                 var arr = (this.target as SingletonManager).GetComponents<Singleton>();
                 for (int i = 0; i < arr.Length; i ++ )
                 {
-                    if(arr[i] != this.target && arr[i].MaintainOnLoad)
+                    if(arr[i] != this.target && arr[i].LifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever))
                     {
                         (this.target as SingletonManager).MaintainOnLoad = true;
                         EditorUtility.SetDirty(this.target);
@@ -132,7 +132,7 @@ namespace com.spacepuppyeditor.Base
             }
             else
             {
-                EditorGUI.PropertyField(position, property.FindPropertyRelative("_maintainOnLoad"));
+                SPEditorGUI.PropertyField(position, property.FindPropertyRelative("_lifeCycle"));
             }
         }
 

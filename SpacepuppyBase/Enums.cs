@@ -5,6 +5,17 @@ using System.Linq;
 namespace com.spacepuppy
 {
 
+    [System.Flags()]
+    public enum SingletonLifeCycleRule
+    {
+
+        LivesForDurationOfScene = 0, //when load is called, this singleton should die
+        LivesForever = 1, //when load is called, this singleton will remain to the next scene
+        AlwaysReplace = 2, //this singleton should replace any singleton that already exists
+        LiveForeverAndAlwaysReplace = 3
+
+    }
+
     /// <summary>
     /// Flagging enum to define how a Coroutine should deal with its operating MonoBehaviour is disabled or deactivated.
     /// </summary>
@@ -29,12 +40,10 @@ namespace com.spacepuppy
     /// <summary>
     /// When ending a coroutine you can yield one of these to tell the RadicalCoroutine how to clean up the routine.
     /// </summary>
-    [System.Flags()]
     public enum RadicalCoroutineEndCommand
     {
-        None = 0,
-        Cancel = 1,
-        StallImmediateResume = 2
+        Stop = 0,
+        Cancel = 2
     }
 
     /// <summary>

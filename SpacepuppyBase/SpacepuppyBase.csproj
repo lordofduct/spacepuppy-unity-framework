@@ -77,6 +77,8 @@
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="CollisionExclusion.cs" />
+    <Compile Include="CustomTimeLayersData.cs" />
+    <Compile Include="Dynamic\DynamicMethodInfo.cs" />
     <Compile Include="Hooks\Callbacks.cs" />
     <Compile Include="Hooks\CollisionHooks.cs" />
     <Compile Include="Hooks\ControllerColliderHitEventHooks.cs" />
@@ -116,6 +118,18 @@
     <Compile Include="IGameObjectSource.cs" />
     <Compile Include="IIgnorableCollision.cs" />
     <Compile Include="IRandom.cs" />
+    <Compile Include="Render\RendererMaterialSwap.cs" />
+    <Compile Include="Scenario\i_Destroy.cs" />
+    <Compile Include="Scenario\i_Enable.cs" />
+    <Compile Include="Scenario\i_EnableComponent.cs" />
+    <Compile Include="Scenario\i_LookAt.cs" />
+    <Compile Include="Scenario\i_PlaySoundEffect.cs" />
+    <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
+    <Compile Include="Scenario\i_Teleport.cs" />
+    <Compile Include="Scenario\t_OnClick.cs" />
+    <Compile Include="Scenario\t_OnEnable.cs" />
+    <Compile Include="Scenario\t_OnEventTrigger.cs" />
+    <Compile Include="Scenario\t_OnStart.cs" />
     <Compile Include="SPEntity.cs" />
     <Compile Include="ITimeSupplier.cs" />
     <Compile Include="KillableEntity.cs" />
@@ -188,6 +202,7 @@
     <Compile Include="StateMachine\TypedStateMachine.cs" />
     <Compile Include="TagData.cs" />
     <Compile Include="TagMask.cs" />
+    <Compile Include="TimePeriod.cs" />
     <Compile Include="Timers\BulkTimer.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
     <Compile Include="Timers\GameTimers.cs" />
