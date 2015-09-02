@@ -23,9 +23,6 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private TimePeriod _interval;
 
-        [System.NonSerialized()]
-        private RadicalCoroutine _ticker;
-
 
         #region CONSTRUCTOR
 
@@ -33,18 +30,7 @@ namespace com.spacepuppy.Scenario
         {
             base.OnStartOrEnable();
 
-            if(_ticker == null || _ticker.Finished || _ticker.Cancelled)
-            {
-                _ticker = RadicalCoroutine.Ticker(this.TickerCallback);
-            }
-            _ticker.Start(this, RadicalCoroutineDisableMode.Pauses);
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-
-            _ticker.Stop();
+            this.StartRadicalCoroutine(this.TickerCallback(), RadicalCoroutineDisableMode.CancelOnDisable);
         }
 
         #endregion
@@ -68,9 +54,15 @@ namespace com.spacepuppy.Scenario
         #region Methods
 
 
-        private object TickerCallback()
+        private System.Collections.IEnumerator TickerCallback()
         {
-            return WaitForDuration.Period(_interval);
+            while(true)
+            {
+                yield return WaitForDuration.Period(_interval);
+
+                this.ActivateTrigger();
+            }
+
         }
 
         #endregion

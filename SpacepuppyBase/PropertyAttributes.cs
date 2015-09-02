@@ -131,6 +131,21 @@ namespace com.spacepuppy
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class TimeUnitsSelectorAttribute : SPPropertyAttribute
+    {
+        public TimePeriod.Units DefaultUnits = TimePeriod.Units.Seconds;
+
+        public TimeUnitsSelectorAttribute()
+        {
+        }
+
+        public TimeUnitsSelectorAttribute(TimePeriod.Units defaultUnits)
+        {
+            DefaultUnits = defaultUnits;
+        }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class GenericMaskAttribute : SPPropertyAttribute
     {
 

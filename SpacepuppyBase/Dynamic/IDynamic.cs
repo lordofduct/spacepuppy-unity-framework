@@ -7,6 +7,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Dynamic
 {
+
     public interface IDynamic
     {
         object this[string sMemberName] { get; set; }
@@ -17,11 +18,15 @@ namespace com.spacepuppy.Dynamic
 
         bool HasMember(string sMemberName, bool includeNonPublic);
         IEnumerable<MemberInfo> GetMembers(bool includeNonPublic);
+        MemberInfo GetMember(string sMemberName, bool includeNonPublic);
 
     }
 
     public static class DynamicUtil
     {
+
+
+        #region IDynamic Methods
 
         public static bool SetValue(this object obj, string sprop, object value)
         {
@@ -142,7 +147,23 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
+        public static MemberInfo GetMember(object obj, string sMemberName, bool includeNonPublic)
+        {
+            if(obj == null) return null;
 
+            if(obj is IDynamic)
+            {
+                return (obj as IDynamic).GetMember(sMemberName, includeNonPublic);
+            }
+            else
+            {
+                return GetMember(obj.GetType(), sMemberName, includeNonPublic);
+            }
+        }
+
+        #endregion
+
+        #region Direct Reflection
 
         public static bool SetValueDirect(object obj, string sprop, object value)
         {
@@ -248,7 +269,7 @@ namespace com.spacepuppy.Dynamic
 
             if (obj == null) return false;
             var vtp = (value != null) ? value.GetType() : null;
-            var member = GetValueSetterMemberDirect(obj.GetType(), sprop, vtp, false);
+            var member = GetValueSetterMember(obj.GetType(), sprop, vtp, false);
             if (member == null) return false;
 
             try
@@ -362,7 +383,101 @@ namespace com.spacepuppy.Dynamic
             return GetMembers(obj.GetType(), includeNonPublic);
         }
 
-        public static MemberInfo GetValueSetterMemberDirect(Type tp, string sprop, Type valueType, bool includeNonPublic)
+
+        public static bool HasMember(System.Type tp, string name, bool includeNonPublic)
+        {
+            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
+            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            if (tp == null) return false;
+
+            if (tp.GetMember(name, BINDING) != null) return true;
+
+            if(includeNonPublic)
+            {
+                while (tp != null)
+                {
+                    if (tp.GetMember(name, PRIV_BINDING) != null) return true;
+                    tp = tp.BaseType;
+                }
+            }
+            return false;
+        }
+
+        public static IEnumerable<MemberInfo> GetMembers(System.Type tp, bool includeNonPublic)
+        {
+            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
+            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            const MemberTypes MASK = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method;
+            if (tp == null) yield break;
+
+            foreach (var m in tp.GetMembers(BINDING))
+            {
+                if ((m.MemberType & MASK) != 0)
+                {
+                    yield return m;
+                }
+            }
+
+            if (includeNonPublic)
+            {
+                while (tp != null)
+                {
+                    foreach (var m in tp.GetMembers(PRIV_BINDING))
+                    {
+                        if ((m.MemberType & MASK) != 0)
+                        {
+                            yield return m;
+                        }
+                    }
+                    tp = tp.BaseType;
+                }
+            }
+        }
+
+        public static MemberInfo GetMember(Type tp, string sMemberName, bool includeNonPublic)
+        {
+            const BindingFlags BINDING_PUBLIC = BindingFlags.Public | BindingFlags.Instance;
+            const BindingFlags BINDING_NONPUBLIC = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            try
+            {
+                while (tp != null)
+                {
+                    var members = tp.GetMember(sMemberName, (includeNonPublic) ? BINDING_NONPUBLIC : BINDING_PUBLIC);
+                    if (members == null || members.Length == 0) return null;
+
+                    foreach (var member in members)
+                    {
+                        switch (member.MemberType)
+                        {
+                            case System.Reflection.MemberTypes.Field:
+                                return member;
+
+                            case System.Reflection.MemberTypes.Property:
+                                {
+                                    var prop = member as System.Reflection.PropertyInfo;
+                                    if (prop.CanRead && prop.GetIndexParameters().Length == 0) return prop;
+                                    break;
+                                }
+                            case System.Reflection.MemberTypes.Method:
+                                {
+                                    var meth = member as System.Reflection.MethodInfo;
+                                    if (meth.GetParameters().Length == 0) return meth;
+                                    break;
+                                }
+                        }
+                    }
+
+                    tp = tp.BaseType;
+                }
+            }
+            catch
+            {
+
+            }
+            return null;
+        }
+
+        public static MemberInfo GetValueSetterMember(Type tp, string sprop, Type valueType, bool includeNonPublic)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             if (tp == null) throw new ArgumentNullException("tp");
@@ -374,7 +489,7 @@ namespace com.spacepuppy.Dynamic
                     var members = tp.GetMember(sprop, BINDING);
                     if (members == null || members.Length == 0) return null;
 
-                    if(valueType != null)
+                    if (valueType != null)
                     {
                         //first strict test
                         foreach (var member in members)
@@ -442,7 +557,7 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
-        public static MemberInfo GetValueGetterMemberDirect(Type tp, string sprop, bool includeNonPublic)
+        public static MemberInfo GetValueGetterMember(Type tp, string sprop, bool includeNonPublic)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             try
@@ -484,57 +599,6 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
-
-        public static bool HasMember(System.Type tp, string name, bool includeNonPublic)
-        {
-            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
-            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            if (tp == null) return false;
-
-            if (tp.GetMember(name, BINDING) != null) return true;
-
-            if(includeNonPublic)
-            {
-                while (tp != null)
-                {
-                    if (tp.GetMember(name, PRIV_BINDING) != null) return true;
-                    tp = tp.BaseType;
-                }
-            }
-            return false;
-        }
-
-        public static IEnumerable<MemberInfo> GetMembers(System.Type tp, bool includeNonPublic)
-        {
-            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
-            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            const MemberTypes MASK = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method;
-            if (tp == null) yield break;
-
-            foreach (var m in tp.GetMembers(BINDING))
-            {
-                if ((m.MemberType & MASK) != 0)
-                {
-                    yield return m;
-                }
-            }
-
-            if (includeNonPublic)
-            {
-                while (tp != null)
-                {
-                    foreach (var m in tp.GetMembers(PRIV_BINDING))
-                    {
-                        if ((m.MemberType & MASK) != 0)
-                        {
-                            yield return m;
-                        }
-                    }
-                    tp = tp.BaseType;
-                }
-            }
-        }
-
         public static System.Type[] GetParameters(MemberInfo info)
         {
             switch(info.MemberType)
@@ -550,8 +614,21 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
+        public static Type GetReturnType(MemberInfo info)
+        {
+            if (info == null) return null;
 
-
+            switch(info.MemberType)
+            {
+                case MemberTypes.Field:
+                    return (info as FieldInfo).FieldType;
+                case MemberTypes.Property:
+                    return (info as PropertyInfo).PropertyType;
+                case MemberTypes.Method:
+                    return (info as MethodInfo).ReturnType;
+            }
+            return null;
+        }
 
         public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(object obj, MemberTypes mask = MemberTypes.All)
         {
@@ -617,8 +694,9 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
+        #endregion
 
-
+        #region Some Minor Helpers
 
         public static object TrySum(object a, object b)
         {
@@ -755,6 +833,8 @@ namespace com.spacepuppy.Dynamic
 
             return true;
         }
+
+        #endregion
 
     }
 

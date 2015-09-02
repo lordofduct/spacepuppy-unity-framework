@@ -7,6 +7,8 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Base.Inspectors
 {
 
@@ -17,11 +19,12 @@ namespace com.spacepuppyeditor.Base.Inspectors
         #region Fields
 
         private VariantReferencePropertyDrawer _variantDrawer = new VariantReferencePropertyDrawer();
-        private VariantCollection.EditorHelper _helper = new VariantCollection.EditorHelper();
 
         private ReorderableList _lst;
         private GUIContent _label;
         private SerializedProperty _currentProp;
+        private SerializedProperty _currentKeysProp;
+        private SerializedProperty _currentValuesProp;
 
         #endregion
 
@@ -29,27 +32,24 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
         private void StartOnGUI(SerializedProperty property, GUIContent label)
         {
-            _helper.UpdateCollection(EditorHelper.GetTargetObjectOfProperty(property) as VariantCollection);
-
-            if (_lst == null)
-            {
-                _lst = new ReorderableList(_helper, _helper.EntryType, true, true, true, true);
-                _lst.drawHeaderCallback = this._lst_DrawHeader;
-                _lst.drawElementCallback = this._lst_DrawElement;
-                _lst.onAddCallback = this._lst_OnAdd;
-                _lst.draggable = false;
-            }
-
-            if (_lst.index >= _helper.Count) _lst.index = -1;
-
             _currentProp = property;
             _label = label;
+            _currentKeysProp = _currentProp.FindPropertyRelative("_keys");
+            _currentValuesProp = _currentProp.FindPropertyRelative("_values");
+
+            _currentValuesProp.arraySize = _currentKeysProp.arraySize;
+
+            _lst = CachedReorderableList.GetListDrawer(_currentKeysProp, _lst_DrawHeader, _lst_DrawElement, _lst_OnAdd, _lst_OnRemove);
+            _lst.draggable = false;
+
         }
 
         private void EndOnGUI(SerializedProperty property, GUIContent label)
         {
-            _helper.UpdateCollection(null);
+            _lst = null;
             _currentProp = null;
+            _currentKeysProp = null;
+            _currentValuesProp = null;
             _label = null;
         }
 
@@ -72,12 +72,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
         {
             this.StartOnGUI(property, label);
 
-            EditorGUI.BeginChangeCheck();
             _lst.DoList(position);
-            if(EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(property.serializedObject.targetObject);
-            }
 
             this.EndOnGUI(property, label);
         }
@@ -93,31 +88,35 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
         private void _lst_DrawElement(Rect area, int index, bool isActive, bool isFocused)
         {
-            var skey = _helper.GetNameAt(index);
-            var variant = _helper.GetVariant(skey);
-            if (variant == null) return;
+            if (_currentValuesProp.arraySize <= index) _currentValuesProp.arraySize = index + 1;
+            var keyProp = _currentKeysProp.GetArrayElementAtIndex(index);
+            var variantProp = _currentValuesProp.GetArrayElementAtIndex(index);
 
             var w = area.width / 3f;
             var nameRect = new Rect(area.xMin, area.yMin, w, EditorGUIUtility.singleLineHeight);
-            EditorGUI.BeginChangeCheck();
-            var newKey = EditorGUI.TextField(nameRect, skey);
-            if(EditorGUI.EndChangeCheck())
-            {
-                if(_helper.ChangeEntryName(skey, newKey))
-                {
-                    skey = newKey;
-                }
-            }
+            keyProp.stringValue = EditorGUI.TextField(nameRect, keyProp.stringValue);
 
             var variantRect = new Rect(nameRect.xMax + 1f, area.yMin, area.width - (nameRect.width + 1f), area.height);
-            _variantDrawer.DrawValueField(variantRect, _currentProp.serializedObject, variant);
+            _variantDrawer.DrawValueField(variantRect, variantProp);
+
         }
 
         private void _lst_OnAdd(ReorderableList lst)
         {
-            _helper.AddEntry();
+            int i = _currentKeysProp.arraySize;
+            _currentKeysProp.arraySize = i + 1;
+            _currentKeysProp.GetArrayElementAtIndex(i).stringValue = "Entry " + i.ToString();
+            _currentValuesProp.arraySize = i + 1;
         }
         
+        private void _lst_OnRemove(ReorderableList lst)
+        {
+            var index = lst.index;
+            if(index < 0 || index >= _currentKeysProp.arraySize) return;
+            _currentKeysProp.DeleteArrayElementAtIndex(index);
+            if (index < _currentValuesProp.arraySize) _currentValuesProp.DeleteArrayElementAtIndex(index);
+        }
+
         #endregion
 
     }

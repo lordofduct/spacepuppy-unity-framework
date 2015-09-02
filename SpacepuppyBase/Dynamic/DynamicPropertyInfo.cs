@@ -15,6 +15,7 @@ namespace com.spacepuppy.Dynamic
 
         private string _name;
         private Type _declaringType;
+        private Type _propertyType;
 
         #endregion
 
@@ -24,6 +25,14 @@ namespace com.spacepuppy.Dynamic
         {
             _name = name;
             _declaringType = declaringType;
+            _propertyType = typeof(object);
+        }
+
+        public DynamicPropertyInfo(string name, Type declaringType, Type propertyType)
+        {
+            _name = name;
+            _declaringType = declaringType;
+            _propertyType = propertyType;
         }
 
         #endregion
@@ -52,7 +61,7 @@ namespace com.spacepuppy.Dynamic
 
         public override Type PropertyType
         {
-            get { return typeof(object); }
+            get { return _propertyType; }
         }
 
         public override Type DeclaringType

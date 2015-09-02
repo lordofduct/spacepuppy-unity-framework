@@ -119,6 +119,14 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
+        System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
+        {
+            if (_table.ContainsKey(sMemberName))
+                return new DynamicPropertyInfo(sMemberName, this.GetType());
+            else
+                return null;
+        }
+
         #endregion
 
         #region IEnumerable Interface

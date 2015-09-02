@@ -8,6 +8,22 @@ namespace com.spacepuppy
     public struct TimePeriod
     {
 
+        public enum Units
+        {
+            Seconds = 0,
+            Minutes = 1,
+            Hours = 2,
+            Days = 3,
+            Years = 4
+        }
+
+        public const float SECONDS_IN_MINUTE = 60f;
+        public const float SECONDS_IN_HOUR = 3600f;
+        public const float SECONDS_IN_DAY = 86400f;
+        public const float SECONDS_IN_WEEK = 604800;
+
+
+
         #region Fields
 
         [SerializeField()]

@@ -45,10 +45,28 @@ namespace com.spacepuppy.Utils
                              (float)value.a / 255f);
         }
 
+        public static Color ToColor(Vector3 value)
+        {
+
+            return new Color((float)value.x,
+                             (float)value.y,
+                             (float)value.z);
+        }
+
+        public static Color ToColor(Vector4 value)
+        {
+            return new Color((float)value.x,
+                             (float)value.y,
+                             (float)value.z,
+                             (float)value.w);
+        }
+
         public static Color ToColor(object value)
         {
             if (value is Color) return (Color)value;
             if (value is Color32) return ToColor((Color32)value);
+            if (value is Vector3) return ToColor((Vector3)value);
+            if (value is Vector4) return ToColor((Vector4)value);
             return ToColor(ToInt(value));
         }
 
@@ -82,10 +100,28 @@ namespace com.spacepuppy.Utils
                                (byte)(value.a * 255f));
         }
 
+        public static Color32 ToColor32(Vector3 value)
+        {
+
+            return new Color32((byte)(value.x * 255f),
+                               (byte)(value.y * 255f),
+                               (byte)(value.z * 255f), 255);
+        }
+
+        public static Color32 ToColor32(Vector4 value)
+        {
+            return new Color32((byte)(value.x * 255f),
+                               (byte)(value.y * 255f),
+                               (byte)(value.z * 255f),
+                               (byte)(value.w * 255f));
+        }
+
         public static Color32 ToColor32(object value)
         {
             if (value is Color32) return (Color32)value;
-            if (value is Color) return ToColor((Color)value);
+            if (value is Color) return ToColor32((Color)value);
+            if (value is Vector3) return ToColor32((Vector3)value);
+            if (value is Vector4) return ToColor32((Vector4)value);
             return ToColor32(ToInt(value));
         }
 

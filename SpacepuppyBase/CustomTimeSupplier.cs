@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy
 {
 
@@ -25,7 +27,6 @@ namespace com.spacepuppy
         private double _startTime;
         private double _t;
         private double _ft;
-        private double _dt;
         private double _scale = 1.0;
         private bool _paused;
         private Dictionary<string, double> _scales = new Dictionary<string, double>();
@@ -69,7 +70,7 @@ namespace com.spacepuppy
         /// <summary>
         /// The delta time since the call to standard update. This will always return the delta since last update, regardless of if you call it in update/fixedupdate.
         /// </summary>
-        public double UpdateDelta { get { return _dt; } }
+        public double UpdateDelta { get { return Time.unscaledDeltaTime * _scale; } }
 
         /// <summary>
         /// The delta time since the call to fixed update. This will always return the delta since last fixedupdate, regardless of if you call it in update/fixedupdate.
@@ -90,8 +91,7 @@ namespace com.spacepuppy
             }
             else
             {
-                _dt = Time.unscaledDeltaTime * _scale;
-                _t += _dt;
+                _t += Time.unscaledDeltaTime * _scale;
             }
         }
 
@@ -108,17 +108,26 @@ namespace com.spacepuppy
             }
         }
 
-        private double GetTimeScale()
+        private void SyncTimeScale()
         {
-            if (_scales.Count == 0) return 1f;
-
-            double result = 1f;
-            var e = _scales.Values.GetEnumerator();
-            while(e.MoveNext())
+            double result = 1d;
+            if (_scales.Count > 0)
             {
-                result *= e.Current;
+                var e = _scales.Values.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    result *= e.Current;
+                }
             }
-            return result;
+            if(System.Math.Abs(result - _scale) > 0.0000001d)
+            {
+                _scale = result;
+                if (this.TimeScaleChanged != null) this.TimeScaleChanged(this, System.EventArgs.Empty);
+            }
+            else
+            {
+                _scale = result;
+            }
         }
 
         public void Reset()
@@ -126,7 +135,6 @@ namespace com.spacepuppy
             _startTime = 0.0;
             _t = 0.0;
             _ft = 0.0;
-            _dt = 0.0;
         }
 
         public void Reset(double startTime)
@@ -134,12 +142,13 @@ namespace com.spacepuppy
             _startTime = startTime;
             _t = 0.0;
             _ft = 0.0;
-            _dt = 0.0;
         }
 
         #endregion
 
         #region ITimeSupplier Interface
+
+        public event System.EventHandler TimeScaleChanged;
 
         /// <summary>
         /// The total time passed since thie CustomTime was created. Value is dependent on the UpdateSequence being accessed from.
@@ -177,12 +186,26 @@ namespace com.spacepuppy
         /// <summary>
         /// The delta time since the last call to update/fixedupdate, relative to in which update/fixedupdate you call.
         /// </summary>
-        public float Delta { get { return (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate) ? (float)(_scale) * Time.fixedDeltaTime : (float)_dt; } }
+        public float Delta
+        {
+            get
+            {
+                if (_paused)
+                    return 0f;
+                else
+                    return (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate) ? (float)(Time.fixedDeltaTime * _scale) : (float)(Time.unscaledDeltaTime * _scale);
+            }
+        }
 
         public bool Paused
         {
             get { return _paused; }
-            set { _paused = value; }
+            set
+            {
+                if (_paused == value) return;
+                _paused = value;
+                if (this.TimeScaleChanged != null) this.TimeScaleChanged(this, System.EventArgs.Empty);
+            }
         }
 
         public float Scale
@@ -198,7 +221,7 @@ namespace com.spacepuppy
         public void SetScale(string id, float scale)
         {
             _scales[id] = (double)scale;
-            _scale = this.GetTimeScale();
+            this.SyncTimeScale();
         }
 
         public float GetScale(string id)
@@ -218,7 +241,7 @@ namespace com.spacepuppy
         {
             if (_scales.Remove(id))
             {
-                _scale = this.GetTimeScale();
+                this.SyncTimeScale();
                 return true;
             }
             else

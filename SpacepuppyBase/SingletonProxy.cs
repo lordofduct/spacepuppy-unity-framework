@@ -78,6 +78,12 @@ namespace com.spacepuppy
             return DynamicUtil.GetMembers(_singletonType.Type, includeNonPublic);
         }
 
+        System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
+        {
+            if (_singletonType == null || _singletonType.Type == null) return null;
+            return DynamicUtil.GetMember(_singletonType.Type, sMemberName, includeNonPublic);
+        }
+
         #endregion
         
     }

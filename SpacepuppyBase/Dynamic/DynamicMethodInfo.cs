@@ -14,6 +14,25 @@ namespace com.spacepuppy.Dynamic
 
         private string _name;
         private Type _declaringType;
+        private Type _returnType;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public DynamicMethodInfo(string name, Type declaringType)
+        {
+            _name = name;
+            _declaringType = declaringType;
+            _returnType = null;
+        }
+
+        public DynamicMethodInfo(string name, Type declaringType, Type returnType)
+        {
+            _name = name;
+            _declaringType = declaringType;
+            _returnType = returnType;
+        }
 
         #endregion
 
@@ -42,6 +61,14 @@ namespace com.spacepuppy.Dynamic
         public override MethodInfo GetBaseDefinition()
         {
             return this;
+        }
+
+        public override Type ReturnType
+        {
+            get
+            {
+                return (_returnType != null) ? _returnType : base.ReturnType;
+            }
         }
 
         public override ICustomAttributeProvider ReturnTypeCustomAttributes

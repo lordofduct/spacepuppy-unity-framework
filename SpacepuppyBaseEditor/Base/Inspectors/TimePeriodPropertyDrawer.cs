@@ -10,124 +10,32 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Base.Inspectors
 {
+
     [CustomPropertyDrawer(typeof(TimePeriod))]
     public class TimePeriodPropertyDrawer : PropertyDrawer
     {
 
-        private const double DAYS_IN_YEAR = 365.0;
-        public enum TimePeriodUnits
-        {
-            Seconds = 0,
-            Minutes = 1,
-            Hours = 2,
-            Days = 3,
-            Years = 4
-        }
-        private static Dictionary<int, TimePeriodUnits> _unitsCache = new Dictionary<int, TimePeriodUnits>();
-        private static TimePeriodUnits GetUnits(SerializedProperty property)
-        {
-            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
-            TimePeriodUnits units;
-            if (_unitsCache.TryGetValue(hash, out units))
-                return units;
-            else
-                return TimePeriodUnits.Seconds;
-        }
-        private static void SetUnits(SerializedProperty property, TimePeriodUnits units)
-        {
-            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
-            _unitsCache[hash] = units;
-        }
+        private TimeUnitsSelectorPropertyDrawer _timeDrawer = new TimeUnitsSelectorPropertyDrawer();
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
 
             position = EditorGUI.PrefixLabel(position, label);
             
+            var secondsProp = property.FindPropertyRelative("_seconds");
             var w = position.width / 3f;
             if(w > 75f)
             {
-                position = this.DrawDuration(position, property, Mathf.Min(w, 150f));
-                position = this.DrawUnits(position, property, 75f);
+                position = _timeDrawer.DrawDuration(position, secondsProp, Mathf.Min(w, 150f));
+                position = _timeDrawer.DrawUnits(position, secondsProp, 75f);
                 position = this.DrawTimeSupplier(position, property, position.width);
             }
             else
             {
-                position = this.DrawDuration(position, property, w);
-                position = this.DrawUnits(position, property, w);
+                position = _timeDrawer.DrawDuration(position, secondsProp, w);
+                position = _timeDrawer.DrawUnits(position, secondsProp, w);
                 position = this.DrawTimeSupplier(position, property, position.width);
             }
-        }
-
-        private Rect DrawDuration(Rect position, SerializedProperty property, float desiredWidth)
-        {
-            if(position.width <= 0f) return position;
-
-            var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, desiredWidth), position.height);
-            
-            var units = GetUnits(property);
-            var durProp = property.FindPropertyRelative("_seconds");
-            System.TimeSpan span = System.TimeSpan.FromSeconds(durProp.floatValue);
-            double dur = 0.0;
-            switch(units)
-            {
-                case TimePeriodUnits.Seconds:
-                    dur = span.TotalSeconds;
-                    break;
-                case TimePeriodUnits.Minutes:
-                    dur = span.TotalMinutes;
-                    break;
-                case TimePeriodUnits.Hours:
-                    dur = span.TotalHours;
-                    break;
-                case TimePeriodUnits.Days:
-                    dur = span.TotalDays;
-                    break;
-                case TimePeriodUnits.Years:
-                    dur = span.Ticks / (System.TimeSpan.TicksPerDay * DAYS_IN_YEAR);
-                    break;
-            }
-            EditorGUI.BeginChangeCheck();
-            dur = EditorGUI.FloatField(r, (float)dur);
-            if(EditorGUI.EndChangeCheck())
-            {
-                switch(units)
-                {
-                    case TimePeriodUnits.Seconds:
-                        span = System.TimeSpan.FromSeconds(dur);
-                        break;
-                    case TimePeriodUnits.Minutes:
-                        span = System.TimeSpan.FromMinutes(dur);
-                        break;
-                    case TimePeriodUnits.Hours:
-                        span = System.TimeSpan.FromHours(dur);
-                        break;
-                    case TimePeriodUnits.Days:
-                        span = System.TimeSpan.FromDays(dur);
-                        break;
-                    case TimePeriodUnits.Years:
-                        span = System.TimeSpan.FromTicks((long)(dur * System.TimeSpan.TicksPerDay * DAYS_IN_YEAR));
-                        break;
-                }
-                durProp.floatValue = (float)span.TotalSeconds;
-            }
-
-            return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);
-        }
-        
-        private Rect DrawUnits(Rect position, SerializedProperty property, float desiredWidth)
-        {
-            if(position.width <= 0f) return position;
-
-            var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, desiredWidth), position.height);
-            
-            var units = GetUnits(property);
-            EditorGUI.BeginChangeCheck();
-            units = (TimePeriodUnits)EditorGUI.EnumPopup(r, units);
-            if(EditorGUI.EndChangeCheck())
-                SetUnits(property, units);
-
-            return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);
         }
 
         private Rect DrawTimeSupplier(Rect position, SerializedProperty property, float desiredWidth)

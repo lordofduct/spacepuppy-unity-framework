@@ -54,7 +54,7 @@ namespace com.spacepuppyeditor.Modifiers
             else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(VariantReference)))
             {
                 var variant = EditorHelper.GetTargetObjectOfProperty(property) as VariantReference;
-                if (variant != null && variant.Value == null && variant.ValueType == VariantReference.VariantType.GameObject)
+                if (variant != null && variant.Value == null && variant.ValueType == VariantType.GameObject)
                 {
                     var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
                     if(bUseEntity)

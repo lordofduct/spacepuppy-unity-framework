@@ -25,6 +25,8 @@ namespace com.spacepuppy
     public interface IScalableTimeSupplier : ITimeSupplier
     {
 
+        event System.EventHandler TimeScaleChanged;
+
         float Scale { get; }
         bool Paused { get; set; }
 

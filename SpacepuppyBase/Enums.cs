@@ -126,4 +126,22 @@ namespace com.spacepuppy
         Always = 7
     }
 
+    public enum VariantType
+    {
+        Object = -1,
+        Null = 0,
+        String = 1,
+        Boolean = 2,
+        Integer = 3,
+        Float = 4,
+        Double = 5,
+        Vector2 = 6,
+        Vector3 = 7,
+        Quaternion = 8,
+        Color = 9,
+        DateTime = 10,
+        GameObject = 11,
+        Component = 12
+    }
+
 }

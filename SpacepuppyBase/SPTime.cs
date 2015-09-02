@@ -28,8 +28,75 @@ namespace com.spacepuppy
     /// 2 with out having to test if one or the other is currently playing (or the scale of it playing). Which is 
     /// SUPER extra handy when tweening the time scale.
     /// </summary>
-    public static class SPTime
+    [System.Serializable()]
+    public class SPTime
     {
+
+        #region Fields
+
+        [SerializeField()]
+        private DeltaTimeType _timeSupplierType;
+        [SerializeField()]
+        private string _timeSupplierName;
+
+        #endregion
+
+        #region Properties
+
+        public DeltaTimeType TimeSupplierType
+        {
+            get { return _timeSupplierType; }
+            //set
+            //{
+            //    if (_timeSupplierType == value) return;
+            //    _timeSupplierType = value;
+            //    _timeSupplierName = null;
+            //}
+        }
+
+        public ITimeSupplier TimeSupplier
+        {
+            get
+            {
+                switch (_timeSupplierType)
+                {
+                    case DeltaTimeType.Normal:
+                        return SPTime.Normal;
+                    case DeltaTimeType.Real:
+                        return SPTime.Real;
+                    case DeltaTimeType.Smooth:
+                        return SPTime.Smooth;
+                    case DeltaTimeType.Custom:
+                        {
+                            //if (_customTime == null || !_customTime.Valid) _customTime = SPTime.Custom(_timeSupplierName, false);
+                            //return _customTime;
+                            return SPTime.Custom(_timeSupplierName, false);
+                        }
+                    default:
+                        return null;
+                }
+            }
+            //set
+            //{
+            //    if(value == null)
+            //    {
+            //        _timeSupplierType = DeltaTimeType.Custom;
+            //        _timeSupplierName = null;
+            //    }
+            //    else
+            //    {
+            //        _timeSupplierType = SPTime.GetDeltaType(value);
+            //        if (value is CustomTimeSupplier)
+            //            _timeSupplierName = (value as CustomTimeSupplier).Id;
+            //        else
+            //            _timeSupplierName = null;
+            //    }
+            //}
+        }
+
+        #endregion
+
+        #region Static Interface
 
         #region Fields
 
@@ -235,6 +302,8 @@ namespace com.spacepuppy
 
         #endregion
 
+        #endregion
+
         #region Special Types
 
         private class NormalTimeSupplier : IScalableTimeSupplier
@@ -242,6 +311,8 @@ namespace com.spacepuppy
 
             private bool _paused;
             private Dictionary<string, float> _scales = new Dictionary<string, float>();
+
+            public event System.EventHandler TimeScaleChanged;
 
             public float Total
             {
@@ -271,7 +342,7 @@ namespace com.spacepuppy
                     }
                     else
                     {
-                        UnityEngine.Time.timeScale = this.GetTimeScale();
+                        this.SyncTimeScale();
                     }
                 }
             }
@@ -294,7 +365,7 @@ namespace com.spacepuppy
                 _scales[id] = scale;
                 if(!_paused)
                 {
-                    Time.timeScale = this.GetTimeScale();
+                    this.SyncTimeScale();
                 }
             }
 
@@ -317,7 +388,7 @@ namespace com.spacepuppy
                 {
                     if (!_paused)
                     {
-                        Time.timeScale = this.GetTimeScale();
+                        this.SyncTimeScale();
                     }
                     return true;
                 }
@@ -332,24 +403,33 @@ namespace com.spacepuppy
                 return _scales.ContainsKey(id);
             }
 
-            private float GetTimeScale()
+            private void SyncTimeScale()
             {
-                if(_scales.Count == 0)
+                float result = this.GetTimeScale();
+
+                if(MathUtil.FuzzyEqual(result, UnityEngine.Time.timeScale))
                 {
-                    return 1f;
+                    UnityEngine.Time.timeScale = result;
                 }
                 else
                 {
-                    float result = 1f;
+                    UnityEngine.Time.timeScale = result;
+                    if (this.TimeScaleChanged != null) this.TimeScaleChanged(this, System.EventArgs.Empty);
+                }
+            }
+
+            private float GetTimeScale()
+            {
+                float result = 1f;
+                if (_scales.Count > 0)
+                {
                     var e = _scales.Values.GetEnumerator();
-                    while(e.MoveNext())
+                    while (e.MoveNext())
                     {
                         result *= e.Current;
                     }
-                    return result;
-
-                    return _scales.Values.Product();
                 }
+                return result;
             }
 
         }

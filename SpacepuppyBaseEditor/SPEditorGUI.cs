@@ -813,5 +813,94 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region ReflectedPropertyField
+
+        /// <summary>
+        /// Reflects the available properties and shows them in a dropdown
+        /// </summary>
+        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        {
+            if (targObj != null)
+            {
+                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property).ToArray();
+
+                int index = -1;
+                for (int i = 0; i < members.Length; i++)
+                {
+                    if(members[i].Name == selectedMemberName)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                index = EditorGUI.Popup(position, label, index, (from m in members select new GUIContent(string.Format("{0} ({1})", m.Name, DynamicUtil.GetReturnType(m).Name))).ToArray());
+                selectedMember = (index >= 0) ? members[index] : null;
+                return (selectedMember != null) ? selectedMember.Name : null;
+            }
+            else
+            {
+                selectedMember = null;
+                EditorGUI.Popup(position, label, -1, new GUIContent[0]);
+                return null;
+            }
+        }
+        
+        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName)
+        {
+            System.Reflection.MemberInfo selectedMember;
+            return ReflectedPropertyField(position, label, targObj, selectedMemberName, out selectedMember);
+        }
+
+        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        {
+            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, out selectedMember);
+        }
+
+        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName)
+        {
+            System.Reflection.MemberInfo selectedMember;
+            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, out selectedMember);
+        }
+
+        #endregion
+
+
+
+
+
+        #region X Button
+
+        public const float X_BTN_WIDTH = 30f;
+        public static bool XButton(Vector2 pos, string tooltip = null)
+        {
+            var r = new Rect(pos.x, pos.y, X_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            return GUI.Button(r, EditorHelper.TempContent("X", tooltip));
+        }
+        public static bool XButton(Rect position, string tooltip = null)
+        {
+            var r = new Rect(position.xMin, position.yMin, Mathf.Min(X_BTN_WIDTH, position.width), EditorGUIUtility.singleLineHeight);
+            return GUI.Button(r, EditorHelper.TempContent("X", tooltip));
+        }
+        public static bool XButton(ref Rect position, string tooltip = null, bool rightSide = true)
+        {
+            var w = Mathf.Min(X_BTN_WIDTH, position.width);
+            Rect r;
+            if(rightSide)
+            {
+                r = new Rect(position.xMax - w, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                position = new Rect(position.xMin, position.yMin, position.width - w, position.height);
+            }
+            else
+            {
+                r = new Rect(position.xMin, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                position = new Rect(r.xMax, position.yMin, position.width - w, position.height);
+            }
+
+            return GUI.Button(r, EditorHelper.TempContent("X", tooltip));
+        }
+
+        #endregion
+
     }
 }

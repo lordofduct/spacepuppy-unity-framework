@@ -361,93 +361,21 @@ namespace com.spacepuppyeditor.Scenario
                     if (paramType == typeof(object))
                     {
                         //draw the default variant as the method accepts anything
-                        //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
                         _variantDrawer.RestrictVariantType = false;
                         _variantDrawer.ForcedComponentType = null;
                         _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
                     }
                     else
                     {
-                        var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
                         var argType = VariantReference.GetVariantType(paramType);
-
-                        if (variantRef.ValueType != argType)
-                        {
-                            variantRef.ValueType = argType;
-                            property.serializedObject.Update();
-                        }
-
                         _variantDrawer.RestrictVariantType = true;
+                        _variantDrawer.VariantTypeRestrictedTo = argType;
                         _variantDrawer.ForcedComponentType = (TypeUtil.IsType(paramType, typeof(Component))) ? paramType : null;
                         _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
                     }
                 }
             }
             
-            /*
-            else if(parr.Length == 1)
-            {
-                //ONE PARAMETER - allow trigger event arg
-                _callMethodModeExtraLines = 1;
-
-                var argRect = new Rect(area.xMin, methNameRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-                var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-                var argArrayProp = property.FindPropertyRelative(PROP_TRIGGERABLEARGS);
-                if (argArrayProp.arraySize == 0)
-                {
-                    EditorGUI.LabelField(argRect, _methodArgLabel, _undefinedArgLabel);
-                    if (GUI.Button(btnRect, _argBtnLabel))
-                    {
-                        argArrayProp.arraySize = 1;
-                        argArrayProp.serializedObject.ApplyModifiedProperties();
-                    }
-                }
-                else
-                {
-                    if (parr[0].ParameterType == typeof(object))
-                    {
-                        //draw the default variant as the method accepts anything
-                        if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
-                        var argProp = argArrayProp.GetArrayElementAtIndex(0);
-                        //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
-                        _variantDrawer.RestrictVariantType = false;
-                        _variantDrawer.ForcedComponentType = null;
-                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
-
-                        if (GUI.Button(btnRect, _argBtnLabel))
-                        {
-                            argArrayProp.arraySize = 0;
-                        }
-                    }
-                    else
-                    {
-                        if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
-                        var argProp = argArrayProp.GetArrayElementAtIndex(0);
-
-                        var variantRef = EditorHelper.GetTargetObjectOfProperty(argProp) as VariantReference;
-
-                        var argType = VariantReference.GetVariantType(parr[0].ParameterType);
-
-                        if (variantRef.ValueType != argType)
-                        {
-                            variantRef.ValueType = argType;
-                            property.serializedObject.Update();
-                        }
-
-                        _variantDrawer.RestrictVariantType = true;
-                        _variantDrawer.ForcedComponentType = (TypeUtil.IsType(parr[0].ParameterType, typeof(Component))) ? parr[0].ParameterType : null;
-                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
-                    }
-
-                    if (GUI.Button(btnRect, _argBtnLabel))
-                    {
-                        argArrayProp.arraySize = 0;
-                        argArrayProp.serializedObject.ApplyModifiedProperties();
-                    }
-                }
-            }
-             */
-
         }
 
 

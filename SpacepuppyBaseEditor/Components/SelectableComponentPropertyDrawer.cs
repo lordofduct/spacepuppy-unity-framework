@@ -17,10 +17,11 @@ namespace com.spacepuppyeditor.Components
 
         public const float DEFAULT_POPUP_WIDTH_SCALE = 0.4f;
 
-        public bool AllowSceneObject;
+        public bool AllowSceneObject = true;
         public bool ForceOnlySelf;
         public bool SearchChildren;
-        public float PopupWidthScale = DEFAULT_POPUP_WIDTH_SCALE;
+        public bool ShowXButton = true;
+        public bool XButtonOnRightSide = true;
         public IComponentChoiceSelector ChoiceSelector;
 
         private System.Type _restrictionType = typeof(Component);
@@ -74,25 +75,32 @@ namespace com.spacepuppyeditor.Components
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            position = EditorGUI.PrefixLabel(position, label);
+
+            this.OnGUI(position, property);
+        }
+
+        public void OnGUI(Rect position, SerializedProperty property)
+        {
             //if (property.propertyType != SerializedPropertyType.ObjectReference || !TypeUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
             if (property.propertyType != SerializedPropertyType.ObjectReference || !(TypeUtil.IsType(_restrictionType, typeof(Component)) || _restrictionType.IsInterface))
             {
-                this.DrawAsMismatchedAttribute(position, property, label);
+                this.DrawAsMismatchedAttribute(position, property);
                 return;
             }
 
             this.Init();
 
-            if(this.ForceOnlySelf)
+            if (this.ForceOnlySelf)
             {
                 var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                if(targGo == null)
+                if (targGo == null)
                 {
-                    this.DrawAsMismatchedAttribute(position, property, label);
+                    this.DrawAsMismatchedAttribute(position, property);
                     return;
                 }
 
-                if(property.objectReferenceValue == null)
+                if (property.objectReferenceValue == null)
                 {
                     property.objectReferenceValue = targGo.GetComponent(_restrictionType);
                 }
@@ -101,34 +109,36 @@ namespace com.spacepuppyeditor.Components
             if (!this.ForceOnlySelf && property.objectReferenceValue == null)
             {
                 //SPEditorGUI.DefaultPropertyField(position, property, label);
-                this.DrawObjectRefField(position, property, label);
+                this.DrawObjectRefField(position, property);
             }
             else
             {
                 this.ChoiceSelector.BeforeGUI(this, property, _restrictionType);
 
-                float w = (label == GUIContent.none) ? position.width : Mathf.Max(position.width - EditorGUIUtility.labelWidth, 0);
-                var ra = new Rect(position.xMin, position.yMin, w * this.PopupWidthScale + EditorGUIUtility.labelWidth, position.height);
-                var rb = new Rect(ra.xMax, position.yMin, position.width - ra.width, position.height);
-
-                var components = this.ChoiceSelector.GetComponents();
-                var names = this.ChoiceSelector.GetPopupEntries();
-                int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
-                int ni = EditorGUI.Popup(ra, label, oi, names);
-                if (oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
-
-                this.DrawObjectRefField(rb, property, GUIContent.none);
+                var fullsize = position;
+                if (this.ShowXButton && SPEditorGUI.XButton(ref position, "Clear Selected GameObject", this.XButtonOnRightSide))
+                {
+                    property.objectReferenceValue = null;
+                    this.DrawObjectRefField(fullsize, property);
+                }
+                else
+                {
+                    var components = this.ChoiceSelector.GetComponents();
+                    var names = this.ChoiceSelector.GetPopupEntries();
+                    int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
+                    int ni = EditorGUI.Popup(position, oi, names);
+                    if (oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
+                }
 
                 this.ChoiceSelector.GUIComplete(property);
             }
-            
         }
 
-        private void DrawObjectRefField(Rect position, SerializedProperty property, GUIContent label)
+        private void DrawObjectRefField(Rect position, SerializedProperty property)
         {
             if (TypeUtil.IsType(_restrictionType, typeof(Component)))
             {
-                var obj = EditorGUI.ObjectField(position, label, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
+                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
                 if(this.ForceOnlySelf)
                 {
                     var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
@@ -147,7 +157,7 @@ namespace com.spacepuppyeditor.Components
             else
             {
                 var ogo = GameObjectUtil.GetGameObjectFromSource(property.objectReferenceValue);
-                var ngo = EditorGUI.ObjectField(position, label, ogo, typeof(GameObject), this.AllowSceneObject) as GameObject;
+                var ngo = EditorGUI.ObjectField(position, ogo, typeof(GameObject), this.AllowSceneObject) as GameObject;
                 if (ogo != ngo)
                 {
                     if(this.ForceOnlySelf)
@@ -168,9 +178,9 @@ namespace com.spacepuppyeditor.Components
         }
 
 
-        private void DrawAsMismatchedAttribute(Rect position, SerializedProperty property, GUIContent label)
+        private void DrawAsMismatchedAttribute(Rect position, SerializedProperty property)
         {
-            EditorGUI.LabelField(position, label, EditorHelper.TempContent("Mismatched type of PropertyDrawer attribute with field."));
+            EditorGUI.LabelField(position, EditorHelper.TempContent("Mismatched type of PropertyDrawer attribute with field."));
         }
 
     }

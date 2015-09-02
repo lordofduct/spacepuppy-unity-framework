@@ -21,8 +21,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             AllowSceneObject = true,
             RestrictionType = typeof(IObservableTrigger),
-            ChoiceSelector = new CustomComponentChoiceSelector(),
-            PopupWidthScale = 0.5f
+            ChoiceSelector = new CustomComponentChoiceSelector()
         };
 
         #endregion
@@ -82,6 +81,7 @@ namespace com.spacepuppyeditor.Scenario
             {
                 _componentNames = DefaultComponentChoiceSelector.GetUniqueComponentNames(this.Components).ToArray();
                 _names.Clear();
+                _names.Add(new GUIContent("Nothing..."));
                 Component c;
                 string nm;
                 for (int i = 0; i < this.Components.Length; i++)
@@ -134,6 +134,7 @@ namespace com.spacepuppyeditor.Scenario
             public override Component GetComponentAtPopupIndex(int index)
             {
                 if (_componentNames == null) return null;
+                if (index == 0) return null;
 
                 if (index < 0 || index >= _names.Count)
                 {

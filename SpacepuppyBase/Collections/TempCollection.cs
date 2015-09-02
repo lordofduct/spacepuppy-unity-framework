@@ -51,6 +51,15 @@ namespace com.spacepuppy.Collections
             _coll = new List<T>(e);
         }
 
+        private TempCollection(int count)
+        {
+            var tp = typeof(T);
+            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+            _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
+            _version = 1;
+            _coll = new List<T>(count);
+        }
+
         #endregion
 
         #region Methods
@@ -248,6 +257,21 @@ namespace com.spacepuppy.Collections
                 var coll = _instance;
                 _instance = null;
                 coll._coll.AddRange(e);
+                return coll;
+            }
+        }
+
+        public static TempCollection<T> GetCollection(int count)
+        {
+            if (_instance == null)
+            {
+                return new TempCollection<T>(count);
+            }
+            else
+            {
+                var coll = _instance;
+                _instance = null;
+                if (coll._coll.Capacity < count) coll._coll.Capacity = count;
                 return coll;
             }
         }
