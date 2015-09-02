@@ -119,7 +119,6 @@
     <Compile Include="IGameObjectSource.cs" />
     <Compile Include="IIgnorableCollision.cs" />
     <Compile Include="IRandom.cs" />
-    <Compile Include="Render\MaterialReference.cs" />
     <Compile Include="Render\RendererMaterialSwap.cs" />
     <Compile Include="Scenario\i_DebugLog.cs" />
     <Compile Include="Scenario\i_Destroy.cs" />
