@@ -185,6 +185,7 @@ namespace com.spacepuppy
                             case VariantType.Double:
                             case VariantType.Vector2:
                             case VariantType.Vector3:
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                             case VariantType.Color:
                             case VariantType.DateTime:
@@ -236,6 +237,7 @@ namespace com.spacepuppy
                                 return (int)_w;
                             case VariantType.Vector2:
                             case VariantType.Vector3:
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                                 return (int)_x;
                             case VariantType.Color:
@@ -289,6 +291,7 @@ namespace com.spacepuppy
                                 return (float)_w;
                             case VariantType.Vector2:
                             case VariantType.Vector3:
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                             case VariantType.Color:
                                 return _x;
@@ -341,6 +344,7 @@ namespace com.spacepuppy
                                 return _w;
                             case VariantType.Vector2:
                             case VariantType.Vector3:
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                             case VariantType.Color:
                                 return _x;
@@ -393,6 +397,7 @@ namespace com.spacepuppy
                                 return new Vector2((float)_w, 0f);
                             case VariantType.Vector2:
                             case VariantType.Vector3:
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                             case VariantType.Color:
                                 return new Vector2(_x, _y);
@@ -445,6 +450,7 @@ namespace com.spacepuppy
                                 return new Vector3((float)_w, 0f, 0f);
                             case VariantType.Vector2:
                             case VariantType.Vector3:
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                             case VariantType.Color:
                                 return new Vector3(_x, _y, _z);
@@ -474,6 +480,59 @@ namespace com.spacepuppy
                 _mode = RefMode.Value;
             }
         }
+        public Vector4 Vector4Value
+        {
+            get
+            {
+                switch (_mode)
+                {
+                    case RefMode.Value:
+                        switch (_type)
+                        {
+                            case VariantType.Object:
+                                return Vector4.zero;
+                            case VariantType.String:
+                                return ConvertUtil.ToVector4(_string);
+                            case VariantType.Boolean:
+                                return (_x != 0f) ? Vector4.one : Vector4.zero;
+                            case VariantType.Integer:
+                                return new Vector4((float)_w, 0f, 0f, 0f);
+                            case VariantType.Float:
+                                return new Vector4(_x, 0f, 0f, 0f);
+                            case VariantType.Double:
+                                return new Vector4((float)_w, 0f, 0f, 0f);
+                            case VariantType.Vector2:
+                            case VariantType.Vector3:
+                            case VariantType.Vector4:
+                            case VariantType.Quaternion:
+                            case VariantType.Color:
+                                return new Vector4(_x, _y, _z, (float)_w);
+                            case VariantType.DateTime:
+                                return Vector4.zero;
+                            case VariantType.GameObject:
+                            case VariantType.Component:
+                                return Vector4.zero;
+                        }
+                        break;
+                    case RefMode.Property:
+                        return ConvertUtil.ToVector3(this.Evaluate());
+                    case RefMode.Eval:
+                        return new Vector3((float)this.EvaluateStatement(), 0f, 0f);
+                }
+                return Vector3.zero;
+            }
+            set
+            {
+                _x = value.x;
+                _y = value.y;
+                _z = value.z;
+                _w = value.w;
+                _string = null;
+                _unityObjectReference = null;
+                _type = VariantType.Vector4;
+                _mode = RefMode.Value;
+            }
+        }
         public Quaternion QuaternionValue
         {
             get
@@ -481,8 +540,8 @@ namespace com.spacepuppy
                 switch (_mode)
                 {
                     case RefMode.Value:
-                        if (_type == VariantType.Quaternion)
-                            return new Quaternion(_x, _y, _z, (float)_z);
+                        if (_type == VariantType.Quaternion || _type == VariantType.Vector4)
+                            return new Quaternion(_x, _y, _z, (float)_w);
                         else
                             return Quaternion.identity;
                     case RefMode.Property:
@@ -533,6 +592,7 @@ namespace com.spacepuppy
                                 return new Color(_x, _y, 0f);
                             case VariantType.Vector3:
                                 return new Color(_x, _y, _z);
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                                 return new Color(_x, _y, _z, (float)_w);
                             case VariantType.Color:
@@ -582,6 +642,7 @@ namespace com.spacepuppy
                             case VariantType.Double:
                             case VariantType.Vector2:
                             case VariantType.Vector3:
+                            case VariantType.Vector4:
                             case VariantType.Quaternion:
                             case VariantType.Color:
                                 return new System.DateTime(0L);
@@ -1001,6 +1062,7 @@ namespace com.spacepuppy
 
             if (tp == typeof(Vector2)) return true;
             else if (tp == typeof(Vector3)) return true;
+            else if (tp == typeof(Vector4)) return true;
             else if (tp == typeof(Quaternion)) return true;
             else if (tp == typeof(Color)) return true;
             else if (tp == typeof(GameObject)) return true;
@@ -1031,6 +1093,7 @@ namespace com.spacepuppy
 
             if (tp == typeof(Vector2)) return VariantType.Vector2;
             else if (tp == typeof(Vector3)) return VariantType.Vector3;
+            else if (tp == typeof(Vector4)) return VariantType.Vector4;
             else if (tp == typeof(Quaternion)) return VariantType.Quaternion;
             else if (tp == typeof(Color)) return VariantType.Color;
             else if (tp == typeof(GameObject)) return VariantType.GameObject;

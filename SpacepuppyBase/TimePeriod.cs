@@ -4,9 +4,12 @@ using System.Linq;
 
 namespace com.spacepuppy
 {
+
     [System.Serializable()]
     public struct TimePeriod
     {
+
+        public static TimePeriod Zero { get { return new TimePeriod(0f); } }
 
         public enum Units
         {
@@ -66,23 +69,7 @@ namespace com.spacepuppy
         {
             get
             {
-                switch (_timeSupplierType)
-                {
-                    case DeltaTimeType.Normal:
-                        return SPTime.Normal;
-                    case DeltaTimeType.Real:
-                        return SPTime.Real;
-                    case DeltaTimeType.Smooth:
-                        return SPTime.Smooth;
-                    case DeltaTimeType.Custom:
-                        {
-                            //if (_customTime == null || !_customTime.Valid) _customTime = SPTime.Custom(_timeSupplierName, false);
-                            //return _customTime;
-                            return SPTime.Custom(_timeSupplierName, false);
-                        }
-                    default:
-                        return null;
-                }
+                return SPTime.GetTime(_timeSupplierType, _timeSupplierName);
             }
         }
 
@@ -121,4 +108,5 @@ namespace com.spacepuppy
         #endregion
 
     }
+
 }

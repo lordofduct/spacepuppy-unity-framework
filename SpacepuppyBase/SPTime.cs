@@ -27,9 +27,14 @@ namespace com.spacepuppy
     /// effect, not half of normal time, so that the sword looks right either way. This allows you to combine those 
     /// 2 with out having to test if one or the other is currently playing (or the scale of it playing). Which is 
     /// SUPER extra handy when tweening the time scale.
+    /// 
+    /// 
+    /// Instances of the class can be used as an inspector configurable reference to a ITimeSupplier. These configurable 
+    /// instances are intended to be immutable once deserialized at runtime. Else the ITimeSupplier interface pass through 
+    /// could add event callbacks to one time supplier, but later remove it from another.
     /// </summary>
     [System.Serializable()]
-    public class SPTime
+    public struct SPTime
     {
 
         #region Fields
@@ -40,61 +45,78 @@ namespace com.spacepuppy
         private string _timeSupplierName;
 
         #endregion
+        
+        #region CONSTRUCTOR
+
+        //public SPTime()
+        //{
+        //    //exists only for unity serialization
+        //}
+
+        public SPTime(DeltaTimeType etp)
+        {
+            if (etp == DeltaTimeType.Custom) throw new System.ArgumentException("For custom time suppliers, you must specify it directly.");
+            _timeSupplierType = etp;
+            _timeSupplierName = null;
+        }
+
+        public SPTime(ITimeSupplier ts)
+        {
+            if (ts == null) throw new System.ArgumentNullException("ts");
+            _timeSupplierType = SPTime.GetDeltaType(ts);
+            if (ts is CustomTimeSupplier) _timeSupplierName = (ts as CustomTimeSupplier).Id;
+            else _timeSupplierName = null;
+        }
+
+        #endregion
 
         #region Properties
 
         public DeltaTimeType TimeSupplierType
         {
             get { return _timeSupplierType; }
-            //set
-            //{
-            //    if (_timeSupplierType == value) return;
-            //    _timeSupplierType = value;
-            //    _timeSupplierName = null;
-            //}
         }
 
         public ITimeSupplier TimeSupplier
         {
             get
             {
-                switch (_timeSupplierType)
-                {
-                    case DeltaTimeType.Normal:
-                        return SPTime.Normal;
-                    case DeltaTimeType.Real:
-                        return SPTime.Real;
-                    case DeltaTimeType.Smooth:
-                        return SPTime.Smooth;
-                    case DeltaTimeType.Custom:
-                        {
-                            //if (_customTime == null || !_customTime.Valid) _customTime = SPTime.Custom(_timeSupplierName, false);
-                            //return _customTime;
-                            return SPTime.Custom(_timeSupplierName, false);
-                        }
-                    default:
-                        return null;
-                }
+                return SPTime.GetTime(_timeSupplierType, _timeSupplierName);
             }
-            //set
-            //{
-            //    if(value == null)
-            //    {
-            //        _timeSupplierType = DeltaTimeType.Custom;
-            //        _timeSupplierName = null;
-            //    }
-            //    else
-            //    {
-            //        _timeSupplierType = SPTime.GetDeltaType(value);
-            //        if (value is CustomTimeSupplier)
-            //            _timeSupplierName = (value as CustomTimeSupplier).Id;
-            //        else
-            //            _timeSupplierName = null;
-            //    }
-            //}
+        }
+
+        public bool IsCustom
+        {
+            get { return _timeSupplierType == DeltaTimeType.Custom; }
         }
 
         #endregion
+
+        #region Methods
+
+        private ITimeSupplier GetTimeSupplier()
+        {
+            switch (_timeSupplierType)
+            {
+                case DeltaTimeType.Normal:
+                    return SPTime.Normal;
+                case DeltaTimeType.Real:
+                    return SPTime.Real;
+                case DeltaTimeType.Smooth:
+                    return SPTime.Smooth;
+                case DeltaTimeType.Custom:
+                    {
+                        //if (_customTime == null || !_customTime.Valid) _customTime = SPTime.Custom(_timeSupplierName, false);
+                        //return _customTime;
+                        return SPTime.Custom(_timeSupplierName, false);
+                    }
+                default:
+                    return null;
+            }
+        }
+
+        #endregion
+
 
         #region Static Interface
 
@@ -148,6 +170,29 @@ namespace com.spacepuppy
             }
         }
 
+        public static ITimeSupplier GetTime(DeltaTimeType etp, string id)
+        {
+            switch (etp)
+            {
+                case DeltaTimeType.Normal:
+                    return _normalTime;
+                case DeltaTimeType.Real:
+                    return _realTime;
+                case DeltaTimeType.Smooth:
+                    return _smoothTime;
+                default:
+                    {
+                        if (id == null) return null;
+                        CustomTimeSupplier ct;
+                        if (_customTimes.TryGetValue(id, out ct))
+                        {
+                            return ct;
+                        }
+                        return null;
+                    }
+            }
+        }
+
         /// <summary>
         /// Reverse lookup for DeltaTimeType from an object.
         /// </summary>
@@ -166,33 +211,14 @@ namespace com.spacepuppy
         }
 
         /// <summary>
-        /// Retrieve a CustomTimeSupplier by name. If no time exists of that name, one is created.
+        /// Retrieve a CustomTimeSupplier by name.
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="createIfNotExists"></param>
         /// <returns></returns>
-        public static CustomTimeSupplier Custom(string id)
+        public static CustomTimeSupplier Custom(string id, bool createIfNotExists = false)
         {
-            if (_customTimes == null)
-            {
-                _customTimes = new Dictionary<string, CustomTimeSupplier>();
-                GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
-            }
-
-            if (_customTimes.ContainsKey(id))
-            {
-                var ct = _customTimes[id];
-                return ct;
-            }
-            else
-            {
-                var ct = new CustomTimeSupplier(id);
-                _customTimes[ct.Id] = ct;
-                return ct;
-            }
-        }
-
-        public static CustomTimeSupplier Custom(string id, bool createIfNotExists)
-        {
+            if (id == null) return null;
             if (_customTimes == null)
             {
                 if (createIfNotExists)
@@ -236,6 +262,7 @@ namespace com.spacepuppy
 
         public static bool HasCustom(string id)
         {
+            if (id == null) return false;
             if (_customTimes == null) return false;
             return _customTimes.ContainsKey(id);
         }
@@ -247,6 +274,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public static bool RemoveCustomTime(string id)
         {
+            if (id == null) return false;
             if (_customTimes != null) return _customTimes.Remove(id);
             else return false;
         }
@@ -284,6 +312,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public static float GetInverseScale(IScalableTimeSupplier supplier)
         {
+            if (supplier == null) return 1f;
             if (supplier is NormalTimeSupplier) return 1f;
 
             return supplier.Scale / Time.timeScale;

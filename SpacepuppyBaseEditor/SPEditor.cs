@@ -90,7 +90,7 @@ namespace com.spacepuppyeditor
 
                 foreach(var info in _shownFields)
                 {
-                    GUI.enabled = !info.Attrib.Readonly;
+                    if (info.Attrib.Readonly) GUI.enabled = false;
 
                     var value = info.FieldInfo.GetValue(this.target);
                     EditorGUI.BeginChangeCheck();
@@ -100,7 +100,7 @@ namespace com.spacepuppyeditor
                         info.FieldInfo.SetValue(this.target, value);
                     }
 
-                    GUI.enabled = true;
+                    if (info.Attrib.Readonly) GUI.enabled = true;
                 }
             }
         }

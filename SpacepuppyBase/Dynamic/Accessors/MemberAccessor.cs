@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
-namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
+namespace com.spacepuppy.Dynamic.Accessors
 {
     internal sealed class ChainingAccessor : IMemberAccessor
     {

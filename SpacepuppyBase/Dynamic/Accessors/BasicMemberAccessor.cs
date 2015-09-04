@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
+namespace com.spacepuppy.Dynamic.Accessors
 {
     public class BasicMemberAccessor : IMemberAccessor
     {

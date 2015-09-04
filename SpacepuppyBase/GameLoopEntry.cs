@@ -94,6 +94,8 @@ namespace com.spacepuppy
 
         #region Properties
 
+        public static bool Initialized { get { return _instance != null; } }
+
         public static GameLoopEntry Hook
         {
             get

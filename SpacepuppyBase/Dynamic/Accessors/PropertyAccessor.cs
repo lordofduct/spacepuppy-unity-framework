@@ -8,7 +8,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
+namespace com.spacepuppy.Dynamic.Accessors
 {
     /// <summary>
     /// The PropertyAccessor class provides fast dynamic access

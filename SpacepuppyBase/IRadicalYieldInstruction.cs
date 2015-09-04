@@ -389,7 +389,7 @@ namespace com.spacepuppy
 
         #region Static Interface
 
-        private static com.spacepuppy.Collections.ObjectCachePool<RadicalWaitHandle> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalWaitHandle>(1000, () => new RadicalWaitHandle());
+        private static com.spacepuppy.Collections.ObjectCachePool<RadicalWaitHandle> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalWaitHandle>(-1, () => new RadicalWaitHandle());
 
         public static IRadicalWaitHandle Null
         {
@@ -497,7 +497,7 @@ namespace com.spacepuppy
 
         #region Static Factory
 
-        private static com.spacepuppy.Collections.ObjectCachePool<WaitForDuration> _pool = new com.spacepuppy.Collections.ObjectCachePool<WaitForDuration>(1000, () => new WaitForDuration());
+        private static com.spacepuppy.Collections.ObjectCachePool<WaitForDuration> _pool = new com.spacepuppy.Collections.ObjectCachePool<WaitForDuration>(-1, () => new WaitForDuration());
 
         public static WaitForDuration Seconds(float seconds, ITimeSupplier supplier = null)
         {

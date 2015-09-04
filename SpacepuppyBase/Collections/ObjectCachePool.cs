@@ -97,10 +97,23 @@ namespace com.spacepuppy.Collections
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
 
-            if (_cacheSize > 0 && _inactive.Count < _cacheSize)
+            if(_cacheSize > 0)
             {
-                if (!_resetOnGet && _resetObjectDelegate != null) _resetObjectDelegate(obj);
-                _inactive.Add(obj);
+                if(_inactive.Count < _cacheSize)
+                {
+                    if (!_resetOnGet && _resetObjectDelegate != null) _resetObjectDelegate(obj);
+                    _inactive.Add(obj);
+                }
+            }
+            else
+            {
+                //TODO - we want to gather some average usage, and calculate what we should resize down to, maybe even do the averaging even when there is a defined limit
+                //currently we'll top out at 1024 as a soft limit
+                if(_inactive.Count < 1024)
+                {
+                    if (!_resetOnGet && _resetObjectDelegate != null) _resetObjectDelegate(obj);
+                    _inactive.Add(obj);
+                }
             }
         }
 

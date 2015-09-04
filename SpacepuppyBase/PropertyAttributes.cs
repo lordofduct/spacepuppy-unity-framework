@@ -200,6 +200,8 @@ namespace com.spacepuppy
         public string ElementLabelFormatString = null;
         public bool DisallowFoldout;
         public bool RemoveBackgroundWhenCollapsed;
+        public bool Draggable = true;
+        public float ElementPadding = 0f;
 
         public ReorderableArrayAttribute()
         {

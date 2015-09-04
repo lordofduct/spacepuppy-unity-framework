@@ -4,7 +4,6 @@ using System.Linq;
 
 using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
-using com.spacepuppy.Utils.FastDynamicMemberAccessor;
 
 namespace com.spacepuppy.Tween
 {

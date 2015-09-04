@@ -8,6 +8,46 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Dynamic
 {
 
+    /// <summary>
+    /// ##Statements
+    /// (...)
+    /// ##Operators
+    /// +
+    /// *
+    /// -
+    /// /
+    /// %
+    /// ^
+    /// 
+    /// ##Functions
+    /// Abs(...)
+    /// Sqrt(...)
+    /// Cos(...)
+    /// Sin(...)
+    /// Tan(...)
+    /// Acos(...)
+    /// Asin(...)
+    /// Atan(...)
+    /// 
+    /// These function names are not case sensitive
+    /// 
+    /// #Variables
+    /// $secsInMin
+    /// $secsInHour
+    /// $secsInDay
+    /// $secsInWeek
+    /// $secsInYear
+    /// 
+    /// These are global values, they are not case sensitive
+    /// 
+    /// #Special Case
+    /// $.nameOfProperty
+    /// 
+    /// In the case of the object referenced on a VariantReference, you can access its properties by typing $ followed by a dot (.) 
+    /// and the name of the property. The property is case sensitive and must be spelled as it appears in code.
+    /// 
+    /// $.CurrentTime / $secsInHour % 24
+    /// </summary>
     public class Evaluator
     {
 
@@ -272,6 +312,114 @@ namespace com.spacepuppy.Dynamic
 
 
 
+        #region Utils
+
+        public static object TrySum(object a, object b)
+        {
+            if (a == null) return b;
+            if (b == null) return a;
+
+            var atp = a.GetType();
+            if (ConvertUtil.IsNumericType(atp))
+            {
+                return ConvertUtil.ToPrim(ConvertUtil.ToDouble(a) + ConvertUtil.ToDouble(b), atp);
+            }
+            else if (atp == typeof(UnityEngine.Vector2))
+            {
+                return ConvertUtil.ToVector2(a) + ConvertUtil.ToVector2(b);
+            }
+            else if (atp == typeof(UnityEngine.Vector3))
+            {
+                return ConvertUtil.ToVector3(a) + ConvertUtil.ToVector3(b);
+            }
+            else if (atp == typeof(UnityEngine.Vector4))
+            {
+                return ConvertUtil.ToVector4(a) + ConvertUtil.ToVector4(b);
+            }
+            else if (atp == typeof(UnityEngine.Quaternion))
+            {
+                return ConvertUtil.ToQuaternion(a) * ConvertUtil.ToQuaternion(b);
+            }
+            else
+            {
+                return b;
+            }
+        }
+
+        public static object TryDifference(object a, object b)
+        {
+            if (a == null) return b;
+            if (b == null) return a;
+
+            var atp = a.GetType();
+            if (ConvertUtil.IsNumericType(atp))
+            {
+                return ConvertUtil.ToPrim(ConvertUtil.ToDouble(a) - ConvertUtil.ToDouble(b), atp);
+            }
+            else if (atp == typeof(UnityEngine.Vector2))
+            {
+                return ConvertUtil.ToVector2(a) - ConvertUtil.ToVector2(b);
+            }
+            else if (atp == typeof(UnityEngine.Vector3))
+            {
+                return ConvertUtil.ToVector3(a) - ConvertUtil.ToVector3(b);
+            }
+            else if (atp == typeof(UnityEngine.Vector4))
+            {
+                return ConvertUtil.ToVector4(a) - ConvertUtil.ToVector4(b);
+            }
+            else if (atp == typeof(UnityEngine.Quaternion))
+            {
+                return ConvertUtil.ToQuaternion(a) * UnityEngine.Quaternion.Inverse(ConvertUtil.ToQuaternion(b));
+            }
+            else
+            {
+                return b;
+            }
+        }
+
+        public static object TryToggle(object value)
+        {
+            if (value == null) return null;
+
+            var tp = value.GetType();
+            if (ConvertUtil.IsNumericType(tp))
+            {
+                return ConvertUtil.ToPrim(ConvertUtil.ToDouble(value) * -1.0, tp);
+            }
+            else if (tp == typeof(UnityEngine.Vector2))
+            {
+                return ConvertUtil.ToVector2(value) * -1f;
+            }
+            else if (tp == typeof(UnityEngine.Vector3))
+            {
+                return ConvertUtil.ToVector3(value) * -1f;
+            }
+            else if (tp == typeof(UnityEngine.Vector4))
+            {
+                return ConvertUtil.ToVector4(value) * -1f;
+            }
+            else if (tp == typeof(UnityEngine.Quaternion))
+            {
+                return UnityEngine.Quaternion.Inverse(ConvertUtil.ToQuaternion(value));
+            }
+            else
+            {
+                return value;
+            }
+        }
+
+        public static bool WillArithmeticallyCompute(System.Type tp)
+        {
+            if (ConvertUtil.IsNumericType(tp)) return true;
+            if (tp == typeof(UnityEngine.Vector2)) return true;
+            if (tp == typeof(UnityEngine.Vector3)) return true;
+            if (tp == typeof(UnityEngine.Vector4)) return true;
+            if (tp == typeof(UnityEngine.Quaternion)) return true;
+
+            return false;
+        }
+
         private static bool IsArithmeticSymbol(char c)
         {
             switch(c)
@@ -287,6 +435,8 @@ namespace com.spacepuppy.Dynamic
                     return false;
             }
         }
+
+        #endregion
 
     }
 

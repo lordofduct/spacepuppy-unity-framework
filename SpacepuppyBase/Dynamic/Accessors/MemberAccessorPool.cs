@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
+using com.spacepuppy.Utils;
+
+namespace com.spacepuppy.Dynamic.Accessors
 {
     public static class MemberAccessorPool
     {
@@ -71,6 +73,8 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
         public static IMemberAccessor GetAccessor(Type objectType, string memberName, out System.Type effectivelyAlteredValueType)
         {
             if (objectType == null) throw new System.ArgumentNullException("objectType");
+            const MemberTypes MASK_MEMBERTYPES = MemberTypes.Field | MemberTypes.Property;
+            const BindingFlags MASK_BINDINGS = BindingFlags.Public | BindingFlags.Instance;
 
             if(memberName.Contains('.'))
             {
@@ -79,8 +83,8 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
                 for(int i = 0; i < arr.Length; i++)
                 {
                     var matches = objectType.GetMember(arr[i],
-                                                   MemberTypes.Field | MemberTypes.Property,
-                                                   BindingFlags.Public | BindingFlags.Instance);
+                                                       MASK_MEMBERTYPES,
+                                                       MASK_BINDINGS);
                     if (matches == null || matches.Length == 0)
                         throw new MemberAccessorException(string.Format("Member \"{0}\" does not exist for type {1}.", memberName, objectType));
 
@@ -100,8 +104,8 @@ namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
             else
             {
                 var matches = objectType.GetMember(memberName,
-                                                   MemberTypes.Field | MemberTypes.Property,
-                                                   BindingFlags.Public | BindingFlags.Instance);
+                                                   MASK_MEMBERTYPES,
+                                                   MASK_BINDINGS);
                 if (matches == null || matches.Length == 0)
                     throw new MemberAccessorException(string.Format("Member \"{0}\" does not exist for type {1}.", memberName, objectType));
 

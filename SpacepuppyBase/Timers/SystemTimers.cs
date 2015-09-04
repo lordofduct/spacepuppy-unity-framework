@@ -22,11 +22,18 @@ namespace com.spacepuppy.Timers
 
         static SystemTimers()
         {
+            if(!GameLoopEntry.Initialized)
+            {
+                throw new System.InvalidOperationException("Make sure to initialize the GameLoopEntry on the main thread before accessing SystemTimers.");
+            }
+
             _hookTimer = new System.Timers.Timer(10); //every 10 milliseconds
             _hookTimer.Elapsed += OnUpdate;
             _hookTimer.Start();
 
             //GameLoopEntry.EarlyUpdate += OnUpdate;
+
+            GameLoopEntry.ApplicatinQuit += (s, e) => { if(_hookTimer != null) _hookTimer.Close(); };
         }
 
         #endregion
@@ -45,6 +52,7 @@ namespace com.spacepuppy.Timers
 
         public static void Start(ITimer t)
         {
+            if (_activeTimers.Count == 0) _hookTimer.Start();
             _activeTimers.Start(t);
         }
 
@@ -56,6 +64,7 @@ namespace com.spacepuppy.Timers
         public static void Stop(ITimer t)
         {
             _activeTimers.Stop(t);
+            if (_activeTimers.Count == 0) _hookTimer.Stop();
         }
 
         public static void CreateGypsyTimer(float delay, System.Action<Timer> complete)

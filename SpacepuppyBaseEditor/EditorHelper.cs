@@ -46,6 +46,25 @@ namespace com.spacepuppyeditor
             }
         }
 
+        private static int _guiDisableStack = 0;
+        public static int GuiDisabled
+        {
+            get { return _guiDisableStack; }
+            set
+            {
+                _guiDisableStack++;
+                if (_guiDisableStack > 0)
+                {
+                    GUI.enabled = false;
+                }
+                else
+                {
+                    _guiDisableStack = 0;
+                    GUI.enabled = true;
+                }
+            }
+        }
+
 
         static EditorHelper()
         {
@@ -494,6 +513,7 @@ namespace com.spacepuppyeditor
 
         private static void OnSceneGUI(SceneView scene)
         {
+            GuiDisabled = 0;
             foreach(var c in _temp_text.ActiveMembers.ToArray())
             {
                 _temp_text.Release(c);

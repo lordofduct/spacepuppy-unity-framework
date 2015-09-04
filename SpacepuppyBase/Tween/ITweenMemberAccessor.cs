@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using com.spacepuppy.Utils.FastDynamicMemberAccessor;
+using com.spacepuppy.Dynamic.Accessors;
 
 namespace com.spacepuppy.Tween
 {

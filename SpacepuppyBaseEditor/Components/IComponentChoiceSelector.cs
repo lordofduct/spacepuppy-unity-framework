@@ -39,14 +39,7 @@ namespace com.spacepuppyeditor.Components
 
         protected virtual Component[] DoGetComponents()
         {
-            if(_drawer.ForceOnlySelf)
-            {
-                return GetComponentsFromSerializedObjectTarget(_property, _restrictionType, _drawer.SearchChildren);
-            }
-            else
-            {
-                return GetComponentsFromPropertyObjectReference(_property, _restrictionType, _drawer.SearchChildren);
-            }
+            return GetComponentsFromSerializedProperty(_property, _restrictionType, _drawer.ForceOnlySelf, _drawer.SearchChildren);
         }
 
         protected virtual void OnBeforeGUI()
@@ -121,21 +114,18 @@ namespace com.spacepuppyeditor.Components
 
 
 
-        public static Component[] GetComponentsFromPropertyObjectReference(SerializedProperty property, System.Type restrictionType, bool searchChildren)
+        public static GameObject GetGameObjectFromSource(SerializedProperty property, bool forceSelfOnly)
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(property.objectReferenceValue);
-            if (go == null) return new Component[] { };
-
-            if(searchChildren)
-                return go.GetComponentsInChildren(restrictionType);
+            if (forceSelfOnly)
+                return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
             else
-                return go.GetComponents(restrictionType);
+                return GameObjectUtil.GetGameObjectFromSource(property.objectReferenceValue);
         }
 
-        public static Component[] GetComponentsFromSerializedObjectTarget(SerializedProperty property, System.Type restrictionType, bool searchChildren)
+        public static Component[] GetComponentsFromSerializedProperty(SerializedProperty property, System.Type restrictionType, bool forceSelfOnly, bool searchChildren)
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-            if (go == null) return new Component[] { };
+            var go = GetGameObjectFromSource(property, forceSelfOnly);
+            if (go == null) return ArrayUtil.Empty<Component>();
 
             if (searchChildren)
                 return go.GetComponentsInChildren(restrictionType);
@@ -149,17 +139,30 @@ namespace com.spacepuppyeditor.Components
             _uniqueCount.Clear();
             for (int i = 0; i < components.Length; i++)
             {
+                //var tp = components[i].GetType();
+                //if (_uniqueCount.ContainsKey(tp))
+                //{
+                //    _uniqueCount[tp]++;
+                //    yield return tp.Name + " " + _uniqueCount[tp].ToString();
+                //}
+                //else
+                //{
+                //    _uniqueCount.Add(tp, 1);
+                //    yield return tp.Name;
+                //}
+
                 var tp = components[i].GetType();
                 if (_uniqueCount.ContainsKey(tp))
                 {
                     _uniqueCount[tp]++;
-                    yield return tp.Name + " " + _uniqueCount[tp].ToString();
+                    yield return string.Format("{0} ({1} {2})", components[i].gameObject.name, tp.Name, _uniqueCount[tp]);
                 }
                 else
                 {
                     _uniqueCount.Add(tp, 1);
-                    yield return tp.Name;
+                    yield return string.Format("{0} ({1})", components[i].gameObject.name, tp.Name);
                 }
+
             }
             _uniqueCount.Clear();
         }
@@ -169,6 +172,7 @@ namespace com.spacepuppyeditor.Components
             _uniqueCount.Clear();
             for (int i = 0; i < components.Length; i++)
             {
+                //TODO - maybe come up with a better naming scheme for this
                 var tp = components[i].GetType();
                 if (_uniqueCount.ContainsKey(tp))
                 {

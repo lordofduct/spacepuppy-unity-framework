@@ -119,10 +119,12 @@ namespace com.spacepuppyeditor.Components
                 if (this.ShowXButton && SPEditorGUI.XButton(ref position, "Clear Selected GameObject", this.XButtonOnRightSide))
                 {
                     property.objectReferenceValue = null;
+                    fullsize = this.DrawDotDotButton(fullsize, property);
                     this.DrawObjectRefField(fullsize, property);
                 }
                 else
                 {
+                    position = this.DrawDotDotButton(position, property);
                     var components = this.ChoiceSelector.GetComponents();
                     var names = this.ChoiceSelector.GetPopupEntries();
                     int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
@@ -132,6 +134,20 @@ namespace com.spacepuppyeditor.Components
 
                 this.ChoiceSelector.GUIComplete(property);
             }
+        }
+
+        private Rect DrawDotDotButton(Rect position, SerializedProperty property)
+        {
+            var w = Mathf.Min(SPEditorGUI.X_BTN_WIDTH, position.width);
+            Rect r = new Rect(position.xMax - w, position.yMin, w, EditorGUIUtility.singleLineHeight);
+            position = new Rect(position.xMin, position.yMin, position.width - w, position.height);
+
+            if(GUI.Button(r, EditorHelper.TempContent("...")))
+            {
+                EditorGUIUtility.PingObject(property.objectReferenceValue as Component);
+            }
+
+            return position;
         }
 
         private void DrawObjectRefField(Rect position, SerializedProperty property)

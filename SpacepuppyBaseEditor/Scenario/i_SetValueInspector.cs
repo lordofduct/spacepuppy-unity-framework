@@ -71,7 +71,7 @@ namespace com.spacepuppyeditor.Scenario
                     }
                 }
 
-                if (com.spacepuppy.Dynamic.DynamicUtil.WillArithmeticallyCompute(propType))
+                if (com.spacepuppy.Dynamic.Evaluator.WillArithmeticallyCompute(propType))
                 {
                     EditorGUILayout.PropertyField(modeProp);
                 }

@@ -4,7 +4,7 @@
 // Author: James Nies
 // Licensed under The Code Project Open License (CPOL): http://www.codeproject.com/info/cpol10.aspx
 
-namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
+namespace com.spacepuppy.Dynamic.Accessors
 {
     /// <summary>
     /// The IMemberAccessor interface defines a member

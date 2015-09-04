@@ -23,6 +23,7 @@ namespace com.spacepuppyeditor.Base
         private GUIContent _label;
         private bool _disallowFoldout;
         private bool _removeBackgroundWhenCollapsed;
+        private bool _draggable = true;
 
         private PropertyDrawer _internalDrawer;
 
@@ -33,6 +34,7 @@ namespace com.spacepuppyeditor.Base
         private CachedReorderableList GetList(SerializedProperty property, GUIContent label)
         {
             var lst = CachedReorderableList.GetListDrawer(property, _maskList_DrawHeader, _maskList_DrawElement);
+            lst.draggable = _draggable;
 
             if(property.arraySize > 0)
             {
@@ -57,6 +59,13 @@ namespace com.spacepuppyeditor.Base
             {
                 _disallowFoldout = attrib.DisallowFoldout;
                 _removeBackgroundWhenCollapsed = attrib.RemoveBackgroundWhenCollapsed;
+                _draggable = attrib.Draggable;
+            }
+            else
+            {
+                _disallowFoldout = false;
+                _removeBackgroundWhenCollapsed = false;
+                _draggable = true;
             }
 
             _label = label;
@@ -161,14 +170,17 @@ namespace com.spacepuppyeditor.Base
 
             //EditorGUI.PropertyField(area, element, GUIContent.none, false);
             var attrib = this.attribute as ReorderableArrayAttribute;
-            GUIContent label;
-            if(attrib != null && attrib.ElementLabelFormatString != null)
+            GUIContent label = GUIContent.none;
+            if(attrib != null)
             {
-                label = EditorHelper.TempContent(string.Format(attrib.ElementLabelFormatString, index));
-            }
-            else
-            {
-                label = GUIContent.none;
+                if (attrib.ElementLabelFormatString != null)
+                {
+                    label = EditorHelper.TempContent(string.Format(attrib.ElementLabelFormatString, index));
+                }
+                if(attrib.ElementPadding > 0f)
+                {
+                    area = new Rect(area.xMin + attrib.ElementPadding, area.yMin, Mathf.Max(0f, area.width - attrib.ElementPadding), area.height);
+                }
             }
 
             if(_internalDrawer != null)

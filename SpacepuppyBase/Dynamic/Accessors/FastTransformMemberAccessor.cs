@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
+using com.spacepuppy.Utils;
+
+namespace com.spacepuppy.Dynamic.Accessors
 {
     internal class FastTransformMemberAccessor : IMemberAccessor
     {

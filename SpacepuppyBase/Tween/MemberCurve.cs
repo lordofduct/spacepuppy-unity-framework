@@ -6,7 +6,8 @@ using System.Reflection;
 using com.spacepuppy.Collections;
 using com.spacepuppy.Tween.Curves;
 using com.spacepuppy.Utils;
-using com.spacepuppy.Utils.FastDynamicMemberAccessor;
+using com.spacepuppy.Dynamic;
+using com.spacepuppy.Dynamic.Accessors;
 
 namespace com.spacepuppy.Tween
 {

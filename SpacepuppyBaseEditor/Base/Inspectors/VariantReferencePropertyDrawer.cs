@@ -120,7 +120,6 @@ namespace com.spacepuppyeditor.Base
             var r0 = new Rect(position.xMin, position.yMin, 90.0f, EditorGUIUtility.singleLineHeight);
             var r1 = new Rect(r0.xMax, position.yMin, position.xMax - r0.xMax, EditorGUIUtility.singleLineHeight);
 
-            var bCache = GUI.enabled;
             if (this.RestrictVariantType) GUI.enabled = false;
 
             EditorGUI.BeginChangeCheck();
@@ -130,7 +129,7 @@ namespace com.spacepuppyeditor.Base
                 helper.PrepareForValueTypeChange(valueType);
             }
 
-            GUI.enabled = bCache;
+            if (this.RestrictVariantType) GUI.enabled = true;
 
             switch (valueType)
             {
@@ -159,6 +158,9 @@ namespace com.spacepuppyeditor.Base
                     break;
                 case VariantType.Vector3:
                     variant.Vector3Value = EditorGUI.Vector3Field(r1, GUIContent.none, variant.Vector3Value);
+                    break;
+                case VariantType.Vector4:
+                    variant.Vector4Value = EditorGUI.Vector4Field(r1, null, variant.Vector4Value);
                     break;
                 case VariantType.Quaternion:
                     variant.QuaternionValue = SPEditorGUI.QuaternionField(r1, GUIContent.none, variant.QuaternionValue);

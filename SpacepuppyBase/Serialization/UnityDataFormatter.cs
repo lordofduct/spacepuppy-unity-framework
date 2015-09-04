@@ -154,7 +154,7 @@ namespace com.spacepuppy.Serialization
             }
             else
             {
-                var pool = new ObjectCachePool<UnityDataFormatter>(5, () =>
+                var pool = new ObjectCachePool<UnityDataFormatter>(10, () =>
                 {
                     var f = new UnityDataFormatter(System.Activator.CreateInstance<T>());
                     f._pooledTypeKey = typeof(T);

@@ -29,9 +29,9 @@ namespace com.spacepuppyeditor.Modifiers
 
         protected internal override void OnPostGUI(SerializedProperty property)
         {
-            if(_cached != null)
+            if (_cached != null)
             {
-                GUI.enabled = _cached.Value;
+                GUI.enabled = (bool)_cached.Value;
             }
         }
 

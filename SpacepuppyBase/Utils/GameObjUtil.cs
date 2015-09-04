@@ -1052,7 +1052,7 @@ namespace com.spacepuppy.Utils
 
             if (child.parent == obj) return;
             child.parent = obj;
-            if (!suppressChangeHierarchyMessage) child.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED);
+            if (!suppressChangeHierarchyMessage) child.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED, SendMessageOptions.DontRequireReceiver);
         }
 
         /// <summary>
@@ -1068,7 +1068,7 @@ namespace com.spacepuppy.Utils
             var t = obj.transform;
             if (t.parent == null) return;
             t.parent = null;
-            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED);
+            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED, SendMessageOptions.DontRequireReceiver);
         }
 
         /// <summary>
@@ -1083,7 +1083,7 @@ namespace com.spacepuppy.Utils
 
             if (obj.parent == null) return;
             obj.parent = null;
-            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED);
+            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED, SendMessageOptions.DontRequireReceiver);
         }
 
         #endregion

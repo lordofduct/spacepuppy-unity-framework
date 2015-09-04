@@ -137,11 +137,12 @@ namespace com.spacepuppy
         Double = 5,
         Vector2 = 6,
         Vector3 = 7,
-        Quaternion = 8,
-        Color = 9,
-        DateTime = 10,
-        GameObject = 11,
-        Component = 12
+        Vector4 = 8,
+        Quaternion = 9,
+        Color = 10,
+        DateTime = 11,
+        GameObject = 12,
+        Component = 13
     }
 
 }

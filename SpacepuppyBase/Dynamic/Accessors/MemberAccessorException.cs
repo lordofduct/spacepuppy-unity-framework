@@ -6,7 +6,7 @@
 
 using System;
 
-namespace com.spacepuppy.Utils.FastDynamicMemberAccessor
+namespace com.spacepuppy.Dynamic.Accessors
 {
     /// <summary>
     /// PropertyAccessorException class.

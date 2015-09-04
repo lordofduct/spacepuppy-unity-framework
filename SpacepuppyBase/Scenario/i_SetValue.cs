@@ -55,19 +55,19 @@ namespace com.spacepuppy.Scenario
                 case SetMode.Increment:
                     {
                         var v = DynamicUtil.GetValue(_target, _memberName);
-                        v = DynamicUtil.TrySum(v, _value.Value);
+                        v = Evaluator.TrySum(v, _value.Value);
                         return DynamicUtil.SetValue(_target, _memberName, v);
                     }
                 case SetMode.Decrement:
                     {
                         var v = DynamicUtil.GetValue(_target, _memberName);
-                        v = DynamicUtil.TryDifference(v, _value.Value);
+                        v = Evaluator.TryDifference(v, _value.Value);
                         return DynamicUtil.SetValue(_target, _memberName, v);
                     }
                 case SetMode.Toggle:
                     {
                         var v = DynamicUtil.GetValue(_target, _memberName);
-                        v = DynamicUtil.TryToggle(v);
+                        v = Evaluator.TryToggle(v);
                         return DynamicUtil.SetValue(_target, _memberName, v);
                     }
             }
