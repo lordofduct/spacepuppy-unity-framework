@@ -52,6 +52,7 @@
     <Compile Include="Base\Inspectors\SPTimePropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\TimePeriodPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\TimeUnitsSelectorPropertyDrawer.cs" />
+    <Compile Include="Collections\DictionaryPropertyDrawer.cs" />
     <Compile Include="EditorHierarchyAlternateContextMenuEvents.cs" />
     <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
     <Compile Include="Geom\CubicBezierCurvePropertyDrawer.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Render\MaterialTransitionPropertyDrawer.cs" />
     <Compile Include="ReorderableListHelper.cs" />
     <Compile Include="Scenario\i_SetValueInspector.cs" />
+    <Compile Include="Scenario\i_TweenValueInspector.cs" />
     <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerableTargetObjectPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerComponentInspector.cs" />

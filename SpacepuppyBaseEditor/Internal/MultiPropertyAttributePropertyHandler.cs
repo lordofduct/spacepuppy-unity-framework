@@ -43,6 +43,15 @@ namespace com.spacepuppyeditor.Internal
         {
             var fieldType = _fieldInfo.FieldType;
             if (fieldType.IsListType()) fieldType = fieldType.GetElementTypeOfListType();
+
+            var fieldTypePropertyDrawerType = ScriptAttributeUtility.GetDrawerTypeForType(fieldType);
+            if (fieldTypePropertyDrawerType != null && TypeUtil.IsType(fieldTypePropertyDrawerType, typeof(PropertyDrawer)))
+            {
+                _drawer = PropertyDrawerActivator.Create(fieldTypePropertyDrawerType, null, _fieldInfo);
+                if (_drawer != null && _fieldInfo.FieldType.IsListType()) _drawer = new ArrayPropertyDrawer(_drawer);
+            }
+
+
             foreach(var attrib in attribs)
             {
                 this.HandleAttribute(attrib, _fieldInfo, fieldType);
@@ -87,7 +96,7 @@ namespace com.spacepuppyeditor.Internal
                     }
                     else if (drawer is IArrayHandlingPropertyDrawer)
                     {
-                        //got an array drawer, this overrides previous drivers
+                        //got an array drawer, this overrides previous drawers
                         if (_drawer is IArrayHandlingPropertyDrawer)
                         {
                             var temp = _drawer as IArrayHandlingPropertyDrawer;

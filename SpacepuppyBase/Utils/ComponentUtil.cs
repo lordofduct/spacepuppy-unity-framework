@@ -28,6 +28,57 @@ namespace com.spacepuppy.Utils
             return (obj is GameObject || obj is Component);
         }
 
+        public static T GetComponentFromSource<T>(object obj) where T : class
+        {
+            if (obj == null) return null;
+            if (obj is T) return obj as T;
+            if (obj is IComponent)
+            {
+                var c = (obj as IComponent).component;
+                if (c is T) return c as T;
+                else return c.GetComponentAlt<T>();
+            }
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go != null)
+                return go.GetComponentAlt<T>();
+
+            return null;
+        }
+
+        public static Component GetComponentFromSource(System.Type tp, object obj)
+        {
+            if (obj == null) return null;
+            if(TypeUtil.IsType(obj.GetType(), tp))
+            {
+                if (obj is Component) return obj as Component;
+                else if (obj is IComponent) return (obj as IComponent).component;
+                else return null;
+            }
+
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go != null)
+                return go.GetComponent(tp);
+
+            return null;
+        }
+
+        public static Component GetComponentFromSourceAsComponent<T>(object obj) where T : class
+        {
+            if (obj == null) return null;
+            if(obj is T)
+            {
+                if (obj is Component) return obj as Component;
+                else if (obj is IComponent) return (obj as IComponent).component;
+                else return null;
+            }
+
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go != null)
+                return go.GetComponent(typeof(T));
+
+            return null;
+        }
+
         public static bool IsEnabled(this Component comp)
         {
             if (comp == null) return false;
@@ -363,11 +414,11 @@ namespace com.spacepuppy.Utils
             }
             else
             {
-                var temp = TempCollection<T>.GetCollection();
-                GetChildComponents<T>(obj, temp, false, bIncludeInactive);
-                var result = temp.ToArray();
-                temp.Release();
-                return result;
+                using (var temp = TempCollection<T>.GetCollection())
+                {
+                    GetChildComponents<T>(obj, temp, false, bIncludeInactive);
+                    return temp.ToArray();
+                }
             }
         }
 
@@ -423,11 +474,11 @@ namespace com.spacepuppy.Utils
             }
             else
             {
-                var temp = TempCollection<Component>.GetCollection();
-                GetChildComponents(obj, tp, temp, false, bIncludeInactive);
-                var result = temp.ToArray();
-                temp.Release();
-                return result;
+                using (var temp = TempCollection<Component>.GetCollection())
+                {
+                    GetChildComponents(obj, tp, temp, false, bIncludeInactive);
+                    return temp.ToArray();
+                }
             }
         }
 

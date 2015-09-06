@@ -165,22 +165,23 @@ namespace com.spacepuppy
 
         public static void CleanLinks()
         {
-            var toRemove = com.spacepuppy.Collections.TempCollection<PairToken>.GetCollection();
-            var e1 = _table.Keys.GetEnumerator();
-            while (e1.MoveNext())
+            using (var toRemove = com.spacepuppy.Collections.TempCollection<PairToken>.GetCollection())
             {
-                if (e1.Current.IsDead) toRemove.Add(e1.Current);
-            }
-
-            if (toRemove.Count > 0)
-            {
-                var e2 = toRemove.GetEnumerator();
-                while (e2.MoveNext())
+                var e1 = _table.Keys.GetEnumerator();
+                while (e1.MoveNext())
                 {
-                    _table.Remove(e2.Current);
+                    if (e1.Current.IsDead) toRemove.Add(e1.Current);
+                }
+
+                if (toRemove.Count > 0)
+                {
+                    var e2 = toRemove.GetEnumerator();
+                    while (e2.MoveNext())
+                    {
+                        _table.Remove(e2.Current);
+                    }
                 }
             }
-            toRemove.Release();
         }
 
         private static void OnGlobalLevelWasLoaded(object sender, GameLoopEntry.LevelWasLoadedEventArgs ev)
@@ -385,22 +386,23 @@ namespace com.spacepuppy
 
         public static void CleanLinks()
         {
-            var toRemove = com.spacepuppy.Collections.TempCollection<PairToken>.GetCollection();
-            var e1 = _table.Keys.GetEnumerator();
-            while (e1.MoveNext())
+            using (var toRemove = com.spacepuppy.Collections.TempCollection<PairToken>.GetCollection())
             {
-                if (e1.Current.IsDead) toRemove.Add(e1.Current);
-            }
-
-            if (toRemove.Count > 0)
-            {
-                var e2 = toRemove.GetEnumerator();
-                while (e2.MoveNext())
+                var e1 = _table.Keys.GetEnumerator();
+                while (e1.MoveNext())
                 {
-                    _table.Remove(e2.Current);
+                    if (e1.Current.IsDead) toRemove.Add(e1.Current);
+                }
+
+                if (toRemove.Count > 0)
+                {
+                    var e2 = toRemove.GetEnumerator();
+                    while (e2.MoveNext())
+                    {
+                        _table.Remove(e2.Current);
+                    }
                 }
             }
-            toRemove.Release();
         }
 
         private static void OnGlobalLevelWasLoaded(object sender, GameLoopEntry.LevelWasLoadedEventArgs ev)

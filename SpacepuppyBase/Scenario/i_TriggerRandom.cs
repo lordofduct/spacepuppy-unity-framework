@@ -12,7 +12,7 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField()]
-        [Trigger.Config(true)]
+        [Trigger.Config(Weighted=true)]
         private Trigger _targets;
 
         public bool PassAlongTriggerArg;

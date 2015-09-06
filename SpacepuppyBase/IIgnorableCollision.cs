@@ -162,24 +162,23 @@ namespace com.spacepuppy
         {
             lock (_table)
             {
-                var toRemove = com.spacepuppy.Collections.TempCollection<Collider>.GetCollection();
-
-                var e1 = _table.Keys.GetEnumerator();
-                while (e1.MoveNext())
+                using (var toRemove = com.spacepuppy.Collections.TempCollection<Collider>.GetCollection())
                 {
-                    if (e1.Current == null) toRemove.Add(e1.Current);
-                }
-
-                if (toRemove.Count > 0)
-                {
-                    var e2 = toRemove.GetEnumerator();
-                    while (e2.MoveNext())
+                    var e1 = _table.Keys.GetEnumerator();
+                    while (e1.MoveNext())
                     {
-                        _table.Remove(e2.Current);
+                        if (e1.Current == null) toRemove.Add(e1.Current);
+                    }
+
+                    if (toRemove.Count > 0)
+                    {
+                        var e2 = toRemove.GetEnumerator();
+                        while (e2.MoveNext())
+                        {
+                            _table.Remove(e2.Current);
+                        }
                     }
                 }
-
-                toRemove.Release();
             }
         }
 

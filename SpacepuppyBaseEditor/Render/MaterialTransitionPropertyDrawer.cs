@@ -84,58 +84,57 @@ namespace com.spacepuppyeditor.Render
             if(mat != null && mat.shader != null)
             {
                 int cnt = ShaderUtil.GetPropertyCount(mat.shader);
-                var infoLst = TempCollection<PropInfo>.GetCollection(cnt);
-                var contentLst = TempCollection<GUIContent>.GetCollection(cnt);
-                int index = -1;
-
-                for(int i = 0; i < cnt; i++)
+                using(var infoLst = TempCollection<PropInfo>.GetCollection(cnt))
+                using (var contentLst = TempCollection<GUIContent>.GetCollection(cnt))
                 {
-                    var nm = ShaderUtil.GetPropertyName(mat.shader, i);
-                    var tp = ShaderUtil.GetPropertyType(mat.shader, i);
-                    
-                    switch(tp)
+                    int index = -1;
+
+                    for (int i = 0; i < cnt; i++)
                     {
-                        case ShaderUtil.ShaderPropertyType.Float:
-                            if (propNameProp.stringValue == nm) index = infoLst.Count;
-                            infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Float));
-                            contentLst.Add(EditorHelper.TempContent(nm + " (float)"));
-                            break;
-                        case ShaderUtil.ShaderPropertyType.Range:
-                            if (propNameProp.stringValue == nm) index = infoLst.Count;
-                            infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Float));
-                            var min = ShaderUtil.GetRangeLimits(mat.shader, i, 1);
-                            var max = ShaderUtil.GetRangeLimits(mat.shader, i, 2);
-                            contentLst.Add(EditorHelper.TempContent(string.Format("{0} (Range [{1}, {2}]])", nm, min, max)));
-                            break;
-                        case ShaderUtil.ShaderPropertyType.Color:
-                            if (propNameProp.stringValue == nm) index = infoLst.Count;
-                            infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Color));
-                            contentLst.Add(EditorHelper.TempContent(nm + " (color)"));
-                            break;
-                        case ShaderUtil.ShaderPropertyType.Vector:
-                            if (propNameProp.stringValue == nm) index = infoLst.Count;
-                            infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Vector));
-                            contentLst.Add(EditorHelper.TempContent(nm + " (vector)"));
-                            break;
+                        var nm = ShaderUtil.GetPropertyName(mat.shader, i);
+                        var tp = ShaderUtil.GetPropertyType(mat.shader, i);
+
+                        switch (tp)
+                        {
+                            case ShaderUtil.ShaderPropertyType.Float:
+                                if (propNameProp.stringValue == nm) index = infoLst.Count;
+                                infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Float));
+                                contentLst.Add(EditorHelper.TempContent(nm + " (float)"));
+                                break;
+                            case ShaderUtil.ShaderPropertyType.Range:
+                                if (propNameProp.stringValue == nm) index = infoLst.Count;
+                                infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Float));
+                                var min = ShaderUtil.GetRangeLimits(mat.shader, i, 1);
+                                var max = ShaderUtil.GetRangeLimits(mat.shader, i, 2);
+                                contentLst.Add(EditorHelper.TempContent(string.Format("{0} (Range [{1}, {2}]])", nm, min, max)));
+                                break;
+                            case ShaderUtil.ShaderPropertyType.Color:
+                                if (propNameProp.stringValue == nm) index = infoLst.Count;
+                                infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Color));
+                                contentLst.Add(EditorHelper.TempContent(nm + " (color)"));
+                                break;
+                            case ShaderUtil.ShaderPropertyType.Vector:
+                                if (propNameProp.stringValue == nm) index = infoLst.Count;
+                                infoLst.Add(new PropInfo(nm, MaterialTransition.MatValueType.Vector));
+                                contentLst.Add(EditorHelper.TempContent(nm + " (vector)"));
+                                break;
+                        }
+                    }
+
+                    index = EditorGUI.Popup(r0, index, contentLst.ToArray());
+
+                    if (index < 0)
+                    {
+                        valTypeProp.SetEnumValue(MaterialTransition.MatValueType.Float);
+                        propNameProp.stringValue = string.Empty;
+                    }
+                    else
+                    {
+                        var info = infoLst[index];
+                        valTypeProp.SetEnumValue(info.MatType);
+                        propNameProp.stringValue = info.Name;
                     }
                 }
-
-                index = EditorGUI.Popup(r0, index, contentLst.ToArray());
-
-                if(index < 0)
-                {
-                    valTypeProp.SetEnumValue(MaterialTransition.MatValueType.Float);
-                    propNameProp.stringValue = string.Empty;
-                }
-                else
-                {
-                    var info = infoLst[index];
-                    valTypeProp.SetEnumValue(info.MatType);
-                    propNameProp.stringValue = info.Name;
-                }
-
-                infoLst.Release();
-                contentLst.Release();
             }
 
         }

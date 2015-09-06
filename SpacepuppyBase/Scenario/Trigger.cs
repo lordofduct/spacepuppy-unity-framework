@@ -177,11 +177,13 @@ namespace com.spacepuppy.Scenario
         public class ConfigAttribute : System.Attribute
         {
             public bool Weighted;
+            public bool AlwaysExpanded;
 
-            public ConfigAttribute(bool weighted)
+            public ConfigAttribute()
             {
-                this.Weighted = weighted;
+
             }
+
         }
 
         public struct Enumerator : IEnumerator<TriggerTarget>

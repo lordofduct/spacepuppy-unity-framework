@@ -57,42 +57,42 @@ namespace com.spacepuppy.Timers
             if (_firstNode == null) return;
 
             var total = _time.TotalPrecise;
-            var lst = com.spacepuppy.Collections.TempCollection<ScheduledEvent>.GetCollection(_nodeCount);
-            var node = _firstNode;
-            _firstNode = null;
-            while(node != null)
+            using (var lst = com.spacepuppy.Collections.TempCollection<ScheduledEvent>.GetCollection(_nodeCount))
             {
-                node._nextScheduledTime = node.GetNextScheduledTime(total);
-                if(double.IsNaN(node._nextScheduledTime))
+                var node = _firstNode;
+                _firstNode = null;
+                while (node != null)
                 {
-                    var tnode = node;
-                    node = node._nextNode;
-                    tnode._prevNode = null;
-                    tnode._nextNode = null;
-                    tnode._owner = null;
+                    node._nextScheduledTime = node.GetNextScheduledTime(total);
+                    if (double.IsNaN(node._nextScheduledTime))
+                    {
+                        var tnode = node;
+                        node = node._nextNode;
+                        tnode._prevNode = null;
+                        tnode._nextNode = null;
+                        tnode._owner = null;
+                    }
+                    else
+                    {
+                        lst.Add(node);
+                    }
                 }
-                else
+
+                _nodeCount = lst.Count;
+                if (_nodeCount > 0)
                 {
-                    lst.Add(node);
+                    lst.Sort((a, b) => a._nextScheduledTime.CompareTo(b._nextScheduledTime));
+
+                    _firstNode = lst[0];
+                    _firstNode._prevNode = null;
+                    for (int i = 1; i < lst.Count; i++)
+                    {
+                        lst[i - 1]._nextNode = lst[i];
+                        lst[i]._prevNode = lst[i - 1];
+                    }
+                    lst[lst.Count - 1]._nextNode = null;
                 }
             }
-
-            _nodeCount = lst.Count;
-            if (_nodeCount > 0)
-            {
-                lst.Sort((a, b) => a._nextScheduledTime.CompareTo(b._nextScheduledTime));
-
-                _firstNode = lst[0];
-                _firstNode._prevNode = null;
-                for (int i = 1; i < lst.Count; i++)
-                {
-                    lst[i - 1]._nextNode = lst[i];
-                    lst[i]._prevNode = lst[i - 1];
-                }
-                lst[lst.Count - 1]._nextNode = null;
-            }
-
-            lst.Release();
         }
 
         public void Update()

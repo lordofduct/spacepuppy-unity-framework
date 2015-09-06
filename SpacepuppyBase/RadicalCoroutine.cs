@@ -964,7 +964,13 @@ namespace com.spacepuppy
 
             public bool Tick(out object yieldObject)
             {
-                if(_e.MoveNext())
+                if (_e == null)
+                {
+                    yieldObject = null;
+                    return false;
+                }
+
+                if (_e.MoveNext())
                 {
                     yieldObject = _e.Current;
                     return true;

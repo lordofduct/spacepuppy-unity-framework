@@ -74,26 +74,27 @@ namespace com.spacepuppy.Collections
             var t = this.UpdateTimeSupplier.Total;
             CooldownInfo info;
 
-            var toRemove = TempCollection<T>.GetCollection();
-            var e1 = _table.GetEnumerator();
-            while(e1.MoveNext())
+            using (var toRemove = TempCollection<T>.GetCollection())
             {
-                info = e1.Current.Value;
-                if(info.Object == null || t - info.StartTime > info.Duration)
+                var e1 = _table.GetEnumerator();
+                while (e1.MoveNext())
                 {
-                    toRemove.Add(info.Object);
+                    info = e1.Current.Value;
+                    if (info.Object == null || t - info.StartTime > info.Duration)
+                    {
+                        toRemove.Add(info.Object);
+                    }
                 }
-            }
 
-            if (toRemove.Count > 0)
-            {
-                var e2 = toRemove.GetEnumerator();
-                while(e2.MoveNext())
+                if (toRemove.Count > 0)
                 {
-                    _table.Remove(e2.Current);
+                    var e2 = toRemove.GetEnumerator();
+                    while (e2.MoveNext())
+                    {
+                        _table.Remove(e2.Current);
+                    }
                 }
             }
-            toRemove.Release();
         }
 
         public void Clear()

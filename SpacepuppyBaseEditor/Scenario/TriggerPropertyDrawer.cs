@@ -32,6 +32,8 @@ namespace com.spacepuppyeditor.Scenario
         private bool _drawWeight;
         private float _totalWeight = 0f;
 
+        private bool _alwaysExpanded;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -45,7 +47,16 @@ namespace com.spacepuppyeditor.Scenario
             if(this.fieldInfo != null)
             {
                 var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
-                if (attribs != null && attribs.Length > 0) _drawWeight = attribs[0].Weighted;
+                if (attribs != null && attribs.Length > 0)
+                {
+                    _drawWeight = attribs[0].Weighted;
+                    _alwaysExpanded = attribs[0].AlwaysExpanded;
+                }
+            }
+            else
+            {
+                _drawWeight = false;
+                _alwaysExpanded = false;
             }
             _triggerTargetDrawer.DrawWeight = _drawWeight;
         }
@@ -56,7 +67,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             this.Init(property, label);
 
-            if(property.isExpanded)
+            if (_alwaysExpanded || property.isExpanded)
             {
                 var h = MARGIN * 2f;
                 h += _targetList.GetHeight();
@@ -86,13 +97,14 @@ namespace com.spacepuppyeditor.Scenario
             this.Init(property, label);
 
             const float WIDTH_FOLDOUT = 5f;
-            property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
+            //if(!_alwaysExpanded) property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
+            if (!_alwaysExpanded) property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none, true);
 
-            if (property.isExpanded)
+            if (_alwaysExpanded || property.isExpanded)
             {
                 if (_drawWeight) this.CalculateTotalWeight();
 
-                GUI.Box(position, GUIContent.none);
+                if(!_alwaysExpanded) GUI.Box(position, GUIContent.none);
 
                 position = new Rect(position.xMin + MARGIN, position.yMin + MARGIN, position.width - MARGIN * 2f, position.height - MARGIN * 2f);
                 EditorGUI.BeginProperty(position, label, property);

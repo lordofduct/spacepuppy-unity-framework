@@ -61,57 +61,57 @@ namespace com.spacepuppyeditor.Base.Inspectors
             var tsNameProp = property.FindPropertyRelative("_timeSupplierName");
 
             int index = -1;
-            var lst = TempCollection<string>.GetCollection();
-            lst.Add("Normal");
-            lst.Add("Real");
-            lst.Add("Smooth");
-
-            foreach (var nm in CustomTimeLayersData.Layers)
+            using (var lst = TempCollection<string>.GetCollection())
             {
-                if (!lst.Contains(nm)) lst.Add(nm);
-            }
+                lst.Add("Normal");
+                lst.Add("Real");
+                lst.Add("Smooth");
 
-            if (availableNames != null)
-            {
-                foreach (var nm in availableNames)
+                foreach (var nm in CustomTimeLayersData.Layers)
                 {
                     if (!lst.Contains(nm)) lst.Add(nm);
                 }
-            }
 
-            var e = tsTypeProp.GetEnumValue<DeltaTimeType>();
-            if (e == DeltaTimeType.Custom)
-            {
-                index = lst.IndexOf(tsNameProp.stringValue);
-                if (index < 0)
+                if (availableNames != null)
                 {
-                    tsTypeProp.SetEnumValue(DeltaTimeType.Normal);
-                    tsNameProp.stringValue = null;
-                    index = 0;
+                    foreach (var nm in availableNames)
+                    {
+                        if (!lst.Contains(nm)) lst.Add(nm);
+                    }
                 }
-            }
-            else
-                index = (int)e;
 
-            if (Application.isPlaying) GUI.enabled = false;
-            EditorGUI.BeginChangeCheck();
-            index = Mathf.Max(EditorGUI.Popup(position, index, lst.ToArray()), 0);
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (index < 3)
+                var e = tsTypeProp.GetEnumValue<DeltaTimeType>();
+                if (e == DeltaTimeType.Custom)
                 {
-                    tsTypeProp.SetEnumValue((DeltaTimeType)index);
-                    tsNameProp.stringValue = null;
+                    index = lst.IndexOf(tsNameProp.stringValue);
+                    if (index < 0)
+                    {
+                        tsTypeProp.SetEnumValue(DeltaTimeType.Normal);
+                        tsNameProp.stringValue = null;
+                        index = 0;
+                    }
                 }
                 else
-                {
-                    tsTypeProp.SetEnumValue(DeltaTimeType.Custom);
-                    tsNameProp.stringValue = lst[index];
-                }
-            }
-            if (Application.isPlaying) GUI.enabled = true;
+                    index = (int)e;
 
-            lst.Release();
+                if (Application.isPlaying) GUI.enabled = false;
+                EditorGUI.BeginChangeCheck();
+                index = Mathf.Max(EditorGUI.Popup(position, index, lst.ToArray()), 0);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (index < 3)
+                    {
+                        tsTypeProp.SetEnumValue((DeltaTimeType)index);
+                        tsNameProp.stringValue = null;
+                    }
+                    else
+                    {
+                        tsTypeProp.SetEnumValue(DeltaTimeType.Custom);
+                        tsNameProp.stringValue = lst[index];
+                    }
+                }
+                if (Application.isPlaying) GUI.enabled = true;
+            }
 
             return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);
         }

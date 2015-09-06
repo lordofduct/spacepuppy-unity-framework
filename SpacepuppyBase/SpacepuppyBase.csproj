@@ -61,6 +61,7 @@
     <Compile Include="Collections\Deque.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
+    <Compile Include="Collections\HashHelper.cs" />
     <Compile Include="Collections\ICachePool.cs" />
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\NotificationPool.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\OrderedDelegate.cs" />
     <Compile Include="Collections\SamplingStack.cs" />
+    <Compile Include="Collections\SerializableDictionaryBase.cs" />
     <Compile Include="Collections\TempCollection.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
     <Compile Include="Collections\UniqueList.cs" />
@@ -129,6 +131,7 @@
     <Compile Include="Scenario\i_PlaySoundEffect.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
+    <Compile Include="Scenario\i_TweenValue.cs" />
     <Compile Include="Scenario\t_OnClick.cs" />
     <Compile Include="Scenario\t_OnEnable.cs" />
     <Compile Include="Scenario\t_OnEventTrigger.cs" />

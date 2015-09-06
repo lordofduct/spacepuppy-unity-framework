@@ -11,7 +11,7 @@ namespace com.spacepuppy.Tween
     public class TweenHash : ITweenHash
     {
 
-        private enum AnimMode
+        public enum AnimMode
         {
             AnimCurve = -2,
             Curve = -1,
@@ -287,6 +287,12 @@ namespace com.spacepuppy.Tween
         public TweenHash FromTo(string memberName, Ease ease, object start, object end, float dur, object option = null)
         {
             _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, start, dur, option, end));
+            return this;
+        }
+
+        public TweenHash ByAnimMode(AnimMode mode, string memberName, Ease ease, object value, float dur, object end)
+        {
+            _props.Add(new PropInfo(mode, memberName, ease, value, dur, null, end));
             return this;
         }
 

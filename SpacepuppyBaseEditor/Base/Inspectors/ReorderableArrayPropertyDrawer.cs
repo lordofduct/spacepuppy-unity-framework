@@ -113,7 +113,7 @@ namespace com.spacepuppyeditor.Base
                 if(_disallowFoldout)
                 {
                     this.StartOnGUI(property, label);
-                    _lst.DoList(position);
+                    _lst.DoList(EditorGUI.IndentedRect(position));
                     this.EndOnGUI(property, label);
                 }
                 else
@@ -123,7 +123,7 @@ namespace com.spacepuppyeditor.Base
                     {
                         this.StartOnGUI(property, label);
                         property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
-                        _lst.DoList(position);
+                        _lst.DoList(EditorGUI.IndentedRect(position));
                         this.EndOnGUI(property, label);
                     }
                     else
@@ -135,7 +135,7 @@ namespace com.spacepuppyeditor.Base
                         else
                         {
                             property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
-                            ReorderableListHelper.DrawRetractedHeader(position, label);
+                            ReorderableListHelper.DrawRetractedHeader(EditorGUI.IndentedRect(position), label);
                         }
                     }
                 }

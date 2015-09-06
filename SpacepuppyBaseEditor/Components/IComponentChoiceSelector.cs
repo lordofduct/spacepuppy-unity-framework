@@ -71,20 +71,19 @@ namespace com.spacepuppyeditor.Components
         public virtual GUIContent[] GetPopupEntries()
         {
             //return (from c in components select new GUIContent(c.GetType().Name)).ToArray();
-            var lst = com.spacepuppy.Collections.TempCollection<GUIContent>.GetCollection();
-            lst.Add(new GUIContent("Nothing..."));
-            if (_drawer.SearchChildren)
+            using (var lst = com.spacepuppy.Collections.TempCollection<GUIContent>.GetCollection())
             {
-                lst.AddRange(from s in DefaultComponentChoiceSelector.GetUniqueComponentNamesWithOwner(_components) select new GUIContent(s));
+                lst.Add(new GUIContent("Nothing..."));
+                if (_drawer.SearchChildren)
+                {
+                    lst.AddRange(from s in DefaultComponentChoiceSelector.GetUniqueComponentNamesWithOwner(_components) select new GUIContent(s));
+                }
+                else
+                {
+                    lst.AddRange(from s in DefaultComponentChoiceSelector.GetUniqueComponentNames(_components) select new GUIContent(s));
+                }
+                return lst.ToArray();
             }
-            else
-            {
-                lst.AddRange(from s in DefaultComponentChoiceSelector.GetUniqueComponentNames(_components) select new GUIContent(s));
-            }
-
-            var result = lst.ToArray();
-            lst.Release();
-            return result;
         }
 
         public virtual int GetPopupIndexOfComponent(Component comp)
