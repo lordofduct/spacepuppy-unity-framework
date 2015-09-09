@@ -40,7 +40,7 @@ namespace com.spacepuppy.Timers
 
         #region Methods
 
-        public ScheduledEvent Add(float interval, float offset, System.Action<ScheduledEvent> callback, int count = 0)
+        public ScheduledEvent Add(double interval, double offset, System.Action<ScheduledEvent> callback, int count = 0)
         {
             var ev = new ScheduledEvent(interval, offset, callback, count);
             this.Add(ev);
@@ -366,8 +366,8 @@ namespace com.spacepuppy.Timers
 
         #region Fields
 
-        private float _interval;
-        private float _offset;
+        private double _interval;
+        private double _offset;
         private int _count;
         private int _currentCount;
         private System.Action<ScheduledEvent> _callback;
@@ -381,7 +381,7 @@ namespace com.spacepuppy.Timers
 
         #region CONSTRUCTOR
 
-        public ScheduledEvent(float interval, float offset, System.Action<ScheduledEvent> callback, int count = 0)
+        public ScheduledEvent(double interval, double offset, System.Action<ScheduledEvent> callback, int count = 0)
         {
             _interval = interval;
             _offset = offset;
@@ -393,9 +393,9 @@ namespace com.spacepuppy.Timers
 
         #region #region Properties
 
-        public float Interval { get { return _interval; } }
+        public double Interval { get { return _interval; } }
 
-        public float Offset { get { return _offset; } }
+        public double Offset { get { return _offset; } }
 
         public int Count { get { return _count; } }
 

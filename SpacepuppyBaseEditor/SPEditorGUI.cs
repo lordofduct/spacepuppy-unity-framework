@@ -863,6 +863,56 @@ namespace com.spacepuppyeditor
             return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, out selectedMember);
         }
 
+
+
+        /// <summary>
+        /// Reflects the available properties and shows them in a dropdown
+        /// </summary>
+        public static string ReflectedPropertyField(Rect position, GUIContent label, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        {
+            if (targType != null)
+            {
+                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targType, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property).ToArray();
+
+                int index = -1;
+                for (int i = 0; i < members.Length; i++)
+                {
+                    if (members[i].Name == selectedMemberName)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                index = EditorGUI.Popup(position, label, index, (from m in members select new GUIContent(string.Format("{0} ({1})", m.Name, DynamicUtil.GetReturnType(m).Name))).ToArray());
+                selectedMember = (index >= 0) ? members[index] : null;
+                return (selectedMember != null) ? selectedMember.Name : null;
+            }
+            else
+            {
+                selectedMember = null;
+                EditorGUI.Popup(position, label, -1, new GUIContent[0]);
+                return null;
+            }
+        }
+
+        public static string ReflectedPropertyField(Rect position, GUIContent label, System.Type targType, string selectedMemberName)
+        {
+            System.Reflection.MemberInfo selectedMember;
+            return ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember);
+        }
+
+        public static string ReflectedPropertyField(Rect position, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        {
+            return ReflectedPropertyField(position, GUIContent.none, targType, selectedMemberName, out selectedMember);
+        }
+
+        public static string ReflectedPropertyField(Rect position, System.Type targType, string selectedMemberName)
+        {
+            System.Reflection.MemberInfo selectedMember;
+            return ReflectedPropertyField(position, GUIContent.none, targType, selectedMemberName, out selectedMember);
+        }
+
         #endregion
 
 

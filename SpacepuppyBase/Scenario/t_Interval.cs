@@ -21,7 +21,7 @@ namespace com.spacepuppy.Scenario
         private float _interval_old = 1.0f;
 
         [SerializeField()]
-        private TimePeriod _interval;
+        private SPTimePeriod _interval;
 
 
         #region CONSTRUCTOR
@@ -37,7 +37,7 @@ namespace com.spacepuppy.Scenario
 
         #region Properties
 
-        public TimePeriod Interval
+        public SPTimePeriod Interval
         {
             get { return _interval; }
             set { _interval = value; }

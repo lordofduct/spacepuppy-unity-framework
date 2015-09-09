@@ -32,7 +32,7 @@ namespace com.spacepuppyeditor.Internal
             if (property == null) throw new System.ArgumentNullException("property");
             if (!property.isArray) throw new System.ArgumentException("SerializedProperty must be a property for an Array or List", "property");
 
-            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
+            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(property);
             CachedReorderableList lst;
             if (_lstCache.TryGetValue(hash, out lst))
             {

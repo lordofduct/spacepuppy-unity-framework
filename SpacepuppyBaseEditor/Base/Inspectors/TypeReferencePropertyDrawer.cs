@@ -14,6 +14,8 @@ namespace com.spacepuppyeditor.Base
     public class TypeReferencePropertyDrawer : PropertyDrawer
     {
 
+        public const string PROP_TYPEHASH = "_typeHash";
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -54,6 +56,15 @@ namespace com.spacepuppyeditor.Base
                 property.serializedObject.Update();
 
             EditorGUI.EndProperty();
+        }
+
+
+        public static System.Type GetTypeFromTypeReference(SerializedProperty property)
+        {
+            if (property == null) return null;
+            var hashProp = property.FindPropertyRelative(PROP_TYPEHASH);
+            if (hashProp == null) return null;
+            return TypeReference.UnHashType(hashProp.stringValue);
         }
 
     }

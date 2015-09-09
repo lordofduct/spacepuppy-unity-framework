@@ -28,6 +28,7 @@ namespace com.spacepuppy.Tween
         private object _targ;
         private List<PropInfo> _props = new List<PropInfo>();
         private Ease _defaultEase = EaseMethods.LinearEaseNone;
+        private float _delay;
         private UpdateSequence _updateType;
         private ITimeSupplier _timeSupplier;
         private TweenWrapMode _wrap;
@@ -75,6 +76,12 @@ namespace com.spacepuppy.Tween
         public TweenHash Ease(Ease ease)
         {
             _defaultEase = ease ?? EaseMethods.LinearEaseNone;
+            return this;
+        }
+
+        public TweenHash Delay(float delay)
+        {
+            _delay = delay;
             return this;
         }
 
@@ -333,10 +340,6 @@ namespace com.spacepuppy.Tween
 
         #region AutoKill
 
-        /// <summary>
-        /// On play the Tweener will be flagged to auto-kill.
-        /// </summary>
-        /// <returns></returns>
         public TweenHash AutoKill()
         {
             _autoKill = true;
@@ -391,6 +394,11 @@ namespace com.spacepuppy.Tween
 
             var tween = this.Create();
             tween.Play(playHeadPos);
+            if (_autoKill && tween is IAutoKillableTweener)
+            {
+                (tween as IAutoKillableTweener).Token = _autoKillToken;
+                SPTween.AutoKill(tween);
+            }
             return tween;
         }
         public Tweener Create()
@@ -435,6 +443,7 @@ namespace com.spacepuppy.Tween
             tween.WrapMode = _wrap;
             tween.WrapCount = _wrapCount;
             tween.Reverse = _reverse;
+            tween.Delay = _delay;
             if (_onStep != null) tween.OnStep += _onStep;
             if (_onWrap != null) tween.OnWrap += _onWrap;
             if (_onFinish != null) tween.OnFinish += _onFinish;
@@ -537,6 +546,11 @@ namespace com.spacepuppy.Tween
         ITweenHash ITweenHash.Ease(Ease ease)
         {
             return this.Ease(ease);
+        }
+
+        ITweenHash ITweenHash.Delay(float delay)
+        {
+            return this.Delay(delay);
         }
 
         ITweenHash ITweenHash.UseUpdate()
@@ -642,6 +656,16 @@ namespace com.spacepuppy.Tween
         ITweenHash ITweenHash.OnFinish(System.Action<Tweener> d)
         {
             return this.OnFinish(d);
+        }
+
+        ITweenHash ITweenHash.AutoKill()
+        {
+            return this.AutoKill();
+        }
+
+        ITweenHash ITweenHash.AutoKill(object token)
+        {
+            return this.AutoKill(token);
         }
 
         Tweener ITweenHash.Play()

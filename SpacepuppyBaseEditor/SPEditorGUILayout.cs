@@ -261,6 +261,22 @@ namespace com.spacepuppyeditor
             return SPEditorGUI.ReflectedPropertyField(position, label, targObj, selectedMemberName, out selectedMember);
         }
 
+        /// <summary>
+        /// Reflects the available properties and shows them in a dropdown
+        /// </summary>
+        public static string ReflectedPropertyField(GUIContent label, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        {
+            var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
+            return SPEditorGUI.ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember);
+        }
+
+        public static string ReflectedPropertyField(GUIContent label, System.Type targType, string selectedMemberName)
+        {
+            var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
+            System.Reflection.MemberInfo selectedMember;
+            return SPEditorGUI.ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember);
+        }
+
         #endregion
 
 

@@ -52,6 +52,26 @@ namespace com.spacepuppyeditor
             return asset;
         }
 
+        /// <summary>
+        //	This makes it easy to create, name and place unique new ScriptableObject asset files.
+        /// </summary>
+        public static ScriptableObject CreateAsset(System.Type tp, string path)
+        {
+            if (StringUtil.IsNullOrWhitespace(path)) throw new System.ArgumentException("Path must not be null or whitespace.", "path");
+            //make sure folder exists
+            CreateFolderIfNotExist(System.IO.Path.GetDirectoryName(path));
+            path = AssetDatabase.GenerateUniqueAssetPath(path);
+
+            var asset = ScriptableObject.CreateInstance(tp);
+            AssetDatabase.CreateAsset(asset, path);
+
+            AssetDatabase.SaveAssets();
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = asset;
+
+            return asset;
+        }
+
         public static bool FolderExists(string path)
         {
             if (string.IsNullOrEmpty(path)) return true;

@@ -51,6 +51,7 @@ namespace com.spacepuppy.Scenario
                 twn.ByAnimMode(_data[i].Mode, _data[i].MemberName, EaseMethods.GetEase(_data[i].Ease), _data[i].ValueS.Value, _data[i].Duration, _data[i].ValueE.Value);
             }
             twn.Use(_timeSupplier.TimeSupplier);
+            twn.AutoKill(this.GetInstanceID());
 
             if (_onComplete.Count > 0)
                 twn.OnFinish((t) => _onComplete.ActivateTrigger());

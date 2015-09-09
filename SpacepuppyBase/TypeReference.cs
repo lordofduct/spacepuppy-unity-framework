@@ -47,13 +47,13 @@ namespace com.spacepuppy
         {
             get
             {
-                if (_type == null) this.UnHashType();
+                if (_type == null) _type = UnHashType(_typeHash);
                 return _type;
             }
             set
             {
                 _type = value;
-                this.HashType();
+                _typeHash = HashType(_type);
             }
         }
 
@@ -62,39 +62,6 @@ namespace com.spacepuppy
             get
             {
                 return this.Type == typeof(void);
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        private void HashType()
-        {
-            if (_type != null)
-            {
-                _typeHash = _type.Assembly.GetName().Name + "|" + _type.FullName;
-            }
-            else
-            {
-                _typeHash = null;
-            }
-        }
-
-        private void UnHashType()
-        {
-            if (_typeHash != null)
-            {
-                var arr = StringUtil.SplitFixedLength(_typeHash, "|", 2);
-                _type = TypeUtil.ParseType(arr[0], arr[1]);
-
-                //set type to void if the type is unfruitful, this way we're not constantly retesting this
-                if (_type == null) _type = typeof(void);
-            }
-            else
-            {
-                //_type = null;
-                _type = null;
             }
         }
 
@@ -110,7 +77,7 @@ namespace com.spacepuppy
 
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
-            this.HashType();
+            _typeHash = HashType(_type);
             info.AddValue("hash", _typeHash);
         }
 
@@ -144,6 +111,39 @@ namespace com.spacepuppy
                 this.InheritsFromType = inheritsFromType;
             }
 
+        }
+
+        #endregion
+
+        #region Util Methods
+
+        public static string HashType(System.Type tp)
+        {
+            if (tp != null)
+            {
+                return tp.Assembly.GetName().Name + "|" + tp.FullName;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static System.Type UnHashType(string hash)
+        {
+            if (hash != null)
+            {
+                var arr = StringUtil.SplitFixedLength(hash, "|", 2);
+                var tp = TypeUtil.ParseType(arr[0], arr[1]);
+
+                //set type to void if the type is unfruitful, this way we're not constantly retesting this
+                if (tp == null) tp = typeof(void);
+                return tp;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         #endregion

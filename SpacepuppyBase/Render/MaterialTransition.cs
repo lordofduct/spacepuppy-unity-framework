@@ -5,29 +5,25 @@ using System.Linq;
 namespace com.spacepuppy.Render
 {
 
+    /// <summary>
+    /// TODO - add an index for multiple-material renderers.
+    /// </summary>
     [System.Serializable()]
     public class MaterialTransition
     {
 
-        public enum MatValueType
-        {
-            Float = 0,
-            Color = 1,
-            Vector = 2,
-        }
-
         #region Fields
 
         [SerializeField()]
-        private Material _material;
+        private UnityEngine.Object _material;
         [SerializeField()]
-        private MatValueType _valueType;
+        private bool _useSharedMaterial = true;
+        [SerializeField()]
+        private MaterialPropertyValueType _valueType;
         [SerializeField()]
         private string _propertyName;
         [SerializeField()]
-        private VariantReference _valueStart;
-        [SerializeField()]
-        private VariantReference _valueEnd;
+        private List<VariantReference> _values = new List<VariantReference>();
 
         [SerializeField()]
         [Range(0f, 1f)]
@@ -36,6 +32,35 @@ namespace com.spacepuppy.Render
         #endregion
 
         #region Properties
+
+        public Material Material
+        {
+            get { return MaterialUtil.GetMaterialFromSource(_material, _useSharedMaterial); }
+            set { _material = value; }
+        }
+
+        public bool UseSharedMaterial
+        {
+            get { return _useSharedMaterial; }
+            set { _useSharedMaterial = value; }
+        }
+
+        public MaterialPropertyValueType PropertyValueType
+        {
+            get { return _valueType; }
+            set { _valueType = value; }
+        }
+
+        public string PropertyName
+        {
+            get { return _propertyName; }
+            set { _propertyName = value; }
+        }
+
+        public List<VariantReference> Values
+        {
+            get { return _values; }
+        }
 
         public float Position
         {
@@ -53,19 +78,60 @@ namespace com.spacepuppy.Render
 
         public void Sync()
         {
-            if(_material == null) return;
+            var mat = this.Material;
+
+            if (mat == null) return;
+            if (_values.Count == 0) return;
+
+            int iLow = Mathf.Clamp(Mathf.FloorToInt(_position * (_values.Count - 1)), 0, _values.Count - 1);
+            int iHigh = iLow + 1;
+            if (iHigh >= _values.Count) iHigh = iLow;
+
+            var dt = (_values.Count > 1) ? 1f / (float)(_values.Count - 1) : 1f;
+            var t = _position % dt;
+
             switch(_valueType)
             {
-                case MatValueType.Float:
-                    _material.SetFloat(_propertyName, Mathf.Lerp(_valueStart.FloatValue, _valueEnd.FloatValue, _position));
+                case MaterialPropertyValueType.Float:
+                    //_material.SetFloat(_propertyName, Mathf.Lerp(_startValue.FloatValue, _endValue.FloatValue, _position));
+                    mat.SetFloat(_propertyName, Mathf.Lerp(_values[iLow].FloatValue, _values[iHigh].FloatValue, t));
                     break;
-                case MatValueType.Color:
-                    _material.SetColor(_propertyName, Color.Lerp(_valueStart.ColorValue, _valueEnd.ColorValue, _position));
+                case MaterialPropertyValueType.Color:
+                    //_material.SetColor(_propertyName, Color.Lerp(_startValue.ColorValue, _endValue.ColorValue, _position));
+                    mat.SetColor(_propertyName, Color.Lerp(_values[iLow].ColorValue, _values[iHigh].ColorValue, t));
                     break;
-                case MatValueType.Vector:
-                    _material.SetVector(_propertyName, Vector4.Lerp(_valueStart.Vector4Value, _valueEnd.Vector4Value, _position));
+                case MaterialPropertyValueType.Vector:
+                    //_material.SetVector(_propertyName, Vector4.Lerp(_startValue.Vector4Value, _endValue.Vector4Value, _position));
+                    mat.SetVector(_propertyName, Vector4.Lerp(_values[iLow].Vector4Value, _values[iHigh].Vector4Value, t));
                     break;
             }
+        }
+
+        public object GetValue()
+        {
+            if(_material == null) return null;
+
+            try
+            {
+                switch (_valueType)
+                {
+                    case MaterialPropertyValueType.Float:
+                        this.Material.GetFloat(_propertyName);
+                        break;
+                    case MaterialPropertyValueType.Color:
+                        this.Material.GetColor(_propertyName);
+                        break;
+                    case MaterialPropertyValueType.Vector:
+                        this.Material.GetVector(_propertyName);
+                        break;
+                }
+            }
+            catch
+            {
+
+            }
+
+            return null;
         }
 
         #endregion

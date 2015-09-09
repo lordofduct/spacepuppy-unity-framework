@@ -14,6 +14,7 @@ namespace com.spacepuppy.Tween
     public interface IAutoKillableTweener
     {
 
+        object Target { get; }
         object Token { get; set; }
 
         void Kill();

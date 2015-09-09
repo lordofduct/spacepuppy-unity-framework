@@ -16,22 +16,22 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
         #region Static Interface
 
-        private static Dictionary<int, TimePeriod.Units> _unitsCache = new Dictionary<int, TimePeriod.Units>();
-        private static TimePeriod.Units GetUnits(SerializedProperty property, TimeUnitsSelectorAttribute attrib)
+        private static Dictionary<int, TimeUnits> _unitsCache = new Dictionary<int, TimeUnits>();
+        private static TimeUnits GetUnits(SerializedProperty property, TimeUnitsSelectorAttribute attrib)
         {
             int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
-            TimePeriod.Units units;
+            TimeUnits units;
             if (_unitsCache.TryGetValue(hash, out units))
                 return units;
             else
             {
                 if (attrib == null)
-                    return TimePeriod.Units.Seconds;
+                    return TimeUnits.Seconds;
                 else
                     return attrib.DefaultUnits;
             }
         }
-        private static void SetUnits(SerializedProperty property, TimePeriod.Units units)
+        private static void SetUnits(SerializedProperty property, TimeUnits units)
         {
             int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
             _unitsCache[hash] = units;
@@ -79,19 +79,19 @@ namespace com.spacepuppyeditor.Base.Inspectors
             double dur = 0.0;
             switch (units)
             {
-                case TimePeriod.Units.Seconds:
+                case TimeUnits.Seconds:
                     dur = span.TotalSeconds;
                     break;
-                case TimePeriod.Units.Minutes:
+                case TimeUnits.Minutes:
                     dur = span.TotalMinutes;
                     break;
-                case TimePeriod.Units.Hours:
+                case TimeUnits.Hours:
                     dur = span.TotalHours;
                     break;
-                case TimePeriod.Units.Days:
+                case TimeUnits.Days:
                     dur = span.TotalDays;
                     break;
-                case TimePeriod.Units.Years:
+                case TimeUnits.Years:
                     dur = span.Ticks / (System.TimeSpan.TicksPerDay * TimeUnitsSelectorPropertyDrawer.DAYS_IN_YEAR);
                     break;
             }
@@ -101,19 +101,19 @@ namespace com.spacepuppyeditor.Base.Inspectors
             {
                 switch (units)
                 {
-                    case TimePeriod.Units.Seconds:
+                    case TimeUnits.Seconds:
                         span = System.TimeSpan.FromSeconds(dur);
                         break;
-                    case TimePeriod.Units.Minutes:
+                    case TimeUnits.Minutes:
                         span = System.TimeSpan.FromMinutes(dur);
                         break;
-                    case TimePeriod.Units.Hours:
+                    case TimeUnits.Hours:
                         span = System.TimeSpan.FromHours(dur);
                         break;
-                    case TimePeriod.Units.Days:
+                    case TimeUnits.Days:
                         span = System.TimeSpan.FromDays(dur);
                         break;
-                    case TimePeriod.Units.Years:
+                    case TimeUnits.Years:
                         span = System.TimeSpan.FromTicks((long)(dur * System.TimeSpan.TicksPerDay * TimeUnitsSelectorPropertyDrawer.DAYS_IN_YEAR));
                         break;
                 }
@@ -131,7 +131,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
             var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute);
             EditorGUI.BeginChangeCheck();
-            units = (TimePeriod.Units)EditorGUI.EnumPopup(r, units);
+            units = (TimeUnits)EditorGUI.EnumPopup(r, units);
             if (EditorGUI.EndChangeCheck())
                 SetUnits(property, units);
 

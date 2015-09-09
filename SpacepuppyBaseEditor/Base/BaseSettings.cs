@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Project;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Base
 {
@@ -12,6 +14,8 @@ namespace com.spacepuppyeditor.Base
     {
 
         #region Consts
+
+        private const float BTN_WIDTH = 275f;
 
         public const string MENU_NAME = SPMenu.MENU_NAME_SETTINGS + "/Base Settings";
         public const int MENU_PRIORITY = SPMenu.MENU_PRIORITY_SETTINGS;
@@ -44,8 +48,8 @@ namespace com.spacepuppyeditor.Base
         private static BaseSettings _openWindow;
 
 
-        private CustomTimeLayersData.EditorHelper _timeLayersHelper;
-        private ReorderableList _timeLayersListDrawer;
+        private GameSettingsBase _gameSettings;
+        private CustomTimeLayersData _timeLayersData;
 
         private void OnEnable()
         {
@@ -56,8 +60,8 @@ namespace com.spacepuppyeditor.Base
 
             this.title = "Base Settings";
 
-            var timeLayersData = (CustomTimeLayersData)AssetDatabase.LoadAssetAtPath(@"Assets/Resources/CustomTimeLayersData.asset", typeof(CustomTimeLayersData));
-            if (timeLayersData != null) _timeLayersHelper = new CustomTimeLayersData.EditorHelper(timeLayersData);
+            _gameSettings = AssetDatabase.LoadAssetAtPath(GameSettingsBase.PATH_DEFAULTSETTINGS_FULL, typeof(GameSettingsBase)) as GameSettingsBase;
+            _timeLayersData = AssetDatabase.LoadAssetAtPath(CustomTimeLayersData.PATH_DEFAULTSETTINGS_FULL, typeof(CustomTimeLayersData)) as CustomTimeLayersData;
         }
 
         private void OnDisable()
@@ -67,6 +71,8 @@ namespace com.spacepuppyeditor.Base
 
         private void OnGUI()
         {
+            Rect rect;
+
             //var labelWidthCache = EditorGUIUtility.labelWidth;
             //EditorGUIUtility.labelWidth = Mathf.Min(this.position.width - 20f, 300f);
 
@@ -94,68 +100,48 @@ namespace com.spacepuppyeditor.Base
                 EditorHierarchyAlternateContextMenuEvents.SetActive(hierarchCustomContextMenu);
             }
 
-            if (_timeLayersHelper == null)
+            if (_gameSettings == null)
             {
-                var rect = EditorGUILayout.GetControlRect();
-                rect.width = Mathf.Min(rect.width, 275f);
-                if(GUI.Button(rect, "Create Custom Time Layers Data Resource"))
+                rect = EditorGUILayout.GetControlRect();
+                rect.width = Mathf.Min(rect.width, BTN_WIDTH);
+
+                if (GUI.Button(rect, "Create Default GameSettings Data Resource"))
                 {
-                    if (!System.IO.Directory.Exists(Application.dataPath + "/Resources"))
+                    var tps = (from t in TypeUtil.GetTypesAssignableFrom(typeof(GameSettingsBase)) where !t.IsAbstract && !t.IsInterface select t).ToArray();
+                    
+                    var menu = new GenericMenu();
+                    foreach(var tp in tps)
                     {
-                        System.IO.Directory.CreateDirectory(Application.dataPath + "/Resources");
+                        menu.AddItem(EditorHelper.TempContent(tp.Name), false, () =>
+                        {
+                            _gameSettings = ScriptableObjectHelper.CreateAsset(tp, GameSettingsBase.PATH_DEFAULTSETTINGS_FULL) as GameSettingsBase;
+                        });
                     }
-                    var timeLayersData = ScriptableObjectHelper.CreateAsset<CustomTimeLayersData>(@"Assets/Resources/CustomTimeLayersData.asset");
-                    if (timeLayersData != null) _timeLayersHelper = new CustomTimeLayersData.EditorHelper(timeLayersData);
+                    menu.ShowAsContext();
                 }
             }
             else
             {
-                if(_timeLayersListDrawer == null)
-                {
-                    _timeLayersListDrawer = new ReorderableList(_timeLayersHelper.Layers, typeof(string));
-                    _timeLayersListDrawer.drawHeaderCallback = _timeLayersList_DrawHeader;
-                    _timeLayersListDrawer.drawElementCallback = _timeLayers_DrawElement;
-                    _timeLayersListDrawer.onAddCallback = _timeLayers_AddElement;
-                }
+                EditorGUILayout.ObjectField("Game Settings", _gameSettings, typeof(GameSettingsBase), false);
+            }
 
-                EditorGUI.BeginChangeCheck();
-                _timeLayersListDrawer.DoLayoutList();
-                if(EditorGUI.EndChangeCheck())
+            if (_timeLayersData == null)
+            {
+                rect = EditorGUILayout.GetControlRect();
+                rect.width = Mathf.Min(rect.width, BTN_WIDTH);
+                if(GUI.Button(rect, "Create Custom Time Layers Data Resource"))
                 {
-                    EditorUtility.SetDirty(_timeLayersHelper.Data);
-                    AssetDatabase.SaveAssets();
+                    _timeLayersData = ScriptableObjectHelper.CreateAsset<CustomTimeLayersData>(CustomTimeLayersData.PATH_DEFAULTSETTINGS_FULL);
                 }
+            }
+            else
+            {
+                EditorGUILayout.ObjectField("Custom Time Layers Data", _timeLayersData, typeof(CustomTimeLayersData), false);
             }
 
             //EditorGUIUtility.labelWidth = labelWidthCache;
         }
 
-
-        #endregion
-
-        #region Time Layers Draw Callback
-
-        private void _timeLayersList_DrawHeader(Rect area)
-        {
-            EditorGUI.LabelField(area, "Custom Time Layers");
-        }
-
-        private void _timeLayers_AddElement(ReorderableList lst)
-        {
-            _timeLayersHelper.Layers.Add(null);
-        }
-
-        private void _timeLayers_DrawElement(Rect area, int index, bool isActive, bool isFocused)
-        {
-            string layerName = _timeLayersHelper.Layers[index] as string;
-
-            EditorGUI.BeginChangeCheck();
-            layerName = EditorGUI.TextField(area, layerName);
-            if (EditorGUI.EndChangeCheck())
-                _timeLayersHelper.Layers[index] = layerName;
-
-            if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_timeLayersListDrawer, area, index, isActive, isFocused);
-        }
 
         #endregion
 

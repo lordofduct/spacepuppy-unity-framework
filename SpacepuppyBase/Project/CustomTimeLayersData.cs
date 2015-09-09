@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace com.spacepuppy
+namespace com.spacepuppy.Project
 {
     public class CustomTimeLayersData : ScriptableObject, ISerializationCallbackReceiver, IEnumerable<string>
     {
+
+        public const string PATH_DEFAULTSETTINGS = @"CustomTimeLayersData";
+        public const string PATH_DEFAULTSETTINGS_FULL = @"Assets/Resources/CustomTimeLayersData.asset";
 
         #region Static Interface
 
@@ -18,7 +21,7 @@ namespace com.spacepuppy
             {
                 if (!_loaded)
                 {
-                    _instance = Resources.Load(@"CustomTimeLayersData") as CustomTimeLayersData;
+                    _instance = Resources.Load(PATH_DEFAULTSETTINGS) as CustomTimeLayersData;
                     if (_instance == null) _instance = ScriptableObject.CreateInstance<CustomTimeLayersData>();
                     _loaded = true;
                 }

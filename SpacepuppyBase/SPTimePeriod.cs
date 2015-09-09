@@ -6,19 +6,10 @@ namespace com.spacepuppy
 {
 
     [System.Serializable()]
-    public struct TimePeriod
+    public struct SPTimePeriod
     {
 
-        public static TimePeriod Zero { get { return new TimePeriod(0f); } }
-
-        public enum Units
-        {
-            Seconds = 0,
-            Minutes = 1,
-            Hours = 2,
-            Days = 3,
-            Years = 4
-        }
+        public static SPTimePeriod Zero { get { return new SPTimePeriod(0f); } }
 
         public const float SECONDS_IN_MINUTE = 60f;
         public const float SECONDS_IN_HOUR = 3600f;
@@ -43,7 +34,7 @@ namespace com.spacepuppy
 
         #region CONSTRUCTOR
 
-        public TimePeriod(float seconds)
+        public SPTimePeriod(float seconds)
         {
             _seconds = seconds;
             _timeSupplierType = DeltaTimeType.Normal;
@@ -73,6 +64,11 @@ namespace com.spacepuppy
             }
         }
 
+        public bool IsCustom
+        {
+            get { return _timeSupplierType == DeltaTimeType.Custom; }
+        }
+
         #endregion
 
         #region Methods
@@ -89,20 +85,18 @@ namespace com.spacepuppy
         #region Special Types
 
         [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple=false)]
-        public class Config : System.Attribute
+        public class Config : SPTime.Config
         {
 
-            #region Fields
+        }
 
-            public string[] AvailableCustomTimeNames;
+        #endregion
 
-            #endregion
+        #region Conversion
 
-            public Config(params string[] availableCustomTimeNames)
-            {
-                this.AvailableCustomTimeNames = availableCustomTimeNames;
-            }
-
+        public static implicit operator SPTime(SPTimePeriod period)
+        {
+            return new SPTime(period._timeSupplierType, period._timeSupplierName);
         }
 
         #endregion

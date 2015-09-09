@@ -77,6 +77,12 @@ namespace com.spacepuppy
         }
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class RequireColliderAttribute : ComponentHeaderAttribute
+    {
+
+    }
+
     #endregion
 
     #region Property Drawer Attributes
@@ -133,13 +139,13 @@ namespace com.spacepuppy
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class TimeUnitsSelectorAttribute : SPPropertyAttribute
     {
-        public TimePeriod.Units DefaultUnits = TimePeriod.Units.Seconds;
+        public TimeUnits DefaultUnits = TimeUnits.Seconds;
 
         public TimeUnitsSelectorAttribute()
         {
         }
 
-        public TimeUnitsSelectorAttribute(TimePeriod.Units defaultUnits)
+        public TimeUnitsSelectorAttribute(TimeUnits defaultUnits)
         {
             DefaultUnits = defaultUnits;
         }

@@ -57,12 +57,32 @@ namespace com.spacepuppyeditor.Internal
             var spath = property.propertyPath;
             int index = spath.IndexOf(".Array.data[");
             int len = 0;
-            while(index >= 0)
+            while (index >= 0)
             {
                 len = spath.IndexOf(']', index) - index;
                 spath = spath.Remove(index, len);
                 index = spath.IndexOf(".Array.data[");
             }
+
+            int num = property.serializedObject.targetObject.GetInstanceID() ^ spath.GetHashCode();
+            if (property.propertyType == SerializedPropertyType.ObjectReference)
+                num ^= property.objectReferenceInstanceIDValue;
+
+            return num;
+        }
+
+        /// <summary>
+        /// Unlike GetPropertyHash, this will respect the index in an array. Useful if you need uniqueness over an array of elements.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static int GetIndexRespectingPropertyHash(SerializedProperty property)
+        {
+            if (property == null) throw new System.ArgumentNullException("property");
+            if (property.serializedObject.targetObject == null)
+                return 0;
+
+            var spath = property.propertyPath;
 
             int num = property.serializedObject.targetObject.GetInstanceID() ^ spath.GetHashCode();
             if (property.propertyType == SerializedPropertyType.ObjectReference)

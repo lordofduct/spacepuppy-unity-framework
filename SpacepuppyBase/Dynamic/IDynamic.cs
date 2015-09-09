@@ -700,6 +700,70 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
+        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(System.Type tp, MemberTypes mask = MemberTypes.All)
+        {
+            if (tp == null) yield break;
+
+            var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembers(tp, false);
+            foreach (var mi in members)
+            {
+                if ((mi.MemberType & mask) == 0) continue;
+
+                if (mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
+                    mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||
+                    mi.DeclaringType.IsAssignableFrom(typeof(SPNotifyingComponent))) continue;
+
+                switch (mi.MemberType)
+                {
+                    case System.Reflection.MemberTypes.Method:
+                        {
+                            var m = mi as System.Reflection.MethodInfo;
+                            if (m.IsSpecialName) continue;
+                            if (m.IsGenericMethod) continue;
+
+                            var parr = m.GetParameters();
+                            if (parr.Length == 0)
+                            {
+                                yield return m;
+                            }
+                            else
+                            {
+                                bool pass = true;
+                                foreach (var p in parr)
+                                {
+                                    if (!(VariantReference.AcceptableType(p.ParameterType) || p.ParameterType == typeof(object)))
+                                    {
+                                        pass = false;
+                                        break;
+                                    }
+                                }
+                                if (pass) yield return m;
+                            }
+                        }
+                        break;
+                    case System.Reflection.MemberTypes.Field:
+                        {
+                            var f = mi as System.Reflection.FieldInfo;
+                            if (f.IsSpecialName) continue;
+
+                            if (VariantReference.AcceptableType(f.FieldType)) yield return f;
+                        }
+                        break;
+                    case System.Reflection.MemberTypes.Property:
+                        {
+                            var p = mi as System.Reflection.PropertyInfo;
+                            if (p.IsSpecialName) continue;
+                            if (!p.CanRead || !p.CanWrite) continue;
+                            if (p.GetIndexParameters().Length > 0) continue; //indexed properties are not allowed
+
+                            if (VariantReference.AcceptableType(p.PropertyType)) yield return p;
+                        }
+                        break;
+                }
+
+            }
+        }
+
         #endregion
 
 

@@ -68,6 +68,20 @@ namespace com.spacepuppy
             else _timeSupplierName = null;
         }
 
+        public SPTime(DeltaTimeType etp, string timeSupplierName)
+        {
+            if(etp == DeltaTimeType.Custom)
+            {
+                _timeSupplierType = etp;
+                _timeSupplierName = timeSupplierName;
+            }
+            else
+            {
+                _timeSupplierType = etp;
+                _timeSupplierName = null;
+            }
+        }
+
         #endregion
 
         #region Properties
@@ -499,6 +513,27 @@ namespace com.spacepuppy
             public float Delta
             {
                 get { return UnityEngine.Time.smoothDeltaTime; }
+            }
+
+        }
+
+        #endregion
+
+        #region Special Config Types
+
+        [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+        public class Config : System.Attribute
+        {
+
+            #region Fields
+
+            public string[] AvailableCustomTimeNames;
+
+            #endregion
+
+            public Config(params string[] availableCustomTimeNames)
+            {
+                this.AvailableCustomTimeNames = availableCustomTimeNames;
             }
 
         }

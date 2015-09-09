@@ -46,19 +46,38 @@ namespace com.spacepuppy.Scenario
 
         public T GetTarget<T>(object triggerArg, bool searchEntity = true) where T : class
         {
-            return GetTarget_Imp(typeof(T), triggerArg, searchEntity) as T;
+            return GetTargetFrom(typeof(T), this.ReduceTarget(triggerArg), searchEntity) as T;
         }
 
         public object GetTarget(System.Type tp, object triggerArg, bool searchEntity = true)
         {
             if (tp == null || !TypeUtil.IsType(tp, typeof(UnityEngine.Object))) throw new TypeArgumentMismatchException(tp, typeof(UnityEngine.Object), "tp");
 
-            return GetTarget_Imp(tp, triggerArg, searchEntity);
+            return GetTargetFrom(tp, this.ReduceTarget(triggerArg), searchEntity);
         }
 
-        private object GetTarget_Imp(System.Type tp, object triggerArg, bool searchEntity = true)
+        private UnityEngine.Object ReduceTarget(object triggerArg)
         {
-            var targ = this.ReduceTarget(triggerArg);
+            switch (_source)
+            {
+                case TargetSource.TriggerArg:
+                    return (triggerArg is UnityEngine.Object) ? triggerArg as UnityEngine.Object : null;
+                case TargetSource.Self:
+                case TargetSource.Root:
+                case TargetSource.Configurable:
+                    return _target;
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Utils
+
+        public static object GetTargetFrom(System.Type tp, UnityEngine.Object targ, bool searchEntity)
+        {
+            if (targ == null) return null;
 
             if (targ != null && TypeUtil.IsType(targ.GetType(), tp))
             {
@@ -72,7 +91,7 @@ namespace com.spacepuppy.Scenario
                     {
                         return GameObjectUtil.GetRootFromSource(targ);
                     }
-                    else if(TypeUtil.IsType(tp, typeof(SPEntity)))
+                    else if (TypeUtil.IsType(tp, typeof(SPEntity)))
                     {
                         return SPEntity.GetEntityFromSource(targ);
                     }
@@ -121,21 +140,6 @@ namespace com.spacepuppy.Scenario
                     }
                 }
             }
-        }
-
-        private UnityEngine.Object ReduceTarget(object triggerArg)
-        {
-            switch (_source)
-            {
-                case TargetSource.TriggerArg:
-                    return (triggerArg is UnityEngine.Object) ? triggerArg as UnityEngine.Object : null;
-                case TargetSource.Self:
-                case TargetSource.Root:
-                case TargetSource.Configurable:
-                    return _target;
-            }
-
-            return null;
         }
 
         #endregion

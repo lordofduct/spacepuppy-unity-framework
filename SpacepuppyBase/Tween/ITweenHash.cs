@@ -10,6 +10,7 @@ namespace com.spacepuppy.Tween
 
         ITweenHash SetId(object id);
         ITweenHash Ease(Ease ease);
+        ITweenHash Delay(float delay);
         ITweenHash UseUpdate();
         ITweenHash UseFixedUpdate();
         ITweenHash UseLateUpdate();
@@ -31,6 +32,9 @@ namespace com.spacepuppy.Tween
         ITweenHash OnWrap(System.Action<Tweener> d);
         ITweenHash OnFinish(System.EventHandler d);
         ITweenHash OnFinish(System.Action<Tweener> d);
+
+        ITweenHash AutoKill();
+        ITweenHash AutoKill(object token);
 
 
         Tweener Play();

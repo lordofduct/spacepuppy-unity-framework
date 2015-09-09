@@ -65,14 +65,16 @@ namespace com.spacepuppy.Tween
 
         #region IAutoKillableTweener Interface
 
+        object IAutoKillableTweener.Target
+        {
+            get { return _target; }
+        }
+
         object IAutoKillableTweener.Token
         {
             get
             {
-                if (_tokenUid == null)
-                    return _target;
-                else
-                    return new TokenPairing(_target, _tokenUid);
+                return _tokenUid;
             }
             set
             {
@@ -99,6 +101,15 @@ namespace com.spacepuppy.Tween
                 this.Target = targ;
                 this.TokenUid = uid;
             }
+
+            //public override bool Equals(object obj)
+            //{
+            //    if (obj == null) return false;
+            //    if (!(obj is TokenPairing)) return false;
+
+            //    var token = (TokenPairing)obj;
+            //    return token.Target == this.Target && token.TokenUid == this.TokenUid;
+            //}
         }
 
         #endregion

@@ -61,7 +61,6 @@
     <Compile Include="Collections\Deque.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
-    <Compile Include="Collections\HashHelper.cs" />
     <Compile Include="Collections\ICachePool.cs" />
     <Compile Include="Collections\ListDictionary.cs" />
     <Compile Include="Collections\NotificationPool.cs" />
@@ -79,7 +78,7 @@
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="CollisionExclusion.cs" />
-    <Compile Include="CustomTimeLayersData.cs" />
+    <Compile Include="Project\CustomTimeLayersData.cs" />
     <Compile Include="Dynamic\DynamicMethodInfo.cs" />
     <Compile Include="Dynamic\Evaluator.cs" />
     <Compile Include="Hooks\Callbacks.cs" />
@@ -121,7 +120,11 @@
     <Compile Include="IGameObjectSource.cs" />
     <Compile Include="IIgnorableCollision.cs" />
     <Compile Include="IRandom.cs" />
+    <Compile Include="Project\GameSettingsBase.cs" />
+    <Compile Include="Render\i_TweenMaterial.cs" />
     <Compile Include="Render\MaterialTransition.cs" />
+    <Compile Include="Render\MaterialUtil.cs" />
+    <Compile Include="Render\RenderEnums.cs" />
     <Compile Include="Render\RendererMaterialSwap.cs" />
     <Compile Include="Scenario\i_DebugLog.cs" />
     <Compile Include="Scenario\i_Destroy.cs" />
@@ -129,6 +132,7 @@
     <Compile Include="Scenario\i_EnableComponent.cs" />
     <Compile Include="Scenario\i_LookAt.cs" />
     <Compile Include="Scenario\i_PlaySoundEffect.cs" />
+    <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
@@ -208,7 +212,7 @@
     <Compile Include="StateMachine\TypedStateMachine.cs" />
     <Compile Include="TagData.cs" />
     <Compile Include="TagMask.cs" />
-    <Compile Include="TimePeriod.cs" />
+    <Compile Include="SPTimePeriod.cs" />
     <Compile Include="Timers\BulkTimer.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
     <Compile Include="Timers\GameTimers.cs" />

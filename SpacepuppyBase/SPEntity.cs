@@ -21,38 +21,56 @@ namespace com.spacepuppy
         /// </summary>
         public static ICollection<SPEntity> ActiveEntities { get { return _pool.Values; } }
 
-        public static SPEntity[] FindAll(System.Predicate<SPEntity> predicate)
+        public static SPEntity[] FindAll(System.Func<SPEntity, bool> predicate)
         {
             if (_findList == null) _findList = new List<SPEntity>();
             if (_findList.Count > 0) throw new System.InvalidOperationException("FindAll can only be called once at a time. Do not call inside the predicate, or from a thread other than the main thread.");
 
-            FindAll(predicate, _findList);
+            FindAll(_findList, predicate);
             var arr = _findList.ToArray();
             _findList.Clear();
             return arr;
         }
 
-        public static void FindAll(System.Predicate<SPEntity> predicate, ICollection<SPEntity> coll)
+        public static void FindAll(ICollection<SPEntity> coll, System.Func<SPEntity, bool> predicate)
         {
-            if (predicate == null) throw new System.ArgumentNullException("predicate");
             if (coll == null) throw new System.ArgumentNullException("coll");
 
             var e = _pool.Values.GetEnumerator();
-            while (e.MoveNext())
+            if(predicate == null)
             {
-                if (predicate(e.Current)) coll.Add(e.Current);
+                while (e.MoveNext())
+                {
+                    coll.Add(e.Current);
+                }
+            }
+            else
+            {
+                while (e.MoveNext())
+                {
+                    if (predicate(e.Current)) coll.Add(e.Current);
+                }
             }
         }
 
-        public static void FindAll<T>(System.Predicate<T> predicate, ICollection<T> coll) where T : SPEntity
+        public static void FindAll<T>(ICollection<T> coll, System.Func<T, bool> predicate) where T : SPEntity
         {
-            if (predicate == null) throw new System.ArgumentNullException("predicate");
             if (coll == null) throw new System.ArgumentNullException("coll");
 
             var e = _pool.Values.GetEnumerator();
-            while (e.MoveNext())
+            if(predicate == null)
             {
-                if (e.Current is T && predicate(e.Current as T)) coll.Add(e.Current as T);
+                while (e.MoveNext())
+                {
+                    if (e.Current is T) coll.Add(e.Current as T);
+                }
+            }
+            else
+            {
+                while (e.MoveNext())
+                {
+                    if (e.Current is T && predicate(e.Current as T)) coll.Add(e.Current as T);
+                }
             }
         }
 

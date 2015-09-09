@@ -521,7 +521,7 @@ namespace com.spacepuppy
             }
         }
 
-        public static WaitForDuration Period(TimePeriod period)
+        public static WaitForDuration Period(SPTimePeriod period)
         {
             var w = _pool.GetInstance();
             w.Init((float)period.Seconds, period.TimeSupplier);

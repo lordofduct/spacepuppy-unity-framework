@@ -28,7 +28,7 @@ namespace com.spacepuppy.Tween
         private List<Tweener> _toRemove = new List<Tweener>();
         private bool _inUpdate;
 
-        private static BiDictionary<object, IAutoKillableTweener> _autoKillDict = new BiDictionary<object, IAutoKillableTweener>();
+        private static Dictionary<TokenPairing, IAutoKillableTweener> _autoKillDict = new Dictionary<TokenPairing, IAutoKillableTweener>(new TokenPairingComparer());
 
         #endregion
 
@@ -61,9 +61,9 @@ namespace com.spacepuppy.Tween
                 if(tween is IAutoKillableTweener)
                 {
                     var auto = tween as IAutoKillableTweener;
-                    var targ = auto.Token;
+                    var token = new TokenPairing(auto.Target, auto.Token);
                     IAutoKillableTweener old;
-                    if(_autoKillDict.TryGetValue(targ, out old))
+                    if (_autoKillDict.TryGetValue(token, out old))
                     {
                         old.Kill();
                     }
@@ -90,10 +90,11 @@ namespace com.spacepuppy.Tween
                 _runningTweens.Remove(tween);
                 if(tween is IAutoKillableTweener && tween.IsComplete)
                 {
-                    var auto = tween as IAutoKillableTweener;
-                    if(_autoKillDict.Reverse.ContainsKey(auto))
+                    IAutoKillableTweener auto = tween as IAutoKillableTweener;
+                    var token = new TokenPairing(auto.Target, auto.Token);
+                    if(_autoKillDict.TryGetValue(token, out auto) && auto == tween)
                     {
-                        _autoKillDict.Reverse.Remove(auto);
+                        _autoKillDict.Remove(token);
                     }
                 }
             }
@@ -113,15 +114,27 @@ namespace com.spacepuppy.Tween
             if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
             _instance.AutoKill_Imp(tween as IAutoKillableTweener);
         }
+        public static void AutoKill(Tweener tween, object token)
+        {
+            if (tween == null || !(tween is IAutoKillableTweener)) return;
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
+
+            var twn = tween as IAutoKillableTweener;
+            twn.Token = token;
+            _instance.AutoKill_Imp(twn);
+        }
         private void AutoKill_Imp(IAutoKillableTweener tween)
         {
-            var targ = tween.Token;
+            var token = new TokenPairing(tween.Target, tween.Token);
+            if (token.IsNull) return;
+
             IAutoKillableTweener old;
-            if(_autoKillDict.TryGetValue(targ, out old))
+            if (_autoKillDict.TryGetValue(token, out old))
             {
                 old.Kill();
             }
-            _autoKillDict[targ] = tween;
+            _autoKillDict[token] = tween;
         }
 
 
@@ -294,6 +307,41 @@ namespace com.spacepuppy.Tween
             var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, ease, start, end, dur, option));
             tween.Play();
             return tween;
+        }
+
+        #endregion
+
+        #region Special Types
+
+        private struct TokenPairing
+        {
+            public object Target;
+            public object TokenUid;
+
+            public TokenPairing(object targ, object uid)
+            {
+                this.Target = targ;
+                this.TokenUid = uid;
+            }
+
+            public bool IsNull { get { return Target == null && TokenUid == null; } }
+
+        }
+
+        private class TokenPairingComparer : IEqualityComparer<TokenPairing>
+        {
+
+            public bool Equals(TokenPairing x, TokenPairing y)
+            {
+                return x.Target == y.Target && x.TokenUid == y.TokenUid;
+            }
+
+            public int GetHashCode(TokenPairing obj)
+            {
+                int a = (obj.Target != null) ? obj.Target.GetHashCode() : 0;
+                int b = (obj.TokenUid != null) ? obj.TokenUid.GetHashCode() : 0;
+                return a ^ b;
+            }
         }
 
         #endregion
