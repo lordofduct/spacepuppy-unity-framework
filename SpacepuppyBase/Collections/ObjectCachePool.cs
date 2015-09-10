@@ -83,9 +83,11 @@ namespace com.spacepuppy.Collections
             var e = _inactive.GetEnumerator();
             if (e.MoveNext())
             {
+                var obj = e.Current;
+                _inactive.Remove(obj);
                 if(_resetOnGet && _resetObjectDelegate != null)
-                    _resetObjectDelegate(e.Current);
-                return e.Current;
+                    _resetObjectDelegate(obj);
+                return obj;
             }
             else
             {

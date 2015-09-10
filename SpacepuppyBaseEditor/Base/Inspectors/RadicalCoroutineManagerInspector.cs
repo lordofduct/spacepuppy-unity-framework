@@ -13,7 +13,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
     public class RadicalCoroutineManagerInspector : SPEditor
     {
 
-        private bool _expanded;
+        private bool _expanded = true;
 
         protected override void OnSPInspectorGUI()
         {
@@ -44,7 +44,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
         public override bool RequiresConstantRepaint()
         {
-            return _expanded;
+            return Application.isPlaying && _expanded;
         }
 
     }
