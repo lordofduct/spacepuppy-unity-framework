@@ -150,6 +150,25 @@ namespace com.spacepuppy
             else return go.GetComponent<SPEntity>();
         }
 
+        public static SPEntity GetEntityFromSource(System.Type tp, object obj)
+        {
+            if (tp == null) throw new System.ArgumentNullException("tp");
+            var go = GameObjectUtil.GetTrueRootFromSource(obj);
+            if (go == null) return null;
+
+            SPEntity e;
+            if (_pool.TryGetValue(go, out e) && TypeUtil.IsType(e.GetType(), tp))
+            {
+                return e;
+            }
+            else if(TypeUtil.IsType(tp, typeof(SPEntity)))
+            {
+                return go.GetComponent(tp) as SPEntity;
+            }
+
+            return null;
+        }
+
         public static T GetEntityFromSource<T>(object obj) where T : SPEntity
         {
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
@@ -183,6 +202,28 @@ namespace com.spacepuppy
                 entity = go.GetComponent<SPEntity>();
                 return entity != null;
             }
+        }
+
+        public static bool GetEntityFromSource(System.Type tp, object obj, out SPEntity entity)
+        {
+            if (tp == null) throw new System.ArgumentNullException("tp");
+            entity = null;
+            var go = GameObjectUtil.GetTrueRootFromSource(obj);
+            if (go == null) return false;
+
+            SPEntity e;
+            if (_pool.TryGetValue(go, out e) && TypeUtil.IsType(e.GetType(), tp))
+            {
+                entity = e;
+                return true;
+            }
+            else if (TypeUtil.IsType(tp, typeof(SPEntity)))
+            {
+                entity = go.GetComponent(tp) as SPEntity;
+                return entity != null;
+            }
+
+            return false;
         }
 
         public static bool GetEntityFromSource<T>(object obj, out T entity) where T : SPEntity

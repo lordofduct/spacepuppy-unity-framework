@@ -57,71 +57,9 @@ namespace com.spacepuppy.Tween
         StrongEaseOut = 35,
         StrongEaseInOut = 36,
     }
-
-    public static class EaseMethods
+    
+    public static class ConcreteEaseMethods
     {
-
-        public static Ease GetEase(EaseStyle style)
-        {
-            switch (style)
-            {
-                case EaseStyle.Linear: return EaseMethods.LinearEaseNone;
-                case EaseStyle.LinearEaseIn: return EaseMethods.LinearEaseIn;
-                case EaseStyle.LinearEaseOut: return EaseMethods.LinearEaseOut;
-                case EaseStyle.LinearEaseInOut: return EaseMethods.LinearEaseInOut;
-
-                case EaseStyle.BackEaseIn : return EaseMethods.BackEaseIn;
-                case EaseStyle.BackEaseOut: return EaseMethods.BackEaseOut;
-                case EaseStyle.BackEaseInOut: return EaseMethods.BackEaseInOut;
-
-                case EaseStyle.BounceEaseIn: return EaseMethods.BounceEaseIn;
-                case EaseStyle.BounceEaseOut: return EaseMethods.BounceEaseOut;
-                case EaseStyle.BounceEaseInOut: return EaseMethods.BounceEaseInOut;
-
-                case EaseStyle.CircleEaseIn: return EaseMethods.CircleEaseIn;
-                case EaseStyle.CircleEaseOut: return EaseMethods.CircleEaseOut;
-                case EaseStyle.CircleEaseInOut: return EaseMethods.CircleEaseInOut;
-
-                case EaseStyle.CubicEaseIn: return EaseMethods.CubicEaseIn;
-                case EaseStyle.CubicEaseOut: return EaseMethods.CubicEaseOut;
-                case EaseStyle.CubicEaseInOut: return EaseMethods.CubicEaseInOut;
-
-                case EaseStyle.ElasticEaseIn: return EaseMethods.ElasticEaseIn;
-                case EaseStyle.ElasticEaseOut: return EaseMethods.ElasticEaseOut;
-                case EaseStyle.ElasticEaseInOut: return EaseMethods.ElasticEaseInOut;
-
-                case EaseStyle.ExpoEaseIn: return EaseMethods.ExpoEaseIn;
-                case EaseStyle.ExpoEaseOut: return EaseMethods.ExpoEaseOut;
-                case EaseStyle.ExpoEaseInOut: return EaseMethods.ExpoEaseInOut;
-
-                case EaseStyle.QuadEaseIn: return EaseMethods.QuadEaseIn;
-                case EaseStyle.QuadEaseOut: return EaseMethods.QuadEaseOut;
-                case EaseStyle.QuadEaseInOut: return EaseMethods.QuadEaseInOut;
-
-                case EaseStyle.QuartEaseIn: return EaseMethods.QuartEaseIn;
-                case EaseStyle.QuartEaseOut: return EaseMethods.QuartEaseOut;
-                case EaseStyle.QuartEaseInOut: return EaseMethods.QuartEaseInOut;
-
-                case EaseStyle.QuintEaseIn: return EaseMethods.QuintEaseIn;
-                case EaseStyle.QuintEaseOut: return EaseMethods.QuintEaseOut;
-                case EaseStyle.QuintEaseInOut: return EaseMethods.QuintEaseInOut;
-
-                case EaseStyle.SineEaseIn: return EaseMethods.SineEaseIn;
-                case EaseStyle.SineEaseOut: return EaseMethods.SineEaseOut;
-                case EaseStyle.SineEaseInOut: return EaseMethods.SineEaseInOut;
-
-                case EaseStyle.StrongEaseIn: return EaseMethods.StrongEaseIn;
-                case EaseStyle.StrongEaseOut: return EaseMethods.StrongEaseOut;
-                case EaseStyle.StrongEaseInOut: return EaseMethods.StrongEaseInOut;
-            }
-
-            return null;
-        }
-
-        public static float EasedLerp(Ease ease, float from, float to, float t)
-        {
-            return ease(t, from, to - from, 1f);
-        }
 
         private const float _2PI = 6.28318530717959f;
         private const float _HALF_PI = 1.5707963267949f;
@@ -384,6 +322,496 @@ namespace com.spacepuppy.Tween
             return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
         }
         #endregion
+        
+    }
+
+    /// <summary>
+    /// References to Ease delegates for use, this avoids the garbage of the ease delegate.
+    /// </summary>
+    public static class EaseMethods
+    {
+
+        public static Ease GetEase(EaseStyle style)
+        {
+            switch (style)
+            {
+                case EaseStyle.Linear: return EaseMethods.LinearEaseNone;
+                case EaseStyle.LinearEaseIn: return EaseMethods.LinearEaseIn;
+                case EaseStyle.LinearEaseOut: return EaseMethods.LinearEaseOut;
+                case EaseStyle.LinearEaseInOut: return EaseMethods.LinearEaseInOut;
+
+                case EaseStyle.BackEaseIn: return EaseMethods.BackEaseIn;
+                case EaseStyle.BackEaseOut: return EaseMethods.BackEaseOut;
+                case EaseStyle.BackEaseInOut: return EaseMethods.BackEaseInOut;
+
+                case EaseStyle.BounceEaseIn: return EaseMethods.BounceEaseIn;
+                case EaseStyle.BounceEaseOut: return EaseMethods.BounceEaseOut;
+                case EaseStyle.BounceEaseInOut: return EaseMethods.BounceEaseInOut;
+
+                case EaseStyle.CircleEaseIn: return EaseMethods.CircleEaseIn;
+                case EaseStyle.CircleEaseOut: return EaseMethods.CircleEaseOut;
+                case EaseStyle.CircleEaseInOut: return EaseMethods.CircleEaseInOut;
+
+                case EaseStyle.CubicEaseIn: return EaseMethods.CubicEaseIn;
+                case EaseStyle.CubicEaseOut: return EaseMethods.CubicEaseOut;
+                case EaseStyle.CubicEaseInOut: return EaseMethods.CubicEaseInOut;
+
+                case EaseStyle.ElasticEaseIn: return EaseMethods.ElasticEaseIn;
+                case EaseStyle.ElasticEaseOut: return EaseMethods.ElasticEaseOut;
+                case EaseStyle.ElasticEaseInOut: return EaseMethods.ElasticEaseInOut;
+
+                case EaseStyle.ExpoEaseIn: return EaseMethods.ExpoEaseIn;
+                case EaseStyle.ExpoEaseOut: return EaseMethods.ExpoEaseOut;
+                case EaseStyle.ExpoEaseInOut: return EaseMethods.ExpoEaseInOut;
+
+                case EaseStyle.QuadEaseIn: return EaseMethods.QuadEaseIn;
+                case EaseStyle.QuadEaseOut: return EaseMethods.QuadEaseOut;
+                case EaseStyle.QuadEaseInOut: return EaseMethods.QuadEaseInOut;
+
+                case EaseStyle.QuartEaseIn: return EaseMethods.QuartEaseIn;
+                case EaseStyle.QuartEaseOut: return EaseMethods.QuartEaseOut;
+                case EaseStyle.QuartEaseInOut: return EaseMethods.QuartEaseInOut;
+
+                case EaseStyle.QuintEaseIn: return EaseMethods.QuintEaseIn;
+                case EaseStyle.QuintEaseOut: return EaseMethods.QuintEaseOut;
+                case EaseStyle.QuintEaseInOut: return EaseMethods.QuintEaseInOut;
+
+                case EaseStyle.SineEaseIn: return EaseMethods.SineEaseIn;
+                case EaseStyle.SineEaseOut: return EaseMethods.SineEaseOut;
+                case EaseStyle.SineEaseInOut: return EaseMethods.SineEaseInOut;
+
+                case EaseStyle.StrongEaseIn: return EaseMethods.StrongEaseIn;
+                case EaseStyle.StrongEaseOut: return EaseMethods.StrongEaseOut;
+                case EaseStyle.StrongEaseInOut: return EaseMethods.StrongEaseInOut;
+            }
+
+            return null;
+        }
+
+        public static float EasedLerp(Ease ease, float from, float to, float t)
+        {
+            return ease(t, from, to - from, 1f);
+        }
+
+
+
+        #region Back Ease
+
+        private static Ease _backEaseIn;
+        public static Ease BackEaseIn
+        {
+            get
+            {
+                if (_backEaseIn == null) _backEaseIn = ConcreteEaseMethods.BackEaseIn;
+                return _backEaseIn;
+            }
+        }
+
+        private static Ease _backEaseOut;
+        public static Ease BackEaseOut
+        {
+            get
+            {
+                if (_backEaseOut == null) _backEaseOut = ConcreteEaseMethods.BackEaseOut;
+                return _backEaseOut;
+            }
+        }
+
+        private static Ease _backEaseInOut;
+        public static Ease BackEaseInOut
+        {
+            get
+            {
+                if (_backEaseInOut == null) _backEaseInOut = ConcreteEaseMethods.BackEaseInOut;
+                return _backEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Bounce Ease
+
+        private static Ease _bounceEaseIn;
+        public static Ease BounceEaseIn
+        {
+            get
+            {
+                if (_bounceEaseIn == null) _bounceEaseIn = ConcreteEaseMethods.BounceEaseIn;
+                return _bounceEaseIn;
+            }
+        }
+
+        private static Ease _bounceEaseOut;
+        public static Ease BounceEaseOut
+        {
+            get
+            {
+                if (_bounceEaseOut == null) _bounceEaseOut = ConcreteEaseMethods.BounceEaseOut;
+                return _bounceEaseOut;
+            }
+        }
+
+        private static Ease _bounceEaseInOut;
+        public static Ease BounceEaseInOut
+        {
+            get
+            {
+                if (_bounceEaseInOut == null) _bounceEaseInOut = ConcreteEaseMethods.BounceEaseInOut;
+                return _bounceEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Circle Ease
+
+        private static Ease _circleEaseIn;
+        public static Ease CircleEaseIn
+        {
+            get
+            {
+                if (_circleEaseIn == null) _circleEaseIn = ConcreteEaseMethods.CircleEaseIn;
+                return _circleEaseIn;
+            }
+        }
+
+        private static Ease _circleEaseOut;
+        public static Ease CircleEaseOut
+        {
+            get
+            {
+                if (_circleEaseOut == null) _circleEaseOut = ConcreteEaseMethods.CircleEaseOut;
+                return _circleEaseOut;
+            }
+        }
+
+        private static Ease _circleEaseInOut;
+        public static Ease CircleEaseInOut
+        {
+            get
+            {
+                if (_circleEaseInOut == null) _circleEaseInOut = ConcreteEaseMethods.CircleEaseInOut;
+                return _circleEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Cubic Ease
+
+        private static Ease _cubicEaseIn;
+        public static Ease CubicEaseIn
+        {
+            get
+            {
+                if (_cubicEaseIn == null) _cubicEaseIn = ConcreteEaseMethods.CubicEaseIn;
+                return _cubicEaseIn;
+            }
+        }
+
+        private static Ease _cubicEaseOut;
+        public static Ease CubicEaseOut
+        {
+            get
+            {
+                if (_cubicEaseOut == null) _cubicEaseOut = ConcreteEaseMethods.CubicEaseOut;
+                return _cubicEaseOut;
+            }
+        }
+
+        private static Ease _cubicEaseInOut;
+        public static Ease CubicEaseInOut
+        {
+            get
+            {
+                if (_cubicEaseInOut == null) _cubicEaseInOut = ConcreteEaseMethods.CubicEaseInOut;
+                return _cubicEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Elastic Ease
+
+        private static Ease _elasticEaseIn;
+        public static Ease ElasticEaseIn
+        {
+            get
+            {
+                if (_elasticEaseIn == null) _elasticEaseIn = ConcreteEaseMethods.ElasticEaseIn;
+                return _elasticEaseIn;
+            }
+        }
+
+        private static Ease _elasticEaseOut;
+        public static Ease ElasticEaseOut
+        {
+            get
+            {
+                if (_elasticEaseOut == null) _elasticEaseOut = ConcreteEaseMethods.ElasticEaseOut;
+                return _elasticEaseOut;
+            }
+        }
+
+        private static Ease _elasticEaseInOut;
+        public static Ease ElasticEaseInOut
+        {
+            get
+            {
+                if (_elasticEaseInOut == null) _elasticEaseInOut = ConcreteEaseMethods.ElasticEaseInOut;
+                return _elasticEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Expo Ease
+
+        private static Ease _expoEaseIn;
+        public static Ease ExpoEaseIn
+        {
+            get
+            {
+                if (_expoEaseIn == null) _expoEaseIn = ConcreteEaseMethods.ExpoEaseIn;
+                return _expoEaseIn;
+            }
+        }
+
+        private static Ease _expoEaseOut;
+        public static Ease ExpoEaseOut
+        {
+            get
+            {
+                if (_expoEaseOut == null) _expoEaseOut = ConcreteEaseMethods.ExpoEaseOut;
+                return _expoEaseOut;
+            }
+        }
+
+        private static Ease _expoEaseInOut;
+        public static Ease ExpoEaseInOut
+        {
+            get
+            {
+                if (_expoEaseInOut == null) _expoEaseInOut = ConcreteEaseMethods.ExpoEaseInOut;
+                return _expoEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Linear Ease
+
+        private static Ease _linearEaseNone;
+        public static Ease LinearEaseNone
+        {
+            get
+            {
+                if (_linearEaseNone == null) _linearEaseNone = ConcreteEaseMethods.LinearEaseNone;
+                return _linearEaseNone;
+            }
+        }
+
+        private static Ease _linearEaseIn;
+        public static Ease LinearEaseIn
+        {
+            get
+            {
+                if (_linearEaseIn == null) _linearEaseIn = ConcreteEaseMethods.LinearEaseIn;
+                return _linearEaseIn;
+            }
+        }
+
+        private static Ease _linearEaseOut;
+        public static Ease LinearEaseOut
+        {
+            get
+            {
+                if (_linearEaseOut == null) _linearEaseOut = ConcreteEaseMethods.LinearEaseOut;
+                return _linearEaseOut;
+            }
+        }
+
+        private static Ease _linearEaseInOut;
+        public static Ease LinearEaseInOut
+        {
+            get
+            {
+                if (_linearEaseInOut == null) _linearEaseInOut = ConcreteEaseMethods.LinearEaseInOut;
+                return _linearEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Quad Ease
+
+        private static Ease _quadEaseIn;
+        public static Ease QuadEaseIn
+        {
+            get
+            {
+                if (_quadEaseIn == null) _quadEaseIn = ConcreteEaseMethods.QuadEaseIn;
+                return _quadEaseIn;
+            }
+        }
+
+        private static Ease _quadEaseOut;
+        public static Ease QuadEaseOut
+        {
+            get
+            {
+                if (_quadEaseOut == null) _quadEaseOut = ConcreteEaseMethods.QuadEaseOut;
+                return _quadEaseOut;
+            }
+        }
+
+        private static Ease _quadEaseInOut;
+        public static Ease QuadEaseInOut
+        {
+            get
+            {
+                if (_quadEaseInOut == null) _quadEaseInOut = ConcreteEaseMethods.QuadEaseInOut;
+                return _quadEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Quart Ease
+
+        private static Ease _quartEaseIn;
+        public static Ease QuartEaseIn
+        {
+            get
+            {
+                if (_quartEaseIn == null) _quartEaseIn = ConcreteEaseMethods.QuartEaseIn;
+                return _quartEaseIn;
+            }
+        }
+
+        private static Ease _quartEaseOut;
+        public static Ease QuartEaseOut
+        {
+            get
+            {
+                if (_quartEaseOut == null) _quartEaseOut = ConcreteEaseMethods.QuartEaseOut;
+                return _quartEaseOut;
+            }
+        }
+
+        private static Ease _quartEaseInOut;
+        public static Ease QuartEaseInOut
+        {
+            get
+            {
+                if (_quartEaseInOut == null) _quartEaseInOut = ConcreteEaseMethods.QuartEaseInOut;
+                return _quartEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Quint Ease
+
+        private static Ease _quintEaseIn;
+        public static Ease QuintEaseIn
+        {
+            get
+            {
+                if (_quintEaseIn == null) _quintEaseIn = ConcreteEaseMethods.QuintEaseIn;
+                return _quintEaseIn;
+            }
+        }
+
+        private static Ease _quintEaseOut;
+        public static Ease QuintEaseOut
+        {
+            get
+            {
+                if (_quintEaseOut == null) _quintEaseOut = ConcreteEaseMethods.QuintEaseOut;
+                return _quintEaseOut;
+            }
+        }
+
+        private static Ease _quintEaseInOut;
+        public static Ease QuintEaseInOut
+        {
+            get
+            {
+                if (_quintEaseInOut == null) _quintEaseInOut = ConcreteEaseMethods.QuintEaseInOut;
+                return _quintEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Sine Ease
+
+        private static Ease _sineEaseIn;
+        public static Ease SineEaseIn
+        {
+            get
+            {
+                if (_sineEaseIn == null) _sineEaseIn = ConcreteEaseMethods.SineEaseIn;
+                return _sineEaseIn;
+            }
+        }
+
+        private static Ease _sineEaseOut;
+        public static Ease SineEaseOut
+        {
+            get
+            {
+                if (_sineEaseOut == null) _sineEaseOut = ConcreteEaseMethods.SineEaseOut;
+                return _sineEaseOut;
+            }
+        }
+
+        private static Ease _sineEaseInOut;
+        public static Ease SineEaseInOut
+        {
+            get
+            {
+                if (_sineEaseInOut == null) _sineEaseInOut = ConcreteEaseMethods.SineEaseInOut;
+                return _sineEaseInOut;
+            }
+        }
+
+        #endregion
+
+        #region Strong Ease
+
+        private static Ease _strongEaseIn;
+        public static Ease StrongEaseIn
+        {
+            get
+            {
+                if (_strongEaseIn == null) _strongEaseIn = ConcreteEaseMethods.StrongEaseIn;
+                return _strongEaseIn;
+            }
+        }
+
+        private static Ease _strongEaseOut;
+        public static Ease StrongEaseOut
+        {
+            get
+            {
+                if (_strongEaseOut == null) _strongEaseOut = ConcreteEaseMethods.StrongEaseOut;
+                return _strongEaseOut;
+            }
+        }
+
+        private static Ease _strongEaseInOut;
+        public static Ease StrongEaseInOut
+        {
+            get
+            {
+                if (_strongEaseInOut == null) _strongEaseInOut = ConcreteEaseMethods.StrongEaseInOut;
+                return _strongEaseInOut;
+            }
+        }
+
+        #endregion
 
         #region AnimationCurve
 
@@ -417,9 +845,14 @@ namespace com.spacepuppy.Tween
 
 
 
+
+
+
+
+
         public static Vector2 EaseVector2(Ease ease, Vector2 start, Vector2 end, float t, float dur)
         {
-            return (ease(t, 0, 1,dur) * (end - start)) + start;
+            return (ease(t, 0, 1, dur) * (end - start)) + start;
 
             //return new Vector2(ease(t, start.x, end.x - start.x, dur), ease(t, start.y, end.y - start.y, dur));
         }
@@ -443,4 +876,5 @@ namespace com.spacepuppy.Tween
             return Quaternion.Slerp(start, end, ease(t, 0, 1, dur));
         }
     }
+
 }

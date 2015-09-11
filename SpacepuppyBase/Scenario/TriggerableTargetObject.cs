@@ -75,7 +75,12 @@ namespace com.spacepuppy.Scenario
 
         #region Utils
 
-        public static object GetTargetFrom(System.Type tp, UnityEngine.Object targ, bool searchEntity)
+        public static T GetTargetFrom<T>(object targ, bool searchEntity) where T : class
+        {
+            return GetTargetFrom(typeof(T), targ, searchEntity) as T;
+        }
+
+        public static object GetTargetFrom(System.Type tp, object targ, bool searchEntity)
         {
             if (targ == null) return null;
 
