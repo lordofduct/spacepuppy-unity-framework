@@ -103,10 +103,9 @@ namespace com.spacepuppyeditor.Base
 
             if (go.HasComponent<SingletonManager>())
             {
-                property.FindPropertyRelative("_maintainOnLoad").boolValue = false;
                 _message = "This Singleton is managed by a SingletonManager.";
                 _messageType = MessageType.Info;
-                return EditorGUIUtility.singleLineHeight * 2f;
+                return EditorGUIUtility.singleLineHeight * 3f;
             }
             else if (go.GetComponentsAlt<ISingleton>().Count() > 1)
             {
@@ -126,13 +125,20 @@ namespace com.spacepuppyeditor.Base
         {
             if (property.serializedObject.isEditingMultipleObjects) return;
 
-            if(_message != null)
+            var lifeCycleProp = property.FindPropertyRelative("_lifeCycle");
+            if (_message != null)
             {
-                EditorGUI.HelpBox(position, _message, _messageType);
+                var r = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight * 2f);
+                EditorGUI.HelpBox(r, _message, _messageType);
+
+                r = new Rect(r.xMin, r.yMax, r.width, EditorGUIUtility.singleLineHeight);
+                var b = lifeCycleProp.GetEnumValue<SingletonLifeCycleRule>().HasFlag(SingletonLifeCycleRule.AlwaysReplace);
+                b = EditorGUI.Toggle(r, "Always Replace", b);
+                lifeCycleProp.SetEnumValue((b) ? SingletonLifeCycleRule.AlwaysReplace : SingletonLifeCycleRule.LivesForDurationOfScene);
             }
             else
             {
-                SPEditorGUI.PropertyField(position, property.FindPropertyRelative("_lifeCycle"));
+                SPEditorGUI.PropertyField(position, lifeCycleProp);
             }
         }
 

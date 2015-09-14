@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 using com.spacepuppy;
 using com.spacepuppy.Project;
@@ -50,6 +51,8 @@ namespace com.spacepuppyeditor.Base
 
         private GameSettingsBase _gameSettings;
         private CustomTimeLayersData _timeLayersData;
+
+        private Vector2 _scenesScrollBarPosition;
 
         private void OnEnable()
         {
@@ -139,9 +142,64 @@ namespace com.spacepuppyeditor.Base
                 EditorGUILayout.ObjectField("Custom Time Layers Data", _timeLayersData, typeof(CustomTimeLayersData), false);
             }
 
+
+
+
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
+            this.DrawDebugBuildScenes();
+
+
             //EditorGUIUtility.labelWidth = labelWidthCache;
         }
 
+
+        #endregion
+
+        #region Debug Build Scenes
+
+        private void DrawDebugBuildScenes()
+        {
+            EditorGUILayout.LabelField("Scenes Available In Editor Mode", EditorStyles.boldLabel);
+
+            EditorGUI.indentLevel++;
+
+            _scenesScrollBarPosition = EditorGUILayout.BeginScrollView(_scenesScrollBarPosition, GUI.skin.box, GUILayout.Height(200f));
+
+            EditorGUI.BeginChangeCheck();
+            var scenes = EditorBuildSettings.scenes;
+            foreach (var scene in scenes)
+            {
+                //EditorGUILayout.LabelField(scene.path);
+                scene.enabled = EditorGUILayout.ToggleLeft(EditorHelper.TempContent(scene.path), scene.enabled);
+            }
+            if (EditorGUI.EndChangeCheck()) EditorBuildSettings.scenes = scenes;
+
+            EditorGUILayout.EndScrollView();
+
+
+            //CLEAR
+            var rect = EditorGUILayout.GetControlRect();
+            var cancelPosition = new Rect(rect.xMax - 110f, rect.yMax, 50f, rect.height);
+            if (GUI.Button(cancelPosition, new GUIContent("Clear")))
+            {
+                EditorBuildSettings.scenes = new EditorBuildSettingsScene[] { };
+            }
+            //SYNC
+            var applyPosition = new Rect(rect.xMax - 55f, rect.yMax, 50f, rect.height);
+            if (GUI.Button(applyPosition, new GUIContent("Sync")))
+            {
+                var lst = new List<EditorBuildSettingsScene>();
+                var mainFolder = Application.dataPath.EnsureNotEndsWith("Assets");
+                foreach (var file in Directory.GetFiles(Application.dataPath + "/Scenes", "*.unity", SearchOption.AllDirectories))
+                {
+                    lst.Add(new EditorBuildSettingsScene(file.EnsureNotStartWith(mainFolder), true));
+                }
+                EditorBuildSettings.scenes = lst.ToArray();
+            }
+            EditorGUI.indentLevel--;
+        }
 
         #endregion
 
