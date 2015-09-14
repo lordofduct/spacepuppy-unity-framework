@@ -30,8 +30,8 @@ namespace com.spacepuppy
             if (a == null) throw new System.ArgumentNullException("a");
             if (b == null) throw new System.ArgumentNullException("b");
 
-            _collA = IgnorableCollider.GetIgnorableCollider(a);
-            _collB = IgnorableCollider.GetIgnorableCollider(b);
+            _collA = IgnorableCollider.GetIgnorableCollision(a);
+            _collB = IgnorableCollider.GetIgnorableCollision(b);
         }
 
         public CollisionExclusion(IIgnorableCollision a, IIgnorableCollision b)
@@ -48,7 +48,7 @@ namespace com.spacepuppy
             if (a == null) throw new System.ArgumentNullException("a");
             if (b == null) throw new System.ArgumentNullException("b");
 
-            _collA = IgnorableCollider.GetIgnorableCollider(a);
+            _collA = IgnorableCollider.GetIgnorableCollision(a);
             _collB = b;
         }
 
@@ -58,7 +58,7 @@ namespace com.spacepuppy
             if (b == null) throw new System.ArgumentNullException("b");
 
             _collA = a;
-            _collB = IgnorableCollider.GetIgnorableCollider(b);
+            _collB = IgnorableCollider.GetIgnorableCollision(b);
         }
 
         ~CollisionExclusion()
@@ -271,13 +271,7 @@ namespace com.spacepuppy
         #endregion
 
     }
-
-
-
-
-
-
-
+    
     public class ColliderExclusion : System.IDisposable
     {
 

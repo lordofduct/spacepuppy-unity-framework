@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy
 {
 
     [DisallowMultipleComponent()]
-    public class SPEntity : SPNotifyingComponent
+    public class SPEntity : SPNotifyingComponent, IIgnorableCollision
     {
         
         #region Static Multiton
@@ -114,6 +115,31 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IIgnorableCollision Interface
+        
+        void IIgnorableCollision.IgnoreCollision(Collider coll, bool ignore)
+        {
+            if (coll == null) return;
+
+            var arr = this.GetComponentsInChildren<Collider>();
+            for(int i = 0; i < arr.Length; i++)
+            {
+                Physics.IgnoreCollision(arr[i], coll, ignore);
+            }
+        }
+
+        void IIgnorableCollision.IgnoreCollision(IIgnorableCollision coll, bool ignore)
+        {
+            if (coll == null) return;
+
+            var arr = this.GetComponentsInChildren<Collider>();
+            for (int i = 0; i < arr.Length; i++)
+            {
+                coll.IgnoreCollision(arr[i], ignore);
+            }
+        }
+
+        #endregion
 
 
 

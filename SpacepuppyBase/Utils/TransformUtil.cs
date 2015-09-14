@@ -418,7 +418,7 @@ namespace com.spacepuppy.Utils
         /// Anchor should be local to the Transform where <0,0,0> would be the same as its true origin.
         /// </summary>
         /// <param name="trans">The transform to transpose.</param>
-        /// <param name="anchor">The point around which to transpose in world space.</param>
+        /// <param name="anchor">The point around which to transpose in local space.</param>
         /// <param name="position">The new position in world space.</param>
         /// <param name="rotation">The new rotation in world space.</param>
         public static void TransposeAroundAnchor(this Transform trans, Vector3 anchor, Vector3 position, Quaternion rotation)
@@ -437,7 +437,7 @@ namespace com.spacepuppy.Utils
         /// Anchor should be local to the Transform where <0,0,0> would be the same as its true origin.
         /// </summary>
         /// <param name="trans">The transform to transpose.</param>
-        /// <param name="anchor">The point around which to transpose in world space.</param>
+        /// <param name="anchor">The point around which to transpose in local space.</param>
         /// <param name="position">The new position in world space.</param>
         /// <param name="rotation">The new rotation in world space.</param>
         public static void TransposeAroundAnchor(this Transform trans, Trans anchor, Vector3 position, Quaternion rotation)

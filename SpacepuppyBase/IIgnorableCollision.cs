@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy
 {
 
@@ -12,7 +14,72 @@ namespace com.spacepuppy
 
     }
 
-    public class IgnorableCollider : IIgnorableCollision, IComponent
+    [RequireComponent(typeof(Rigidbody))]
+    public class IgnorableRigidbody : SPComponent, IIgnorableCollision
+    {
+
+        #region Fields
+
+        [System.NonSerialized()]
+        private Collider[] _colliders; //consider making this configurable
+
+        [System.NonSerialized()]
+        private Rigidbody _rigidbody;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            _rigidbody = this.GetComponent<Rigidbody>();
+            _colliders = this.GetComponentsInChildren<Collider>();
+        }
+
+        #endregion
+
+        #region IIgnorableCollision Interface
+
+        public void IgnoreCollision(IIgnorableCollision coll, bool ignore)
+        {
+            if (coll == null) return;
+            if (_colliders == null) return;
+
+            for(int i = 0; i < _colliders.Length; i++)
+            {
+                if (_colliders[i] != null) coll.IgnoreCollision(_colliders[i], ignore);
+            }
+        }
+
+        public void IgnoreCollision(Collider coll, bool ignore)
+        {
+            if (coll == null) return;
+            if (_colliders == null) return;
+
+            for (int i = 0; i < _colliders.Length; i++)
+            {
+                if (_colliders[i] != null) Physics.IgnoreCollision(_colliders[i], coll, ignore);
+            }
+        }
+
+        #endregion
+
+        #region Static Utils
+
+        public static IgnorableRigidbody GetIgnorableCollision(Rigidbody rb)
+        {
+            if (rb == null) return null;
+
+            return rb.AddOrGetComponent<IgnorableRigidbody>();
+        }
+
+        #endregion
+
+    }
+
+    public class IgnorableCollider : SPComponent, IIgnorableCollision
     {
 
         #region Fields
@@ -23,9 +90,11 @@ namespace com.spacepuppy
 
         #region CONSTRUCTOR
 
-        private IgnorableCollider(Collider coll)
+        protected override void Awake()
         {
-            _collider = coll;
+            base.Awake();
+
+            _collider = this.GetComponent<Collider>();
         }
 
         #endregion
@@ -35,43 +104,7 @@ namespace com.spacepuppy
         public Collider Collider { get { return _collider; } }
 
         #endregion
-
-        #region IComponent Interface
-
-        GameObject IGameObjectSource.gameObject
-        {
-            get { return _collider.gameObject; }
-        }
-
-        Transform IGameObjectSource.transform
-        {
-            get { return _collider.transform; }
-        }
-
-        public bool enabled
-        {
-            get
-            {
-                return _collider.enabled;
-            }
-            set
-            {
-                _collider.enabled = value;
-            }
-        }
-
-        public bool isActiveAndEnabled
-        {
-            get { return _collider.enabled && _collider.gameObject.activeInHierarchy; }
-        }
-
-        public Component component
-        {
-            get { return _collider; }
-        }
-
-        #endregion
-
+        
         #region IIgnorableCollision Interface
 
         public void IgnoreCollision(Collider coll, bool ignore)
@@ -90,96 +123,13 @@ namespace com.spacepuppy
 
         #endregion
 
-        #region Overrides
-
-        public override bool Equals(object obj)
-        {
-            var a = obj as IgnorableCollider;
-            if (object.ReferenceEquals(a, null)) return false;
-            return this.GetHashCode() == a.GetHashCode();
-        }
-
-        public override int GetHashCode()
-        {
-            if (object.ReferenceEquals(_collider, null)) return 0;
-            return _collider.GetInstanceID();
-        }
-
-        public static bool operator ==(IgnorableCollider a, IgnorableCollider b)
-        {
-            if (object.ReferenceEquals(a, null))
-                return object.ReferenceEquals(b, null);
-            else if (object.ReferenceEquals(b, null)) return false;
-
-            return a.GetHashCode() == b.GetHashCode();
-        }
-
-        public static bool operator !=(IgnorableCollider a, IgnorableCollider b)
-        {
-            if (object.ReferenceEquals(a, null))
-                return !object.ReferenceEquals(b, null);
-            else if (object.ReferenceEquals(b, null)) return true;
-
-            return a.GetHashCode() != b.GetHashCode();
-        }
-
-        #endregion
-
         #region Static Interface
-
-        private static Dictionary<Collider, IgnorableCollider> _table = new Dictionary<Collider, IgnorableCollider>(com.spacepuppy.Collections.ObjectInstanceIDEqualityComparer<Collider>.Default);
-
-        private IgnorableCollider()
-        {
-            GameLoopEntry.LevelWasLoaded += (s, e) => { IgnorableCollider.Clean(); };
-            com.spacepuppy.Timers.SystemTimers.CreateGypsyTimer(60f, 0, null, (t) =>
-            {
-                IgnorableCollider.Clean();
-            });
-        }
-
-        public static IgnorableCollider GetIgnorableCollider(Collider coll)
+        
+        public static IgnorableCollider GetIgnorableCollision(Collider coll)
         {
             if (coll == null) return null;
 
-            lock (_table)
-            {
-                IgnorableCollider aspect;
-                if (_table.TryGetValue(coll, out aspect))
-                {
-                    return aspect;
-                }
-                else
-                {
-                    aspect = new IgnorableCollider(coll);
-                    _table.Add(coll, aspect);
-                    return aspect;
-                }
-            }
-        }
-
-        public static void Clean()
-        {
-            lock (_table)
-            {
-                using (var toRemove = com.spacepuppy.Collections.TempCollection<Collider>.GetCollection())
-                {
-                    var e1 = _table.Keys.GetEnumerator();
-                    while (e1.MoveNext())
-                    {
-                        if (e1.Current == null) toRemove.Add(e1.Current);
-                    }
-
-                    if (toRemove.Count > 0)
-                    {
-                        var e2 = toRemove.GetEnumerator();
-                        while (e2.MoveNext())
-                        {
-                            _table.Remove(e2.Current);
-                        }
-                    }
-                }
-            }
+            return coll.AddOrGetComponent<IgnorableCollider>();
         }
 
         #endregion

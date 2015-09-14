@@ -424,6 +424,42 @@ namespace com.spacepuppy.Utils
         #region Lerp Like
 
         /// <summary>
+        /// Unity's Vector2.Lerp clamps between 0->1, this allows a true lerp of all ranges.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static Vector2 Lerp(Vector2 a, Vector2 b, float t)
+        {
+            return (b - a) * t + a;
+        }
+
+        /// <summary>
+        /// Unity's Vector3.Lerp clamps between 0->1, this allows a true lerp of all ranges.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static Vector3 Lerp(Vector3 a, Vector3 b, float t)
+        {
+            return (b - a) * t + a;
+        }
+
+        /// <summary>
+        /// Unity's Vector4.Lerp clamps between 0->1, this allows a true lerp of all ranges.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static Vector4 Lerp(Vector4 a, Vector4 b, float t)
+        {
+            return (b - a) * t + a;
+        }
+
+        /// <summary>
         /// Moves from a to b at some speed dependent of a delta time with out passing b.
         /// </summary>
         /// <param name="a"></param>

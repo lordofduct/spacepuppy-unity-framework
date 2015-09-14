@@ -15,7 +15,8 @@ namespace com.spacepuppy.Collections
 
         #region Fields
 
-        private HashSet<T> _inactive = new HashSet<T>();
+        //private HashSet<T> _inactive = new HashSet<T>();
+        private Stack<T> _inactive = new Stack<T>();
 
         private int _cacheSize;
         private Func<T> _constructorDelegate;
@@ -80,12 +81,26 @@ namespace com.spacepuppy.Collections
 
         public T GetInstance()
         {
-            var e = _inactive.GetEnumerator();
-            if (e.MoveNext())
+            //## hashset
+            //var e = _inactive.GetEnumerator();
+            //if (e.MoveNext())
+            //{
+            //    var obj = e.Current;
+            //    _inactive.Remove(obj);
+            //    if(_resetOnGet && _resetObjectDelegate != null)
+            //        _resetObjectDelegate(obj);
+            //    return obj;
+            //}
+            //else
+            //{
+            //    return _constructorDelegate();
+            //}
+
+            //## stack
+            if (_inactive.Count > 0)
             {
-                var obj = e.Current;
-                _inactive.Remove(obj);
-                if(_resetOnGet && _resetObjectDelegate != null)
+                var obj = _inactive.Pop();
+                if (_resetOnGet && _resetObjectDelegate != null)
                     _resetObjectDelegate(obj);
                 return obj;
             }
@@ -104,7 +119,8 @@ namespace com.spacepuppy.Collections
                 if(_inactive.Count < _cacheSize)
                 {
                     if (!_resetOnGet && _resetObjectDelegate != null) _resetObjectDelegate(obj);
-                    _inactive.Add(obj);
+                    //_inactive.Add(obj); //## hashset
+                    _inactive.Push(obj); //## stack
                 }
             }
             else
@@ -114,7 +130,8 @@ namespace com.spacepuppy.Collections
                 if(_inactive.Count < 1024)
                 {
                     if (!_resetOnGet && _resetObjectDelegate != null) _resetObjectDelegate(obj);
-                    _inactive.Add(obj);
+                    //_inactive.Add(obj); //## hashset
+                    _inactive.Push(obj); //## stack
                 }
             }
         }

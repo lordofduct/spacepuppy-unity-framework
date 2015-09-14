@@ -70,7 +70,7 @@ namespace com.spacepuppy.Tween.Curves
         {
             if (this.Duration == 0f) return _end;
             t = this.Ease(t, 0f, 1f, this.Duration);
-            return Vector4.Lerp(_start, _end, t);
+            return VectorUtil.Lerp(_start, _end, t);
         }
 
         #endregion

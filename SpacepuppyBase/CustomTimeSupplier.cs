@@ -144,6 +144,20 @@ namespace com.spacepuppy
             _ft = 0.0;
         }
 
+
+        /// <summary>
+        /// Adjust the current 'TotalTime' by some amount. 
+        /// WARNING - delta is not effected
+        /// WARNING - time based event systems might be adversely impacted
+        /// Especially if the value is negative.
+        /// USE AT OWN RISK!
+        /// </summary>
+        /// <param name="value"></param>
+        public void AdjustTime(double value)
+        {
+            _t += value;
+        }
+
         #endregion
 
         #region ITimeSupplier Interface

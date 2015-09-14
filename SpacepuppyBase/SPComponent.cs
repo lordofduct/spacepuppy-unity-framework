@@ -169,11 +169,11 @@ namespace com.spacepuppy
             return co;
         }
 
-        public RadicalCoroutine InvokeRadical(System.Action method, float delay, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        public RadicalCoroutine InvokeRadical(System.Action method, float delay, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (method == null) throw new System.ArgumentNullException("method");
 
-            return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay), disableMode);
+            return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay, -1f, time), disableMode);
         }
 
         public RadicalCoroutine InvokeAfterYield(System.Action method, object yieldInstruction, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
@@ -183,11 +183,11 @@ namespace com.spacepuppy
             return this.StartRadicalCoroutine(CoroutineUtil.InvokeAfterYieldRedirect(method, yieldInstruction), disableMode);
         }
 
-        public RadicalCoroutine InvokeRepeatingRadical(System.Action method, float delay, float repeatRate, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        public RadicalCoroutine InvokeRepeatingRadical(System.Action method, float delay, float repeatRate, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (method == null) throw new System.ArgumentNullException("method");
 
-            return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay), disableMode);
+            return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay, repeatRate, time), disableMode);
         }
 
         public new void StopAllCoroutines()
