@@ -57,7 +57,11 @@ namespace com.spacepuppy.Tween
         StrongEaseOut = 35,
         StrongEaseInOut = 36,
     }
-    
+
+    /// <summary>
+    /// A set of easing methods, to see a visual representation you can check out:
+    /// https://msdn.microsoft.com/en-us/library/vstudio/Ee308751%28v=VS.100%29.aspx
+    /// </summary>
     public static class ConcreteEaseMethods
     {
 

@@ -1202,7 +1202,7 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Test if float is greater than some other value by some degree of error in epsilon.
+        /// Test if float is less than some other value by some degree of error in epsilon.
         /// 
         /// Due to float error, two values may be considered similar... but the computer considers them different. 
         /// By using some epsilon (degree of error) once can test if the two values are similar.
