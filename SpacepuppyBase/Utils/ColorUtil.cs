@@ -146,5 +146,36 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
+        #region Lerp
+
+        /// <summary>
+        /// Unity's Color.Lerp clamps between 0->1, this allows a true lerp of all ranges.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static Color Lerp(Color a, Color b, float t)
+        {
+            return new Color(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
+        }
+
+        /// <summary>
+        /// Unity's Color32.Lerp clamps between 0->1, this allows a true lerp of all ranges.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static Color32 Lerp(Color32 a, Color32 b, float t)
+        {
+            return new Color32((byte)MathUtil.Clamp((float)a.r + (float)((int)b.r - (int)a.r) * t, 0, 255), 
+                               (byte)MathUtil.Clamp((float)a.g + (float)((int)b.g - (int)a.g) * t, 0, 255), 
+                               (byte)MathUtil.Clamp((float)a.b + (float)((int)b.b - (int)a.b) * t, 0, 255), 
+                               (byte)MathUtil.Clamp((float)a.a + (float)((int)b.a - (int)a.a) * t, 0, 255));
+        }
+
+        #endregion
+
     }
 }
