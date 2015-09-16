@@ -109,21 +109,20 @@ namespace com.spacepuppy.Render
 
         public object GetValue()
         {
-            if(_material == null) return null;
+            var mat = this.Material;
+
+            if (mat == null) return null;
 
             try
             {
                 switch (_valueType)
                 {
                     case MaterialPropertyValueType.Float:
-                        this.Material.GetFloat(_propertyName);
-                        break;
+                        return mat.GetFloat(_propertyName);
                     case MaterialPropertyValueType.Color:
-                        this.Material.GetColor(_propertyName);
-                        break;
+                        return mat.GetColor(_propertyName);
                     case MaterialPropertyValueType.Vector:
-                        this.Material.GetVector(_propertyName);
-                        break;
+                        return mat.GetVector(_propertyName);
                 }
             }
             catch

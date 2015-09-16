@@ -172,7 +172,13 @@ namespace com.spacepuppy
         public Singleton()
         {
             var tp = this.GetType();
-            if (!_singletonRefs.ContainsKey(tp)) _singletonRefs[tp] = this;
+            //if (Application.isEditor && !Application.isPlaying)
+            //{
+            var attrib = tp.GetCustomAttributes(typeof(Singleton.ConfigAttribute), false).FirstOrDefault() as Singleton.ConfigAttribute;
+            if (attrib != null) _maintainer.LifeCycle = attrib.DefaultLifeCycle;
+            //}
+
+            //if (!_singletonRefs.ContainsKey(tp)) _singletonRefs[tp] = this;
         }
 
         protected override void Awake()
@@ -205,7 +211,7 @@ namespace com.spacepuppy
 
         #endregion
 
-        public SingletonLifeCycleRule LifeCycle
+        public virtual SingletonLifeCycleRule LifeCycle
         {
             get { return _maintainer.LifeCycle; }
             set
@@ -264,7 +270,7 @@ namespace com.spacepuppy
                     if (_lifeCycle == value) return;
                     _lifeCycle = value;
 
-                    if (!_flaggedSelfMaintaining && _lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)) this.UpdateMaintainOnLoadStatus();
+                    if (_target != null && !_flaggedSelfMaintaining && _lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)) this.UpdateMaintainOnLoadStatus();
                 }
             }
 
@@ -349,16 +355,19 @@ namespace com.spacepuppy
 
             private void EnforceThisAsSingleton()
             {
-                var c = (_singletonRefs.ContainsKey(_target.GetType())) ? _singletonRefs[_target.GetType()] : null;
-                if (c.component == null || c.component == _target.component || !c.isActiveAndEnabled)
+                var targTp = _target.GetType();
+                ISingleton c;
+                if (!_singletonRefs.TryGetValue(targTp, out c)) c = null;
+
+                if (object.ReferenceEquals(c, null) || c.component == null || c.component == _target.component || !c.isActiveAndEnabled)
                 {
-                    _singletonRefs[_target.GetType()] = _target;
+                    _singletonRefs[targTp] = _target;
                 }
                 else if(_target.component != null)
                 {
                     if(_lifeCycle.HasFlag(SingletonLifeCycleRule.AlwaysReplace))
                     {
-                        _singletonRefs[_target.GetType()] = _target;
+                        _singletonRefs[targTp] = _target;
                         if (_target.component.HasComponent<SingletonManager>())
                         {
                             Object.Destroy(c.component);
@@ -416,11 +425,14 @@ namespace com.spacepuppy
 
         public class ConfigAttribute : System.Attribute
         {
+
+            public SingletonLifeCycleRule DefaultLifeCycle;
+            public bool LifeCycleReadOnly;
             public bool ExcludeFromSingletonManager;
 
-            public ConfigAttribute(bool excludeFromSingletonManager)
+            public ConfigAttribute()
             {
-                this.ExcludeFromSingletonManager = excludeFromSingletonManager;
+
             }
         }
 
@@ -448,7 +460,7 @@ namespace com.spacepuppy
         protected override void Awake()
         {
             base.Awake();
-
+            
             this.UpdateMaintainOnLoadStatus();
         }
 

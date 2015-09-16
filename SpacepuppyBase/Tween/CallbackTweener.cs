@@ -11,18 +11,18 @@ namespace com.spacepuppy.Tween
     /// <summary>
     /// A tweener that calls an update function tick by tick.
     /// 
-    /// When AutoKilling a CallbackTweener, it has no object identity to reference, so make sure to include a token to make it unique.
+    /// When AutoKilling Id must be set.
     /// </summary>
-    public class CallbackTweener : Tweener, ITweenHash, IAutoKillableTweener
+    public class CallbackTweener : Tweener, ITweenHash
     {
 
         #region Fields
 
+        private object _id;
         private TweenerUpdateCallback _callback;
         private Ease _ease;
         private float _dur;
-        private object _tokenUid;
-
+        
         #endregion
         
         #region CONSTRUCTOR
@@ -44,6 +44,19 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Properties
+
+        public override object Id
+        {
+            get
+            {
+                return _id;
+            }
+
+            set
+            {
+                _id = value;
+            }
+        }
 
         public Ease Ease
         {
@@ -70,28 +83,7 @@ namespace com.spacepuppy.Tween
         }
 
         #endregion
-
-        #region IAutoKillableTweener Interface
-
-        object IAutoKillableTweener.Target
-        {
-            get { return null; }
-        }
-
-        object IAutoKillableTweener.Token
-        {
-            get
-            {
-                return _tokenUid;
-            }
-            set
-            {
-                _tokenUid = value;
-            }
-        }
-
-        #endregion
-
+        
         #region ITweenHash Interface
 
         ITweenHash ITweenHash.SetId(object id)
@@ -255,21 +247,21 @@ namespace com.spacepuppy.Tween
 
         ITweenHash ITweenHash.AutoKill(object token)
         {
-            _tokenUid = token;
+            this.AutoKillToken = token;
             return this;
         }
 
         Tweener ITweenHash.Play()
         {
             this.Play();
-            if (_tokenUid != null) SPTween.AutoKill(this);
+            if (this.AutoKillToken != null) SPTween.AutoKill(this);
             return this;
         }
 
         Tweener ITweenHash.Play(float playHeadPosition)
         {
             this.Play(playHeadPosition);
-            if (_tokenUid != null) SPTween.AutoKill(this);
+            if (this.AutoKillToken != null) SPTween.AutoKill(this);
             return this;
         }
 

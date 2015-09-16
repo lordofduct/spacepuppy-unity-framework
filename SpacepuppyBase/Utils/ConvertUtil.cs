@@ -144,12 +144,32 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        public static T ToEnum<T>(int val, T defaultValue) where T : struct, System.IConvertible
+        {
+            if (!typeof(T).IsEnum) throw new System.ArgumentException("T must be an enumerated type");
+
+            object obj = val;
+            if(System.Enum.IsDefined(typeof(T), obj))
+            {
+                return (T)obj;
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
         public static T ToEnum<T>(object val, T defaultValue) where T : struct, System.IConvertible
         {
             return ToEnum<T>(System.Convert.ToString(val), defaultValue);
         }
 
         public static T ToEnum<T>(string val) where T : struct, System.IConvertible
+        {
+            return ToEnum<T>(val, default(T));
+        }
+
+        public static T ToEnum<T>(int val) where T : struct, System.IConvertible
         {
             return ToEnum<T>(val, default(T));
         }

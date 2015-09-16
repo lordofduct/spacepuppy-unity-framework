@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace com.spacepuppy.Tween
 {
@@ -10,6 +11,7 @@ namespace com.spacepuppy.Tween
 
         #region Fields
 
+        private object _id;
         private TweenSequenceCollection _sequence;
         private Tweener _current;
         private int _currentIndex = -1;
@@ -27,6 +29,18 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Properties
+
+        public override object Id
+        {
+            get
+            {
+                return _id;
+            }
+            set
+            {
+                _id = value;
+            }
+        }
 
         public IList<Tweener> Tweens { get { return _sequence; } }
 

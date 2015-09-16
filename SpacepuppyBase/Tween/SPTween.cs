@@ -7,7 +7,7 @@ using com.spacepuppy.Collections;
 namespace com.spacepuppy.Tween
 {
 
-    [Singleton.Config(true)]
+    [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
     public class SPTween : Singleton
     {
 
@@ -23,12 +23,12 @@ namespace com.spacepuppy.Tween
 
         #region Fields
 
-        private List<Tweener> _runningTweens = new List<Tweener>();
-        private List<Tweener> _toAdd = new List<Tweener>();
-        private List<Tweener> _toRemove = new List<Tweener>();
-        private bool _inUpdate;
+        private HashSet<Tweener> _runningTweens = new HashSet<Tweener>();
+        private HashSet<Tweener> _toAdd = new HashSet<Tweener>();
+        private HashSet<Tweener> _toRemove = new HashSet<Tweener>();
+        private bool _locked;
 
-        private static Dictionary<TokenPairing, IAutoKillableTweener> _autoKillDict = new Dictionary<TokenPairing, IAutoKillableTweener>(new TokenPairingComparer());
+        private static Dictionary<TokenPairing, Tweener> _autoKillDict = new Dictionary<TokenPairing, Tweener>(new TokenPairingComparer());
 
         #endregion
 
@@ -49,7 +49,7 @@ namespace com.spacepuppy.Tween
         }
         private void AddReference_Imp(Tweener tween)
         {
-            if(_inUpdate)
+            if(_locked)
             {
                 if (_runningTweens.Contains(tween) || _toAdd.Contains(tween)) return;
                 _toAdd.Add(tween);
@@ -58,12 +58,11 @@ namespace com.spacepuppy.Tween
             {
                 if (_runningTweens.Contains(tween)) return;
                 _runningTweens.Add(tween);
-                if(tween is IAutoKillableTweener)
+                if(tween.Id != null)
                 {
-                    var auto = tween as IAutoKillableTweener;
-                    var token = new TokenPairing(auto.Target, auto.Token);
-                    IAutoKillableTweener old;
-                    if (_autoKillDict.TryGetValue(token, out old))
+                    var token = new TokenPairing(tween.Id, tween.AutoKillToken);
+                    Tweener old;
+                    if (_autoKillDict.TryGetValue(token, out old) && old != tween)
                     {
                         old.Kill();
                     }
@@ -79,7 +78,7 @@ namespace com.spacepuppy.Tween
         }
         private void RemoveReference_Imp(Tweener tween)
         {
-            if (_inUpdate)
+            if (_locked)
             {
                 if (!_runningTweens.Contains(tween)) return;
                 if (_toRemove.Contains(tween)) return;
@@ -88,10 +87,10 @@ namespace com.spacepuppy.Tween
             else
             {
                 _runningTweens.Remove(tween);
-                if(tween is IAutoKillableTweener && tween.IsComplete)
+                if(tween.Id != null && tween.IsComplete)
                 {
-                    IAutoKillableTweener auto = tween as IAutoKillableTweener;
-                    var token = new TokenPairing(auto.Target, auto.Token);
+                    var token = new TokenPairing(tween.Id, tween.AutoKillToken);
+                    Tweener auto;
                     if(_autoKillDict.TryGetValue(token, out auto) && auto == tween)
                     {
                         _autoKillDict.Remove(token);
@@ -99,6 +98,40 @@ namespace com.spacepuppy.Tween
                 }
             }
         }
+
+
+        private void LockTweenSet()
+        {
+            _locked = true;
+        }
+
+        private void UnlockTweenSet()
+        {
+            _locked = false;
+
+            if (_toRemove.Count > 0)
+            {
+                var e = _toRemove.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    this.RemoveReference_Imp(e.Current);
+                }
+                _toRemove.Clear();
+            }
+            if (_toAdd.Count > 0)
+            {
+                var e = _toAdd.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    this.AddReference_Imp(e.Current);
+                }
+                _toAdd.Clear();
+            }
+        }
+
+
+
+
 
         /// <summary>
         /// Flag a Tweener that implements IAutoKillableTweener to be auto killed if another tween targeting the same object is played. 
@@ -109,57 +142,77 @@ namespace com.spacepuppy.Tween
         /// <param name="tween"></param>
         public static void AutoKill(Tweener tween)
         {
-            if (tween == null || !(tween is IAutoKillableTweener)) return;
+            if (tween == null) throw new System.ArgumentNullException("tween");
+            if (tween.Id == null) throw new System.ArgumentException("Can only register a Tweener with a valid 'Id' for autokill.");
             if (GameLoopEntry.ApplicationClosing) return;
+            if (!tween.IsPlaying) throw new System.ArgumentException("Can only register a playing Tweener for autokill.");
             if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
-            _instance.AutoKill_Imp(tween as IAutoKillableTweener);
-        }
-        public static void AutoKill(Tweener tween, object token)
-        {
-            if (tween == null || !(tween is IAutoKillableTweener)) return;
-            if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
-
-            var twn = tween as IAutoKillableTweener;
-            twn.Token = token;
-            _instance.AutoKill_Imp(twn);
-        }
-        private void AutoKill_Imp(IAutoKillableTweener tween)
-        {
-            var token = new TokenPairing(tween.Target, tween.Token);
-            if (token.IsNull) return;
-
-            IAutoKillableTweener old;
-            if (_autoKillDict.TryGetValue(token, out old))
+            
+            var token = new TokenPairing(tween.Id, tween.AutoKillToken);
+            
+            Tweener old;
+            if (_autoKillDict.TryGetValue(token, out old) && old != tween)
             {
                 old.Kill();
             }
             _autoKillDict[token] = tween;
         }
 
-
         public static void KillAll(object id)
         {
             if (GameLoopEntry.ApplicationClosing) return;
             if (_instance == null) return;
+            if (_instance._runningTweens.Count == 0) return;
 
-            var arr = (from t in _instance._runningTweens where t.Id == id select t).ToArray();
-            foreach (var t in arr)
+            using (var lst = TempCollection<Tweener>.GetCollection())
             {
-                t.Kill();
+                var e = _instance._runningTweens.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current.Id == id) lst.Add(e.Current);
+                }
+
+                var e2 = lst.GetEnumerator();
+                while (e2.MoveNext())
+                {
+                    e2.Current.Kill();
+                }
             }
         }
         public static void KillAll()
         {
             if (GameLoopEntry.ApplicationClosing) return;
             if (_instance == null) return;
-
-            var arr = _instance._runningTweens.ToArray();
-            foreach(var t in arr)
+            if (_instance._runningTweens.Count == 0) return;
+            
+            var e = _instance._runningTweens.GetEnumerator();
+            while(e.MoveNext())
             {
-                t.Kill();
+                e.Current.SetKilled();
             }
+            _instance._runningTweens.Clear();
         }
+
+        /// <summary>
+        /// Enumerate over all active tweeen and call a function with them as an arg. Return true to stop enumerating.
+        /// </summary>
+        /// <param name="pred"></param>
+        public static void Find(System.Func<Tweener, bool> pred)
+        {
+            if (pred == null) return;
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) return;
+            if (_instance._runningTweens.Count == 0) return;
+
+            _instance.LockTweenSet();
+            var e = _instance._runningTweens.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (pred(e.Current)) return;
+            }
+            _instance.UnlockTweenSet();
+        }
+
 
         #endregion
 
@@ -187,30 +240,15 @@ namespace com.spacepuppy.Tween
 
         private void DoUpdate(UpdateSequence updateType)
         {
-            _inUpdate = true;
-
-            float dt;
-            Tweener twn;
-            for (int i = 0; i < _runningTweens.Count; i++)
+            this.LockTweenSet();
+            
+            var e = _runningTweens.GetEnumerator();
+            while(e.MoveNext())
             {
-                twn = _runningTweens[i];
-                if (twn.UpdateType != updateType) continue;
-
-                twn.Update();
+                if (e.Current.UpdateType == updateType) e.Current.Update();
             }
 
-            _inUpdate = false;
-
-            for(int i = 0; i < _toRemove.Count; i++)
-            {
-                this.RemoveReference_Imp(_toRemove[i]);
-            }
-            _toRemove.Clear();
-            for(int i = 0; i < _toAdd.Count; i++)
-            {
-                this.AddReference_Imp(_toAdd[i]);
-            }
-            _toAdd.Clear();
+            this.UnlockTweenSet();
         }
 
         #endregion

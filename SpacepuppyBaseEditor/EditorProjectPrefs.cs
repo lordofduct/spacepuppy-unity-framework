@@ -140,6 +140,20 @@ namespace com.spacepuppyeditor
                 return EditorPrefs.GetString(key, defaultValue);
             }
 
+            public T GetEnum<T>(string key) where T : struct, System.IConvertible
+            {
+                key = GetKey(key);
+                int i = EditorPrefs.GetInt(key);
+                return ConvertUtil.ToEnum<T>(i);
+            }
+
+            public T GetEnum<T>(string key, T defaultValue) where T : struct, System.IConvertible
+            {
+                key = GetKey(key);
+                int i = EditorPrefs.GetInt(key, System.Convert.ToInt32(defaultValue));
+                return ConvertUtil.ToEnum<T>(i, defaultValue);
+            }
+
             public void SetBool(string key, bool value)
             {
                 key = GetKey(key);
@@ -162,6 +176,12 @@ namespace com.spacepuppyeditor
             {
                 key = GetKey(key);
                 EditorPrefs.SetString(key, value);
+            }
+
+            public void SetEnum<T>(string key, T value) where T : struct, System.IConvertible
+            {
+                key = GetKey(key);
+                EditorPrefs.SetInt(key, System.Convert.ToInt32(value));
             }
 
             #region Utils

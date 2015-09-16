@@ -12,6 +12,12 @@ namespace com.spacepuppy.Render
     {
 
         #region Fields
+        
+        [SerializeField()]
+        private VariantReference _autoKillId;
+
+        [SerializeField()]
+        private bool _killOnDisable;
 
         [SerializeField()]
         private SPTime _timeSupplier;
@@ -33,7 +39,7 @@ namespace com.spacepuppy.Render
 
         [SerializeField()]
         private Trigger _onComplete;
-
+        
         #endregion
 
         #region CONSTRUCTOR
@@ -55,13 +61,43 @@ namespace com.spacepuppy.Render
 
         }
 
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            if (_killOnDisable)
+            {
+                SPTween.Find((t) =>
+                {
+                    if (t is ObjectTweener && (t as ObjectTweener).Target == _transition)
+                    {
+                        t.Kill();
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        }
+
         #endregion
 
-        #region Tweener Update
+        #region Properties
 
-        private void TweenUpdate(Tweener tween, float dt, float t)
+        public object AutoKillId
         {
-            _transition.Position = tween.PlayHeadTime / tween.PlayHeadLength;
+            get
+            {
+                var id = _autoKillId.Value;
+                if (id == null) id = this;
+                return id;
+            }
+            set
+            {
+                if (Object.Equals(value, this))
+                    _autoKillId.Value = null;
+                else
+                    _autoKillId.Value = value;
+            }
         }
 
         #endregion
@@ -79,7 +115,7 @@ namespace com.spacepuppy.Render
         public override bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
-
+            
             switch (_mode)
             {
                 case TweenHash.AnimMode.To:
@@ -90,11 +126,13 @@ namespace com.spacepuppy.Render
                     break;
             }
 
-            var twn = SPTween.Tween(this.TweenUpdate, _duration)
-                              .Use(_timeSupplier.TimeSupplier)
-                              .Ease(EaseMethods.GetEase(_ease))
-                              .AutoKill(this.GetInstanceID());
-
+            var twn = SPTween.Tween(_transition)
+                             .FromTo("Position", 0f, 1f, _duration)
+                             .SetId(this.AutoKillId)
+                             .Use(_timeSupplier.TimeSupplier)
+                             .Ease(EaseMethods.GetEase(_ease))
+                             .AutoKill();
+            
             if (_onComplete.Count > 0)
                 twn.OnFinish((t) => _onComplete.ActivateTrigger());
 

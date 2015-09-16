@@ -10,11 +10,11 @@ namespace com.spacepuppyeditor.Base
 {
 
     [CustomEditor(typeof(SingletonManager))]
-    public class SingletonInspector : SPEditor
+    public class SingletonManagerInspector : SPEditor
     {
 
         private static System.Type[] IgnoredSpecialSingletonTypes;
-        static SingletonInspector()
+        static SingletonManagerInspector()
         {
             var lst = new List<System.Type>();
             foreach(var tp in TypeUtil.GetTypesAssignableFrom(typeof(ISingleton)))
@@ -86,7 +86,7 @@ namespace com.spacepuppyeditor.Base
         {
             if (property.serializedObject.isEditingMultipleObjects) return 0f;
 
-            if (property.serializedObject.targetObject is ISingleton && SingletonInspector.SingletonCount(property.serializedObject.targetObject.GetType()) > 1)
+            if (property.serializedObject.targetObject is ISingleton && SingletonManagerInspector.SingletonCount(property.serializedObject.targetObject.GetType()) > 1)
             {
                 _message = "Multiple Singletons of this type exist, you should purge the scene of duplicates!";
                 _messageType = MessageType.Error;
@@ -143,4 +143,51 @@ namespace com.spacepuppyeditor.Base
         }
 
     }
+
+    [CustomEditor(typeof(Singleton), true)]
+    public class GameLoopEntryInspector : SPEditor
+    {
+
+
+        protected override void OnSPInspectorGUI()
+        {
+            this.serializedObject.Update();
+
+            if(this.target is Singleton)
+            {
+                var attrib = this.target.GetType().GetCustomAttributes(typeof(Singleton.ConfigAttribute), false).FirstOrDefault() as Singleton.ConfigAttribute;
+                if(attrib != null && attrib.LifeCycleReadOnly)
+                {
+                    this.DrawReadOnlyInspector(attrib);
+                }
+                else
+                {
+                    this.DrawDefaultInspector();
+                }
+            }
+            else
+            {
+                this.DrawDefaultInspector();
+            }
+
+            this.serializedObject.ApplyModifiedProperties();
+        }
+
+
+        private void DrawReadOnlyInspector(Singleton.ConfigAttribute attrib)
+        {
+            this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
+
+            var prop = this.serializedObject.FindProperty("_maintainer._lifeCycle");
+            if (prop.GetEnumValue<SingletonLifeCycleRule>() != attrib.DefaultLifeCycle) prop.SetEnumValue(attrib.DefaultLifeCycle);
+
+            GUI.enabled = false;
+            EditorGUILayout.EnumPopup("Life Cycle", prop.GetEnumValue<SingletonLifeCycleRule>());
+            GUI.enabled = true;
+
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, "_maintainer");
+        }
+
+    }
+
 }

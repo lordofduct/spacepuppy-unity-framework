@@ -20,8 +20,7 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Fields
-
-        private object _id;
+        
         private UpdateSequence _updateType;
         private ITimeSupplier _timeSupplier = SPTime.Normal;
         private TweenWrapMode _wrap;
@@ -39,16 +38,32 @@ namespace com.spacepuppy.Tween
 
         private int _currentWrapCount;
 
+        private object _autoKillToken;
+
         #endregion
 
         #region Configurable Properties
 
-        public object Id
+        /// <summary>
+        /// An identifier for this tween to relate it to other tweens. Usually its the object being tweened, if one exists.
+        /// </summary>
+        public abstract object Id
         {
-            get { return _id; }
-            set { _id = value; }
+            get;
+            set;
         }
 
+        public object AutoKillToken
+        {
+            get { return _autoKillToken; }
+            set
+            {
+                if (this.IsPlaying) throw new System.InvalidOperationException("Can only chnage the AutoKillToken on a Tweener that is not currently playing.");
+
+                _autoKillToken = value;
+            }
+        }
+        
         public UpdateSequence UpdateType
         {
             get { return _updateType; }
@@ -237,6 +252,15 @@ namespace com.spacepuppy.Tween
         public virtual void Kill()
         {
             this.Stop();
+            _time = float.NaN;
+        }
+
+        /// <summary>
+        /// Called internally if killed by SPTween.
+        /// </summary>
+        internal void SetKilled()
+        {
+            _isPlaying = false;
             _time = float.NaN;
         }
 

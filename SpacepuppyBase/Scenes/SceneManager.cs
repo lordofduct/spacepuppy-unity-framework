@@ -8,6 +8,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenes
 {
 
+    [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, LifeCycleReadOnly = true)]
     public class SceneManager : Singleton
     {
 
@@ -141,7 +142,7 @@ namespace com.spacepuppy.Scenes
                 _manager = manager;
                 _scene = scene;
                 _options = options;
-                _routine = GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad(), RadicalCoroutineDisableMode.Default);
+                _routine = manager.StartRadicalCoroutine(this.DoLoad()); //GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad(), RadicalCoroutineDisableMode.Default);
             }
 
             public void Cancel()
@@ -162,10 +163,10 @@ namespace com.spacepuppy.Scenes
 
                 _manager.OnBeforeSceneLoaded(args);
                 if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
-                
+
                 _loadOp = _scene.LoadScene();
                 yield return _loadOp;
-
+                
                 _manager.OnSceneLoaded(args);
                 if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
                 else yield return null; //wait one last frame to actually begin the scene

@@ -21,7 +21,7 @@ namespace com.spacepuppy.Tween
             FromTo = 3,
             RedirectTo = 4
         }
-
+        
         #region Fields
 
         private object _id;
@@ -379,11 +379,15 @@ namespace com.spacepuppy.Tween
             if (_targ == null) return null;
 
             var tween = this.Create();
-            tween.Play();
-            if (_autoKill && tween is IAutoKillableTweener)
+            if (_autoKill)
             {
-                (tween as IAutoKillableTweener).Token = _autoKillToken;
+                tween.AutoKillToken = _autoKillToken;
+                tween.Play();
                 SPTween.AutoKill(tween);
+            }
+            else
+            {
+                tween.Play();
             }
             return tween;
         }
@@ -393,11 +397,15 @@ namespace com.spacepuppy.Tween
             if (_targ == null) return null;
 
             var tween = this.Create();
-            tween.Play(playHeadPos);
-            if (_autoKill && tween is IAutoKillableTweener)
+            if (_autoKill)
             {
-                (tween as IAutoKillableTweener).Token = _autoKillToken;
+                tween.AutoKillToken = _autoKillToken;
+                tween.Play(playHeadPos);
                 SPTween.AutoKill(tween);
+            }
+            else
+            {
+                tween.Play(playHeadPos);
             }
             return tween;
         }
@@ -437,7 +445,7 @@ namespace com.spacepuppy.Tween
             }
 
             //set props
-            tween.Id = _id;
+            if (_id != null) tween.Id = _id;
             tween.UpdateType = _updateType;
             tween.TimeSupplier = _timeSupplier;
             tween.WrapMode = _wrap;

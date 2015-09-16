@@ -234,7 +234,6 @@
     <Compile Include="Tween\CustomMemberCurveAttribute.cs" />
     <Compile Include="Tween\Curves\FloatMemberCurve.cs" />
     <Compile Include="Tween\CustomTweenMemberAccessorAttribute.cs" />
-    <Compile Include="Tween\IAutoKillableTweener.cs" />
     <Compile Include="Tween\ITweenHash.cs" />
     <Compile Include="Tween\ITweenMemberAccessor.cs" />
     <Compile Include="Tween\MemberCurve.cs" />

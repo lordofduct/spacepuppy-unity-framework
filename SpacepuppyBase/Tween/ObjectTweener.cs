@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy.Tween
 {
-    public class ObjectTweener : Tweener, IAutoKillableTweener
+    public class ObjectTweener : Tweener
     {
 
         #region Fields
 
         private object _target;
         private TweenCurve _curve;
+        private object _id;
         private object _tokenUid;
 
         #endregion
@@ -33,6 +35,18 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Properties
+
+        public override object Id
+        {
+            get
+            {
+                return (_id != null) ? _id : _target;
+            }
+            set
+            {
+                _id = value;
+            }
+        }
 
         public object Target { get { return _target; } }
 
@@ -59,32 +73,6 @@ namespace com.spacepuppy.Tween
                 return;
             }
             _curve.Update(_target, dt, t);
-        }
-
-        #endregion
-
-        #region IAutoKillableTweener Interface
-
-        object IAutoKillableTweener.Target
-        {
-            get { return _target; }
-        }
-
-        object IAutoKillableTweener.Token
-        {
-            get
-            {
-                return _tokenUid;
-            }
-            set
-            {
-                _tokenUid = value;
-            }
-        }
-
-        void IAutoKillableTweener.Kill()
-        {
-            this.Kill();
         }
 
         #endregion
