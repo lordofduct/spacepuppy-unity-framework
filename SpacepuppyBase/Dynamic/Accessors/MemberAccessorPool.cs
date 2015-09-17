@@ -17,6 +17,7 @@ namespace com.spacepuppy.Dynamic.Accessors
         private static bool _isAOT;
         private static Dictionary<MemberInfo, IMemberAccessor> _pool;
         private static Queue<IMemberAccessor> _chainBuilder = new Queue<IMemberAccessor>();
+        private static Dictionary<string, DynamicMemberAccessor> _dynPool;
 
         public static IMemberAccessor GetAccessor(MemberInfo memberInfo)
         {
@@ -131,6 +132,28 @@ namespace com.spacepuppy.Dynamic.Accessors
                 return null;
         }
 
+
+
+        public static IMemberAccessor GetDynamicAccessor(object target, string memberName, out System.Type memberType)
+        {
+            memberType = null;
+            if (target == null) return null;
+
+            if(!(target is IDynamic)) return GetAccessor(target.GetType(), memberName, out memberType);
+
+            var dyn = target as IDynamic;
+            var info = dyn.GetMember(memberName, false);
+            if(info == null) return GetAccessor(target.GetType(), memberName, out memberType);
+
+            memberType = DynamicUtil.GetReturnType(info);
+            DynamicMemberAccessor accessor;
+            if (_dynPool != null && _dynPool.TryGetValue(memberName, out accessor)) return accessor;
+
+            accessor = new DynamicMemberAccessor(memberName);
+            if (_dynPool == null) _dynPool = new Dictionary<string, DynamicMemberAccessor>();
+            _dynPool[memberName] = accessor;
+            return accessor;
+        }
 
     }
 }

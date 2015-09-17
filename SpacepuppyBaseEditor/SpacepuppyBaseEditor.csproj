@@ -49,6 +49,7 @@
     <Compile Include="Base\AdvancedInputManagerWindow.cs" />
     <Compile Include="Base\Commands\FindReferencesToObjectMenu.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
+    <Compile Include="Components\SelectableObjectPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\SPEntityInspector.cs" />
     <Compile Include="Base\Inspectors\SPTimePropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\SPTimePeriodPropertyDrawer.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="PrefabHelper.cs" />
     <Compile Include="Project\CustomTimeLayersDataInspector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Render\MaterialPropertyReferencePropertyDrawer.cs" />
     <Compile Include="Render\MaterialTransitionPropertyDrawer.cs" />
     <Compile Include="ReorderableListHelper.cs" />
     <Compile Include="Scenario\i_SetValueInspector.cs" />

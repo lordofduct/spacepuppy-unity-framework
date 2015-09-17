@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Dynamic;
+using com.spacepuppy.Utils;
+using System;
+using System.Reflection;
+
 namespace com.spacepuppy.Render
 {
 
-    /// <summary>
-    /// TODO - add an index for multiple-material renderers.
-    /// </summary>
     [System.Serializable()]
-    public class MaterialTransition
+    public class MaterialPropertyReference
     {
 
         #region Fields
@@ -23,12 +25,29 @@ namespace com.spacepuppy.Render
         private MaterialPropertyValueType _valueType;
         [SerializeField()]
         private string _propertyName;
-        [SerializeField()]
-        private List<VariantReference> _values = new List<VariantReference>();
 
-        [SerializeField()]
-        [Range(0f, 1f)]
-        private float _position;
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public MaterialPropertyReference()
+        {
+
+        }
+
+        public MaterialPropertyReference(Material mat, string propName, MaterialPropertyValueType valueType)
+        {
+            _material = mat;
+            _propertyName = propName;
+            _valueType = valueType;
+        }
+
+        public MaterialPropertyReference(Renderer renderer, string propName, MaterialPropertyValueType valueType)
+        {
+            _material = renderer;
+            _propertyName = propName;
+            _valueType = valueType;
+        }
 
         #endregion
 
@@ -58,18 +77,15 @@ namespace com.spacepuppy.Render
             set { _propertyName = value; }
         }
 
-        public List<VariantReference> Values
+        public object Value
         {
-            get { return _values; }
-        }
-
-        public float Position
-        {
-            get { return _position; }
+            get
+            {
+                return this.GetValue();
+            }
             set
             {
-                _position = Mathf.Clamp01(value);
-                this.Sync();
+                this.SetValue(value);
             }
         }
 
@@ -77,35 +93,57 @@ namespace com.spacepuppy.Render
 
         #region Methods
 
-        public void Sync()
+        public void SetValue(object value)
         {
             var mat = this.Material;
 
             if (mat == null) return;
-            if (_values.Count == 0) return;
 
-            int iLow = Mathf.Clamp(Mathf.FloorToInt(_position * (_values.Count - 1)), 0, _values.Count - 1);
-            int iHigh = iLow + 1;
-            if (iHigh >= _values.Count) iHigh = iLow;
-
-            var dt = (_values.Count > 1) ? 1f / (float)(_values.Count - 1) : 1f;
-            var t = _position % dt;
-
-            switch(_valueType)
+            switch (_valueType)
             {
                 case MaterialPropertyValueType.Float:
-                    //_material.SetFloat(_propertyName, Mathf.Lerp(_startValue.FloatValue, _endValue.FloatValue, _position));
-                    mat.SetFloat(_propertyName, Mathf.Lerp(_values[iLow].FloatValue, _values[iHigh].FloatValue, t));
+                    mat.SetFloat(_propertyName, ConvertUtil.ToSingle(value));
                     break;
                 case MaterialPropertyValueType.Color:
-                    //_material.SetColor(_propertyName, Color.Lerp(_startValue.ColorValue, _endValue.ColorValue, _position));
-                    mat.SetColor(_propertyName, Color.Lerp(_values[iLow].ColorValue, _values[iHigh].ColorValue, t));
+                    mat.SetColor(_propertyName, ConvertUtil.ToColor(value));
                     break;
                 case MaterialPropertyValueType.Vector:
-                    //_material.SetVector(_propertyName, Vector4.Lerp(_startValue.Vector4Value, _endValue.Vector4Value, _position));
-                    mat.SetVector(_propertyName, Vector4.Lerp(_values[iLow].Vector4Value, _values[iHigh].Vector4Value, t));
+                    mat.SetVector(_propertyName, ConvertUtil.ToVector4(value));
                     break;
             }
+        }
+
+        public void SetValue(float value)
+        {
+            if (_valueType != MaterialPropertyValueType.Float) return;
+
+            var mat = this.Material;
+
+            if (mat == null) return;
+
+            mat.SetFloat(_propertyName, value);
+        }
+
+        public void SetValue(Color value)
+        {
+            if (_valueType != MaterialPropertyValueType.Color) return;
+
+            var mat = this.Material;
+
+            if (mat == null) return;
+
+            mat.SetColor(_propertyName, value);
+        }
+
+        public void SetValue(Vector4 value)
+        {
+            if (_valueType != MaterialPropertyValueType.Vector) return;
+
+            var mat = this.Material;
+
+            if (mat == null) return;
+
+            mat.SetVector(_propertyName, value);
         }
 
         public object GetValue()

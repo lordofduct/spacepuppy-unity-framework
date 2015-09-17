@@ -340,6 +340,14 @@ namespace com.spacepuppy.Dynamic
             {
                 return ConvertUtil.ToQuaternion(a) * ConvertUtil.ToQuaternion(b);
             }
+            else if (atp == typeof(UnityEngine.Color))
+            {
+                return ConvertUtil.ToColor(a) + ConvertUtil.ToColor(b);
+            }
+            else if (atp == typeof(UnityEngine.Color32))
+            {
+                return ConvertUtil.ToColor32(ConvertUtil.ToColor(a) + ConvertUtil.ToColor(b));
+            }
             else
             {
                 return b;
@@ -371,6 +379,14 @@ namespace com.spacepuppy.Dynamic
             else if (atp == typeof(UnityEngine.Quaternion))
             {
                 return ConvertUtil.ToQuaternion(a) * UnityEngine.Quaternion.Inverse(ConvertUtil.ToQuaternion(b));
+            }
+            else if (atp == typeof(UnityEngine.Color))
+            {
+                return ConvertUtil.ToColor(a) - ConvertUtil.ToColor(b);
+            }
+            else if (atp == typeof(UnityEngine.Color32))
+            {
+                return ConvertUtil.ToColor32(ConvertUtil.ToColor(a) - ConvertUtil.ToColor(b));
             }
             else
             {

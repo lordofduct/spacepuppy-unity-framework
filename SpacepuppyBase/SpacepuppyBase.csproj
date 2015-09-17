@@ -78,6 +78,7 @@
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="CollisionExclusion.cs" />
+    <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
     <Compile Include="Project\CustomTimeLayersData.cs" />
     <Compile Include="Dynamic\DynamicMethodInfo.cs" />
     <Compile Include="Dynamic\Evaluator.cs" />
@@ -121,7 +122,9 @@
     <Compile Include="IIgnorableCollision.cs" />
     <Compile Include="IRandom.cs" />
     <Compile Include="Project\GameSettingsBase.cs" />
+    <Compile Include="Render\i_SetMaterialProperty.cs" />
     <Compile Include="Render\i_TweenMaterial.cs" />
+    <Compile Include="Render\MaterialPropertyReference.cs" />
     <Compile Include="Render\MaterialTransition.cs" />
     <Compile Include="Render\MaterialUtil.cs" />
     <Compile Include="Render\RenderEnums.cs" />

@@ -25,6 +25,9 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private Trigger _onComplete;
 
+        [SerializeField()]
+        private Trigger _onTick;
+
         #endregion
 
         #region Methods
@@ -55,6 +58,9 @@ namespace com.spacepuppy.Scenario
 
             if (_onComplete.Count > 0)
                 twn.OnFinish((t) => _onComplete.ActivateTrigger());
+
+            if (_onTick.Count > 0)
+                twn.OnStep((t) => _onTick.ActivateTrigger());
 
             twn.Play();
             return true;

@@ -847,7 +847,6 @@ namespace com.spacepuppy
                 case RefMode.Property:
                     {
                         if (_unityObjectReference == null) return null;
-                        if (_type == VariantType.Null) return null;
                         return DynamicUtil.GetValue(_unityObjectReference, _string);
                     }
                 case RefMode.Eval:

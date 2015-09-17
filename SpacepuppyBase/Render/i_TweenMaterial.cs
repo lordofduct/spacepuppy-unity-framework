@@ -39,7 +39,10 @@ namespace com.spacepuppy.Render
 
         [SerializeField()]
         private Trigger _onComplete;
-        
+
+        [SerializeField()]
+        private Trigger _onTick;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -135,6 +138,9 @@ namespace com.spacepuppy.Render
             
             if (_onComplete.Count > 0)
                 twn.OnFinish((t) => _onComplete.ActivateTrigger());
+
+            if (_onTick.Count > 0)
+                twn.OnStep((t) => _onTick.ActivateTrigger());
 
             twn.Play();
 

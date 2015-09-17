@@ -200,6 +200,17 @@ namespace com.spacepuppy
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class SelectableObjectAttribute : SPPropertyAttribute
+    {
+        public bool AllowSceneObjects = true;
+
+        public SelectableObjectAttribute()
+        {
+
+        }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class ReorderableArrayAttribute : SPPropertyAttribute
     {
 

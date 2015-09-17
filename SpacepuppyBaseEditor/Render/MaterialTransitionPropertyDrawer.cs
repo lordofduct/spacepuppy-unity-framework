@@ -13,26 +13,25 @@ using com.spacepuppyeditor.Internal;
 namespace com.spacepuppyeditor.Render
 {
 
+    /// <summary>
+    /// It is critical that MaterialTransition mirrors the same 4 properties found in MaterialPropertyReference. 
+    /// </summary>
     [CustomPropertyDrawer(typeof(MaterialTransition))]
     public class MaterialTransitionPropertyDrawer : PropertyDrawer
     {
-
-        public const string PROP_MATERIAL = "_material";
-        public const string PROP_USESHARED = "_useSharedMaterial";
-        public const string PROP_VALUETYPE = "_valueType";
-        public const string PROP_PROPERTYNAME = "_propertyName";
-        //public const string PROP_VALUESTART = "_startValue";
-        //public const string PROP_VALUEEND = "_endValue";
+        
+        public const string PROP_VALUES = "_values";
         public const string PROP_POSITION = "_position";
 
 
+        private MaterialPropertyReferencePropertyDrawer _matPropRefDrawer = new MaterialPropertyReferencePropertyDrawer();
         private VariantReferencePropertyDrawer _variantDrawer = new VariantReferencePropertyDrawer() { RestrictVariantType = true };
         private SerializedProperty _property;
         private SerializedProperty _valuesProp;
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            var valuesProp = property.FindPropertyRelative("_values");
+            var valuesProp = property.FindPropertyRelative(PROP_VALUES);
             var lst = CachedReorderableList.GetListDrawer(valuesProp, _valuesList_DrawHeader, _valuesList_DrawElement);
             lst.headerHeight = 1f;
             lst.elementHeight = EditorGUIUtility.singleLineHeight;
@@ -44,21 +43,23 @@ namespace com.spacepuppyeditor.Render
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if (Application.isPlaying) GUI.enabled = false;
+
             _property = property;
 
             GUI.Box(position, GUIContent.none);
 
             var r0 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
-            this.DrawMaterialLine(r0, property, label);
+            _matPropRefDrawer.OnGUI(r0, property, label); //because we mirror the properties of MaterialPropertyReference, this works
             position = new Rect(position.xMin, r0.yMax, position.width, position.height - r0.height);
 
             EditorGUI.indentLevel++;
 
             var r1 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
-            SPEditorGUI.PropertyField(r1, property.FindPropertyRelative(PROP_USESHARED));
+            SPEditorGUI.PropertyField(r1, property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_USESHARED));
             position = new Rect(position.xMin, r1.yMax, position.width, position.height - r1.height);
 
-            _valuesProp = property.FindPropertyRelative("_values");
+            _valuesProp = property.FindPropertyRelative(PROP_VALUES);
             var lst = CachedReorderableList.GetListDrawer(_valuesProp, _valuesList_DrawHeader, _valuesList_DrawElement);
             lst.headerHeight = 0f;
             lst.elementHeight = EditorGUIUtility.singleLineHeight;
@@ -70,93 +71,13 @@ namespace com.spacepuppyeditor.Render
             EditorGUI.PropertyField(r3, property.FindPropertyRelative(PROP_POSITION));
 
             EditorGUI.indentLevel--;
-
+            
             _property = null;
             _valuesProp = null;
+
+            if (Application.isPlaying) GUI.enabled = true;
         }
-
-        private void DrawMaterialLine(Rect position, SerializedProperty property, GUIContent label)
-        {
-            //property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, 15f, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
-            position = EditorGUI.PrefixLabel(position, label);
-
-
-            var r0 = new Rect(position.xMin, position.yMin, position.width / 2f, position.height);
-            var r1 = new Rect(r0.xMax, r0.yMin, position.width - r0.width, r0.height);
-
-            var matProp = property.FindPropertyRelative(PROP_MATERIAL);
-            var useSharedProp = property.FindPropertyRelative(PROP_USESHARED);
-            var valTypeProp = property.FindPropertyRelative(PROP_VALUETYPE);
-            var propNameProp = property.FindPropertyRelative(PROP_PROPERTYNAME);
-
-
-            //matProp.objectReferenceValue = EditorGUI.ObjectField(r1, matProp.objectReferenceValue, typeof(Material), true);
-            EditorGUI.BeginChangeCheck();
-            matProp.objectReferenceValue = EditorGUI.ObjectField(r1, matProp.objectReferenceValue, typeof(UnityEngine.Object), true);
-            if(EditorGUI.EndChangeCheck())
-            {
-                if (!MaterialUtil.IsMaterialSource(matProp.objectReferenceValue)) matProp.objectReferenceValue = null;
-            }
-
-            var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue, useSharedProp.boolValue);
-            if(mat != null && mat.shader != null)
-            {
-                int cnt = ShaderUtil.GetPropertyCount(mat.shader);
-                using(var infoLst = TempCollection<PropInfo>.GetCollection(cnt))
-                using (var contentLst = TempCollection<GUIContent>.GetCollection(cnt))
-                {
-                    int index = -1;
-
-                    for (int i = 0; i < cnt; i++)
-                    {
-                        var nm = ShaderUtil.GetPropertyName(mat.shader, i);
-                        var tp = ShaderUtil.GetPropertyType(mat.shader, i);
-
-                        switch (tp)
-                        {
-                            case ShaderUtil.ShaderPropertyType.Float:
-                                if (propNameProp.stringValue == nm) index = infoLst.Count;
-                                infoLst.Add(new PropInfo(nm, MaterialPropertyValueType.Float));
-                                contentLst.Add(EditorHelper.TempContent(nm + " (float)"));
-                                break;
-                            case ShaderUtil.ShaderPropertyType.Range:
-                                if (propNameProp.stringValue == nm) index = infoLst.Count;
-                                infoLst.Add(new PropInfo(nm, MaterialPropertyValueType.Float));
-                                var min = ShaderUtil.GetRangeLimits(mat.shader, i, 1);
-                                var max = ShaderUtil.GetRangeLimits(mat.shader, i, 2);
-                                contentLst.Add(EditorHelper.TempContent(string.Format("{0} (Range [{1}, {2}]])", nm, min, max)));
-                                break;
-                            case ShaderUtil.ShaderPropertyType.Color:
-                                if (propNameProp.stringValue == nm) index = infoLst.Count;
-                                infoLst.Add(new PropInfo(nm, MaterialPropertyValueType.Color));
-                                contentLst.Add(EditorHelper.TempContent(nm + " (color)"));
-                                break;
-                            case ShaderUtil.ShaderPropertyType.Vector:
-                                if (propNameProp.stringValue == nm) index = infoLst.Count;
-                                infoLst.Add(new PropInfo(nm, MaterialPropertyValueType.Vector));
-                                contentLst.Add(EditorHelper.TempContent(nm + " (vector)"));
-                                break;
-                        }
-                    }
-
-                    index = EditorGUI.Popup(r0, index, contentLst.ToArray());
-
-                    if (index < 0)
-                    {
-                        valTypeProp.SetEnumValue(MaterialPropertyValueType.Float);
-                        propNameProp.stringValue = string.Empty;
-                    }
-                    else
-                    {
-                        var info = infoLst[index];
-                        valTypeProp.SetEnumValue(info.MatType);
-                        propNameProp.stringValue = info.Name;
-                    }
-                }
-            }
-
-        }
-
+        
 
 
         #region List Drawer Methods
@@ -168,28 +89,11 @@ namespace com.spacepuppyeditor.Render
         private void _valuesList_DrawElement(Rect area, int index, bool isActive, bool isFocused)
         {
             var valueProp = _valuesProp.GetArrayElementAtIndex(index);
-            _variantDrawer.VariantTypeRestrictedTo = GetVariantType(_property.FindPropertyRelative(PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>());
+            _variantDrawer.VariantTypeRestrictedTo = GetVariantType(_property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>());
             _variantDrawer.OnGUI(area, valueProp, GUIContent.none);
         }
 
         #endregion
-
-
-
-
-
-
-        private struct PropInfo
-        {
-            public string Name;
-            public MaterialPropertyValueType MatType;
-
-            public PropInfo(string nm, MaterialPropertyValueType tp)
-            {
-                Name = nm;
-                MatType = tp;
-            }
-        }
 
         private static VariantType GetVariantType(MaterialPropertyValueType etp)
         {

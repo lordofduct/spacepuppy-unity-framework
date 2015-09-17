@@ -227,7 +227,8 @@ namespace com.spacepuppy.Tween
                     }
                 }
             }
-            return MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
+            //return MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
+            return MemberAccessorPool.GetDynamicAccessor(target, propName, out memberType);
         }
 
         private static MemberCurve Create(System.Type memberType, IMemberAccessor accessor, Ease ease, float dur, object start, object end, object option)

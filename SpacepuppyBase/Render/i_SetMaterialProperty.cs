@@ -3,29 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Dynamic;
+using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
-namespace com.spacepuppy.Scenario
-{
 
-    public class i_SetValue : TriggerableMechanism
+namespace com.spacepuppy.Render
+{
+    public class i_SetMaterialProperty : TriggerableMechanism
     {
 
         public enum SetMode
         {
             Set = 0,
             Increment = 1,
-            Decrement = 2,
-            Toggle = 3
+            Decrement = 2
         }
 
         #region Fields
 
         [SerializeField()]
-        [SelectableObject()]
-        private UnityEngine.Object _target;
-        [SerializeField()]
-        private string _memberName;
+        private MaterialPropertyReference _target;
         [SerializeField()]
         private VariantReference _value;
         [SerializeField()]
@@ -33,14 +30,13 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
-
         #region TriggerableMechanism Interface
 
         public override bool CanTrigger
         {
             get
             {
-                return base.CanTrigger && _target != null && _memberName != null && _value != null;
+                return base.CanTrigger && _target != null && _value != null;
             }
         }
 
@@ -48,27 +44,24 @@ namespace com.spacepuppy.Scenario
         {
             if (!this.CanTrigger) return false;
 
-            switch(_mode)
+            switch (_mode)
             {
                 case SetMode.Set:
-                    return DynamicUtil.SetValue(_target, _memberName, _value.Value);
+                    _target.SetValue(_value.Value);
+                    return true;
                 case SetMode.Increment:
                     {
-                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        var v = _target.GetValue();
                         v = Evaluator.TrySum(v, _value.Value);
-                        return DynamicUtil.SetValue(_target, _memberName, v);
+                        _target.SetValue(v);
+                        return true;
                     }
                 case SetMode.Decrement:
                     {
-                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        var v = _target.GetValue();
                         v = Evaluator.TryDifference(v, _value.Value);
-                        return DynamicUtil.SetValue(_target, _memberName, v);
-                    }
-                case SetMode.Toggle:
-                    {
-                        var v = DynamicUtil.GetValue(_target, _memberName);
-                        v = Evaluator.TryToggle(v);
-                        return DynamicUtil.SetValue(_target, _memberName, v);
+                        _target.SetValue(v);
+                        return true;
                     }
             }
 
@@ -78,5 +71,4 @@ namespace com.spacepuppy.Scenario
         #endregion
 
     }
-
 }
