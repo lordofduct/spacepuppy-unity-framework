@@ -13,8 +13,6 @@ namespace com.spacepuppy.Project
 
 
 
-
-
         #region Static Factory
 
         public static GameSettingsBase GetGameSettings(string path)

@@ -3,6 +3,7 @@ using System.Collections;
 
 using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy
 {
@@ -24,6 +25,15 @@ namespace com.spacepuppy
 
         bool Tick(out object yieldObject);
 
+    }
+
+    /// <summary>
+    /// A contract joint of IEnumerator and IRadicalYieldInstruction. This can be implemented by an object that can be used in a dual way as either a IEnuemrator or a yield statement. 
+    /// This is useful for objects that can be jsut directly tossed into 'MonoBehaviour.StartCoroutine' and do their job, or used as a yield instruction.
+    /// </summary>
+    public interface IRadicalEnumerator : System.Collections.IEnumerator, IRadicalYieldInstruction
+    {
+        //just a contract
     }
 
     /// <summary>
@@ -410,102 +420,216 @@ namespace com.spacepuppy
 
     /// <summary>
     /// Represents a duration of time to wait for that can be paused, and can use various kinds of TimeSuppliers. 
-    /// NOTE - this yield instruction is pooled, NEVER store one for reuse. The pool takes care of that for you. Instead 
-    /// use the static factory methods.
+    /// Reset must be called if reused.
+    /// 
+    /// NOTE - If you use the WaitForDuration objects that are spawned by the static factory methods, these objects are 
+    /// pooled. The WaitForDuration object should be yielded immediately in a RadicalCoroutine and not reused.
     /// </summary>
-    public class WaitForDuration : IPausibleYieldInstruction, IPooledYieldInstruction, IProgressingYieldInstruction
+    public class WaitForDuration : IRadicalEnumerator, IPausibleYieldInstruction, IProgressingYieldInstruction
     {
+
+        #region Events
+
+        public event System.EventHandler OnComplete;
+
+        #endregion
 
         #region Fields
 
         private ITimeSupplier _supplier;
         private double _t;
-        private double _cache;
+        private double _lastTotal;
         private float _dur;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        private WaitForDuration()
+        public WaitForDuration(float dur, ITimeSupplier supplier)
         {
-
+            this.Reset(dur, supplier);
         }
 
-        private void Init(float dur, ITimeSupplier supplier)
+        internal WaitForDuration()
         {
-            _supplier = supplier ?? SPTime.Normal;
-            _dur = dur;
-            this.Reset();
+            //allow overriding
         }
-
+        
         #endregion
 
         #region Properties
 
         public float Duration { get { return _dur; } }
 
-        public double CurrentTime { get { return (double.IsNaN(_t)) ? _cache : (_supplier.Total - _t) + _cache; } }
+        public double CurrentTime { get { return _t; } }
+
+        #endregion
+
+        #region Methods
+
+        public void Reset()
+        {
+            _t = 0d;
+            _lastTotal = double.NegativeInfinity;
+        }
+
+        public void Reset(float dur, ITimeSupplier supplier)
+        {
+            _supplier = supplier ?? SPTime.Normal;
+            _dur = dur;
+            _t = 0d;
+            _lastTotal = double.NegativeInfinity;
+        }
+
+        public void Cancel()
+        {
+            _t = double.PositiveInfinity;
+            _lastTotal = double.NegativeInfinity;
+        }
+
+        private bool Tick()
+        {
+            if (this.IsComplete) return false;
+
+            if (double.IsNaN(_lastTotal))
+            {
+                //we're paused
+            }
+            else if (_lastTotal == double.NegativeInfinity)
+            {
+                //first time being called
+                _lastTotal = _supplier.TotalPrecise;
+                if(_dur <= 0f && _t <= 0d && this.OnComplete != null)
+                {
+                    _t = 0d;
+                    this.OnComplete(this, System.EventArgs.Empty);
+                    return false;
+                }
+            }
+            else
+            {
+                _t += (_supplier.TotalPrecise - _lastTotal);
+                _lastTotal = _supplier.TotalPrecise;
+                if (this.OnComplete != null && this.IsComplete)
+                {
+                    this.OnComplete(this, System.EventArgs.Empty);
+                    return false;
+                }
+            }
+
+            return !this.IsComplete;
+        }
+
+        protected void Dispose()
+        {
+            this.OnComplete = null;
+            _supplier = null;
+            _t = 0d;
+            _lastTotal = float.NegativeInfinity;
+            _dur = 0f;
+        }
+
+        #endregion
+
+        #region IRadicalYieldInstruction Interface
+
+        public bool IsComplete
+        {
+            get { return _t >= _dur; }
+        }
+
+        float IProgressingYieldInstruction.Progress
+        {
+            get { return Mathf.Clamp01((float)(_t / _dur)); }
+        }
+        
+        bool IRadicalYieldInstruction.Tick(out object yieldObject)
+        {
+            yieldObject = null;
+            return this.Tick();
+        }
+
+        void IPausibleYieldInstruction.OnPause()
+        {
+            _lastTotal = double.NaN;
+        }
+
+        void IPausibleYieldInstruction.OnResume()
+        {
+            _lastTotal = _supplier.TotalPrecise;
+        }
 
         #endregion
 
         #region IEnumerator Interface
 
-        bool IRadicalYieldInstruction.IsComplete
+        object IEnumerator.Current
         {
-            get { return this.CurrentTime >= _dur; }
+            get
+            {
+                return null;
+            }
         }
 
-        float IProgressingYieldInstruction.Progress
+        bool IEnumerator.MoveNext()
         {
-            get { return Mathf.Clamp01((float)(this.CurrentTime / _dur)); }
+            if(this.Tick())
+            {
+                return true;
+            }
+            else
+            {
+                //in case a PooledYieldInstruction was used in a regular Unity Coroutine
+                if (this is IPooledYieldInstruction)
+                    (this as IPooledYieldInstruction).Dispose();
+                return false;
+            }
         }
 
-        bool IRadicalYieldInstruction.Tick(out object yieldObject)
+        void IEnumerator.Reset()
         {
-            yieldObject = null;
-            return this.CurrentTime < _dur;
-        }
-
-        public void Reset()
-        {
-            _t = _supplier.TotalPrecise;
-            _cache = 0f;
-        }
-
-        void IPausibleYieldInstruction.OnPause()
-        {
-            _cache = (_supplier.TotalPrecise - _t) + _cache;
-            _t = float.NaN;
-        }
-
-        void IPausibleYieldInstruction.OnResume()
-        {
-            _t = _supplier.TotalPrecise;
+            this.Reset();
         }
 
         #endregion
 
-        #region IPooledYieldInstruction Interface
 
-        void System.IDisposable.Dispose()
+        #region Static Interface
+
+        private static com.spacepuppy.Collections.ObjectCachePool<PooledWaitForDuration> _pool = new com.spacepuppy.Collections.ObjectCachePool<PooledWaitForDuration>(-1, () => new PooledWaitForDuration());
+        private class PooledWaitForDuration : WaitForDuration, IPooledYieldInstruction
         {
-            _pool.Release(this);
+
+            void IDisposable.Dispose()
+            {
+                this.Dispose();
+            }
+            
         }
 
-        #endregion
-
-        #region Static Factory
-
-        private static com.spacepuppy.Collections.ObjectCachePool<WaitForDuration> _pool = new com.spacepuppy.Collections.ObjectCachePool<WaitForDuration>(-1, () => new WaitForDuration());
-
+        /// <summary>
+        /// Create a WaitForDuration in seconds as a pooled object.
+        /// 
+        /// NOTE - This retrieves a pooled WaitForDuration that should be used only once. It should be immediately yielded and not used again.
+        /// </summary>
+        /// <param name="seconds"></param>
+        /// <param name="supplier"></param>
+        /// <returns></returns>
         public static WaitForDuration Seconds(float seconds, ITimeSupplier supplier = null)
         {
             var w = _pool.GetInstance();
-            w.Init(seconds, supplier);
+            w.Reset(seconds, supplier);
             return w;
         }
 
+        /// <summary>
+        /// Create a WaitForDuration from a WaitForSeconds object as a pooled object.
+        /// 
+        /// NOTE - This retrieves a pooled WaitForDuration that should be used only once. It should be immediately yielded and not used again.
+        /// </summary>
+        /// <param name="wait"></param>
+        /// <param name="returnNullIfZero"></param>
+        /// <returns></returns>
         public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
         {
             var dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(wait, "m_Seconds"));
@@ -516,21 +640,30 @@ namespace com.spacepuppy
             else
             {
                 var w = _pool.GetInstance();
-                w.Init(dur, SPTime.Normal);
+                w.Reset(dur, SPTime.Normal);
                 return w;
             }
         }
 
+        /// <summary>
+        /// Create a WaitForDuration from a SPTimePeriod as a pooled object.
+        /// 
+        /// NOTE - This retrieves a pooled WaitForDuration that should be used only once. It should be immediately yielded and not used again.
+        /// </summary>
+        /// <param name="period"></param>
+        /// <returns></returns>
         public static WaitForDuration Period(SPTimePeriod period)
         {
             var w = _pool.GetInstance();
-            w.Init((float)period.Seconds, period.TimeSupplier);
+            w.Reset((float)period.Seconds, period.TimeSupplier);
             return w;
         }
 
         #endregion
 
     }
+
+
 
     /// <summary>
     /// Blocks until the dispatcher fires some notification. See the notification system in com.spacepuppy.Notification.

@@ -57,7 +57,7 @@ namespace com.spacepuppy
     /// TODO - #100 - We should set up a RadicalCoroutine pool to reduce garbage collection
     /// 
     /// </notes>
-    public sealed class RadicalCoroutine : IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator, System.IDisposable
+    public sealed class RadicalCoroutine : IRadicalEnumerator, IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator, System.IDisposable
     {
 
         #region Events

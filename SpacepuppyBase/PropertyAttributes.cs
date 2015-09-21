@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Reflection;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy
 {
 
@@ -77,6 +79,9 @@ namespace com.spacepuppy
         }
     }
 
+    /// <summary>
+    /// Defines a script as requiring either a Collider or Rigidbody attached to it.
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class RequireColliderAttribute : ComponentHeaderAttribute
     {
@@ -303,6 +308,45 @@ namespace com.spacepuppy
 
     }
 
+    #endregion
+
+    #region Default Or Configured Property Drawer Attribute
+
+    public abstract class DefaultOrConfiguredAttribute : PropertyAttribute
+    {
+
+        private System.Type _fieldType;
+        private object _defaultValue;
+
+        public DefaultOrConfiguredAttribute(System.Type tp)
+        {
+            _fieldType = tp;
+            _defaultValue = tp.GetDefaultValue();
+        }
+
+        public DefaultOrConfiguredAttribute(System.Type tp, object defaultValue)
+        {
+            _fieldType = tp;
+            _defaultValue = defaultValue;
+        }
+
+        public System.Type FieldType { get { return _fieldType; } }
+
+        public virtual bool DrawAsDefault(object value)
+        {
+            return object.Equals(value, _defaultValue);
+        }
+        public virtual object GetDefaultValue()
+        {
+            return _defaultValue;
+        }
+
+        public virtual object GetValueToDisplayAsDefault()
+        {
+            return this.GetDefaultValue();
+        }
+    }
+    
     #endregion
 
     #region ModifierDrawer Attributes

@@ -49,6 +49,7 @@
     <Compile Include="Base\AdvancedInputManagerWindow.cs" />
     <Compile Include="Base\Commands\FindReferencesToObjectMenu.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
+    <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
     <Compile Include="Components\SelectableObjectPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\SPEntityInspector.cs" />
     <Compile Include="Base\Inspectors\SPTimePropertyDrawer.cs" />
