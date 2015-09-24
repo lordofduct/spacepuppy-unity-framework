@@ -79,6 +79,7 @@
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="CollisionExclusion.cs" />
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
+    <Compile Include="Project\AssetBundleMonitor.cs" />
     <Compile Include="Project\CustomTimeLayersData.cs" />
     <Compile Include="Dynamic\DynamicMethodInfo.cs" />
     <Compile Include="Dynamic\Evaluator.cs" />

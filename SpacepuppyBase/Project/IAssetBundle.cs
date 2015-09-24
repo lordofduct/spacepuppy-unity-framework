@@ -6,6 +6,11 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Project
 {
 
+    /// <summary>
+    /// An interface that represents a bundle of resources that can be loaded on demand. This facilitates wrappers 
+    /// around the global 'Resources' (see: ResourceAssetBundle), portions of 'Resources' (see: ResourceMonitor), 
+    /// 'AssetBundle' (see: AssetBundleMonitor), as well as groups of bundles (see: AssetBundleGroup).
+    /// </summary>
     public interface IAssetBundle
     {
         
@@ -23,6 +28,9 @@ namespace com.spacepuppy.Project
 
     }
 
+    /// <summary>
+    /// A wrapper around the global 'Resources' class so it can be used as an IAssetBundle.
+    /// </summary>
     public sealed class ResourcesAssetBundle : IAssetBundle
     {
 
@@ -106,130 +114,11 @@ namespace com.spacepuppy.Project
 
     }
 
-    public sealed class LoadedAssetBundle : IAssetBundle, System.IDisposable
-    {
-
-        #region Fields
-        
-        private AssetBundle _bundle;
-        private HashSet<UnityEngine.Object> _loadedAssets = new HashSet<UnityEngine.Object>(com.spacepuppy.Collections.ObjectInstanceIDEqualityComparer<UnityEngine.Object>.Default);
-
-        #endregion
-
-        #region CONSTRUCTOR
-        
-        internal LoadedAssetBundle(AssetBundle bundle)
-        {
-            //should only ever be called by SPAssetBundle factory methods
-            _bundle = bundle;
-        }
-
-        #endregion
-
-        #region Properties
-
-        public int Id
-        {
-            get
-            {
-                if (_bundle == null) return 0;
-
-                return _bundle.GetInstanceID();
-            }
-        }
-
-        public AssetBundle AssetBundle { get { return _bundle; } }
-
-        #endregion
-
-        #region Methods
-        
-        public bool Contains(string name)
-        {
-            if (_bundle == null) return false;
-            return _bundle.Contains(name);
-        }
-
-        public bool Contains(UnityEngine.Object asset)
-        {
-            return _loadedAssets.Contains(asset);
-        }
-
-        public UnityEngine.Object LoadAsset(string name)
-        {
-            if (_bundle == null) return null;
-            var asset = _bundle.Load(name);
-            if (asset == null) return null;
-            _loadedAssets.Add(asset);
-            return asset;
-        }
-
-        public UnityEngine.Object LoadAsset(string name, System.Type tp)
-        {
-            if (_bundle == null) return null;
-            var asset = _bundle.Load(name, tp);
-            if (asset == null) return null;
-            _loadedAssets.Add(asset);
-            return asset;
-        }
-
-        public T LoadAsset<T>(string name) where T : UnityEngine.Object
-        {
-            return this.LoadAsset(name, typeof(T)) as T;
-        }
-
-        public void UnloadAsset(UnityEngine.Object asset)
-        {
-            if (_bundle == null) return;
-
-            _loadedAssets.Remove(asset);
-            UnityEngine.Object.Destroy(asset);
-        }
-
-        public void UnloadAllAssets()
-        {
-            if (_loadedAssets.Count == 0) return;
-
-            var e = _loadedAssets.GetEnumerator();
-            while(e.MoveNext())
-            {
-                UnityEngine.Object.Destroy(e.Current);
-            }
-            _loadedAssets.Clear();
-        }
-
-        #endregion
-
-        #region Equality Overrides
-
-        public override int GetHashCode()
-        {
-            return this.Id;
-        }
-
-        #endregion
-
-        #region IDisposable Interface
-
-        public void Dispose(bool unloadAllLoadedObjects)
-        {
-            if(_bundle != null)
-            {
-                _bundle.Unload(unloadAllLoadedObjects);
-                AssetBundleManager.RemoveLoadedAssetBundle(this);
-                _bundle = null;
-            }
-        }
-
-        void System.IDisposable.Dispose()
-        {
-            this.Dispose(true);
-        }
-
-        #endregion
-
-    }
-
+    /// <summary>
+    /// A collection of IAssetBundles that can be treated as one. Good for merging bundles together for factory patterns. 
+    /// A good example is a game with downloadable content that expands the available items in the game. The factory 
+    /// receives a group of IAssetBundles as this object.
+    /// </summary>
     public sealed class AssetBundleGroup : IAssetBundle, ICollection<IAssetBundle>
     {
 

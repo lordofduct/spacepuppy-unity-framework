@@ -126,6 +126,7 @@
     <Compile Include="Base\Modifiers\OnChangedInEditorModifier.cs" />
     <Compile Include="Base\Modifiers\PropertyModifier.cs" />
     <Compile Include="PrefabHelper.cs" />
+    <Compile Include="Project\AssetBundleMonitorInspector.cs" />
     <Compile Include="Project\CustomTimeLayersDataInspector.cs" />
     <Compile Include="Project\ResourceMonitorInspector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

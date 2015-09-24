@@ -1,10 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace com.spacepuppy.Project
 {
+
+    /// <summary>
+    /// A ScriptableObject that can be placed inside a 'Resources' folder and records the various assets in that folder. 
+    /// When loaded it can be used to index the contents of that folder as a bundle of asssets. Facilitating the IAssetBundle 
+    /// interface, and any factories that may use it.
+    /// </summary>
     public class ResourceMonitor : ScriptableObject, IAssetBundle
     {
 
@@ -66,7 +71,7 @@ namespace com.spacepuppy.Project
             return AssetBundleManager.Resources.LoadAsset(path);
         }
 
-        public UnityEngine.Object LoadAsset(string path, Type tp)
+        public UnityEngine.Object LoadAsset(string path, System.Type tp)
         {
             if (!this.ContainsPath(path)) return null;
             return AssetBundleManager.Resources.LoadAsset(path, tp);

@@ -28,7 +28,7 @@ namespace com.spacepuppy.Project
 
         public bool Contains(IAssetBundle bundle)
         {
-            if (bundle is LoadedAssetBundle) return _bundles.Contains(bundle as LoadedAssetBundle);
+            if (bundle is AssetBundleMonitor) return _bundles.Contains(bundle as AssetBundleMonitor);
             if (bundle == AssetBundleManager.Resources) return true;
 
             return false;
@@ -40,7 +40,7 @@ namespace com.spacepuppy.Project
 
             if(_bundles.Count > 0)
             {
-                using (var lst = com.spacepuppy.Collections.TempCollection<LoadedAssetBundle>.GetCollection())
+                using (var lst = com.spacepuppy.Collections.TempCollection<AssetBundleMonitor>.GetCollection())
                 {
                     var e = _bundles.GetEnumerator();
                     while(e.MoveNext())
@@ -81,7 +81,7 @@ namespace com.spacepuppy.Project
         #region Static Interface
 
         private static AssetBundleManager _instance;
-        private static HashSet<LoadedAssetBundle> _bundles = new HashSet<LoadedAssetBundle>(new LoadedAssetBundleEqualityComparer());
+        private static HashSet<AssetBundleMonitor> _bundles = new HashSet<AssetBundleMonitor>(new AssetBundleMonitorEqualityComparer());
         
         public static AssetBundleManager Bundles
         {
@@ -101,10 +101,10 @@ namespace com.spacepuppy.Project
 
         public static IAssetBundle LoadFromFile(string path)
         {
-            var bundle = AssetBundle.CreateFromFile(path);
-            var spbundle = new LoadedAssetBundle(bundle);
-            _bundles.Add(spbundle);
-            return spbundle;
+            var bundle = ExtractBundleMonitor(AssetBundle.CreateFromFile(path));
+            if (bundle == null) return null;
+            _bundles.Add(bundle);
+            return bundle;
         }
 
         /// <summary>
@@ -116,35 +116,48 @@ namespace com.spacepuppy.Project
         /// <returns></returns>
         public static IAssetBundle Create(AssetBundle bundle)
         {
-            var spbundle = new LoadedAssetBundle(bundle);
-            if (_bundles.Contains(spbundle)) throw new System.ArgumentException("AssetBundle is already managed by SPAssetBundle.", "bundle");
-            _bundles.Add(spbundle);
-            return spbundle;
+            return ExtractBundleMonitor(bundle);
         }
 
         public static void UnloadLoadedBundle(IAssetBundle bundle, bool unloadAllLoadedObjects)
         {
-            if (!(bundle is LoadedAssetBundle)) return;
-            (bundle as LoadedAssetBundle).Dispose(unloadAllLoadedObjects);
+            if (!(bundle is AssetBundleMonitor)) return;
+            (bundle as AssetBundleMonitor).Dispose(unloadAllLoadedObjects);
         }
 
-        internal static void RemoveLoadedAssetBundle(LoadedAssetBundle bundle)
+        internal static void RemoveAssetBundleMonitor(AssetBundleMonitor bundle)
         {
             _bundles.Remove(bundle);
         }
 
+        private static AssetBundleMonitor ExtractBundleMonitor(AssetBundle bundle)
+        {
+            if (bundle.mainAsset is AssetBundleMonitor)
+            {
+                var spbundle = bundle.mainAsset as AssetBundleMonitor;
+                spbundle.Init(bundle);
+                return spbundle;
+            }
+            else
+            {
+                var spbundle = ScriptableObject.CreateInstance<AssetBundleMonitor>();
+                spbundle.Init(bundle);
+                return spbundle;
+            }
+        }
+        
         #endregion
         
         #region Special Types
 
-        private class LoadedAssetBundleEqualityComparer : IEqualityComparer<LoadedAssetBundle>
+        private class AssetBundleMonitorEqualityComparer : IEqualityComparer<AssetBundleMonitor>
         {
-            public bool Equals(LoadedAssetBundle x, LoadedAssetBundle y)
+            public bool Equals(AssetBundleMonitor x, AssetBundleMonitor y)
             {
                 return x.Id == y.Id;
             }
 
-            public int GetHashCode(LoadedAssetBundle obj)
+            public int GetHashCode(AssetBundleMonitor obj)
             {
                 return obj.Id;
             }
@@ -153,7 +166,7 @@ namespace com.spacepuppy.Project
         public struct Enumerator : IEnumerator<IAssetBundle>
         {
 
-            private HashSet<LoadedAssetBundle>.Enumerator _e;
+            private HashSet<AssetBundleMonitor>.Enumerator _e;
             private int _state;
             
             public IAssetBundle Current

@@ -9,6 +9,12 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Project
 {
 
+    /// <summary>
+    /// Represents an ID table for an IAssetBundle. This way you can associate specific ids/names with the long form path name in the IAssetBundle. 
+    /// As you load Assets they'll be recorded inside the Pool for easy unloading when needed. This works great in factory patterns that 
+    /// follow strict naming mechanics, but need to work with different unique AssetBundles that might have conflicting path names to the id 
+    /// required by the factory.
+    /// </summary>
     public class AssetPool : IEnumerable<AssetPool.ResourceEntry>
     {
 
