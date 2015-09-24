@@ -59,10 +59,8 @@ namespace com.spacepuppy
             //_instance = Singleton.GetInstance<GameLoopEntry>();
         }
 
-        protected override void Awake()
+        protected override void OnValidAwake()
         {
-            base.Awake();
-
             _updateHook = this.gameObject.AddComponent<UpdateEventHooks>();
             _tardyUpdateHook = this.gameObject.AddComponent<TardyExecutionUpdateEventHooks>();
 

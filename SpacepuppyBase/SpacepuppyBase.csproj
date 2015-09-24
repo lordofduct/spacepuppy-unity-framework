@@ -122,6 +122,10 @@
     <Compile Include="IIgnorableCollision.cs" />
     <Compile Include="IRandom.cs" />
     <Compile Include="Project\GameSettingsBase.cs" />
+    <Compile Include="Project\AssetPool.cs" />
+    <Compile Include="Project\ResourceMonitor.cs" />
+    <Compile Include="Project\IAssetBundle.cs" />
+    <Compile Include="Project\AssetBundleManager.cs" />
     <Compile Include="Render\i_SetMaterialProperty.cs" />
     <Compile Include="Render\i_TweenMaterial.cs" />
     <Compile Include="Render\MaterialPropertyReference.cs" />

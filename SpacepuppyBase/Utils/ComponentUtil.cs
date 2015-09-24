@@ -21,7 +21,10 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
-
+        public static bool IsComponentType(System.Type tp)
+        {
+            return typeof(Component).IsAssignableFrom(tp) || typeof(IComponent).IsAssignableFrom(tp);
+        }
 
         public static bool IsComponentSource(object obj)
         {

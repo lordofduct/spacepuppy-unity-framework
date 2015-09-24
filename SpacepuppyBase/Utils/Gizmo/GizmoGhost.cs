@@ -29,10 +29,8 @@ namespace com.spacepuppy.Utils.Gizmo
 
         #region CONSTRUCTOR
 
-        protected override void Awake()
+        protected override void OnValidAwake()
         {
-            base.Awake();
-
             if (!Application.isEditor)
             {
                 if (this.gameObject == Singleton.GameObjectSource)

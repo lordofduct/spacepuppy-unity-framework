@@ -181,11 +181,20 @@ namespace com.spacepuppy
             //if (!_singletonRefs.ContainsKey(tp)) _singletonRefs[tp] = this;
         }
 
-        protected override void Awake()
+        protected override sealed void Awake()
         {
             base.Awake();
 
-            _maintainer.OnAwake(this);
+            if (_maintainer.OnAwake(this)) this.OnValidAwake();
+        }
+
+        /// <summary>
+        /// Called if the singleton object properly validated during 'Awake'. 
+        /// Override this to perform 'Awake' operations.
+        /// </summary>
+        protected virtual void OnValidAwake()
+        {
+
         }
 
         protected override void Start()
@@ -278,7 +287,12 @@ namespace com.spacepuppy
 
             #region Methods
 
-            public void OnAwake(ISingleton target)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="target"></param>
+            /// <returns>Returns true if the validation was a success.</returns>
+            public bool OnAwake(ISingleton target)
             {
                 if (object.ReferenceEquals(target, null)) throw new System.ArgumentNullException("target");
                 _target = target;
@@ -296,11 +310,13 @@ namespace com.spacepuppy
                     this.EnforceThisAsSingleton();
                     _target.ComponentDestroyed += this.OnComponentDestroyed;
                     GameLoopEntry.LevelWasLoaded += this.OnLevelWasLoaded;
+                    return true;
                 }
                 else
                 {
                     //remove self if it were added
                     this.RemoveThisAsSingleton();
+                    return false;
                 }
 
             }
@@ -397,9 +413,10 @@ namespace com.spacepuppy
             private void RemoveThisAsSingleton()
             {
                 var tp = _target.GetType();
-                if (_singletonRefs.ContainsKey(tp))
+                ISingleton sing;
+                if(_singletonRefs.TryGetValue(tp, out sing))
                 {
-                    if (_singletonRefs[tp].component == _target.component)
+                    if(sing.component == _target.component)
                     {
                         _singletonRefs.Remove(tp);
                     }

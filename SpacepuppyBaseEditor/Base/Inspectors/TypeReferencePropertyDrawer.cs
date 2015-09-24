@@ -40,18 +40,20 @@ namespace com.spacepuppyeditor.Base
             bool allowAbstractTypes = false;
             bool allowInterfaces = false;
             System.Type defaultType = null;
+            System.Type[] excludedTypes = null;
             TypeDropDownListingStyle style = TypeDropDownListingStyle.Namespace;
             if (attrib != null)
             {
-                baseType = attrib.InheritsFromType;
+                baseType = attrib.inheritsFromType;
                 allowAbstractTypes = attrib.allowAbstractClasses;
                 allowInterfaces = attrib.allowInterfaces;
                 defaultType = attrib.defaultType;
+                excludedTypes = attrib.excludedTypes;
                 style = attrib.dropDownStyle;
             }
 
             EditorGUI.BeginChangeCheck();
-            tpref.Type = SPEditorGUI.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType, style);
+            tpref.Type = SPEditorGUI.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, style);
             if (EditorGUI.EndChangeCheck())
                 property.serializedObject.Update();
 

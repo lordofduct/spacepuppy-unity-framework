@@ -520,7 +520,11 @@ namespace com.spacepuppyeditor
 
         #region Type Dropdown
 
-        public static System.Type TypeDropDown(Rect position, GUIContent label, System.Type baseType, System.Type selectedType, bool allowAbstractTypes = false, bool allowInterfaces = false, System.Type defaultType = null, TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
+        public static System.Type TypeDropDown(Rect position, GUIContent label, 
+                                               System.Type baseType, System.Type selectedType, 
+                                               bool allowAbstractTypes = false, bool allowInterfaces = false, 
+                                               System.Type defaultType = null, System.Type[] excludedTypes = null, 
+                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
         {
             if (!TypeUtil.IsType(selectedType, baseType)) selectedType = null;
 
@@ -530,7 +534,7 @@ namespace com.spacepuppyeditor
             //                  orderby tp.FullName.Substring(tp.FullName.LastIndexOf(".") + 1) ascending
             //                  select tp).ToArray();
             var knownTypes = (from tp in TypeUtil.GetTypesAssignableFrom(baseType)
-                              where (allowAbstractTypes || !tp.IsAbstract) && (allowInterfaces || !tp.IsInterface)
+                              where (allowAbstractTypes || !tp.IsAbstract) && (allowInterfaces || !tp.IsInterface) && (excludedTypes == null || System.Array.IndexOf(excludedTypes, tp) < 0)
                               orderby tp.FullName.Substring(tp.FullName.LastIndexOf(".") + 1) ascending
                               select tp).ToArray();
             GUIContent[] knownTypeNames = null;

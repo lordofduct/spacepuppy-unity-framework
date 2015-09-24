@@ -36,6 +36,22 @@ namespace com.spacepuppy.Utils
         #endregion
 
 
+        public static T GetAsFromSource<T>(object obj) where T : class
+        {
+            if (obj == null) return null;
+            if (obj is T) return obj as T;
+
+            var tp = typeof(T);
+            if(ComponentUtil.IsComponentType(tp) && ComponentUtil.IsComponentSource(obj))
+            {
+                return ComponentUtil.GetComponentFromSource<T>(obj);
+            }
+            
+            return null;
+        }
+
+
+
 
 
         public static void SmartDestroy(UnityEngine.Object obj)

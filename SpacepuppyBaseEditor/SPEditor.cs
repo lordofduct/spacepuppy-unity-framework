@@ -134,7 +134,7 @@ namespace com.spacepuppyeditor
             {
                 _headerDrawers = new List<GUIDrawer>();
                 var componentType = serializedObject.targetObject.GetType();
-                if(TypeUtil.IsType(componentType, typeof(Component)))
+                if(TypeUtil.IsType(componentType, typeof(Component), typeof(ScriptableObject)))
                 {
                     var attribs = (from o in componentType.GetCustomAttributes(typeof(ComponentHeaderAttribute), true) 
                                    let a = o as ComponentHeaderAttribute 
@@ -273,6 +273,13 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
+
+    }
+
+    [CustomEditor(typeof(ScriptableObject), true)]
+    [CanEditMultipleObjects()]
+    public class SPScriptableObjectEditor : SPEditor
+    {
 
     }
 

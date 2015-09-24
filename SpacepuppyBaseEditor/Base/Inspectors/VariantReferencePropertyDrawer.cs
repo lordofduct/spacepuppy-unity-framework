@@ -206,7 +206,7 @@ namespace com.spacepuppyeditor.Base
 
                         if(_selectedComponentType == null)
                         {
-                            _selectedComponentType = SPEditorGUI.TypeDropDown(r1, GUIContent.none, typeof(Component), _selectedComponentType, false, false, null, TypeDropDownListingStyle.ComponentMenu);
+                            _selectedComponentType = SPEditorGUI.TypeDropDown(r1, GUIContent.none, typeof(Component), _selectedComponentType, false, false, null, null, TypeDropDownListingStyle.ComponentMenu);
                         }
                         else
                         {

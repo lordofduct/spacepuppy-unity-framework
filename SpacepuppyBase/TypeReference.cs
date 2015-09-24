@@ -25,7 +25,7 @@ namespace com.spacepuppy
 
         [System.NonSerialized()]
         private System.Type _type;
-
+        
         #endregion
 
         #region CONSTRUCTOR
@@ -100,15 +100,22 @@ namespace com.spacepuppy
         public class ConfigAttribute : System.Attribute
         {
 
-            public System.Type InheritsFromType;
+            public System.Type inheritsFromType;
             public bool allowAbstractClasses = false;
             public bool allowInterfaces = false;
             public System.Type defaultType = null;
+            public System.Type[] excludedTypes = null;
             public TypeDropDownListingStyle dropDownStyle = TypeDropDownListingStyle.Namespace;
 
             public ConfigAttribute(System.Type inheritsFromType)
             {
-                this.InheritsFromType = inheritsFromType;
+                this.inheritsFromType = inheritsFromType;
+            }
+
+            public ConfigAttribute(System.Type inheritsFromType, params System.Type[] excludedTypes)
+            {
+                this.inheritsFromType = inheritsFromType;
+                this.excludedTypes = excludedTypes;
             }
 
         }

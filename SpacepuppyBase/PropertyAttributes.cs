@@ -88,6 +88,12 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    public class ForceRootTagAttribute : ComponentHeaderAttribute
+    {
+
+    }
+
     #endregion
 
     #region Property Drawer Attributes

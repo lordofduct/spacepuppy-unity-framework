@@ -117,7 +117,7 @@ namespace com.spacepuppyeditor.Components
                         else
                             _overrideBaseTypeDict[label.text] = inheritsFromType;
                     }
-                    _overrideBaseTypeDict[label.text] = SPEditorGUI.TypeDropDown(r1, new GUIContent("Restrict Type"), inheritsFromType, _overrideBaseTypeDict[label.text], true, true, inheritsFromType, (this.attribute as ComponentTypeRestrictionAttribute).MenuListingStyle);
+                    _overrideBaseTypeDict[label.text] = SPEditorGUI.TypeDropDown(r1, new GUIContent("Restrict Type"), inheritsFromType, _overrideBaseTypeDict[label.text], true, true, inheritsFromType, null, (this.attribute as ComponentTypeRestrictionAttribute).MenuListingStyle);
                     inheritsFromType = _overrideBaseTypeDict[label.text];
 
                     //draw object field
