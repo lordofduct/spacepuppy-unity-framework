@@ -10,13 +10,13 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Project
 {
 
-    [CustomEditor(typeof(ResourceMonitor))]
-    public class ResourceMonitorInspector : SPEditor
+    [CustomEditor(typeof(ResourcePackage))]
+    public class ResourcePackageInspector : SPEditor
     {
 
         #region Menu Entries
 
-        [MenuItem("Assets/Create/Resource Monitor", priority =1000)]
+        [MenuItem("Assets/Create/Resource Package", priority =1000)]
         private static void CreateResourceMonitor()
         {
             var spath = AssetDatabase.GetAssetPath(Selection.activeObject);
@@ -24,12 +24,12 @@ namespace com.spacepuppyeditor.Project
             if (Path.HasExtension(spath)) spath = Path.GetDirectoryName(spath);
 
             if (!spath.EndsWith("/")) spath += "/";
-            spath += "ResourceMonitor.asset";
+            spath += "ResourcePackage.asset";
 
-            ScriptableObjectHelper.CreateAsset<ResourceMonitor>(spath);
+            ScriptableObjectHelper.CreateAsset<ResourcePackage>(spath);
         }
 
-        [MenuItem("Assets/Create/Resource Monitor", validate = true)]
+        [MenuItem("Assets/Create/Resource Package", validate = true)]
         private static bool ValidateCreateResourceMonitor()
         {
             var spath = AssetDatabase.GetAssetPath(Selection.activeObject);

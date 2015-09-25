@@ -10,7 +10,7 @@ namespace com.spacepuppy.Project
     /// When loaded it can be used to index the contents of that folder as a bundle of asssets. Facilitating the IAssetBundle 
     /// interface, and any factories that may use it.
     /// </summary>
-    public class ResourceMonitor : ScriptableObject, IAssetBundle
+    public class ResourcePackage : ScriptableObject, IAssetBundle
     {
 
         #region Fields

@@ -12,7 +12,7 @@ namespace com.spacepuppy.Project
     /// comes with extra tools to make that easier. This class can still benefit you in Unity5 though, since it implements IAssetBundle 
     /// for use in factory patterns that use IAssetBundles.
     /// </summary>
-    public class AssetBundleMonitor : ScriptableObject, IAssetBundle, System.IDisposable
+    public class AssetBundlePackage : ScriptableObject, IAssetBundle, System.IDisposable
     {
 
         #region Fields
@@ -127,7 +127,7 @@ namespace com.spacepuppy.Project
             if (_bundle != null)
             {
                 _bundle.Unload(unloadAllLoadedObjects);
-                AssetBundleManager.RemoveAssetBundleMonitor(this);
+                AssetBundleManager.RemoveAssetBundle(this);
                 _bundle = null;
             }
         }

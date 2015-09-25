@@ -8,8 +8,8 @@ namespace com.spacepuppy.Project
 
     /// <summary>
     /// An interface that represents a bundle of resources that can be loaded on demand. This facilitates wrappers 
-    /// around the global 'Resources' (see: ResourceAssetBundle), portions of 'Resources' (see: ResourceMonitor), 
-    /// 'AssetBundle' (see: AssetBundleMonitor), as well as groups of bundles (see: AssetBundleGroup).
+    /// around the global 'Resources' (see: ResourceAssetBundle), portions of 'Resources' (see: ResourcePackage), 
+    /// 'AssetBundle' (see: AssetBundlePackage), as well as groups of bundles (see: AssetBundleGroup).
     /// </summary>
     public interface IAssetBundle
     {

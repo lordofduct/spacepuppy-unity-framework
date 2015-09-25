@@ -10,13 +10,13 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Project
 {
 
-    [CustomEditor(typeof(AssetBundleMonitor))]
-    public class AssetBundleMonitorInspector : SPEditor
+    [CustomEditor(typeof(AssetBundlePackage))]
+    public class AssetBundlePackageInspector : SPEditor
     {
 
         #region Menu Entries
 
-        [MenuItem("Assets/Create/AssetBundle Monitor", priority = 1001)]
+        [MenuItem("Assets/Create/AssetBundle Package", priority = 1001)]
         private static void CreateResourceMonitor()
         {
             var spath = (Selection.activeGameObject != null) ? AssetDatabase.GetAssetPath(Selection.activeObject) : "Assets/";
@@ -24,9 +24,9 @@ namespace com.spacepuppyeditor.Project
             if (Path.HasExtension(spath)) spath = Path.GetDirectoryName(spath);
 
             if (!spath.EndsWith("/")) spath += "/";
-            spath += "AssetBundleMonitor.asset";
+            spath += "AssetBundlePackage.asset";
 
-            ScriptableObjectHelper.CreateAsset<AssetBundleMonitor>(spath);
+            ScriptableObjectHelper.CreateAsset<AssetBundlePackage>(spath);
         }
         
         #endregion
