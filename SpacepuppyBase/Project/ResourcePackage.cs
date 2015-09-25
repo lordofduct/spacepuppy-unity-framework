@@ -30,17 +30,13 @@ namespace com.spacepuppy.Project
         #endregion
 
         #region Methods
-
-        public string[] GetAllAssetPaths()
-        {
-            return _paths.Clone() as string[];
-        }
-
-        public bool ContainsPath(string path)
-        {
-            return System.Array.IndexOf(_paths, path) >= 0;
-        }
-
+        
+        /// <summary>
+        /// ResourcePackage names are actually paths in the Resources hierarchy, this will return those asset names/paths 
+        /// that exist in some specific folder.
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <returns></returns>
         public IEnumerable<string> GetAssetPathsIn(string folderPath)
         {
             if (_paths == null) yield break;
@@ -55,9 +51,18 @@ namespace com.spacepuppy.Project
 
         #region IAssetBundle Interface
 
-        bool IAssetBundle.Contains(string path)
+        /// <summary>
+        /// ResourcePackage names are full paths.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetAllAssetNames()
         {
-            return this.ContainsPath(path);
+            return _paths;
+        }
+
+        public bool Contains(string path)
+        {
+            return System.Array.IndexOf(_paths, path) >= 0;
         }
 
         bool IAssetBundle.Contains(UnityEngine.Object asset)
@@ -67,19 +72,19 @@ namespace com.spacepuppy.Project
 
         public UnityEngine.Object LoadAsset(string path)
         {
-            if (!this.ContainsPath(path)) return null;
+            if (!this.Contains(path)) return null;
             return AssetBundleManager.Resources.LoadAsset(path);
         }
 
         public UnityEngine.Object LoadAsset(string path, System.Type tp)
         {
-            if (!this.ContainsPath(path)) return null;
+            if (!this.Contains(path)) return null;
             return AssetBundleManager.Resources.LoadAsset(path, tp);
         }
 
         public T LoadAsset<T>(string path) where T : UnityEngine.Object
         {
-            if (!this.ContainsPath(path)) return null;
+            if (!this.Contains(path)) return null;
             return AssetBundleManager.Resources.LoadAsset<T>(path);
         }
 

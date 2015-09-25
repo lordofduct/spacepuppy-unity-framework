@@ -154,12 +154,12 @@ namespace com.spacepuppy.Project
         {
             public bool Equals(AssetBundlePackage x, AssetBundlePackage y)
             {
-                return x.Id == y.Id;
+                return x.UniqueId == y.UniqueId;
             }
 
             public int GetHashCode(AssetBundlePackage obj)
             {
-                return obj.Id;
+                return obj.UniqueId;
             }
         }
 

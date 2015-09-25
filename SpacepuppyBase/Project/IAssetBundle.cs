@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 using com.spacepuppy.Utils;
 
@@ -13,7 +14,9 @@ namespace com.spacepuppy.Project
     /// </summary>
     public interface IAssetBundle
     {
-        
+
+        IEnumerable<string> GetAllAssetNames();
+
         bool Contains(string name);
 
         bool Contains(UnityEngine.Object asset);
@@ -62,6 +65,11 @@ namespace com.spacepuppy.Project
         #endregion
 
         #region Methods
+
+        IEnumerable<string> IAssetBundle.GetAllAssetNames()
+        {
+            return Enumerable.Empty<string>();
+        }
         
         public bool Contains(string path)
         {
@@ -271,6 +279,19 @@ namespace com.spacepuppy.Project
         #endregion
 
         #region SPAssetBundle Interface
+
+        public IEnumerable<string> GetAllAssetNames()
+        {
+            //NOTE - we don't include resources, because its list is empty anyways. If this changes, add it here.
+            var e = _bundles.GetEnumerator();
+            while(e.MoveNext())
+            {
+                foreach(var p in e.Current.GetAllAssetNames())
+                {
+                    yield return p;
+                }
+            }
+        }
 
         public bool Contains(string name)
         {

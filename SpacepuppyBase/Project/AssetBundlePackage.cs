@@ -17,7 +17,12 @@ namespace com.spacepuppy.Project
 
         #region Fields
 
+        [SerializeField()]
+        private string[] _names;
+
+        [System.NonSerialized()]
         private AssetBundle _bundle;
+        [System.NonSerialized()]
         private HashSet<UnityEngine.Object> _loadedAssets = new HashSet<UnityEngine.Object>(com.spacepuppy.Collections.ObjectInstanceIDEqualityComparer<UnityEngine.Object>.Default);
 
         #endregion
@@ -39,7 +44,7 @@ namespace com.spacepuppy.Project
 
         #region Properties
 
-        public int Id
+        public int UniqueId
         {
             get
             {
@@ -54,6 +59,11 @@ namespace com.spacepuppy.Project
         #endregion
 
         #region Methods
+
+        public IEnumerable<string> GetAllAssetNames()
+        {
+            return _names ?? Enumerable.Empty<string>();
+        }
 
         public bool Contains(string name)
         {
@@ -115,7 +125,7 @@ namespace com.spacepuppy.Project
 
         public override int GetHashCode()
         {
-            return this.Id;
+            return this.UniqueId;
         }
 
         #endregion
