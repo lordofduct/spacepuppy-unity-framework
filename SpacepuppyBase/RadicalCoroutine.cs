@@ -80,6 +80,7 @@ namespace com.spacepuppy
         {
             this.ClearStack();
             _currentIEnumeratorYieldValue = null;
+            _forcedTick = false;
             try
             {
                 if (_owner != null) _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
@@ -326,7 +327,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public bool ManualTick(MonoBehaviour handle)
         {
-            if (_owner != null || _state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operating.");
+            if (_owner != null || _state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated.");
             if (handle == null) throw new System.ArgumentNullException("handle");
 
             _state = RadicalCoroutineOperatingState.Active;
@@ -349,7 +350,7 @@ namespace com.spacepuppy
             return result;
         }
 
-        public void ForceTick()
+        private void ForceTick()
         {
             _forcedTick = false;
             if ((this as IEnumerator).MoveNext())
@@ -471,29 +472,32 @@ namespace com.spacepuppy
                     //the tick may have forced a tick, which could have popped this yieldinstruction already, this usually means it was an IImmediatelyResumingYieldInstruction
                     //deal with accordingly
                     if (_stack.Count > 0 && _stack.Peek() == r) this.PopStack();
-                    if(_forcedTick)
+
+                    if (this.Cancelled)
+                    {
+                        if (_state == RadicalCoroutineOperatingState.Cancelling)
+                            this.OnFinish(true);
+
+                        _forcedTick = false; //make sure this is reset
+                        return false;
+                    }
+                    else if (this.Complete)
+                    {
+                        if (_state == RadicalCoroutineOperatingState.Completing)
+                            this.OnFinish(false);
+
+                        _forcedTick = false; //make sure this is reset
+                        return false;
+                    }
+                    else if (_stack.Count == 0)
+                    {
+                        this.OnFinish(false);
+                        return false;
+                    }
+                    else if (_forcedTick)
                     {
                         _forcedTick = false;
-                        if (this.Cancelled)
-                        {
-                            if (_state == RadicalCoroutineOperatingState.Cancelling)
-                            {
-                                this.OnFinish(true);
-                            }
-                            return false;
-                        }
-                        else if (this.Complete)
-                        {
-                            if (_state == RadicalCoroutineOperatingState.Completing)
-                            {
-                                this.OnFinish(false);
-                            }
-                            return false;
-                        }
-                        else
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                     else
                     {
