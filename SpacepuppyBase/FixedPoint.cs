@@ -17,7 +17,7 @@ namespace com.spacepuppy
     /// value has enough precision to house the FixedPercent value in the same range.
     /// </remarks>
     [System.Serializable()]
-    public struct FixedPercent : IConvertible
+    public struct FixedPercent : IConvertible, IEquatable<FixedPercent>
     {
 
         public const decimal MAX_VALUE = 2147M;
@@ -99,6 +99,11 @@ namespace com.spacepuppy
         public override int GetHashCode()
         {
             return _value;
+        }
+
+        public bool Equals(FixedPercent other)
+        {
+            return _value == other._value;
         }
 
         #endregion
