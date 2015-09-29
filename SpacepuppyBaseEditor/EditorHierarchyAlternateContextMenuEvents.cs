@@ -86,6 +86,6 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
-
+        
     }
 }

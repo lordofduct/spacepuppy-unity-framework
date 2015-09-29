@@ -55,7 +55,6 @@ namespace com.spacepuppy.Utils
             {
                 if (obj is Component) return obj as Component;
                 else if (obj is IComponent) return (obj as IComponent).component;
-                else return null;
             }
 
             var go = GameObjectUtil.GetGameObjectFromSource(obj);

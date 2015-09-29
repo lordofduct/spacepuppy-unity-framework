@@ -25,7 +25,7 @@ namespace com.spacepuppyeditor.Internal
         #endregion
 
         #region CONSTRUCTOR
-
+        
         public MultiPropertyAttributePropertyHandler(System.Reflection.FieldInfo fieldInfo, PropertyAttribute[] attribs)
         {
             if (fieldInfo == null) throw new System.ArgumentNullException("fieldInfo");
@@ -37,9 +37,15 @@ namespace com.spacepuppyeditor.Internal
 
         #endregion
 
+        #region Properties
+
+        public System.Reflection.FieldInfo Field { get { return _fieldInfo; } }
+
+        #endregion
+
         #region Methods
 
-        private void Init(PropertyAttribute[] attribs)
+        protected virtual void Init(PropertyAttribute[] attribs)
         {
             var fieldType = _fieldInfo.FieldType;
             if (fieldType.IsListType()) fieldType = fieldType.GetElementTypeOfListType();
@@ -74,68 +80,76 @@ namespace com.spacepuppyeditor.Internal
             else
             {
                 base.HandleAttribute(attribute, field, propertyType);
-                var drawer = this.InternalDrawer;
-                if (_drawer == null)
+                var drawer = this.InternalDrawer; //this retrieves the drawer that was selected by called 'base.HandleAttribute'
+                this.AppendDrawer(drawer);
+            }
+        }
+
+        protected void AppendDrawer(PropertyDrawer drawer)
+        {
+            if (_drawer == null)
+            {
+                //no drawer has been set before... lets see if we got one
+                if (drawer != null)
                 {
-                    //no drawer has been set before... lets see if we got one
-                    if (drawer != null)
+                    //we got a new drawer, set it
+                    if (this.Field.FieldType.IsListType()) drawer = new ArrayPropertyDrawer(drawer);
+                    _drawer = drawer;
+                }
+            }
+            else if (drawer != _drawer)
+            {
+                //a new drawer was created, lets see what we need to do with it compared to the last one
+                if (drawer is PropertyModifier)
+                {
+                    if (_modifiers == null) _modifiers = new List<PropertyModifier>();
+                    _modifiers.Add(drawer as PropertyModifier);
+                    this.InternalDrawer = _drawer;
+                }
+                else if (drawer is IArrayHandlingPropertyDrawer)
+                {
+                    //got an array drawer, this overrides previous drawers
+                    if (_drawer is IArrayHandlingPropertyDrawer)
                     {
-                        //we got a new drawer, set it
-                        if (field.FieldType.IsListType()) drawer = new ArrayPropertyDrawer(drawer);
+                        var temp = _drawer as IArrayHandlingPropertyDrawer;
+                        _drawer = drawer;
+                        (_drawer as IArrayHandlingPropertyDrawer).InternalDrawer = temp.InternalDrawer;
+                    }
+                    else if (_drawer != null)
+                    {
+                        var temp = _drawer;
+                        _drawer = drawer;
+                        (_drawer as IArrayHandlingPropertyDrawer).InternalDrawer = temp;
+                    }
+                    else
+                    {
                         _drawer = drawer;
                     }
                 }
-                else if (drawer != _drawer)
+                else if (_drawer is IArrayHandlingPropertyDrawer)
                 {
-                    //a new drawer was created, lets see what we need to do with it compared to the last one
-                    if (drawer is PropertyModifier)
+                    //got an internal drawer for the existing array drawer
+                    (_drawer as IArrayHandlingPropertyDrawer).InternalDrawer = drawer;
+                    this.InternalDrawer = _drawer;
+                }
+                else
+                {
+                    //we got a new drawer, set it
+                    if (this.Field.FieldType.IsListType())
                     {
-                        if (_modifiers == null) _modifiers = new List<PropertyModifier>();
-                        _modifiers.Add(drawer as PropertyModifier);
-                        this.InternalDrawer = _drawer;
-                    }
-                    else if (drawer is IArrayHandlingPropertyDrawer)
-                    {
-                        //got an array drawer, this overrides previous drawers
-                        if (_drawer is IArrayHandlingPropertyDrawer)
-                        {
-                            var temp = _drawer as IArrayHandlingPropertyDrawer;
-                            _drawer = drawer;
-                            (_drawer as IArrayHandlingPropertyDrawer).InternalDrawer = temp.InternalDrawer;
-                        }
-                        else if (_drawer != null)
-                        {
-                            var temp = _drawer;
-                            _drawer = drawer;
-                            (_drawer as IArrayHandlingPropertyDrawer).InternalDrawer = temp;
-                        }
-                        else
-                        {
-                            _drawer = drawer;
-                        }
-                    }
-                    else if (_drawer is IArrayHandlingPropertyDrawer)
-                    {
-                        //got an internal drawer for the existing array drawer
-                        (_drawer as IArrayHandlingPropertyDrawer).InternalDrawer = drawer;
+                        _drawer = new ArrayPropertyDrawer(drawer);
                         this.InternalDrawer = _drawer;
                     }
                     else
                     {
-                        //we got a new drawer, set it
-                        if (field.FieldType.IsListType())
-                        {
-                            _drawer = new ArrayPropertyDrawer(drawer);
-                            this.InternalDrawer = _drawer;
-                        }
-                        else
-                        {
-                            _drawer = drawer;
-                        }
+                        _drawer = drawer;
                     }
                 }
             }
         }
+
+
+
 
 
         public override bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
@@ -309,4 +323,5 @@ namespace com.spacepuppyeditor.Internal
         #endregion
 
     }
+
 }

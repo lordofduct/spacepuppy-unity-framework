@@ -15,7 +15,9 @@ namespace com.spacepuppyeditor.Components
 
         #region Fields
 
-        private Dictionary<string, System.Type> _overrideBaseTypeDict = new Dictionary<string, System.Type>();
+        //private Dictionary<string, System.Type> _overrideBaseTypeDict = new Dictionary<string, System.Type>();
+
+        private SelectableComponentPropertyDrawer _selectComponentDrawer;
 
         #endregion
 
@@ -29,25 +31,64 @@ namespace com.spacepuppyeditor.Components
 
             var attrib = this.attribute as ComponentTypeRestrictionAttribute;
             return attrib.InheritsFromType == null ||
-                TypeUtil.IsType(attrib.InheritsFromType, fieldType) ||
-                TypeUtil.IsType(attrib.InheritsFromType, typeof(IComponent));
-        }
-
-        private GUIContent GetHeaderLabel(SerializedProperty property, GUIContent label, System.Type inheritsFromType)
-        {
-            string suffix = (property.objectReferenceValue != null) ? "(" + property.objectReferenceValue.GetType().Name + ")" : "(" + inheritsFromType.Name + ")";
-            string tooltip = inheritsFromType.Name;
-            if (property.objectReferenceValue != null) tooltip += " - " + suffix;
-
-            var tooltipAttrib = this.fieldInfo.GetCustomAttributes(typeof(TooltipAttribute), false).FirstOrDefault() as TooltipAttribute;
-            if (tooltipAttrib != null) tooltip += "\n\n" + tooltipAttrib.tooltip;
-
-            return new GUIContent(label.text + " " + suffix, tooltip);
+                attrib.InheritsFromType.IsInterface ||
+                TypeUtil.IsType(attrib.InheritsFromType, fieldType);
+            //return attrib.InheritsFromType == null ||
+            //    TypeUtil.IsType(attrib.InheritsFromType, fieldType) ||
+            //    TypeUtil.IsType(attrib.InheritsFromType, typeof(IComponent));
         }
 
         #endregion
 
         #region Drawer Overrides
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return EditorGUIUtility.singleLineHeight;
+        }
+
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            if (!this.ValidateFieldType())
+            {
+                EditorGUI.PropertyField(position, property, label);
+                return;
+            }
+
+            EditorGUI.BeginProperty(position, label, property);
+
+            //get base type
+            var attrib = this.attribute as ComponentTypeRestrictionAttribute;
+            var inheritsFromType = attrib.InheritsFromType ?? typeof(Component);
+
+            bool isArray = this.fieldInfo.FieldType.IsListType();
+            var fieldType = (isArray) ? this.fieldInfo.FieldType.GetElementTypeOfListType() : this.fieldInfo.FieldType;
+
+            if (attrib.HideTypeDropDown)
+            {
+                //draw object field
+                property.objectReferenceValue = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, inheritsFromType, true, fieldType);
+            }
+            else
+            {
+                //draw complex field
+                if(_selectComponentDrawer == null)
+                {
+                    _selectComponentDrawer = new SelectableComponentPropertyDrawer();
+                }
+
+                _selectComponentDrawer.RestrictionType = inheritsFromType;
+                _selectComponentDrawer.ShowXButton = true;
+
+                _selectComponentDrawer.OnGUI(position, property, label);
+            }
+
+            EditorGUI.EndProperty();
+        }
+        
+
+        /*
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -131,6 +172,20 @@ namespace com.spacepuppyeditor.Components
 
             EditorGUI.EndProperty();
         }
+        
+        private GUIContent GetHeaderLabel(SerializedProperty property, GUIContent label, System.Type inheritsFromType)
+        {
+            string suffix = (property.objectReferenceValue != null) ? "(" + property.objectReferenceValue.GetType().Name + ")" : "(" + inheritsFromType.Name + ")";
+            string tooltip = inheritsFromType.Name;
+            if (property.objectReferenceValue != null) tooltip += " - " + suffix;
+
+            var tooltipAttrib = this.fieldInfo.GetCustomAttributes(typeof(TooltipAttribute), false).FirstOrDefault() as TooltipAttribute;
+            if (tooltipAttrib != null) tooltip += "\n\n" + tooltipAttrib.tooltip;
+
+            return new GUIContent(label.text + " " + suffix, tooltip);
+        }
+
+        */
 
         #endregion
 

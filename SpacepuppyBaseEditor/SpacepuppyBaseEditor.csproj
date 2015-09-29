@@ -51,6 +51,8 @@
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
     <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
+    <Compile Include="Collections\EnumKeyedCollectionPropertyDrawer.cs" />
     <Compile Include="Components\SelectableObjectPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\SPEntityInspector.cs" />
     <Compile Include="Base\Inspectors\SPTimePropertyDrawer.cs" />
@@ -60,6 +62,7 @@
     <Compile Include="EditorHierarchyAlternateContextMenuEvents.cs" />
     <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
     <Compile Include="Geom\CubicBezierCurvePropertyDrawer.cs" />
+    <Compile Include="Geom\TransformAltContextMenu.cs" />
     <Compile Include="Hooks\CollisionSignalSourcePropertyDrawer.cs" />
     <Compile Include="IArrayHandlingPropertyDrawer.cs" />
     <Compile Include="Base\BaseSettings.cs" />

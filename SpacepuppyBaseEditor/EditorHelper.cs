@@ -72,6 +72,32 @@ namespace com.spacepuppyeditor
             SceneView.onSceneGUIDelegate += OnSceneGUI;
         }
 
+        #region Methods
+
+        public static bool AssertMultiObjectEditingNotSupportedHeight(SerializedProperty property, GUIContent label, out float height)
+        {
+            if(property.hasMultipleDifferentValues)
+            {
+                height = EditorGUIUtility.singleLineHeight;
+                return true;
+            }
+
+            height = 0f;
+            return false;
+        }
+
+        public static bool AssertMultiObjectEditingNotSupported(Rect position, SerializedProperty property, GUIContent label)
+        {
+            if(property.hasMultipleDifferentValues)
+            {
+                EditorGUI.LabelField(position, label, EditorHelper.TempContent("Multi-Object editing is not supported."));
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
 
         #region SerializedProperty Helpers
 

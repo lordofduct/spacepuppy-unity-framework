@@ -21,7 +21,7 @@ namespace com.spacepuppyeditor.Base.Commands
         //    return true;
         //}
 
-        [MenuItem("CONTEXT/ALT/Find References To")]
+        [MenuItem("CONTEXT/ALT/Find References To", priority = 100)]
         private static void Menu_Search(MenuCommand cmnd)
         {
             if (cmnd.context == null) return;

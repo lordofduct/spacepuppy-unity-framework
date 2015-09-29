@@ -12,4 +12,11 @@ namespace com.spacepuppy.Scenario
 
     }
 
+    public interface IBlockingTriggerableMechanism : ITriggerableMechanism
+    {
+
+        bool Trigger(object arg, BlockingTriggerYieldInstruction instruction);
+
+    }
+    
 }

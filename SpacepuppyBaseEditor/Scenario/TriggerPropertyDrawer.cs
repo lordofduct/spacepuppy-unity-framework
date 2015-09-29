@@ -65,11 +65,14 @@ namespace com.spacepuppyeditor.Scenario
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            float h;
+            if (EditorHelper.AssertMultiObjectEditingNotSupportedHeight(property, label, out h)) return h;
+
             this.Init(property, label);
 
             if (_alwaysExpanded || property.isExpanded)
             {
-                var h = MARGIN * 2f;
+                h = MARGIN * 2f;
                 h += _targetList.GetHeight();
                 h += EditorGUIUtility.singleLineHeight;
                 if (_foldoutTargetExtra)
@@ -94,6 +97,8 @@ namespace com.spacepuppyeditor.Scenario
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if (EditorHelper.AssertMultiObjectEditingNotSupported(position, property, label)) return;
+
             this.Init(property, label);
 
             const float WIDTH_FOLDOUT = 5f;

@@ -31,7 +31,8 @@ namespace com.spacepuppyeditor.Components
             get { return _restrictionType; }
             set
             {
-                if (value == null || !TypeUtil.IsType(value, typeof(Component), typeof(IComponent))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
+                if (value == null) value = typeof(Component);
+                else if (!value.IsInterface && !TypeUtil.IsType(value, typeof(Component))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
                 _restrictionType = value;
             }
         }
@@ -114,9 +115,11 @@ namespace com.spacepuppyeditor.Components
             else
             {
                 this.ChoiceSelector.BeforeGUI(this, property, _restrictionType);
+                var components = this.ChoiceSelector.GetComponents();
 
                 var fullsize = position;
-                if (this.ShowXButton && SPEditorGUI.XButton(ref position, "Clear Selected GameObject", this.XButtonOnRightSide))
+                if (components.Length == 0 || 
+                    (this.ShowXButton && SPEditorGUI.XButton(ref position, "Clear Selected GameObject", this.XButtonOnRightSide)))
                 {
                     property.objectReferenceValue = null;
                     fullsize = this.DrawDotDotButton(fullsize, property);
@@ -124,8 +127,20 @@ namespace com.spacepuppyeditor.Components
                 }
                 else
                 {
+                    //position = this.DrawDotDotButton(position, property);
+                    //if(components.Length == 1)
+                    //{
+                    //    property.objectReferenceValue = EditorGUI.ObjectField(position, components[0], _restrictionType, this.AllowSceneObject);
+                    //}
+                    //else
+                    //{
+                    //    var names = this.ChoiceSelector.GetPopupEntries();
+                    //    int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
+                    //    int ni = EditorGUI.Popup(position, oi, names);
+                    //    if (oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
+                    //}
+
                     position = this.DrawDotDotButton(position, property);
-                    var components = this.ChoiceSelector.GetComponents();
                     var names = this.ChoiceSelector.GetPopupEntries();
                     int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
                     int ni = EditorGUI.Popup(position, oi, names);

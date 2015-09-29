@@ -14,10 +14,13 @@ namespace com.spacepuppy.Utils.Diminish
         [SerializeField()]
         private float _weight = 1f;
         [SerializeField()]
+        [Tooltip("Number of times that can be selected before weight is forced to zero no matter the diminish rate.")]
         private DiscreteFloat _maxCount = DiscreteFloat.PositiveInfinity;
         [SerializeField()]
+        [Tooltip("Every time the option is selected the weight is multipled by this rate.")]
         private float _diminishRate = 1.0f;
         [SerializeField()]
+        [Tooltip("Amount of time each compounded diminish lasts against the weight.")]
         private float _diminishPeriodDuration = 1f;
 
         [System.NonSerialized()]

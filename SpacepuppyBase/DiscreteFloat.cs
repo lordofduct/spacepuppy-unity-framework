@@ -16,6 +16,15 @@ namespace com.spacepuppy
         [SerializeField()]
         private float _value;
 
+        #region CONSTRUCTOR
+
+        public DiscreteFloat(float f)
+        {
+            _value = Mathf.Round(f);
+        }
+
+        #endregion
+
         #region Properties
 
         #endregion
@@ -48,12 +57,15 @@ namespace com.spacepuppy
         #endregion
 
         #region Operators
-
-        #region Addition
-
+        
         public static DiscreteFloat operator ++(DiscreteFloat df)
         {
             df._value++;
+            return df;
+        }
+
+        public static DiscreteFloat operator +(DiscreteFloat df)
+        {
             return df;
         }
 
@@ -62,36 +74,16 @@ namespace com.spacepuppy
             a._value = Mathf.Floor(a._value + b._value);
             return a;
         }
-        
-        public static DiscreteFloat operator +(DiscreteFloat a, float b)
-        {
-            a._value = Mathf.Floor(a._value + b);
-            return a;
-        }
-
-        public static DiscreteFloat operator +(DiscreteFloat a, int b)
-        {
-            a._value = Mathf.Floor(a._value + b);
-            return a;
-        }
-
-        public static float operator +(float a, DiscreteFloat b)
-        {
-            return a + b._value;
-        }
-
-        public static double operator +(double a, DiscreteFloat b)
-        {
-            return a + b._value;
-        }
-
-        #endregion
-
-        #region Subtraction
 
         public static DiscreteFloat operator --(DiscreteFloat df)
         {
             df._value--;
+            return df;
+        }
+
+        public static DiscreteFloat operator -(DiscreteFloat df)
+        {
+            df._value = -df._value;
             return df;
         }
 
@@ -100,239 +92,56 @@ namespace com.spacepuppy
             a._value = Mathf.Floor(a._value - b._value);
             return a;
         }
-
-        public static DiscreteFloat operator -(DiscreteFloat a, float b)
-        {
-            a._value = Mathf.Floor(a._value - b);
-            return a;
-        }
-
-        public static DiscreteFloat operator -(DiscreteFloat a, int b)
-        {
-            a._value = Mathf.Floor(a._value - b);
-            return a;
-        }
-
-        public static float operator -(float a, DiscreteFloat b)
-        {
-            return a - b._value;
-        }
-
-        public static double operator -(double a, DiscreteFloat b)
-        {
-            return a - b._value;
-        }
-
-        #endregion
-
-        #region Multiplication
-
+        
         public static DiscreteFloat operator *(DiscreteFloat a, DiscreteFloat b)
         {
             a._value = Mathf.Floor(a._value * b._value);
             return a;
         }
-
-        public static DiscreteFloat operator *(DiscreteFloat a, float b)
-        {
-            a._value = Mathf.Floor(a._value * b);
-            return a;
-        }
-
-        public static DiscreteFloat operator *(DiscreteFloat a, int b)
-        {
-            a._value = Mathf.Floor(a._value * b);
-            return a;
-        }
-
-        public static float operator *(float a, DiscreteFloat b)
-        {
-            return a * b._value;
-        }
-
-        public static double operator *(double a, DiscreteFloat b)
-        {
-            return a * b._value;
-        }
-
-        #endregion
-
-        #region Division
-
+        
         public static DiscreteFloat operator /(DiscreteFloat a, DiscreteFloat b)
         {
             a._value = Mathf.Floor(a._value / b._value);
             return a;
         }
-
-        public static DiscreteFloat operator /(DiscreteFloat a, float b)
-        {
-            a._value = Mathf.Floor(a._value / b);
-            return a;
-        }
-
-        public static DiscreteFloat operator /(DiscreteFloat a, int b)
-        {
-            a._value = Mathf.Floor(a._value / b);
-            return a;
-        }
-
-        public static float operator /(float a, DiscreteFloat b)
-        {
-            return a / b._value;
-        }
-
-        public static double operator /(double a, DiscreteFloat b)
-        {
-            return a / b._value;
-        }
-
-        #endregion
-
-        #region Comparison
-
+        
         public static bool operator >(DiscreteFloat a, DiscreteFloat b)
         {
             return a._value > b._value;
         }
-        public static bool operator >(DiscreteFloat a, float b)
-        {
-            return a._value > b;
-        }
-        public static bool operator >(float a, DiscreteFloat b)
-        {
-            return a > b._value;
-        }
-        public static bool operator >(DiscreteFloat a, int b)
-        {
-            return a._value > (float)b;
-        }
-        public static bool operator >(int a, DiscreteFloat b)
-        {
-            return (float)a > b._value;
-        }
-
 
         public static bool operator >=(DiscreteFloat a, DiscreteFloat b)
         {
             return a._value >= b._value;
         }
-        public static bool operator >=(DiscreteFloat a, float b)
-        {
-            return a._value >= b;
-        }
-        public static bool operator >=(float a, DiscreteFloat b)
-        {
-            return a >= b._value;
-        }
-        public static bool operator >=(DiscreteFloat a, int b)
-        {
-            return a._value >= (float)b;
-        }
-        public static bool operator >=(int a, DiscreteFloat b)
-        {
-            return (float)a >= b._value;
-        }
-
 
         public static bool operator <(DiscreteFloat a, DiscreteFloat b)
         {
             return a._value < b._value;
         }
-        public static bool operator <(DiscreteFloat a, float b)
-        {
-            return a._value < b;
-        }
-        public static bool operator <(float a, DiscreteFloat b)
-        {
-            return a < b._value;
-        }
-        public static bool operator <(DiscreteFloat a, int b)
-        {
-            return a._value < (float)b;
-        }
-        public static bool operator <(int a, DiscreteFloat b)
-        {
-            return (float)a < b._value;
-        }
-
 
         public static bool operator <=(DiscreteFloat a, DiscreteFloat b)
         {
             return a._value <= b._value;
         }
-        public static bool operator <=(DiscreteFloat a, float b)
-        {
-            return a._value <= b;
-        }
-        public static bool operator <=(float a, DiscreteFloat b)
-        {
-            return a <= b._value;
-        }
-        public static bool operator <=(DiscreteFloat a, int b)
-        {
-            return a._value <= (float)b;
-        }
-        public static bool operator <=(int a, DiscreteFloat b)
-        {
-            return (float)a <= b._value;
-        }
-
 
         public static bool operator ==(DiscreteFloat a, DiscreteFloat b)
         {
             return a._value == b._value;
         }
-        public static bool operator ==(DiscreteFloat a, float b)
-        {
-            return a._value == b;
-        }
-        public static bool operator ==(float a, DiscreteFloat b)
-        {
-            return a == b._value;
-        }
-        public static bool operator ==(DiscreteFloat a, int b)
-        {
-            return a._value == (float)b;
-        }
-        public static bool operator ==(int a, DiscreteFloat b)
-        {
-            return (float)a == b._value;
-        }
-
 
         public static bool operator !=(DiscreteFloat a, DiscreteFloat b)
         {
             return a._value != b._value;
         }
-        public static bool operator !=(DiscreteFloat a, float b)
-        {
-            return a._value != b;
-        }
-        public static bool operator !=(float a, DiscreteFloat b)
-        {
-            return a == b._value;
-        }
-        public static bool operator !=(DiscreteFloat a, int b)
-        {
-            return a._value != (float)b;
-        }
-        public static bool operator !=(int a, DiscreteFloat b)
-        {
-            return (float)a != b._value;
-        }
-
-        #endregion
-
+        
         #endregion
 
         #region Conversions
 
         public static implicit operator DiscreteFloat(int f)
         {
-            var df = new DiscreteFloat();
-            df._value = (float)f;
-            return df;
+            return new DiscreteFloat((float)f);
         }
 
         public static implicit operator int(DiscreteFloat df)
@@ -342,9 +151,7 @@ namespace com.spacepuppy
 
         public static implicit operator DiscreteFloat(float f)
         {
-            var df = new DiscreteFloat();
-            df._value = f;
-            return df;
+            return new DiscreteFloat(f);
         }
 
         public static implicit operator float(DiscreteFloat df)
@@ -352,16 +159,24 @@ namespace com.spacepuppy
             return df._value;
         }
 
-        public static implicit operator DiscreteFloat(double f)
+        public static implicit operator DiscreteFloat(double d)
         {
-            var df = new DiscreteFloat();
-            df._value = (float)f;
-            return df;
+            return new DiscreteFloat((float)d);
         }
 
         public static implicit operator double(DiscreteFloat df)
         {
             return (double)df._value;
+        }
+
+        public static implicit operator DiscreteFloat(decimal d)
+        {
+            return new DiscreteFloat((float)d);
+        }
+
+        public static implicit operator decimal(DiscreteFloat df)
+        {
+            return (decimal)df._value;
         }
 
         #endregion

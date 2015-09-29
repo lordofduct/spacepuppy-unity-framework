@@ -287,7 +287,7 @@ namespace com.spacepuppyeditor.Scenario
             {
                 EditorGUI.BeginChangeCheck();
                 var selectedComp = SPEditorGUI.SelectComponentFromSourceField(targCompPopupRect, "Target Component", targGo, targProp.objectReferenceValue as Component);
-                if(EditorGUI.EndChangeCheck())
+                if (EditorGUI.EndChangeCheck())
                 {
                     targProp.objectReferenceValue = selectedComp;
                 }

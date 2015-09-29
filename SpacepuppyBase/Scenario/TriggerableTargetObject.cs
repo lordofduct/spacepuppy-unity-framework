@@ -100,17 +100,9 @@ namespace com.spacepuppy.Scenario
                     {
                         return SPEntity.GetEntityFromSource(targ);
                     }
-                    else if (TypeUtil.IsType(tp, typeof(Component)))
-                    {
-                        return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
-                    }
-                    else if (TypeUtil.IsType(tp, typeof(IComponent)))
-                    {
-                        return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
-                    }
                     else
                     {
-                        return null;
+                        return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
                     }
                 }
                 else
@@ -123,25 +115,13 @@ namespace com.spacepuppy.Scenario
                     {
                         return SPEntity.GetEntityFromSource(targ);
                     }
-                    else if (TypeUtil.IsType(tp, typeof(Component)))
-                    {
-                        var go = GameObjectUtil.GetGameObjectFromSource(targ);
-                        if (go != null)
-                            return go.GetComponent(tp);
-                        else
-                            return null;
-                    }
-                    else if (TypeUtil.IsType(tp, typeof(IComponent)))
-                    {
-                        var go = GameObjectUtil.GetGameObjectFromSource(targ);
-                        if (go != null)
-                            return go.GetComponent(tp);
-                        else
-                            return null;
-                    }
                     else
                     {
-                        return null;
+                        var go = GameObjectUtil.GetGameObjectFromSource(targ);
+                        if (go != null)
+                            return go.GetComponent(tp);
+                        else
+                            return null;
                     }
                 }
             }
@@ -171,8 +151,11 @@ namespace com.spacepuppy.Scenario
 
             public ConfigAttribute(System.Type targetType)
             {
-                if (targetType == null || 
-                    (!TypeUtil.IsType(targetType, typeof(UnityEngine.Object)) && !TypeUtil.IsType(targetType, typeof(IComponent)))) throw new TypeArgumentMismatchException(targetType, typeof(UnityEngine.Object), "targetType");
+                //if (targetType == null || 
+                //    (!TypeUtil.IsType(targetType, typeof(UnityEngine.Object)) && !TypeUtil.IsType(targetType, typeof(IComponent)))) throw new TypeArgumentMismatchException(targetType, typeof(UnityEngine.Object), "targetType");
+                if (targetType == null ||
+                    (!TypeUtil.IsType(targetType, typeof(UnityEngine.Object)) && !targetType.IsInterface))
+                    throw new TypeArgumentMismatchException(targetType, typeof(UnityEngine.Object), "targetType");
 
                 this.TargetType = targetType;
             }

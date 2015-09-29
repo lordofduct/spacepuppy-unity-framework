@@ -42,18 +42,7 @@ namespace com.spacepuppyeditor.Scenario
                             return null;
                         }
                     }
-                    else if(TypeUtil.IsType(_configAttrib.TargetType, typeof(Component)))
-                    {
-                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).GetComponent(_configAttrib.TargetType);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else if(TypeUtil.IsType(_configAttrib.TargetType, typeof(IComponent)))
+                    else if(_configAttrib.TargetType.IsInterface || TypeUtil.IsType(_configAttrib.TargetType, typeof(Component)))
                     {
                         if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
                         {
@@ -85,31 +74,16 @@ namespace com.spacepuppyeditor.Scenario
                             return null;
                         }
                     }
-                    else if (TypeUtil.IsType(_configAttrib.TargetType, typeof(Component)))
-                    {
-                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetComponent(_configAttrib.TargetType);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else if(TypeUtil.IsType(_configAttrib.TargetType, typeof(IComponent)))
-                    {
-                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetComponent(_configAttrib.TargetType);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
                     else
                     {
-                        return null;
+                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
+                        {
+                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetComponent(_configAttrib.TargetType);
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
 
                 default:

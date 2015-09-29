@@ -4,6 +4,7 @@ using System.Linq;
 
 using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy.Scenario
 {
@@ -38,6 +39,10 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private string _methodName;
 
+
+        [System.NonSerialized()]
+        private ITriggerableMechanism[] _triggerAllCache;
+
         #endregion
 
         #region Properties
@@ -55,6 +60,34 @@ namespace com.spacepuppy.Scenario
 
         public TriggerActivationType ActivationType { get { return this._activationType; } }
 
+        //public bool CanBlock
+        //{
+        //    get
+        //    {
+        //        switch(_activationType)
+        //        {
+        //            case TriggerActivationType.TriggerAllOnTarget:
+        //                {
+        //                    return _triggerable.HasComponent<IBlockingTriggerableMechanism>();
+        //                }
+        //            case TriggerActivationType.TriggerSelectedTarget:
+        //                {
+        //                    return _triggerable is IBlockingTriggerableMechanism;
+        //                }
+        //            case TriggerActivationType.SendMessage:
+        //                {
+        //                    return false;
+        //                }
+        //            case TriggerActivationType.CallMethodOnSelectedTarget:
+        //                {
+        //                    return false;
+        //                }
+        //            default:
+        //                return false;
+        //        }
+        //    }
+        //}
+
         #endregion
 
         #region Configure Methods
@@ -65,6 +98,7 @@ namespace com.spacepuppy.Scenario
             this._triggerableArgs = null;
             this._activationType = TriggerActivationType.TriggerAllOnTarget;
             this._methodName = null;
+            _triggerAllCache = null;
         }
 
         public void ConfigureTriggerAll(GameObject targ, object arg = null)
@@ -81,6 +115,7 @@ namespace com.spacepuppy.Scenario
             }
             this._activationType = TriggerActivationType.TriggerAllOnTarget;
             this._methodName = null;
+            _triggerAllCache = null;
         }
 
         public void ConfigureTriggerAll(ITriggerableMechanism mechanism, object arg = null)
@@ -97,6 +132,7 @@ namespace com.spacepuppy.Scenario
             }
             this._activationType = TriggerActivationType.TriggerAllOnTarget;
             this._methodName = null;
+            _triggerAllCache = null;
         }
 
         public void ConfigureTriggerTarget(ITriggerableMechanism mechanism, object arg = null)
@@ -113,6 +149,7 @@ namespace com.spacepuppy.Scenario
             }
             this._activationType = TriggerActivationType.TriggerSelectedTarget;
             this._methodName = null;
+            _triggerAllCache = null;
         }
 
         public void ConfigureSendMessage(GameObject targ, string message, object arg = null)
@@ -129,6 +166,7 @@ namespace com.spacepuppy.Scenario
             }
             this._methodName = message;
             this._activationType = TriggerActivationType.SendMessage;
+            _triggerAllCache = null;
         }
 
         public void ConfigureCallMethod(GameObject targ, string methodName, params object[] args)
@@ -145,6 +183,7 @@ namespace com.spacepuppy.Scenario
             }
             this._methodName = methodName;
             this._activationType = TriggerActivationType.CallMethodOnSelectedTarget;
+            _triggerAllCache = null;
         }
 
         #endregion
@@ -155,37 +194,8 @@ namespace com.spacepuppy.Scenario
         {
             if (this._triggerable == null) return;
 
-            var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : null;
-            switch (this._activationType)
-            {
-                case TriggerActivationType.TriggerAllOnTarget:
-                    foreach (var t in (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t))
-                    {
-                        t.Trigger(arg0);
-                    }
-                    break;
-                case TriggerActivationType.TriggerSelectedTarget:
-                    if (this._triggerable is ITriggerableMechanism)
-                    {
-                        (this._triggerable as ITriggerableMechanism).Trigger(arg0);
-                    }
-                    break;
-                case TriggerActivationType.SendMessage:
-                    var go = GameObjectUtil.GetGameObjectFromSource(this._triggerable);
-                    if (go != null && this._methodName != null)
-                    {
-                        go.SendMessage(this._methodName, arg0, SendMessageOptions.DontRequireReceiver);
-                    }
-                    break;
-                case TriggerActivationType.CallMethodOnSelectedTarget:
-                    if (this._methodName != null)
-                    {
-                        //CallMethod does not support using the passed in arg
-                        var args = (this._triggerableArgs != null) ? (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray() : null;
-                        DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
-                    }
-                    break;
-            }
+            var arg = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : null;
+            this.Trigger_Imp(arg, null);
         }
 
         public void Trigger(object arg)
@@ -193,25 +203,80 @@ namespace com.spacepuppy.Scenario
             if (this._triggerable == null) return;
 
             var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : arg;
+            this.Trigger_Imp(arg0, null);
+        }
+
+        public void TriggerYielding(BlockingTriggerYieldInstruction instruction)
+        {
+            if (this._triggerable == null) return;
+
+            var arg = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : null;
+            this.Trigger_Imp(arg, instruction);
+        }
+
+        public void TriggerYielding(object arg, BlockingTriggerYieldInstruction instruction)
+        {
+            if (this._triggerable == null) return;
+
+            var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : arg;
+            this.Trigger_Imp(arg0, instruction);
+        }
+
+        private void Trigger_Imp(object arg, BlockingTriggerYieldInstruction instruction)
+        {
             switch (this._activationType)
             {
                 case TriggerActivationType.TriggerAllOnTarget:
-                    foreach (var t in (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t))
+                    if(_triggerAllCache == null)
                     {
-                        t.Trigger(arg0);
+                        //_triggerAllCache = (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t).ToArray();
+                        _triggerAllCache = _triggerable.GetComponentsAlt<ITriggerableMechanism>();
+                        System.Array.Sort(_triggerableArgs, MechanismComparer.Default);
+                    }
+                    if(instruction != null)
+                    {
+                        foreach (var t in _triggerAllCache)
+                        {
+                            if (t.component != null && t.CanTrigger)
+                            {
+                                if (t is IBlockingTriggerableMechanism)
+                                    (t as IBlockingTriggerableMechanism).Trigger(arg, instruction);
+                                else
+                                    t.Trigger(arg);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var t in _triggerAllCache)
+                        {
+                            if (t.component != null && t.CanTrigger)
+                            {
+                                t.Trigger(arg);
+                            }
+                        }
                     }
                     break;
                 case TriggerActivationType.TriggerSelectedTarget:
-                    if (this._triggerable is ITriggerableMechanism)
+                    if (_triggerable != null && _triggerable is ITriggerableMechanism)
                     {
-                        (this._triggerable as ITriggerableMechanism).Trigger(arg0);
+                        if(instruction != null && _triggerable is IBlockingTriggerableMechanism)
+                        {
+                            var t = _triggerable as IBlockingTriggerableMechanism;
+                            if (t.CanTrigger) t.Trigger(arg);
+                        }
+                        else
+                        {
+                            var t = _triggerable as ITriggerableMechanism;
+                            if (t.CanTrigger) t.Trigger(arg);
+                        }
                     }
                     break;
                 case TriggerActivationType.SendMessage:
                     var go = GameObjectUtil.GetGameObjectFromSource(this._triggerable);
                     if (go != null && this._methodName != null)
                     {
-                        go.SendMessage(this._methodName, arg0, SendMessageOptions.DontRequireReceiver);
+                        go.SendMessage(this._methodName, arg, SendMessageOptions.DontRequireReceiver);
                     }
                     break;
                 case TriggerActivationType.CallMethodOnSelectedTarget:
@@ -222,6 +287,33 @@ namespace com.spacepuppy.Scenario
                         DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
                     }
                     break;
+            }
+        }
+        
+
+        #endregion
+
+
+
+        #region Special Types
+
+        private class MechanismComparer : System.Collections.IComparer
+        {
+
+            private static MechanismComparer _default;
+            public static MechanismComparer Default
+            {
+                get
+                {
+                    if (_default == null) _default = new MechanismComparer();
+                    return _default;
+                }
+            }
+
+
+            public int Compare(object x, object y)
+            {
+                return (x as ITriggerableMechanism).Order.CompareTo((y as ITriggerableMechanism).Order);
             }
         }
 

@@ -59,6 +59,7 @@
     <Compile Include="Collections\ComponentCollection.cs" />
     <Compile Include="Collections\CooldownPool.cs" />
     <Compile Include="Collections\Deque.cs" />
+    <Compile Include="Collections\EnumKeyedCollection.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
     <Compile Include="Collections\ICachePool.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="CollisionExclusion.cs" />
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
+    <Compile Include="FixedPoint.cs" />
     <Compile Include="Project\AssetBundlePackage.cs" />
     <Compile Include="Project\CustomTimeLayersData.cs" />
     <Compile Include="Dynamic\DynamicMethodInfo.cs" />

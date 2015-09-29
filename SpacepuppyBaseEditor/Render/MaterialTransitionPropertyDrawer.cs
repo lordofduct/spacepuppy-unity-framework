@@ -31,18 +31,23 @@ namespace com.spacepuppyeditor.Render
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            float h;
+            if (EditorHelper.AssertMultiObjectEditingNotSupportedHeight(property, label, out h)) return h;
+
             var valuesProp = property.FindPropertyRelative(PROP_VALUES);
             var lst = CachedReorderableList.GetListDrawer(valuesProp, _valuesList_DrawHeader, _valuesList_DrawElement);
             lst.headerHeight = 1f;
             lst.elementHeight = EditorGUIUtility.singleLineHeight;
 
-            var h = lst.GetHeight();
+            h = lst.GetHeight();
             h += EditorGUIUtility.singleLineHeight * 3.5f; //material line, position slider, and a small padding
             return h;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if (EditorHelper.AssertMultiObjectEditingNotSupported(position, property, label)) return;
+
             if (Application.isPlaying) GUI.enabled = false;
 
             _property = property;

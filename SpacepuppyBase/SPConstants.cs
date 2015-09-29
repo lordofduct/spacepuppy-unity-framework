@@ -32,7 +32,7 @@ namespace com.spacepuppy
         public const string MSG_ONTRANSFORMHIERARCHYCHANGED = "OnTransformHierarchyChanged";
 
 
-        public static Quaternion ROT_3DSMAX_TO_UNITY = Quaternion.LookRotation(Vector3.left, Vector3.forward);
+        public static Quaternion ROT_3DSMAX_TO_UNITY = Quaternion.LookRotation(Vector3.down, Vector3.forward);
 
     }
 }

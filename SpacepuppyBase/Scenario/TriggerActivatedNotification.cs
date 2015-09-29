@@ -6,6 +6,7 @@ using System.Text;
 namespace com.spacepuppy.Scenario
 {
 
+    [System.Obsolete("This should not be used.")]
     public class TriggerActivatedNotification : Notification
     {
 

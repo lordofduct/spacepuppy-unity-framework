@@ -25,7 +25,7 @@ namespace com.spacepuppyeditor.Base
         private System.Type _selectedComponentType;
 
         private VariantReference.EditorHelper _helper = new VariantReference.EditorHelper(new VariantReference());
-        private SelectableComponentPropertyDrawer _selectComponentDrawer = new SelectableComponentPropertyDrawer() { ShowXButton = false };
+        private SelectableComponentPropertyDrawer _selectComponentDrawer = new SelectableComponentPropertyDrawer();
 
         #endregion
 
@@ -175,71 +175,59 @@ namespace com.spacepuppyeditor.Base
                     variant.GameObjectValue = EditorGUI.ObjectField(r1, variant.GameObjectValue, typeof(GameObject), true) as GameObject;
                     break;
                 case VariantType.Component:
-                    if (_forcedComponentType == null)
+                    //if (_forcedComponentType == null)
+                    //{
+                    //    if (_selectedComponentType == null && variant.ComponentValue != null)
+                    //    {
+                    //        _selectedComponentType = variant.ComponentValue.GetType();
+                    //    }
+
+                    //    if(_selectedComponentType == null)
+                    //    {
+                    //        _selectedComponentType = SPEditorGUI.TypeDropDown(r1, GUIContent.none, typeof(Component), _selectedComponentType, false, false, null, null, TypeDropDownListingStyle.ComponentMenu);
+                    //    }
+                    //    else
+                    //    {
+                    //        if(SPEditorGUI.XButton(ref r1, "Clear Component Type Selection"))
+                    //        {
+                    //            variant.ComponentValue = null;
+                    //            _selectedComponentType = null;
+                    //            GUI.changed = true; //force a change flag
+                    //        }
+
+                    //        variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _selectedComponentType, true) as Component;
+
+                    //        //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
+                    //        if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
+                    //        {
+                    //            var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
+                    //            variant.ComponentValue = go.GetComponent(_selectedComponentType);
+                    //            GUI.changed = true; //force a change flag
+                    //        }
+
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _forcedComponentType, true) as Component;
+
+                    //    //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
+                    //    if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
+                    //    {
+                    //        var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
+                    //        variant.ComponentValue = go.GetComponent(_forcedComponentType);
+                    //        GUI.changed = true; //force a change flag
+                    //    }
+                    //}
+
+                    _selectComponentDrawer.RestrictionType = _forcedComponentType;
+                    _selectComponentDrawer.ShowXButton = true;
+                    var targProp = property.FindPropertyRelative("_unityObjectReference");
+                    EditorGUI.BeginChangeCheck();
+                    _selectComponentDrawer.OnGUI(r1, targProp);
+                    if(EditorGUI.EndChangeCheck())
                     {
-                        if (_selectedComponentType == null && variant.ComponentValue != null)
-                        {
-                            _selectedComponentType = variant.ComponentValue.GetType();
-                        }
-
-                        //var totalMax = r1.xMax;
-                        //r1 = new Rect(r1.xMin, r1.yMin, Mathf.Max(100f, r1.width - 100f), r1.height);
-                        //var r2 = new Rect(r1.xMax, r1.yMin, totalMax - r1.xMax, r1.height);
-                        //_selectedComponentType = SPEditorGUI.TypeDropDown(r2, GUIContent.none, typeof(Component), _selectedComponentType, false, false, null, TypeDropDownListingStyle.ComponentMenu);
-                        //if (_selectedComponentType != null)
-                        //{
-                        //    variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _selectedComponentType, true) as Component;
-
-                        //    //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                        //    if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
-                        //    {
-                        //        var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
-                        //        variant.ComponentValue = go.GetComponent(_selectedComponentType);
-                        //    }
-                        //}
-                        //else
-                        //{
-                        //    //EditorGUI.LabelField(r1, "Select Component Type");
-                        //    r1.xMin += 10.0f;
-                        //    EditorGUI.HelpBox(r1, "Select Component Type", MessageType.Info);
-                        //}
-
-                        if(_selectedComponentType == null)
-                        {
-                            _selectedComponentType = SPEditorGUI.TypeDropDown(r1, GUIContent.none, typeof(Component), _selectedComponentType, false, false, null, null, TypeDropDownListingStyle.ComponentMenu);
-                        }
-                        else
-                        {
-                            if(SPEditorGUI.XButton(ref r1, "Clear Component Type Selection"))
-                            {
-                                variant.ComponentValue = null;
-                                _selectedComponentType = null;
-                                GUI.changed = true; //force a change flag
-                            }
-
-                            variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _selectedComponentType, true) as Component;
-
-                            //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                            if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
-                            {
-                                var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
-                                variant.ComponentValue = go.GetComponent(_selectedComponentType);
-                                GUI.changed = true; //force a change flag
-                            }
-
-                        }
-                    }
-                    else
-                    {
-                        variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _forcedComponentType, true) as Component;
-
-                        //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                        if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
-                        {
-                            var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
-                            variant.ComponentValue = go.GetComponent(_forcedComponentType);
-                            GUI.changed = true; //force a change flag
-                        }
+                        variant.ComponentValue = targProp.objectReferenceValue as Component;
                     }
 
                     break;
@@ -251,10 +239,12 @@ namespace com.spacepuppyeditor.Base
 
         private void DrawValueFieldInPropertyMode(Rect position, SerializedProperty property, VariantReference.EditorHelper helper)
         {
+            _selectComponentDrawer.RestrictionType = null;
+            _selectComponentDrawer.ShowXButton = false;
             var targProp = property.FindPropertyRelative("_unityObjectReference");
             var memberProp = property.FindPropertyRelative("_string");
 
-            if(targProp.objectReferenceValue == null)
+            if (targProp.objectReferenceValue == null)
             {
                 _selectComponentDrawer.OnGUI(position, targProp);
             }
@@ -269,6 +259,8 @@ namespace com.spacepuppyeditor.Base
 
         private void DrawValueFieldInEvalMode(Rect position, SerializedProperty property, VariantReference.EditorHelper helper)
         {
+            _selectComponentDrawer.RestrictionType = null;
+            _selectComponentDrawer.ShowXButton = false;
             var targProp = property.FindPropertyRelative("_unityObjectReference");
             var evalProp = property.FindPropertyRelative("_string");
 

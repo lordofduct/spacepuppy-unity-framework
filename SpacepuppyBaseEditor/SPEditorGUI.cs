@@ -635,8 +635,10 @@ namespace com.spacepuppyeditor
 
         public static Component ComponentField(Rect position, GUIContent label, Component value, System.Type inheritsFromType, bool allowSceneObjects)
         {
+            //if (inheritsFromType == null) inheritsFromType = typeof(Component);
+            //else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from IComponent or Component.", "inheritsFromType");
             if (inheritsFromType == null) inheritsFromType = typeof(Component);
-            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from IComponent or Component.", "inheritsFromType");
+            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !inheritsFromType.IsInterface) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from Component or be an interface.", "inheritsFromType");
             if (value != null && !inheritsFromType.IsAssignableFrom(value.GetType())) throw new TypeArgumentMismatchException(value.GetType(), inheritsFromType, "value must inherit from " + inheritsFromType.Name, "value");
 
             if (TypeUtil.IsType(inheritsFromType, typeof(Component)))
@@ -658,8 +660,10 @@ namespace com.spacepuppyeditor
 
         public static Component ComponentField(Rect position, GUIContent label, Component value, System.Type inheritsFromType, bool allowSceneObjects, System.Type targetComponentType)
         {
+            //if (inheritsFromType == null) inheritsFromType = typeof(Component);
+            //else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from IComponent or Component.", "inheritsFromType");
             if (inheritsFromType == null) inheritsFromType = typeof(Component);
-            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !typeof(IComponent).IsAssignableFrom(inheritsFromType)) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from IComponent or Component.", "inheritsFromType");
+            else if (!typeof(Component).IsAssignableFrom(inheritsFromType) && !inheritsFromType.IsInterface) throw new TypeArgumentMismatchException(inheritsFromType, typeof(IComponent), "Type must inherit from Component or be an interface.", "inheritsFromType");
             if (targetComponentType == null) throw new System.ArgumentNullException("targetComponentType");
             if (!typeof(Component).IsAssignableFrom(targetComponentType)) throw new TypeArgumentMismatchException(targetComponentType, typeof(Component), "targetComponentType");
             if (value != null && !targetComponentType.IsAssignableFrom(value.GetType())) throw new TypeArgumentMismatchException(value.GetType(), inheritsFromType, "value must inherit from " + inheritsFromType.Name, "value");
@@ -689,6 +693,10 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+
+
+
+
         #region Component Selection From Source
 
         public static Component SelectComponentFromSourceField(Rect position, string label, GameObject source, Component selectedComp, System.Predicate<Component> filter = null)
@@ -698,7 +706,10 @@ namespace com.spacepuppyeditor
 
         public static Component SelectComponentFromSourceField(Rect position, GUIContent label, GameObject source, Component selectedComp, System.Predicate<Component> filter = null)
         {
-            if (source == null) throw new System.ArgumentNullException("source");
+            if (source == null)
+            {
+
+            }
 
             //var selectedType = (selectedComp != null) ? selectedComp.GetType() : null;
             //System.Type[] availableMechanismTypes;
@@ -728,7 +739,7 @@ namespace com.spacepuppyeditor
 
         public static Component SelectComponentField(Rect position, GUIContent label, Component[] components, Component selectedComp)
         {
-            if (components == null) throw new System.ArgumentNullException("source");
+            if (components == null) throw new System.ArgumentNullException("components");
 
             System.Type[] availableMechanismTypes = (from c in components select c.GetType()).ToArray();
             var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => EditorHelper.TempContent(tp.Name)).ToArray();
@@ -740,7 +751,7 @@ namespace com.spacepuppyeditor
 
         public static Component SelectComponentField(Rect position, string label, Component[] components, string[] componentLabels, Component selectedComp)
         {
-            if (components == null) throw new System.ArgumentNullException("source");
+            if (components == null) throw new System.ArgumentNullException("components");
             if (componentLabels == null || componentLabels.Length != components.Length) throw new System.ArgumentException("Component Labels collection must be the same size as the component collection.", "componentLabels");
 
             var index = System.Array.IndexOf(components, selectedComp);
@@ -750,7 +761,7 @@ namespace com.spacepuppyeditor
 
         public static Component SelectComponentField(Rect position, GUIContent label, Component[] components, GUIContent[] componentLabels, Component selectedComp)
         {
-            if (components == null) throw new System.ArgumentNullException("source");
+            if (components == null) throw new System.ArgumentNullException("components");
             if (componentLabels == null || componentLabels.Length != components.Length) throw new System.ArgumentException("Component Labels collection must be the same size as the component collection.", "componentLabels");
 
             var index = System.Array.IndexOf(components, selectedComp);
@@ -759,6 +770,10 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
+        
+
+
+
 
         #region Curve Swatch
 

@@ -89,7 +89,10 @@ namespace com.spacepuppyeditor.Base
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if(property.isArray)
+            float h;
+            if (EditorHelper.AssertMultiObjectEditingNotSupportedHeight(property, label, out h)) return h;
+
+            if (property.isArray)
             {
                 if (_disallowFoldout || property.isExpanded)
                 {
@@ -108,7 +111,9 @@ namespace com.spacepuppyeditor.Base
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if(property.isArray)
+            if (EditorHelper.AssertMultiObjectEditingNotSupported(position, property, label)) return;
+
+            if (property.isArray)
             {
                 if(_disallowFoldout)
                 {

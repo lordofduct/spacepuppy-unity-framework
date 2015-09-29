@@ -45,6 +45,11 @@ namespace com.spacepuppy.Scenario
             set { _id = value; }
         }
 
+        public List<TriggerTarget> Targets
+        {
+            get { return _targets; }
+        }
+
         #endregion
 
         #region Methods
@@ -59,37 +64,33 @@ namespace com.spacepuppy.Scenario
         public void ActivateTrigger()
         {
             if (_targets.Count == 0) return;
-
-            foreach (var targ in _targets)
+            
+            var e = _targets.GetEnumerator();
+            while(e.MoveNext())
             {
-                if (targ != null)
-                {
-                    targ.Trigger();
-                }
+                if (e.Current != null) e.Current.Trigger();
             }
 
-            if(_owner != null)
-            {
-                _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            }
+            //if(_owner != null)
+            //{
+            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
+            //}
         }
 
         public void ActivateTrigger(object arg)
         {
             if (_targets.Count == 0) return;
-
-            foreach (var targ in _targets)
+            
+            var e = _targets.GetEnumerator();
+            while (e.MoveNext())
             {
-                if (targ != null)
-                {
-                    targ.Trigger(arg);
-                }
+                if (e.Current != null) e.Current.Trigger(arg);
             }
-
-            if (_owner != null)
-            {
-                _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            }
+            
+            //if (_owner != null)
+            //{
+            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
+            //}
         }
         
         public void ActivateRandomTrigger(bool considerWeights)
@@ -97,10 +98,10 @@ namespace com.spacepuppy.Scenario
             TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
             trig.Trigger();
 
-            if (_owner != null)
-            {
-                _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            }
+            //if (_owner != null)
+            //{
+            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
+            //}
         }
 
         public void ActivateRandomTrigger(object arg, bool considerWeights)
@@ -108,10 +109,10 @@ namespace com.spacepuppy.Scenario
             TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
             trig.Trigger();
 
-            if (_owner != null)
-            {
-                _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            }
+            //if (_owner != null)
+            //{
+            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
+            //}
         }
 
         #endregion
@@ -221,6 +222,95 @@ namespace com.spacepuppy.Scenario
                 _e.Dispose();
             }
 
+        }
+
+        #endregion
+
+    }
+
+    [System.Serializable()]
+    public class BlockingTrigger : Trigger
+    {
+
+
+        public IRadicalYieldInstruction ActivateTriggerYielding()
+        {
+            if (this.Targets.Count == 0) return null;
+
+            var instruction = new BlockingTriggerYieldInstruction();
+
+            var e = this.Targets.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current != null) e.Current.Trigger();
+            }
+
+            return (instruction.Count > 0) ? instruction : null;
+        }
+
+        public IRadicalYieldInstruction ActivateTriggerYielding(object arg)
+        {
+            if (this.Targets.Count == 0) return null;
+
+            var instruction = new BlockingTriggerYieldInstruction();
+
+            var e = this.Targets.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current != null) e.Current.Trigger(arg);
+            }
+
+            return (instruction.Count > 0) ? instruction : null;
+        }
+
+
+        public void DaisyChainTriggerYielding(object arg, BlockingTriggerYieldInstruction instruction)
+        {
+            if (this.Targets.Count == 0) return;
+
+            var e = this.Targets.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current != null) e.Current.Trigger(arg);
+            }
+        }
+
+    }
+
+    public class BlockingTriggerYieldInstruction : RadicalYieldInstruction
+    {
+
+        #region Fields
+
+        private int _count;
+
+        #endregion
+
+        #region Properties
+
+        public int Count
+        {
+            get { return _count; }
+        }
+
+        #endregion
+
+        #region Methods
+
+        public void BeginBlock()
+        {
+            _count++;
+        }
+
+        public void EndBlock()
+        {
+            if (this.IsComplete) return;
+
+            _count--;
+            if(_count <= 0)
+            {
+                this.SetSignal();
+            }
         }
 
         #endregion
