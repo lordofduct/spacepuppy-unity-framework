@@ -220,6 +220,7 @@ namespace com.spacepuppyeditor.Base
                     //    }
                     //}
 
+                    _selectComponentDrawer.AllowNonComponents = false;
                     _selectComponentDrawer.RestrictionType = _forcedComponentType;
                     _selectComponentDrawer.ShowXButton = true;
                     var targProp = property.FindPropertyRelative("_unityObjectReference");
@@ -239,6 +240,7 @@ namespace com.spacepuppyeditor.Base
 
         private void DrawValueFieldInPropertyMode(Rect position, SerializedProperty property, VariantReference.EditorHelper helper)
         {
+            _selectComponentDrawer.AllowNonComponents = true;
             _selectComponentDrawer.RestrictionType = null;
             _selectComponentDrawer.ShowXButton = false;
             var targProp = property.FindPropertyRelative("_unityObjectReference");
@@ -259,6 +261,7 @@ namespace com.spacepuppyeditor.Base
 
         private void DrawValueFieldInEvalMode(Rect position, SerializedProperty property, VariantReference.EditorHelper helper)
         {
+            _selectComponentDrawer.AllowNonComponents = true;
             _selectComponentDrawer.RestrictionType = null;
             _selectComponentDrawer.ShowXButton = false;
             var targProp = property.FindPropertyRelative("_unityObjectReference");

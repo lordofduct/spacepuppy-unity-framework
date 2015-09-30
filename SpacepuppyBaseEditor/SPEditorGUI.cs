@@ -891,7 +891,7 @@ namespace com.spacepuppyeditor
         {
             if (targType != null)
             {
-                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targType, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property).ToArray();
+                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembersFromType(targType, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property).ToArray();
 
                 int index = -1;
                 for (int i = 0; i < members.Length; i++)

@@ -23,6 +23,7 @@ namespace com.spacepuppyeditor.Components
         public bool ShowXButton = true;
         public bool XButtonOnRightSide = true;
         public IComponentChoiceSelector ChoiceSelector;
+        public bool AllowNonComponents;
 
         private System.Type _restrictionType = typeof(Component);
 
@@ -31,8 +32,11 @@ namespace com.spacepuppyeditor.Components
             get { return _restrictionType; }
             set
             {
-                if (value == null) value = typeof(Component);
-                else if (!value.IsInterface && !TypeUtil.IsType(value, typeof(Component))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
+                //if (value == null) value = typeof(Component);
+                //else if (!value.IsInterface && !TypeUtil.IsType(value, typeof(Component))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
+                //_restrictionType = value;
+
+                if (value == null) value = (this.AllowNonComponents) ? typeof(UnityEngine.Object) : typeof(Component);
                 _restrictionType = value;
             }
         }
@@ -84,7 +88,7 @@ namespace com.spacepuppyeditor.Components
         public void OnGUI(Rect position, SerializedProperty property)
         {
             //if (property.propertyType != SerializedPropertyType.ObjectReference || !TypeUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
-            if (property.propertyType != SerializedPropertyType.ObjectReference || !(TypeUtil.IsType(_restrictionType, typeof(Component)) || _restrictionType.IsInterface))
+            if (property.propertyType != SerializedPropertyType.ObjectReference || (!this.AllowNonComponents && !(TypeUtil.IsType(_restrictionType, typeof(Component)) || _restrictionType.IsInterface)))
             {
                 this.DrawAsMismatchedAttribute(position, property);
                 return;
@@ -92,9 +96,10 @@ namespace com.spacepuppyeditor.Components
 
             this.Init();
 
+            GameObject targGo;
             if (this.ForceOnlySelf)
             {
-                var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
                 if (targGo == null)
                 {
                     this.DrawAsMismatchedAttribute(position, property);
@@ -107,10 +112,56 @@ namespace com.spacepuppyeditor.Components
                 }
             }
 
-            if (!this.ForceOnlySelf && property.objectReferenceValue == null)
+            targGo = GameObjectUtil.GetGameObjectFromSource(property.objectReferenceValue);
+            if (property.objectReferenceValue == null)
             {
                 //SPEditorGUI.DefaultPropertyField(position, property, label);
-                this.DrawObjectRefField(position, property);
+                if(!this.ForceOnlySelf)
+                    this.DrawObjectRefField(position, property);
+                else
+                {
+                    EditorGUI.LabelField(position, "Malformed serializable field.");
+                }
+            }
+            else if(this.AllowNonComponents)
+            {
+                if(targGo == null)
+                {
+                    this.DrawObjectRefField(position, property);
+                }
+                else
+                {
+                    this.ChoiceSelector.BeforeGUI(this, property, _restrictionType);
+                    var components = this.ChoiceSelector.GetComponents();
+
+                    var fullsize = position;
+                    if (components.Length == 0 ||
+                        (this.ShowXButton && SPEditorGUI.XButton(ref position, "Clear Selected Object", this.XButtonOnRightSide)))
+                    {
+                        property.objectReferenceValue = null;
+                        fullsize = this.DrawDotDotButton(fullsize, property);
+                        this.DrawObjectRefField(fullsize, property);
+                    }
+                    else
+                    {
+                        position = this.DrawDotDotButton(position, property);
+                        var names = this.ChoiceSelector.GetPopupEntries();
+                        System.Array.Resize(ref names, names.Length + 1);
+                        names[names.Length - 1] = EditorHelper.TempContent("...GameObject");
+
+                        int oi = (property.objectReferenceValue is GameObject) ? names.Length - 1 : this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
+                        int ni = EditorGUI.Popup(position, oi, names);
+                        if (oi != ni)
+                        {
+                            if (ni < components.Length)
+                                property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
+                            else
+                                property.objectReferenceValue = targGo;
+                        }
+                    }
+
+                    this.ChoiceSelector.GUIComplete(property);
+                }
             }
             else
             {
@@ -119,7 +170,7 @@ namespace com.spacepuppyeditor.Components
 
                 var fullsize = position;
                 if (components.Length == 0 || 
-                    (this.ShowXButton && SPEditorGUI.XButton(ref position, "Clear Selected GameObject", this.XButtonOnRightSide)))
+                    (this.ShowXButton && SPEditorGUI.XButton(ref position, "Clear Selected Object", this.XButtonOnRightSide)))
                 {
                     property.objectReferenceValue = null;
                     fullsize = this.DrawDotDotButton(fullsize, property);
@@ -127,19 +178,6 @@ namespace com.spacepuppyeditor.Components
                 }
                 else
                 {
-                    //position = this.DrawDotDotButton(position, property);
-                    //if(components.Length == 1)
-                    //{
-                    //    property.objectReferenceValue = EditorGUI.ObjectField(position, components[0], _restrictionType, this.AllowSceneObject);
-                    //}
-                    //else
-                    //{
-                    //    var names = this.ChoiceSelector.GetPopupEntries();
-                    //    int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
-                    //    int ni = EditorGUI.Popup(position, oi, names);
-                    //    if (oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
-                    //}
-
                     position = this.DrawDotDotButton(position, property);
                     var names = this.ChoiceSelector.GetPopupEntries();
                     int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
@@ -175,6 +213,24 @@ namespace com.spacepuppyeditor.Components
                     var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
                     var ngo = GameObjectUtil.GetGameObjectFromSource(obj);
                     if(targGo == ngo ||
+                       (this.SearchChildren && targGo.IsParentOf(ngo)))
+                    {
+                        property.objectReferenceValue = obj;
+                    }
+                }
+                else
+                {
+                    property.objectReferenceValue = obj;
+                }
+            }
+            else if (this.AllowNonComponents)
+            {
+                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
+                if(this.ForceOnlySelf)
+                {
+                    var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                    var ngo = GameObjectUtil.GetGameObjectFromSource(obj);
+                    if (targGo == ngo ||
                        (this.SearchChildren && targGo.IsParentOf(ngo)))
                     {
                         property.objectReferenceValue = obj;

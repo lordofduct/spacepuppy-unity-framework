@@ -132,7 +132,7 @@ namespace com.spacepuppy.Dynamic
             }
             else
             {
-                return HasMember(obj.GetType(), name, includeNonPublic);
+                return TypeHasMember(obj.GetType(), name, includeNonPublic);
             }
         }
 
@@ -146,7 +146,7 @@ namespace com.spacepuppy.Dynamic
             }
             else
             {
-                return GetMembers(obj.GetType(), includeNonPublic);
+                return GetMembersFromType(obj.GetType(), includeNonPublic);
             }
         }
 
@@ -160,7 +160,7 @@ namespace com.spacepuppy.Dynamic
             }
             else
             {
-                return GetMember(obj.GetType(), sMemberName, includeNonPublic);
+                return GetMemberFromType(obj.GetType(), sMemberName, includeNonPublic);
             }
         }
 
@@ -272,7 +272,7 @@ namespace com.spacepuppy.Dynamic
 
             if (obj == null) return false;
             var vtp = (value != null) ? value.GetType() : null;
-            var member = GetValueSetterMember(obj.GetType(), sprop, vtp, false);
+            var member = GetValueSetterMemberFromType(obj.GetType(), sprop, vtp, false);
             if (member == null) return false;
 
             try
@@ -376,21 +376,21 @@ namespace com.spacepuppy.Dynamic
         {
             if (obj == null) return false;
 
-            return HasMember(obj.GetType(), name, includeNonPublic);
+            return TypeHasMember(obj.GetType(), name, includeNonPublic);
         }
 
         public static IEnumerable<MemberInfo> GetMembersDirect(object obj, bool includeNonPublic)
         {
             if (obj == null) return Enumerable.Empty<MemberInfo>();
 
-            return GetMembers(obj.GetType(), includeNonPublic);
+            return GetMembersFromType(obj.GetType(), includeNonPublic);
         }
 
 
 
 
 
-        public static bool HasMember(System.Type tp, string name, bool includeNonPublic)
+        public static bool TypeHasMember(System.Type tp, string name, bool includeNonPublic)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
             const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
@@ -409,7 +409,7 @@ namespace com.spacepuppy.Dynamic
             return false;
         }
 
-        public static IEnumerable<MemberInfo> GetMembers(System.Type tp, bool includeNonPublic)
+        public static IEnumerable<MemberInfo> GetMembersFromType(System.Type tp, bool includeNonPublic)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
             const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
@@ -440,7 +440,7 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        public static MemberInfo GetMember(Type tp, string sMemberName, bool includeNonPublic)
+        public static MemberInfo GetMemberFromType(Type tp, string sMemberName, bool includeNonPublic)
         {
             const BindingFlags BINDING_PUBLIC = BindingFlags.Public | BindingFlags.Instance;
             const BindingFlags BINDING_NONPUBLIC = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
@@ -483,7 +483,7 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
-        public static MemberInfo GetValueSetterMember(Type tp, string sprop, Type valueType, bool includeNonPublic)
+        public static MemberInfo GetValueSetterMemberFromType(Type tp, string sprop, Type valueType, bool includeNonPublic)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             if (tp == null) throw new ArgumentNullException("tp");
@@ -563,7 +563,7 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
-        public static MemberInfo GetValueGetterMember(Type tp, string sprop, bool includeNonPublic)
+        public static MemberInfo GetValueGetterMemberFromType(Type tp, string sprop, bool includeNonPublic)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             try
@@ -689,7 +689,7 @@ namespace com.spacepuppy.Dynamic
                         {
                             var p = mi as System.Reflection.PropertyInfo;
                             if (p.IsSpecialName) continue;
-                            if (!p.CanRead || !p.CanWrite) continue;
+                            //if (!p.CanRead || !p.CanWrite) continue;
                             if (p.GetIndexParameters().Length > 0) continue; //indexed properties are not allowed
 
                             if (VariantReference.AcceptableType(p.PropertyType)) yield return p;
@@ -700,11 +700,11 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(System.Type tp, MemberTypes mask = MemberTypes.All)
+        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembersFromType(System.Type tp, MemberTypes mask = MemberTypes.All)
         {
             if (tp == null) yield break;
 
-            var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembers(tp, false);
+            var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembersFromType(tp, false);
             foreach (var mi in members)
             {
                 if ((mi.MemberType & mask) == 0) continue;
@@ -753,7 +753,7 @@ namespace com.spacepuppy.Dynamic
                         {
                             var p = mi as System.Reflection.PropertyInfo;
                             if (p.IsSpecialName) continue;
-                            if (!p.CanRead || !p.CanWrite) continue;
+                            //if (!p.CanRead || !p.CanWrite) continue;
                             if (p.GetIndexParameters().Length > 0) continue; //indexed properties are not allowed
 
                             if (VariantReference.AcceptableType(p.PropertyType)) yield return p;

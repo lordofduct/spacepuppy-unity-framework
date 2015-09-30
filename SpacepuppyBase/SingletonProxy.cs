@@ -69,19 +69,19 @@ namespace com.spacepuppy
         {
             if (_singletonType == null || _singletonType.Type == null) return false;
 
-            return DynamicUtil.HasMember(_singletonType.Type, sMemberName, includeNonPublic);
+            return DynamicUtil.TypeHasMember(_singletonType.Type, sMemberName, includeNonPublic);
         }
 
         IEnumerable<System.Reflection.MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
         {
             if (_singletonType == null || _singletonType.Type == null) return Enumerable.Empty<System.Reflection.MemberInfo>();
-            return DynamicUtil.GetMembers(_singletonType.Type, includeNonPublic);
+            return DynamicUtil.GetMembersFromType(_singletonType.Type, includeNonPublic);
         }
 
         System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
         {
             if (_singletonType == null || _singletonType.Type == null) return null;
-            return DynamicUtil.GetMember(_singletonType.Type, sMemberName, includeNonPublic);
+            return DynamicUtil.GetMemberFromType(_singletonType.Type, sMemberName, includeNonPublic);
         }
 
         #endregion

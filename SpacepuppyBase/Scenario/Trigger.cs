@@ -15,20 +15,39 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField()]
+        private bool _yield;
+
+        [SerializeField()]
         private List<TriggerTarget> _targets = new List<TriggerTarget>();
 
         [System.NonSerialized()]
         private IObservableTrigger _owner;
         [System.NonSerialized()]
         private string _id;
-
+        
         #endregion
 
         #region CONSTRUCTOR
 
+        public Trigger()
+        {
+
+        }
+
+        public Trigger(bool yielding)
+        {
+            _yield = yielding;
+        }
+
         #endregion
 
         #region Properties
+
+        public bool Yielding
+        {
+            get { return _yield; }
+            set { _yield = value; }
+        }
 
         /// <summary>
         /// The INotificationDispatcher associated with this trigger that will post the notification of it being triggered.
@@ -113,6 +132,58 @@ namespace com.spacepuppy.Scenario
             //{
             //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
             //}
+        }
+
+        public IRadicalYieldInstruction ActivateTriggerYielding()
+        {
+            if (this.Targets.Count == 0) return null;
+            if (!_yield)
+            {
+                this.ActivateTrigger();
+                return null;
+            }
+
+            var instruction = new BlockingTriggerYieldInstruction();
+
+            var e = this.Targets.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current != null) e.Current.Trigger();
+            }
+
+            return (instruction.Count > 0) ? instruction : null;
+        }
+
+        public IRadicalYieldInstruction ActivateTriggerYielding(object arg)
+        {
+            if (this.Targets.Count == 0) return null;
+            if (!_yield)
+            {
+                this.ActivateTrigger(arg);
+                return null;
+            }
+
+            var instruction = new BlockingTriggerYieldInstruction();
+
+            var e = this.Targets.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current != null) e.Current.Trigger(arg);
+            }
+
+            return (instruction.Count > 0) ? instruction : null;
+        }
+
+
+        public void DaisyChainTriggerYielding(object arg, BlockingTriggerYieldInstruction instruction)
+        {
+            if (this.Targets.Count == 0) return;
+
+            var e = this.Targets.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current != null) e.Current.Trigger(arg);
+            }
         }
 
         #endregion
@@ -227,56 +298,7 @@ namespace com.spacepuppy.Scenario
         #endregion
 
     }
-
-    [System.Serializable()]
-    public class BlockingTrigger : Trigger
-    {
-
-
-        public IRadicalYieldInstruction ActivateTriggerYielding()
-        {
-            if (this.Targets.Count == 0) return null;
-
-            var instruction = new BlockingTriggerYieldInstruction();
-
-            var e = this.Targets.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current != null) e.Current.Trigger();
-            }
-
-            return (instruction.Count > 0) ? instruction : null;
-        }
-
-        public IRadicalYieldInstruction ActivateTriggerYielding(object arg)
-        {
-            if (this.Targets.Count == 0) return null;
-
-            var instruction = new BlockingTriggerYieldInstruction();
-
-            var e = this.Targets.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current != null) e.Current.Trigger(arg);
-            }
-
-            return (instruction.Count > 0) ? instruction : null;
-        }
-
-
-        public void DaisyChainTriggerYielding(object arg, BlockingTriggerYieldInstruction instruction)
-        {
-            if (this.Targets.Count == 0) return;
-
-            var e = this.Targets.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current != null) e.Current.Trigger(arg);
-            }
-        }
-
-    }
-
+    
     public class BlockingTriggerYieldInstruction : RadicalYieldInstruction
     {
 

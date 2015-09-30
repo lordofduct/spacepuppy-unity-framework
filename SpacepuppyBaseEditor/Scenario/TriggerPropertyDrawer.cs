@@ -13,12 +13,13 @@ using com.spacepuppyeditor.Internal;
 namespace com.spacepuppyeditor.Scenario
 {
 
-    [CustomPropertyDrawer(typeof(Trigger))]
+    [CustomPropertyDrawer(typeof(Trigger), true)]
     public class TriggerPropertyDrawer : PropertyDrawer
     {
 
         private const float MARGIN = 2.0f;
 
+        public const string PROP_YIELDING = "_yield";
         public const string PROP_TARGETS = "_targets";
         private const string PROP_WEIGHT = "_weight";
 
@@ -74,7 +75,7 @@ namespace com.spacepuppyeditor.Scenario
             {
                 h = MARGIN * 2f;
                 h += _targetList.GetHeight();
-                h += EditorGUIUtility.singleLineHeight;
+                h += EditorGUIUtility.singleLineHeight * 2f;
                 if (_foldoutTargetExtra)
                 {
                     if (_targetList.index >= 0)
@@ -113,38 +114,10 @@ namespace com.spacepuppyeditor.Scenario
 
                 position = new Rect(position.xMin + MARGIN, position.yMin + MARGIN, position.width - MARGIN * 2f, position.height - MARGIN * 2f);
                 EditorGUI.BeginProperty(position, label, property);
-
-                var listRect = new Rect(position.xMin, position.yMin, position.width, _targetList.GetHeight());
-
-                EditorGUI.BeginChangeCheck();
-                _targetList.DoList(listRect);
-                if (EditorGUI.EndChangeCheck())
-                    property.serializedObject.ApplyModifiedProperties();
-                if (_targetList.index >= _targetList.count) _targetList.index = -1;
-
-                const float FOLDOUT_MRG = 12f;
-                var foldoutRect = new Rect(position.xMin + FOLDOUT_MRG, listRect.yMax, position.width - FOLDOUT_MRG, EditorGUIUtility.singleLineHeight); //for some reason the foldout needs to be pushed in an extra amount for the arrow...
-                _foldoutTargetExtra = EditorGUI.Foldout(foldoutRect, _foldoutTargetExtra, "Advanced Target Settings");
-                if (_foldoutTargetExtra)
-                {
-                    //EditorGUI.indentLevel++;
-
-                    if (_targetList.index >= 0)
-                    {
-                        var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
-                        const float INDENT_MRG = 14f;
-                        var settingsRect = new Rect(position.xMin + INDENT_MRG, foldoutRect.yMax, position.width - INDENT_MRG, _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none));
-                        _triggerTargetDrawer.OnGUI(settingsRect, element, GUIContent.none);
-                    }
-                    else
-                    {
-                        var helpRect = new Rect(position.xMin, foldoutRect.yMax, position.width, EditorGUIUtility.singleLineHeight * 3.0f);
-                        EditorGUI.HelpBox(helpRect, "Select a target to edit.", MessageType.Info);
-                    }
-
-                    //EditorGUI.indentLevel--;
-                }
-
+                
+                position = this.DrawList(position, property);
+                position = this.DrawYieldToggle(position, property);
+                position = this.DrawAdvancedTargetSettings(position, property);
 
                 EditorGUI.EndProperty();
             }
@@ -168,6 +141,59 @@ namespace com.spacepuppyeditor.Scenario
             }
         }
 
+
+        private Rect DrawList(Rect position, SerializedProperty property)
+        {
+            var listRect = new Rect(position.xMin, position.yMin, position.width, _targetList.GetHeight());
+
+            EditorGUI.BeginChangeCheck();
+            _targetList.DoList(listRect);
+            if (EditorGUI.EndChangeCheck())
+                property.serializedObject.ApplyModifiedProperties();
+            if (_targetList.index >= _targetList.count) _targetList.index = -1;
+
+            return new Rect(position.xMin, listRect.yMax, position.width, position.height - listRect.height);
+        }
+
+        private Rect DrawAdvancedTargetSettings(Rect position, SerializedProperty property)
+        {
+            const float FOLDOUT_MRG = 12f;
+            var foldoutRect = new Rect(position.xMin + FOLDOUT_MRG, position.yMin, position.width - FOLDOUT_MRG, EditorGUIUtility.singleLineHeight); //for some reason the foldout needs to be pushed in an extra amount for the arrow...
+            position = new Rect(position.xMin, foldoutRect.yMax, position.width, position.yMax - foldoutRect.yMax);
+            _foldoutTargetExtra = EditorGUI.Foldout(foldoutRect, _foldoutTargetExtra, "Advanced Target Settings");
+
+            if (_foldoutTargetExtra)
+            {
+                if (_targetList.index >= 0)
+                {
+                    var element = _targetList.serializedProperty.GetArrayElementAtIndex(_targetList.index);
+                    const float INDENT_MRG = 14f;
+                    var settingsRect = new Rect(position.xMin + INDENT_MRG, position.yMin, position.width - INDENT_MRG, _triggerTargetDrawer.GetPropertyHeight(element, GUIContent.none));
+                    _triggerTargetDrawer.OnGUI(settingsRect, element, GUIContent.none);
+
+                    position = new Rect(position.xMin, settingsRect.yMax, position.width, position.yMax - settingsRect.yMax);
+                }
+                else
+                {
+                    var helpRect = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight * 3.0f);
+                    EditorGUI.HelpBox(helpRect, "Select a target to edit.", MessageType.Info);
+
+                    position = new Rect(position.xMin, helpRect.yMax, position.width, position.yMax - helpRect.yMax);
+                }
+            }
+
+            return position;
+        }
+
+        private Rect DrawYieldToggle(Rect position, SerializedProperty property)
+        {
+            var yieldProp = property.FindPropertyRelative(PROP_YIELDING);
+            var r = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
+
+            yieldProp.boolValue = EditorGUI.ToggleLeft(r, EditorHelper.TempContent("Yield", "Should we yield if called from a coroutine."), yieldProp.boolValue);
+
+            return new Rect(position.xMin, r.yMax, position.width, position.yMax - r.yMax);
+        }
 
 
         #region ReorderableList Handlers
