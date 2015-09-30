@@ -32,6 +32,11 @@ namespace com.spacepuppy.Dynamic
     /// These function names are not case sensitive
     /// 
     /// #Variables
+    /// $pi
+    /// $2pi
+    /// $pi_2
+    /// $rad2deg
+    /// $deg2rad
     /// $secsInMin
     /// $secsInHour
     /// $secsInDay
@@ -235,6 +240,20 @@ namespace com.spacepuppy.Dynamic
 
                 switch(str)
                 {
+                    case "pi":
+                        return System.Math.PI;
+                    case "2pi":
+                        const double TWO_PI = System.Math.PI * 2d;
+                        return TWO_PI;
+                    case "pi_2":
+                        const double PI_TWO = System.Math.PI / 2d;
+                        return PI_TWO;
+                    case "rad2deg":
+                        const double RAD2DEG = 180d / System.Math.PI;
+                        return RAD2DEG;
+                    case "deg2rad":
+                        const double DEG2RAD = System.Math.PI / 180d;
+                        return DEG2RAD;
                     case "secsinmin":
                         return 60d;
                     case "secsinhour":
