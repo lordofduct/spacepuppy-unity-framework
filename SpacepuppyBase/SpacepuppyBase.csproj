@@ -311,7 +311,10 @@
   <PropertyGroup>
     <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\
 copy /Y "$(TargetDir)SpacepuppyUnityFramework.dll" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.pdb"</PostBuildEvent>
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.pdb"
+mkdir $(ProjectDir)..\Builds\OpenSource\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.dll" "$(ProjectDir)..\Builds\OpenSource\SpacepuppyUnityFramework.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.pdb" "$(ProjectDir)..\Builds\OpenSource\SpacepuppyUnityFramework.pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
