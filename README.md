@@ -26,4 +26,10 @@ Lastly, you need to add 2 tags to the tag manager: 'MultiTag' and 'Root'. Once y
 Now you're fully set up.
 
 #Future Plans
-In the future I plan to make something to ease the pipeline of building the framework. And probably a .unitypackage for importing the latest version into your project quickly and easily.
+Soon I plan to upgrade this project to Unity 5. As far as I know I don't really access anything that has been removed from Unity 5 (namely the quick access fields on GameObject and Component), but I haven't actually tested this against Unity 5 yet.
+
+When I do this the project will move forward as Unity 5 only as I have a few classes/methods that mimic Unity 5 behaviour that will be removed.
+
+I'll include one final Unity 4.x build for use, as well as a branch for Unity 4.x users to easily pull and modify themselves.
+
+As unitypackage is still a possibility, but really all it would do is paste the dll's into the folder as described in 'Quick Import', so really, I don't see the need for it.
