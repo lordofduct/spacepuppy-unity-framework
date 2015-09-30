@@ -32,4 +32,4 @@ When I do this the project will move forward as Unity 5 only as I have a few cla
 
 I'll include one final Unity 4.x build for use, as well as a branch for Unity 4.x users to easily pull and modify themselves.
 
-As unitypackage is still a possibility, but really all it would do is paste the dll's into the folder as described in 'Quick Import', so really, I don't see the need for it.
+A unitypackage is still a possibility, but really all it would do is paste the dll's into the folder as described in 'Quick Import', so really, I don't see the need for it.
