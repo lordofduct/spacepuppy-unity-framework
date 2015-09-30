@@ -8,6 +8,14 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// Facilitates creating a serializable field that references any of multiple of common unity types. 
+    /// This includes any of the prims easily serialized by unity (int, float, double, bool, etc), any 
+    /// UnityEngine.Object reference, a property of said objects, or even evaluate a simple arithmetic operation.
+    /// 
+    /// In the case of arithmetic evaluations, you can evaluate them based on the properties of a referenced 
+    /// object. See com.spacepuppy.Dynamic.Evaluator for more information on how to format eval statements.
+    /// </summary>
     [System.Serializable()]
     public sealed class VariantReference : ISerializationCallbackReceiver, System.Runtime.Serialization.ISerializable
     {
