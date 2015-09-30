@@ -26,7 +26,7 @@ Lastly, you need to add 2 tags to the tag manager: 'MultiTag' and 'Root'. Once y
 Now you're fully set up.
 
 #Future Plans
-Soon I plan to upgrade this project to Unity 5. As far as I know I don't really access anything that has been removed from Unity 5 (namely the quick access fields on GameObject and Component), but I haven't actually tested this against Unity 5 yet.
+Soon I plan to upgrade this project to Unity 5. As far as I know I don't really access anything that has been removed from Unity 4 (namely the quick access fields on GameObject and Component), but I haven't actually tested this against Unity 5 yet.
 
 When I do this the project will move forward as Unity 5 only as I have a few classes/methods that mimic Unity 5 behaviour that will be removed.
 
