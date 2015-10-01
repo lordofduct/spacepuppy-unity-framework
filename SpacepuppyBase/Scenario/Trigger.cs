@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy.Scenario
 {
@@ -143,7 +145,7 @@ namespace com.spacepuppy.Scenario
                 return null;
             }
 
-            var instruction = new BlockingTriggerYieldInstruction();
+            var instruction = BlockingTriggerYieldInstruction.Create();
 
             var e = this.Targets.GetEnumerator();
             while (e.MoveNext())
@@ -163,7 +165,7 @@ namespace com.spacepuppy.Scenario
                 return null;
             }
 
-            var instruction = new BlockingTriggerYieldInstruction();
+            var instruction = BlockingTriggerYieldInstruction.Create();
 
             var e = this.Targets.GetEnumerator();
             while (e.MoveNext())
@@ -299,12 +301,21 @@ namespace com.spacepuppy.Scenario
 
     }
     
-    public class BlockingTriggerYieldInstruction : RadicalYieldInstruction
+    public class BlockingTriggerYieldInstruction : RadicalYieldInstruction, IPooledYieldInstruction
     {
 
         #region Fields
 
         private int _count;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        private BlockingTriggerYieldInstruction()
+        {
+
+        }
 
         #endregion
 
@@ -333,6 +344,29 @@ namespace com.spacepuppy.Scenario
             {
                 this.SetSignal();
             }
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+
+        void IDisposable.Dispose()
+        {
+            _count = 0;
+            _pool.Release(this);
+        }
+
+        #endregion
+
+        #region Static Factory
+
+        private static ObjectCachePool<BlockingTriggerYieldInstruction> _pool = new ObjectCachePool<BlockingTriggerYieldInstruction>(-1, () => new BlockingTriggerYieldInstruction());
+
+        public static BlockingTriggerYieldInstruction Create()
+        {
+            var obj = _pool.GetInstance();
+            obj._count = 0;
+            return obj;
         }
 
         #endregion

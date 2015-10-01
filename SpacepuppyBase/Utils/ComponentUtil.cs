@@ -387,6 +387,30 @@ namespace com.spacepuppy.Utils
             GetComponentsAlt<T>(obj.gameObject, lst);
         }
 
+        public static void GetComponents<T>(this GameObject obj, ICollection<T> lst, System.Func<Component, T> filter)
+        {
+            if (obj == null) return;
+            if (filter == null) return;
+
+            obj.GetComponents(typeof(Component), _recycledList);
+            var e = _recycledList.GetEnumerator();
+            T c;
+            while(e.MoveNext())
+            {
+                c = filter(e.Current);
+                if (c != null) lst.Add(c);
+            }
+
+            ResetRecycledList();
+        }
+
+        public static void GetComponents<T>(this Component obj, ICollection<T> lst, System.Func<Component, T> filter)
+        {
+            if (obj == null) return;
+
+            GetComponents(obj.gameObject, lst, filter);
+        }
+
         #endregion
 
         #region ChildComponent

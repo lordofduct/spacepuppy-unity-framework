@@ -10,7 +10,7 @@ namespace com.spacepuppy
     [System.Serializable()]
     public class VariantCollection : IDynamic, ISerializationCallbackReceiver
     {
-
+        
         #region Fields
 
         [System.NonSerialized()]
@@ -20,11 +20,19 @@ namespace com.spacepuppy
         private string[] _keys;
         [SerializeField()]
         private VariantReference[] _values;
+        
+        #endregion
 
+        #region CONSTRUCTOR
+
+        public VariantCollection()
+        {
+        }
+        
         #endregion
 
         #region Properties
-
+        
         public object this[string key]
         {
             get
@@ -72,6 +80,28 @@ namespace com.spacepuppy
         public VariantReference GetVariant(string key)
         {
             return _table[key];
+        }
+
+        public VariantReference GetVariant(string key, bool createIfNotExist)
+        {
+            if(createIfNotExist)
+            {
+                VariantReference v;
+                if (_table.TryGetValue(key, out v))
+                {
+                    return v;
+                }
+                else
+                {
+                    v = new VariantReference();
+                    _table.Add(key, v);
+                    return v;
+                }
+            }
+            else
+            {
+                return _table[key];
+            }
         }
 
         public bool HasMember(string key)

@@ -238,6 +238,8 @@ namespace com.spacepuppyeditor
             HierarchyDrawer drawer;
             foreach(var c in go.GetComponents<Component>())
             {
+                if (c == null) continue;
+
                 var id = c.GetInstanceID();
                 if (_activeObjects.TryGetValue(id, out drawer))
                 {

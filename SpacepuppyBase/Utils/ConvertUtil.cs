@@ -2658,7 +2658,7 @@ namespace com.spacepuppy.Utils
                     return null;
             }
         }
-
+        
         #endregion
 
         #region "BitArray"

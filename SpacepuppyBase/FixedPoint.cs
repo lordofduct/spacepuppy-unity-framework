@@ -32,20 +32,18 @@ namespace com.spacepuppy
 
         #region CONSTRUCTOR
 
-        public FixedPercent(float f)
+        public FixedPercent(float value)
         {
-            var value = (decimal)f;
-            if (value < MIN_VALUE) _value = Int32.MinValue;
-            else if (value > MAX_VALUE) _value = Int32.MaxValue;
-            else _value = (int)(value * PRECISION_M);
+            if (value < (float)MIN_VALUE) _value = Int32.MinValue;
+            else if (value < (float)MAX_VALUE) _value = Int32.MaxValue;
+            else _value = (int)(value * (float)PRECISION);
         }
 
-        public FixedPercent(double f)
+        public FixedPercent(double value)
         {
-            var value = (decimal)f;
-            if (value < MIN_VALUE) _value = Int32.MinValue;
-            else if (value > MAX_VALUE) _value = Int32.MaxValue;
-            else _value = (int)(value * PRECISION_M);
+            if (value < (double)MIN_VALUE) _value = Int32.MinValue;
+            else if (value < (double)MAX_VALUE) _value = Int32.MaxValue;
+            else _value = (int)(value * (double)PRECISION);
         }
 
         public FixedPercent(decimal value)
@@ -82,6 +80,17 @@ namespace com.spacepuppy
                 else _value = (int)(value * PRECISION_M);
             }
         }
+
+        //public double ValueDouble
+        //{
+        //    get { return (double)this.Value; }
+        //    set
+        //    {
+        //        if (value < (double)MIN_VALUE) _value = Int32.MinValue;
+        //        else if (value < (double)MAX_VALUE) _value = Int32.MaxValue;
+        //        else _value = (int)(value * (double)PRECISION);
+        //    }
+        //}
 
         #endregion
 
@@ -124,12 +133,12 @@ namespace com.spacepuppy
 
         public static implicit operator FixedPercent(float f)
         {
-            return new FixedPercent((decimal)f);
+            return new FixedPercent(f);
         }
 
         public static implicit operator FixedPercent(double f)
         {
-            return new FixedPercent((decimal)f);
+            return new FixedPercent(f);
         }
 
         public static implicit operator FixedPercent(decimal d)

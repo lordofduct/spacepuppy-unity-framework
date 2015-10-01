@@ -497,6 +497,24 @@ namespace com.spacepuppyeditor
             }
         }
 
+
+
+        public static int GetChildPropertyCount(SerializedProperty property, bool includeGrandChildren = false)
+        {
+            var pstart = property.Copy();
+            var pend = property.GetEndProperty();
+            int cnt = 0;
+
+            pstart.Next(true);
+            while(!SerializedProperty.EqualContents(pstart, pend))
+            {
+                cnt++;
+                pstart.Next(includeGrandChildren);
+            }
+
+            return cnt;
+        }
+
         #endregion
 
         #region Path

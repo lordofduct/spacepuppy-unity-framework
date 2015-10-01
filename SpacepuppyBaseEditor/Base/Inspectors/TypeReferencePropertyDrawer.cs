@@ -20,21 +20,6 @@ namespace com.spacepuppyeditor.Base
         {
             EditorGUI.BeginProperty(position, label, property);
 
-            //var targOwner = EditorHelper.GetTargetObjectWithProperty(property);
-            //var tpref = this.fieldInfo.GetValue(targOwner) as TypeReference;
-            //if (tpref == null)
-            //{
-            //    tpref = new TypeReference();
-            //    this.fieldInfo.SetValue(targOwner, tpref);
-            //}
-            var tpref = EditorHelper.GetTargetObjectOfProperty(property) as TypeReference;
-            if(tpref == null)
-            {
-                tpref = new TypeReference();
-                EditorHelper.SetTargetObjectOfProperty(property, tpref);
-                property.serializedObject.ApplyModifiedProperties();
-            }
-
             var attrib = this.fieldInfo.GetCustomAttributes(typeof(TypeReference.ConfigAttribute), true).FirstOrDefault() as TypeReference.ConfigAttribute;
             var baseType = typeof(Object);
             bool allowAbstractTypes = false;
@@ -51,11 +36,29 @@ namespace com.spacepuppyeditor.Base
                 excludedTypes = attrib.excludedTypes;
                 style = attrib.dropDownStyle;
             }
+            
 
+
+            //var tpref = EditorHelper.GetTargetObjectOfProperty(property) as TypeReference;
+            //if(tpref == null)
+            //{
+            //    tpref = new TypeReference();
+            //    EditorHelper.SetTargetObjectOfProperty(property, tpref);
+            //    property.serializedObject.ApplyModifiedProperties();
+            //}
+
+            //EditorGUI.BeginChangeCheck();
+            //tpref.Type = SPEditorGUI.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, style);
+            //if (EditorGUI.EndChangeCheck())
+            //    property.serializedObject.Update();
+
+
+
+            var tp = GetTypeFromTypeReference(property);
             EditorGUI.BeginChangeCheck();
-            tpref.Type = SPEditorGUI.TypeDropDown(position, label, baseType, tpref.Type, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, style);
+            tp = SPEditorGUI.TypeDropDown(position, label, baseType, tp, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, style);
             if (EditorGUI.EndChangeCheck())
-                property.serializedObject.Update();
+                SetTypeToTypeReference(property, tp);
 
             EditorGUI.EndProperty();
         }
@@ -67,6 +70,25 @@ namespace com.spacepuppyeditor.Base
             var hashProp = property.FindPropertyRelative(PROP_TYPEHASH);
             if (hashProp == null) return null;
             return TypeReference.UnHashType(hashProp.stringValue);
+        }
+
+        public static void SetTypeToTypeReference(SerializedProperty property, System.Type tp)
+        {
+            if (property == null) return;
+
+            var hashProp = property.FindPropertyRelative(PROP_TYPEHASH);
+            if (hashProp == null) return;
+
+            hashProp.stringValue = TypeReference.HashType(tp);
+
+            if(Application.isPlaying)
+            {
+                var tpref = EditorHelper.GetTargetObjectOfProperty(property) as TypeReference;
+                if(tpref != null)
+                {
+                    tpref.Type = tp;
+                }
+            }
         }
 
     }
