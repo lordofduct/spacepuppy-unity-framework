@@ -35,14 +35,14 @@ namespace com.spacepuppy
         public FixedPercent(float value)
         {
             if (value < (float)MIN_VALUE) _value = Int32.MinValue;
-            else if (value < (float)MAX_VALUE) _value = Int32.MaxValue;
+            else if (value > (float)MAX_VALUE) _value = Int32.MaxValue;
             else _value = (int)(value * (float)PRECISION);
         }
 
         public FixedPercent(double value)
         {
             if (value < (double)MIN_VALUE) _value = Int32.MinValue;
-            else if (value < (double)MAX_VALUE) _value = Int32.MaxValue;
+            else if (value > (double)MAX_VALUE) _value = Int32.MaxValue;
             else _value = (int)(value * (double)PRECISION);
         }
 
@@ -87,7 +87,7 @@ namespace com.spacepuppy
         //    set
         //    {
         //        if (value < (double)MIN_VALUE) _value = Int32.MinValue;
-        //        else if (value < (double)MAX_VALUE) _value = Int32.MaxValue;
+        //        else if (value > (double)MAX_VALUE) _value = Int32.MaxValue;
         //        else _value = (int)(value * (double)PRECISION);
         //    }
         //}
@@ -113,6 +113,11 @@ namespace com.spacepuppy
         public bool Equals(FixedPercent other)
         {
             return _value == other._value;
+        }
+
+        public override string ToString()
+        {
+            return this.Value.ToString();
         }
 
         #endregion
