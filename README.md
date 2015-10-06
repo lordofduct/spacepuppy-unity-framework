@@ -26,10 +26,6 @@ Lastly, you need to add 2 tags to the tag manager: 'MultiTag' and 'Root'. Once y
 Now you're fully set up.
 
 #Future Plans
-Soon I plan to upgrade this project to Unity 5. As far as I know I don't really access anything that has been removed from Unity 4 (namely the quick access fields on GameObject and Component), but I haven't actually tested this against Unity 5 yet.
-
-When I do this the project will move forward as Unity 5 only as I have a few classes/methods that mimic Unity 5 behaviour that will be removed.
-
-I'll include one final Unity 4.x build for use, as well as a branch for Unity 4.x users to easily pull and modify themselves.
+I've updated Spacepuppy Framework to work with Unity 5. A final version of 4.6.x support exists as a tagged branch of the project as 1.0.0.198, and is also included as a build in the builds section of the git page. You can fork off this branch to continue work in a 4.6.x setting if you want. All future versions will be number 2.x and will be Unity 5 exclusive.
 
 A unitypackage is still a possibility, but really all it would do is paste the dll's into the folder as described in 'Quick Import', so really, I don't see the need for it.
