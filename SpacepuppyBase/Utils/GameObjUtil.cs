@@ -835,11 +835,13 @@ namespace com.spacepuppy.Utils
         {
             if (go == null) return null;
 
-            if (go.rigidbody != null) return go.rigidbody;
+            var rb = go.GetComponent<Rigidbody>();
+            if (rb != null) return rb;
 
             foreach (var p in go.GetParents(stopAtRoot))
             {
-                if (p.rigidbody != null) return p.rigidbody;
+                rb = p.GetComponent<Rigidbody>();
+                if (rb != null) return rb;
             }
 
             return null;
@@ -1105,10 +1107,11 @@ namespace com.spacepuppy.Utils
                 if (!bIgnoreScale) go.transform.localScale = Vector3.one;
             }
 
-            if (go.rigidbody != null && !go.rigidbody.isKinematic)
+            var rb = go.GetComponent<Rigidbody>();
+            if (rb != null && !rb.isKinematic)
             {
-                go.rigidbody.velocity = Vector3.zero;
-                go.rigidbody.angularVelocity = Vector3.zero;
+                rb.velocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
 
             }
         }

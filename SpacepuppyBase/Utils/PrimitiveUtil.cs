@@ -65,7 +65,10 @@ namespace com.spacepuppy.Utils
                 go = GameObject.CreatePrimitive(type);
             }
 
-            if (go != null) go.collider.isTrigger = bTrigger;
+            if (go != null)
+            {
+                go.GetComponent<Collider>().isTrigger = bTrigger;
+            }
             return go;
         }
 

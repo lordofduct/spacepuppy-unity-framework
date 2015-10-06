@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Project
 {
     public class CustomTimeLayersData : ScriptableObject, ISerializationCallbackReceiver, IEnumerable<string>
@@ -25,7 +27,7 @@ namespace com.spacepuppy.Project
                     if (_instance == null) _instance = ScriptableObject.CreateInstance<CustomTimeLayersData>();
                     _loaded = true;
                 }
-                return (_instance != null) ? _instance._readonlyLayers : null;
+                return (_instance != null && _instance._readonlyLayers != null) ? _instance._readonlyLayers : ArrayUtil.Empty<string>();
             }
         }
 

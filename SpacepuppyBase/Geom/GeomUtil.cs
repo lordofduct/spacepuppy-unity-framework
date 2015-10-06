@@ -278,8 +278,11 @@ namespace com.spacepuppy.Geom
         public static Sphere GetGlobalBoundingSphere(this GameObject go, BoundingSphereAlgorithm algorithm, bool bRecurseChildren = true)
         {
             var s = new Sphere(go.transform.position, 0.0f);
-            if (go.renderer != null) s.Encapsulate(go.renderer.GetGlobalBoundingSphere(algorithm));
-            if (go.collider != null) s.Encapsulate(go.collider.GetGlobalBoundingSphere(algorithm));
+
+            var rend = go.GetComponent<Renderer>();
+            if (rend != null) s.Encapsulate(rend.GetGlobalBoundingSphere(algorithm));
+            var coll = go.GetComponent<Collider>();
+            if (coll != null) s.Encapsulate(coll.GetGlobalBoundingSphere(algorithm));
 
             if (bRecurseChildren)
             {
@@ -297,8 +300,10 @@ namespace com.spacepuppy.Geom
         {
             var b = new Bounds(go.transform.position, Vector3.zero);
 
-            if (go.renderer != null) b.Encapsulate(go.renderer.bounds);
-            if (go.collider != null) b.Encapsulate(go.collider.bounds);
+            var rend = go.GetComponent<Renderer>();
+            if (rend != null) b.Encapsulate(rend.bounds);
+            var coll = go.GetComponent<Collider>();
+            if (coll != null) b.Encapsulate(coll.bounds);
 
             if (bRecurseChildren)
             {
