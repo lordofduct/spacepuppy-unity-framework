@@ -79,7 +79,7 @@ namespace com.spacepuppy.Project
         public UnityEngine.Object LoadAsset(string name)
         {
             if (_bundle == null) return null;
-            var asset = _bundle.Load(name);
+            var asset = _bundle.LoadAsset(name);
             if (asset == null) return null;
             _loadedAssets.Add(asset);
             return asset;
@@ -88,7 +88,7 @@ namespace com.spacepuppy.Project
         public UnityEngine.Object LoadAsset(string name, System.Type tp)
         {
             if (_bundle == null) return null;
-            var asset = _bundle.Load(name, tp);
+            var asset = _bundle.LoadAsset(name, tp);
             if (asset == null) return null;
             _loadedAssets.Add(asset);
             return asset;
