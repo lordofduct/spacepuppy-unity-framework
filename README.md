@@ -1,11 +1,11 @@
 # spacepuppy-unity-framework
-A framework of reusable objects with the Unity game engine version 4.x.
+A framework of reusable objects with the Unity game engine version 5.x.
 
 This project is intended to be compiled in Visual Studio and then place the compiled dll's into the project. When compiling you will need to ensure you reference the UnityEngine and UnityEditor dll's for your version of unity. I include a version list in the Resources folder for the version of unity I'm currently using.
 
 #Quick Import
 
-In Builds/OpenSource folder is a prebuilt version of the library in its current state. Drag the contents of this folder into a folder anywhere in your project and it'll work out of the box, I prefer the 'Assets/3rdParty/SpacepuppyUnityFramework' folder. The included meta file configures the scripts execution order automatically. Caution, this meta file's guid is what controls the references to scripts in the library, deleting or modifying it will ruin any script references.
+In Builds/OpenSource folder is a prebuilt version of the library in its current state, or you can find a build in the builds section of this git page. Drag the contents of this into a folder anywhere in your project and it'll work out of the box, I prefer the 'Assets/3rdParty/SpacepuppyUnityFramework' folder. The included meta file configures the scripts execution order automatically. Caution, this meta file's guid is what controls the references to scripts in the library, deleting or modifying it will ruin any script references. Also make sure to add 2 tags, 'MultiTag' and 'Root', to your tags for your project.
 
 #Custom Building
 
