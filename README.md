@@ -5,7 +5,13 @@ This project is intended to be compiled in Visual Studio and then place the comp
 
 #Quick Import
 
-In Builds/OpenSource folder is a prebuilt version of the library in its current state, or you can find a build in the builds section of this git page. Drag the contents of this into a folder anywhere in your project and it'll work out of the box, I prefer the 'Assets/3rdParty/SpacepuppyUnityFramework' folder. The included meta file configures the scripts execution order automatically. Caution, this meta file's guid is what controls the references to scripts in the library, deleting or modifying it will ruin any script references. Also make sure to add 2 tags, 'MultiTag' and 'Root', to your tags for your project.
+In Builds/OpenSource folder is a prebuilt version of the library in its current state, or you can find a build in the builds section of this git page. Drag the contents of this into a folder anywhere in your project and it'll work out of the box, I prefer the 'Assets/3rdParty/SpacepuppyUnityFramework' folder. The included meta file configures the scripts execution order automatically. Caution, this meta file's guid is what controls the references to scripts in the library, deleting or modifying it will ruin any script references.
+
+Once added make sure to go to "Spacepuppy->Settings->Sync TagData".
+
+This will add the required 'MultiTag' and 'Root' tags, as well as sync any of your existing tags to a resource that can be read at runtime. Any time you add new tags you must sync the tag data again by either clicking this same menu item, or going into /Assets/Resources/TagData and clicking "Sync TagData" in the inspector there.
+
+Earlier version (1.0 and earlier) will require adding these tags manually before syncing.
 
 #Custom Building
 
@@ -21,7 +27,9 @@ com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks : -31999
 
 com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks : 32000
 
-Lastly, you need to add 2 tags to the tag manager: 'MultiTag' and 'Root'. Once you've done that select the menu dropdown Spacepuppy->Settings->Sync TagData.
+Lastly, make sure to go to "Spacepuppy->Settings->Sync TagData".
+
+This will add the required 'MultiTag' and 'Root' tags, as well as sync any of your existing tags to a resource that can be read at runtime. Any time you add new tags you must sync the tag data again by either clicking this same menu item, or going into /Assets/Resources/TagData and clicking "Sync TagData" in the inspector there.
 
 Now you're fully set up.
 
