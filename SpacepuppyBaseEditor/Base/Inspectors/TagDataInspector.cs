@@ -15,27 +15,8 @@ namespace com.spacepuppyeditor.Base
     {
 
         #region Static Interface
-
-        //private static System.DateTime _lastUpdate;
-
-
-        //static TagDataInspector()
-        //{
-        //    _lastUpdate = System.DateTime.Now;
-        //    SceneView.onSceneGUIDelegate -= OnSceneGUI;
-        //    SceneView.onSceneGUIDelegate += OnSceneGUI;
-        //}
-
-        //private static void OnSceneGUI(SceneView scene)
-        //{
-        //    if ((System.DateTime.Now - _lastUpdate).TotalSeconds < 1.0d) return;
-
-        //    if (!Application.isPlaying)
-        //    {
-        //        SPMenu.SyncTagData();
-        //        _lastUpdate = System.DateTime.Now;
-        //    }
-        //}
+        
+        
 
         #endregion
 
@@ -63,9 +44,7 @@ namespace com.spacepuppyeditor.Base
 
             if(GUILayout.Button("Sync Tags"))
             {
-                _helper.UpdateTags(UnityEditorInternal.InternalEditorUtility.tags);
-                EditorUtility.SetDirty(this.target);
-                AssetDatabase.SaveAssets();
+                SPMenu.SyncTagData(_helper.Target);
             }
         }
 

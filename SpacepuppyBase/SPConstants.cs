@@ -15,10 +15,10 @@ namespace com.spacepuppy
         public const string TAG_EDITORONLY = "EditorOnly";
         public const string TAG_MAINCAMERA = "MainCamera";
         public const string TAG_GAMECONTROLLER = "GameController";
+        public const string TAG_PLAYER = "Player";
 
         public const string TAG_MULTITAG = "MultiTag";
         public const string TAG_ROOT = "Root";
-        public const string TAG_PLAYER = "Player";
 
         //sent by SPComponent when enabled and disabled
         //public const string MSG_ONSPCOMPONENTENABLED = "OnSPComponentEnabled";

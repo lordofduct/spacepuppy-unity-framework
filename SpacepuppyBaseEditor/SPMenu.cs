@@ -45,12 +45,53 @@ namespace com.spacepuppyeditor
                 tagData = ScriptableObjectHelper.CreateAsset<TagData>(@"Assets/Resources/TagData.asset");
             }
 
+            SyncTagData(tagData);
+        }
+
+        public static void SyncTagData(TagData tagData)
+        {
             if (!tagData.SimilarTo(UnityEditorInternal.InternalEditorUtility.tags))
             {
                 var helper = new TagData.EditorHelper(tagData);
-                helper.UpdateTags(UnityEditorInternal.InternalEditorUtility.tags);
-                EditorUtility.SetDirty(tagData);
-                AssetDatabase.SaveAssets();
+
+                using (var tags = com.spacepuppy.Collections.TempCollection<string>.GetCollection(UnityEditorInternal.InternalEditorUtility.tags))
+                {
+                    bool added = false;
+                    if (!tags.Contains(SPConstants.TAG_MULTITAG))
+                    {
+                        tags.Add(SPConstants.TAG_MULTITAG);
+                        added = true;
+                    }
+                    if (!tags.Contains(SPConstants.TAG_ROOT))
+                    {
+                        tags.Add(SPConstants.TAG_ROOT);
+                        added = true;
+                    }
+                    if(added)
+                    {
+                        try
+                        {
+                            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+                            SerializedProperty tagsProp = tagManager.FindProperty("tags");
+
+                            var arr = (from st in tags where !TagData.IsDefaultUnityTag(st) select st).ToArray();
+                            tagsProp.arraySize = arr.Length;
+                            for(int i = 0; i < arr.Length; i++)
+                            {
+                                tagsProp.GetArrayElementAtIndex(i).stringValue = arr[i];
+                            }
+                            tagManager.ApplyModifiedProperties();
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to save TagManager when syncing tags.");
+                        }
+                    }
+
+                    helper.UpdateTags(tags);
+                    EditorUtility.SetDirty(tagData);
+                    AssetDatabase.SaveAssets();
+                }
             }
         }
 

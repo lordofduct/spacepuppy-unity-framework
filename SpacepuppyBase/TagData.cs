@@ -66,6 +66,29 @@ namespace com.spacepuppy
         }
         #endregion
 
+
+
+        #region Static Utils
+
+        public static bool IsDefaultUnityTag(string tag)
+        {
+            switch(tag)
+            {
+                case SPConstants.TAG_UNTAGGED:
+                case SPConstants.TAG_RESPAWN:
+                case SPConstants.TAG_FINISH:
+                case SPConstants.TAG_EDITORONLY:
+                case SPConstants.TAG_MAINCAMERA:
+                case SPConstants.TAG_GAMECONTROLLER:
+                case SPConstants.TAG_PLAYER:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        #endregion
+
         #region Special Types
 
         public class EditorHelper
@@ -76,6 +99,8 @@ namespace com.spacepuppy
             {
                 _data = data;
             }
+
+            public TagData Target { get { return _data; } }
 
             public IList<string> Tags { get { return _data._readonlyTags; } }
 
