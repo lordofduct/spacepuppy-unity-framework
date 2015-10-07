@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy
 {
 
-    public abstract class SPComponent : MonoBehaviour, IComponent
+    public abstract class SPComponent : MonoBehaviour, IComponent, ISPDisposable
     {
 
         #region Events
@@ -220,6 +221,24 @@ namespace com.spacepuppy
         GameObject IComponent.gameObject { get { return this.gameObject; } }
         Transform IComponent.transform { get { return this.transform; } }
         */
+
+        #endregion
+
+
+        #region ISPDisposable Interface
+
+        bool ISPDisposable.IsDisposed
+        {
+            get
+            {
+                return !ObjUtil.IsObjectAlive(this);
+            }
+        }
+
+        void IDisposable.Dispose()
+        {
+            ObjUtil.SmartDestroy(this);
+        }
 
         #endregion
 

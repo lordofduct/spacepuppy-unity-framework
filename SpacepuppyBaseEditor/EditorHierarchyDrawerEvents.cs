@@ -235,6 +235,7 @@ namespace com.spacepuppyeditor
             if (!_activeGameObjects.Contains(instanceID)) return;
 
             var go = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
+            if (go == null) return;
             HierarchyDrawer drawer;
             foreach(var c in go.GetComponents<Component>())
             {

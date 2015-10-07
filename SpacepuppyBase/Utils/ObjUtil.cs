@@ -10,7 +10,7 @@ namespace com.spacepuppy.Utils
 
         #region Fields
 
-        private static System.Func<UnityEngine.Object, UnityEngine.Object, bool> _compareBaseObjects;
+        private static System.Func<UnityEngine.Object, bool> _isObjectAlive;
 
         #endregion
 
@@ -21,20 +21,23 @@ namespace com.spacepuppy.Utils
             try
             {
                 var tp = typeof(UnityEngine.Object);
-                var meth = tp.GetMethod("CompareBaseObjectsInternal", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-                _compareBaseObjects = System.Delegate.CreateDelegate(typeof(System.Func<UnityEngine.Object, UnityEngine.Object, bool>), meth) as System.Func<UnityEngine.Object, UnityEngine.Object, bool>;
+                var meth = tp.GetMethod("IsNativeObjectAlive", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+                if (meth != null)
+                    _isObjectAlive = System.Delegate.CreateDelegate(typeof(System.Func<UnityEngine.Object, bool>), meth) as System.Func<UnityEngine.Object, bool>;
+                else
+                    _isObjectAlive = (a) => a == null;
+                //_isObjectAlive = (a) => a != null;
             }
             catch
             {
                 //incase there was a change to the UnityEngine.dll
-                _compareBaseObjects = (a, b) => a == b;
+                _isObjectAlive = (a) => a != null;
                 UnityEngine.Debug.LogWarning("This version of Spacepuppy Framework does not support the version of Unity it's being used with.");
                 //throw new System.InvalidOperationException("This version of Spacepuppy Framework does not support the version of Unity it's being used with.");
             }
         }
-
+        
         #endregion
-
 
         public static T GetAsFromSource<T>(object obj) where T : class
         {
@@ -66,8 +69,21 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        public static System.Func<UnityEngine.Object, bool> IsObjectAlive
+        {
+            get { return _isObjectAlive; }
+        }
+
+        public static bool IsDisposed(this ISPDisposable obj)
+        {
+            if (object.ReferenceEquals(obj, null)) return true;
+
+            return obj.IsDisposed;
+        }
+
         /// <summary>
-        /// Returns true if the object is either a null reference or has been destroyed by unity.
+        /// Returns true if the object is either a null reference or has been destroyed by unity. 
+        /// This will respect ISPDisposable over all else.
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -75,19 +91,29 @@ namespace com.spacepuppy.Utils
         {
             if (object.ReferenceEquals(obj, null)) return true;
 
-            if (obj is UnityEngine.Object)
-                return _compareBaseObjects(obj as UnityEngine.Object, null);
+            if (obj is ISPDisposable)
+                return (obj as ISPDisposable).IsDisposed;
+            else if (obj is UnityEngine.Object)
+                return !_isObjectAlive(obj as UnityEngine.Object);
             else if (obj is IComponent)
-                return _compareBaseObjects((obj as IComponent).component, null);
+                return !_isObjectAlive((obj as IComponent).component);
             else if (obj is IGameObjectSource)
-                return _compareBaseObjects((obj as IGameObjectSource).gameObject, null);
+                return !_isObjectAlive((obj as IGameObjectSource).gameObject);
+
+            //if (obj is UnityEngine.Object)
+            //    return (obj as UnityEngine.Object) == null;
+            //else if (obj is IComponent)
+            //    return (obj as IComponent).component == null;
+            //else if (obj is IGameObjectSource)
+            //    return (obj as IGameObjectSource).gameObject == null;
 
             return false;
         }
 
         /// <summary>
         /// Unlike IsNullOrDestroyed, this only returns true if the managed object half of the object still exists, 
-        /// but the unmanaged half has been destroyed by unity.
+        /// but the unmanaged half has been destroyed by unity. 
+        /// This will respect ISPDisposable over all else.
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -95,12 +121,22 @@ namespace com.spacepuppy.Utils
         {
             if (object.ReferenceEquals(obj, null)) return false;
 
-            if (obj is UnityEngine.Object)
-                return _compareBaseObjects(obj as UnityEngine.Object, null);
+            if (obj is ISPDisposable)
+                return (obj as ISPDisposable).IsDisposed;
+            else if (obj is UnityEngine.Object)
+                return !_isObjectAlive(obj as UnityEngine.Object);
             else if (obj is IComponent)
-                return _compareBaseObjects((obj as IComponent).component, null);
+                return !_isObjectAlive((obj as IComponent).component);
             else if (obj is IGameObjectSource)
-                return _compareBaseObjects((obj as IGameObjectSource).gameObject, null);
+                return !_isObjectAlive((obj as IGameObjectSource).gameObject);
+
+
+            //if (obj is UnityEngine.Object)
+            //    return (obj as UnityEngine.Object) == null;
+            //else if (obj is IComponent)
+            //    return (obj as IComponent).component == null;
+            //else if (obj is IGameObjectSource)
+            //    return (obj as IGameObjectSource).gameObject == null;
 
             return false;
         }
@@ -109,12 +145,22 @@ namespace com.spacepuppy.Utils
         {
             if (object.ReferenceEquals(obj, null)) return false;
 
-            if (obj is UnityEngine.Object)
-                return !_compareBaseObjects(obj as UnityEngine.Object, null);
+            if (obj is ISPDisposable)
+                return !(obj as ISPDisposable).IsDisposed;
+            else if (obj is UnityEngine.Object)
+                return _isObjectAlive(obj as UnityEngine.Object);
             else if (obj is IComponent)
-                return !_compareBaseObjects((obj as IComponent).component, null);
+                return _isObjectAlive((obj as IComponent).component);
             else if (obj is IGameObjectSource)
-                return !_compareBaseObjects((obj as IGameObjectSource).gameObject, null);
+                return _isObjectAlive((obj as IGameObjectSource).gameObject);
+
+
+            //if (obj is UnityEngine.Object)
+            //    return (obj as UnityEngine.Object) != null;
+            //else if (obj is IComponent)
+            //    return (obj as IComponent).component != null;
+            //else if (obj is IGameObjectSource)
+            //    return (obj as IGameObjectSource).gameObject != null;
 
             return true;
         }

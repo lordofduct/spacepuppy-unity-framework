@@ -7,7 +7,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
-    public interface ISingleton : IComponent
+    public interface ISingleton : IComponent, ISPDisposable
     {
 
         event System.EventHandler ComponentDestroyed;

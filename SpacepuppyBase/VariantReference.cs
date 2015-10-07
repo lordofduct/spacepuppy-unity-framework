@@ -17,7 +17,7 @@ namespace com.spacepuppy
     /// object. See com.spacepuppy.Dynamic.Evaluator for more information on how to format eval statements.
     /// </summary>
     [System.Serializable()]
-    public sealed class VariantReference : ISerializationCallbackReceiver, System.Runtime.Serialization.ISerializable
+    public sealed class VariantReference : ISerializationCallbackReceiver, System.Runtime.Serialization.ISerializable, ISPDisposable
     {
         
         public enum RefMode : byte
@@ -1041,6 +1041,37 @@ namespace com.spacepuppy
                     this.Value = null; //just set to null value
                     break;
             }
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+
+        bool ISPDisposable.IsDisposed
+        {
+            get
+            {
+                if(!object.ReferenceEquals(_unityObjectReference, null))
+                {
+                    return !ObjUtil.IsObjectAlive(_unityObjectReference);
+                }
+                else
+                {
+                    return _mode == RefMode.Value && _type == VariantType.Null;
+                }
+            }
+        }
+
+        void System.IDisposable.Dispose()
+        {
+            _mode = RefMode.Value;
+            _type = VariantType.Null;
+            _x = 0f;
+            _y = 0f;
+            _z = 0f;
+            _w = 0.0;
+            _string = null;
+            _unityObjectReference = null;
         }
 
         #endregion

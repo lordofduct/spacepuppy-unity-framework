@@ -8,7 +8,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween
 {
 
-    public abstract class Tweener : System.IDisposable, IProgressingYieldInstruction
+    public abstract class Tweener : ISPDisposable, IProgressingYieldInstruction
     {
 
         #region Events
@@ -411,6 +411,11 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region IDisposable Interface
+
+        bool ISPDisposable.IsDisposed
+        {
+            get { return this.IsDead; }
+        }
 
         void System.IDisposable.Dispose()
         {
