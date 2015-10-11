@@ -23,7 +23,9 @@ Next you'll want to set the execution order of 3 classes in the framework. Of co
 
 com.spacepuppy.GameLoopEntry : -32000
 
-com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks : -31999
+com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks : -31990
+
+com.spacepuppy.Utils.SpecializedCoponents.EarlyParentSetter : -31980
 
 com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks : 32000
 
