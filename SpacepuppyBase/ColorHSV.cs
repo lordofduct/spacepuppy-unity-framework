@@ -167,22 +167,34 @@ namespace com.spacepuppy
 
         public static ColorHSV operator +(ColorHSV a, ColorHSV b)
         {
+            //var r = new ColorHSV();
+            //r.h = (a.h + b.h) % 1f;
+            //r.s = Mathf.Clamp01(a.s + b.s);
+            //r.v = Mathf.Clamp01(a.v + b.v);
+            //r.a = Mathf.Clamp01(a.a + b.a);
+            //return r;
             var r = new ColorHSV();
-            r.h = (a.h + b.h) % 1f;
-            r.s = Mathf.Clamp01(a.s + b.s);
-            r.v = Mathf.Clamp01(a.v + b.v);
-            r.a = Mathf.Clamp01(a.a + b.a);
+            r.h = a.h + b.h;
+            r.s = a.s + b.s;
+            r.v = a.v + b.v;
+            r.a = a.a + b.a;
             return r;
         }
 
         public static ColorHSV operator -(ColorHSV a, ColorHSV b)
         {
+            //var r = new ColorHSV();
+            //r.h = a.h - b.h;
+            //if (r.h < 0f) r.h += 1f;
+            //r.s = Mathf.Clamp01(a.s - b.s);
+            //r.v = Mathf.Clamp01(a.v - b.v);
+            //r.a = Mathf.Clamp01(a.a - b.a);
+            //return r;
             var r = new ColorHSV();
             r.h = a.h - b.h;
-            if (r.h < 0f) r.h += 1f;
-            r.s = Mathf.Clamp01(a.s - b.s);
-            r.v = Mathf.Clamp01(a.v - b.v);
-            r.a = Mathf.Clamp01(a.a - b.a);
+            r.s = a.s - b.s;
+            r.v = a.v - b.v;
+            r.a = a.a - b.a;
             return r;
         }
 
@@ -198,25 +210,38 @@ namespace com.spacepuppy
 
         public static ColorHSV operator *(ColorHSV a, float b)
         {
+            //var r = new ColorHSV();
+            //r.h = (a.h * b) % 1f;
+            //if (r.h < 0f) r.h += 1f;
+            //r.s = Mathf.Clamp01(a.s * b);
+            //r.v = Mathf.Clamp01(a.v * b);
+            //r.a = Mathf.Clamp01(a.a * b);
+            //return r;
             var r = new ColorHSV();
-            r.h = (a.h * b) % 1f;
-            if (r.h < 0f) r.h += 1f;
-            r.s = Mathf.Clamp01(a.s * b);
-            r.v = Mathf.Clamp01(a.v * b);
-            r.a = Mathf.Clamp01(a.a * b);
+            r.h = a.h * b;
+            r.s = a.s * b;
+            r.v = a.v * b;
+            r.a = a.a * b;
             return r;
         }
 
         public static ColorHSV operator /(ColorHSV a, float b)
         {
-            if (float.IsNaN(b)) return new ColorHSV();
+            if (float.IsNaN(b) || b == 0f) return new ColorHSV();
+
+            //var r = new ColorHSV();
+            //r.h = (a.h / b) % 1f;
+            //if (r.h < 0f) r.h += 1f;
+            //r.s = Mathf.Clamp01(a.s / b);
+            //r.v = Mathf.Clamp01(a.v / b);
+            //r.a = Mathf.Clamp01(a.a / b);
+            //return r;
 
             var r = new ColorHSV();
-            r.h = (a.h / b) % 1f;
-            if (r.h < 0f) r.h += 1f;
-            r.s = Mathf.Clamp01(a.s / b);
-            r.v = Mathf.Clamp01(a.v / b);
-            r.a = Mathf.Clamp01(a.a / b);
+            r.h = a.h / b;
+            r.s = a.s / b;
+            r.v = a.v / b;
+            r.a = a.a / b;
             return r;
         }
 
