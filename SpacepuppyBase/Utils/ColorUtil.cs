@@ -136,7 +136,7 @@ namespace com.spacepuppy.Utils
 
         public static Color Slerp(Color a, Color b, float t)
         {
-            return (Color)ColorHSV.Lerp((ColorHSV)a, (ColorHSV)b, t);
+            return (Color)ColorHSV.Slerp((ColorHSV)a, (ColorHSV)b, t);
         }
 
         #endregion
