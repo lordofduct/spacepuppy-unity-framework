@@ -64,7 +64,6 @@
     <Compile Include="Collections\ComponentCollection.cs" />
     <Compile Include="Collections\CooldownPool.cs" />
     <Compile Include="Collections\Deque.cs" />
-    <Compile Include="Collections\EnumKeyedCollection.cs" />
     <Compile Include="Collections\EventForwardingPool.cs" />
     <Compile Include="Collections\GameObjectCollection.cs" />
     <Compile Include="Collections\ICachePool.cs" />
@@ -74,10 +73,12 @@
     <Compile Include="Collections\ObjectInstanceIDEqualityComparer.cs" />
     <Compile Include="Collections\ObjectReferenceEqualityComparer.cs" />
     <Compile Include="Collections\OrderedDelegate.cs" />
+    <Compile Include="Collections\PrimeHelper.cs" />
     <Compile Include="Collections\SamplingStack.cs" />
     <Compile Include="Collections\SerializableDictionaryBase.cs" />
     <Compile Include="Collections\TempCollection.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
+    <Compile Include="Collections\UniqueHashSet.cs" />
     <Compile Include="Collections\UniqueList.cs" />
     <Compile Include="Collections\WeakInternalTypes.cs" />
     <Compile Include="Collections\WeakKeyDictionary.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="CollisionExclusion.cs" />
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
     <Compile Include="FixedPoint.cs" />
+    <Compile Include="ColorHSV.cs" />
     <Compile Include="ISPDisposable.cs" />
     <Compile Include="Project\AssetBundlePackage.cs" />
     <Compile Include="Project\CustomTimeLayersData.cs" />
@@ -295,10 +297,12 @@
     <Compile Include="Utils\MathUtil.cs" />
     <Compile Include="Utils\MouseUtil.cs" />
     <Compile Include="Utils\ObjUtil.cs" />
+    <Compile Include="Utils\PrefabUtil.cs" />
     <Compile Include="Utils\PrimitiveUtil.cs" />
     <Compile Include="Utils\QuaternionUtil.cs" />
     <Compile Include="Utils\RandomUtil.cs" />
     <Compile Include="Utils\Rand\RandomRange.cs" />
+    <Compile Include="Utils\SpecializedComponents\EarlyParentSetter.cs" />
     <Compile Include="Utils\StreamUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="Utils\TransformUtil.cs" />

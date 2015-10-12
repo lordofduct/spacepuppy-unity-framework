@@ -41,7 +41,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
             var tsNameProp = property.FindPropertyRelative(PROP_TIMESUPPLIERNAME);
 
             int index = -1;
-            using (var lst = TempCollection<string>.GetCollection())
+            using (var lst = TempCollection.GetList<string>())
             {
                 lst.Add("Normal");
                 lst.Add("Real");

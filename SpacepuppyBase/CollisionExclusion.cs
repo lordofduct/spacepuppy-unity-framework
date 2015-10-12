@@ -165,7 +165,7 @@ namespace com.spacepuppy
 
         public static void CleanLinks()
         {
-            using (var toRemove = com.spacepuppy.Collections.TempCollection<PairToken>.GetCollection())
+            using (var toRemove = com.spacepuppy.Collections.TempCollection.GetList<PairToken>())
             {
                 var e1 = _table.Keys.GetEnumerator();
                 while (e1.MoveNext())
@@ -380,7 +380,7 @@ namespace com.spacepuppy
 
         public static void CleanLinks()
         {
-            using (var toRemove = com.spacepuppy.Collections.TempCollection<PairToken>.GetCollection())
+            using (var toRemove = com.spacepuppy.Collections.TempCollection.GetList<PairToken>())
             {
                 var e1 = _table.Keys.GetEnumerator();
                 while (e1.MoveNext())

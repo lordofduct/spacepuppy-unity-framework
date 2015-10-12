@@ -54,8 +54,8 @@ namespace com.spacepuppyeditor.Render
             if (mat != null && mat.shader != null)
             {
                 int cnt = ShaderUtil.GetPropertyCount(mat.shader);
-                using (var infoLst = TempCollection<PropInfo>.GetCollection(cnt))
-                using (var contentLst = TempCollection<GUIContent>.GetCollection(cnt))
+                using (var infoLst = TempCollection.GetList<PropInfo>(cnt))
+                using (var contentLst = TempCollection.GetList<GUIContent>(cnt))
                 {
                     int index = -1;
 

@@ -57,7 +57,7 @@ namespace com.spacepuppy.Timers
             if (_firstNode == null) return;
 
             var total = _time.TotalPrecise;
-            using (var lst = com.spacepuppy.Collections.TempCollection<ScheduledEvent>.GetCollection(_nodeCount))
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<ScheduledEvent>(_nodeCount))
             {
                 var node = _firstNode;
                 _firstNode = null;

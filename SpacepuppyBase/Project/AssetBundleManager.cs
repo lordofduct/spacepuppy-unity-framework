@@ -40,7 +40,7 @@ namespace com.spacepuppy.Project
 
             if(_bundles.Count > 0)
             {
-                using (var lst = com.spacepuppy.Collections.TempCollection<AssetBundlePackage>.GetCollection())
+                using (var lst = com.spacepuppy.Collections.TempCollection.GetList<AssetBundlePackage>())
                 {
                     var e = _bundles.GetEnumerator();
                     while(e.MoveNext())

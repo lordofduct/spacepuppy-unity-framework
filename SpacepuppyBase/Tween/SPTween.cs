@@ -164,7 +164,7 @@ namespace com.spacepuppy.Tween
             if (_instance == null) return;
             if (_instance._runningTweens.Count == 0) return;
 
-            using (var lst = TempCollection<Tweener>.GetCollection())
+            using (var lst = TempCollection.GetList<Tweener>())
             {
                 var e = _instance._runningTweens.GetEnumerator();
                 while (e.MoveNext())

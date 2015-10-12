@@ -37,5 +37,14 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Methods
+
+        public void Reset()
+        {
+            _cancelled = false;
+        }
+
+        #endregion
+
     }
 }

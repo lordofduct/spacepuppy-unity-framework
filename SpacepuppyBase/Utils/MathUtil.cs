@@ -751,159 +751,91 @@ namespace com.spacepuppy.Utils
         /// <param name="min">min in range</param>
         /// <returns>A value wrapped around min to max</returns>
         /// <remarks></remarks>
-        public static short Wrap(short value, short max, short min)
-        {
-            value -= min;
-            max -= min;
-            if (max == 0)
-                return min;
-
-            value = (short)(value % max);
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
-
-            return value;
-
-        }
-        public static short Wrap(short value, short max)
-        {
-            short min = 0;
-
-            value -= min;
-            max -= min;
-            if (max == 0)
-                return min;
-
-            value = (short)(value % max);
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
-
-            return value;
-        }
-
         public static int Wrap(int value, int max, int min)
         {
-            value -= min;
             max -= min;
             if (max == 0)
                 return min;
 
-            value = value % max;
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
-
-            return value;
-
+            return value - max * (int)Math.Floor((double)(value - min) / max);
         }
         public static int Wrap(int value, int max)
         {
-            int min = 0;
-
-            value -= min;
-            max -= min;
-            if (max == 0)
-                return min;
-
-            value = (value % max);
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
-
-            return value;
+            return Wrap(value, max, 0);
         }
 
         public static long Wrap(long value, long max, long min)
         {
-            value -= min;
             max -= min;
             if (max == 0)
                 return min;
 
-            value = value % max;
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
-
-            return value;
-
+            return value - max * (long)Math.Floor((double)(value - min) / max);
         }
         public static long Wrap(long value, long max)
         {
-            long min = 0;
-
-            value -= min;
-            max -= min;
-            if (max == 0)
-                return min;
-
-            value = (value % max);
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
-
-            return value;
+            return Wrap(value, max, 0);
         }
 
         public static float Wrap(float value, float max, float min)
         {
-            value -= min;
             max -= min;
             if (max == 0)
                 return min;
 
-            value = value % max;
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
+            return value - max * (float)Math.Floor((value - min) / max);
 
-            return value;
+
+            // //old method using while loop, slow for large numbers
+            //value -= min;
+            //max -= min;
+            //if (max == 0)
+            //    return min;
+
+            //value = value % max;
+            //value += min;
+            //while (value < min)
+            //{
+            //    value += max;
+            //}
+
+            //return value;
+
         }
         public static float Wrap(float value, float max)
         {
-            float min = 0;
+            return Wrap(value, max, 0);
 
-            value -= min;
-            max -= min;
-            if (max == 0)
-                return min;
 
-            value = (value % max);
-            value += min;
-            while (value < min)
-            {
-                value += max;
-            }
+            // //old method using while loop, slow for large numbers
+            //float min = 0;
 
-            return value;
+            //value -= min;
+            //max -= min;
+            //if (max == 0)
+            //    return min;
+
+            //value = (value % max);
+            //value += min;
+            //while (value < min)
+            //{
+            //    value += max;
+            //}
+
+            //return value;
+
+
         }
 
         /// <summary>
-        /// Arithmetic version of Wrap... unsure of which is more efficient.
-        /// 
-        /// Here for demo purposes
+        /// Alt of Wrap, obsolete.
         /// </summary>
         /// <param name="value">value to wrap</param>
         /// <param name="max">max in range</param>
         /// <param name="min">min in range</param>
         /// <returns>A value wrapped around min to max</returns>
         /// <remarks></remarks>
+        [System.Obsolete("Use MathUtil.Wrap")]
         public static float ArithWrap(float value, float max, float min)
         {
             max -= min;
@@ -912,6 +844,7 @@ namespace com.spacepuppy.Utils
 
             return value - max * (float)Math.Floor((value - min) / max);
         }
+        [System.Obsolete("Use MathUtil.Wrap")]
         public static float ArithWrap(float value, float max)
         {
             return ArithWrap(value, max, 0);
@@ -1413,12 +1346,11 @@ namespace com.spacepuppy.Utils
         /// <param name="weight"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static float InterpolateAngle(float a1, float a2, float weight, bool useRadians)
+        public static float InterpolateAngle(float a, float b, float weight, bool useRadians)
         {
-            a1 = NormalizeAngle(a1, useRadians);
-            a2 = ShortenAngleToAnother(a2, a1, useRadians);
-
-            return Interpolate(a1, a2, weight);
+            var rd = (useRadians) ? PI : 180f;
+            var delta = (b - a) % (rd * 2f);
+            return Wrap(a + delta * weight, rd, -rd);
         }
 
         //public static float ClampAngle(float a, float max, float min, bool bUseRadians)

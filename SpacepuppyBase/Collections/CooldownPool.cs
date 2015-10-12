@@ -74,7 +74,7 @@ namespace com.spacepuppy.Collections
             var t = this.UpdateTimeSupplier.Total;
             CooldownInfo info;
 
-            using (var toRemove = TempCollection<T>.GetCollection())
+            using (var toRemove = TempCollection.GetList<T>())
             {
                 var e1 = _table.GetEnumerator();
                 while (e1.MoveNext())

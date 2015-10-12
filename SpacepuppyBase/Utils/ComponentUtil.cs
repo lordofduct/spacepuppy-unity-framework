@@ -440,7 +440,7 @@ namespace com.spacepuppy.Utils
             }
             else
             {
-                using (var temp = TempCollection<T>.GetCollection())
+                using (var temp = TempCollection.GetList<T>())
                 {
                     GetChildComponents<T>(obj, temp, false, bIncludeInactive);
                     return temp.ToArray();
@@ -500,7 +500,7 @@ namespace com.spacepuppy.Utils
             }
             else
             {
-                using (var temp = TempCollection<Component>.GetCollection())
+                using (var temp = TempCollection.GetList<Component>())
                 {
                     GetChildComponents(obj, tp, temp, false, bIncludeInactive);
                     return temp.ToArray();

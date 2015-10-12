@@ -5,6 +5,11 @@ using System.Linq;
 namespace com.spacepuppy.Collections
 {
 
+    public interface ITempCollection<T> : ICollection<T>, IDisposable
+    {
+
+    }
+
     /// <summary>
     /// This is intended for a short lived collection that needs to be memory efficient and fast. 
     /// Call the static 'GetCollection' method to get a cached collection for use. 
@@ -18,169 +23,83 @@ namespace com.spacepuppy.Collections
     /// this.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TempCollection<T> : IList<T>, IDisposable
+    public static class TempCollection
     {
 
         private const int MAX_SIZE_INBYTES = 1024;
 
-        #region Fields
-
-        private List<T> _coll;
-        private int _maxCapacityOnRelease;
-        private int _version;
-
-        #endregion
-
-        #region CONSTRUCTOR
-
-        private TempCollection()
-        {
-            var tp = typeof(T);
-            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
-            _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-            _version = 1;
-            _coll = new List<T>();
-        }
-
-        private TempCollection(IEnumerable<T> e)
-        {
-            var tp = typeof(T);
-            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
-            _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-            _version = 1;
-            _coll = new List<T>(e);
-        }
-
-        private TempCollection(int count)
-        {
-            var tp = typeof(T);
-            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
-            _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-            _version = 1;
-            _coll = new List<T>(count);
-        }
-
-        #endregion
-
-        #region Methods
-
-        public void Sort(Comparison<T> comparison)
-        {
-            _coll.Sort(comparison);
-        }
-
-        public void Sort(IComparer<T> comparer)
-        {
-            _coll.Sort(comparer);
-        }
-
-        public void Release()
-        {
-            this.Clear();
-            if (_instance != null) return;
-
-            _instance = this;
-            if (_coll.Capacity > _maxCapacityOnRelease / Math.Min(_version, 4))
-            {
-                _coll.Capacity = _maxCapacityOnRelease / Math.Min(_version, 4);
-                _version = 0;
-            }
-
-            _version++;
-        }
-
-        #endregion
-
-        #region IDisposable Interface
-
-        public void Dispose()
-        {
-            this.Release();
-        }
-
-        #endregion
-
-        #region ICollection Interface
-
-        public void Add(T item)
-        {
-            _coll.Add(item);
-        }
-
-        public void Clear()
-        {
-            _coll.Clear();
-        }
-
-        public bool Contains(T item)
-        {
-            return _coll.Contains(item);
-        }
-
-        public void CopyTo(T[] array, int arrayIndex)
-        {
-            _coll.CopyTo(array, arrayIndex);
-        }
-
-        public int Count
-        {
-            get { return _coll.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
-        public bool Remove(T item)
-        {
-            return _coll.Remove(item);
-        }
-
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(_coll.GetEnumerator());
-        }
+        #region Static Interface
         
-
-        IEnumerator<T> System.Collections.Generic.IEnumerable<T>.GetEnumerator()
+        /// <summary>
+        /// Returns the any available collection for use generically. 
+        /// The collection could be a HashSet, List, or any temp implementation. 
+        /// This is intended to reduce the need for creating a new collection 
+        /// unnecessarily.
+        /// </summary>
+        /// <returns></returns>
+        public static ITempCollection<T> GetCollection<T>()
         {
-            return this.GetEnumerator();
+            return GetList<T>();
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        /// <summary>
+        /// Returns the any available collection for use generically. 
+        /// The collection could be a HashSet, List, or any temp implementation. 
+        /// This is intended to reduce the need for creating a new collection 
+        /// unnecessarily.
+        /// </summary>
+        /// <returns></returns>
+        public static ITempCollection<T> GetCollection<T>(IEnumerable<T> e)
         {
-            return this.GetEnumerator();
+            return GetList<T>(e);
         }
 
-        #endregion
 
-        #region IList Interface
 
-        public int IndexOf(T item)
+
+
+
+        public static TempList<T> GetList<T>()
         {
-            return _coll.IndexOf(item);
-        }
-
-        public void Insert(int index, T item)
-        {
-            _coll.Insert(index, item);
-        }
-
-        public void RemoveAt(int index)
-        {
-            _coll.RemoveAt(index);
-        }
-
-        public T this[int index]
-        {
-            get
+            if(TempList<T>._instance == null)
             {
-                return _coll[index];
+                return new TempList<T>();
             }
-            set
+            else
             {
-                _coll[index] = value;
+                var coll = TempList<T>._instance;
+                TempList<T>._instance = null;
+                return coll;
+            }
+        }
+
+        public static TempList<T> GetList<T>(IEnumerable<T> e)
+        {
+            if (TempList<T>._instance == null)
+            {
+                return new TempList<T>(e);
+            }
+            else
+            {
+                var coll = TempList<T>._instance;
+                TempList<T>._instance = null;
+                coll.AddRange(e);
+                return coll;
+            }
+        }
+
+        public static TempList<T> GetList<T>(int count)
+        {
+            if (TempList<T>._instance == null)
+            {
+                return new TempList<T>(count);
+            }
+            else
+            {
+                var coll = TempList<T>._instance;
+                TempList<T>._instance = null;
+                if (coll.Capacity < count) coll.Capacity = count;
+                return coll;
             }
         }
 
@@ -188,92 +107,68 @@ namespace com.spacepuppy.Collections
 
         #region Special Types
 
-        public struct Enumerator : IEnumerator<T>
+        public class TempList<T> : List<T>, ITempCollection<T>
         {
 
-            private List<T>.Enumerator _e;
+            #region Fields
 
-            public Enumerator(List<T>.Enumerator e)
+            internal static TempList<T> _instance;
+
+            private int _maxCapacityOnRelease;
+            private int _version;
+
+            #endregion
+
+            #region CONSTRUCTOR
+
+            internal TempList()
+                : base()
             {
-                _e = e;
+                var tp = typeof(T);
+                int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+                _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
+                _version = 1;
             }
 
-
-            public T Current
+            internal TempList(IEnumerable<T> e)
+                : base(e)
             {
-                get { return _e.Current; }
+                var tp = typeof(T);
+                int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+                _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
+                _version = 1;
             }
 
-            object System.Collections.IEnumerator.Current
+            internal TempList(int count)
+                : base(count)
             {
-                get { return _e.Current; }
+                var tp = typeof(T);
+                int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+                _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
+                _version = 1;
             }
 
-            public bool MoveNext()
-            {
-                return _e.MoveNext();
-            }
+            #endregion
 
-            public void Reset()
-            {
-                (_e as IEnumerator<T>).Reset();
-            }
+            #region IDisposable Interface
 
             public void Dispose()
             {
-                _e.Dispose();
-            }
-        }
+                this.Clear();
+                if (_instance != null) return;
 
-        #endregion
+                _instance = this;
+                if (this.Capacity > _maxCapacityOnRelease / Math.Min(_version, 4))
+                {
+                    this.Capacity = _maxCapacityOnRelease / Math.Min(_version, 4);
+                    _version = 0;
+                }
 
+                _version++;
+            }
 
-        #region Static Interface
+            #endregion
 
-        private static TempCollection<T> _instance;
-
-        public static TempCollection<T> GetCollection()
-        {
-            if(_instance == null)
-            {
-                return new TempCollection<T>();
-            }
-            else
-            {
-                var coll = _instance;
-                _instance = null;
-                return coll;
-            }
-        }
-
-        public static TempCollection<T> GetCollection(IEnumerable<T> e)
-        {
-            if(_instance == null)
-            {
-                return new TempCollection<T>(e);
-            }
-            else
-            {
-                var coll = _instance;
-                _instance = null;
-                coll._coll.AddRange(e);
-                return coll;
-            }
-        }
-
-        public static TempCollection<T> GetCollection(int count)
-        {
-            if (_instance == null)
-            {
-                return new TempCollection<T>(count);
-            }
-            else
-            {
-                var coll = _instance;
-                _instance = null;
-                if (coll._coll.Capacity < count) coll._coll.Capacity = count;
-                return coll;
-            }
         }
 
         #endregion

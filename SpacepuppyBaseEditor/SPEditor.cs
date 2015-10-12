@@ -160,6 +160,12 @@ namespace com.spacepuppyeditor
                             }
                         }
                     }
+
+                    var obsoleteAttrib = componentType.GetCustomAttributes(typeof(System.ObsoleteAttribute), false).FirstOrDefault() as System.ObsoleteAttribute;
+                    if (obsoleteAttrib != null)
+                    {
+                        _headerDrawers.Add(new ObsoleteHeaderDrawer("This script is considered deprecated:\n\t" + obsoleteAttrib.Message));
+                    }
                 }
             }
 
@@ -181,6 +187,7 @@ namespace com.spacepuppyeditor
                     compDrawer.OnGUI(position, this.serializedObject);
                 }
             }
+            
         }
 
 
@@ -269,6 +276,28 @@ namespace com.spacepuppyeditor
             public ShowNonSerializedPropertyAttribute Attrib;
             public System.Reflection.FieldInfo FieldInfo;
             public GUIContent Label;
+
+        }
+
+        private class ObsoleteHeaderDrawer : DecoratorDrawer
+        {
+
+            private string _message;
+
+            public ObsoleteHeaderDrawer(string msg)
+            {
+                _message = msg;
+            }
+
+            public override float GetHeight()
+            {
+                return EditorStyles.helpBox.CalcSize(EditorHelper.TempContent(_message)).y;
+            }
+
+            public override void OnGUI(Rect position)
+            {
+                EditorGUI.HelpBox(position, _message, MessageType.Warning);
+            }
 
         }
 

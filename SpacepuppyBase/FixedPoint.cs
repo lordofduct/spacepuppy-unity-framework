@@ -17,7 +17,7 @@ namespace com.spacepuppy
     /// value has enough precision to house the FixedPercent value in the same range.
     /// </remarks>
     [System.Serializable()]
-    public struct FixedPercent : IConvertible, IEquatable<FixedPercent>
+    public struct FixedPercent : IConvertible, IEquatable<FixedPercent>, IFormattable
     {
 
         public const decimal MAX_VALUE = 2147M;
@@ -342,6 +342,19 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IFormattable Interface
+
+        public string ToString(string format)
+        {
+            return this.Value.ToString(format);
+        }
+
+        public string ToString(string format, IFormatProvider provider)
+        {
+            return this.Value.ToString(format, provider);
+        }
+        
+        #endregion
 
         #region Special Types
 

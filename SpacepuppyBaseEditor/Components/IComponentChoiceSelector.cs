@@ -71,7 +71,7 @@ namespace com.spacepuppyeditor.Components
         public virtual GUIContent[] GetPopupEntries()
         {
             //return (from c in components select new GUIContent(c.GetType().Name)).ToArray();
-            using (var lst = com.spacepuppy.Collections.TempCollection<GUIContent>.GetCollection())
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<GUIContent>())
             {
                 lst.Add(new GUIContent("Nothing..."));
                 if (_drawer.SearchChildren)

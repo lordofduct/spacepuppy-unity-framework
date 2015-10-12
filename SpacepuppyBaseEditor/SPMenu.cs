@@ -54,7 +54,7 @@ namespace com.spacepuppyeditor
             {
                 var helper = new TagData.EditorHelper(tagData);
 
-                using (var tags = com.spacepuppy.Collections.TempCollection<string>.GetCollection(UnityEditorInternal.InternalEditorUtility.tags))
+                using (var tags = com.spacepuppy.Collections.TempCollection.GetList<string>(UnityEditorInternal.InternalEditorUtility.tags))
                 {
                     bool added = false;
                     if (!tags.Contains(SPConstants.TAG_MULTITAG))

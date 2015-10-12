@@ -55,70 +55,25 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static float ExtractHue(this Color c)
         {
-            float sum = 0f;
-            float mult = 1f;
-
-            float x1, x2, x3;
-            if(c.r >= c.g && c.r >= c.b)
+            var max = Mathf.Max(c.r, Mathf.Max(c.g, c.b));
+            var min = Mathf.Min(c.r, Mathf.Min(c.g, c.b));
+            var delta = max - min;
+            if (Mathf.Abs(delta) < 0.0001f)
             {
-                if( c.g >= c.b)
-                {
-                    x1 = c.r;
-                    x2 = c.g;
-                    x3 = c.b;
-                    sum = 0f;
-                    mult = 1f;
-                }
-                else
-                {
-                    x1 = c.r;
-                    x2 = c.b;
-                    x3 = c.g;
-                    sum = 6f;
-                    mult = -1f;
-                }
+                return 0f;
             }
-            else if(c.g > c.r && c.g >= c.b)
+            else if(c.r >= c.g && c.r >= c.b)
             {
-                if (c.r >= c.b)
-                {
-                    x1 = c.g;
-                    x2 = c.r;
-                    x3 = c.b;
-                    sum = 2f;
-                    mult = -1f;
-                }
-                else
-                {
-                    x1 = c.g;
-                    x2 = c.b;
-                    x3 = c.r;
-                    sum = 2f;
-                    mult = 1f;
-                }
+                return 60f * (((c.g - c.b) / delta) % 6f);
+            }
+            else if(c.g >= c.b)
+            {
+                return 60f * ((c.b - c.r) / delta + 2f);
             }
             else
             {
-                if(c.g > c.r)
-                {
-                    x1 = c.b;
-                    x2 = c.g;
-                    x3 = c.r;
-                    sum = 4f;
-                    mult = -1f;
-                }
-                else
-                {
-                    x1 = c.b;
-                    x2 = c.r;
-                    x3 = c.g;
-                    sum = 4f;
-                    mult = 1f;
-                }
+                return 60f * ((c.r - c.g) / delta + 4f);
             }
-
-            float fract = (x2 - x3) / (x1 - x3);
-            return 60f * (sum + mult * fract);
         }
 
         /// <summary>
@@ -128,20 +83,24 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static float ExtractValue(this Color c)
         {
-            return Mathf.Max(c.r, c.g, c.b);
+            return Mathf.Max(c.r, Mathf.Max(c.g, c.b));
         }
 
         public static float ExtractSaturation(this Color c)
         {
-            var max = Mathf.Max(c.r, c.g, c.b);
-            var min = Mathf.Min(c.r, c.g, c.b);
-            var delta = max - min;
-            if (Mathf.Abs(delta) < 0.0001f) return 0f;
-            else
-            {
-                var light = (max + min) / 2f;
-                return delta / (1 - Mathf.Abs(2 * light - 1f));
-            }
+            ////ala HSL formula
+            //var max = Mathf.Max(c.r, c.g, c.b);
+            //var min = Mathf.Min(c.r, c.g, c.b);
+            //var delta = max - min;
+            //if (Mathf.Abs(delta) < 0.0001f) return 0f;
+            //else
+            //    return delta / (1f - Mathf.Abs(max + min - 1f));
+
+            //ala HSV formula
+            var max = Mathf.Max(c.r, Mathf.Max(c.g, c.b));
+            if (Mathf.Abs(max) < 0.0001f) return 0f;
+            var min = Mathf.Min(c.r, Mathf.Min(c.g, c.b));
+            return (max - min) / max;
         }
 
         #endregion
