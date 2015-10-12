@@ -5,7 +5,9 @@ This project is intended to be compiled in Visual Studio and then place the comp
 
 #Quick Import
 
-In Builds/OpenSource folder is a prebuilt version of the library in its current state, or you can find a build in the builds section of this git page. Drag the contents of this into a folder anywhere in your project and it'll work out of the box, I prefer the 'Assets/3rdParty/SpacepuppyUnityFramework' folder. The included meta file configures the scripts execution order automatically. Caution, this meta file's guid is what controls the references to scripts in the library, deleting or modifying it will ruin any script references.
+Select the latest stable version from the builds section of the git page. Or if you want the bleeding edge build locate the files in the Builds/OpenSource directory of the repo.
+
+Drag the contents of this into a folder anywhere in your project and it'll work out of the box, I prefer the 'Assets/3rdParty/SpacepuppyUnityFramework' folder. The included meta file configures the scripts execution order automatically. Caution, this meta file's guid is what controls the references to scripts in the library, deleting or modifying it will ruin any script references.
 
 Once added make sure to go to "Spacepuppy->Settings->Sync TagData".
 
