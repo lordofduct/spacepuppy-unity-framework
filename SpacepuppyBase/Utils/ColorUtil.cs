@@ -134,6 +134,11 @@ namespace com.spacepuppy.Utils
                                (byte)MathUtil.Clamp((float)a.a + (float)((int)b.a - (int)a.a) * t, 0, 255));
         }
 
+        public static Color Slerp(Color a, Color b, float t)
+        {
+            return (Color)ColorHSV.Lerp((ColorHSV)a, (ColorHSV)b, t);
+        }
+
         #endregion
 
     }

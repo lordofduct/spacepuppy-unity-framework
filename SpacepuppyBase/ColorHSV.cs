@@ -1,8 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-
-using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
 {
@@ -49,11 +45,11 @@ namespace com.spacepuppy
             var min = Mathf.Min(r, Mathf.Min(g, b));
             var delta = max - min;
 
-            if (Mathf.Abs(delta) < 0.0001f)
+            if (Mathf.Abs(delta) < 0.001f)
             {
                 this.h = 0f;
             }
-            if (r >= g && r >= b)
+            else if (r >= g && r >= b)
             {
                 this.h = (((g - b) / delta) % 6f) / 6f;
             }
@@ -90,7 +86,7 @@ namespace com.spacepuppy
 
         public override string ToString()
         {
-            return string.Format("H:{0:0.000},S:{1:0.000},V:{2:0.000},A:{3:0.000}", this.h, this.s, this.v, this.a);
+            return string.Format("HSVA({0:0.000}, {1:0.000}, {2:0.000},{3:0.000})", this.h, this.s, this.v, this.a);
         }
 
         #endregion
@@ -131,12 +127,12 @@ namespace com.spacepuppy
 
         #region Conversion
 
-        public static implicit operator ColorHSV(Color c)
+        public static explicit operator ColorHSV(Color c)
         {
             return new ColorHSV(c);
         }
 
-        public static implicit operator Color(ColorHSV hsv)
+        public static explicit operator Color(ColorHSV hsv)
         {
             return ToColor(hsv);
         }
@@ -280,7 +276,7 @@ namespace com.spacepuppy
             return new Color(r + m, g + m, b + m, hsv.a);
         }
 
-        public ColorHSV Lerp(ColorHSV start, ColorHSV end, float t)
+        public static ColorHSV Lerp(ColorHSV start, ColorHSV end, float t)
         {
             ColorHSV r = new ColorHSV();
 
@@ -322,6 +318,28 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Colors
+
+        public static ColorHSV black { get { return new ColorHSV(0f, 0f, 0f); } }
+
+        public static ColorHSV white { get { return new ColorHSV(0f, 0f, 1f); } }
+
+        public static ColorHSV red { get { return new ColorHSV(0f, 1f, 1f); } }
+
+        public static ColorHSV green { get { return new ColorHSV(0.33333333f, 1f, 1f); } }
+
+        public static ColorHSV blue { get { return new ColorHSV(0.66666667f, 1f, 1f); } }
+
+        public static ColorHSV cyan { get { return new ColorHSV(0.5f, 1f, 1f); } }
+
+        public static ColorHSV magenta { get { return new ColorHSV(-0.1666667f, 1f, 1f); } }
+
+        public static ColorHSV gray { get { return new ColorHSV(0f, 0f, 0.5f); } }
+
+        public static ColorHSV grey { get { return new ColorHSV(0f, 0f, 0.5f); } }
+
+        #endregion
+
     }
-    
+
 }
