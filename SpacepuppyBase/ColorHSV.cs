@@ -22,18 +22,18 @@ namespace com.spacepuppy
 
         public ColorHSV(float h, float s, float v)
         {
-            this.h = Mathf.Clamp01(h);
-            this.s = Mathf.Clamp01(s);
-            this.v = Mathf.Clamp01(v);
+            this.h = h;
+            this.s = s;
+            this.v = v;
             this.a = 1f;
         }
 
         public ColorHSV(float h, float s, float v, float a)
         {
-            this.h = Mathf.Clamp01(h);
-            this.s = Mathf.Clamp01(s);
-            this.v = Mathf.Clamp01(v);
-            this.a = Mathf.Clamp01(a);
+            this.h = h;
+            this.s = s;
+            this.v = v;
+            this.a = a;
         }
 
         public ColorHSV(Color c)
@@ -65,6 +65,20 @@ namespace com.spacepuppy
             this.s = (max > 0f) ? delta / max : 0f;
             this.v = max;
             this.a = Mathf.Clamp01(c.a);
+        }
+
+        #endregion
+
+        #region Properties
+
+        public float HueAngle
+        {
+            get { return this.h * 360f; }
+        }
+
+        public ColorHSV normalized
+        {
+            get { return Normalize(this); }
         }
 
         #endregion
@@ -220,6 +234,12 @@ namespace com.spacepuppy
 
         #region Static Utils
 
+        public static ColorHSV Normalize(ColorHSV c)
+        {
+            c.Normalize();
+            return c;
+        }
+
         public static Color ToColor(ColorHSV hsv)
         {
             hsv.Normalize();
@@ -277,6 +297,15 @@ namespace com.spacepuppy
         }
 
         public static ColorHSV Lerp(ColorHSV start, ColorHSV end, float t)
+        {
+            start.h += (end.h - start.h) * t;
+            start.s += (end.s - start.s) * t;
+            start.v += (end.v - start.v) * t;
+            start.a += (end.a - start.a) * t;
+            return start;
+        }
+
+        public static ColorHSV Slerp(ColorHSV start, ColorHSV end, float t)
         {
             ColorHSV r = new ColorHSV();
 
