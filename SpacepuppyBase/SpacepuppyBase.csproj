@@ -77,6 +77,7 @@
     <Compile Include="Collections\SamplingStack.cs" />
     <Compile Include="Collections\SerializableDictionaryBase.cs" />
     <Compile Include="Collections\TempCollection.cs" />
+    <Compile Include="Collections\TempList.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
     <Compile Include="Collections\UniqueHashSet.cs" />
     <Compile Include="Collections\UniqueList.cs" />

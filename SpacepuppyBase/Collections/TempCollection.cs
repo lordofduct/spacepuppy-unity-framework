@@ -26,8 +26,6 @@ namespace com.spacepuppy.Collections
     public static class TempCollection
     {
 
-        private const int MAX_SIZE_INBYTES = 1024;
-
         #region Static Interface
         
         /// <summary>
@@ -63,7 +61,10 @@ namespace com.spacepuppy.Collections
         {
             if(TempList<T>._instance == null)
             {
-                return new TempList<T>();
+                return new TempList<T>()
+                {
+                    _global = true
+                };
             }
             else
             {
@@ -77,7 +78,10 @@ namespace com.spacepuppy.Collections
         {
             if (TempList<T>._instance == null)
             {
-                return new TempList<T>(e);
+                return new TempList<T>(e)
+                {
+                    _global = true
+                };
             }
             else
             {
@@ -92,7 +96,10 @@ namespace com.spacepuppy.Collections
         {
             if (TempList<T>._instance == null)
             {
-                return new TempList<T>(count);
+                return new TempList<T>(count)
+                {
+                    _global = true
+                };
             }
             else
             {
@@ -104,74 +111,6 @@ namespace com.spacepuppy.Collections
         }
 
         #endregion
-
-        #region Special Types
-
-        public class TempList<T> : List<T>, ITempCollection<T>
-        {
-
-            #region Fields
-
-            internal static TempList<T> _instance;
-
-            private int _maxCapacityOnRelease;
-            private int _version;
-
-            #endregion
-
-            #region CONSTRUCTOR
-
-            internal TempList()
-                : base()
-            {
-                var tp = typeof(T);
-                int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
-                _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-                _version = 1;
-            }
-
-            internal TempList(IEnumerable<T> e)
-                : base(e)
-            {
-                var tp = typeof(T);
-                int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
-                _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-                _version = 1;
-            }
-
-            internal TempList(int count)
-                : base(count)
-            {
-                var tp = typeof(T);
-                int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
-                _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-                _version = 1;
-            }
-
-            #endregion
-
-            #region IDisposable Interface
-
-            public void Dispose()
-            {
-                this.Clear();
-                if (_instance != null) return;
-
-                _instance = this;
-                if (this.Capacity > _maxCapacityOnRelease / Math.Min(_version, 4))
-                {
-                    this.Capacity = _maxCapacityOnRelease / Math.Min(_version, 4);
-                    _version = 0;
-                }
-
-                _version++;
-            }
-
-            #endregion
-
-        }
-
-        #endregion
-
+        
     }
 }

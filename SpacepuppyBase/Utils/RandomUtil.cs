@@ -55,6 +55,13 @@ namespace com.spacepuppy.Utils
             return (rng.Next(1000) % 2 != 0);
         }
 
+        public static bool Bool(this IRandom rng, float oddsOfTrue)
+        {
+            int i = rng.Next(100000);
+            int m = (int)(oddsOfTrue * 100000);
+            return i < m;
+        }
+
         /// <summary>
         /// Return -1, 0, 1 randomly. This can be used for bizarre things like randomizing an array.
         /// </summary>
