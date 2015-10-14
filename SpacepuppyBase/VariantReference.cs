@@ -1106,6 +1106,8 @@ namespace com.spacepuppy
             else if (tp == typeof(GameObject)) return true;
             else if (typeof(Component).IsAssignableFrom(tp)) return true;
             else if (typeof(UnityEngine.Object).IsAssignableFrom(tp)) return true;
+            else if (typeof(IComponent).IsAssignableFrom(tp)) return true;
+            else if (tp.IsInterface) return true;
             else return false;
         }
 
@@ -1137,6 +1139,8 @@ namespace com.spacepuppy
             else if (tp == typeof(GameObject)) return VariantType.GameObject;
             else if (typeof(Component).IsAssignableFrom(tp)) return VariantType.Component;
             else if (typeof(UnityEngine.Object).IsAssignableFrom(tp)) return VariantType.Object;
+            else if (typeof(IComponent).IsAssignableFrom(tp)) return VariantType.Component;
+            else if (tp.IsInterface) return VariantType.Object;
 
             return VariantType.Null;
         }

@@ -12,7 +12,7 @@ using com.spacepuppyeditor.Internal;
 namespace com.spacepuppyeditor.Base.Inspectors
 {
 
-    [CustomPropertyDrawer(typeof(VariantCollection))]
+    [CustomPropertyDrawer(typeof(VariantCollection), true)]
     public class VariantCollectionPropertyDrawer : PropertyDrawer
     {
 

@@ -36,12 +36,14 @@ namespace com.spacepuppyeditor.Base
             get { return _forcedComponentType; }
             set
             {
-                if (value == null)
-                    _forcedComponentType = null;
-                else if (typeof(Component).IsAssignableFrom(value))
-                    _forcedComponentType = value;
-                else
-                    throw new TypeArgumentMismatchException(value, typeof(Component), "value");
+                //if (value == null)
+                //    _forcedComponentType = null;
+                //else if (value.IsInterface || typeof(Component).IsAssignableFrom(value))
+                //    _forcedComponentType = value;
+                //else
+                //    throw new TypeArgumentMismatchException(value, typeof(Component), "value");
+
+                _forcedComponentType = value; //lets just allow anything... if they set it to something not working, it jsut won't list anything
             }
         }
 
@@ -175,65 +177,67 @@ namespace com.spacepuppyeditor.Base
                     variant.GameObjectValue = EditorGUI.ObjectField(r1, variant.GameObjectValue, typeof(GameObject), true) as GameObject;
                     break;
                 case VariantType.Component:
-                    //if (_forcedComponentType == null)
-                    //{
-                    //    if (_selectedComponentType == null && variant.ComponentValue != null)
-                    //    {
-                    //        _selectedComponentType = variant.ComponentValue.GetType();
-                    //    }
-
-                    //    if(_selectedComponentType == null)
-                    //    {
-                    //        _selectedComponentType = SPEditorGUI.TypeDropDown(r1, GUIContent.none, typeof(Component), _selectedComponentType, false, false, null, null, TypeDropDownListingStyle.ComponentMenu);
-                    //    }
-                    //    else
-                    //    {
-                    //        if(SPEditorGUI.XButton(ref r1, "Clear Component Type Selection"))
-                    //        {
-                    //            variant.ComponentValue = null;
-                    //            _selectedComponentType = null;
-                    //            GUI.changed = true; //force a change flag
-                    //        }
-
-                    //        variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _selectedComponentType, true) as Component;
-
-                    //        //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                    //        if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
-                    //        {
-                    //            var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
-                    //            variant.ComponentValue = go.GetComponent(_selectedComponentType);
-                    //            GUI.changed = true; //force a change flag
-                    //        }
-
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    variant.ComponentValue = EditorGUI.ObjectField(r1, variant.ComponentValue, _forcedComponentType, true) as Component;
-
-                    //    //DefaultFromSelfAttribute done here because DefaultFromSelfAttribute class can't do it itself
-                    //    if (variant.ComponentValue == null && GameObjectUtil.IsGameObjectSource(property.serializedObject) && this.fieldInfo.GetCustomAttributes(typeof(com.spacepuppy.DefaultFromSelfAttribute), false).Count() > 0)
-                    //    {
-                    //        var go = GameObjectUtil.GetGameObjectFromSource(property.serializedObject);
-                    //        variant.ComponentValue = go.GetComponent(_forcedComponentType);
-                    //        GUI.changed = true; //force a change flag
-                    //    }
-                    //}
-
-                    _selectComponentDrawer.AllowNonComponents = false;
-                    _selectComponentDrawer.RestrictionType = _forcedComponentType;
-                    _selectComponentDrawer.ShowXButton = true;
-                    var targProp = property.FindPropertyRelative("_unityObjectReference");
-                    EditorGUI.BeginChangeCheck();
-                    _selectComponentDrawer.OnGUI(r1, targProp);
-                    if(EditorGUI.EndChangeCheck())
                     {
-                        variant.ComponentValue = targProp.objectReferenceValue as Component;
+                        _selectComponentDrawer.AllowNonComponents = false;
+                        _selectComponentDrawer.RestrictionType = _forcedComponentType;
+                        _selectComponentDrawer.ShowXButton = true;
+                        var targProp = property.FindPropertyRelative("_unityObjectReference");
+                        EditorGUI.BeginChangeCheck();
+                        _selectComponentDrawer.OnGUI(r1, targProp);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            variant.ComponentValue = targProp.objectReferenceValue as Component;
+                        }
                     }
-
                     break;
                 case VariantType.Object:
-                    variant.ObjectValue = EditorGUI.ObjectField(r1, variant.ObjectValue, typeof(UnityEngine.Object), true);
+                    {
+                        var obj = variant.ObjectValue;
+                        if(_forcedComponentType != null && _forcedComponentType.IsInterface)
+                        {
+                            if (obj is GameObject || obj is Component)
+                            {
+                                _selectComponentDrawer.AllowNonComponents = false;
+                                _selectComponentDrawer.RestrictionType = _forcedComponentType;
+                                _selectComponentDrawer.ShowXButton = true;
+                                var targProp = property.FindPropertyRelative("_unityObjectReference");
+                                EditorGUI.BeginChangeCheck();
+                                _selectComponentDrawer.OnGUI(r1, targProp);
+                                if (EditorGUI.EndChangeCheck())
+                                {
+                                    variant.ObjectValue = targProp.objectReferenceValue as Component;
+                                }
+                            }
+                            else
+                            {
+                                EditorGUI.BeginChangeCheck();
+                                obj = EditorGUI.ObjectField(r1, obj, typeof(UnityEngine.Object), true);
+                                if(EditorGUI.EndChangeCheck())
+                                {
+                                    if(obj == null)
+                                    {
+                                        variant.ObjectValue = null;
+                                    }
+                                    else if(TypeUtil.IsType(obj.GetType(), _forcedComponentType))
+                                    {
+                                        variant.ObjectValue = obj;
+                                    }
+                                    else
+                                    {
+                                        var go = GameObjectUtil.GetGameObjectFromSource(obj);
+                                        if (go != null)
+                                            variant.ObjectValue = go.GetComponent(_forcedComponentType);
+                                        else
+                                            variant.ObjectValue = null;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            variant.ObjectValue = EditorGUI.ObjectField(r1, obj, _forcedComponentType, true);
+                        }
+                    }
                     break;
             }
         }
