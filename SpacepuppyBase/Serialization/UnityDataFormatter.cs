@@ -7,11 +7,14 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
+using System;
+using System.IO;
 
 namespace com.spacepuppy.Serialization
 {
 
-    public sealed class UnityDataFormatter : System.IDisposable
+    [System.Obsolete("No longer used.")]
+    public sealed class UnityDataFormatter : IFormatter, System.IDisposable
     {
 
         #region Fields
@@ -62,8 +65,8 @@ namespace com.spacepuppy.Serialization
                     _formatter.Serialize(strm, obj);
                     strm.Position = 0;
 
-                    byte[] arr = new byte[strm.Length];
-                    strm.Read(arr, 0, arr.Length);
+                    //byte[] arr = new byte[strm.Length];
+                    //strm.Read(arr, 0, arr.Length);
 
                     data.SetData(strm, _surrogate.StopSerialization());
                 }
@@ -85,6 +88,24 @@ namespace com.spacepuppy.Serialization
                 _surrogate.StopDeserialization();
                 return result;
             }
+        }
+
+        #endregion
+
+        #region IFormatter Interface
+
+        public void Serialize(Stream strm, object graph)
+        {
+            _formatter.Serialize(strm, graph);
+        }
+
+        public object Deserialize(Stream strm)
+        {
+            strm.Position = 0;
+            _surrogate.StartDeserialization(Enumerable.Empty<UnityEngine.Object>());
+            var result = _formatter.Deserialize(strm);
+            _surrogate.StopDeserialization();
+            return result;
         }
 
         #endregion
@@ -143,14 +164,54 @@ namespace com.spacepuppy.Serialization
 
         private static Dictionary<System.Type, ObjectCachePool<UnityDataFormatter>> _formatterPools;
 
+        public ISurrogateSelector SurrogateSelector
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public SerializationBinder Binder
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public StreamingContext Context
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public static UnityDataFormatter GetFormatter<T>() where T : IFormatter
         {
             if (_formatterPools == null) _formatterPools = new Dictionary<System.Type, ObjectCachePool<UnityDataFormatter>>();
 
             var tp = typeof(T);
+            UnityDataFormatter formatter;
             if(_formatterPools.ContainsKey(tp))
             {
-                return _formatterPools[tp].GetInstance();
+                formatter = _formatterPools[tp].GetInstance();
             }
             else
             {
@@ -161,8 +222,10 @@ namespace com.spacepuppy.Serialization
                     return f;
                 });
                 _formatterPools.Add(tp, pool);
-                return pool.GetInstance();
+                formatter = pool.GetInstance();
             }
+            
+            return formatter;
         }
 
         #endregion

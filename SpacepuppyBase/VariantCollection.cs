@@ -1,14 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 using com.spacepuppy.Dynamic;
+using System;
 
 namespace com.spacepuppy
 {
 
     [System.Serializable()]
-    public class VariantCollection : IDynamic, ISerializationCallbackReceiver
+    public class VariantCollection : IDynamic, ISerializationCallbackReceiver, ISerializable
     {
         
         #region Fields
@@ -188,6 +190,29 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region ISerializable Interface
+
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            this.GetObjectData(info, context);
+        }
+
+        protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            (this as ISerializationCallbackReceiver).OnBeforeSerialize();
+            info.AddValue("_keys", _keys);
+            info.AddValue("_values", _values);
+        }
+
+        protected VariantCollection(SerializationInfo info, StreamingContext context)
+        {
+            _keys = info.GetValue("_keys", typeof(string[])) as string[];
+            _values = info.GetValue("_values", typeof(VariantReference[])) as VariantReference[];
+
+            (this as ISerializationCallbackReceiver).OnAfterDeserialize();
+        }
+
+        #endregion
 
 
         #region Special Types

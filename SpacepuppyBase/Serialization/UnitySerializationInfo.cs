@@ -9,6 +9,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Serialization
 {
 
+    [System.Obsolete("No longer used.")]
     public sealed class UnitySerializationInfo
     {
 
@@ -93,6 +94,10 @@ namespace com.spacepuppy.Serialization
             if (TypeUtil.IsType(tp, typeof(UnityEngine.Object)))
             {
                 this.AddUnityObjectReference(name, value as UnityEngine.Object);
+            }
+            else if(typeof(DummyList).IsAssignableFrom(tp))
+            {
+                _currentInfo.AddValue(name, value, tp);
             }
             else if (tp.IsListType(true))
             {
@@ -377,7 +382,7 @@ namespace com.spacepuppy.Serialization
         private void AddList(string name, System.Collections.IList lst, System.Type elementType, bool isArray)
         {
             var dummy = new DummyList(lst, elementType, isArray);
-            _currentInfo.AddValue(name, dummy);
+            _currentInfo.AddValue(name, dummy, typeof(DummyList));
         }
 
         #endregion
@@ -478,10 +483,10 @@ namespace com.spacepuppy.Serialization
                 _elementType = TypeUtil.ParseType(info.GetString("assembly"), info.GetString("type"));
                 _isArray = info.GetBoolean("isArray");
 
-                if(_isArray)
+                if (_isArray)
                 {
                     var arr = System.Array.CreateInstance(_elementType, cnt);
-                    for(int i = 0; i < cnt; i++)
+                    for (int i = 0; i < cnt; i++)
                     {
                         arr.SetValue(info.GetValue("element" + i.ToString(), _elementType), i);
                     }

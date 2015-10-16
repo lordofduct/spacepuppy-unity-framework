@@ -10,6 +10,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Serialization
 {
 
+    [System.Obsolete("No longer used.")]
     internal class UnitySerializationSurrogate : ISerializationSurrogate, ISurrogateSelector
     {
 

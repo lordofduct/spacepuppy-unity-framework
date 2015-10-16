@@ -159,6 +159,8 @@
     <Compile Include="Scenario\t_OnEnable.cs" />
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />
+    <Compile Include="Serialization\SimpleUnityStructureSurrogate.cs" />
+    <Compile Include="Serialization\SPSerializationSurrogate.cs" />
     <Compile Include="SPEntity.cs" />
     <Compile Include="ITimeSupplier.cs" />
     <Compile Include="KillableEntity.cs" />

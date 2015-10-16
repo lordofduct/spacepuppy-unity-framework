@@ -178,7 +178,7 @@ namespace com.spacepuppy.Utils
 
             float IRandom.Next()
             {
-                return (float)this.Next();
+                return (float)this.NextDouble();
             }
 
             double IRandom.NextDouble()
