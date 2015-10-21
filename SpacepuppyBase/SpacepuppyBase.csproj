@@ -23,7 +23,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <CodeAnalysisRuleSet>SpacepuppyBase.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,7 +34,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <CodeAnalysisRuleSet>SpacepuppyBase.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -248,6 +250,7 @@
     <Compile Include="TinyUid.cs" />
     <Compile Include="Tuple.cs" />
     <Compile Include="Tween\Accessors\GeneralMoveAccessor.cs" />
+    <Compile Include="Tween\Accessors\GeneralRotateAccessor.cs" />
     <Compile Include="Tween\Accessors\RigidbodyMovePositionAccessor.cs" />
     <Compile Include="Tween\Accessors\TimeScaleMemberAccessor.cs" />
     <Compile Include="Tween\Accessors\TransformGlobalTransAccessor.cs" />
@@ -255,11 +258,13 @@
     <Compile Include="Tween\CallbackTweener.cs" />
     <Compile Include="Tween\Curves\Color32MemberCurve.cs" />
     <Compile Include="Tween\Curves\ColorMemberCurve.cs" />
+    <Compile Include="Tween\Curves\RectMemberCurve.cs" />
     <Compile Include="Tween\Curves\StringCurve.cs" />
     <Compile Include="Tween\Curves\TransMemberCurve.cs" />
     <Compile Include="Tween\CustomMemberCurveAttribute.cs" />
     <Compile Include="Tween\Curves\FloatMemberCurve.cs" />
     <Compile Include="Tween\CustomTweenMemberAccessorAttribute.cs" />
+    <Compile Include="Tween\Delegates.cs" />
     <Compile Include="Tween\ITweenHash.cs" />
     <Compile Include="Tween\ITweenMemberAccessor.cs" />
     <Compile Include="Tween\MemberCurve.cs" />
@@ -323,7 +328,6 @@
     <None Include="Hooks\EarlyExecutionUpdateEventHooks.cs.meta" />
     <None Include="Hooks\TardyExecutionUpdateEventHooks.cs.meta" />
     <None Include="Hooks\UpdateEventHooks.cs.meta" />
-    <None Include="SpacepuppyBase.ruleset" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

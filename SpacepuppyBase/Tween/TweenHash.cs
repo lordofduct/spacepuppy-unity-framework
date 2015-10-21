@@ -7,7 +7,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween
 {
 
-    public class TweenHash : ITweenHash
+    public class TweenHash : ITweenHash, System.ICloneable
     {
 
         public enum AnimMode
@@ -20,8 +20,10 @@ namespace com.spacepuppy.Tween
             FromTo = 3,
             RedirectTo = 4
         }
-        
+
         #region Fields
+
+        private TweenHash _chainLink;
 
         private object _id;
         private object _targ;
@@ -223,6 +225,32 @@ namespace com.spacepuppy.Tween
 
         #region Curve Methods
 
+        public TweenHash Chain(object targ)
+        {
+            var hash = new TweenHash(_targ, _id);
+            hash._chainLink = this;
+            hash._defaultEase = _defaultEase;
+            hash._delay = _delay;
+            hash._updateType = _updateType;
+            hash._timeSupplier = _timeSupplier;
+            hash._wrap = _wrap;
+            hash._wrapCount = _wrapCount;
+            hash._reverse = _reverse;
+            hash._speedScale = _speedScale;
+            hash._autoKill = _autoKill;
+            hash._autoKillToken = _autoKillToken;
+            hash._onStep = _onStep;
+            hash._onWrap = _onWrap;
+            hash._onFinish = _onFinish;
+            return hash;
+        }
+
+        public TweenHash Apply(TweenConfigCallback callback, Ease ease, float dur)
+        {
+            if (callback != null) callback(this, ease, dur);
+            return this;
+        }
+
         //#########################
         // CURVES
         //
@@ -414,16 +442,18 @@ namespace com.spacepuppy.Tween
 
             //set curves
             Tweener tween = null;
-            if (_props.Count == 0)
+            if (_chainLink != null || _props.Count > 1)
             {
-                return new ObjectTweener(_targ, new NullCurve());
+                var grp = new TweenCurveGroup();
+                this.ApplyToTweenCurveGroup(grp);
+                tween = new ObjectTweener(_targ, grp);
             }
-            else if (_props.Count == 1)
+            else if(_props.Count == 1)
             {
                 var curve = this.CreateCurve(_props[0]);
                 if (curve == null)
                 {
-                    Debug.LogWarning("Failed to create tween for property '" + _props[0].name + "' on target.", _targ as Object);
+                    Debug.LogWarning("Failed to create tween for property '" + _props[0].name + "' on target.", _targ as UnityEngine.Object);
                     return new ObjectTweener(_targ, TweenCurve.Null);
                 }
                 else
@@ -431,16 +461,7 @@ namespace com.spacepuppy.Tween
             }
             else
             {
-                var grp = new TweenCurveGroup();
-                for (int i = 0; i < _props.Count; i++)
-                {
-                    var curve = this.CreateCurve(_props[i]);
-                    if (curve == null)
-                        Debug.LogWarning("Failed to create tween for property '" + _props[i].name + "' on target.", _targ as Object);
-                    else
-                        grp.Curves.Add(curve);
-                }
-                tween = new ObjectTweener(_targ, grp);
+                tween = new ObjectTweener(_targ, TweenCurve.Null);
             }
 
             //set props
@@ -457,6 +478,24 @@ namespace com.spacepuppy.Tween
 
             return tween;
         }
+
+        private void ApplyToTweenCurveGroup(TweenCurveGroup group)
+        {
+            if(_chainLink != null)
+            {
+                _chainLink.ApplyToTweenCurveGroup(group);
+            }
+
+            for (int i = 0; i < _props.Count; i++)
+            {
+                var curve = this.CreateCurve(_props[i]);
+                if (curve == null)
+                    Debug.LogWarning("Failed to create tween for property '" + _props[i].name + "' on target.", _targ as Object);
+                else
+                    group.Curves.Add(curve);
+            }
+        }
+
         private TweenCurve CreateCurve(PropInfo prop)
         {
             try
@@ -525,20 +564,6 @@ namespace com.spacepuppy.Tween
                 this.option = option;
             }
 
-        }
-
-        private class NullCurve : TweenCurve
-        {
-
-            public override float TotalTime
-            {
-                get { return 0f; }
-            }
-
-            protected internal override void Update(object targ, float dt, float t)
-            {
-                //do nothing
-            }
         }
 
         #endregion
@@ -683,6 +708,35 @@ namespace com.spacepuppy.Tween
         Tweener ITweenHash.Play(float playHeadPosition)
         {
             return this.Play(playHeadPosition);
+        }
+
+        #endregion
+
+        #region ICloneable INterface
+
+        public TweenHash Clone()
+        {
+            var hash = new TweenHash(_targ, _id);
+            hash._props = _props;
+            hash._defaultEase = _defaultEase;
+            hash._delay = _delay;
+            hash._updateType = _updateType;
+            hash._timeSupplier = _timeSupplier;
+            hash._wrap = _wrap;
+            hash._wrapCount = _wrapCount;
+            hash._reverse = _reverse;
+            hash._speedScale = _speedScale;
+            hash._autoKill = _autoKill;
+            hash._autoKillToken = _autoKillToken;
+            hash._onStep = _onStep;
+            hash._onWrap = _onWrap;
+            hash._onFinish = _onFinish;
+            return hash;
+        }
+
+        object System.ICloneable.Clone()
+        {
+            return this.Clone();
         }
 
         #endregion

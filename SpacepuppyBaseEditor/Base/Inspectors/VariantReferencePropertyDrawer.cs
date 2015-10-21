@@ -239,6 +239,16 @@ namespace com.spacepuppyeditor.Base
                         }
                     }
                     break;
+                case VariantType.LayerMask:
+                    {
+                        variant.LayerMaskValue = SPEditorGUI.LayerMaskField(r1, GUIContent.none, (int)variant.LayerMaskValue);
+                    }
+                    break;
+                case VariantType.Rect:
+                    {
+                        variant.RectValue = EditorGUI.RectField(r1, variant.RectValue);
+                    }
+                    break;
             }
         }
 
@@ -288,7 +298,7 @@ namespace com.spacepuppyeditor.Base
             helper._x = property.FindPropertyRelative("_x").floatValue;
             helper._y = property.FindPropertyRelative("_y").floatValue;
             helper._z = property.FindPropertyRelative("_z").floatValue;
-            helper._w = property.FindPropertyRelative("_w").floatValue; //TODO - need better support for doubles
+            helper._w = property.FindPropertyRelative("_w").doubleValue;
             helper._string = property.FindPropertyRelative("_string").stringValue;
             helper._unityObjectReference = property.FindPropertyRelative("_unityObjectReference").objectReferenceValue;
         }
@@ -300,7 +310,7 @@ namespace com.spacepuppyeditor.Base
             property.FindPropertyRelative("_x").floatValue = helper._x;
             property.FindPropertyRelative("_y").floatValue = helper._y;
             property.FindPropertyRelative("_z").floatValue = helper._z;
-            property.FindPropertyRelative("_w").floatValue = (float)helper._w; //TODO - new better support for doubles
+            property.FindPropertyRelative("_w").doubleValue = helper._w;
             property.FindPropertyRelative("_string").stringValue = helper._string;
             property.FindPropertyRelative("_unityObjectReference").objectReferenceValue = helper._unityObjectReference;
         }

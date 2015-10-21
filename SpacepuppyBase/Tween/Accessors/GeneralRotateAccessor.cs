@@ -5,18 +5,17 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(GameObject), "*Move")]
-    [CustomTweenMemberAccessor(typeof(Component), "*Move")]
-    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*Move")]
-    public class GeneralMoveAccessor : ITweenMemberAccessor
+    [CustomTweenMemberAccessor(typeof(GameObject), "*Rotate")]
+    [CustomTweenMemberAccessor(typeof(Component), "*Rotate")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*Rotate")]
+    public class GeneralRotateAccessor : ITweenMemberAccessor
     {
-
 
         #region ImplicitCurve Interface
 
         public System.Type Init(string propName, string args)
         {
-            return typeof(Vector3);
+            return typeof(Quaternion);
         }
 
         public object Get(object target)
@@ -24,19 +23,19 @@ namespace com.spacepuppy.Tween.Accessors
             var t = GameObjectUtil.GetTransformFromSource(target);
             if (t != null)
             {
-                return t.position;
+                return t.rotation;
             }
-            return Vector3.zero;
+            return Quaternion.identity;
         }
 
         public void Set(object targ, object valueObj)
         {
-            var value = ConvertUtil.ToVector3(valueObj);
+            var value = ConvertUtil.ToQuaternion(valueObj);
 
             if (targ is Rigidbody)
             {
                 var rb = targ as Rigidbody;
-                rb.MovePosition(value - rb.position);
+                rb.MoveRotation(QuaternionUtil.FromToRotation(rb.rotation, value));
             }
             else
             {
@@ -46,18 +45,16 @@ namespace com.spacepuppy.Tween.Accessors
                 var rb = trans.GetComponent<Rigidbody>();
                 if (rb != null && !rb.isKinematic)
                 {
-                    var dp = value - rb.position;
-                    rb.velocity = dp / Time.fixedDeltaTime;
+                    rb.MoveRotation(QuaternionUtil.FromToRotation(rb.rotation, value));
                     return;
                 }
 
-                //just update the position
-                trans.position = value;
+                //just update the rotation
+                trans.rotation = value;
             }
         }
 
         #endregion
-
 
     }
 }

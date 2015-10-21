@@ -1,24 +1,31 @@
 ﻿using UnityEngine;
 
 using com.spacepuppy.Geom;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(Transform), "GlobalTrans")]
+    [CustomTweenMemberAccessor(typeof(GameObject), "*GlobalTrans")]
+    [CustomTweenMemberAccessor(typeof(Component), "*GlobalTrans")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*GlobalTrans")]
     public class TransformGlobalTransAccessor : ITweenMemberAccessor
     {
+
+        private bool _includeScale;
 
         #region ITweenMemberAccessor Interface
 
         public System.Type Init(string propName, string args)
         {
+            _includeScale = ConvertUtil.ToBool(args);
+
             return typeof(Trans);
         }
 
         public object Get(object target)
         {
-            var trans = target as Transform;
+            var trans = GameObjectUtil.GetTransformFromSource(target);
             if (trans != null)
             {
                 return Trans.GetGlobal(trans);
@@ -29,10 +36,10 @@ namespace com.spacepuppy.Tween.Accessors
         public void Set(object target, object value)
         {
             if (!(value is Trans)) return;
-            var trans = target as Transform;
+            var trans = GameObjectUtil.GetTransformFromSource(target);
             if (trans != null)
             {
-                ((Trans)value).SetToGlobal(trans, true);
+                ((Trans)value).SetToGlobal(trans, _includeScale);
             }
         }
 

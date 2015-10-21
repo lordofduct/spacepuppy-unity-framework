@@ -128,6 +128,12 @@ namespace com.spacepuppy
                         case VariantType.Component:
                             this.ComponentValue = value as Component;
                             break;
+                        case VariantType.LayerMask:
+                            this.LayerMaskValue = (LayerMask)value;
+                            break;
+                        case VariantType.Rect:
+                            this.RectValue = (Rect)value;
+                            break;
                     }
                 }
             }
@@ -199,6 +205,10 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return _unityObjectReference != null;
+                            case VariantType.LayerMask:
+                                return (_x + _y + _z + _w) != 0;
+                            case VariantType.Rect:
+                                return (_x + _y + _z + _w) != 0;
                         }
                         break;
                     case RefMode.Property:
@@ -253,6 +263,10 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return 0;
+                            case VariantType.LayerMask:
+                                return (int)_w;
+                            case VariantType.Rect:
+                                return (int)_x;
                         }
                         break;
                     case RefMode.Property:
@@ -306,6 +320,10 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return 0f;
+                            case VariantType.LayerMask:
+                                return (int)_w;
+                            case VariantType.Rect:
+                                return _x;
                         }
                         break;
                     case RefMode.Property:
@@ -359,6 +377,10 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return 0d;
+                            case VariantType.LayerMask:
+                                return (int)_w;
+                            case VariantType.Rect:
+                                return _x;
                         }
                         break;
                     case RefMode.Property:
@@ -412,6 +434,10 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return Vector2.zero;
+                            case VariantType.LayerMask:
+                                return new Vector2((float)_w, 0f);
+                            case VariantType.Rect:
+                                return new Vector2(_x, _y);
                         }
                         break;
                     case RefMode.Property:
@@ -465,6 +491,10 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return Vector3.zero;
+                            case VariantType.LayerMask:
+                                return new Vector3((float)_w, 0f, 0f);
+                            case VariantType.Rect:
+                                return new Vector3(_x, _y, _z);
                         }
                         break;
                     case RefMode.Property:
@@ -518,14 +548,18 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return Vector4.zero;
+                            case VariantType.LayerMask:
+                                return new Vector4((float)_w, 0f, 0f, 0f);
+                            case VariantType.Rect:
+                                return new Vector4(_x, _y, _z, (float)_w);
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToVector3(this.Evaluate());
+                        return ConvertUtil.ToVector4(this.Evaluate());
                     case RefMode.Eval:
-                        return new Vector3((float)this.EvaluateStatement(), 0f, 0f);
+                        return new Vector4((float)this.EvaluateStatement(), 0f, 0f, 0f);
                 }
-                return Vector3.zero;
+                return Vector4.zero;
             }
             set
             {
@@ -608,6 +642,10 @@ namespace com.spacepuppy
                             case VariantType.GameObject:
                             case VariantType.Component:
                                 return Color.black;
+                            case VariantType.LayerMask:
+                                return ConvertUtil.ToColor((int)_w);
+                            case VariantType.Rect:
+                                return new Color(_x, _y, _z, (float)_w);
                         }
                         break;
                     case RefMode.Property:
@@ -656,6 +694,10 @@ namespace com.spacepuppy
                                 return DecodeDateTime(_w, _x);
                             case VariantType.GameObject:
                             case VariantType.Component:
+                                return new System.DateTime(0L);
+                            case VariantType.LayerMask:
+                                return new System.DateTime(0L);
+                            case VariantType.Rect:
                                 return new System.DateTime(0L);
                         }
                         break;
@@ -769,6 +811,133 @@ namespace com.spacepuppy
                     _type = VariantType.Object;
             }
         }
+        public LayerMask LayerMaskValue
+        {
+            get
+            {
+                switch (_mode)
+                {
+                    case RefMode.Value:
+                        switch (_type)
+                        {
+                            case VariantType.Object:
+                                return 0;
+                            case VariantType.String:
+                                return ConvertUtil.ToInt(_string);
+                            case VariantType.Boolean:
+                                return (_x != 0f) ? 1 : 0;
+                            case VariantType.Integer:
+                                return (int)_w;
+                            case VariantType.Float:
+                                return (int)_x;
+                            case VariantType.Double:
+                                return (int)_w;
+                            case VariantType.Vector2:
+                            case VariantType.Vector3:
+                            case VariantType.Vector4:
+                            case VariantType.Quaternion:
+                                return (int)_x;
+                            case VariantType.Color:
+                                return ConvertUtil.ToInt(new Color(_x, _y, _z, (float)_w));
+                            case VariantType.DateTime:
+                                return 0;
+                            case VariantType.GameObject:
+                            case VariantType.Component:
+                                return 0;
+                            case VariantType.LayerMask:
+                                return new LayerMask() { value = (int)_w };
+                            case VariantType.Rect:
+                                return new LayerMask();
+                        }
+                        break;
+                    case RefMode.Property:
+                        return ConvertUtil.ToInt(this.Evaluate());
+                    case RefMode.Eval:
+                        return (int)this.EvaluateStatement();
+                }
+                return 0;
+            }
+            set
+            {
+                _x = 0f;
+                _y = 0f;
+                _z = 0f;
+                _w = value;
+                _string = null;
+                _unityObjectReference = null;
+                _type = VariantType.LayerMask;
+                _mode = RefMode.Value;
+            }
+        }
+        public Rect RectValue
+        {
+            get
+            {
+                switch (_mode)
+                {
+                    case RefMode.Value:
+                        switch (_type)
+                        {
+                            case VariantType.Object:
+                                return new Rect();
+                            case VariantType.String:
+                                {
+                                    var v = ConvertUtil.ToVector4(_string);
+                                    return new Rect(v.x, v.y, v.z, v.w);
+                                }
+                            case VariantType.Boolean:
+                                return new Rect();
+                            case VariantType.Integer:
+                                return new Rect((float)_w, 0f, 0f, 0f);
+                            case VariantType.Float:
+                                return new Rect(_x, 0f, 0f, 0f);
+                            case VariantType.Double:
+                                return new Rect((float)_w, 0f, 0f, 0f);
+                            case VariantType.Vector2:
+                            case VariantType.Vector3:
+                            case VariantType.Vector4:
+                            case VariantType.Quaternion:
+                            case VariantType.Color:
+                                return new Rect(_x, _y, _z, (float)_w);
+                            case VariantType.DateTime:
+                                return new Rect();
+                            case VariantType.GameObject:
+                            case VariantType.Component:
+                                return new Rect();
+                            case VariantType.LayerMask:
+                                return new Rect();
+                            case VariantType.Rect:
+                                return new Rect(_x, _y, _z, (float)_w);
+                        }
+                        break;
+                    case RefMode.Property:
+                        {
+                            var r = this.Evaluate();
+                            if (r is Rect)
+                                return (Rect)r;
+                            else
+                                return new Rect();
+                        }
+                    case RefMode.Eval:
+                        {
+                            var v = new Vector4((float)this.EvaluateStatement(), 0f, 0f, 0f);
+                            return new Rect(v.x, 0f, 0f, 0f);
+                        }
+                }
+                return new Rect();
+            }
+            set
+            {
+                _x = value.xMin;
+                _y = value.yMin;
+                _z = value.width;
+                _w = value.height;
+                _string = null;
+                _unityObjectReference = null;
+                _type = VariantType.Rect;
+                _mode = RefMode.Value;
+            }
+        }
 
         #endregion
 
@@ -847,6 +1016,10 @@ namespace com.spacepuppy
                                 return this.GameObjectValue;
                             case VariantType.Component:
                                 return this.ComponentValue;
+                            case VariantType.LayerMask:
+                                return this.LayerMaskValue;
+                            case VariantType.Rect:
+                                return this.RectValue;
                         }
                     }
                     break;
@@ -1101,6 +1274,8 @@ namespace com.spacepuppy
             else if (tp == typeof(Vector4)) return true;
             else if (tp == typeof(Quaternion)) return true;
             else if (tp == typeof(Color)) return true;
+            else if (tp == typeof(LayerMask)) return true;
+            else if (tp == typeof(Rect)) return true;
             else if (tp == typeof(GameObject)) return true;
             else if (typeof(Component).IsAssignableFrom(tp)) return true;
             else if (typeof(UnityEngine.Object).IsAssignableFrom(tp)) return true;
@@ -1134,6 +1309,8 @@ namespace com.spacepuppy
             else if (tp == typeof(Vector4)) return VariantType.Vector4;
             else if (tp == typeof(Quaternion)) return VariantType.Quaternion;
             else if (tp == typeof(Color)) return VariantType.Color;
+            else if (tp == typeof(LayerMask)) return VariantType.LayerMask;
+            else if (tp == typeof(Rect)) return VariantType.Rect;
             else if (tp == typeof(GameObject)) return VariantType.GameObject;
             else if (typeof(Component).IsAssignableFrom(tp)) return VariantType.Component;
             else if (typeof(UnityEngine.Object).IsAssignableFrom(tp)) return VariantType.Object;

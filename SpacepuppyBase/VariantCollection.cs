@@ -4,12 +4,14 @@ using System.Linq;
 using System.Runtime.Serialization;
 
 using com.spacepuppy.Dynamic;
+using System;
+using System.Collections;
 
 namespace com.spacepuppy
 {
 
     [System.Serializable()]
-    public class VariantCollection : IDynamic, ISerializationCallbackReceiver, ISerializable
+    public class VariantCollection : IDynamic, ISerializationCallbackReceiver, ISerializable, IEnumerable<KeyValuePair<string, object>>
     {
         
         #region Fields
@@ -115,6 +117,61 @@ namespace com.spacepuppy
             return _table.Remove(key);
         }
 
+        /// <summary>
+        /// Iterates over members of the collection and attempts to set them to an object as if they 
+        /// were property names on that object.
+        /// </summary>
+        /// <param name="obj"></param>
+        public void DynamicallyCopyTo(object obj)
+        {
+            var e = _table.GetEnumerator();
+            while(e.MoveNext())
+            {
+                DynamicUtil.SetValue(obj, e.Current.Key, e.Current.Value.Value);
+            }
+        }
+
+        /// <summary>
+        /// Iterates over keys in this collection and attempts to update the values associated with that 
+        /// key to the value pulled from a property on object.
+        /// </summary>
+        /// <param name="obj"></param>
+        public void DynamicallyCopyFrom(object obj)
+        {
+            var e = _table.GetEnumerator();
+            while(e.MoveNext())
+            {
+                e.Current.Value.Value = DynamicUtil.GetValue(obj, e.Current.Key);
+            }
+        }
+
+        public com.spacepuppy.Tween.TweenHash DynamicallyTweenTo(com.spacepuppy.Tween.TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur)
+        {
+            var e = _table.GetEnumerator();
+            while (e.MoveNext())
+            {
+                var value = e.Current.Value.Value;
+                if (value == null) continue;
+
+                switch(VariantReference.GetVariantType(value.GetType()))
+                {
+                    case VariantType.Integer:
+                    case VariantType.Float:
+                    case VariantType.Double:
+                    case VariantType.Vector2:
+                    case VariantType.Vector3:
+                    case VariantType.Vector4:
+                    case VariantType.Quaternion:
+                    case VariantType.Color:
+                    case VariantType.Rect:
+                        hash.To(e.Current.Key, ease, value, dur);
+                        break;
+                }
+            }
+
+            return hash;
+        } 
+
         #endregion
 
         #region IDynamic Interface
@@ -213,6 +270,79 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IEnumerable Interface
+
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        public struct Enumerator : IEnumerator<KeyValuePair<string, object>>
+        {
+
+            private Dictionary<string, VariantReference>.Enumerator _e;
+            private KeyValuePair<string, object> _current;
+
+            internal Enumerator(VariantCollection coll)
+            {
+                _e = coll._table.GetEnumerator();
+                _current = default(KeyValuePair<string, object>);
+            }
+
+
+
+            public KeyValuePair<string, object> Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
+
+            public void Dispose()
+            {
+                _e.Dispose();
+                _current = default(KeyValuePair<string, object>);
+            }
+
+            public bool MoveNext()
+            {
+                if(_e.MoveNext())
+                {
+                    _current = new KeyValuePair<string, object>(_e.Current.Key, _e.Current.Value.Value);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            void System.Collections.IEnumerator.Reset()
+            {
+                (_e as System.Collections.IEnumerator).Reset();
+            }
+        }
+
+        #endregion
 
         #region Special Types
 

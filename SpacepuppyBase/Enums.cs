@@ -138,7 +138,9 @@
         Color = 10,
         DateTime = 11,
         GameObject = 12,
-        Component = 13
+        Component = 13,
+        LayerMask = 14,
+        Rect = 15
     }
 
     public enum TimeUnits

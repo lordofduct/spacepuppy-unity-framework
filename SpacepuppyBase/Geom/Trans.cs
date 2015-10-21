@@ -229,6 +229,13 @@ namespace com.spacepuppy.Geom
             trans.localScale = Scale;
         }
 
+        public void SetToLocal(Transform trans, bool bSetScale)
+        {
+            trans.localPosition = Position;
+            trans.localRotation = Rotation;
+            if (bSetScale) trans.localScale = Scale;
+        }
+
         public void SetToGlobal(Transform trans, bool bSetScale)
         {
             if (bSetScale)
