@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace com.spacepuppy.Collections
 {
@@ -48,29 +47,19 @@ namespace com.spacepuppy.Collections
 
         public void Clean()
         {
-            //List<TKey> lst = null;
-
-            //foreach (var pair in _dict)
-            //{
-            //    if (!pair.Value.IsAlive)
-            //    {
-            //        if (lst == null) lst = new List<TKey>();
-            //        lst.Add(pair.Key);
-            //    }
-            //}
-
-            //if (lst != null)
-            //{
-            //    foreach (var key in lst)
-            //    {
-            //        _dict.Remove(key);
-            //    }
-            //}
-
-            var arr = (from p in _dict where !p.Value.IsAlive select p.Key).ToArray();
-            foreach (var key in arr)
+            using (var lst = TempCollection.GetList<TKey>())
             {
-                _dict.Remove(key);
+                var e = _dict.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    if (!e.Current.Value.IsAlive) lst.Add(e.Current.Key);
+                }
+
+                var e2 = lst.GetEnumerator();
+                while(e2.MoveNext())
+                {
+                    _dict.Remove(e2.Current);
+                }
             }
         }
 
@@ -298,11 +287,10 @@ namespace com.spacepuppy.Collections
 
             public IEnumerator<TKey> GetEnumerator()
             {
-                //foreach (var pair in _dict)
-                //{
-                //    yield return pair.Key;
-                //}
-                return (from p in _dict select p.Key).GetEnumerator();
+                foreach (var pair in _dict)
+                {
+                    yield return pair.Key;
+                }
             }
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -375,11 +363,10 @@ namespace com.spacepuppy.Collections
 
             public IEnumerator<TValue> GetEnumerator()
             {
-                //foreach (var pair in _dict)
-                //{
-                //    yield return pair.Value;
-                //}
-                return (from p in _dict select p.Value).GetEnumerator();
+                foreach (var pair in _dict)
+                {
+                    yield return pair.Value;
+                }
             }
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

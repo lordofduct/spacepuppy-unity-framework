@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace com.spacepuppy.Utils
 {
@@ -51,7 +49,7 @@ namespace com.spacepuppy.Utils
         {
             return Quaternion.Inverse(start) * end;
         }
-
+        
         public static Quaternion SpeedSlerp(Quaternion from, Quaternion to, float angularSpeed, float dt, bool bUseRadians = false)
         {
             if (bUseRadians) angularSpeed *= Mathf.Rad2Deg;

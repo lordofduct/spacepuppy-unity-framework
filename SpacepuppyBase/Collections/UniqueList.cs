@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Collections
 {
@@ -325,12 +326,7 @@ namespace com.spacepuppy.Collections
 
         void System.Collections.ICollection.CopyTo(Array array, int index)
         {
-            if (_lst is System.Collections.ICollection)
-                (_lst as System.Collections.ICollection).CopyTo(array, index);
-            else
-            {
-                _lst.ToArray().CopyTo(array, index);
-            }
+            ArrayUtil.Copy(_lst, array, index);
         }
 
         int System.Collections.ICollection.Count

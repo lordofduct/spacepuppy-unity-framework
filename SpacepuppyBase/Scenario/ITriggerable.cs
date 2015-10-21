@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace com.spacepuppy.Scenario
+﻿namespace com.spacepuppy.Scenario
 {
 
     public interface ITriggerableMechanism : IComponent

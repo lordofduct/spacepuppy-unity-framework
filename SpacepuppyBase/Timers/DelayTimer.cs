@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-
-namespace com.spacepuppy.Timers
+﻿namespace com.spacepuppy.Timers
 {
 
     public class DelayTimer : ITimer

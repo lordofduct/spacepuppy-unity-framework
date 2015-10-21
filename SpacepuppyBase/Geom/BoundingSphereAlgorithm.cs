@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace com.spacepuppy.Geom
+﻿namespace com.spacepuppy.Geom
 {
 
     public enum BoundingSphereAlgorithm

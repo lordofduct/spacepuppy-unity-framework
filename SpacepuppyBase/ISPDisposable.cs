@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace com.spacepuppy
+﻿namespace com.spacepuppy
 {
-    
+
     /// <summary>
     /// Intended for use with classes that wrap around UnityObjects and need to signal if that 
     /// object has been destroyed (would return true if compared to 'null'). 

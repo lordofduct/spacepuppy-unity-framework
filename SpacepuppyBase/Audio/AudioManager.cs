@@ -1,9 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
-
-using com.spacepuppy.Collections;
-using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Audio
 {
@@ -230,11 +226,21 @@ namespace com.spacepuppy.Audio
 
             public IEnumerator<AudioSource> GetEnumerator()
             {
-                var managedSources = (from g in AudioManager._groups from s in g select s).ToArray();
-                var allSources = Object.FindObjectsOfType<AudioSource>();
-                for (int i = 0; i < allSources.Length; i++)
+                //var managedSources = (from g in AudioManager._groups from s in g select s).ToArray();
+                //var allSources = Object.FindObjectsOfType<AudioSource>();
+                //for (int i = 0; i < allSources.Length; i++)
+                //{
+                //    if (System.Array.IndexOf(managedSources, allSources[i]) < 0) yield return allSources[i];
+                //}
+
+                var e = AudioManager._groups.GetEnumerator();
+                while(e.MoveNext())
                 {
-                    if (System.Array.IndexOf(managedSources, allSources[i]) < 0) yield return allSources[i];
+                    var e2 = e.Current.GetEnumerator();
+                    while(e2.MoveNext())
+                    {
+                        yield return e2.Current;
+                    }
                 }
             }
 

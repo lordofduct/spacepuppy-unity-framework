@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Linq;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Geom;
 
 namespace com.spacepuppy.Utils
@@ -125,15 +125,18 @@ namespace com.spacepuppy.Utils
         public static bool IsKilled(this GameObject obj)
         {
             if (obj.IsNullOrDestroyed()) return true;
-
-            //var comp = obj.GetComponent<KillableEntityProxy>();
-            //if (!comp.IsNullOrDestroyed())
-            //{
-            //    return comp.IsDead;
-            //}
-            foreach (var c in obj.GetComponentsAlt<IKillableEntity>())
+            
+            using (var lst = TempCollection.GetList<IKillableEntity>())
             {
-                if (c.IsDead) return true;
+                obj.GetComponents<IKillableEntity>(lst);
+                if (lst.Count > 0)
+                {
+                    var e = lst.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (e.Current.IsDead) return true;
+                    }
+                }
             }
 
             return false;
@@ -147,15 +150,18 @@ namespace com.spacepuppy.Utils
         public static bool IsKilled(this Component obj)
         {
             if (obj.IsNullOrDestroyed()) return true;
-
-            //var comp = obj.GetComponent<KillableEntityProxy>();
-            //if (!comp.IsNullOrDestroyed())
-            //{
-            //    return comp.IsDead;
-            //}
-            foreach (var c in obj.GetComponentsAlt<IKillableEntity>())
+            
+            using (var lst = TempCollection.GetList<IKillableEntity>())
             {
-                if (c.IsDead) return true;
+                obj.GetComponents<IKillableEntity>(lst);
+                if (lst.Count > 0)
+                {
+                    var e = lst.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (e.Current.IsDead) return true;
+                    }
+                }
             }
 
             return false;
@@ -169,27 +175,21 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return;
 
-            //var comp = obj.GetComponent<KillableEntityProxy>();
-            //if (comp != null)
-            //{
-            //    comp.Kill();
-            //    return;
-            //}
-            //else
-            //{
-            //    obj.DestroyAll();
-            //}
-            var comps = obj.GetComponentsAlt<IKillableEntity>().ToArray();
-            if(comps.Length > 0)
+            using (var lst = TempCollection.GetList<IKillableEntity>())
             {
-                for(int i = 0; i < comps.Length; i++)
+                obj.GetComponentsInChildren<IKillableEntity>(true, lst);
+                if(lst.Count > 0)
                 {
-                    comps[i].Kill();
+                    var e = lst.GetEnumerator();
+                    while(e.MoveNext())
+                    {
+                        e.Current.Kill();
+                    }
                 }
-            }
-            else
-            {
-                obj.DestroyAll();
+                else
+                {
+                    ObjUtil.SmartDestroy(obj);
+                }
             }
         }
 
@@ -200,29 +200,22 @@ namespace com.spacepuppy.Utils
         public static void KillEntity(this GameObject obj)
         {
             if (obj.IsNullOrDestroyed()) return;
-
-            //var root = obj.FindRoot();
-            //var comp = root.GetComponent<KillableEntityProxy>();
-            //if (comp != null)
-            //{
-            //    comp.Kill();
-            //    return;
-            //}
-            //else
-            //{
-            //    root.DestroyAll();
-            //}
-            var comps = obj.FindComponents<IKillableEntity>().ToArray();
-            if (comps.Length > 0)
+            
+            using (var lst = TempCollection.GetList<IKillableEntity>())
             {
-                for (int i = 0; i < comps.Length; i++)
+                obj.FindComponents<IKillableEntity>(lst, true);
+                if (lst.Count > 0)
                 {
-                    comps[i].Kill();
+                    var e = lst.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        e.Current.Kill();
+                    }
                 }
-            }
-            else
-            {
-                obj.DestroyAll();
+                else
+                {
+                    ObjUtil.SmartDestroy(obj);
+                }
             }
         }
 
@@ -275,53 +268,7 @@ namespace com.spacepuppy.Utils
         }
 
         #endregion
-
-        #region Activation Methods
-
-        /// <summary>
-        /// Destroys self and all children
-        /// </summary>
-        /// <param name="obj"></param>
-        public static void DestroyAll(this GameObject obj)
-        {
-            foreach (Transform child in obj.transform)
-            {
-                DestroyAll(child.gameObject);
-            }
-
-            Object.Destroy(obj);
-        }
-
-        /// <summary>
-        /// Sets 'active' property of self and all children to false
-        /// </summary>
-        /// <param name="obj"></param>
-        public static void DeactivateAll(this GameObject obj)
-        {
-            foreach (Transform child in obj.transform)
-            {
-                DeactivateAll(child.gameObject);
-            }
-
-            obj.SetActive(false);
-        }
-
-        /// <summary>
-        /// Sets 'active' property of self and all children to true
-        /// </summary>
-        /// <param name="obj"></param>
-        public static void ActivateAll(this GameObject obj)
-        {
-            foreach (Transform child in obj.transform)
-            {
-                ActivateAll(child.gameObject);
-            }
-
-            obj.SetActive(true);
-        }
-
-        #endregion
-
+        
         #region Search/Find
 
         public static GameObject Find(this GameObject go, string spath)

@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
-
-using com.spacepuppy;
 using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 using System;
@@ -21,6 +18,9 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         private List<TriggerTarget> _targets = new List<TriggerTarget>();
+
+        [System.NonSerialized()]
+        private System.Action<object> _handlers;
 
         [System.NonSerialized()]
         private IObservableTrigger _owner;
@@ -75,6 +75,18 @@ namespace com.spacepuppy.Scenario
 
         #region Methods
 
+        public void AddHandler(System.Action<object> handler)
+        {
+            _handlers += handler;
+        }
+
+        public void RemoveHandler(System.Action<object> handler)
+        {
+            _handlers -= handler;
+        }
+
+
+
         public TriggerTarget AddNew()
         {
             var targ = new TriggerTarget();
@@ -84,13 +96,17 @@ namespace com.spacepuppy.Scenario
 
         public void ActivateTrigger()
         {
-            if (_targets.Count == 0) return;
-            
-            var e = _targets.GetEnumerator();
-            while(e.MoveNext())
+            if (_targets.Count > 0)
             {
-                if (e.Current != null) e.Current.Trigger();
+                var e = _targets.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current != null) e.Current.Trigger();
+                }
             }
+
+            if (_handlers != null)
+                _handlers(null);
 
             //if(_owner != null)
             //{
@@ -100,14 +116,18 @@ namespace com.spacepuppy.Scenario
 
         public void ActivateTrigger(object arg)
         {
-            if (_targets.Count == 0) return;
-            
-            var e = _targets.GetEnumerator();
-            while (e.MoveNext())
+            if (_targets.Count > 0)
             {
-                if (e.Current != null) e.Current.Trigger(arg);
+                var e = _targets.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current != null) e.Current.Trigger(arg);
+                }
             }
-            
+
+            if (_handlers != null)
+                _handlers(arg);
+
             //if (_owner != null)
             //{
             //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
@@ -116,9 +136,15 @@ namespace com.spacepuppy.Scenario
         
         public void ActivateRandomTrigger(bool considerWeights)
         {
-            TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
-            trig.Trigger();
+            if (_targets.Count > 0)
+            {
+                TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
+                trig.Trigger();
+            }
 
+            if (_handlers != null)
+                _handlers(null);
+            
             //if (_owner != null)
             //{
             //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
@@ -127,8 +153,14 @@ namespace com.spacepuppy.Scenario
 
         public void ActivateRandomTrigger(object arg, bool considerWeights)
         {
-            TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
-            trig.Trigger();
+            if (_targets.Count > 0)
+            {
+                TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
+                trig.Trigger();
+            }
+
+            if (_handlers != null)
+                _handlers(arg);
 
             //if (_owner != null)
             //{
@@ -138,53 +170,88 @@ namespace com.spacepuppy.Scenario
 
         public IRadicalYieldInstruction ActivateTriggerYielding()
         {
-            if (this.Targets.Count == 0) return null;
-            if (!_yield)
+            if (_yield && _targets.Count > 0)
             {
-                this.ActivateTrigger();
+                var instruction = BlockingTriggerYieldInstruction.Create();
+
+                var e = _targets.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current != null) e.Current.Trigger();
+                }
+
+                if (_handlers != null)
+                    _handlers(null);
+
+                return (instruction.Count > 0) ? instruction : null;
+            }
+            else
+            {
+
+                if (_targets.Count > 0)
+                {
+                    var e = _targets.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (e.Current != null) e.Current.Trigger();
+                    }
+                }
+
+                if (_handlers != null)
+                    _handlers(null);
+
                 return null;
             }
-
-            var instruction = BlockingTriggerYieldInstruction.Create();
-
-            var e = this.Targets.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current != null) e.Current.Trigger();
-            }
-
-            return (instruction.Count > 0) ? instruction : null;
         }
 
         public IRadicalYieldInstruction ActivateTriggerYielding(object arg)
         {
-            if (this.Targets.Count == 0) return null;
-            if (!_yield)
+            if (_yield && _targets.Count > 0)
             {
-                this.ActivateTrigger(arg);
+                var instruction = BlockingTriggerYieldInstruction.Create();
+
+                var e = _targets.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current != null) e.Current.Trigger(arg);
+                }
+
+                if (_handlers != null)
+                    _handlers(arg);
+
+                return (instruction.Count > 0) ? instruction : null;
+            }
+            else
+            {
+                if (_targets.Count > 0)
+                {
+                    var e = _targets.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (e.Current != null) e.Current.Trigger(arg);
+                    }
+                }
+
+                if (_handlers != null)
+                    _handlers(arg);
+
                 return null;
             }
-
-            var instruction = BlockingTriggerYieldInstruction.Create();
-
-            var e = this.Targets.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current != null) e.Current.Trigger(arg);
-            }
-
-            return (instruction.Count > 0) ? instruction : null;
         }
 
 
         public void DaisyChainTriggerYielding(object arg, BlockingTriggerYieldInstruction instruction)
         {
-            if (this.Targets.Count == 0) return;
-
-            var e = this.Targets.GetEnumerator();
-            while (e.MoveNext())
+            if (_targets.Count > 0)
             {
-                if (e.Current != null) e.Current.Trigger(arg);
+                var e = _targets.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current != null) e.Current.Trigger(arg);
+                }
+
+                if (_handlers != null)
+                    _handlers(arg);
             }
         }
 
@@ -214,7 +281,13 @@ namespace com.spacepuppy.Scenario
 
         public int Count
         {
-            get { return _targets.Count; }
+            get
+            {
+                if (_handlers == null)
+                    return _targets.Count;
+                else
+                    return _targets.Count + 1;
+            }
         }
 
         bool ICollection<TriggerTarget>.IsReadOnly

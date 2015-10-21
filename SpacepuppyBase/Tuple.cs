@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace com.spacepuppy
+﻿namespace com.spacepuppy
 {
-    
+
     public class Tuple
     {
         public static Tuple<T1> Create<T1>(T1 item1)

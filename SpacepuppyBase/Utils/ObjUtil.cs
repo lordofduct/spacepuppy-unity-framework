@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-#pragma warning disable 0168 // variable declared but not used.
+﻿#pragma warning disable 0168 // variable declared but not used.
 
 namespace com.spacepuppy.Utils
 {

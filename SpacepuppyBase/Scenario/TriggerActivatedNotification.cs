@@ -1,9 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace com.spacepuppy.Scenario
+﻿namespace com.spacepuppy.Scenario
 {
 
     [System.Obsolete("This should not be used.")]

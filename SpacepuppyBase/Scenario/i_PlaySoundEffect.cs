@@ -1,8 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-
-using com.spacepuppy;
-using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario

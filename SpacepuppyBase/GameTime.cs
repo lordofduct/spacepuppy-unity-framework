@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace com.spacepuppy
+﻿namespace com.spacepuppy
 {
 
     public struct GameTime

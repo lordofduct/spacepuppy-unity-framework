@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace com.spacepuppy.Timers
+﻿namespace com.spacepuppy.Timers
 {
     public interface ITimer
     {

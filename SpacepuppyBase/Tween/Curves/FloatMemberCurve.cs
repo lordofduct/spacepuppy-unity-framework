@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-
+﻿
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Tween.Curves

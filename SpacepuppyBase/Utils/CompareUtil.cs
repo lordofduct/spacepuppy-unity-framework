@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace com.spacepuppy.Utils
+﻿namespace com.spacepuppy.Utils
 {
     public static class CompareUtil
     {

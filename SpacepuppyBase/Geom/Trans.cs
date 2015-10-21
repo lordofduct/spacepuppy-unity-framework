@@ -269,6 +269,25 @@ namespace com.spacepuppy.Geom
 
         #endregion
 
+        #region Lerp
+
+        public static Trans Lerp(Trans start, Trans end, float t)
+        {
+            start.Position = Vector3.LerpUnclamped(start.Position, end.Position, t);
+            start.Rotation = Quaternion.SlerpUnclamped(start.Rotation, end.Rotation, t);
+            start.Scale = Vector3.Lerp(start.Scale, end.Scale, t);
+            return start;
+        }
+
+        public static Trans Slerp(Trans start, Trans end, float t)
+        {
+            start.Position = Vector3.SlerpUnclamped(start.Position, end.Position, t);
+            start.Rotation = Quaternion.SlerpUnclamped(start.Rotation, end.Rotation, t);
+            start.Scale = Vector3.LerpUnclamped(start.Scale, end.Scale, t);
+            return start;
+        }
+
+        #endregion
 
     }
 }

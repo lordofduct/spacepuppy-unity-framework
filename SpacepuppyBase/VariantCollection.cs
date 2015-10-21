@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.Serialization;
 
 using com.spacepuppy.Dynamic;
-using System;
 
 namespace com.spacepuppy
 {
@@ -217,7 +216,29 @@ namespace com.spacepuppy
 
         #region Special Types
 
-        public class EditorHelper : System.Collections.IList
+        [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+        public class AsPropertyListAttribute : System.Attribute
+        {
+
+            private System.Type _tp;
+
+            public AsPropertyListAttribute(System.Type tp)
+            {
+                _tp = tp;
+            }
+
+            public System.Type TargetType { get { return _tp; } }
+
+        }
+
+
+
+
+
+
+
+        [System.Obsolete("No longer used by VariantCollectionPropertyDrawer")]
+        private class EditorHelper : System.Collections.IList
         {
 
             private VariantCollection _coll;

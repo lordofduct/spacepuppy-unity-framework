@@ -60,7 +60,8 @@ namespace com.spacepuppy
         {
             base.Awake();
 
-            this.gameObject.tag = SPConstants.TAG_MULTITAG;
+            if(!this.gameObject.CompareTag(SPConstants.TAG_MULTITAG))
+                this.gameObject.tag = SPConstants.TAG_MULTITAG;
         }
 
         protected override void OnEnable()
@@ -146,9 +147,8 @@ namespace com.spacepuppy
         {
             if (_tags == null) return false;
 
-            if (_tags.Contains(tag))
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<string>(_tags))
             {
-                var lst = new List<string>(_tags);
                 if (lst.Remove(tag))
                 {
                     _tags = lst.ToArray();

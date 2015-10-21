@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppy
 {
@@ -85,12 +84,12 @@ namespace com.spacepuppy
         #endregion
 
         #region CONSTRUCTOR
-
-        protected override void Awake()
+        
+        protected override void Start()
         {
-            base.Awake();
+            base.Start();
 
-            this.SetTag(SPConstants.TAG_ROOT);
+            this.AddTag(SPConstants.TAG_ROOT);
         }
 
         protected override void OnStartOrEnable()

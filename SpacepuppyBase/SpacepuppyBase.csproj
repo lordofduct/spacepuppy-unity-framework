@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet>SpacepuppyBase.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet>SpacepuppyBase.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -248,10 +250,13 @@
     <Compile Include="Tween\Accessors\GeneralMoveAccessor.cs" />
     <Compile Include="Tween\Accessors\RigidbodyMovePositionAccessor.cs" />
     <Compile Include="Tween\Accessors\TimeScaleMemberAccessor.cs" />
+    <Compile Include="Tween\Accessors\TransformGlobalTransAccessor.cs" />
+    <Compile Include="Tween\Accessors\TransformLocalTransAccessor.cs" />
     <Compile Include="Tween\CallbackTweener.cs" />
     <Compile Include="Tween\Curves\Color32MemberCurve.cs" />
     <Compile Include="Tween\Curves\ColorMemberCurve.cs" />
     <Compile Include="Tween\Curves\StringCurve.cs" />
+    <Compile Include="Tween\Curves\TransMemberCurve.cs" />
     <Compile Include="Tween\CustomMemberCurveAttribute.cs" />
     <Compile Include="Tween\Curves\FloatMemberCurve.cs" />
     <Compile Include="Tween\CustomTweenMemberAccessorAttribute.cs" />
@@ -318,6 +323,7 @@
     <None Include="Hooks\EarlyExecutionUpdateEventHooks.cs.meta" />
     <None Include="Hooks\TardyExecutionUpdateEventHooks.cs.meta" />
     <None Include="Hooks\UpdateEventHooks.cs.meta" />
+    <None Include="SpacepuppyBase.ruleset" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

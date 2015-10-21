@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace com.spacepuppy
+﻿namespace com.spacepuppy
 {
 
     public abstract class SPNotifyingComponent : SPComponent, INotificationDispatcher

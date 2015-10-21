@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using System.Reflection;
 using System.Runtime.Serialization;
-
-using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Serialization
 {

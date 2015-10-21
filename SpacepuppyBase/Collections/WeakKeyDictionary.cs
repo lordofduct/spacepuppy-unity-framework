@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace com.spacepuppy.Collections
 {
@@ -50,35 +49,20 @@ namespace com.spacepuppy.Collections
 
         public void Clean()
         {
-            //List<object> lst;
-
-            //foreach (var pair in _dict)
-            //{
-            //    var weakKey = pair.Key as WeakReference<TKey>;
-            //    if (weakKey == null || !weakKey.IsAlive)
-            //    {
-            //        if (lst == null) lst = new List<object>();
-            //        lst.Add(pair.Key);
-            //    }
-            //}
-
-            //if (lst != null)
-            //{
-            //    foreach (var key in lst)
-            //    {
-            //        _dict.Remove(key);
-            //    }
-            //}
-
-            var arr = _dict.Where((p) =>
+            using (var lst = TempCollection.GetList<object>())
             {
-                var weakKey = p.Key as WeakReference<TKey>;
-                return (weakKey == null || !weakKey.IsAlive);
-            }).Select((p) => p.Key).ToArray();
+                var e = _dict.Keys.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    var weakKey = e.Current as WeakKeyReference<TKey>;
+                    if (weakKey == null || !weakKey.IsAlive) lst.Add(e.Current);
+                }
 
-            foreach (var key in arr)
-            {
-                _dict.Remove(key);
+                var e2 = lst.GetEnumerator();
+                while(e2.MoveNext())
+                {
+                    _dict.Remove(e2.Current);
+                }
             }
         }
 
@@ -283,11 +267,10 @@ namespace com.spacepuppy.Collections
 
             public IEnumerator<TKey> GetEnumerator()
             {
-                //foreach (var pair in _dict)
-                //{
-                //    yield return pair.Key;
-                //}
-                return (from p in _dict select p.Key).GetEnumerator();
+                foreach(var pair in _dict)
+                {
+                    yield return pair.Key;
+                }
             }
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -360,11 +343,10 @@ namespace com.spacepuppy.Collections
 
             public IEnumerator<TValue> GetEnumerator()
             {
-                //foreach (var pair in _dict)
-                //{
-                //    yield return pair.Value;
-                //}
-                return (from p in _dict select p.Value).GetEnumerator();
+                foreach (var pair in _dict)
+                {
+                    yield return pair.Value;
+                }
             }
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

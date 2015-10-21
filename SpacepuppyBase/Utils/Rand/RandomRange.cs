@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace com.spacepuppy.Utils.Rand
+﻿namespace com.spacepuppy.Utils.Rand
 {
     public struct IntRange
     {

@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace com.spacepuppy.Timers
+﻿namespace com.spacepuppy.Timers
 {
 
     public class StopWatch : ITimer

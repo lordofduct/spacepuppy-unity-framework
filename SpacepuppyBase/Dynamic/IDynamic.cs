@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
-using com.spacepuppy.Dynamic.Accessors;
 
 namespace com.spacepuppy.Dynamic
 {
@@ -23,7 +22,13 @@ namespace com.spacepuppy.Dynamic
 
     }
 
-
+    [System.Flags()]
+    public enum DynamicMemberAccess
+    {
+        Read = 1,
+        Write = 2,
+        ReadWrite = 3
+    }
 
     public static class DynamicUtil
     {
@@ -614,7 +619,15 @@ namespace com.spacepuppy.Dynamic
                 case MemberTypes.Property:
                     return new System.Type[] { (info as PropertyInfo).PropertyType };
                 case MemberTypes.Method:
-                    return (from p in (info as MethodBase).GetParameters() select p.ParameterType).ToArray();
+                    {
+                        var paramInfos = (info as MethodBase).GetParameters();
+                        Type[] arr = new Type[paramInfos.Length];
+                        for(int i = 0; i < arr.Length; i++)
+                        {
+                            arr[i] = paramInfos[i].ParameterType;
+                        }
+                        return arr;
+                    }
                 default:
                     return new System.Type[] {};
             }
@@ -636,10 +649,12 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
-        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(object obj, MemberTypes mask = MemberTypes.All)
+        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(object obj, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite)
         {
             if (obj == null) yield break;
 
+            bool bRead = access.HasFlag(DynamicMemberAccess.Read);
+            bool bWrite = access.HasFlag(DynamicMemberAccess.Write);
             var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembers(obj, false);
             foreach (var mi in members)
             {
@@ -689,7 +704,8 @@ namespace com.spacepuppy.Dynamic
                         {
                             var p = mi as System.Reflection.PropertyInfo;
                             if (p.IsSpecialName) continue;
-                            //if (!p.CanRead || !p.CanWrite) continue;
+                            if (!p.CanRead && bRead) continue;
+                            if (!p.CanWrite && bWrite) continue;
                             if (p.GetIndexParameters().Length > 0) continue; //indexed properties are not allowed
 
                             if (VariantReference.AcceptableType(p.PropertyType)) yield return p;
@@ -700,10 +716,12 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembersFromType(System.Type tp, MemberTypes mask = MemberTypes.All)
+        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembersFromType(System.Type tp, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite)
         {
             if (tp == null) yield break;
 
+            bool bRead = access.HasFlag(DynamicMemberAccess.Read);
+            bool bWrite = access.HasFlag(DynamicMemberAccess.Write);
             var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembersFromType(tp, false);
             foreach (var mi in members)
             {
@@ -753,7 +771,8 @@ namespace com.spacepuppy.Dynamic
                         {
                             var p = mi as System.Reflection.PropertyInfo;
                             if (p.IsSpecialName) continue;
-                            //if (!p.CanRead || !p.CanWrite) continue;
+                            if (!p.CanRead && bRead) continue;
+                            if (!p.CanWrite && bWrite) continue;
                             if (p.GetIndexParameters().Length > 0) continue; //indexed properties are not allowed
 
                             if (VariantReference.AcceptableType(p.PropertyType)) yield return p;

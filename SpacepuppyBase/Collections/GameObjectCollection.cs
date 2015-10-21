@@ -39,7 +39,15 @@ namespace com.spacepuppy.Collections
 
         public bool IsAlive
         {
-            get { return (from r in _roots where r != null select r).Any(); }
+            get
+            {
+                var e = _roots.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    return e.Current != null;
+                }
+                return false;
+            }
         }
 
         #endregion

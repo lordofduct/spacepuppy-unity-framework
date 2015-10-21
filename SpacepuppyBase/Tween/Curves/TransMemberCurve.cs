@@ -1,30 +1,30 @@
-﻿using UnityEngine;
-
+﻿
+using com.spacepuppy.Geom;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Tween.Curves
 {
 
-    [CustomMemberCurve(typeof(Vector3))]
-    public class Vector3MemberCurve : MemberCurve
+    [CustomMemberCurve(typeof(Trans))]
+    public class TransMemberCurve : MemberCurve
     {
 
         #region Fields
 
-        private Vector3 _start;
-        private Vector3 _end;
+        private Trans _start;
+        private Trans _end;
         private bool _useSlerp;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        protected Vector3MemberCurve()
+        protected TransMemberCurve()
         {
 
         }
 
-        public Vector3MemberCurve(string propName, float dur, Vector3 start, Vector3 end)
+        public TransMemberCurve(string propName, float dur, Trans start, Trans end)
             : base(propName, dur)
         {
             _start = start;
@@ -32,7 +32,7 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = false;
         }
 
-        public Vector3MemberCurve(string propName, float dur, Vector3 start, Vector3 end, bool slerp)
+        public TransMemberCurve(string propName, float dur, Trans start, Trans end, bool slerp)
             : base(propName, dur)
         {
             _start = start;
@@ -40,7 +40,7 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        public Vector3MemberCurve(string propName, Ease ease, float dur, Vector3 start, Vector3 end)
+        public TransMemberCurve(string propName, Ease ease, float dur, Trans start, Trans end)
             : base(propName, ease, dur)
         {
             _start = start;
@@ -48,7 +48,7 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = false;
         }
 
-        public Vector3MemberCurve(string propName, Ease ease, float dur, Vector3 start, Vector3 end, bool slerp)
+        public TransMemberCurve(string propName, Ease ease, float dur, Trans start, Trans end, bool slerp)
             : base(propName, ease, dur)
         {
             _start = start;
@@ -58,8 +58,8 @@ namespace com.spacepuppy.Tween.Curves
 
         protected override void ReflectiveInit(object start, object end, object option)
         {
-            _start = ConvertUtil.ToVector3(start);
-            _end = ConvertUtil.ToVector3(end);
+            _start = (start is Trans) ? (Trans)start : Trans.Identity;
+            _end = (end is Trans) ? (Trans)end : Trans.Identity;
             _useSlerp = ConvertUtil.ToBool(option);
         }
 
@@ -67,13 +67,13 @@ namespace com.spacepuppy.Tween.Curves
 
         #region Properties
 
-        public Vector3 Start
+        public Trans Start
         {
             get { return _start; }
             set { _start = value; }
         }
 
-        public Vector3 End
+        public Trans End
         {
             get { return _end; }
             set { _end = value; }
@@ -93,7 +93,7 @@ namespace com.spacepuppy.Tween.Curves
         {
             if (this.Duration == 0f) return _end;
             t = this.Ease(t, 0f, 1f, this.Duration);
-            return (_useSlerp) ? Vector3.SlerpUnclamped(_start, _end, t) : Vector3.LerpUnclamped(_start, _end, t);
+            return (_useSlerp) ? Trans.Slerp(_start, _end, t) : Trans.Lerp(_start, _end, t);
         }
 
         #endregion

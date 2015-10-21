@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace com.spacepuppy.Collections
 {
@@ -11,6 +10,7 @@ namespace com.spacepuppy.Collections
         #region Fields
 
         private List<DelegateEntry> _delegates = new List<DelegateEntry>();
+        private Delegate _callback;
 
         #endregion
 
@@ -45,7 +45,7 @@ namespace com.spacepuppy.Collections
             get
             {
                 if (_delegates.Count == 0) return float.NaN;
-                return _delegates.First().Precedence;
+                return _delegates[0].Precedence;
             }
         }
 
@@ -54,28 +54,41 @@ namespace com.spacepuppy.Collections
             get
             {
                 if (_delegates.Count == 0) return float.NaN;
-                return _delegates.Last().Precedence;
+                return _delegates[_delegates.Count - 1].Precedence;
             }
         }
-
+        
         #endregion
 
         #region Methods
 
+        protected Delegate GetDelegate()
+        {
+            if(_callback == null && _delegates.Count > 0)
+            {
+                Delegate[] arr = new Delegate[_delegates.Count];
+                for(int i = 0; i < _delegates.Count; i++)
+                {
+                    arr[i] = _delegates[i].Delegate;
+                }
+                _callback = Delegate.Combine(arr);
+            }
+            return _callback;
+        }
+
         public void DynamicInvoke(params object[] args)
         {
-            for (int i = 0; i < _delegates.Count; i++)
-            {
-                _delegates[i].Delegate.DynamicInvoke(args);
-            }
+            var d = this.GetDelegate();
+            if (d != null) d.DynamicInvoke(args);
         }
 
         public void Add(Delegate del)
         {
             if (del == null) throw new System.ArgumentNullException("del");
 
-            float prec = (_delegates.Count > 0) ? _delegates.Last().Precedence : 0f;
+            float prec = (_delegates.Count > 0) ? _delegates[_delegates.Count - 1].Precedence : 0f;
             _delegates.Add(new DelegateEntry(del, prec, null));
+            _callback = null;
         }
 
         public void Add(Delegate del, float precedence, object tag = null)
@@ -84,6 +97,7 @@ namespace com.spacepuppy.Collections
 
             int i = this.FindInsertLocationOfPrecedence(precedence);
             _delegates.Insert(i, new DelegateEntry(del, precedence, tag));
+            _callback = null;
         }
 
         public bool Contains(Delegate del)
@@ -102,6 +116,7 @@ namespace com.spacepuppy.Collections
             if (index >= 0)
             {
                 _delegates.RemoveAt(index);
+                _callback = null;
                 return true;
             }
             else
@@ -232,7 +247,7 @@ namespace com.spacepuppy.Collections
         {
             get
             {
-                return Delegate.Combine((from e in this select e.Delegate).Cast<Delegate>().ToArray()) as T;
+                return this.GetDelegate() as T;
             }
         }
 

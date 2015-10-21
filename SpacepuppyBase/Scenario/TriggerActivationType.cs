@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace com.spacepuppy.Scenario
+﻿namespace com.spacepuppy.Scenario
 {
 
     public enum TriggerActivationType

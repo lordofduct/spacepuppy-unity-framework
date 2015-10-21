@@ -352,6 +352,21 @@ namespace com.spacepuppy.Utils
             System.Array.Clear(arr, 0, arr.Length);
         }
 
+        public static void Copy<T>(IEnumerable<T> source, System.Array destination, int index)
+        {
+            if (source is System.Collections.ICollection)
+                (source as System.Collections.ICollection).CopyTo(destination, index);
+            else
+            {
+                int i = 0;
+                foreach(var el in source)
+                {
+                    destination.SetValue(el, i + index);
+                    i++;
+                }
+            }
+        }
+
         #endregion
 
         #region HashSet Methods

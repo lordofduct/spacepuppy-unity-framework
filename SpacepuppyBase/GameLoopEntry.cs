@@ -1,11 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-
-using com.spacepuppy.Collections;
-using com.spacepuppy.Hooks;
-using com.spacepuppy.Utils;
+﻿using com.spacepuppy.Hooks;
 
 namespace com.spacepuppy
 {

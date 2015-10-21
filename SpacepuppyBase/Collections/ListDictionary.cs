@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace com.spacepuppy.Collections
 {
@@ -142,10 +141,20 @@ namespace com.spacepuppy.Collections
         /// </summary>
         public void Purge()
         {
-            var keys = this.Keys.ToArray();
-            foreach (var key in keys)
+            //var keys = this.Keys.ToArray();
+            //foreach (var key in keys)
+            //{
+            //    if (_dict[key] == null || _dict[key].Count == 0) _dict.Remove(key);
+            //}
+
+            using (var lst = TempCollection.GetList<TKey>(this.Keys))
             {
-                if (_dict[key] == null || _dict[key].Count == 0) _dict.Remove(key);
+                var e = lst.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    var sublst = _dict[e.Current];
+                    if (sublst == null || sublst.Count == 0) _dict.Remove(e.Current);
+                }
             }
         }
 
@@ -247,7 +256,12 @@ namespace com.spacepuppy.Collections
 
         bool ICollection<KeyValuePair<TKey, IList<TValue>>>.Contains(KeyValuePair<TKey, IList<TValue>> item)
         {
-            return _dict.Contains(item);
+            var e = _dict.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (object.ReferenceEquals(e.Current, item)) return true;
+            }
+            return false;
         }
 
         void ICollection<KeyValuePair<TKey, IList<TValue>>>.CopyTo(KeyValuePair<TKey, IList<TValue>>[] array, int arrayIndex)
@@ -333,7 +347,12 @@ namespace com.spacepuppy.Collections
 
             public bool Contains(IList<TValue> item)
             {
-                return _listDict._dict.Values.Contains(item);
+                var e = _listDict._dict.Values.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current == item) return true;
+                }
+                return false;
             }
 
             public void CopyTo(IList<TValue>[] array, int arrayIndex)

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace com.spacepuppy.Render
+﻿namespace com.spacepuppy.Render
 {
 
     public enum MaterialPropertyValueType

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-using com.spacepuppy.Collections;
+﻿using System.Collections.Generic;
 
 namespace com.spacepuppy.StateMachine
 {

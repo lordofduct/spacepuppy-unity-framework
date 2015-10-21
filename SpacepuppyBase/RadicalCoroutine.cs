@@ -1065,6 +1065,7 @@ namespace com.spacepuppy
                 {
                     var w = e as EnumWrapper;
                     if (w._e == null) return string.Empty;
+
                     return w._e.GetType().FullName.Split('.').Last();
                 }
                 else

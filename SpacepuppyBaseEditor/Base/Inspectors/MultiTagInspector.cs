@@ -12,26 +12,29 @@ namespace com.spacepuppyeditor.Base
     public class MultiTagInspector : SPEditor
     {
 
+        public const string PROP_TAGS = "_tags";
+
         #region Properties
-
-        public new MultiTag target { get { return base.target as MultiTag; } }
-
+        
         private bool _showTags;
 
         #endregion
 
         protected override void OnBeforeSPInspectorGUI()
         {
-            var mtag = this.target as MultiTag;
-            if (mtag != null && !mtag.CompareTag(SPConstants.TAG_MULTITAG))
+            var go = com.spacepuppy.Utils.GameObjectUtil.GetGameObjectFromSource(this.target);
+
+            if (go != null && !go.CompareTag(SPConstants.TAG_MULTITAG))
             {
-                mtag.tag = SPConstants.TAG_MULTITAG;
-                EditorUtility.SetDirty(mtag);
+                go.tag = SPConstants.TAG_MULTITAG;
+                EditorUtility.SetDirty(go);
             }
         }
 
         protected override void OnSPInspectorGUI()
         {
+            this.serializedObject.Update();
+
             //this may change in later releases...
             _showTags = EditorGUILayout.Foldout(_showTags, "Tags");
 
@@ -39,7 +42,8 @@ namespace com.spacepuppyeditor.Base
             {
                 EditorGUI.indentLevel++;
 
-                var currentTags = this.target.GetTags().ToArray();
+                var tagsProp = this.serializedObject.FindProperty(PROP_TAGS);
+                var currentTags = this.GetTags(tagsProp);
                 var selectedTags = new List<string>();
 
                 EditorGUI.BeginChangeCheck();
@@ -55,13 +59,35 @@ namespace com.spacepuppyeditor.Base
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    this.target.UpdateTags(selectedTags.ToArray());
-                    this.serializedObject.Update();
+                    this.SetTags(tagsProp, selectedTags.ToArray());
                 }
 
                 EditorGUI.indentLevel--;
             }
+            
+            this.serializedObject.ApplyModifiedProperties();
+        }
 
+
+
+
+        private string[] GetTags(SerializedProperty prop)
+        {
+            string[] tags = new string[prop.arraySize];
+            for (int i = 0; i < prop.arraySize; i++)
+            {
+                tags[i] = prop.GetArrayElementAtIndex(i).stringValue;
+            }
+            return tags;
+        }
+
+        private void SetTags(SerializedProperty prop, string[] tags)
+        {
+            prop.arraySize = tags.Length;
+            for(int i = 0; i < tags.Length; i++)
+            {
+                prop.GetArrayElementAtIndex(i).stringValue = tags[i];
+            }
         }
 
     }
