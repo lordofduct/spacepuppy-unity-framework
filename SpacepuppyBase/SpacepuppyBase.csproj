@@ -62,6 +62,17 @@
     <Compile Include="Audio\AudioManager.cs" />
     <Compile Include="Audio\IAudioGroup.cs" />
     <Compile Include="AutoNotificationManager.cs" />
+    <Compile Include="Cameras\CameraController.cs" />
+    <Compile Include="Cameras\CameraFade.cs" />
+    <Compile Include="Cameras\CameraManager.cs" />
+    <Compile Include="Cameras\CameraMovementController.cs" />
+    <Compile Include="Cameras\CameraNode.cs" />
+    <Compile Include="Cameras\CameraToken.cs" />
+    <Compile Include="Cameras\ColorAlphaCameraFade.cs" />
+    <Compile Include="Cameras\ICamera.cs" />
+    <Compile Include="Cameras\ICameraMovementControllerState.cs" />
+    <Compile Include="Cameras\MultiCameraController.cs" />
+    <Compile Include="Cameras\UnityCamera.cs" />
     <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\BiDictionary.cs" />
     <Compile Include="Collections\CircularQueue.cs" />
