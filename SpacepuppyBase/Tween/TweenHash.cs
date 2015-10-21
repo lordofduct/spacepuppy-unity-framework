@@ -227,7 +227,7 @@ namespace com.spacepuppy.Tween
 
         public TweenHash Chain(object targ)
         {
-            var hash = new TweenHash(_targ, _id);
+            var hash = new TweenHash(targ, _id);
             hash._chainLink = this;
             hash._defaultEase = _defaultEase;
             hash._delay = _delay;
@@ -442,10 +442,17 @@ namespace com.spacepuppy.Tween
 
             //set curves
             Tweener tween = null;
-            if (_chainLink != null || _props.Count > 1)
+            if (_props.Count > 1)
             {
                 var grp = new TweenCurveGroup();
-                this.ApplyToTweenCurveGroup(grp);
+                for (int i = 0; i < _props.Count; i++)
+                {
+                    var curve = this.CreateCurve(_props[i]);
+                    if (curve == null)
+                        Debug.LogWarning("Failed to create tween for property '" + _props[i].name + "' on target.", _targ as Object);
+                    else
+                        grp.Curves.Add(curve);
+                }
                 tween = new ObjectTweener(_targ, grp);
             }
             else if(_props.Count == 1)
@@ -464,6 +471,21 @@ namespace com.spacepuppy.Tween
                 tween = new ObjectTweener(_targ, TweenCurve.Null);
             }
 
+            if(_chainLink != null)
+            {
+                using (var lst = com.spacepuppy.Collections.TempCollection.GetList<Tweener>())
+                {
+                    lst.Add(tween);
+                    var link = _chainLink;
+                    while(link != null)
+                    {
+                        lst.Add(link.Create());
+                        link = link._chainLink;
+                    }
+                    tween = new TweenerGroup(lst.ToArray());
+                }
+            }
+
             //set props
             if (_id != null) tween.Id = _id;
             tween.UpdateType = _updateType;
@@ -478,24 +500,7 @@ namespace com.spacepuppy.Tween
 
             return tween;
         }
-
-        private void ApplyToTweenCurveGroup(TweenCurveGroup group)
-        {
-            if(_chainLink != null)
-            {
-                _chainLink.ApplyToTweenCurveGroup(group);
-            }
-
-            for (int i = 0; i < _props.Count; i++)
-            {
-                var curve = this.CreateCurve(_props[i]);
-                if (curve == null)
-                    Debug.LogWarning("Failed to create tween for property '" + _props[i].name + "' on target.", _targ as Object);
-                else
-                    group.Curves.Add(curve);
-            }
-        }
-
+        
         private TweenCurve CreateCurve(PropInfo prop)
         {
             try

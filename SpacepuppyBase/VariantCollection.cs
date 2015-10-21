@@ -145,7 +145,7 @@ namespace com.spacepuppy
             }
         }
 
-        public com.spacepuppy.Tween.TweenHash DynamicallyTweenTo(com.spacepuppy.Tween.TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur)
+        public void DynamicallyTweenTo(com.spacepuppy.Tween.TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur)
         {
             var e = _table.GetEnumerator();
             while (e.MoveNext())
@@ -168,8 +168,6 @@ namespace com.spacepuppy
                         break;
                 }
             }
-
-            return hash;
         } 
 
         #endregion

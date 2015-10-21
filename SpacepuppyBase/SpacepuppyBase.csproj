@@ -249,6 +249,7 @@
     <Compile Include="Timers\TimerCollection.cs" />
     <Compile Include="TinyUid.cs" />
     <Compile Include="Tuple.cs" />
+    <Compile Include="Tween\Accessors\FollowTargetPositionAccessor.cs" />
     <Compile Include="Tween\Accessors\GeneralMoveAccessor.cs" />
     <Compile Include="Tween\Accessors\GeneralRotateAccessor.cs" />
     <Compile Include="Tween\Accessors\RigidbodyMovePositionAccessor.cs" />
@@ -258,6 +259,7 @@
     <Compile Include="Tween\CallbackTweener.cs" />
     <Compile Include="Tween\Curves\Color32MemberCurve.cs" />
     <Compile Include="Tween\Curves\ColorMemberCurve.cs" />
+    <Compile Include="Tween\Curves\FollowTargetPositionCurve.cs" />
     <Compile Include="Tween\Curves\RectMemberCurve.cs" />
     <Compile Include="Tween\Curves\StringCurve.cs" />
     <Compile Include="Tween\Curves\TransMemberCurve.cs" />

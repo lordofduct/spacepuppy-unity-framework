@@ -49,7 +49,7 @@ namespace com.spacepuppy.Tween
 
         #region Tweener Interface
 
-        protected override float GetPlayHeadLength()
+        protected internal override float GetPlayHeadLength()
         {
             throw new System.NotImplementedException();
         }
@@ -113,7 +113,7 @@ namespace com.spacepuppy.Tween
             //}
         }
 
-        protected override void DoUpdate(float dt, float t)
+        protected internal override void DoUpdate(float dt, float t)
         {
             if (_currentIndex < 0) return;
 

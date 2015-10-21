@@ -68,12 +68,12 @@ namespace com.spacepuppy.Tween
 
         #region Tweener Interface
 
-        protected override float GetPlayHeadLength()
+        protected internal override float GetPlayHeadLength()
         {
  	        return _dur;
         }
 
-        protected override void DoUpdate(float dt, float t)
+        protected internal override void DoUpdate(float dt, float t)
         {
             if (_callback == null) return;
             _callback(this, dt, _ease(t, 0, _dur, _dur));

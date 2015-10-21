@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace com.spacepuppy.Tween
 {
@@ -390,7 +392,7 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        internal void Update()
+        internal virtual void Update()
         {
             this.Scrub(_timeSupplier.Delta * _speedScale);
         }
@@ -399,9 +401,9 @@ namespace com.spacepuppy.Tween
 
         #region Tweener Interface
 
-        protected abstract float GetPlayHeadLength();
+        protected internal abstract float GetPlayHeadLength();
 
-        protected abstract void DoUpdate(float dt, float t);
+        protected internal abstract void DoUpdate(float dt, float t);
 
         #endregion
 
@@ -456,6 +458,82 @@ namespace com.spacepuppy.Tween
         }
 
         #endregion
+
+    }
+
+
+    public class TweenerGroup : Tweener
+    {
+
+        #region Fields
+
+        private object _id;
+        private Tweener[] _tweens;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public TweenerGroup(IEnumerable<Tweener> tweens)
+        {
+            _tweens = tweens.ToArray();
+        }
+
+        internal TweenerGroup(Tweener[] tweens)
+        {
+            _tweens = tweens;
+        }
+
+        #endregion
+
+
+        public override object Id
+        {
+            get
+            {
+                if (_id != null) return _id;
+
+                foreach (var twn in _tweens)
+                {
+                    var id = twn.Id;
+                    if (id != null) return id;
+                }
+
+                return null;
+            }
+            set
+            {
+                _id = value;
+            }
+        }
+
+        internal override void Update()
+        {
+            base.Update();
+
+            foreach (var twn in _tweens)
+            {
+                twn.Update();
+            }
+        }
+
+        protected internal override void DoUpdate(float dt, float t)
+        {
+            //do nothing
+        }
+
+        protected internal override float GetPlayHeadLength()
+        {
+            float length = 0f;
+
+            foreach (var twn in _tweens)
+            {
+                float l = twn.GetPlayHeadLength();
+                if (l > length) length = l;
+            }
+
+            return length;
+        }
 
     }
 
