@@ -532,7 +532,7 @@ namespace com.spacepuppy.Utils
             {
                 return 0;
             }
-            else if (IsNumericType(value.GetType()))
+            else if (value is System.IConvertible)
             {
                 try
                 {
@@ -866,46 +866,117 @@ namespace com.spacepuppy.Utils
         /// </remarks>
         public static double ToDouble(string value, System.Globalization.NumberStyles style, System.IFormatProvider provider)
         {
-            if (value == null) return 0d;
-            value = value.Trim();
             if (string.IsNullOrEmpty(value)) return 0d;
 
-#if UNITY_WEBPLAYER
-			Match m = Regex.Match(value, RX_ISHEX, RegexOptions.IgnoreCase);
-#else
-            Match m = Regex.Match(value, RX_ISHEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-#endif
-
-            if (m.Success)
+            style = style & System.Globalization.NumberStyles.Any;
+            double dbl = 0;
+            if(double.TryParse(value, style, provider, out dbl))
             {
-                long lng = 0;
-                style = (style & System.Globalization.NumberStyles.HexNumber) | System.Globalization.NumberStyles.AllowHexSpecifier;
-                long.TryParse(m.Groups["num"].Value, style, provider, out lng);
-
-                if (m.Groups["sign"].Value == "-")
-                    lng = -lng;
-
-                if (m.Groups["fractional"].Success)
-                {
-                    long flng = 0;
-                    string sfract = m.Groups["fractional"].Value.Substring(1);
-                    long.TryParse(sfract, style, provider, out flng);
-                    return System.Convert.ToDouble(lng) + System.Convert.ToDouble(flng) / System.Math.Pow(16d, sfract.Length);
-                }
-                else
-                {
-                    return System.Convert.ToDouble(lng);
-                }
-
+                return dbl;
             }
             else
             {
-                style = style & System.Globalization.NumberStyles.Any;
-                double dbl = 0;
-                double.TryParse(value, style, provider, out dbl);
-                return dbl;
+                //test hex
+                int i;
+                bool isNeg = false;
+                for (i = 0; i < value.Length; i++)
+                {
+                    if (value[i] == ' ' || value[i] == '+') continue;
+                    if (value[i] == '-')
+                    {
+                        isNeg = !isNeg;
+                        continue;
+                    }
+                    break;
+                }
 
+                if (i < value.Length - 1 &&
+                        (
+                        (value[i] == '#') ||
+                        (value[i] == '0' && (value[i + 1] == 'x' || value[i + 1] == 'X')) ||
+                        (value[i] == '&' && (value[i + 1] == 'h' || value[i + 1] == 'H'))
+                        ))
+                {
+                    //is hex
+                    style = (style & System.Globalization.NumberStyles.HexNumber) | System.Globalization.NumberStyles.AllowHexSpecifier;
+
+                    if (value[i] == '#') i++;
+                    else i += 2;
+                    int j = value.IndexOf('.', i);
+
+                    if (j >= 0)
+                    {
+                        long lng = 0;
+                        long.TryParse(value.Substring(i, j - i), style, provider, out lng);
+
+                        if (isNeg)
+                            lng = -lng;
+
+                        long flng = 0;
+                        string sfract = value.Substring(j + 1).Trim();
+                        long.TryParse(sfract, style, provider, out flng);
+                        return System.Convert.ToDouble(lng) + System.Convert.ToDouble(flng) / System.Math.Pow(16d, sfract.Length);
+                    }
+                    else
+                    {
+                        string num = value.Substring(i);
+                        long l;
+                        if (long.TryParse(num, style, provider, out l))
+                            return System.Convert.ToDouble(l);
+                        else
+                            return 0d;
+                    }
+                }
+                else
+                {
+                    return 0d;
+                }
             }
+            
+
+            ////################
+            ////OLD garbage heavy version
+
+            //if (value == null) return 0d;
+            //value = value.Trim();
+            //if (string.IsNullOrEmpty(value)) return 0d;
+
+            //#if UNITY_WEBPLAYER
+            //			Match m = Regex.Match(value, RX_ISHEX, RegexOptions.IgnoreCase);
+            //#else
+            //            Match m = Regex.Match(value, RX_ISHEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            //#endif
+
+            //if (m.Success)
+            //{
+            //    long lng = 0;
+            //    style = (style & System.Globalization.NumberStyles.HexNumber) | System.Globalization.NumberStyles.AllowHexSpecifier;
+            //    long.TryParse(m.Groups["num"].Value, style, provider, out lng);
+
+            //    if (m.Groups["sign"].Value == "-")
+            //        lng = -lng;
+
+            //    if (m.Groups["fractional"].Success)
+            //    {
+            //        long flng = 0;
+            //        string sfract = m.Groups["fractional"].Value.Substring(1);
+            //        long.TryParse(sfract, style, provider, out flng);
+            //        return System.Convert.ToDouble(lng) + System.Convert.ToDouble(flng) / System.Math.Pow(16d, sfract.Length);
+            //    }
+            //    else
+            //    {
+            //        return System.Convert.ToDouble(lng);
+            //    }
+
+            //}
+            //else
+            //{
+            //    style = style & System.Globalization.NumberStyles.Any;
+            //    double dbl = 0;
+            //    double.TryParse(value, style, provider, out dbl);
+            //    return dbl;
+
+            //}
         }
 
         public static double ToDouble(string value, System.Globalization.NumberStyles style)
@@ -1090,6 +1161,17 @@ namespace com.spacepuppy.Utils
             {
                 return false;
             }
+            else if (value is System.IConvertible)
+            {
+                try
+                {
+                    return System.Convert.ToBoolean(value);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
             else
             {
                 return ToBool(value.ToString());
@@ -1109,8 +1191,10 @@ namespace com.spacepuppy.Utils
         /// <remarks></remarks>
         public static bool ToBool(string str)
         {
-            str = (str + "").Trim().ToLower();
-            return !System.Convert.ToBoolean(string.IsNullOrEmpty(str) || str == "false" || str == "0" || str == "off");
+            //str = (str + "").Trim().ToLower();
+            //return !System.Convert.ToBoolean(string.IsNullOrEmpty(str) || str == "false" || str == "0" || str == "off");
+
+            return !(string.IsNullOrEmpty(str) || str.Equals("false", System.StringComparison.OrdinalIgnoreCase) || str.Equals("0", System.StringComparison.OrdinalIgnoreCase) || str.Equals("off", System.StringComparison.OrdinalIgnoreCase));
         }
 
 
@@ -1185,6 +1269,17 @@ namespace com.spacepuppy.Utils
             {
                 return false;
             }
+            else if (value is System.IConvertible)
+            {
+                try
+                {
+                    return System.Convert.ToBoolean(value);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
             else
             {
                 return ToBoolInverse(value.ToString());
@@ -1204,8 +1299,13 @@ namespace com.spacepuppy.Utils
         /// <remarks></remarks>
         public static bool ToBoolInverse(string str)
         {
-            str = (str + "").Trim().ToLower();
-            return (!string.IsNullOrEmpty(str) && str != "false" && str != "0");
+            //str = (str + "").Trim().ToLower();
+            //return (!string.IsNullOrEmpty(str) && str != "false" && str != "0");
+
+            return !string.IsNullOrEmpty(str) && 
+                   !str.Equals("false", System.StringComparison.OrdinalIgnoreCase) && 
+                   !str.Equals("0", System.StringComparison.OrdinalIgnoreCase) && 
+                   !str.Equals("off", System.StringComparison.OrdinalIgnoreCase);
         }
         #endregion
 
@@ -1654,6 +1754,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector2 ToVector2(object value)
         {
+            if (value == null) return Vector2.zero;
             if (value is Vector2) return (Vector2)value;
             if (value is Vector3)
             {
@@ -1669,6 +1770,10 @@ namespace com.spacepuppy.Utils
             {
                 var q = (Quaternion)value;
                 return new Vector2(q.x, q.y);
+            }
+            if (ValueIsNumericType(value))
+            {
+                return new Vector2(ToSingle(value), 0f);
             }
             return ToVector2(System.Convert.ToString(value));
         }
@@ -1703,6 +1808,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector3 ToVector3(object value)
         {
+            if (value == null) return Vector3.zero;
             if (value is Vector2)
             {
                 var v = (Vector2)value;
@@ -1721,6 +1827,10 @@ namespace com.spacepuppy.Utils
             {
                 var q = (Quaternion)value;
                 return new Vector3(q.x, q.y, q.z);
+            }
+            if (ValueIsNumericType(value))
+            {
+                return new Vector3(ToSingle(value), 0f);
             }
             return ToVector3(System.Convert.ToString(value));
         }
@@ -1755,6 +1865,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector4 ToVector4(object value)
         {
+            if (value == null) return Vector4.zero;
             if (value is Vector2)
             {
                 var v = (Vector2)value;
@@ -1774,12 +1885,16 @@ namespace com.spacepuppy.Utils
                 var q = (Quaternion)value;
                 return new Vector4(q.x, q.y, q.z, q.w);
             }
+            if (ValueIsNumericType(value))
+            {
+                return new Vector4(ToSingle(value), 0f);
+            }
             return ToVector4(System.Convert.ToString(value));
         }
 
         #endregion
 
-        #region ToVector4
+        #region ToQuaternion
 
         public static Quaternion ToQuaternion(Vector2 vec)
         {
@@ -1814,6 +1929,7 @@ namespace com.spacepuppy.Utils
 
         public static Quaternion ToQuaternion(object value)
         {
+            if (value == null) return Quaternion.identity;
             if (value is Vector2)
             {
                 var v = (Vector2)value;
@@ -1832,6 +1948,10 @@ namespace com.spacepuppy.Utils
             if (value is Quaternion)
             {
                 return (Quaternion)value;
+            }
+            if (ValueIsNumericType(value))
+            {
+                return new Quaternion(ToSingle(value), 0f, 0f, 0f);
             }
             return ToQuaternion(System.Convert.ToString(value));
         }
@@ -1875,19 +1995,16 @@ namespace com.spacepuppy.Utils
         /// <remarks></remarks>
         public static bool IsNumeric(object value, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Any, System.IFormatProvider provider = null, bool bBlankIsZero = false)
         {
+            if (value == null) return bBlankIsZero;
+            if (ValueIsNumericType(value)) return true;
 
-            string sval = (System.Convert.ToString(value) + "").Trim();
-
+            string sval = System.Convert.ToString(value);
             if (string.IsNullOrEmpty(sval))
                 return bBlankIsZero;
 
-#if UNITY_WEBPLAYER
-			Match m = Regex.Match(sval, RX_ISHEX, RegexOptions.IgnoreCase);
-#else
-            Match m = Regex.Match(sval, RX_ISHEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-#endif
+            sval = sval.Trim();
 
-            if (m.Success)
+            if(IsHex(sval))
             {
                 return true;
             }
@@ -1899,11 +2016,54 @@ namespace com.spacepuppy.Utils
             }
 
 
+            ////################
+            ////OLD garbage heavy version
+
+            //#if UNITY_WEBPLAYER
+            //			Match m = Regex.Match(sval, RX_ISHEX, RegexOptions.IgnoreCase);
+            //#else
+            //            Match m = Regex.Match(sval, RX_ISHEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            //#endif
+
+            //            if (m.Success)
+            //            {
+            //                return true;
+            //            }
+            //            else
+            //            {
+            //                style = style & System.Globalization.NumberStyles.Any;
+            //                double dbl = 0;
+            //                return double.TryParse(sval, style, provider, out dbl);
+            //            }
+
+
         }
 
+        public static bool IsHex(string value)
+        {
+            int i;
+            for (i = 0; i < value.Length; i++)
+            {
+                if (value[i] == ' ' || value[i] == '+' || value[i] == '-') continue;
+
+                break;
+            }
+
+            return (i < value.Length - 1 &&
+                    (
+                    (value[i] == '#') ||
+                    (value[i] == '0' && (value[i + 1] == 'x' || value[i + 1] == 'X')) ||
+                    (value[i] == '&' && (value[i + 1] == 'h' || value[i + 1] == 'H'))
+                    ));
+        }
+        
         public static bool IsInteger(object value, bool bBlankIsZero = false)
         {
-            string sval = (System.Convert.ToString(value) + "").Trim();
+            if (value == null) return bBlankIsZero;
+            if (ValueIsNumericType(value)) return true;
+
+            //string sval = (System.Convert.ToString(value) + "").Trim();
+            string sval = System.Convert.ToString(value);
 
             if (string.IsNullOrEmpty(sval))
                 return bBlankIsZero;
@@ -2042,7 +2202,8 @@ namespace com.spacepuppy.Utils
         public const string LOD_STRARR_PIPE = "str[|]";
         public static bool IsLoDConvertType(string sType)
         {
-            sType = (sType + "").Trim();
+            //sType = (sType + "").Trim();
+            if (string.IsNullOrEmpty(sType)) return false;
 
             const string sREGX = "^((p-?\\d+)|(str)|(string)|(num\\?)|(float)|(single)|(dbl)|(double)|(num)|(dec)|(cash)|(int)|(bool)|(ascii)|(char)|(date)|(time)|(timeofday))(\\[.\\])?$";
 
@@ -2052,7 +2213,8 @@ namespace com.spacepuppy.Utils
 
         public static bool IsLoDNumericConvertType(string sType)
         {
-            sType = (sType + "").Trim();
+            //sType = (sType + "").Trim();
+            if (string.IsNullOrEmpty(sType)) return false;
 
             const string sREGX = "^((p-?\\d+)|(num\\?)|(float)|(single)|(dbl)|(double)|(num)|(dec)|(cash)|(int))$";
 
@@ -2132,7 +2294,9 @@ namespace com.spacepuppy.Utils
 
             const string sREGX = "^(?<type>(p-?\\d+)|(str)|(string)|(num\\?)|(float)|(single)|(dbl)|(double)|(num)|(dec)|(cash)|(int)|(bool)|(ascii)|(char)|(date)|(time)|(timeofday))(?<array>(\\[.\\]))?$";
 
-            sType = (sType + "").Trim();
+            //sType = (sType + "").Trim();
+            if (string.IsNullOrEmpty(sType)) return null;
+
             var match = Regex.Match(sType, sREGX, RegexOptions.IgnoreCase);
             if (!match.Success)
                 return null;
@@ -2210,17 +2374,16 @@ namespace com.spacepuppy.Utils
         /// </remarks>
         public static object LoDConvertTo(object value, string sType)
         {
-
-            if (value == null)
-                value = "";
-            if (string.IsNullOrEmpty(sType))
-                sType = "str";
-            else
-                sType = sType.Trim();
-
             const string sREGX = "^(?<type>(p-?\\d+)|(str)|(string)|(num\\?)|(float)|(single)|(dbl)|(double)|(num)|(dec)|(cash)|(int)|(bool)|(ascii)|(char)|(date)|(timeofdaytoseconds)|(time)|(timeofday))(?<array>(\\[.\\]))?$";
 
-            sType = (sType + "").Trim();
+            //if (value == null)
+            //    value = "";
+            //if (string.IsNullOrEmpty(sType))
+            //    sType = "str";
+            //else
+            //    sType = sType.Trim();
+            if (string.IsNullOrEmpty(sType)) return null;
+            
             var match = Regex.Match(sType, sREGX, RegexOptions.IgnoreCase);
             if (!match.Success)
                 return null;

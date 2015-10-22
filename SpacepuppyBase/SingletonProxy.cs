@@ -15,6 +15,8 @@ namespace com.spacepuppy
         [TypeReference.Config(typeof(ISingleton), allowAbstractClasses = false, allowInterfaces = false, dropDownStyle = TypeDropDownListingStyle.Flat)]
         [SerializeField()]
         private TypeReference _singletonType;
+        [SerializeField()]
+        private bool _createIfNone;
 
         #endregion
 
@@ -25,11 +27,19 @@ namespace com.spacepuppy
             get
             {
                 if (_singletonType == null || _singletonType.Type == null) return null;
-                ISingleton instance;
-                if (Singleton.HasInstance(_singletonType.Type, out instance))
-                    return instance;
+
+                if(_createIfNone)
+                {
+                    return Singleton.GetInstance(_singletonType.Type);
+                }
                 else
-                    return null;
+                {
+                    ISingleton instance;
+                    if (Singleton.HasInstance(_singletonType.Type, out instance))
+                        return instance;
+                    else
+                        return null;
+                }
             }
         }
 

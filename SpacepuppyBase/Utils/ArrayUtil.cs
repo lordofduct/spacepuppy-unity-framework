@@ -266,30 +266,70 @@ namespace com.spacepuppy.Utils
 
         public static T PickRandom<T>(this IEnumerable<T> lst, System.Func<T, float> weightPredicate, IRandom rng = null)
         {
+            //var arr = (lst is IList<T>) ? lst as IList<T> : lst.ToList();
+            //if (arr.Count == 0) return default(T);
+
+            //var weights = (from o in lst select weightPredicate(o)).ToArray();
+            //var total = weights.Sum();
+            //if (total <= 0) return arr[0];
+
+            //if (rng == null) rng = RandomUtil.Standard;
+            //float r = rng.Next();
+            //float s = 0f;
+
+            //int i;
+            //for (i = 0; i < weights.Length; i++)
+            //{
+            //    s += weights[i] / total;
+            //    if (s >= r)
+            //    {
+            //        return arr[i];
+            //    }
+            //}
+
+            ////should only get here if last element had a zero weight, and the r was large
+            //i = arr.Count - 1;
+            //while (i > 0 || weights[i] <= 0f) i--;
+            //return arr[i];
+
+
             var arr = (lst is IList<T>) ? lst as IList<T> : lst.ToList();
             if (arr.Count == 0) return default(T);
-            var weights = (from o in lst select weightPredicate(o)).ToArray();
-            var total = weights.Sum();
-            if (total <= 0) return arr[0];
 
-            if (rng == null) rng = RandomUtil.Standard;
-            float r = rng.Next();
-            float s = 0f;
-
-            int i;
-            for (i = 0; i < weights.Length; i++)
+            using (var weights = com.spacepuppy.Collections.TempCollection.GetList<float>())
             {
-                s += weights[i] / total;
-                if (s >= r)
+                int i;
+                float w;
+                float total = 0f;
+                for (i = 0; i < arr.Count; i++)
                 {
-                    return arr[i];
+                    w = weightPredicate(arr[i]);
+                    if (float.IsPositiveInfinity(w)) return arr[i];
+                    else if (w >= 0f && !float.IsNaN(w)) total += w;
+                    weights.Add(w);
                 }
-            }
 
-            //should only get here if last element had a zero weight, and the r was large
-            i = arr.Count - 1;
-            while (i > 0 || weights[i] <= 0f) i--;
-            return arr[i];
+                if (rng == null) rng = RandomUtil.Standard;
+                float r = rng.Next();
+                float s = 0f;
+
+                for (i = 0; i < weights.Count; i++)
+                {
+                    w = weights[i];
+                    if (float.IsNaN(w) || w <= 0f) continue;
+
+                    s += w / total;
+                    if (s >= r)
+                    {
+                        return arr[i];
+                    }
+                }
+
+                //should only get here if last element had a zero weight, and the r was large
+                i = arr.Count - 1;
+                while (i > 0 || weights[i] <= 0f) i--;
+                return arr[i];
+            }
         }
 
         #endregion

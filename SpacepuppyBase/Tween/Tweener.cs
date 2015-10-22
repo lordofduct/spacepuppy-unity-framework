@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy.Tween
 {
 
-    public abstract class Tweener : ISPDisposable, IProgressingYieldInstruction
+    public abstract class Tweener : ISPDisposable, IProgressingYieldInstruction, IRadicalWaitHandle
     {
 
         #region Events
@@ -13,6 +13,7 @@ namespace com.spacepuppy.Tween
         public event System.EventHandler OnStep;
         public event System.EventHandler OnWrap;
         public event System.EventHandler OnFinish;
+        public event System.EventHandler OnStopped;
 
         #endregion
 
@@ -244,6 +245,7 @@ namespace com.spacepuppy.Tween
             if (!_isPlaying) return;
             _isPlaying = false;
             SPTween.RemoveReference(this);
+            if (this.OnStopped != null) this.OnStopped(this, System.EventArgs.Empty);
         }
 
         public virtual void Kill()
@@ -455,6 +457,18 @@ namespace com.spacepuppy.Tween
         {
             yieldObject = null;
             return !this.IsComplete;
+        }
+
+        void IRadicalWaitHandle.OnComplete(System.Action<IRadicalWaitHandle> callback)
+        {
+            System.EventHandler d = null;
+            d = (s, e) =>
+            {
+                this.OnStopped -= d;
+                callback(this);
+            };
+
+            this.OnStopped += d;
         }
 
         #endregion

@@ -131,6 +131,11 @@ namespace com.spacepuppy.Utils
 
         #region "Public Shared Methods"
 
+        public static bool IsReal(float f)
+        {
+            return !float.IsNaN(f) && !float.IsNegativeInfinity(f) && !float.IsPositiveInfinity(f);
+        }
+
         /// <summary>
         /// This exists because Mathf.Sign returns 1 when the input value is 0. I'm personally used to the System.Math.Sign method that returns 0 on 0.
         /// </summary>

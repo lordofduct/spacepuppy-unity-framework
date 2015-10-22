@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
@@ -454,6 +456,83 @@ namespace com.spacepuppy
         }
 
         #endregion
+
+    }
+
+    /// <summary>
+    /// Allows creating a singleton access point of any class that isn't inherently a Singleton
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public abstract class PsuedoSingleton<T> : Singleton, IDynamic where T : Component
+    {
+
+        #region Static Interface
+
+        private static T _instance;
+
+        public static T Instance
+        {
+            get { return _instance; }
+        }
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        protected override void OnValidAwake()
+        {
+            _instance = this.AddComponent<T>();
+        }
+
+        #endregion
+
+
+        #region IDynamic Interface
+
+        public object this[string key]
+        {
+            get
+            {
+                return DynamicUtil.GetValue(PsuedoSingleton<T>.Instance, key);
+            }
+            set
+            {
+                DynamicUtil.SetValue(PsuedoSingleton<T>.Instance, key, value);
+            }
+        }
+
+        MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
+        {
+            return DynamicUtil.GetMember(PsuedoSingleton<T>.Instance, sMemberName, includeNonPublic);
+        }
+
+        IEnumerable<MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
+        {
+            return DynamicUtil.GetMembers(PsuedoSingleton<T>.Instance, includeNonPublic);
+        }
+
+        object IDynamic.GetValue(string sMemberName, params object[] args)
+        {
+            return DynamicUtil.GetValue(PsuedoSingleton<T>.Instance, sMemberName, args);
+        }
+
+        bool IDynamic.HasMember(string sMemberName, bool includeNonPublic)
+        {
+            return DynamicUtil.HasMember(PsuedoSingleton<T>.Instance, sMemberName, includeNonPublic);
+        }
+
+        object IDynamic.InvokeMethod(string sMemberName, params object[] args)
+        {
+            return DynamicUtil.InvokeMethod(PsuedoSingleton<T>.Instance, sMemberName, args);
+        }
+
+        bool IDynamic.SetValue(string sMemberName, object value, params object[] index)
+        {
+            return DynamicUtil.SetValue(PsuedoSingleton<T>.Instance, sMemberName, value, index);
+        }
+
+        #endregion
+
 
     }
 

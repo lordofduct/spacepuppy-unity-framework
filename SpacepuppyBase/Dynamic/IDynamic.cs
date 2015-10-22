@@ -807,7 +807,12 @@ namespace com.spacepuppy.Dynamic
                 }
                 if (convertToParamTypeIfCan)
                 {
-                    if(ConvertUtil.IsNumericType(paramInfos[i].ParameterType) && ConvertUtil.IsNumeric(args[i]))
+                    //if (ConvertUtil.IsNumericType(paramInfos[i].ParameterType) && ConvertUtil.IsNumeric(args[i]))
+                    //{
+                    //    args[i] = ConvertUtil.ToPrim(args[i], paramInfos[i].ParameterType);
+                    //    continue;
+                    //}
+                    if (ConvertUtil.IsNumericType(paramInfos[i].ParameterType) && args[i] is IConvertible)
                     {
                         args[i] = ConvertUtil.ToPrim(args[i], paramInfos[i].ParameterType);
                         continue;

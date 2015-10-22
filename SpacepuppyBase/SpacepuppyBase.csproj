@@ -74,6 +74,7 @@
     <Compile Include="Cameras\MultiCameraController.cs" />
     <Compile Include="Cameras\UnityCamera.cs" />
     <Compile Include="CancellableNotification.cs" />
+    <Compile Include="Collections\SamplingCharEnumerator.cs" />
     <Compile Include="Collections\BiDictionary.cs" />
     <Compile Include="Collections\CircularQueue.cs" />
     <Compile Include="Collections\ComponentCollection.cs" />
@@ -169,6 +170,7 @@
     <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
+    <Compile Include="Scenario\i_TriggerOnIfThen.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
     <Compile Include="Scenario\t_OnClick.cs" />
     <Compile Include="Scenario\t_OnEnable.cs" />
@@ -335,6 +337,8 @@
     <Compile Include="Utils\TransformUtil.cs" />
     <Compile Include="Utils\TypeUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />
+    <Compile Include="VariableStore.cs" />
+    <Compile Include="VariableStoreSingleton.cs" />
     <Compile Include="VariantCollection.cs" />
     <Compile Include="VariantReference.cs" />
   </ItemGroup>

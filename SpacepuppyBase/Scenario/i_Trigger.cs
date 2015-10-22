@@ -44,8 +44,8 @@ namespace com.spacepuppy.Scenario
         public new bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
-
-            if(this.Delay > 0f)
+            
+            if (this.Delay > 0f)
             {
                 this.Invoke(() =>
                 {
