@@ -603,6 +603,7 @@ namespace com.spacepuppy
             void IDisposable.Dispose()
             {
                 this.Dispose();
+                _pool.Release(this);
             }
             
         }
