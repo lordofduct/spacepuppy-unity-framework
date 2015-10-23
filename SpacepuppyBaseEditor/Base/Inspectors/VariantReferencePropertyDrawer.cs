@@ -21,8 +21,7 @@ namespace com.spacepuppyeditor.Base
 
         public bool RestrictVariantType = false;
         public VariantType VariantTypeRestrictedTo;
-        private System.Type _forcedComponentType;
-        private System.Type _selectedComponentType;
+        private System.Type _forcedObjectType = typeof(UnityEngine.Object);
 
         private VariantReference.EditorHelper _helper = new VariantReference.EditorHelper(new VariantReference());
         private SelectableComponentPropertyDrawer _selectComponentDrawer = new SelectableComponentPropertyDrawer();
@@ -31,19 +30,17 @@ namespace com.spacepuppyeditor.Base
 
         #region Properties
 
-        public System.Type ForcedComponentType
+        public System.Type ForcedObjectType
         {
-            get { return _forcedComponentType; }
+            get { return _forcedObjectType; }
             set
             {
-                //if (value == null)
-                //    _forcedComponentType = null;
-                //else if (value.IsInterface || typeof(Component).IsAssignableFrom(value))
-                //    _forcedComponentType = value;
-                //else
-                //    throw new TypeArgumentMismatchException(value, typeof(Component), "value");
-
-                _forcedComponentType = value; //lets just allow anything... if they set it to something not working, it jsut won't list anything
+                if (ComponentUtil.IsAcceptableComponentType(value))
+                    _forcedObjectType = value;
+                else if (TypeUtil.IsType(value, typeof(UnityEngine.Object)))
+                    _forcedObjectType = value;
+                else
+                    _forcedObjectType = typeof(UnityEngine.Object);
             }
         }
 
@@ -179,7 +176,7 @@ namespace com.spacepuppyeditor.Base
                 case VariantType.Component:
                     {
                         _selectComponentDrawer.AllowNonComponents = false;
-                        _selectComponentDrawer.RestrictionType = _forcedComponentType;
+                        _selectComponentDrawer.RestrictionType = _forcedObjectType;
                         _selectComponentDrawer.ShowXButton = true;
                         var targProp = property.FindPropertyRelative("_unityObjectReference");
                         EditorGUI.BeginChangeCheck();
@@ -193,12 +190,12 @@ namespace com.spacepuppyeditor.Base
                 case VariantType.Object:
                     {
                         var obj = variant.ObjectValue;
-                        if(_forcedComponentType != null && _forcedComponentType.IsInterface)
+                        if(ComponentUtil.IsAcceptableComponentType(_forcedObjectType))
                         {
                             if (obj is GameObject || obj is Component)
                             {
                                 _selectComponentDrawer.AllowNonComponents = false;
-                                _selectComponentDrawer.RestrictionType = _forcedComponentType;
+                                _selectComponentDrawer.RestrictionType = _forcedObjectType;
                                 _selectComponentDrawer.ShowXButton = true;
                                 var targProp = property.FindPropertyRelative("_unityObjectReference");
                                 EditorGUI.BeginChangeCheck();
@@ -218,7 +215,7 @@ namespace com.spacepuppyeditor.Base
                                     {
                                         variant.ObjectValue = null;
                                     }
-                                    else if(TypeUtil.IsType(obj.GetType(), _forcedComponentType))
+                                    else if(TypeUtil.IsType(obj.GetType(), _forcedObjectType))
                                     {
                                         variant.ObjectValue = obj;
                                     }
@@ -226,7 +223,7 @@ namespace com.spacepuppyeditor.Base
                                     {
                                         var go = GameObjectUtil.GetGameObjectFromSource(obj);
                                         if (go != null)
-                                            variant.ObjectValue = go.GetComponent(_forcedComponentType);
+                                            variant.ObjectValue = go.GetComponent(_forcedObjectType);
                                         else
                                             variant.ObjectValue = null;
                                     }
@@ -235,7 +232,7 @@ namespace com.spacepuppyeditor.Base
                         }
                         else
                         {
-                            variant.ObjectValue = EditorGUI.ObjectField(r1, obj, _forcedComponentType, true);
+                            variant.ObjectValue = EditorGUI.ObjectField(r1, obj, _forcedObjectType, true);
                         }
                     }
                     break;

@@ -338,7 +338,6 @@
     <Compile Include="Utils\TypeUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />
     <Compile Include="VariableStore.cs" />
-    <Compile Include="VariableStoreSingleton.cs" />
     <Compile Include="VariantCollection.cs" />
     <Compile Include="VariantReference.cs" />
   </ItemGroup>

@@ -123,6 +123,9 @@ namespace com.spacepuppyeditor.Components
 
         public static Component[] GetComponentsFromSerializedProperty(SerializedProperty property, System.Type restrictionType, bool forceSelfOnly, bool searchChildren)
         {
+            if (!ComponentUtil.IsAcceptableComponentType(restrictionType))
+                return ArrayUtil.Empty<Component>();
+
             var go = GetGameObjectFromSource(property, forceSelfOnly);
             if (go == null) return ArrayUtil.Empty<Component>();
 

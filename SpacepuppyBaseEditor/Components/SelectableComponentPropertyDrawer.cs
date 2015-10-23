@@ -23,13 +23,21 @@ namespace com.spacepuppyeditor.Components
         public bool ShowXButton = true;
         public bool XButtonOnRightSide = true;
         public IComponentChoiceSelector ChoiceSelector;
+
+        /// <summary>
+        /// SelectableComponentPropertyDrawer will allow drawing an Object field that will only go into 'Component Select' mode if the object is a Component source.
+        /// Otherwise it just remains a simple object field.
+        /// </summary>
         public bool AllowNonComponents;
 
         private System.Type _restrictionType = typeof(Component);
 
         public System.Type RestrictionType
         {
-            get { return _restrictionType; }
+            get
+            {
+                return _restrictionType;
+            }
             set
             {
                 //if (value == null) value = typeof(Component);
@@ -39,6 +47,14 @@ namespace com.spacepuppyeditor.Components
                 //if (value == null) value = (this.AllowNonComponents) ? typeof(UnityEngine.Object) : typeof(Component);
                 if (value == null) value = typeof(Component);
                 _restrictionType = value;
+            }
+        }
+
+        public System.Type ComponentRestrictionType
+        {
+            get
+            {
+                return (ComponentUtil.IsAcceptableComponentType(_restrictionType)) ? _restrictionType : typeof(Component);
             }
         }
 
@@ -132,7 +148,7 @@ namespace com.spacepuppyeditor.Components
                 }
                 else
                 {
-                    this.ChoiceSelector.BeforeGUI(this, property, _restrictionType);
+                    this.ChoiceSelector.BeforeGUI(this, property, this.ComponentRestrictionType);
                     var components = this.ChoiceSelector.GetComponents();
 
                     var fullsize = position;
@@ -166,7 +182,7 @@ namespace com.spacepuppyeditor.Components
             }
             else
             {
-                this.ChoiceSelector.BeforeGUI(this, property, _restrictionType);
+                this.ChoiceSelector.BeforeGUI(this, property, this.ComponentRestrictionType);
                 var components = this.ChoiceSelector.GetComponents();
 
                 var fullsize = position;
@@ -206,7 +222,7 @@ namespace com.spacepuppyeditor.Components
 
         private void DrawObjectRefField(Rect position, SerializedProperty property)
         {
-            if (TypeUtil.IsType(_restrictionType, typeof(Component)))
+            if (ComponentUtil.IsAcceptableComponentType(_restrictionType))
             {
                 var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
                 if(this.ForceOnlySelf)

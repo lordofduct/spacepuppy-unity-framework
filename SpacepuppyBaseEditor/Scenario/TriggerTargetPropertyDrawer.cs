@@ -135,7 +135,7 @@ namespace com.spacepuppyeditor.Scenario
                 var argProp = argArrayProp.GetArrayElementAtIndex(0);
                 //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
                 _variantDrawer.RestrictVariantType = false;
-                _variantDrawer.ForcedComponentType = null;
+                _variantDrawer.ForcedObjectType = null;
                 _variantDrawer.OnGUI(argRect, argProp, _defaultArgLabel);
 
                 if (GUI.Button(btnRect, _argBtnLabel))
@@ -201,7 +201,7 @@ namespace com.spacepuppyeditor.Scenario
                 var argProp = argArrayProp.GetArrayElementAtIndex(0);
                 //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
                 _variantDrawer.RestrictVariantType = false;
-                _variantDrawer.ForcedComponentType = null;
+                _variantDrawer.ForcedObjectType = null;
                 _variantDrawer.OnGUI(argRect, argProp, _defaultArgLabel);
 
                 if (GUI.Button(btnRect, _argBtnLabel))
@@ -257,7 +257,7 @@ namespace com.spacepuppyeditor.Scenario
                 var argProp = argArrayProp.GetArrayElementAtIndex(0);
                 //EditorGUI.PropertyField(argRect, argProp, _messageArgLabel);
                 _variantDrawer.RestrictVariantType = false;
-                _variantDrawer.ForcedComponentType = null;
+                _variantDrawer.ForcedObjectType = null;
                 _variantDrawer.OnGUI(argRect, argProp, _messageArgLabel);
 
                 if (GUI.Button(btnRect, _argBtnLabel))
@@ -362,7 +362,7 @@ namespace com.spacepuppyeditor.Scenario
                     {
                         //draw the default variant as the method accepts anything
                         _variantDrawer.RestrictVariantType = false;
-                        _variantDrawer.ForcedComponentType = null;
+                        _variantDrawer.ForcedObjectType = null;
                         _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
                     }
                     else
@@ -370,7 +370,7 @@ namespace com.spacepuppyeditor.Scenario
                         var argType = VariantReference.GetVariantType(paramType);
                         _variantDrawer.RestrictVariantType = true;
                         _variantDrawer.VariantTypeRestrictedTo = argType;
-                        _variantDrawer.ForcedComponentType = (paramType.IsInterface || TypeUtil.IsType(paramType, typeof(Component))) ? paramType : null;
+                        _variantDrawer.ForcedObjectType = (paramType.IsInterface || TypeUtil.IsType(paramType, typeof(Component))) ? paramType : null;
                         _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
                     }
                 }

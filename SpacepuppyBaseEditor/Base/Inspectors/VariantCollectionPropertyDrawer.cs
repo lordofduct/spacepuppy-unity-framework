@@ -80,7 +80,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
             _propertyListNames = null;
 
             _variantDrawer.RestrictVariantType = false;
-            _variantDrawer.ForcedComponentType = null;
+            _variantDrawer.ForcedObjectType = null;
         }
 
         #endregion
@@ -143,7 +143,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
                     var argType = VariantReference.GetVariantType(propType);
                     _variantDrawer.RestrictVariantType = true;
                     _variantDrawer.VariantTypeRestrictedTo = argType;
-                    _variantDrawer.ForcedComponentType = (TypeUtil.IsType(propType, typeof(Component))) ? propType : null;
+                    _variantDrawer.ForcedObjectType = propType;
                     _variantDrawer.DrawValueField(variantRect, variantProp);
                 }
                 else

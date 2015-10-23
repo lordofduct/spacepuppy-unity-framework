@@ -17,7 +17,14 @@ namespace com.spacepuppy.Utils
 
         public static bool IsComponentType(System.Type tp)
         {
+            if (tp == null) return false;
             return typeof(Component).IsAssignableFrom(tp) || typeof(IComponent).IsAssignableFrom(tp);
+        }
+
+        public static bool IsAcceptableComponentType(System.Type tp)
+        {
+            if (tp == null) return false;
+            return tp.IsInterface || typeof(Component).IsAssignableFrom(tp);
         }
 
         public static bool IsComponentSource(object obj)
