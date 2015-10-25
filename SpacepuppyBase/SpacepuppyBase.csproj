@@ -176,8 +176,6 @@
     <Compile Include="Scenario\t_OnEnable.cs" />
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />
-    <Compile Include="Serialization\SimpleUnityStructureSurrogate.cs" />
-    <Compile Include="Serialization\SPSerializationSurrogate.cs" />
     <Compile Include="SPAssets.cs" />
     <Compile Include="SPEntity.cs" />
     <Compile Include="ITimeSupplier.cs" />
@@ -223,14 +221,6 @@
     <Compile Include="Scenes\SceneBehaviourSequence.cs" />
     <Compile Include="Scenes\SceneSequence.cs" />
     <Compile Include="Scenes\SimpleScene.cs" />
-    <Compile Include="Serialization\IUnityData.cs" />
-    <Compile Include="Serialization\IUnitySerializable.cs" />
-    <Compile Include="Serialization\SerializationHelper.cs" />
-    <Compile Include="Serialization\UnityData.cs" />
-    <Compile Include="Serialization\UnityDataFormatter.cs" />
-    <Compile Include="Serialization\UnityDataScriptableObject.cs" />
-    <Compile Include="Serialization\UnitySerializationInfo.cs" />
-    <Compile Include="Serialization\UnitySerializationSurrogate.cs" />
     <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="Singleton.cs" />

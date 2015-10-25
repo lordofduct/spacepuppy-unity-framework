@@ -485,6 +485,30 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+        public static string GetPathNameRelativeTo(this GameObject go, Transform parent)
+        {
+            if (go == null) return null;
+            return GetPathNameRelativeTo(go.transform, parent);
+        }
+
+        public static string GetPathNameRelativeTo(this Transform t, Transform parent)
+        {
+            if (t == null) return null;
+            if (t == parent) return null;
+
+            var bldr = StringUtil.GetTempStringBuilder();
+            bldr.Append(t.name);
+            t = t.parent;
+            while(t != null && t != parent)
+            {
+                bldr.Insert(0, '/');
+                bldr.Insert(0, t.name);
+            }
+            var result = bldr.ToString();
+            StringUtil.Release(bldr);
+            return result;
+        }
+
         #endregion
 
         #region Tags

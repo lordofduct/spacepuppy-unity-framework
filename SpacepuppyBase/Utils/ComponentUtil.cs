@@ -82,6 +82,40 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+        public static T[] GetComponentsFromSource<T>(object obj) where T : class
+        {
+            if (obj == null) return ArrayUtil.Empty<T>();
+            if (obj is T) return new T[] { obj as T };
+            if (obj is IComponent)
+            {
+                var c = (obj as IComponent).component;
+                if (c is T) return new T[] { c as T };
+                else return c.GetComponents<T>();
+            }
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go != null)
+                return go.GetComponents<T>();
+
+            return ArrayUtil.Empty<T>();
+        }
+
+        public static Component[] GetComponentsFromSource(System.Type tp, object obj)
+        {
+            if (obj == null) return ArrayUtil.Empty<Component>();
+            if (TypeUtil.IsType(obj.GetType(), tp))
+            {
+                if (obj is Component) return new Component[] { obj as Component };
+                else if (obj is IComponent && (obj as IComponent).component != null) return (obj as IComponent).component.GetComponents<Component>();
+            }
+
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go != null)
+                return go.GetComponents<Component>();
+
+            return ArrayUtil.Empty<Component>();
+        }
+
+
         public static bool IsEnabled(this Component comp)
         {
             if (comp == null) return false;

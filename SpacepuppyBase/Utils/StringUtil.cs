@@ -523,7 +523,7 @@ namespace com.spacepuppy.Utils
         #region StringBuilders
 
         private static ObjectCachePool<StringBuilder> _pool = new ObjectCachePool<StringBuilder>(10, () => new StringBuilder(), (b) => b.Length = 0);
-
+        
         public static StringBuilder GetTempStringBuilder()
         {
             return _pool.GetInstance();
