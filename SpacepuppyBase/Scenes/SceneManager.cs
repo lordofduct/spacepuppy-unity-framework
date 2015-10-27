@@ -12,7 +12,7 @@ namespace com.spacepuppy.Scenes
 
         #region Events
 
-        public event System.EventHandler<SceneLoadingEventArgs> SceneCreated;
+        public event System.EventHandler<SceneLoadingEventArgs> BeforeSceneLoaded;
         public event System.EventHandler<SceneLoadingEventArgs> SceneLoaded;
         public event System.EventHandler<SceneLoadingEventArgs> SceneStarted;
 
@@ -21,9 +21,9 @@ namespace com.spacepuppy.Scenes
         #region Fields
 
         [System.NonSerialized()]
-        private GameObject _currentSceneBehaviourGameObject;
-        [System.NonSerialized()]
         private ISceneBehaviour _currentSceneBehaviour;
+        [System.NonSerialized()]
+        private ISceneBehaviour _lastSceneBehaviour;
 
         private WaitForSceneLoaded _loadingOp;
 
@@ -35,75 +35,87 @@ namespace com.spacepuppy.Scenes
 
         #region Properties
 
-        public ISceneBehaviour Current { get { return _currentSceneBehaviour; } }
+        public ISceneBehaviour Current { get { return _currentSceneBehaviour ?? _lastSceneBehaviour; } }
 
         #endregion
 
         #region LoadScene Methods
 
-        public void Unload()
+        public IRadicalYieldInstruction Unload()
         {
+            IRadicalYieldInstruction arg = null;
+
             if (_loadingOp != null)
             {
-                _loadingOp.Cancel();
+                var op = _loadingOp;
                 _loadingOp = null;
-            }
 
-            if (_currentSceneBehaviourGameObject != null)
+                op.Cancel();
+                if(_currentSceneBehaviour != null)
+                {
+                    if(op.LastScene == _currentSceneBehaviour)
+                    {
+                        _currentSceneBehaviour = null;
+                    }
+                    else
+                    {
+                        arg = _currentSceneBehaviour.EndScene();
+                        if(arg != null)
+                        {
+                            _lastSceneBehaviour = _currentSceneBehaviour;
+                            arg = this.StartRadicalCoroutine(this.ForceUnloadRoutine(arg, _lastSceneBehaviour));
+                        }
+                    }
+                }
+            }
+            else if (_currentSceneBehaviour != null)
             {
-                if(_currentSceneBehaviour != null) _currentSceneBehaviour.EndScene();
-                GameObject.Destroy(_currentSceneBehaviourGameObject);
-                _currentSceneBehaviourGameObject = null;
-                _currentSceneBehaviour = null;
+                _currentSceneBehaviour.EndScene();
+                if (_currentSceneBehaviour.gameObject != null) ObjUtil.SmartDestroy(_currentSceneBehaviour.gameObject);
             }
+
+            _currentSceneBehaviour = null;
+            return arg;
         }
 
-        public IProgressingYieldInstruction LoadScene<T>() where T : class, ISceneBehaviour
-        {
-            return this.LoadScene(new SceneBehaviourLoadOptions(typeof(T)));
-        }
-
-        public IProgressingYieldInstruction LoadScene(System.Type tp)
-        {
-            if (tp == null || !TypeUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
-            return this.LoadScene(new SceneBehaviourLoadOptions(tp));
-        }
-
-        public IProgressingYieldInstruction LoadScene(ISceneBehaviourLoadOptions options)
+        public IProgressingYieldInstruction LoadScene(ISceneLoadOptions options)
         {
             if (options == null) throw new System.ArgumentNullException("options");
 
-            var tp = options.SceneBehaviourType;
-            if (tp == null || !TypeUtil.IsType(tp, typeof(ISceneBehaviour))) throw new TypeArgumentMismatchException(tp, typeof(ISceneBehaviour), "tp");
+            if (_loadingOp != null)
+            {
+                _loadingOp.Cancel();
+                if (!_loadingOp.NextSceneStarted) _currentSceneBehaviour = null;
+                _loadingOp = null;
+            }
 
-            this.Unload();
-
-            _currentSceneBehaviourGameObject = new GameObject(tp.Name);
-            _currentSceneBehaviourGameObject.transform.parent = this.transform;
-            _currentSceneBehaviourGameObject.transform.position = Vector3.zero;
-
-            _currentSceneBehaviour = _currentSceneBehaviourGameObject.AddComponent(tp) as ISceneBehaviour;
-
+            _lastSceneBehaviour = _currentSceneBehaviour;
+            _currentSceneBehaviour = null;
             _loadingOp = new WaitForSceneLoaded();
-            _loadingOp.Start(this, _currentSceneBehaviour, options);
+            _loadingOp.Start(this, options, _lastSceneBehaviour);
             return _loadingOp;
         }
 
+        private System.Collections.IEnumerator ForceUnloadRoutine(IRadicalYieldInstruction instruction, ISceneBehaviour waitingOn)
+        {
+            yield return instruction;
+            if (_lastSceneBehaviour == waitingOn) _lastSceneBehaviour = null;
+        }
 
+
+        
 
         protected virtual void OnBeforeSceneLoaded(SceneLoadingEventArgs e)
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
-            e.LoadOptions.OnBeforeSceneLoaded(this, e);
-            if (this.SceneCreated != null) this.SceneCreated(this, e);
+            if (this.BeforeSceneLoaded != null) this.BeforeSceneLoaded(this, e);
         }
 
         protected virtual void OnSceneLoaded(SceneLoadingEventArgs e)
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
-            e.LoadOptions.OnSceneLoaded(this, e);
             if (this.SceneLoaded != null) this.SceneLoaded(this, e);
         }
 
@@ -111,7 +123,6 @@ namespace com.spacepuppy.Scenes
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
-            e.LoadOptions.OnSceneStarted(this, e);
             if (this.SceneStarted != null) this.SceneStarted(this, e);
         }
 
@@ -125,21 +136,35 @@ namespace com.spacepuppy.Scenes
             #region Fields
 
             private SceneManager _manager;
-            private ISceneBehaviour _scene;
-            private ISceneBehaviourLoadOptions _options;
+            private ISceneLoadOptions _options;
+            private ISceneBehaviour _lastScene;
+
             private IProgressingYieldInstruction _loadOp;
+            private bool _started;
 
             private RadicalCoroutine _routine;
 
             #endregion
 
+            #region Properties
+
+            public SceneManager Manager { get { return _manager; } }
+
+            public ISceneLoadOptions LoadOptions { get { return _options; } }
+
+            public ISceneBehaviour LastScene { get {return _lastScene; } }
+
+            public bool NextSceneStarted { get { return _started; } }
+
+            #endregion
+
             #region Methods
 
-            public void Start(SceneManager manager, ISceneBehaviour scene, ISceneBehaviourLoadOptions options)
+            public void Start(SceneManager manager, ISceneLoadOptions options, ISceneBehaviour lastScene)
             {
                 _manager = manager;
-                _scene = scene;
                 _options = options;
+                _lastScene = lastScene;
                 _routine = manager.StartRadicalCoroutine(this.DoLoad()); //GameLoopEntry.Hook.StartRadicalCoroutine(this.DoLoad(), RadicalCoroutineDisableMode.Default);
             }
 
@@ -156,22 +181,59 @@ namespace com.spacepuppy.Scenes
 
             private System.Collections.IEnumerator DoLoad()
             {
-                var args = new SceneLoadingEventArgs(_manager, _scene, _options);
+                if(_lastScene != null)
+                {
+                    //end last scene
+                    var endInstruction = _lastScene.EndScene();
+                    if (endInstruction != null) yield return endInstruction;
+                    if(_manager._lastSceneBehaviour == _lastScene) _manager._lastSceneBehaviour = null;
+                }
+
+                var args = new SceneLoadingEventArgs(_manager, _options);
                 object[] instructions;
 
+                //signal about to load
+                _options.OnBeforeSceneLoaded(_manager, args);
                 _manager.OnBeforeSceneLoaded(args);
                 if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
 
-                _loadOp = _scene.LoadScene();
+                //do load
+                var scene = _options.GetScene(_manager);
+                _loadOp = (scene != null) ? scene.LoadAsync() : RadicalYieldInstruction.Null;
                 yield return _loadOp;
-                
+
+                //get scene behaviour
+                var sceneBehaviour = _options.LoadCustomSceneBehaviour(_manager);
+                if(sceneBehaviour == null)
+                {
+                    var go = new GameObject("SceneBehaviour");
+                    go.transform.parent = _manager.transform;
+                    go.transform.localPosition = Vector3.zero;
+                    sceneBehaviour = go.AddComponent<SceneBehaviour>();
+                }
+                SceneBehaviour.SceneLoadedInstance = sceneBehaviour;
+                _manager._currentSceneBehaviour = sceneBehaviour;
+
+                //signal loaded
+                _options.OnSceneLoaded(_manager, args);
                 _manager.OnSceneLoaded(args);
                 if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
                 else yield return null; //wait one last frame to actually begin the scene
 
-                _scene.BeginScene();
+                //signal scene begun
+                _started = true;
+                var beginInstruction = sceneBehaviour.BeginScene();
+                _options.OnSceneStarted(_manager, args);
                 _manager.OnSceneStarted(args);
-                if (args.ShouldStall(out instructions)) yield return new WaitForAllComplete(GameLoopEntry.Hook, instructions);
+                if (args.ShouldStall(out instructions))
+                {
+                    var waitAll = new WaitForAllComplete(GameLoopEntry.Hook, instructions);
+                    if (beginInstruction != null)
+                        waitAll.Add(beginInstruction);
+                    beginInstruction = waitAll;
+                }
+                if (beginInstruction != null) yield return beginInstruction;
+                _manager._loadingOp = null;
                 this.SetSignal();
             }
 

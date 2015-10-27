@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Dynamic
 {
 
-    public class DynamicPropertyInfo : PropertyInfo
+    public class DynamicPropertyInfo : PropertyInfo, IDynamicMemberInfo
     {
 
         #region Fields
@@ -130,6 +130,8 @@ namespace com.spacepuppy.Dynamic
         }
 
         #endregion
+
+        Type IDynamicMemberInfo.ReturnType { get { return this.PropertyType; } }
 
     }
 

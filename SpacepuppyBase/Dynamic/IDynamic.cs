@@ -180,101 +180,6 @@ namespace com.spacepuppy.Dynamic
 
         public static bool SetValueDirect(object obj, string sprop, object value, params object[] index)
         {
-            /*
-            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            if (obj == null) return false;
-
-            try
-            {
-                var tp = obj.GetType();
-
-                while (tp != null)
-                {
-                    var members = tp.GetMember(sprop, BINDING);
-                    if (members == null || members.Length == 0) return false;
-
-                    System.Type vtp = (value != null) ? value.GetType() : null;
-
-                    //first strict test
-                    foreach (var member in members)
-                    {
-                        switch (member.MemberType)
-                        {
-                            case System.Reflection.MemberTypes.Field:
-                                var field = member as System.Reflection.FieldInfo;
-                                if (vtp == null || field.FieldType == vtp)
-                                {
-                                    field.SetValue(obj, value);
-                                    return true;
-                                }
-
-                                break;
-                            case System.Reflection.MemberTypes.Property:
-                                var prop = member as System.Reflection.PropertyInfo;
-                                if (prop.CanWrite && (vtp == null || prop.PropertyType == vtp) && prop.GetIndexParameters().Length == 0)
-                                {
-                                    prop.SetValue(obj, value, index);
-                                    return true;
-                                }
-                                break;
-                            case System.Reflection.MemberTypes.Method:
-                                {
-                                    var meth = member as System.Reflection.MethodInfo;
-                                    var paramInfos = meth.GetParameters();
-                                    var arr = new object[] { value };
-                                    if (DynamicUtil.ParameterSignatureMatches(arr, paramInfos, false))
-                                    {
-                                        meth.Invoke(obj, arr);
-                                        return true;
-                                    }
-                                }
-                                break;
-                        }
-                    }
-
-                    //now weak test
-                    foreach (var member in members)
-                    {
-                        switch (member.MemberType)
-                        {
-                            case System.Reflection.MemberTypes.Field:
-                                var field = member as System.Reflection.FieldInfo;
-                                field.SetValue(obj, value);
-                                return true;
-                            case System.Reflection.MemberTypes.Property:
-                                var prop = member as System.Reflection.PropertyInfo;
-                                    if (prop.CanWrite)
-                                    {
-                                        prop.SetValue(obj, value, null);
-                                        return true;
-                                    }
-                                break;
-                            case System.Reflection.MemberTypes.Method:
-                                {
-                                    var meth = member as System.Reflection.MethodInfo;
-                                    var paramInfos = meth.GetParameters();
-                                    var arr = new object[] { value };
-                                    if (DynamicUtil.ParameterSignatureMatches(arr, paramInfos, true))
-                                    {
-                                        meth.Invoke(obj, arr);
-                                        return true;
-                                    }
-                                }
-                                break;
-                        }
-                    }
-
-                    tp = tp.BaseType;
-                }
-            }
-            catch
-            {
-
-            }
-
-            return false;
-             */
-
             if (obj == null) return false;
             var vtp = (value != null) ? value.GetType() : null;
             var member = GetValueSetterMemberFromType(obj.GetType(), sprop, vtp, false);
@@ -637,7 +542,7 @@ namespace com.spacepuppy.Dynamic
         {
             if (info == null) return null;
 
-            switch(info.MemberType)
+            switch (info.MemberType)
             {
                 case MemberTypes.Field:
                     return (info as FieldInfo).FieldType;
@@ -647,6 +552,17 @@ namespace com.spacepuppy.Dynamic
                     return (info as MethodInfo).ReturnType;
             }
             return null;
+
+            //if (info is IDynamicMemberInfo)
+            //    return (info as IDynamicMemberInfo).ReturnType;
+            //else if (info is PropertyInfo)
+            //    return (info as PropertyInfo).PropertyType;
+            //else if (info is FieldInfo)
+            //    return (info as FieldInfo).FieldType;
+            //else if (info is MethodInfo)
+            //    return (info as MethodInfo).ReturnType;
+            //else
+            //    return null;
         }
 
         public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(object obj, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite)

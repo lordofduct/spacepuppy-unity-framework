@@ -741,6 +741,11 @@ namespace com.spacepuppy.Utils
             return value;
         }
 
+        public static float Wrap01(float value)
+        {
+            return (float)((double)value - Math.Floor((double)value));
+        }
+
         /// <summary>
         /// Wraps a value around some significant range.
         /// 

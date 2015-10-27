@@ -33,7 +33,7 @@ namespace com.spacepuppy.Dynamic.Accessors
                 return _pool[memberInfo];
             }
 
-            if (_pool == null) _pool = new Dictionary<MemberInfo, IMemberAccessor>();
+            if (_pool == null) _pool = new Dictionary<MemberInfo, IMemberAccessor>(new MemberInfoEqualityComparer());
 
             IMemberAccessor result;
             if(typeof(UnityEngine.Transform).IsAssignableFrom(memberInfo.DeclaringType))
@@ -89,7 +89,7 @@ namespace com.spacepuppy.Dynamic.Accessors
                     if (matches == null || matches.Length == 0)
                         throw new MemberAccessorException(string.Format("Member \"{0}\" does not exist for type {1}.", memberName, objectType));
 
-                    objectType = GetMemberType(matches[0]);
+                    objectType = DynamicUtil.GetReturnType(matches[0]);
                     _chainBuilder.Enqueue(GetAccessor(matches[0], true));
                 }
 
@@ -110,7 +110,7 @@ namespace com.spacepuppy.Dynamic.Accessors
                 if (matches == null || matches.Length == 0)
                     throw new MemberAccessorException(string.Format("Member \"{0}\" does not exist for type {1}.", memberName, objectType));
 
-                effectivelyAlteredValueType = GetMemberType(matches[0]);
+                effectivelyAlteredValueType = DynamicUtil.GetReturnType(matches[0]);
                 return GetAccessor(matches[0]);
             }
 
@@ -121,19 +121,7 @@ namespace com.spacepuppy.Dynamic.Accessors
             Type memberType;
             return GetAccessor(objectType, memberName, out memberType);
         }
-
-        private static Type GetMemberType(MemberInfo memberInfo)
-        {
-            if (memberInfo is PropertyInfo)
-                return (memberInfo as PropertyInfo).PropertyType;
-            else if (memberInfo is FieldInfo)
-                return (memberInfo as FieldInfo).FieldType;
-            else
-                return null;
-        }
-
-
-
+        
         public static IMemberAccessor GetDynamicAccessor(object target, string memberName, out System.Type memberType)
         {
             memberType = null;
@@ -154,6 +142,36 @@ namespace com.spacepuppy.Dynamic.Accessors
             _dynPool[memberName] = accessor;
             return accessor;
         }
+
+
+
+
+
+
+        #region Special Types
+
+        private class MemberInfoEqualityComparer : IEqualityComparer<MemberInfo>
+        {
+            public bool Equals(MemberInfo x, MemberInfo y)
+            {
+                if (x == null) return y == null;
+                if (y == null) return false;
+
+                if (x is IDynamicMemberInfo && y is IDynamicMemberInfo)
+                    return x.DeclaringType == y.DeclaringType && x.Name == y.Name && x.MemberType == y.MemberType;
+                else
+                    return x == y;
+            }
+
+            public int GetHashCode(MemberInfo obj)
+            {
+                if (obj == null) return 0;
+
+                return obj.DeclaringType.GetHashCode() ^ obj.Name.GetHashCode();
+            }
+        }
+
+        #endregion
 
     }
 }

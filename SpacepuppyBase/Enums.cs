@@ -22,7 +22,13 @@
         /// The default action from Unity. The routine cancels on deactivate, and plays through disable.
         /// </summary>
         Default = 0,
+        /// <summary>
+        /// The default action from Unity. The routine cancels on deactivate, and plays through disable.
+        /// </summary>
         CancelOnDeactivate = 0,
+        /// <summary>
+        /// Cancels on disable, still cancels on Deactivate as well.
+        /// </summary>
         CancelOnDisable = 1,
         StopOnDeactivate = 2,
         StopOnDisable = 4,

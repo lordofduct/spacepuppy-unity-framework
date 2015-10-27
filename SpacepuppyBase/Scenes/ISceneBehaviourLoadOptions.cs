@@ -4,6 +4,8 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenes
 {
 
+    /*
+
     public interface ISceneBehaviourLoadOptions
     {
 
@@ -91,5 +93,7 @@ namespace com.spacepuppy.Scenes
         #endregion
 
     }
+
+    */
 
 }

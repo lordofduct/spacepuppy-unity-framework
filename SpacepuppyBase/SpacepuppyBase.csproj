@@ -103,6 +103,8 @@
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="CollisionExclusion.cs" />
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
+    <Compile Include="Dynamic\DynamicObjectAccessor.cs" />
+    <Compile Include="Dynamic\IDynamicMemberInfo.cs" />
     <Compile Include="FixedPoint.cs" />
     <Compile Include="ColorHSV.cs" />
     <Compile Include="ISPDisposable.cs" />
@@ -176,6 +178,7 @@
     <Compile Include="Scenario\t_OnEnable.cs" />
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />
+    <Compile Include="Scenes\ISceneLoadOptions.cs" />
     <Compile Include="SPAssets.cs" />
     <Compile Include="SPEntity.cs" />
     <Compile Include="ITimeSupplier.cs" />

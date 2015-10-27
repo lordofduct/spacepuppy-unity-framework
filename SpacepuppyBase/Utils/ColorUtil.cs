@@ -132,10 +132,39 @@ namespace com.spacepuppy.Utils
                                (byte)MathUtil.Clamp((float)a.a + (float)((int)b.a - (int)a.a) * t, 0, 255));
         }
 
+        public static Color Lerp(float t, params Color[] colors)
+        {
+            if (colors == null || colors.Length == 0) return Color.black;
+            if (colors.Length == 1) return colors[0];
+
+            int i = Mathf.FloorToInt(colors.Length * t);
+            if (i < 0) i = 0;
+            if (i >= colors.Length - 1) return colors[colors.Length - 1];
+            
+            t %= 1f / (float)(colors.Length - 1);
+            return Color.Lerp(colors[i], colors[i + 1], t);
+        }
+
         public static Color Slerp(Color a, Color b, float t)
         {
             return (Color)ColorHSV.Slerp((ColorHSV)a, (ColorHSV)b, t);
         }
+
+        public static Color Slerp(float t, params Color[] colors)
+        {
+            if (colors == null || colors.Length == 0) return Color.black;
+            if (colors.Length == 1) return colors[0];
+
+            int i = Mathf.FloorToInt(colors.Length * t);
+            if (i < 0) i = 0;
+            if (i >= colors.Length - 1) return colors[colors.Length - 1];
+
+            t %= 1f / (float)(colors.Length - 1);
+            return (Color)ColorHSV.Slerp((ColorHSV)colors[i], (ColorHSV)colors[i + 1], t);
+        }
+
+
+
 
         #endregion
 

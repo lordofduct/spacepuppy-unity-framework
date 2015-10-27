@@ -240,13 +240,33 @@ namespace com.spacepuppy.Geom
         {
             if (bSetScale)
             {
-                trans.position = Vector3.zero;
-                trans.rotation = Quaternion.identity;
-                trans.localScale = Vector3.one;
-
-                var m = trans.worldToLocalMatrix;
                 trans.position = Position;
                 trans.rotation = Rotation;
+                var m = trans.worldToLocalMatrix;
+                m.SetColumn(3, new Vector4(0f, 0f, 0f, 1f));
+                trans.localScale = m.MultiplyPoint(Scale);
+            }
+            else
+            {
+                trans.position = Position;
+                trans.rotation = Rotation;
+            }
+        }
+
+        public void SetToGlobal(Transform trans, bool bSetScale, bool bSetScaleOnGlobalAxes)
+        {
+            if (bSetScale)
+            {
+                trans.position = Position;
+                trans.rotation = Rotation;
+                var m = trans.worldToLocalMatrix;
+                if(bSetScaleOnGlobalAxes)
+                {
+                    m.SetColumn(0, new Vector4(m.GetColumn(0).magnitude, 0f));
+                    m.SetColumn(1, new Vector4(0f, m.GetColumn(1).magnitude));
+                    m.SetColumn(2, new Vector4(0f, 0f, m.GetColumn(2).magnitude));
+                }
+                m.SetColumn(3, new Vector4(0f, 0f, 0f, 1f));
                 trans.localScale = m.MultiplyPoint(Scale);
             }
             else

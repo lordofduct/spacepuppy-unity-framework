@@ -713,6 +713,11 @@ namespace com.spacepuppy
             _instructions = new System.Collections.Generic.List<object>(instructions);
         }
 
+        public void Add(object instruction)
+        {
+            _instructions.Add(instruction);
+        }
+
         protected override bool Tick(out object yieldObject)
         {
             if(this.IsComplete)

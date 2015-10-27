@@ -357,9 +357,11 @@ namespace com.spacepuppy
                 else
                 {
                     var delta = (end.h - start.h) % 1f;
-                    r.h = start.h + delta * (t % 1f);
-                    if (r.h < 0f)
-                        r.h += 1f;
+                    //r.h = start.h + delta * (t % 1f);
+                    //if (r.h < 0f)
+                    //    r.h += 1f;
+                    r.h = start.h + delta * t;
+                    r.h -= Mathf.Floor(r.h); //wrap the value 0->1
                 }
                 r.s = Mathf.Clamp01(start.s + (end.s - start.s) * t);
             }

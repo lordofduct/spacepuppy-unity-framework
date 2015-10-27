@@ -31,8 +31,8 @@ namespace com.spacepuppy.Tween
         private bool _isPlaying;
         private float _playHeadLength;
         private float _time; //the time since the tween was first played
-        private float _unwrappedPlayHeadTime; //we need an unwrapped value so that we can pingpong/loop the playhead
-        private float _normalizedPlayHeadTime; //this position the playhead is currently at, with wrap applied
+        private float _unwrappedPlayHeadPosition; //we need an unwrapped value so that we can pingpong/loop the playhead
+        private float _normalizedPlayHeadPosition; //this position the playhead is currently at, with wrap applied
 
         private int _currentWrapCount;
 
@@ -197,9 +197,15 @@ namespace com.spacepuppy.Tween
         /// <summary>
         /// The position of the play-head relative to PlayHeadLength of the tween.
         /// </summary>
+        public float PlayHeadPosition
+        {
+            get { return _normalizedPlayHeadPosition; }
+        } 
+
+        [System.Obsolete("User PlayHeadPosition")]
         public float PlayHeadTime
         {
-            get { return _normalizedPlayHeadTime; }
+            get { return _normalizedPlayHeadPosition; }
         }
 
         public int CurrentWrapCount
@@ -228,16 +234,29 @@ namespace com.spacepuppy.Tween
         public virtual void Play(float playHeadPosition)
         {
             if (this.IsDead) throw new System.InvalidOperationException("Cannot play a dead Tweener.");
-            _isPlaying = true;
-            _playHeadLength = this.GetPlayHeadLength();
-            SPTween.AddReference(this);
 
-            if (_time == 0f && _reverse)
+            if (!_isPlaying)
             {
-                //if this the first time we're playing, and we're in reverse, then make sure we set the playhead correctly
-                _unwrappedPlayHeadTime = playHeadPosition;
-                _normalizedPlayHeadTime = playHeadPosition;
+                _isPlaying = true;
+                _playHeadLength = this.GetPlayHeadLength();
+                SPTween.AddReference(this);
             }
+
+            _unwrappedPlayHeadPosition = playHeadPosition;
+            _normalizedPlayHeadPosition = playHeadPosition;
+        }
+
+        public void Resume()
+        {
+            if (_isPlaying) return;
+            this.Play(this.PlayHeadPosition);
+        }
+
+        public void ResumeReverse()
+        {
+            _reverse = !_reverse;
+            if (_isPlaying) return;
+            this.Play(this.PlayHeadPosition);
         }
 
         public virtual void Stop()
@@ -268,8 +287,8 @@ namespace com.spacepuppy.Tween
             this.Stop();
             _currentWrapCount = 0;
             _time = 0f;
-            _unwrappedPlayHeadTime = 0f;
-            _normalizedPlayHeadTime = 0f;
+            _unwrappedPlayHeadPosition = 0f;
+            _normalizedPlayHeadPosition = 0f;
         }
 
         public bool CompleteImmediately()
@@ -281,9 +300,9 @@ namespace com.spacepuppy.Tween
                 case TweenWrapMode.Once:
                     float odt = this.PlayHeadLength - _time;
                     _time = this.PlayHeadLength + _delay + 0.0001f;
-                    _normalizedPlayHeadTime = (_reverse) ? 0f : _time;
-                    _unwrappedPlayHeadTime = _normalizedPlayHeadTime;
-                    this.DoUpdate(odt, _normalizedPlayHeadTime);
+                    _normalizedPlayHeadPosition = (_reverse) ? 0f : _time;
+                    _unwrappedPlayHeadPosition = _normalizedPlayHeadPosition;
+                    this.DoUpdate(odt, _normalizedPlayHeadPosition);
                     this.Stop();
                     if (this.OnFinish != null) this.OnFinish(this, System.EventArgs.Empty);
                     return true;
@@ -297,9 +316,9 @@ namespace com.spacepuppy.Tween
                     {
                         float pdt = (this.PlayHeadLength * _wrapCount) - _time;
                         _time = this.PlayHeadLength * _wrapCount + _delay + 0.0001f;
-                        _normalizedPlayHeadTime = (_reverse) ? 0f : (_wrapCount % 2 == 0) ? 0f : this.PlayHeadLength;
-                        _unwrappedPlayHeadTime = _normalizedPlayHeadTime;
-                        this.DoUpdate(pdt, _normalizedPlayHeadTime);
+                        _normalizedPlayHeadPosition = (_reverse) ? 0f : (_wrapCount % 2 == 0) ? 0f : this.PlayHeadLength;
+                        _unwrappedPlayHeadPosition = _normalizedPlayHeadPosition;
+                        this.DoUpdate(pdt, _normalizedPlayHeadPosition);
                         this.Stop();
                         if (this.OnFinish != null) this.OnFinish(this, System.EventArgs.Empty);
                         return true;
@@ -316,7 +335,7 @@ namespace com.spacepuppy.Tween
 
             this.MovePlayHeadPosition(dt);
 
-            this.DoUpdate(dt, _normalizedPlayHeadTime);
+            this.DoUpdate(dt, _normalizedPlayHeadPosition);
 
             switch (_wrap)
             {
@@ -362,9 +381,9 @@ namespace com.spacepuppy.Tween
         {
             _time += Mathf.Abs(dt);
             if (_reverse)
-                _unwrappedPlayHeadTime -= dt;
+                _unwrappedPlayHeadPosition -= dt;
             else
-                _unwrappedPlayHeadTime += dt;
+                _unwrappedPlayHeadPosition += dt;
 
             var totalDur = this.PlayHeadLength;
             if (totalDur > 0f)
@@ -372,25 +391,25 @@ namespace com.spacepuppy.Tween
                 switch (_wrap)
                 {
                     case TweenWrapMode.Once:
-                        _normalizedPlayHeadTime = Mathf.Clamp(_unwrappedPlayHeadTime - _delay, 0, totalDur);
+                        _normalizedPlayHeadPosition = Mathf.Clamp(_unwrappedPlayHeadPosition - _delay, 0, totalDur);
                         break;
                     case TweenWrapMode.Loop:
-                        if (_unwrappedPlayHeadTime < _delay)
-                            _normalizedPlayHeadTime = 0f;
+                        if (_unwrappedPlayHeadPosition < _delay)
+                            _normalizedPlayHeadPosition = 0f;
                         else
-                            _normalizedPlayHeadTime = Mathf.Repeat(_unwrappedPlayHeadTime - _delay, totalDur);
+                            _normalizedPlayHeadPosition = Mathf.Repeat(_unwrappedPlayHeadPosition - _delay, totalDur);
                         break;
                     case TweenWrapMode.PingPong:
-                        if (_normalizedPlayHeadTime < _delay)
-                            _normalizedPlayHeadTime = 0f;
+                        if (_normalizedPlayHeadPosition < _delay)
+                            _normalizedPlayHeadPosition = 0f;
                         else
-                            _normalizedPlayHeadTime = Mathf.PingPong(_unwrappedPlayHeadTime - _delay, totalDur);
+                            _normalizedPlayHeadPosition = Mathf.PingPong(_unwrappedPlayHeadPosition - _delay, totalDur);
                         break;
                 }
             }
             else
             {
-                _normalizedPlayHeadTime = 0f;
+                _normalizedPlayHeadPosition = 0f;
             }
         }
 

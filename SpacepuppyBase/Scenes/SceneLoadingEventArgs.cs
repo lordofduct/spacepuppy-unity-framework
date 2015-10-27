@@ -7,23 +7,19 @@ namespace com.spacepuppy.Scenes
     {
 
         private SceneManager _manager;
-        private ISceneBehaviour _scene;
-        private ISceneBehaviourLoadOptions _options;
+        private ISceneLoadOptions _options;
 
         private List<object> _stallInstructions;
 
-        public SceneLoadingEventArgs(SceneManager manager, ISceneBehaviour scene, ISceneBehaviourLoadOptions loadOptions)
+        public SceneLoadingEventArgs(SceneManager manager, ISceneLoadOptions loadOptions)
         {
             _manager = manager;
-            _scene = scene;
             _options = loadOptions;
         }
 
         public SceneManager Manager { get { return _manager; } }
 
-        public ISceneBehaviour Scene { get { return _scene; } }
-
-        public ISceneBehaviourLoadOptions LoadOptions { get { return _options; } }
+        public ISceneLoadOptions LoadOptions { get { return _options; } }
 
         public void RequestManagerToStall(object instruction)
         {

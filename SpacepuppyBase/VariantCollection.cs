@@ -66,6 +66,11 @@ namespace com.spacepuppy
 
         public IEnumerable<string> Names { get { return _table.Keys; } }
 
+        public int Count
+        {
+            get { return _table.Count; }
+        }
+
         #endregion
 
         #region Methods
