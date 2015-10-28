@@ -59,6 +59,7 @@
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
     <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
     <Compile Include="Components\SelectableObjectPropertyDrawer.cs" />

@@ -13,13 +13,18 @@ namespace com.spacepuppyeditor.Base
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var obj = EditorHelper.GetTargetObjectWithProperty(property);
-            FixedPercentLong value = (FixedPercentLong)this.fieldInfo.GetValue(obj);
+            var valueProp = property.FindPropertyRelative("_value");
+            var fractProp = property.FindPropertyRelative("_fract");
+            decimal value = (decimal)valueProp.longValue + (decimal)fractProp.intValue / FixedPercentLong.RNG_FRACT;
+
 
             EditorGUI.BeginChangeCheck();
-            value = (FixedPercentLong)EditorGUI.DoubleField(position, label, (double)value);
-            if(EditorGUI.EndChangeCheck())
-                this.fieldInfo.SetValue(obj, value);
+            value = (FixedPercentDecimal)EditorGUI.DoubleField(position, label, (double)value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                valueProp.longValue = (long)System.Math.Floor(value);
+                fractProp.intValue = (int)((value % 1M) * FixedPercentLong.RNG_FRACT);
+            }
         }
 
     }

@@ -2,23 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 
 namespace com.spacepuppy
 {
 
     [System.Serializable()]
-    public struct FixedPercentLong : IConvertible, IEquatable<FixedPercentLong>, IFormattable, UnityEngine.ISerializationCallbackReceiver
+    public struct FixedPercentLong : IConvertible, IEquatable<FixedPercentLong>, IFormattable
     {
 
-        public const decimal MAX_VALUE = decimal.MaxValue;
+        public const decimal MAX_VALUE = (decimal)long.MaxValue + 0.999999999M;
         public const decimal MIN_VALUE = decimal.MinValue;
+        public const decimal MINUS_ONE = decimal.MinusOne;
+        public const decimal ONE = decimal.One;
+        public const decimal RNG_FRACT = 1000000000M;
 
         #region Fields
 
-        private decimal _value;
-        [SerializeField()]
-        private int[] _bits;
+        [UnityEngine.SerializeField()]
+        private long _value;
+        [UnityEngine.SerializeField()]
+        private int _fract;
 
         #endregion
 
@@ -26,26 +29,26 @@ namespace com.spacepuppy
 
         public FixedPercentLong(float value)
         {
-            _value = System.Convert.ToDecimal(value);
-            _bits = null;
+            _value = (long)Math.Floor(value);
+            _fract = (int)((decimal)(value % 1f) * RNG_FRACT);
         }
 
         public FixedPercentLong(double value)
         {
-            _value = System.Convert.ToDecimal(value);
-            _bits = null;
+            _value = (long)Math.Floor(value);
+            _fract = (int)((decimal)(value % 1d) * RNG_FRACT);
         }
 
         public FixedPercentLong(decimal value)
         {
-            _value = value;
-            _bits = null;
+            _value = (long)Math.Floor(value);
+            _fract = (int)((decimal)(value % 1M) * RNG_FRACT);
         }
 
         public FixedPercentLong(int value)
         {
-            _value = (decimal)value;
-            _bits = null;
+            _value = value;
+            _fract = 0;
         }
 
         #endregion
@@ -54,8 +57,15 @@ namespace com.spacepuppy
 
         public decimal Value
         {
-            get { return _value; }
-            set { _value = value; }
+            get
+            {
+                return (decimal)_value + (decimal)_fract / RNG_FRACT;
+            }
+            set
+            {
+                _value = (long)Math.Floor(value);
+                _fract = (int)((decimal)(value % 1M) * RNG_FRACT);
+            }
         }
 
         #endregion
@@ -141,68 +151,73 @@ namespace com.spacepuppy
 
         public static FixedPercentLong operator ++(FixedPercentLong a)
         {
-            return new FixedPercentLong(a._value + 1M);
+            return new FixedPercentLong(a.Value + 1M);
         }
 
         public static FixedPercentLong operator +(FixedPercentLong a, FixedPercentLong b)
         {
-            return new FixedPercentLong(a._value + b._value);
+            return new FixedPercentLong(a.Value + b.Value);
         }
 
         public static FixedPercentLong operator -(FixedPercentLong a)
         {
-            a._value = -a._value;
+            a.Value = -a.Value;
             return a;
         }
 
         public static FixedPercentLong operator --(FixedPercentLong a)
         {
-            return new FixedPercentLong(a._value - 1M);
+            return new FixedPercentLong(a.Value - 1M);
         }
 
         public static FixedPercentLong operator -(FixedPercentLong a, FixedPercentLong b)
         {
-            return new FixedPercentLong(a._value - b._value);
+            return new FixedPercentLong(a.Value - b.Value);
         }
 
         public static FixedPercentLong operator *(FixedPercentLong a, FixedPercentLong b)
         {
-            return new FixedPercentLong(a._value * b._value);
+            return new FixedPercentLong(a.Value * b.Value);
         }
 
         public static FixedPercentLong operator /(FixedPercentLong a, FixedPercentLong b)
         {
-            return new FixedPercentLong(a._value / b._value);
+            return new FixedPercentLong(a.Value / b.Value);
+        }
+
+        public static FixedPercentLong operator %(FixedPercentLong a, FixedPercentLong b)
+        {
+            return new FixedPercentLong(a.Value % b.Value);
         }
 
         public static bool operator >(FixedPercentLong a, FixedPercentLong b)
         {
-            return a._value > b._value;
+            return a.Value > b.Value;
         }
 
         public static bool operator <(FixedPercentLong a, FixedPercentLong b)
         {
-            return a._value < b._value;
+            return a.Value < b.Value;
         }
 
         public static bool operator >=(FixedPercentLong a, FixedPercentLong b)
         {
-            return a._value >= b._value;
+            return a.Value >= b.Value;
         }
 
         public static bool operator <=(FixedPercentLong a, FixedPercentLong b)
         {
-            return a._value <= b._value;
+            return a.Value <= b.Value;
         }
 
         public static bool operator ==(FixedPercentLong a, FixedPercentLong b)
         {
-            return a._value == b._value;
+            return a.Value == b.Value;
         }
 
         public static bool operator !=(FixedPercentLong a, FixedPercentLong b)
         {
-            return a._value != b._value;
+            return a.Value != b.Value;
         }
 
         #endregion
@@ -216,57 +231,57 @@ namespace com.spacepuppy
 
         bool IConvertible.ToBoolean(IFormatProvider provider)
         {
-            return _value != 0;
+            return _value != 0 && _fract != 0;
         }
 
         byte IConvertible.ToByte(IFormatProvider provider)
         {
-            return Convert.ToByte(this._value);
+            return Convert.ToByte(this.Value);
         }
 
         char IConvertible.ToChar(IFormatProvider provider)
         {
-            return Convert.ToChar(this._value);
+            return Convert.ToChar(this.Value);
         }
 
         DateTime IConvertible.ToDateTime(IFormatProvider provider)
         {
-            return Convert.ToDateTime(this._value);
+            return Convert.ToDateTime(this.Value);
         }
 
         decimal IConvertible.ToDecimal(IFormatProvider provider)
         {
-            return this._value;
+            return this.Value;
         }
 
         double IConvertible.ToDouble(IFormatProvider provider)
         {
-            return Convert.ToDouble(this._value);
+            return Convert.ToDouble(this.Value);
         }
 
         short IConvertible.ToInt16(IFormatProvider provider)
         {
-            return Convert.ToInt16(this._value);
+            return Convert.ToInt16(this.Value);
         }
 
         int IConvertible.ToInt32(IFormatProvider provider)
         {
-            return Convert.ToInt32(this._value);
+            return Convert.ToInt32(this.Value);
         }
 
         long IConvertible.ToInt64(IFormatProvider provider)
         {
-            return Convert.ToInt64(this._value);
+            return Convert.ToInt64(this.Value);
         }
 
         sbyte IConvertible.ToSByte(IFormatProvider provider)
         {
-            return Convert.ToSByte(this._value);
+            return Convert.ToSByte(this.Value);
         }
 
         float IConvertible.ToSingle(IFormatProvider provider)
         {
-            return Convert.ToSingle(this._value);
+            return Convert.ToSingle(this.Value);
         }
 
         string IConvertible.ToString(IFormatProvider provider)
@@ -281,17 +296,17 @@ namespace com.spacepuppy
 
         ushort IConvertible.ToUInt16(IFormatProvider provider)
         {
-            return Convert.ToUInt16(this._value);
+            return Convert.ToUInt16(this.Value);
         }
 
         uint IConvertible.ToUInt32(IFormatProvider provider)
         {
-            return Convert.ToUInt32(this._value);
+            return Convert.ToUInt32(this.Value);
         }
 
         ulong IConvertible.ToUInt64(IFormatProvider provider)
         {
-            return Convert.ToUInt64(this._value);
+            return Convert.ToUInt64(this.Value);
         }
 
         #endregion
@@ -300,32 +315,12 @@ namespace com.spacepuppy
 
         public string ToString(string format)
         {
-            return this._value.ToString(format);
+            return this.Value.ToString(format);
         }
 
         public string ToString(string format, IFormatProvider provider)
         {
-            return this._value.ToString(format, provider);
-        }
-
-        #endregion
-
-        #region ISerializationCallbackReceiver
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            _bits = decimal.GetBits(_value);
-        }
-
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-            if(_bits != null && _bits.Length == 4)
-            {
-                bool sign = (_bits[3] & 0x80000000) != 0;
-                byte scale = (byte)((_bits[3] >> 16) & 0x7F);
-                _value = new System.Decimal(_bits[0], _bits[1], _bits[2], sign, scale);
-            }
-            _bits = null;
+            return this.Value.ToString(format, provider);
         }
 
         #endregion
