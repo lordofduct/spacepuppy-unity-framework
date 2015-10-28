@@ -242,6 +242,7 @@ namespace com.spacepuppy.Geom
             {
                 trans.position = Position;
                 trans.rotation = Rotation;
+                trans.localScale = Vector3.one;
                 var m = trans.worldToLocalMatrix;
                 m.SetColumn(3, new Vector4(0f, 0f, 0f, 1f));
                 trans.localScale = m.MultiplyPoint(Scale);
@@ -259,6 +260,7 @@ namespace com.spacepuppy.Geom
             {
                 trans.position = Position;
                 trans.rotation = Rotation;
+                trans.localScale = Vector3.one;
                 var m = trans.worldToLocalMatrix;
                 if(bSetScaleOnGlobalAxes)
                 {

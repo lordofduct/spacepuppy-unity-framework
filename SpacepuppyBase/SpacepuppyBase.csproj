@@ -105,6 +105,7 @@
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
     <Compile Include="Dynamic\DynamicObjectAccessor.cs" />
     <Compile Include="Dynamic\IDynamicMemberInfo.cs" />
+    <Compile Include="FixedPercentLong.cs" />
     <Compile Include="FixedPoint.cs" />
     <Compile Include="ColorHSV.cs" />
     <Compile Include="ISPDisposable.cs" />
