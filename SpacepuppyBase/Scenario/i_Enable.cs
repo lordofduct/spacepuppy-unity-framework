@@ -32,6 +32,31 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
+        #region Properties
+
+        public GameObject TargetObject
+        {
+            get { return _targetObject.GetTarget<GameObject>(null); }
+            set
+            {
+                _targetObject.SetTarget(value);
+            }
+        }
+        
+        public EnableMode Mode
+        {
+            get { return _mode; }
+            set { _mode = value; }
+        }
+
+        public float Delay
+        {
+            get { return _delay; }
+            set { _delay = value; }
+        }
+
+        #endregion
+
         #region Methods
 
         private void SetEnabledByMode(object arg)

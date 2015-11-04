@@ -9,6 +9,14 @@ namespace com.spacepuppy.Scenario
     public class TriggerableTargetObject
     {
 
+        public enum TargetSource
+        {
+            TriggerArg = 0,
+            Self = 1,
+            Root = 2,
+            Configurable = 3
+        }
+
         #region Fields
 
         [SerializeField()]
@@ -41,6 +49,12 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region Methods
+
+        public void SetTarget(UnityEngine.Object targ)
+        {
+            _source = TargetSource.Configurable;
+            _target = targ;
+        }
 
         public T GetTarget<T>(object triggerArg, bool searchEntity = true) where T : class
         {
@@ -128,14 +142,6 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region Special Types
-
-        public enum TargetSource
-        {
-            TriggerArg = 0,
-            Self = 1,
-            Root = 2,
-            Configurable = 3
-        }
 
         public class ConfigAttribute : System.Attribute
         {
