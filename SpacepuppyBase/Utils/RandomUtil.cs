@@ -16,6 +16,11 @@ namespace com.spacepuppy.Utils
             return new MicrosoftRNG(seed);
         }
 
+        public static IRandom CreateRNG()
+        {
+            return new MicrosoftRNG();
+        }
+
         #endregion
 
         #region Static Properties
@@ -168,6 +173,11 @@ namespace com.spacepuppy.Utils
 
         private class MicrosoftRNG : System.Random, IRandom
         {
+
+            public MicrosoftRNG() : base()
+            {
+
+            }
 
             public MicrosoftRNG(int seed) : base(seed)
             {

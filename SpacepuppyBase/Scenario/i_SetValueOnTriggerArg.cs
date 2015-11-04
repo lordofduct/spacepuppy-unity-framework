@@ -34,7 +34,6 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
-
         #region TriggerableMechanism Interface
 
         public override bool Trigger(object arg)

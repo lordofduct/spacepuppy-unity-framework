@@ -7,6 +7,17 @@ namespace com.spacepuppy.Utils
     public static class TypeUtil
     {
 
+        public static IEnumerable<Type> GetTypes(System.Func<System.Type, bool> predicate)
+        {
+            foreach (var assemb in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (var tp in assemb.GetTypes())
+                {
+                    if (predicate(tp)) yield return tp;
+                }
+            }
+        }
+
         public static IEnumerable<Type> GetTypesAssignableFrom(System.Type rootType)
         {
             foreach (var assemb in System.AppDomain.CurrentDomain.GetAssemblies())

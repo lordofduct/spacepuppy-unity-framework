@@ -223,7 +223,7 @@ namespace com.spacepuppyeditor.Base.Commands
             foreach (var go in _sceneResults)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label(go.transform.GetHiearchyPathName(), GUILayout.Width(lw));
+                GUILayout.Label(go.transform.GetFullPathName(), GUILayout.Width(lw));
                 if (GUILayout.Button("Select", GUILayout.Width(bw)))
                 {
                     Selection.activeObject = go;

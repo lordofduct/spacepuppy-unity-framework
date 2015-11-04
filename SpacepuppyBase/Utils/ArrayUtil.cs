@@ -228,6 +228,22 @@ namespace com.spacepuppy.Utils
 
         #region Random Methods
 
+        public static void Shuffle<T>(T[] arr, IRandom rng = null)
+        {
+            if (arr == null) throw new System.ArgumentNullException("arr");
+            if (rng == null) rng = RandomUtil.Standard;
+            
+            int j;
+            T temp;
+            for (int i = 0; i < arr.Length; i++)
+            {
+                j = rng.Next(arr.Length);
+                temp = arr[j];
+                arr[j] = arr[i];
+                arr[i] = temp;
+            }
+        }
+
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst, IRandom rng = null)
         {
             if (lst == null) throw new System.ArgumentNullException("lst");

@@ -5,6 +5,11 @@ namespace com.spacepuppy.Utils
     public static class QuaternionUtil
     {
 
+        public static bool IsNaN(Quaternion q)
+        {
+            return float.IsNaN(q.x * q.y * q.z * q.w);
+        }
+
         public static string Stringify(Quaternion q)
         {
             return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + q.w.ToString();

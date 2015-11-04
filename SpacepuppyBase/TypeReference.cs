@@ -136,7 +136,7 @@ namespace com.spacepuppy
 
         public static System.Type UnHashType(string hash)
         {
-            if (hash != null)
+            if (!string.IsNullOrEmpty(hash))
             {
                 var arr = StringUtil.SplitFixedLength(hash, "|", 2);
                 var tp = TypeUtil.ParseType(arr[0], arr[1]);

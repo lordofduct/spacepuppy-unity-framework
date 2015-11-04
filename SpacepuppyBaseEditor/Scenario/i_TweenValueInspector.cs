@@ -21,6 +21,7 @@ namespace com.spacepuppyeditor.Scenario
         public const string PROP_TARGET = "_target";
         public const string PROP_TWEENDATA = "_data";
         public const string PROP_ONCOMPLETE = "_onComplete";
+        public const string PROP_TWEENTOKEN = "_tweenToken";
 
         private const string PROP_DATA_MODE = "Mode";
         private const string PROP_DATA_MEMBER = "MemberName";
@@ -54,8 +55,12 @@ namespace com.spacepuppyeditor.Scenario
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
             this.DrawPropertyField(PROP_TIMESUPPLIER);
             SPEditorGUILayout.PropertyField(_targetProp);
+            this.DrawPropertyField(PROP_TWEENTOKEN);
             _dataList.DoLayoutList();
             this.DrawPropertyField(PROP_ONCOMPLETE);
+
+
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_TARGET, PROP_TIMESUPPLIER, PROP_ONCOMPLETE, PROP_TWEENTOKEN);
 
             this.serializedObject.ApplyModifiedProperties();
         }

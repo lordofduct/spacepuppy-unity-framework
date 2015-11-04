@@ -38,6 +38,28 @@ namespace com.spacepuppy.Timers
 
         #region Methods
 
+        public ScheduledEvent ScheduleOnce(double duration, System.Action<ScheduledEvent> callback)
+        {
+            var ev = new ScheduledEvent(duration, _time.TotalPrecise, callback, 0);
+            this.Add(ev);
+            return ev;
+        }
+
+        public ScheduledEvent ScheduleRepeating(double duration, double repeatFrequency, System.Action<ScheduledEvent> callback, int repeatCount = -1)
+        {
+            var ev = new ScheduledEvent(repeatFrequency, _time.TotalPrecise + duration - repeatFrequency, callback, repeatCount);
+            this.Add(ev);
+            return ev;
+        }
+
+        /// <summary>
+        /// Create an event that occurs on some interval.
+        /// </summary>
+        /// <param name="interval">The interval of the event.</param>
+        /// <param name="offset"></param>
+        /// <param name="callback"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public ScheduledEvent Add(double interval, double offset, System.Action<ScheduledEvent> callback, int count = 0)
         {
             var ev = new ScheduledEvent(interval, offset, callback, count);
@@ -199,7 +221,7 @@ namespace com.spacepuppy.Timers
         #endregion
 
         #region ICollection Interface
-
+        
         public void Add(ScheduledEvent item)
         {
             if (item._owner == this) return;
@@ -366,7 +388,7 @@ namespace com.spacepuppy.Timers
 
         private double _interval;
         private double _offset;
-        private int _count;
+        private int _repeatCount;
         private int _currentCount;
         private System.Action<ScheduledEvent> _callback;
 
@@ -379,43 +401,87 @@ namespace com.spacepuppy.Timers
 
         #region CONSTRUCTOR
 
-        public ScheduledEvent(double interval, double offset, System.Action<ScheduledEvent> callback, int count = 0)
+        public ScheduledEvent(double interval, double offset, System.Action<ScheduledEvent> callback, int repeatCount)
         {
             _interval = interval;
             _offset = offset;
             _callback = callback;
-            _count = count;
+            _repeatCount = repeatCount;
         }
 
         #endregion
 
         #region #region Properties
 
+        /// <summary>
+        /// The interval after 'Offset' that the event should raise.
+        /// </summary>
         public double Interval { get { return _interval; } }
 
+        /// <summary>
+        /// An offset for the start of the first interval. If Interval was 3, and offset was 2, events would occur on 5, 8, 11, 14...
+        /// </summary>
         public double Offset { get { return _offset; } }
+        
+        /// <summary>
+        /// Number of times the interval should repeat before completing, values &lt 0 repeat forever.
+        /// </summary>
+        public int RepeatCount { get { return _repeatCount; } }
 
-        public int Count { get { return _count; } }
-
+        /// <summary>
+        /// Number of times the interval has passed.
+        /// </summary>
         public int CurrentCount { get { return _currentCount; } }
 
-        public bool Complete { get { return _count > 0 && _currentCount >= _count; } }
+        /// <summary>
+        /// Has all the events finished.
+        /// </summary>
+        public bool Complete { get { return _repeatCount >= 0 && _currentCount > _repeatCount; } }
+
+        /// <summary>
+        /// The Scheduler with which this event is registered.
+        /// </summary>
+        public Scheduler Scheduler { get { return _owner; } }
 
         #endregion
 
         #region Methods
 
-        public double GetNextScheduledTime(double total)
+        public double GetNextScheduledTime()
+        {
+            double t = (_owner != null && _owner.TimeSupplier != null) ? _owner.TimeSupplier.TotalPrecise : 0d;
+            return GetNextScheduledTime(t);
+        }
+
+        /// <summary>
+        /// Returns the next time after 'time' that this event aught to be raised.
+        /// </summary>
+        /// <param name="time">The time after which to get the next scheduled time.</param>
+        /// <returns></returns>
+        public double GetNextScheduledTime(double time)
         {
             if (this.Complete) return double.NaN;
-            if (_interval == 0f) return double.NaN;
+            if (_interval <= 0f) return double.NaN;
+            
+            if (time < _offset) return _offset + _interval;
+            var t = time - _offset;
+            int cnt = (int)Math.Floor(t / _interval);
+            if (_repeatCount >= 0 && cnt > _repeatCount) return double.NaN;
 
-            var loop = total % _interval;
-            total = total - loop + _offset;
-            if (loop >= _offset)
-                total += _interval;
+            return _offset + (_interval * cnt) + (t % _interval);
+        }
 
-            return total;
+        public float GetProgress()
+        {
+            double t = (_owner != null && _owner.TimeSupplier != null) ? _owner.TimeSupplier.TotalPrecise : 0d;
+            double tf = GetNextScheduledTime(t);
+            double t0 = tf - _interval;
+
+            float p = com.spacepuppy.Utils.MathUtil.Clamp01((float)((t - t0) / (tf - t0)));
+            if (com.spacepuppy.Utils.MathUtil.IsReal(p))
+                return p;
+            else
+                return 1f;
         }
 
         protected internal virtual void Signal()
@@ -437,7 +503,7 @@ namespace com.spacepuppy.Timers
             _interval = 0f;
             _offset = 0f;
             _callback = null;
-            _count = 0;
+            _repeatCount = 0;
         }
 
         #endregion

@@ -27,6 +27,11 @@ namespace com.spacepuppy.Scenario
             get { return this.IsActiveAndEnabled(); }
         }
 
+        public void Trigger()
+        {
+            this.Trigger(null);
+        }
+
         public abstract bool Trigger(object arg);
 
         #endregion

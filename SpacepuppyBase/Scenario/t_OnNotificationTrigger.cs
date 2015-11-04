@@ -6,18 +6,17 @@ namespace com.spacepuppy.Scenario
     {
 
         #region Fields
-
-        [ModifierChain()]
-        [DisableOnPlay()]
-        [TypeReference.Config(typeof(com.spacepuppy.Notification))]
+        
         [SerializeField()]
+        [TypeReference.Config(typeof(com.spacepuppy.Notification))]
         private TypeReference _notificationType = new TypeReference();
 
-        [ModifierChain()]
-        [DisableOnPlay()]
+        [SerializeField()]
+        private bool _useGlobal = true;
+        
+        [SerializeField()]
         [DefaultFromSelf()]
         [Tooltip("The target to whom to listen to for the notification.")]
-        [SerializeField()]
         private GameObject _targetGameObject;
 
         [System.NonSerialized()]
@@ -28,36 +27,19 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region CONSTRUCTOR
-
-        protected override void Awake()
-        {
-            base.Awake();
-
-            if (_targetGameObject == null) _targetGameObject = this.gameObject;
-        }
-
+        
         protected override void OnEnable()
         {
             base.OnEnable();
 
-            if (_targetGameObject != null && _notificationType.Type != null)
-            {
-                _typeCache = _notificationType.Type;
-                _targCache = _targetGameObject;
-                Notification.UnsafeRegisterObserver(_typeCache, _targCache, this.OnNotification);
-            }
+            this.AddHandler();
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            if (_targCache != null)
-            {
-                Notification.UnsafeRemoveObserver(_typeCache, _targCache, this.OnNotification);
-                _typeCache = null;
-                _targCache = null;
-            }
+            this.RemoveHandler();
         }
 
         #endregion
@@ -65,6 +47,16 @@ namespace com.spacepuppy.Scenario
         #region Properties
 
         public TypeReference NotificationType { get { return _notificationType; } }
+
+        public bool UseGlobal
+        {
+            get { return _useGlobal; }
+            set
+            {
+                _useGlobal = value;
+                if (_useGlobal) _targetGameObject = null;
+            }
+        }
 
         public GameObject TargetGameObject
         {
@@ -81,21 +73,52 @@ namespace com.spacepuppy.Scenario
 
         public void ResetHandler()
         {
+            this.RemoveHandler();
+
             if (!this.enabled) return;
-            if (_targCache != null)
+            
+            this.AddHandler();
+        }
+
+        private void RemoveHandler()
+        {
+            if (_typeCache != null)
             {
-                Notification.UnsafeRemoveObserver(_typeCache, _targCache, this.OnNotification);
+                if (!object.ReferenceEquals(_targCache, null))
+                {
+                    Notification.UnsafeRemoveObserver(_typeCache, _targCache, this.OnNotification);
+                }
+                else
+                {
+                    Notification.UnsafeRemoveGlobalObserver(_typeCache, this.OnNotification);
+                }
                 _typeCache = null;
                 _targCache = null;
             }
-
-            if (_targetGameObject != null && _notificationType.Type != null)
-            {
-                _typeCache = _notificationType.Type;
-                _targCache = _targetGameObject;
-                Notification.UnsafeRegisterObserver(_typeCache, _targCache, this.OnNotification);
-            }
         }
+
+        private void AddHandler()
+        {
+            _typeCache = null;
+            _targCache = null;
+            if(_notificationType.Type != null)
+            {
+                if (_useGlobal)
+                {
+                    _typeCache = _notificationType.Type;
+                    _targCache = null;
+                    Notification.UnsafeRegisterGlobalObserver(_typeCache, this.OnNotification);
+                }
+                else if (_targetGameObject != null)
+                {
+                    _typeCache = _notificationType.Type;
+                    _targCache = _targetGameObject;
+                    Notification.UnsafeRegisterObserver(_typeCache, _targCache, this.OnNotification);
+                }
+            }
+            
+        }
+
 
         private void OnNotification(object sender, Notification n)
         {

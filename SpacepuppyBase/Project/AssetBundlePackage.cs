@@ -137,7 +137,6 @@ namespace com.spacepuppy.Project
             if (_bundle != null)
             {
                 _bundle.Unload(unloadAllLoadedObjects);
-                AssetBundleManager.RemoveAssetBundle(this);
                 _bundle = null;
             }
         }

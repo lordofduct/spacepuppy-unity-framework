@@ -14,6 +14,11 @@ namespace com.spacepuppyeditor.Project
     public class ResourcePackageInspector : SPEditor
     {
 
+        public const string PROP_RELATIVEPATH = "_relativePath";
+        //public const string PROP_RESOURCES = "_resources";
+        public const string PROP_PATHS = "_paths";
+
+
         #region Menu Entries
 
         [MenuItem("Assets/Create/Resource Package", priority =1000)]
@@ -43,16 +48,24 @@ namespace com.spacepuppyeditor.Project
 
         protected override void OnSPInspectorGUI()
         {
-            this.DrawSyncButton();
+            this.serializedObject.Update();
+            this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
+            
+            EditorGUILayout.LabelField("Relative Path", this.serializedObject.FindProperty(PROP_RELATIVEPATH).stringValue, EditorStyles.textField);
 
-            var pathsProp = this.serializedObject.FindProperty("_paths");
-
+            var pathsProp = this.serializedObject.FindProperty(PROP_PATHS);
             EditorGUILayout.BeginVertical("Box");
-            for(int i = 0; i < pathsProp.arraySize; i++)
+            EditorGUI.indentLevel++;
+            for (int i = 0; i < pathsProp.arraySize; i++)
             {
-                EditorGUILayout.LabelField(pathsProp.GetArrayElementAtIndex(i).stringValue);
+                EditorGUILayout.LabelField(pathsProp.GetArrayElementAtIndex(i).stringValue, EditorStyles.textField);
             }
+            EditorGUI.indentLevel--;
             EditorGUILayout.EndVertical();
+            
+            this.DrawSyncButton();
+            
+            this.serializedObject.ApplyModifiedProperties();
         }
 
 
@@ -69,33 +82,33 @@ namespace com.spacepuppyeditor.Project
             {
                 var spath = AssetDatabase.GetAssetPath(this.serializedObject.targetObject);
                 var dir = System.IO.Path.GetDirectoryName(spath);
-                if(!dir.Contains("Resources"))
+
+                
+                var relPathProp = this.serializedObject.FindProperty(PROP_RELATIVEPATH);
+                var pathsProp = this.serializedObject.FindProperty(PROP_PATHS);
+                if (!dir.Contains("Resources"))
                 {
-                    var pathsProp = this.serializedObject.FindProperty("_paths");
+                    relPathProp.stringValue = string.Empty;
                     pathsProp.arraySize = 0;
                 }
                 else
                 {
-                    var pathsProp = this.serializedObject.FindProperty("_paths");
-                    var paths = (from p in AssetDatabase.GetAllAssetPaths() where p.StartsWith(dir) && Path.HasExtension(p) let p2 = ConvertFullPathToResourcePath(p) orderby p2 select p2).ToArray();
+                    var relDir = AssetHelper.GetRelativeResourcePath(dir);
+                    relPathProp.stringValue = relDir;
+
+                    var paths = (from p in AssetDatabase.GetAllAssetPaths() where p.StartsWith(dir) && p != spath && Path.HasExtension(p) let p2 = AssetHelper.GetRelativeResourcePath(p) orderby p2 select p2).ToArray();
                     pathsProp.arraySize = paths.Length;
-                    for (int i = 0; i < paths.Length; i++)
+                    for(int i = 0; i < paths.Length; i++)
                     {
-                        pathsProp.GetArrayElementAtIndex(i).stringValue = paths[i];
+                        var elProp = pathsProp.GetArrayElementAtIndex(i);
+                        elProp.stringValue = paths[i];
                     }
                 }
 
                 this.serializedObject.ApplyModifiedProperties();
             }
         }
-
-        private static string ConvertFullPathToResourcePath(string spath)
-        {
-            int i = spath.IndexOf("Resources") + 10;
-            spath = spath.Substring(i);
-            return Path.Combine(Path.GetDirectoryName(spath), Path.GetFileNameWithoutExtension(spath)).Replace(@"\", "/");
-        }
-
+        
         #endregion
 
     }

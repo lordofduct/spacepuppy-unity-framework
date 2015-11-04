@@ -8,6 +8,7 @@ using com.spacepuppy.Geom;
 using com.spacepuppy.Utils;
 using com.spacepuppy.Dynamic;
 
+using com.spacepuppyeditor.Base;
 using com.spacepuppyeditor.Internal;
 
 namespace com.spacepuppyeditor
@@ -25,6 +26,7 @@ namespace com.spacepuppyeditor
         private static System.Action<Rect, GUIContent[], float[], float> _imp_MultiFloatField_01;
         private static System.Func<SerializedProperty, GUIContent, float> _imp_GetSinglePropertyHeight;
         private static System.Func<GUIContent, Rect, Gradient, Gradient> _imp_GradientField;
+        private static System.Func<Rect, string, string> _imp_SearchField;
 
         #endregion
 
@@ -111,6 +113,12 @@ namespace com.spacepuppyeditor
             position = SPEditorGUI.MultiFieldPrefixLabel(position, controlId, label, subLabels.Length);
             position.height = EditorGUIUtility.singleLineHeight;
             SPEditorGUI.MultiFloatField(position, subLabels, values, labelWidth);
+        }
+
+        public static string SearchField(Rect position, string search)
+        {
+            if (_imp_SearchField == null) _imp_SearchField = _accessWrapper.GetStaticMethod("SearchField", typeof(System.Func<Rect, string, string>)) as System.Func<Rect, string, string>;
+            return _imp_SearchField(position, search);
         }
 
         #endregion
@@ -526,6 +534,8 @@ namespace com.spacepuppyeditor
                                                System.Type defaultType = null, System.Type[] excludedTypes = null, 
                                                TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
         {
+            /*
+
             if (!TypeUtil.IsType(selectedType, baseType)) selectedType = null;
 
             //var knownTypes = (from ass in System.AppDomain.CurrentDomain.GetAssemblies()
@@ -588,6 +598,10 @@ namespace com.spacepuppyeditor
             int index = knownTypes.IndexOf(selectedType);
             index = EditorGUI.Popup(position, label, index, knownTypeNames);
             return (index >= 0) ? knownTypes[index] : defaultType;
+
+            */
+
+            return TypeSelectionDropDownWindow.Popup(position, label, baseType, selectedType, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType);
         }
 
         #endregion

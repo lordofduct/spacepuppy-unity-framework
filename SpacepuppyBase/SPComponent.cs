@@ -120,25 +120,6 @@ namespace com.spacepuppy
 
         #endregion
 
-        #region Component Overrides
-
-        //public new T GetComponent<T>() where T : class
-        //{
-        //    return ComponentUtil.GetComponentAlt<T>(this);
-        //}
-
-        //public new T[] GetComponents<T>() where T : class
-        //{
-        //    return ComponentUtil.GetComponentsAlt<T>(this);
-        //}
-
-        //public new T GetComponentInChildren<T>() where T : class
-        //{
-        //    return ComponentUtil.GetComponentInChildrenAlt<T>(this);
-        //}
-
-        #endregion
-
         #region Radical Coroutine Methods
 
         public RadicalCoroutine StartRadicalCoroutine(System.Collections.IEnumerator routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)

@@ -130,10 +130,8 @@ namespace com.spacepuppy.Tween.Curves
                             }
 
                             builder.Append(_start.Substring(ipos));
-
-                            var result = builder.ToString();
-                            StringUtil.Release(builder);
-                            return result;
+                            
+                            return StringUtil.Release(builder);
                         }
                         else
                         {
@@ -181,10 +179,8 @@ namespace com.spacepuppy.Tween.Curves
                             }
 
                             builder.Append(_end.Substring(ipos));
-
-                            var result = builder.ToString();
-                            StringUtil.Release(builder);
-                            return result;
+                            
+                            return StringUtil.Release(builder);
                         }
                         else
                         {
@@ -237,10 +233,8 @@ namespace com.spacepuppy.Tween.Curves
                         }
 
                         if(posHigh + 1 < _start.Length) builder.Append(_start.Substring(posHigh + 1));
-
-                        var result = builder.ToString();
-                        StringUtil.Release(builder);
-                        return result;
+                        
+                        return StringUtil.Release(builder);
 
                     }
                     else
@@ -296,10 +290,8 @@ namespace com.spacepuppy.Tween.Curves
                         }
 
                         if (posHigh + 1 < _end.Length) builder.Append(_end.Substring(posHigh + 1));
-
-                        var result = builder.ToString();
-                        StringUtil.Release(builder);
-                        return result;
+                        
+                        return StringUtil.Release(builder);
                     }
                     else
                     {

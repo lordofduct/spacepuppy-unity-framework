@@ -13,7 +13,7 @@ namespace com.spacepuppy.Project
     /// follow strict naming mechanics, but need to work with different unique AssetBundles that might have conflicting path names to the id 
     /// required by the factory.
     /// </summary>
-    public class AssetPool : IEnumerable<AssetPool.ResourceEntry>
+    public class AssetPool : IEnumerable<AssetPool.ResourceEntry>, System.IDisposable
     {
 
         #region Fields
@@ -28,12 +28,12 @@ namespace com.spacepuppy.Project
 
         public AssetPool()
         {
-            _bundle = AssetBundleManager.Resources;
+            _bundle = AssetBundles.Resources;
         }
 
         public AssetPool(IAssetBundle bundle)
         {
-            _bundle = bundle ?? AssetBundleManager.Resources;
+            _bundle = bundle ?? AssetBundles.Resources;
         }
 
         #endregion
@@ -159,6 +159,15 @@ namespace com.spacepuppy.Project
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new Enumerator(this);
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+
+        public void Dispose()
+        {
+            this.Clear();
         }
 
         #endregion

@@ -87,7 +87,7 @@
         public bool UnsafePostNotification(Notification n, bool bNotifyEntity)
         {
             if (_dispatcher == null) _dispatcher = new NotificationDispatcher(this);
-            return _dispatcher.PostNotification(n, bNotifyEntity);
+            return _dispatcher.UnsafePostNotification(n, bNotifyEntity);
         }
 
         public void PurgeHandlers()

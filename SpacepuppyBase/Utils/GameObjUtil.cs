@@ -110,7 +110,7 @@ namespace com.spacepuppy.Utils
 
             return null;
         }
-
+        
         #endregion
 
 
@@ -504,9 +504,19 @@ namespace com.spacepuppy.Utils
                 bldr.Insert(0, '/');
                 bldr.Insert(0, t.name);
             }
-            var result = bldr.ToString();
-            StringUtil.Release(bldr);
-            return result;
+            return StringUtil.Release(bldr);
+        }
+
+        public static string GetFullPathName(this Transform t)
+        {
+            var builder = StringUtil.GetTempStringBuilder();
+            while (t.parent != null)
+            {
+                t = t.parent;
+                builder.Insert(0, @"\");
+                builder.Insert(0, t.name);
+            }
+            return StringUtil.Release(builder);
         }
 
         #endregion

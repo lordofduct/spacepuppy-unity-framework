@@ -111,6 +111,7 @@
     <Compile Include="ColorHSV.cs" />
     <Compile Include="ISPDisposable.cs" />
     <Compile Include="Project\AssetBundlePackage.cs" />
+    <Compile Include="Project\AssetBundles.cs" />
     <Compile Include="Project\CustomTimeLayersData.cs" />
     <Compile Include="Dynamic\DynamicMethodInfo.cs" />
     <Compile Include="Dynamic\Evaluator.cs" />
@@ -157,7 +158,6 @@
     <Compile Include="Project\AssetPool.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
-    <Compile Include="Project\AssetBundleManager.cs" />
     <Compile Include="Render\i_SetMaterialProperty.cs" />
     <Compile Include="Render\i_TweenMaterial.cs" />
     <Compile Include="Render\MaterialPropertyReference.cs" />
@@ -171,6 +171,7 @@
     <Compile Include="Scenario\i_EnableComponent.cs" />
     <Compile Include="Scenario\i_LookAt.cs" />
     <Compile Include="Scenario\i_PlaySoundEffect.cs" />
+    <Compile Include="Scenario\i_PostNotification.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />

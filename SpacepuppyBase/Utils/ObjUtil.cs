@@ -40,17 +40,17 @@ namespace com.spacepuppy.Utils
         {
             if (obj == null) return null;
             if (obj is T) return obj as T;
-
-            var tp = typeof(T);
-            if(ComponentUtil.IsComponentType(tp) && ComponentUtil.IsComponentSource(obj))
+            if (obj is IComponent)
             {
-                return ComponentUtil.GetComponentFromSource<T>(obj);
+                var c = (obj as IComponent).component;
+                if (c is T) return c as T;
             }
-            
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go is T) return go as T;
+            if (go != null) return go.GetComponentAlt<T>();
+
             return null;
         }
-
-
 
 
 

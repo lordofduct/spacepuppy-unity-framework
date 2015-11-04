@@ -54,6 +54,16 @@ namespace com.spacepuppy.Geom
             }
         }
 
+        public static Trans NaN
+        {
+            get
+            {
+                return new Trans(new Vector3(float.NaN, float.NaN, float.NaN),
+                                 new Quaternion(float.NaN, float.NaN, float.NaN, float.NaN),
+                                 new Vector3(float.NaN, float.NaN, float.NaN));
+            }
+        }
+
         public static Trans Translation(Vector3 pos)
         {
             return new Trans(pos, Quaternion.identity, Vector3.one);
@@ -298,7 +308,12 @@ namespace com.spacepuppy.Geom
 
         #endregion
 
-        #region Lerp
+        #region Static Methods
+
+        public static bool IsNaN(Trans t)
+        {
+            return VectorUtil.IsNaN(t.Position) || VectorUtil.IsNaN(t.Scale) || QuaternionUtil.IsNaN(t.Rotation);
+        }
 
         public static Trans Lerp(Trans start, Trans end, float t)
         {

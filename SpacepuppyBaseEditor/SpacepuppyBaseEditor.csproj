@@ -54,6 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssetHelper.cs" />
     <Compile Include="Base\AdvancedInputManagerWindow.cs" />
     <Compile Include="Base\Commands\FindReferencesToObjectMenu.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="HierarchyDrawer.cs" />
     <Compile Include="IconHelper.cs" />
     <Compile Include="Internal\CachedReorderableList.cs" />
+    <Compile Include="Internal\GUIViewProxy.cs" />
     <Compile Include="Internal\PropertyHandlerValidationUtility.cs" />
     <Compile Include="Internal\MultiPropertyAttributePropertyHandler.cs" />
     <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
@@ -156,11 +158,14 @@
     <Compile Include="Scenario\TriggerTargetPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerTargetProps.cs" />
     <Compile Include="Scenario\t_OnEventTriggerInspector.cs" />
+    <Compile Include="Scenario\t_OnNotificationTriggerInspector.cs" />
     <Compile Include="ScriptableObjectHelper.cs" />
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorGUI.cs" />
     <Compile Include="SPEditorGUILayout.cs" />
+    <Compile Include="SPEditorStyles.cs" />
     <Compile Include="SPMenu.cs" />
+    <Compile Include="Base\TypeSelectionDropDownWindow.cs" />
     <Compile Include="Utils\Diminish\DiminishingWeightOverDurationPropertyDrawer.cs" />
   </ItemGroup>
   <ItemGroup>

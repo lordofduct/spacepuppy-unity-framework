@@ -876,23 +876,6 @@ namespace com.spacepuppy.Utils
         }
 
         #endregion
-
-
-        #region GetHierarchyPath
-
-        public static string GetHiearchyPathName(this Transform t)
-        {
-            var builder = StringUtil.GetTempStringBuilder();
-            while(t.parent != null)
-            {
-                t = t.parent;
-                builder.Insert(0, @"\");
-                builder.Insert(0, t.name);
-            }
-            return StringUtil.Release(builder);
-        }
-
-        #endregion
-
+        
     }
 }

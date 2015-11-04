@@ -161,16 +161,34 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
+        public static bool Contains(string str, bool ignorCase, string sother)
+        {
+            if (string.IsNullOrEmpty(str)) return string.IsNullOrEmpty(sother);
+            if (sother == null) return false;
+
+            if (ignorCase)
+            {
+                str = str.ToLower();
+                if (str.Contains(sother.ToLower())) return true;
+            }
+            else
+            {
+                if (str.Contains(sother)) return true;
+            }
+
+            return false;
+        }
+
         public static bool Contains(string str, bool ignorCase, params string[] values)
         {
             if (str == null || values == null || values.Length == 0) return false;
 
             if (ignorCase)
             {
-                str = str.ToUpper();
+                str = str.ToLower();
                 foreach (var sother in values)
                 {
-                    if (str.Contains(sother.ToUpper())) return true;
+                    if (str.Contains(sother.ToLower())) return true;
                 }
             }
             else
@@ -522,7 +540,7 @@ namespace com.spacepuppy.Utils
 
         #region StringBuilders
 
-        private static ObjectCachePool<StringBuilder> _pool = new ObjectCachePool<StringBuilder>(10, () => new StringBuilder(), (b) => b.Length = 0);
+        private static ObjectCachePool<StringBuilder> _pool = new ObjectCachePool<StringBuilder>(10, () => new StringBuilder());
         
         public static StringBuilder GetTempStringBuilder()
         {
@@ -531,9 +549,24 @@ namespace com.spacepuppy.Utils
 
         public static string Release(StringBuilder b)
         {
+            if (b == null) return null;
+
             var result = b.ToString();
+            b.Length = 0;
             _pool.Release(b);
             return result;
+        }
+        
+        public static string ToStringHax(this StringBuilder sb)
+        {
+            var info = typeof(StringBuilder).GetField("_str",
+                                                        System.Reflection.BindingFlags.NonPublic |
+                                                        System.Reflection.BindingFlags.Instance);
+            if (info == null)
+                return sb.ToString();
+            else
+                return info.GetValue(sb) as string;
+
         }
 
         #endregion

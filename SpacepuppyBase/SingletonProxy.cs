@@ -97,4 +97,74 @@ namespace com.spacepuppy
         
     }
 
+    public abstract class PsuedoSingletonProxy<T> : MonoBehaviour, IDynamic
+    {
+
+
+        #region Properties
+
+        public abstract T ConcreteInstance { get; }
+
+        #endregion
+
+        #region IDynamic Interface
+
+        object IDynamic.this[string sMemberName]
+        {
+            get
+            {
+                return (this as IDynamic).GetValue(sMemberName);
+            }
+            set
+            {
+                (this as IDynamic).SetValue(sMemberName, value);
+            }
+        }
+
+        bool IDynamic.SetValue(string sMemberName, object value, params object[] index)
+        {
+            return this.ConcreteInstance.SetValue(sMemberName, value, index);
+        }
+
+        object IDynamic.GetValue(string sMemberName, params object[] args)
+        {
+            return this.ConcreteInstance.GetValue(sMemberName, args);
+        }
+
+        object IDynamic.InvokeMethod(string sMemberName, params object[] args)
+        {
+            return this.ConcreteInstance.InvokeMethod(sMemberName, args);
+        }
+
+        bool IDynamic.HasMember(string sMemberName, bool includeNonPublic)
+        {
+            var obj = this.ConcreteInstance;
+            if (obj != null)
+                return DynamicUtil.HasMember(obj, sMemberName, includeNonPublic);
+            else
+                return DynamicUtil.TypeHasMember(typeof(T), sMemberName, includeNonPublic);
+        }
+
+        IEnumerable<System.Reflection.MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
+        {
+            var obj = this.ConcreteInstance;
+            if (obj != null)
+                return DynamicUtil.GetMembers(obj, includeNonPublic);
+            else
+                return DynamicUtil.GetMembersFromType(typeof(T), includeNonPublic);
+        }
+
+        System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
+        {
+            var obj = this.ConcreteInstance;
+            if (obj != null)
+                return DynamicUtil.GetMember(obj, sMemberName, includeNonPublic);
+            else
+                return DynamicUtil.GetMemberFromType(typeof(T), sMemberName, includeNonPublic);
+        }
+
+        #endregion
+
+    }
+
 }

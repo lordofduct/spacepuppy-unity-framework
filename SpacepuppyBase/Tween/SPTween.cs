@@ -158,6 +158,20 @@ namespace com.spacepuppy.Tween
             _autoKillDict[token] = tween;
         }
 
+        
+        public static void KillAll()
+        {
+            if (GameLoopEntry.ApplicationClosing) return;
+            if (_instance == null) return;
+            if (_instance._runningTweens.Count == 0) return;
+            
+            var e = _instance._runningTweens.GetEnumerator();
+            while(e.MoveNext())
+            {
+                e.Current.SetKilled();
+            }
+            _instance._runningTweens.Clear();
+        }
         public static void KillAll(object id)
         {
             if (GameLoopEntry.ApplicationClosing) return;
@@ -179,18 +193,15 @@ namespace com.spacepuppy.Tween
                 }
             }
         }
-        public static void KillAll()
+        public static void KillAll(object id, object token)
         {
-            if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) return;
-            if (_instance._runningTweens.Count == 0) return;
-            
-            var e = _instance._runningTweens.GetEnumerator();
-            while(e.MoveNext())
+            var tk = new TokenPairing(id, token);
+            Tweener old;
+            if (_autoKillDict.TryGetValue(tk, out old))
             {
-                e.Current.SetKilled();
+                old.Kill();
+                _autoKillDict.Remove(tk);
             }
-            _instance._runningTweens.Clear();
         }
 
         /// <summary>

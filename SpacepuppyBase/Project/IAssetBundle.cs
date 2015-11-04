@@ -10,7 +10,7 @@ namespace com.spacepuppy.Project
     /// around the global 'Resources' (see: ResourceAssetBundle), portions of 'Resources' (see: ResourcePackage), 
     /// 'AssetBundle' (see: AssetBundlePackage), as well as groups of bundles (see: AssetBundleGroup).
     /// </summary>
-    public interface IAssetBundle
+    public interface IAssetBundle : System.IDisposable
     {
 
         IEnumerable<string> GetAllAssetNames();
@@ -98,6 +98,11 @@ namespace com.spacepuppy.Project
 
         public void UnloadAsset(UnityEngine.Object asset)
         {
+            if(asset is GameObject || asset is Component)
+            {
+                //UnityEngine.Object.Destroy(asset);
+                return;
+            }
             Resources.UnloadAsset(asset);
         }
 
@@ -108,6 +113,16 @@ namespace com.spacepuppy.Project
         }
 
         #endregion
+
+        #region IDisposable Interface
+
+        public void Dispose()
+        {
+            this.UnloadAllAssets();
+        }
+
+        #endregion
+
 
         #region Equality Overrides
 
@@ -399,6 +414,15 @@ namespace com.spacepuppy.Project
             {
                 _resources.UnloadAsset(asset);
             }
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+
+        public void Dispose()
+        {
+            this.UnloadAllAssets();
         }
 
         #endregion

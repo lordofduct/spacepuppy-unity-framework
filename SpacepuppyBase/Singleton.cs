@@ -468,11 +468,15 @@ namespace com.spacepuppy
 
         #region Static Interface
 
-        private static T _instance;
+        private static PsuedoSingleton<T> _instance;
 
         public static T Instance
         {
-            get { return _instance; }
+            get
+            {
+                if (_instance == null) return null;
+                else return _instance.ConcreteInstance;
+            }
         }
 
         #endregion
@@ -481,8 +485,14 @@ namespace com.spacepuppy
 
         protected override void OnValidAwake()
         {
-            _instance = this.AddComponent<T>();
+            _instance = this;
         }
+
+        #endregion
+
+        #region Properties
+
+        public abstract T ConcreteInstance { get; }
 
         #endregion
 
