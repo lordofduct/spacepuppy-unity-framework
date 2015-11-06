@@ -149,13 +149,13 @@ namespace com.spacepuppy
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class TimeUnitsSelectorAttribute : SPPropertyAttribute
     {
-        public TimeUnits DefaultUnits = TimeUnits.Seconds;
+        public string DefaultUnits;
 
         public TimeUnitsSelectorAttribute()
         {
         }
 
-        public TimeUnitsSelectorAttribute(TimeUnits defaultUnits)
+        public TimeUnitsSelectorAttribute(string defaultUnits)
         {
             DefaultUnits = defaultUnits;
         }

@@ -14,41 +14,70 @@ namespace com.spacepuppyeditor.Base.Inspectors
     public class TimeUnitsSelectorPropertyDrawer : PropertyDrawer
     {
 
-        #region Static Interface
+        #region Get/Set TimeUnits
 
-        private static Dictionary<int, TimeUnits> _unitsCache = new Dictionary<int, TimeUnits>();
-        private static TimeUnits GetUnits(SerializedProperty property, TimeUnitsSelectorAttribute attrib)
+        //private static Dictionary<int, TimeUnits> _unitsCache = new Dictionary<int, TimeUnits>();
+        //private static TimeUnits GetUnits(SerializedProperty property, TimeUnitsSelectorAttribute attrib)
+        //{
+        //    int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
+        //    TimeUnits units;
+        //    if (_unitsCache.TryGetValue(hash, out units))
+        //        return units;
+        //    else
+        //    {
+        //        if (attrib == null)
+        //            return TimeUnits.Seconds;
+        //        else
+        //            return attrib.DefaultUnits;
+        //    }
+        //}
+        //private static void SetUnits(SerializedProperty property, TimeUnits units)
+        //{
+        //    int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
+        //    _unitsCache[hash] = units;
+        //}
+        private static Dictionary<int, string> _unitsCache = new Dictionary<int, string>();
+        private static string GetUnits(SerializedProperty property, TimeUnitsSelectorAttribute attrib, ITimeUnitsCalculator calculator)
         {
             int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
-            TimeUnits units;
-            if (_unitsCache.TryGetValue(hash, out units))
-                return units;
-            else
+            
+            string units;
+            if(!_unitsCache.TryGetValue(hash,out units))
             {
-                if (attrib == null)
-                    return TimeUnits.Seconds;
-                else
-                    return attrib.DefaultUnits;
+                if (attrib != null)
+                    units = attrib.DefaultUnits; 
             }
+
+            if(!calculator.TimeUnits.Contains(units))
+            {
+                units = calculator.DefaultUnits;
+            }
+            return units;
         }
-        private static void SetUnits(SerializedProperty property, TimeUnits units)
+        private static void SetUnits(SerializedProperty property, string units)
         {
             int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetPropertyHash(property);
             _unitsCache[hash] = units;
         }
 
-        public static double DAYS_IN_YEAR
+        #endregion
+
+        #region Fields
+
+        private ITimeUnitsCalculator _calculator;
+
+        public ITimeUnitsCalculator TimeUnitsCalculator
         {
-            get
+            get { return _calculator ?? _defaultCalculator; }
+            set
             {
-                //TODO - allow configuring at runtime
-                return 365d;
+                _calculator = value;
             }
         }
 
         #endregion
 
-
+        #region Methods
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -74,50 +103,14 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
             var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, desiredWidth), position.height);
 
-            var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute);
-            System.TimeSpan span = System.TimeSpan.FromSeconds(property.floatValue);
-            double dur = 0.0;
-            switch (units)
-            {
-                case TimeUnits.Seconds:
-                    dur = span.TotalSeconds;
-                    break;
-                case TimeUnits.Minutes:
-                    dur = span.TotalMinutes;
-                    break;
-                case TimeUnits.Hours:
-                    dur = span.TotalHours;
-                    break;
-                case TimeUnits.Days:
-                    dur = span.TotalDays;
-                    break;
-                case TimeUnits.Years:
-                    dur = span.Ticks / (System.TimeSpan.TicksPerDay * TimeUnitsSelectorPropertyDrawer.DAYS_IN_YEAR);
-                    break;
-            }
+            var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute, this.TimeUnitsCalculator);
+
+            double dur = this.TimeUnitsCalculator.SecondsToTimeUnits(units, property.floatValue);
             EditorGUI.BeginChangeCheck();
             dur = EditorGUI.FloatField(r, (float)dur);
             if (EditorGUI.EndChangeCheck())
             {
-                switch (units)
-                {
-                    case TimeUnits.Seconds:
-                        span = System.TimeSpan.FromSeconds(dur);
-                        break;
-                    case TimeUnits.Minutes:
-                        span = System.TimeSpan.FromMinutes(dur);
-                        break;
-                    case TimeUnits.Hours:
-                        span = System.TimeSpan.FromHours(dur);
-                        break;
-                    case TimeUnits.Days:
-                        span = System.TimeSpan.FromDays(dur);
-                        break;
-                    case TimeUnits.Years:
-                        span = System.TimeSpan.FromTicks((long)(dur * System.TimeSpan.TicksPerDay * TimeUnitsSelectorPropertyDrawer.DAYS_IN_YEAR));
-                        break;
-                }
-                property.floatValue = (float)span.TotalSeconds;
+                property.floatValue = (float)this.TimeUnitsCalculator.TimeUnitsToSeconds(units, dur);
             }
 
             return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);
@@ -129,14 +122,151 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
             var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, desiredWidth), position.height);
 
-            var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute);
+            var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute, this.TimeUnitsCalculator);
+
             EditorGUI.BeginChangeCheck();
-            units = (TimeUnits)EditorGUI.EnumPopup(r, units);
+
+            var allowedUnits = this.TimeUnitsCalculator.TimeUnits;
+            int i = allowedUnits.IndexOf(units);
+            i = EditorGUI.Popup(r, i, allowedUnits);
+
             if (EditorGUI.EndChangeCheck())
-                SetUnits(property, units);
+                SetUnits(property, (i < 0) ? allowedUnits.FirstOrDefault() : allowedUnits[i]);
 
             return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);
         }
+
+        #endregion
+
+
+
+        #region Special Types
+
+        private static ITimeUnitsCalculator _defaultCalculator;
+
+        static TimeUnitsSelectorPropertyDrawer()
+        {
+            int order = int.MinValue;
+            System.Type selectedType = null;
+
+            foreach(var tp in TypeUtil.GetTypesAssignableFrom(typeof(ITimeUnitsCalculator)))
+            {
+                var attrib = tp.GetCustomAttributes(typeof(OverrideDefaultTimeUnitsCalculatorAttribute), false).FirstOrDefault() as OverrideDefaultTimeUnitsCalculatorAttribute;
+                if(attrib != null)
+                {
+                    if(attrib.order > order || selectedType == null)
+                    {
+                        order = attrib.order;
+                        selectedType = tp;
+                    }
+                }
+            }
+
+            if (selectedType != null)
+            {
+                try
+                {
+                    _defaultCalculator = System.Activator.CreateInstance(selectedType) as ITimeUnitsCalculator;
+                }
+                catch(System.Exception ex)
+                {
+                    Debug.LogWarning("Failed to create an override time units calculator of type '" + selectedType.FullName + "'");
+                }
+            }
+
+            if(_defaultCalculator == null)
+            {
+                _defaultCalculator = new DefaultTimeUnitsCalculator();
+            }
+
+        }
+
+        public class OverrideDefaultTimeUnitsCalculatorAttribute : System.Attribute
+        {
+            public int order;
+        }
+
+        public interface ITimeUnitsCalculator
+        {
+
+            string[] TimeUnits { get; }
+
+            string DefaultUnits { get; }
+
+            double SecondsToTimeUnits(string units, double seconds);
+
+            double TimeUnitsToSeconds(string units, double time);
+
+        }
+
+        public class DefaultTimeUnitsCalculator : ITimeUnitsCalculator
+        {
+
+            public const double DAYS_IN_YEAR = 365d;
+
+            private string[] _units = new string[]
+            {
+                "Seconds",
+                "Minutes",
+                "Hours",
+                "Days",
+                "Years"
+            };
+
+            public virtual string[] TimeUnits
+            {
+                get { return _units; }
+            }
+
+            public virtual string DefaultUnits
+            {
+                get { return "Seconds"; }
+            }
+
+            public virtual double SecondsToTimeUnits(string units, double seconds)
+            {
+                var span = System.TimeSpan.FromSeconds(seconds);
+
+                switch(units)
+                {
+                    case "Seconds":
+                        return span.TotalSeconds;
+                    case "Minutes":
+                        return span.TotalMinutes;
+                    case "Hours":
+                        return span.TotalHours;
+                    case "Days":
+                        return span.TotalDays;
+                    case "Years":
+                        return span.Ticks / (System.TimeSpan.TicksPerDay * DAYS_IN_YEAR);
+                    default:
+                        return seconds;
+                }
+            }
+
+            public virtual double TimeUnitsToSeconds(string units, double time)
+            {
+                switch(units)
+                {
+                    case "Seconds":
+                        return time;
+                    case "Minutes":
+                        return System.TimeSpan.FromMinutes(time).TotalSeconds;
+                    case "Hours":
+                        return System.TimeSpan.FromHours(time).TotalSeconds;
+                    case "Days":
+                        return System.TimeSpan.FromDays(time).TotalSeconds;
+                    case "Years":
+                        return System.TimeSpan.FromTicks((long)(time * System.TimeSpan.TicksPerDay * DAYS_IN_YEAR)).TotalSeconds;
+                    default:
+                        return time;
+                }
+            }
+
+        }
+
+        #endregion
+
 
     }
 }

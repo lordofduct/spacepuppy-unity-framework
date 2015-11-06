@@ -33,12 +33,7 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region CONSTRUCTOR
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
+        
         #endregion
 
         #region Methods

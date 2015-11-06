@@ -168,12 +168,18 @@ namespace com.spacepuppyeditor.Components
 
                         int oi = (property.objectReferenceValue is GameObject) ? names.Length - 1 : this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
                         int ni = EditorGUI.Popup(position, oi, names);
+                        
                         if (oi != ni)
                         {
-                            if (ni < components.Length)
-                                property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
-                            else
+                            if (ni == names.Length - 1)
                                 property.objectReferenceValue = targGo;
+                            else
+                                property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
+
+                            //if (ni < components.Length)
+                            //    property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
+                            //else
+                            //    property.objectReferenceValue = targGo;
                         }
                     }
 

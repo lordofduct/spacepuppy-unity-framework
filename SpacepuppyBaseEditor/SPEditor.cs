@@ -21,6 +21,7 @@ namespace com.spacepuppyeditor
         #region Fields
 
         private List<GUIDrawer> _headerDrawers;
+        private SPEditorAddonDrawer[] _addons;
 
         private List<ShownPropertyInfo> _shownFields;
 
@@ -68,11 +69,13 @@ namespace com.spacepuppyeditor
 
             this.OnBeforeSPInspectorGUI();
 
+            EditorGUI.BeginChangeCheck();
+
             //draw header infobox if needed
             this.DrawDefaultInspectorHeader();
-
-            EditorGUI.BeginChangeCheck();
             this.OnSPInspectorGUI();
+            this.DrawDefaultInspectorFooters();
+
             if(EditorGUI.EndChangeCheck())
             {
                 //do call onValidate
@@ -166,6 +169,8 @@ namespace com.spacepuppyeditor
                     {
                         _headerDrawers.Add(new ObsoleteHeaderDrawer("This script is considered deprecated:\n\t" + obsoleteAttrib.Message));
                     }
+
+                    _addons = SPEditorAddonDrawer.GetDrawers(this.serializedObject);
                 }
             }
 
@@ -187,9 +192,26 @@ namespace com.spacepuppyeditor
                     compDrawer.OnGUI(position, this.serializedObject);
                 }
             }
-            
+
+            if(_addons != null)
+            {
+                foreach (var d in _addons)
+                {
+                    if (!d.IsFooter) d.OnInspectorGUI();
+                }
+            }
         }
 
+        private void DrawDefaultInspectorFooters()
+        {
+            if (_addons != null)
+            {
+                foreach (var d in _addons)
+                {
+                    if (d.IsFooter) d.OnInspectorGUI();
+                }
+            }
+        }
 
         public override bool RequiresConstantRepaint()
         {

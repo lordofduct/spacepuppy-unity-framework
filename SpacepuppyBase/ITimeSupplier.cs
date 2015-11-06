@@ -11,6 +11,7 @@ namespace com.spacepuppy
 
         float Total { get; }
         float Delta { get; }
+        float Scale { get; }
 
         double TotalPrecise { get; }
 
@@ -24,7 +25,6 @@ namespace com.spacepuppy
 
         event System.EventHandler TimeScaleChanged;
 
-        float Scale { get; }
         bool Paused { get; set; }
 
 

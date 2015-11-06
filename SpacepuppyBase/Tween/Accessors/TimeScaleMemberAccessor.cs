@@ -4,7 +4,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(IScalableTimeSupplier), "Scale")]
+    [CustomTweenMemberAccessor(typeof(ITimeSupplier), "Scale")]
     public class TimeScaleMemberAccessor : ITweenMemberAccessor
     {
 

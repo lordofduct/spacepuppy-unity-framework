@@ -147,6 +147,7 @@
     <Compile Include="Render\MaterialPropertyReferencePropertyDrawer.cs" />
     <Compile Include="Render\MaterialTransitionPropertyDrawer.cs" />
     <Compile Include="ReorderableListHelper.cs" />
+    <Compile Include="Scenario\ITriggerableMechanismAddonDrawer.cs" />
     <Compile Include="Scenario\i_SetValueInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArgInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="Scenario\t_OnNotificationTriggerInspector.cs" />
     <Compile Include="ScriptableObjectHelper.cs" />
     <Compile Include="SPEditor.cs" />
+    <Compile Include="SPEditorAddonDrawer.cs" />
     <Compile Include="SPEditorGUI.cs" />
     <Compile Include="SPEditorGUILayout.cs" />
     <Compile Include="SPEditorStyles.cs" />

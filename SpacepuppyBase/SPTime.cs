@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy
 {
@@ -45,7 +46,7 @@ namespace com.spacepuppy
         private string _timeSupplierName;
 
         #endregion
-        
+
         #region CONSTRUCTOR
 
         //public SPTime()
@@ -97,36 +98,24 @@ namespace com.spacepuppy
             {
                 return SPTime.GetTime(_timeSupplierType, _timeSupplierName);
             }
+            set
+            {
+                _timeSupplierType = GetDeltaType(value);
+                if (_timeSupplierType == DeltaTimeType.Custom)
+                {
+                    var cts = value as CustomTimeSupplier;
+                    _timeSupplierName = (cts != null) ? cts.Id : null;
+                }
+                else
+                {
+                    _timeSupplierName = null;
+                }
+            }
         }
 
         public bool IsCustom
         {
             get { return _timeSupplierType == DeltaTimeType.Custom; }
-        }
-
-        #endregion
-
-        #region Methods
-
-        private ITimeSupplier GetTimeSupplier()
-        {
-            switch (_timeSupplierType)
-            {
-                case DeltaTimeType.Normal:
-                    return SPTime.Normal;
-                case DeltaTimeType.Real:
-                    return SPTime.Real;
-                case DeltaTimeType.Smooth:
-                    return SPTime.Smooth;
-                case DeltaTimeType.Custom:
-                    {
-                        //if (_customTime == null || !_customTime.Valid) _customTime = SPTime.Custom(_timeSupplierName, false);
-                        //return _customTime;
-                        return SPTime.Custom(_timeSupplierName, false);
-                    }
-                default:
-                    return null;
-            }
         }
 
         #endregion
@@ -214,7 +203,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public static DeltaTimeType GetDeltaType(ITimeSupplier time)
         {
-            if (time == _normalTime)
+            if (time == _normalTime || time == null)
                 return DeltaTimeType.Normal;
             else if (time == _realTime)
                 return DeltaTimeType.Real;
@@ -324,7 +313,7 @@ namespace com.spacepuppy
         /// </summary>
         /// <param name="supplier"></param>
         /// <returns></returns>
-        public static float GetInverseScale(IScalableTimeSupplier supplier)
+        public static float GetInverseScale(ITimeSupplier supplier)
         {
             if (supplier == null) return 1f;
             if (supplier is NormalTimeSupplier) return 1f;
@@ -495,9 +484,17 @@ namespace com.spacepuppy
                 get { return UnityEngine.Time.unscaledDeltaTime; }
             }
 
+            public float Scale
+            {
+                get
+                {
+                    return 1f;
+                }
+            }
+
         }
 
-        private class SmoothTimeSupplier : ITimeSupplier
+        private class SmoothTimeSupplier : IScalableTimeSupplier
         {
 
             public float Total
@@ -515,6 +512,66 @@ namespace com.spacepuppy
                 get { return UnityEngine.Time.smoothDeltaTime; }
             }
 
+            public float Scale
+            {
+                get
+                {
+                    return SPTime.Normal.Scale;
+                }
+            }
+
+            bool IScalableTimeSupplier.Paused
+            {
+                get
+                {
+                    return SPTime.Normal.Paused;
+                }
+                set
+                {
+                    throw new System.NotSupportedException();
+                }
+            }
+
+            IEnumerable<string> IScalableTimeSupplier.ScaleIds
+            {
+                get
+                {
+                    return SPTime.Normal.ScaleIds;
+                }
+            }
+
+            event EventHandler IScalableTimeSupplier.TimeScaleChanged
+            {
+                add
+                {
+                    SPTime.Normal.TimeScaleChanged += value;
+                }
+
+                remove
+                {
+                    SPTime.Normal.TimeScaleChanged -= value;
+                }
+            }
+
+            void IScalableTimeSupplier.SetScale(string id, float scale)
+            {
+                throw new System.NotSupportedException();
+            }
+
+            float IScalableTimeSupplier.GetScale(string id)
+            {
+                return SPTime.Normal.GetScale(id);
+            }
+
+            bool IScalableTimeSupplier.RemoveScale(string id)
+            {
+                throw new System.NotSupportedException();
+            }
+
+            bool IScalableTimeSupplier.HasScale(string id)
+            {
+                return SPTime.Normal.HasScale(id);
+            }
         }
 
         #endregion

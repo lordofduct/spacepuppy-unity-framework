@@ -101,6 +101,21 @@ namespace com.spacepuppyeditor
 
         #region SerializedProperty Helpers
 
+        public static System.Type GetTargetType(this SerializedObject obj)
+        {
+            if (obj == null) return null;
+
+            if(obj.isEditingMultipleObjects)
+            {
+                var c = obj.targetObjects[0];
+                return c.GetType();
+            }
+            else
+            {
+                return obj.targetObject.GetType();
+            }
+        }
+
         /// <summary>
         /// Gets the object the property represents.
         /// </summary>

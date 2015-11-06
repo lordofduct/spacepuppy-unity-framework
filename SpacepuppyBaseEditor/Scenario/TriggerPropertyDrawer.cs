@@ -18,6 +18,7 @@ namespace com.spacepuppyeditor.Scenario
     {
 
         private const float MARGIN = 2.0f;
+        private const float BTN_ACTIVATE_HEIGHT = 24f;
 
         public const string PROP_YIELDING = "_yield";
         public const string PROP_TARGETS = "_targets";
@@ -70,7 +71,7 @@ namespace com.spacepuppyeditor.Scenario
             if (EditorHelper.AssertMultiObjectEditingNotSupportedHeight(property, label, out h)) return h;
 
             this.Init(property, label);
-
+            
             if (_alwaysExpanded || property.isExpanded)
             {
                 h = MARGIN * 2f;
@@ -88,12 +89,18 @@ namespace com.spacepuppyeditor.Scenario
                         h += EditorGUIUtility.singleLineHeight * 3.0f;
                     }
                 }
-                return h;
+
+                if (Application.isPlaying)
+                {
+                    h += BTN_ACTIVATE_HEIGHT;
+                }
             }
             else
             {
-                return EditorGUIUtility.singleLineHeight;
+                h = EditorGUIUtility.singleLineHeight;
             }
+
+            return h;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -120,6 +127,18 @@ namespace com.spacepuppyeditor.Scenario
                 position = this.DrawAdvancedTargetSettings(position, property);
 
                 EditorGUI.EndProperty();
+
+                if (Application.isPlaying)
+                {
+                    var w = position.width * 0.6f;
+                    var pad = (position.width - w) / 2f;
+                    var rect = new Rect(position.xMin + pad, position.yMax + -BTN_ACTIVATE_HEIGHT + 2f, w, 20f);
+                    if (GUI.Button(rect, "Activate Trigger"))
+                    {
+                        var targ = EditorHelper.GetTargetObjectOfProperty(property) as Trigger;
+                        if (targ != null) targ.ActivateTrigger();
+                    }
+                }
             }
             else
             {
@@ -129,6 +148,7 @@ namespace com.spacepuppyeditor.Scenario
 
                 EditorGUI.EndProperty();
             }
+
         }
 
 
