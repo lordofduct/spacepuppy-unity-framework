@@ -6,29 +6,54 @@ namespace com.spacepuppy.Scenario
     /// <summary>
     /// Perform an action on some interval.
     /// 
-    /// Need to remove the old float for interval that is now replaced with TimePeriod. It's kept for now 
+    /// TODO - Need to remove the old float for interval that is now replaced with TimePeriod. It's kept for now 
     /// until all the scripts are updated. Remove ISerializationCallbackReceiver when that is done.
     /// </summary>
-    public class t_Interval : TriggerComponent, ISerializationCallbackReceiver
+    public class t_Interval : AutoTriggerComponent, ISerializationCallbackReceiver
     {
+
+        #region Fields
 
         [HideInInspector()]
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("Interval")]
         [System.Obsolete("This needs to be removed.")]
-        private float _interval_old = 1.0f;
+        private float _interval_old;
+
+
+
+
 
         [SerializeField()]
-        private SPTimePeriod _interval;
+        private SPTimePeriod _interval = new SPTimePeriod(1f);
 
+        [SerializeField()]
+        [Tooltip("Negative values will repeat forever like infinity.")]
+        [DiscreteFloat.NonNegative()]
+        private DiscreteFloat _repeatCount = DiscreteFloat.PositiveInfinity;
+
+        [SerializeField()]
+        [TimeUnitsSelector()]
+        [Tooltip("Wait a duration before starting interval, waits using the same timesupplier as interval.")]
+        private float _delay;
+
+
+        [System.NonSerialized()]
+        private RadicalCoroutine _routine;
+
+        #endregion
 
         #region CONSTRUCTOR
 
-        protected override void OnStartOrEnable()
+        protected override void OnDisable()
         {
-            base.OnStartOrEnable();
+            base.OnDisable();
 
-            this.StartRadicalCoroutine(this.TickerCallback(), RadicalCoroutineDisableMode.CancelOnDisable);
+            if (_routine != null)
+            {
+                _routine.Cancel();
+                _routine = null;
+            }
         }
 
         #endregion
@@ -47,18 +72,50 @@ namespace com.spacepuppy.Scenario
             set { _interval.Seconds = value; }
         }
 
+        public float Delay
+        {
+            get { return _delay; }
+        }
+
+        public DiscreteFloat RepeatCount
+        {
+            get { return _repeatCount; }
+            set { _repeatCount = (value < 0f) ? DiscreteFloat.Zero : value; }
+        }
+
         #endregion
 
         #region Methods
 
+        protected override void OnTriggerActivate()
+        {
+            if (_routine != null)
+            {
+                _routine.Cancel();
+                _routine = null;
+            }
+
+            this.StartRadicalCoroutine(this.TickerCallback(), RadicalCoroutineDisableMode.CancelOnDisable);
+        }
+
 
         private System.Collections.IEnumerator TickerCallback()
         {
+            if (_delay > 0f) yield return WaitForDuration.Seconds(_delay, _interval.TimeSupplier);
+
+            int cnt = 0;
+
             while(true)
             {
                 yield return WaitForDuration.Period(_interval);
 
                 this.ActivateTrigger();
+
+                cnt++;
+                if(cnt > _repeatCount)
+                {
+                    yield break;
+                }
             }
 
         }

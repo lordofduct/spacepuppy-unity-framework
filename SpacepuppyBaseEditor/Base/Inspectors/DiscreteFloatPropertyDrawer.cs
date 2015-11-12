@@ -17,9 +17,30 @@ namespace com.spacepuppyeditor.Base
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var valueProp = property.FindPropertyRelative("_value");
+
+            EditorGUI.BeginChangeCheck();
+
             var value = EditorGUI.FloatField(position, label, valueProp.floatValue);
-            //if the value increased ever so much, ceil the value, good for the mouse scroll
-            valueProp.floatValue = NormalizeValue(valueProp.floatValue, value);
+            
+            if (EditorGUI.EndChangeCheck())
+            {
+                //if the value increased ever so much, ceil the value, good for the mouse scroll
+                value = NormalizeValue(valueProp.floatValue, value);
+
+                if (this.fieldInfo != null)
+                {
+                    var attribs = this.fieldInfo.GetCustomAttributes(typeof(DiscreteFloat.ConfigAttribute), false) as DiscreteFloat.ConfigAttribute[];
+                    foreach (var attrib in attribs)
+                    {
+                        value = attrib.Normalize(value);
+                    }
+
+                    //if the value increased ever so much, ceil the value, good for the mouse scroll
+                    value = NormalizeValue(valueProp.floatValue, value);
+                }
+
+                valueProp.floatValue = value;
+            }
         }
 
 

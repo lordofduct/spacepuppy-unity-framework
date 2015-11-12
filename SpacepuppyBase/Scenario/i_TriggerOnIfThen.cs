@@ -12,11 +12,33 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         private ConditionBlock[] _conditions;
-        public bool PassAlongTriggerArg;
-        public float Delay = 0f;
+
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("PassAlongTriggerArg")]
+        private bool _passAlongTriggerArg;
+
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
+        [TimeUnitsSelector()]
+        private float _delay = 0f;
 
         #endregion
 
+        #region Properties
+
+        public bool PassAlongTriggerArg
+        {
+            get { return _passAlongTriggerArg; }
+            set { _passAlongTriggerArg = value; }
+        }
+
+        public float Delay
+        {
+            get { return _delay; }
+            set { _delay = value; }
+        }
+
+        #endregion
 
         #region ITriggerableMechanism Interface
 
@@ -24,17 +46,17 @@ namespace com.spacepuppy.Scenario
         {
             if (_conditions == null || _conditions.Length == 0) return false;
 
-            if (!this.PassAlongTriggerArg) arg = null;
+            if (!this._passAlongTriggerArg) arg = null;
             foreach(var c in _conditions)
             {
                 if (c.Condition.BoolValue)
                 {
-                    if (this.Delay > 0f)
+                    if (_delay > 0f)
                     {
                         this.Invoke(() =>
                         {
                             c.Trigger.ActivateTrigger(arg);
-                        }, this.Delay);
+                        }, _delay);
                     }
                     else
                     {

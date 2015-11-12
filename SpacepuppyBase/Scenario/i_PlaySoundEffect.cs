@@ -17,23 +17,41 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         [TriggerableTargetObject.Config(typeof(AudioSource))]
-        private TriggerableTargetObject _targetAudioSource = new TriggerableTargetObject(TriggerableTargetObject.TargetSource.Self);
+        private TriggerableTargetObject _targetAudioSource = new TriggerableTargetObject();
+
         [SerializeField()]
         [OneOrMany()]
         private AudioClip[] _clips;
-        public InterruptMode Interrupt = InterruptMode.StopIfPlaying;
-        public float Delay;
+        
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Interrupt")]
+        private InterruptMode Interrupt = InterruptMode.StopIfPlaying;
+        
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
+        [TimeUnitsSelector()]
+        private float _delay;
 
         [Tooltip("Trigger something at the end of the sound effect. This is NOT perfectly accurate and really just starts a timer for the duration of the sound being played.")]
         [SerializeField()]
         private Trigger _onAudioComplete;
 
+        [System.NonSerialized()]
         private RadicalCoroutine _completeRoutine;
 
         #endregion
 
         #region CONSTRUCTOR
-        
+
+        #endregion
+
+        #region Properties
+
+        public float Delay
+        {
+            get { return _delay; }
+        }
+
         #endregion
 
         #region Methods
@@ -60,7 +78,7 @@ namespace com.spacepuppy.Scenario
         {
             if (!this.CanTrigger) return false;
 
-            var src = _targetAudioSource.GetTarget<AudioSource>(arg, false);
+            var src = _targetAudioSource.GetTarget<AudioSource>(arg);
             if (src == null)
             {
                 Debug.LogWarning("Failed to play audio due to a lack of AudioSource on the target.", this);
@@ -85,7 +103,7 @@ namespace com.spacepuppy.Scenario
 
             if (clip != null)
             {
-                if (this.Delay > 0)
+                if (this._delay > 0)
                 {
                     this.Invoke(() =>
                     {
@@ -94,7 +112,7 @@ namespace com.spacepuppy.Scenario
                             _completeRoutine = this.InvokeRadical(this.OnAudioComplete, clip.length);
                             src.Play();
                         }
-                    }, this.Delay);
+                    }, this._delay);
                 }
                 else
                 {

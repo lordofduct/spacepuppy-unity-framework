@@ -124,7 +124,18 @@ namespace com.spacepuppyeditor
         #endregion
 
 
+        #region Prefix
 
+        public static bool PrefixFoldoutLabel(ref Rect position, bool foldout, GUIContent label)
+        {
+            //EditorGUI.PrefixLabel(position, label);
+            
+            var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, EditorGUIUtility.labelWidth), EditorGUIUtility.singleLineHeight);
+            position = new Rect(position.xMin + r.width, position.yMin, position.width - r.width, position.height);
+            return EditorGUI.Foldout(r, foldout, label);
+        }
+
+        #endregion
 
         #region DefaultPropertyField
 

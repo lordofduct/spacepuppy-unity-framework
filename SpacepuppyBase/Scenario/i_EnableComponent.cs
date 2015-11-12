@@ -18,7 +18,7 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         [TriggerableTargetObject.Config(typeof(Component))]
-        private TriggerableTargetObject _target = new TriggerableTargetObject(TriggerableTargetObject.TargetSource.Configurable);
+        private TriggerableTargetObject _target = new TriggerableTargetObject();
 
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("Mode")]
@@ -26,6 +26,7 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
+        [TimeUnitsSelector()]
         private float _delay = 0f;
 
         #endregion

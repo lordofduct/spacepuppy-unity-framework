@@ -271,6 +271,20 @@ namespace com.spacepuppy.Utils
         
         #region Search/Find
 
+        public static bool CompareName(this GameObject go, string name)
+        {
+            if (go == null) return false;
+
+            return go.name == name;
+        }
+
+        public static bool CompareName(this Component c, string name)
+        {
+            if (c == null) return false;
+
+            return c.name == name;
+        }
+
         public static GameObject Find(this GameObject go, string spath)
         {
             if (go == null) throw new System.ArgumentNullException("go");
@@ -461,6 +475,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static GameObject FindByName(this GameObject go, string sname, bool bIgnoreCase = false)
         {
+            if (go == null) return null;
             var result = FindByName(go.transform, sname, bIgnoreCase);
             if (result != null)
                 return result.gameObject;
@@ -477,11 +492,33 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Transform FindByName(this Transform trans, string sname, bool bIgnoreCase = false)
         {
+            if (trans == null) return null;
             foreach (var child in trans.GetAllChildren())
             {
                 if (StringUtil.Equals(child.name, sname, bIgnoreCase)) return child;
             }
 
+            return null;
+        }
+
+        public static GameObject FindParentWithName(this GameObject go, string sname, bool bIgnoreCase = false)
+        {
+            if (go == null) return null;
+            var result = FindParentWithName(go.transform, sname, bIgnoreCase);
+            if (result != null)
+                return result.gameObject;
+            else
+                return null;
+        }
+
+        public static Transform FindParentWithName(this Transform trans, string sname, bool bIgnoreCase = false)
+        {
+            var p = trans.parent;
+            while(p != null)
+            {
+                if (StringUtil.Equals(p.name, sname, bIgnoreCase)) return p;
+                p = p.parent;
+            }
             return null;
         }
 

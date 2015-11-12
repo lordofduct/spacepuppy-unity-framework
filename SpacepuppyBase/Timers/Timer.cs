@@ -63,7 +63,7 @@
         }
 
         /// <summary>
-        /// Number of times the interval should repeat before completing.
+        /// Number of times the interval should repeat before completing. Negative values repeat forever.
         /// </summary>
         public int RepeatCount
         {
@@ -80,7 +80,7 @@
         }
 
         /// <summary>
-        /// Number of times the interval has repeated already.
+        /// Number of times the timer has elapsed.
         /// </summary>
         public int ElapsedCount
         {
@@ -112,7 +112,7 @@
 
                 if (this.TimerCount != null) this.TimerCount(this);
 
-                if (_repeatCount > 0 && _elapsedCount >= _repeatCount)
+                if (_repeatCount >= 0 && _elapsedCount > _repeatCount)
                 {
                     if (this.TimerComplete != null)
                     {

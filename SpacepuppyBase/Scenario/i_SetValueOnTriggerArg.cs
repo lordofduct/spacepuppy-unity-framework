@@ -43,7 +43,7 @@ namespace com.spacepuppy.Scenario
             var go = GameObjectUtil.GetGameObjectFromSource(arg);
             if(go == null) return false;
 
-            var targ = TriggerableTargetObject.GetTargetFrom(_componentType.Type, go, _searchEntity);
+            var targ = (_searchEntity) ? go.FindComponent(_componentType.Type) : go.GetComponent(_componentType.Type);
             if (targ == null) return false;
 
             switch (_mode)

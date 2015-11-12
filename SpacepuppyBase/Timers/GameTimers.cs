@@ -50,7 +50,7 @@ namespace com.spacepuppy.Timers
         {
             if (complete == null) throw new System.ArgumentNullException("complete", "complete event handler must be non-null");
 
-            var t = new Timer(delay, 1);
+            var t = new Timer(delay, 0);
             t.TimerComplete += complete;
             Start(t);
         }

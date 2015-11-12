@@ -1,4 +1,5 @@
-﻿using com.spacepuppy.Utils;
+﻿using UnityEngine;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
@@ -7,7 +8,20 @@ namespace com.spacepuppy.Scenario
 
         #region Fields
 
-        public float Delay;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
+        [TimeUnitsSelector()]
+        private float _delay;
+
+        #endregion
+
+        #region Properties
+
+        public float Delay
+        {
+            get { return _delay; }
+            set { _delay = value; }
+        }
 
         #endregion
 
@@ -17,12 +31,12 @@ namespace com.spacepuppy.Scenario
         {
             base.OnStartOrEnable();
 
-            if (this.Delay > 0f)
+            if (_delay > 0f)
             {
                 this.Invoke(() =>
                 {
                     this.ActivateTrigger(this);
-                }, this.Delay);
+                }, _delay);
             }
             else
             {

@@ -28,6 +28,17 @@ namespace com.spacepuppy
 
         #region Static/Constants
 
+        public static DiscreteFloat Zero
+        {
+            get
+            {
+                return new DiscreteFloat()
+                            {
+                                _value = 0f
+                            };
+            }
+        }
+
         public static DiscreteFloat PositiveInfinity { get { return new DiscreteFloat() { _value = float.PositiveInfinity }; } }
         public static DiscreteFloat NegativeInfinity { get { return new DiscreteFloat() { _value = float.NegativeInfinity }; } }
 
@@ -174,6 +185,30 @@ namespace com.spacepuppy
         public static implicit operator decimal(DiscreteFloat df)
         {
             return (decimal)df._value;
+        }
+
+        #endregion
+
+
+
+        #region Special Types
+
+        public abstract class ConfigAttribute : System.Attribute
+        {
+
+            public abstract float Normalize(float value);
+
+        }
+
+        public class NonNegative : ConfigAttribute
+        {
+
+            public override float Normalize(float value)
+            {
+                if (value < 0f) return 0f;
+                else return value;
+            }
+
         }
 
         #endregion

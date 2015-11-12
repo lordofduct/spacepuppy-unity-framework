@@ -15,8 +15,14 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private Trigger _trigger = new Trigger();
 
-        public bool PassAlongTriggerArg;
-        public float Delay = 0f;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("PassAlongTriggerArg")]
+        private bool _passAlongTriggerArg;
+
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
+        [TimeUnitsSelector()]
+        private float _delay = 0f;
 
         #endregion
 
@@ -42,13 +48,25 @@ namespace com.spacepuppy.Scenario
             }
         }
 
+        public bool PassAlongTriggerArg
+        {
+            get { return _passAlongTriggerArg; }
+            set { _passAlongTriggerArg = value; }
+        }
+
+        public float Delay
+        {
+            get { return _delay; }
+            set { _delay = value; }
+        }
+
         #endregion
 
         #region Methods
 
         private void DoTriggerNext(object arg)
         {
-            if (this.PassAlongTriggerArg)
+            if (this._passAlongTriggerArg)
                 _trigger.ActivateTrigger(arg);
             else
                 _trigger.ActivateTrigger();
@@ -65,7 +83,7 @@ namespace com.spacepuppy.Scenario
 
         public bool CanTrigger
         {
-            get { return this.enabled; }
+            get { return this.isActiveAndEnabled; }
         }
 
         public void ActivateTrigger()
@@ -77,12 +95,12 @@ namespace com.spacepuppy.Scenario
         {
             if (!this.CanTrigger) return false;
             
-            if (this.Delay > 0f)
+            if (_delay > 0f)
             {
                 this.Invoke(() =>
                 {
                     this.DoTriggerNext(arg);
-                }, this.Delay);
+                }, _delay);
             }
             else
             {

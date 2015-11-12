@@ -42,27 +42,19 @@ namespace com.spacepuppy.Scenario
 
         #region Properties
 
-        public Transform Observer
+        public TriggerableTargetObject Observer
         {
             get
             {
-                return _observer.GetTarget<Transform>(null);
-            }
-            set
-            {
-                _observer.SetTarget(value);
+                return _observer;
             }
         }
 
-        public Transform Target
+        public TriggerableTargetObject Target
         {
             get
             {
-                return _observer.GetTarget<Transform>(null);
-            }
-            set
-            {
-                _observer.SetTarget(value);
+                return _observer;
             }
         }
 

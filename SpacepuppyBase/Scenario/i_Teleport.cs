@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Scenario
 {
 
@@ -8,13 +10,39 @@ namespace com.spacepuppy.Scenario
 
         #region Fields
 
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Target")]
         [TriggerableTargetObject.Config(typeof(Transform))]
-        public TriggerableTargetObject Target;
+        private TriggerableTargetObject _target = new TriggerableTargetObject();
 
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Location")]
         [TriggerableTargetObject.Config(typeof(Transform))]
-        public TriggerableTargetObject Location = new TriggerableTargetObject(TriggerableTargetObject.TargetSource.Configurable);
+        private TriggerableTargetObject _location = new TriggerableTargetObject();
 
-        public bool TeleportEntireEntity = true;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("TeleportEntireEntity")]
+        private bool _teleportEntireEntity = true;
+
+        #endregion
+
+        #region Properties
+
+        public TriggerableTargetObject Target
+        {
+            get { return _target; }
+        }
+
+        public TriggerableTargetObject Location
+        {
+            get { return _location; }
+        }
+
+        public bool TeleportEntireEntity
+        {
+            get { return _teleportEntireEntity; }
+            set { _teleportEntireEntity = value; }
+        }
 
         #endregion
 
@@ -22,8 +50,13 @@ namespace com.spacepuppy.Scenario
 
         public override bool Trigger(object arg)
         {
-            var targ = this.Target.GetTarget<Transform>(arg, this.TeleportEntireEntity);
-            var loc = this.Location.GetTarget<Transform>(arg, false);
+            if (!this.CanTrigger) return false;
+
+            var targ = this._target.GetTarget<Transform>(arg);
+            if (targ == null) return false;
+            if (_teleportEntireEntity) targ = GameObjectUtil.FindRoot(targ).transform;
+
+            var loc = _location.GetTarget<Transform>(arg);
             if (targ == null || loc == null) return false;
 
             targ.position = loc.position;

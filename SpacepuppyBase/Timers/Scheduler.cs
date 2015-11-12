@@ -447,6 +447,16 @@ namespace com.spacepuppy.Timers
 
         #region Methods
 
+
+        public void Cancel()
+        {
+            if(_owner != null)
+            {
+                _owner.Remove(this);
+            }
+        }
+
+
         public double GetNextScheduledTime()
         {
             double t = (_owner != null && _owner.TimeSupplier != null) ? _owner.TimeSupplier.TotalPrecise : 0d;
@@ -468,7 +478,8 @@ namespace com.spacepuppy.Timers
             int cnt = (int)Math.Floor(t / _interval);
             if (_repeatCount >= 0 && cnt > _repeatCount) return double.NaN;
 
-            return _offset + (_interval * cnt) + (t % _interval);
+            //return _offset + (_interval * (cnt + 1)) + (t % _interval);
+            return _offset + (_interval * (cnt + 1));
         }
 
         public float GetProgress()

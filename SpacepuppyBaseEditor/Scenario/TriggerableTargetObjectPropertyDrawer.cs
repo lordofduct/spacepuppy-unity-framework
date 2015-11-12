@@ -7,6 +7,9 @@ using com.spacepuppy;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Base;
+using com.spacepuppyeditor.Components;
+
 namespace com.spacepuppyeditor.Scenario
 {
 
@@ -14,118 +17,36 @@ namespace com.spacepuppyeditor.Scenario
     public class TriggerableTargetObjectPropertyDrawer : PropertyDrawer
     {
 
+        private const string PROP_CONFIGURED = "_configured";
+        private const string PROP_TARGET = "_target";
+        private const string PROP_FIND = "_find";
+        private const string PROP_RESOLVEBY = "_resolveBy";
+        private const string PROP_QUERY = "_queryString";
+
+        public enum TargetSource
+        {
+            Arg = 0,
+            Self = 1,
+            Root = 2,
+            Config = 3
+        }
+
+        #region Fields
+
         private TriggerableTargetObject.ConfigAttribute _configAttrib;
+        private SelectableComponentPropertyDrawer _objectDrawer = new SelectableComponentPropertyDrawer()
+        {
+            AllowNonComponents = true
+        };
+        private bool _defaultSet;
+
+        #endregion
+
+        #region Methods
 
         private void Init(SerializedProperty property)
         {
             _configAttrib = this.fieldInfo.GetCustomAttributes(typeof(TriggerableTargetObject.ConfigAttribute), false).FirstOrDefault() as TriggerableTargetObject.ConfigAttribute;
-
-            if(_configAttrib == null)
-            {
-                _configAttrib = new TriggerableTargetObject.ConfigAttribute();
-            }
-        }
-        
-        private UnityEngine.Object GetTargetFromSource(SerializedProperty property, TriggerableTargetObject.TargetSource esrc)
-        {
-            switch (esrc)
-            {
-                case TriggerableTargetObject.TargetSource.Self:
-                    if(_configAttrib.TargetType == typeof(GameObject))
-                    {
-                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else if(_configAttrib.TargetType.IsInterface || TypeUtil.IsType(_configAttrib.TargetType, typeof(Component)))
-                    {
-                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).GetComponent(_configAttrib.TargetType);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else if(TypeUtil.IsType(property.serializedObject.targetObject.GetType(), _configAttrib.TargetType))
-                    {
-                        return property.serializedObject.targetObject as UnityEngine.Object;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-
-                case TriggerableTargetObject.TargetSource.Root:
-                    if (_configAttrib.TargetType == typeof(GameObject))
-                    {
-                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot();
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else
-                    {
-                        if (GameObjectUtil.IsGameObjectSource(property.serializedObject.targetObject))
-                        {
-                            return GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject).FindRoot().GetComponent(_configAttrib.TargetType);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-
-                default:
-                    return null;
-            }
-        }
-
-        private bool PropertyIsComplex(SerializedProperty property)
-        {
-            if (_configAttrib == null) this.Init(property);
-
-            var sourceProp = property.FindPropertyRelative("_source");
-            var targetProp = property.FindPropertyRelative("_target");
-
-            var esrc = sourceProp.GetEnumValue<TriggerableTargetObject.TargetSource>();
-            var go = GameObjectUtil.GetGameObjectFromSource(targetProp.objectReferenceValue);
-            if (go == null) return false;
-
-            switch(esrc)
-            {
-                case TriggerableTargetObject.TargetSource.Self:
-                case TriggerableTargetObject.TargetSource.Root:
-                case TriggerableTargetObject.TargetSource.Configurable:
-                    {
-                        if (TypeUtil.IsType(_configAttrib.TargetType, typeof(Component)))
-                        {
-                            return go.GetComponents(_configAttrib.TargetType).Length > 1;
-                        }
-                        else if (TypeUtil.IsType(_configAttrib.TargetType, typeof(IComponent)))
-                        {
-                            return go.GetComponents(_configAttrib.TargetType).Length > 1;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
-                case TriggerableTargetObject.TargetSource.TriggerArg:
-                    return false;
-            }
-
-            return false;
         }
 
 
@@ -134,9 +55,9 @@ namespace com.spacepuppyeditor.Scenario
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (_configAttrib == null) this.Init(property);
+            this.Init(property);
 
-            if (this.PropertyIsComplex(property))
+            if(property.isExpanded)
             {
                 return EditorGUIUtility.singleLineHeight * 2f;
             }
@@ -148,67 +69,160 @@ namespace com.spacepuppyeditor.Scenario
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (_configAttrib == null) this.Init(property);
+            this.Init(property);
 
             EditorGUI.BeginProperty(position, label, property);
 
-            position = EditorGUI.PrefixLabel(position, label);
+            //################################
+            //FIRST LINE
+            var rect = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
 
-            var sourceProp = property.FindPropertyRelative("_source");
-            var targetProp = property.FindPropertyRelative("_target");
+            var configProp = property.FindPropertyRelative(PROP_CONFIGURED);
+            var targetProp = property.FindPropertyRelative(PROP_TARGET);
 
-            var r0 = new Rect(position.xMin, position.yMin, Mathf.Min(position.width * 0.3f, 80f), EditorGUIUtility.singleLineHeight);
-            EditorGUI.PropertyField(r0, sourceProp, GUIContent.none, false);
-            //TriggerableTargetObject.TargetSource esrc = (TriggerableTargetObject.TargetSource)sourceProp.enumValueIndex;
-            var esrc = sourceProp.GetEnumValue<TriggerableTargetObject.TargetSource>();
+            //var r0 = new Rect(rect.xMin, rect.yMin, EditorGUIUtility.labelWidth, rect.height);
+            //rect = new Rect(r0.xMax, rect.yMin, rect.width - r0.width, rect.height);
+            //property.isExpanded = EditorGUI.Foldout(r0, property.isExpanded, label);
+            property.isExpanded = SPEditorGUI.PrefixFoldoutLabel(ref rect, property.isExpanded, label);
 
-            if(esrc == TriggerableTargetObject.TargetSource.TriggerArg)
+            var r0 = new Rect(rect.xMin, rect.yMin, Mathf.Min(rect.width * 0.25f, 50f), rect.height);
+            var e = (configProp.boolValue) ? TargetSource.Config : TargetSource.Arg;
+            EditorGUI.BeginChangeCheck();
+            e = (TargetSource)EditorGUI.EnumPopup(r0, e);
+            if(EditorGUI.EndChangeCheck())
             {
-                var r1 = new Rect(r0.xMax, position.yMin, position.width - r0.width, EditorGUIUtility.singleLineHeight);
+                UpdateTargetFromSource(targetProp, e, (_configAttrib != null) ? _configAttrib.TargetType : null);
+                configProp.boolValue = (e != TargetSource.Arg);
+            }
+            else if(e == TargetSource.Config && !_defaultSet && targetProp.objectReferenceValue == null)
+            {
+                UpdateTargetFromSource(targetProp, e, (_configAttrib != null) ? _configAttrib.TargetType : null);
+                _defaultSet = true;
+            }
+            else
+            {
+                _defaultSet = true;
+            }
+
+            var r1 = new Rect(rect.xMin + r0.width, rect.yMin, rect.width - r0.width, rect.height);
+            if(!configProp.boolValue)
+            {
                 EditorGUI.LabelField(r1, "Target determined by activating trigger.");
                 targetProp.objectReferenceValue = null;
             }
             else
             {
-                var r1 = new Rect(r0.xMax, position.yMin, position.width - r0.width, EditorGUIUtility.singleLineHeight);
-                EditorGUI.PropertyField(r1, targetProp, GUIContent.none, false);
+                _objectDrawer.RestrictionType = (_configAttrib != null) ? _configAttrib.TargetType : null;
+                _objectDrawer.OnGUI(r1, targetProp, GUIContent.none);
+            }
 
-                if (targetProp.objectReferenceValue == null)
+
+            //################################
+            //SECOND LINE
+            if (property.isExpanded)
+            {
+                var indent = EditorGUIUtility.labelWidth * 0.5f;
+                rect = new Rect(position.xMin + indent, position.yMin + EditorGUIUtility.singleLineHeight, Mathf.Max(0f, position.width - indent), EditorGUIUtility.singleLineHeight);
+
+                var w0 = Mathf.Min(rect.width * 0.3f, 120f);
+                var w1 = Mathf.Min(rect.width * 0.3f, 80f);
+                var w2 = rect.width - w0 - w1;
+                r0 = new Rect(rect.xMin, rect.yMin, w0, rect.height);
+                r1 = new Rect(r0.xMax, rect.yMin, w1, rect.height);
+                var r2 = new Rect(r1.xMax, rect.yMin, w2, rect.height);
+
+                var findProp = property.FindPropertyRelative(PROP_FIND);
+                var resolveProp = property.FindPropertyRelative(PROP_RESOLVEBY);
+                var queryProp = property.FindPropertyRelative(PROP_QUERY);
+
+                var e0 = findProp.GetEnumValue<TriggerableTargetObject.FindCommand>();
+                EditorGUI.BeginChangeCheck();
+                e0 = (TriggerableTargetObject.FindCommand)EditorGUI.EnumPopup(r0, e0);
+                if (EditorGUI.EndChangeCheck())
+                    findProp.SetEnumValue(e0);
+
+                var e1 = resolveProp.GetEnumValue<TriggerableTargetObject.ResolveByCommand>();
+                EditorGUI.BeginChangeCheck();
+                e1 = (TriggerableTargetObject.ResolveByCommand)EditorGUI.EnumPopup(r1, e1);
+                if (EditorGUI.EndChangeCheck())
+                    resolveProp.SetEnumValue(e1);
+
+                switch(e1)
                 {
-                    targetProp.objectReferenceValue = GetTargetFromSource(property, esrc);
-                }
-                else if(esrc != TriggerableTargetObject.TargetSource.Configurable)
-                {
-                    var expectedTarg = GetTargetFromSource(property, esrc);
-                    if(targetProp.objectReferenceValue != expectedTarg)
-                    {
-                        //sourceProp.enumValueIndex = (int)TriggerableTargetObject.TargetSource.Configurable;
-                        sourceProp.SetEnumValue(TriggerableTargetObject.TargetSource.Configurable);
-                    }
+                    case TriggerableTargetObject.ResolveByCommand.Nothing:
+                        {
+                            GUI.enabled = false;
+                            EditorGUI.TextField(r2, string.Empty);
+                            queryProp.stringValue = string.Empty;
+                            GUI.enabled = true;
+                        }
+                        break;
+                    case TriggerableTargetObject.ResolveByCommand.WithTag:
+                        {
+                            queryProp.stringValue = EditorGUI.TagField(r2, queryProp.stringValue);
+                        }
+                        break;
+                    case TriggerableTargetObject.ResolveByCommand.WithName:
+                        {
+                            queryProp.stringValue = EditorGUI.TextField(r2, queryProp.stringValue);
+                        }
+                        break;
                 }
 
-                if(this.PropertyIsComplex(property))
-                {
-                    var r2 = new Rect(r1.xMin, r1.yMax, r1.width, r1.height);
-                    var go = GameObjectUtil.GetGameObjectFromSource(targetProp.objectReferenceValue);
-
-                    var selectedType = targetProp.objectReferenceValue.GetType();
-                    var availableTypes = (from c in go.GetComponents(_configAttrib.TargetType) select c.GetType()).ToArray();
-                    var availableTypeNames = availableTypes.Select((tp) => EditorHelper.TempContent(tp.Name)).ToArray();
-
-                    var index = System.Array.IndexOf(availableTypes, selectedType);
-                    EditorGUI.BeginChangeCheck();
-                    index = EditorGUI.Popup(r2, GUIContent.none, index, availableTypeNames);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        targetProp.objectReferenceValue = (index >= 0) ? go.GetComponent(availableTypes[index]) : null;
-                    }
-                }
             }
 
             EditorGUI.EndProperty();
         }
 
+        #endregion
+
+
+        #region Utils
+
+        private static void UpdateTargetFromSource(SerializedProperty property, TargetSource esrc, System.Type targetType)
+        {
+            switch(esrc)
+            {
+                case TargetSource.Arg:
+                    {
+                        property.objectReferenceValue = null;
+                    }
+                    break;
+                case TargetSource.Self:
+                    {
+                        UnityEngine.Object obj = property.serializedObject.targetObject;
+                        if (targetType != null)
+                            obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;
+                        property.objectReferenceValue = obj;
+                    }
+                    break;
+                case TargetSource.Root:
+                    {
+                        UnityEngine.Object obj = property.serializedObject.targetObject;
+                        var go = GameObjectUtil.GetGameObjectFromSource(obj);
+                        if (go != null)
+                            obj = go.FindRoot();
+
+                        if (targetType != null)
+                            obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;
+                        property.objectReferenceValue = obj;
+                    }
+                    break;
+                case TargetSource.Config:
+                    {
+                        if(property.objectReferenceValue == null)
+                        {
+                            UnityEngine.Object obj = property.serializedObject.targetObject;
+                            if (targetType != null)
+                                obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;
+                            property.objectReferenceValue = obj;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        #endregion
 
     }
 

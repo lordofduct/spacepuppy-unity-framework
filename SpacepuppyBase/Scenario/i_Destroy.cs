@@ -7,10 +7,33 @@ namespace com.spacepuppy.Scenario
     public class i_Destroy : TriggerableMechanism
     {
 
-        [TriggerableTargetObject.Config(typeof(UnityEngine.GameObject))]
-        public TriggerableTargetObject Target;
+        #region Fields
 
-        public float Delay = 0f;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Target")]
+        [TriggerableTargetObject.Config(typeof(UnityEngine.GameObject))]
+        private TriggerableTargetObject _target = new TriggerableTargetObject();
+
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
+        [TimeUnitsSelector()]
+        private float _delay = 0f;
+
+        #endregion
+
+        #region Properties
+
+        public TriggerableTargetObject Target
+        {
+            get { return _target; }
+        }
+
+        public float Delay
+        {
+            get { return _delay; }
+        }
+
+        #endregion
 
         #region ITriggerableMechanism Interface
 
@@ -18,10 +41,10 @@ namespace com.spacepuppy.Scenario
         {
             if (!this.CanTrigger) return false;
 
-            var targ = this.Target.GetTarget<UnityEngine.Object>(arg, false);
+            var targ = this._target.GetTarget<UnityEngine.Object>(arg);
             if (targ == null) return false;
 
-            if (this.Delay > 0f)
+            if (_delay > 0f)
             {
                 this.Invoke(() =>
                 {
@@ -33,7 +56,7 @@ namespace com.spacepuppy.Scenario
                     {
                         Object.Destroy(targ);
                     }
-                }, this.Delay);
+                }, _delay);
             }
             else
             {

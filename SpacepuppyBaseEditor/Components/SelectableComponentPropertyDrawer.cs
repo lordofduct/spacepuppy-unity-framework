@@ -164,7 +164,7 @@ namespace com.spacepuppyeditor.Components
                         position = this.DrawDotDotButton(position, property);
                         var names = this.ChoiceSelector.GetPopupEntries();
                         System.Array.Resize(ref names, names.Length + 1);
-                        names[names.Length - 1] = EditorHelper.TempContent("...GameObject");
+                        names[names.Length - 1] = EditorHelper.TempContent(targGo.name + " (...GameObject)");
 
                         int oi = (property.objectReferenceValue is GameObject) ? names.Length - 1 : this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
                         int ni = EditorGUI.Popup(position, oi, names);
@@ -220,7 +220,7 @@ namespace com.spacepuppyeditor.Components
 
             if(GUI.Button(r, EditorHelper.TempContent("...")))
             {
-                EditorGUIUtility.PingObject(property.objectReferenceValue as Component);
+                EditorGUIUtility.PingObject(property.objectReferenceValue);
             }
 
             return position;

@@ -165,6 +165,8 @@
     <Compile Include="Render\MaterialUtil.cs" />
     <Compile Include="Render\RenderEnums.cs" />
     <Compile Include="Render\RendererMaterialSwap.cs" />
+    <Compile Include="Scenario\AutoTriggerableMechanism.cs" />
+    <Compile Include="Scenario\AutoTriggerComponent.cs" />
     <Compile Include="Scenario\i_DebugLog.cs" />
     <Compile Include="Scenario\i_Destroy.cs" />
     <Compile Include="Scenario\i_Enable.cs" />

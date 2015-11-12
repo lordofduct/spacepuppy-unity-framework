@@ -47,11 +47,45 @@ namespace com.spacepuppy.Utils
             }
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go is T) return go as T;
-            if (go != null) return go.GetComponentAlt<T>();
+            
+            //if (go != null && ComponentUtil.IsAcceptableComponentType(typeof(T))) return go.GetComponentAlt<T>();
+            if (go != null)
+            {
+                var tp = typeof(T);
+                if (typeof(SPEntity).IsAssignableFrom(tp))
+                    return SPEntity.GetEntityFromSource(tp, go) as T;
+                else if (ComponentUtil.IsAcceptableComponentType(tp))
+                    return go.GetComponent(tp) as T;
+            }
 
             return null;
         }
 
+        public static object GetAsFromSource(System.Type tp, object obj)
+        {
+            if (obj == null) return null;
+
+            var otp = obj.GetType();
+            if (TypeUtil.IsType(otp, tp)) return obj;
+            if (obj is IComponent)
+            {
+                var c = (obj as IComponent).component;
+                if (!object.ReferenceEquals(c, null) && TypeUtil.IsType(c.GetType(), tp)) return c;
+            }
+
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (tp == typeof(UnityEngine.GameObject)) return go;
+
+            if(go != null)
+            {
+                if (typeof(SPEntity).IsAssignableFrom(tp))
+                    return SPEntity.GetEntityFromSource(tp, go);
+                else if (ComponentUtil.IsAcceptableComponentType(tp))
+                    return go.GetComponent(tp);
+            }
+
+            return null;
+        }
 
 
         public static void SmartDestroy(UnityEngine.Object obj)

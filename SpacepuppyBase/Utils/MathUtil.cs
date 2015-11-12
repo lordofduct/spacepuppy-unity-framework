@@ -1094,6 +1094,13 @@ namespace com.spacepuppy.Utils
             return (float)Math.Round(value / interval) * interval;
         }
 
+        /// <summary>
+        /// Rounds to the nearest interval offset by mean. A value of 7, for interval 4, with mean 2 would be 6.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="interval"></param>
+        /// <param name="mean"></param>
+        /// <returns></returns>
         public static float RoundToInterval(float value, float interval, float mean)
         {
             return (float)Math.Round((value - mean) / interval) * interval + mean;

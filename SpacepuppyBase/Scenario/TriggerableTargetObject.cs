@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Linq;
 
 using com.spacepuppy.Utils;
 
@@ -8,22 +9,37 @@ namespace com.spacepuppy.Scenario
     [System.Serializable()]
     public class TriggerableTargetObject
     {
-
-        public enum TargetSource
+        
+        public enum FindCommand
         {
-            TriggerArg = 0,
-            Self = 1,
-            Root = 2,
-            Configurable = 3
+            Direct = 0,
+            FindParent = 1,
+            FindInChildren = 2,
+            FindInEntity = 3,
+            FindInScene = 4
+        }
+
+        public enum ResolveByCommand
+        {
+            Nothing = 0,
+            WithTag = 1,
+            WithName = 2
         }
 
         #region Fields
-
+        
         [SerializeField()]
-        private TargetSource _source;
+        [UnityEngine.Serialization.FormerlySerializedAs("_source")]
+        private bool _configured = true;
         [SerializeField()]
         private UnityEngine.Object _target;
-
+        [SerializeField()]
+        private FindCommand _find;
+        [SerializeField()]
+        private ResolveByCommand _resolveBy;
+        [SerializeField()]
+        private string _queryString;
+        
         #endregion
 
         #region CONSTRUCTOR
@@ -32,115 +48,173 @@ namespace com.spacepuppy.Scenario
         {
         }
 
-        public TriggerableTargetObject(TargetSource src)
+        public TriggerableTargetObject(bool defaultTriggerArg)
         {
-            _source = src;
+            _configured = !defaultTriggerArg;
         }
 
         #endregion
 
         #region Properties
 
-        public TargetSource Source
+        public bool TargetsTriggerArg
         {
-            get { return _source; }
+            get { return !_configured; }
+            set
+            {
+                _configured = !value;
+            }
         }
 
+        public UnityEngine.Object Target
+        {
+            get { return _target; }
+            set { _target = value; }
+        }
+        
         #endregion
 
         #region Methods
 
-        public void SetTarget(UnityEngine.Object targ)
+        public T GetTarget<T>(object triggerArg) where T : class
         {
-            _source = TargetSource.Configurable;
-            _target = targ;
-        }
+            var obj = this.ReduceTarget(triggerArg);
+            if (obj == null) return null;
 
-        public T GetTarget<T>(object triggerArg, bool searchEntity = true) where T : class
-        {
-            return GetTargetFrom(typeof(T), this.ReduceTarget(triggerArg), searchEntity) as T;
-        }
-
-        public object GetTarget(System.Type tp, object triggerArg, bool searchEntity = true)
-        {
-            if (tp == null || !TypeUtil.IsType(tp, typeof(UnityEngine.Object))) throw new TypeArgumentMismatchException(tp, typeof(UnityEngine.Object), "tp");
-
-            return GetTargetFrom(tp, this.ReduceTarget(triggerArg), searchEntity);
-        }
-
-        private UnityEngine.Object ReduceTarget(object triggerArg)
-        {
-            switch (_source)
+            var result = ObjUtil.GetAsFromSource<T>(obj);
+            if(result == null && !_configured && ComponentUtil.IsAcceptableComponentType(typeof(T)))
             {
-                case TargetSource.TriggerArg:
-                    return (triggerArg is UnityEngine.Object) ? triggerArg as UnityEngine.Object : null;
-                case TargetSource.Self:
-                case TargetSource.Root:
-                case TargetSource.Configurable:
-                    return _target;
+                var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
+                if (go == null) return null;
+                result = go.FindComponent<T>();
+            }
+            return result;
+        }
+
+        public object GetTarget(System.Type tp, object triggerArg)
+        {
+            if (tp == null) throw new System.ArgumentNullException("tp");
+            
+            var obj = this.ReduceTarget(triggerArg);
+            if (obj == null) return null;
+
+            var result = ObjUtil.GetAsFromSource(tp, obj);
+            if(result == null && !_configured && ComponentUtil.IsAcceptableComponentType(tp))
+            {
+                var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
+                if (go == null) return null;
+                result = go.FindComponent(tp);
+            }
+            return result;
+        }
+
+
+        private object ReduceTarget(object triggerArg)
+        {
+            switch (_find)
+            {
+                case FindCommand.Direct:
+                    {
+                        object obj = (_configured) ? _target : triggerArg;
+                        if (obj == null) return null;
+                        switch (_resolveBy)
+                        {
+                            case ResolveByCommand.Nothing:
+                                return obj;
+                            case ResolveByCommand.WithTag:
+                                return GameObjectUtil.GetGameObjectFromSource(obj).HasTag(_queryString) ? obj : null;
+                            case ResolveByCommand.WithName:
+                                return GameObjectUtil.GetGameObjectFromSource(obj).CompareName(_queryString) ? obj : null;
+                        }
+                    }
+                    break;
+                case FindCommand.FindParent:
+                    {
+                        Transform trans = GameObjectUtil.GetTransformFromSource((_configured) ? _target : triggerArg);
+                        if (trans == null) return null;
+                        switch (_resolveBy)
+                        {
+                            case ResolveByCommand.Nothing:
+                                return trans.parent;
+                            case ResolveByCommand.WithTag:
+                                return trans.FindParentWithTag(_queryString);
+                            case ResolveByCommand.WithName:
+                                return trans.FindParentWithName(_queryString);
+                        }
+                    }
+                    break;
+                case FindCommand.FindInChildren:
+                    {
+                        Transform trans = GameObjectUtil.GetTransformFromSource((_configured) ? _target : triggerArg);
+                        if (trans == null) return null;
+                        switch (_resolveBy)
+                        {
+                            case ResolveByCommand.Nothing:
+                                if (trans.childCount > 0)
+                                {
+                                    foreach (Transform child in trans)
+                                    {
+                                        return child;
+                                    }
+                                }
+                                break;
+                            case ResolveByCommand.WithTag:
+                                if (trans.childCount > 0)
+                                {
+                                    foreach (Transform child in trans)
+                                    {
+                                        if (child.HasTag(_queryString)) return child;
+                                    }
+                                }
+                                break;
+                            case ResolveByCommand.WithName:
+                                if (trans.childCount > 0)
+                                {
+                                    foreach (Transform child in trans)
+                                    {
+                                        if (child.CompareName(_queryString)) return child;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case FindCommand.FindInEntity:
+                    {
+                        GameObject entity = GameObjectUtil.GetRootFromSource((_configured) ? _target : triggerArg);
+                        if (entity == null) return null;
+
+                        switch (_resolveBy)
+                        {
+                            case ResolveByCommand.Nothing:
+                                return entity;
+                            case ResolveByCommand.WithTag:
+                                return entity.FindWithMultiTag(_queryString);
+                            case ResolveByCommand.WithName:
+                                return entity.FindByName(_queryString);
+                        }
+                    }
+                    break;
+                case FindCommand.FindInScene:
+                    {
+                        switch (_resolveBy)
+                        {
+                            case ResolveByCommand.Nothing:
+                                return GameObjectUtil.GetGameObjectFromSource((_configured) ? _target : triggerArg);
+                            case ResolveByCommand.WithTag:
+                                return GameObjectUtil.FindGameObjectsWithMultiTag(_queryString).FirstOrDefault();
+                            case ResolveByCommand.WithName:
+                                return GameObject.Find(_queryString);
+                        }
+                    }
+                    break;
             }
 
             return null;
         }
 
         #endregion
-
-        #region Utils
-
-        public static T GetTargetFrom<T>(object targ, bool searchEntity) where T : class
-        {
-            return GetTargetFrom(typeof(T), targ, searchEntity) as T;
-        }
-
-        public static object GetTargetFrom(System.Type tp, object targ, bool searchEntity)
-        {
-            if (targ == null) return null;
-
-            if (targ != null && TypeUtil.IsType(targ.GetType(), tp))
-            {
-                return targ;
-            }
-            else
-            {
-                if (searchEntity)
-                {
-                    if (tp == typeof(GameObject))
-                    {
-                        return GameObjectUtil.GetRootFromSource(targ);
-                    }
-                    else if (TypeUtil.IsType(tp, typeof(SPEntity)))
-                    {
-                        return SPEntity.GetEntityFromSource(targ);
-                    }
-                    else
-                    {
-                        return GameObjectUtil.GetGameObjectFromSource(targ).FindComponent(tp);
-                    }
-                }
-                else
-                {
-                    if (tp == typeof(GameObject))
-                    {
-                        return GameObjectUtil.GetGameObjectFromSource(targ);
-                    }
-                    else if (TypeUtil.IsType(tp, typeof(SPEntity)))
-                    {
-                        return SPEntity.GetEntityFromSource(targ);
-                    }
-                    else
-                    {
-                        var go = GameObjectUtil.GetGameObjectFromSource(targ);
-                        if (go != null)
-                            return go.GetComponent(tp);
-                        else
-                            return null;
-                    }
-                }
-            }
-        }
-
-        #endregion
-
+        
         #region Special Types
 
         public class ConfigAttribute : System.Attribute

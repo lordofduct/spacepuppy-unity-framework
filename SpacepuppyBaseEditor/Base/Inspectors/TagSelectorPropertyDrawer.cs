@@ -21,7 +21,7 @@ namespace com.spacepuppyeditor.Base
 
                 var attrib = this.attribute as TagSelectorAttribute;
 
-                if (attrib.AllowUntagged)
+                if (attrib != null && attrib.AllowUntagged)
                 {
                     property.stringValue = EditorGUI.TagField(position, label, property.stringValue);
                 }

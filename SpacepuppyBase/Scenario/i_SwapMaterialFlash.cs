@@ -15,7 +15,10 @@ namespace com.spacepuppy.Scenario
         [InsertButton("Search for Renderers", "FindRenderersInTarget")]
         [SerializeField()]
         [TriggerableTargetObject.Config(typeof(GameObject))]
-        private TriggerableTargetObject _target = new TriggerableTargetObject(TriggerableTargetObject.TargetSource.Root);
+        private TriggerableTargetObject _target = new TriggerableTargetObject();
+
+        [SerializeField()]
+        private bool _searchEntireEntity = true;
 
         [SerializeField()]
         [Tooltip("Leave empty to have it auto-sync on load.")]
@@ -38,7 +41,7 @@ namespace com.spacepuppy.Scenario
         {
             base.OnStartOrEnable();
 
-            if(_target.Source != TriggerableTargetObject.TargetSource.TriggerArg &&
+            if(!_target.TargetsTriggerArg &&
                (_targetRenderers == null || _targetRenderers.Length == 0))
             {
                 this.FindRenderersInTarget();
@@ -48,6 +51,17 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region Properties
+
+        public TriggerableTargetObject Target
+        {
+            get { return _target; }
+        }
+
+        public bool SearchEntireEntity
+        {
+            get { return _searchEntireEntity; }
+            set { _searchEntireEntity = value; }
+        }
 
         public Material Material
         {
@@ -65,15 +79,21 @@ namespace com.spacepuppy.Scenario
 
         #region Methods
 
+        /// <summary>
+        /// If 'Target' is modified, this must be called to resync the cahced renderers.
+        /// </summary>
         public void FindRenderersInTarget()
         {
-            if (_target == null || _target.Source == TriggerableTargetObject.TargetSource.TriggerArg)
+            if (_target == null || !_target.TargetsTriggerArg)
             {
                 _targetRenderers = ArrayUtil.Empty<Renderer>();
                 return;
             }
 
             var src = _target.GetTarget<GameObject>(null);
+            if (src == null) return;
+            if (_searchEntireEntity) src = GameObjectUtil.FindRoot(src);
+
             _targetRenderers = src.GetComponentsInChildren<Renderer>();
         }
 
@@ -86,10 +106,11 @@ namespace com.spacepuppy.Scenario
             if (!this.CanTrigger) return false;
 
             Renderer[] arr;
-            if(_target.Source == TriggerableTargetObject.TargetSource.TriggerArg)
+            if(_target.TargetsTriggerArg)
             {
                 var targ = _target.GetTarget<GameObject>(arg);
                 if (targ == null) return false;
+                if (_searchEntireEntity) targ = GameObjectUtil.FindRoot(targ);
                 arr = targ.GetComponentsInChildren<Renderer>();
             }
             else

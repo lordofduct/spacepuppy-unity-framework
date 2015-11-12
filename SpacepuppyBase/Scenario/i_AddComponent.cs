@@ -17,11 +17,22 @@ namespace com.spacepuppy.Scenario
         [TriggerableTargetObject.Config(typeof(GameObject))]
         private TriggerableTargetObject _target;
 
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("AddMultipleIfExists")]
         [Tooltip("Add a new component even if one already exists.")]
-        public bool AddMultipleIfExists;
+        private bool _addMultipleIfExists;
 
         #endregion
 
+        #region Properties
+
+        public bool AddMultipleIfExists
+        {
+            get { return _addMultipleIfExists; }
+            set { _addMultipleIfExists = value; }
+        }
+
+        #endregion
 
         #region TriggerableMechanism Interface
 
@@ -34,7 +45,7 @@ namespace com.spacepuppy.Scenario
 
             try
             {
-                if (!this.AddMultipleIfExists && targ.HasComponent(_componentType.Type)) return false;
+                if (!this._addMultipleIfExists && targ.HasComponent(_componentType.Type)) return false;
 
                 var comp = targ.AddComponent(_componentType.Type);
                 return true;

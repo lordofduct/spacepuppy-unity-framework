@@ -480,6 +480,50 @@ namespace com.spacepuppy.Utils
 
         #region ChildComponent
 
+        public static bool GetComponentInChildren<T>(this GameObject obj, out T comp) where T : class
+        {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
+            comp = obj.GetComponentInChildren(typeof(T)) as T;
+            return comp != null;
+        }
+
+        public static bool GetComponentInChildren<T>(this Component obj, out T comp) where T : class
+        {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
+            comp = obj.GetComponentInChildren(typeof(T)) as T;
+            return comp != null;
+        }
+
+        public static bool GetComponentInChildren<T>(this GameObject obj, System.Type tp, out Component comp)
+        {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
+            comp = obj.GetComponentInChildren(tp);
+            return comp != null;
+        }
+
+        public static bool GetComponentInChildren<T>(this Component obj, System.Type tp, out Component comp)
+        {
+            if (obj == null)
+            {
+                comp = null;
+                return false;
+            }
+            comp = obj.GetComponentInChildren(tp);
+            return comp != null;
+        }
+
         public static T GetComponentInChildrenAlt<T>(this GameObject obj) where T : class
         {
             if (obj == null) return null;

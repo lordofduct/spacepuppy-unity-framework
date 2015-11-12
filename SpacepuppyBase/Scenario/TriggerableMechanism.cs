@@ -24,7 +24,7 @@ namespace com.spacepuppy.Scenario
 
         public virtual bool CanTrigger
         {
-            get { return this.IsActiveAndEnabled(); }
+            get { return this.isActiveAndEnabled; }
         }
 
         public void Trigger()
