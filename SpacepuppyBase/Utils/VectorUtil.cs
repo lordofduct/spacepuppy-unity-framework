@@ -400,22 +400,22 @@ namespace com.spacepuppy.Utils
 
         public static bool FuzzyEquals(this Vector2 a, Vector2 b)
         {
-            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), MathUtil.EPSILON_SQR);
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), 0f, MathUtil.EPSILON_SQR);
         }
 
         public static bool FuzzyEquals(this Vector2 a, Vector2 b, float epsilon)
         {
-            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), epsilon);
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), 0f, epsilon);
         }
 
         public static bool FuzzyEquals(this Vector3 a, Vector3 b)
         {
-            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), MathUtil.EPSILON_SQR);
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), 0f, MathUtil.EPSILON_SQR);
         }
 
         public static bool FuzzyEquals(this Vector3 a, Vector3 b, float epsilon)
         {
-            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), epsilon);
+            return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), 0f, epsilon);
         }
 
         #endregion
