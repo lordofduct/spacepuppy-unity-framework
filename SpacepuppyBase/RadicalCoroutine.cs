@@ -39,6 +39,10 @@ namespace com.spacepuppy
     /// *Scheduling
     /// Schedule a coroutine to run when a current coroutine is complete.
     /// 
+    /// *RadicalTask
+    /// You can quickly and easily jump from a pooled thread to a main unity thread with RadicalTask.
+    /// yield 'RadicalTask.JumpToAsync' to enter a pooled thread, and yield 'RadicalTask.JumpToUnityThread' to return.
+    /// 
     /// *Manual Override
     /// Tick the operation of a coroutine manually. Won't be needed really ever, but that one time you want it, it's a life saver.
     /// 

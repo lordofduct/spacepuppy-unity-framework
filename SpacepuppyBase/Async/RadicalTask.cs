@@ -3,6 +3,16 @@ using System.Threading;
 
 namespace com.spacepuppy.Async
 {
+
+    /// <summary>
+    /// Facilitates the multi-threading feature of RadicalCoroutine. Access the static interface to easily 
+    /// jump between a pooled thread and the main unity thread.
+    /// 
+    /// yield RadicalTask.JumpToAsync to operate on a pooled thread
+    /// yield RadicalTask.JumpToUnityThread (or anything for that matter) to return to the unity thread
+    /// 
+    /// If you yield a JumpToAsync in an already threaded routine, it'll just remain in the thread, with no wait.
+    /// </summary>
     public sealed class RadicalTask : IRadicalYieldInstruction
     {
 
