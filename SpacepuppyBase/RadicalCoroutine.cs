@@ -229,7 +229,7 @@ namespace com.spacepuppy
 
             _state = RadicalCoroutineOperatingState.Active;
             _owner = behaviour;
-            _stack.Push(com.spacepuppy.Async.RadicalTask.StartTask(this)); //we start the task as an async operation
+            _stack.Push(com.spacepuppy.Async.RadicalTask.Create(this)); //we start the task as an async operation
             _token = behaviour.StartCoroutine(this);
 
             _disableMode = disableMode;
@@ -615,7 +615,7 @@ namespace com.spacepuppy
                 else if(current == com.spacepuppy.Async.RadicalTask.JumpToAsync)
                 {
                     //auto async flag
-                    var instruction = com.spacepuppy.Async.RadicalTask.StartTask(this) as IRadicalYieldInstruction;
+                    var instruction = com.spacepuppy.Async.RadicalTask.Create(this) as IRadicalYieldInstruction;
 
                     //we push first, incase the instruction checks if the 'currentoperation' is itself on first tick
                     _stack.Push(instruction);
