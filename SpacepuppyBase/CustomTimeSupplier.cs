@@ -79,20 +79,45 @@ namespace com.spacepuppy
             }
         }
 
+        public TimeSpan TotalSpan
+        {
+            get
+            {
+                if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
+                {
+                    return new TimeSpan(_ft + _startTime);
+                }
+                else
+                {
+                    return new TimeSpan(_t + _startTime);
+                }
+            }
+        }
+
+
+
+
         /// <summary>
         /// The total time passed since the CustomTime was created. Value is relative to the Update sequence.
         /// </summary>
         public double UpdateTotal { get { return (_t + _startTime) * TICKS_TO_SECONDS; } }
 
-        /// <summary>
-        /// The total time passed since the CustomTime was created. Value is relative to the FixedUpdate sequence;
-        /// </summary>
-        public double FixedTotal { get { return (_ft + _startTime) * TICKS_TO_SECONDS; } }
+        public TimeSpan UpdateTotalSpan { get { return new TimeSpan(_t + _startTime); } }
 
         /// <summary>
         /// The delta time since the call to standard update. This will always return the delta since last update, regardless of if you call it in update/fixedupdate.
         /// </summary>
         public double UpdateDelta { get { return Time.unscaledDeltaTime * _scale; } }
+
+
+
+
+        /// <summary>
+        /// The total time passed since the CustomTime was created. Value is relative to the FixedUpdate sequence;
+        /// </summary>
+        public double FixedTotal { get { return (_ft + _startTime) * TICKS_TO_SECONDS; } }
+        
+        public TimeSpan FixedTotalSpan { get { return new TimeSpan(_ft + _startTime); } }
 
         /// <summary>
         /// The delta time since the call to fixed update. This will always return the delta since last fixedupdate, regardless of if you call it in update/fixedupdate.

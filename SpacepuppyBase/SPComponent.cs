@@ -149,6 +149,40 @@ namespace com.spacepuppy
             return co;
         }
 
+
+
+
+        public RadicalCoroutine StartRadicalCoroutineAsync(System.Collections.IEnumerator routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine);
+            co.StartAsync(this, disableMode);
+            return co;
+        }
+
+        public RadicalCoroutine StartRadicalCoroutineAsync(System.Collections.IEnumerable routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine.GetEnumerator());
+            co.StartAsync(this, disableMode);
+            return co;
+        }
+
+        public RadicalCoroutine StartRadicalCoroutineAsync(CoroutineMethod routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine().GetEnumerator());
+            co.StartAsync(this, disableMode);
+            return co;
+        }
+
+
+
+
+
         public RadicalCoroutine InvokeRadical(System.Action method, float delay, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (method == null) throw new System.ArgumentNullException("method");

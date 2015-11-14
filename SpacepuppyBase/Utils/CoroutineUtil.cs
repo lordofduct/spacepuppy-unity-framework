@@ -101,6 +101,63 @@ namespace com.spacepuppy.Utils
             return co;
         }
 
+
+
+
+        public static RadicalCoroutine StartRadicalCoroutineAsync(this MonoBehaviour behaviour, System.Collections.IEnumerator routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine);
+            co.StartAsync(behaviour, disableMode);
+            return co;
+        }
+
+        public static RadicalCoroutine StartRadicalCoroutineAsync(this MonoBehaviour behaviour, System.Collections.IEnumerable routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(routine.GetEnumerator());
+            co.StartAsync(behaviour, disableMode);
+            return co;
+        }
+
+        public static RadicalCoroutine StartRadicalCoroutineAsync(this MonoBehaviour behaviour, CoroutineMethod method, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("routine");
+
+            var co = new RadicalCoroutine(method().GetEnumerator());
+            co.StartAsync(behaviour, disableMode);
+            return co;
+        }
+
+        public static RadicalCoroutine StartRadicalCoroutineAsync(this MonoBehaviour behaviour, System.Delegate method, object[] args = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            System.Collections.IEnumerator e;
+            if (com.spacepuppy.Utils.TypeUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerable)))
+            {
+                e = (method.DynamicInvoke(args) as System.Collections.IEnumerable).GetEnumerator();
+            }
+            else if (com.spacepuppy.Utils.TypeUtil.IsType(method.Method.ReturnType, typeof(System.Collections.IEnumerator)))
+            {
+                e = (method.DynamicInvoke(args) as System.Collections.IEnumerator);
+            }
+            else
+            {
+                throw new System.ArgumentException("Delegate must have a return type of IEnumerable or IEnumerator.", "method");
+            }
+
+            var co = new RadicalCoroutine(e);
+            co.StartAsync(behaviour, disableMode);
+            return co;
+        }
+
         #endregion
 
         #region Invoke

@@ -78,7 +78,7 @@ namespace com.spacepuppy
 
         private void OnFinish(bool cancelled)
         {
-            this.ClearStack();
+            _stack.Clear();
             _currentIEnumeratorYieldValue = null;
             _forcedTick = false;
             try
@@ -125,8 +125,8 @@ namespace com.spacepuppy
         private MonoBehaviour _owner;
         private Coroutine _token;
         private RadicalCoroutineDisableMode _disableMode;
-
-        private System.Collections.Generic.Stack<IRadicalYieldInstruction> _stack = new System.Collections.Generic.Stack<IRadicalYieldInstruction>();
+        
+        private RadicalOperationStack _stack;
         private object _currentIEnumeratorYieldValue;
 
         private RadicalCoroutineOperatingState _state;
@@ -139,12 +139,14 @@ namespace com.spacepuppy
         public RadicalCoroutine(System.Collections.IEnumerable routine)
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
+            _stack = new RadicalOperationStack(this);
             _stack.Push(EnumWrapper.Create(routine.GetEnumerator()));
         }
 
         public RadicalCoroutine(System.Collections.IEnumerator routine)
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
+            _stack = new RadicalOperationStack(this);
             _stack.Push(EnumWrapper.Create(routine));
         }
 
@@ -176,6 +178,11 @@ namespace com.spacepuppy
         /// The MonoBehaviour operating this routine. This may be null if it hasn't been started, or it's being manually ticked.
         /// </summary>
         public MonoBehaviour Operator { get { return _owner; } }
+
+        internal RadicalOperationStack OperationStack
+        {
+            get { return _stack; }
+        }
 
         #endregion
 
@@ -212,7 +219,28 @@ namespace com.spacepuppy
                 manager.RegisterCoroutine(behaviour as SPComponent, this);
             }
 
-            if (_stack.Count > 0 && _stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnResume();
+            if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
+        }
+
+        public void StartAsync(MonoBehaviour behaviour, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (_state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+
+            _state = RadicalCoroutineOperatingState.Active;
+            _owner = behaviour;
+            _stack.Push(com.spacepuppy.Async.RadicalTask.StartTask(this)); //we start the task as an async operation
+            _token = behaviour.StartCoroutine(this);
+
+            _disableMode = disableMode;
+            if (behaviour is SPComponent && _disableMode > RadicalCoroutineDisableMode.Default && _disableMode != RadicalCoroutineDisableMode.ResumeOnEnable)
+            {
+                //no point in managing the routine if it acts in default mode... a flag of 'ResumeOnEnable' is a redundant mode to default
+                var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
+                manager.RegisterCoroutine(behaviour as SPComponent, this);
+            }
+
+            //if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
         }
 
         internal void Resume(SPComponent behaviour)
@@ -224,7 +252,7 @@ namespace com.spacepuppy
             _owner = behaviour;
             _token = behaviour.StartCoroutine(this);
 
-            if (_stack.Count > 0 && _stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnResume();
+            if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
         }
 
         /// <summary>
@@ -250,7 +278,7 @@ namespace com.spacepuppy
                 _owner = null;
                 _token = null;
 
-                if (_stack.Count > 0 && _stack.Peek() is IPausibleYieldInstruction) (_stack.Peek() as IPausibleYieldInstruction).OnPause();
+                if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnPause();
             }
         }
 
@@ -261,9 +289,9 @@ namespace com.spacepuppy
         {
             _state = RadicalCoroutineOperatingState.Cancelling;
         }
-
+        
         #endregion
-
+        
         #region Scheduling
 
         public RadicalCoroutine Schedule(MonoBehaviour behaviour, System.Collections.IEnumerator routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
@@ -360,30 +388,7 @@ namespace com.spacepuppy
         }
 
         #endregion
-
-        #region Private Methods
-
-        private IRadicalYieldInstruction PopStack()
-        {
-            var r = _stack.Pop();
-            if (r is IPooledYieldInstruction) (r as IPooledYieldInstruction).Dispose();
-            if (r is IImmediatelyResumingYieldInstruction) (r as IImmediatelyResumingYieldInstruction).Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
-            return r;
-        }
-
-        private void ClearStack()
-        {
-            foreach(var r in _stack)
-            {
-                if (r is IPooledYieldInstruction) (r as IPooledYieldInstruction).Dispose();
-                if (r is IImmediatelyResumingYieldInstruction) (r as IImmediatelyResumingYieldInstruction).Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
-            }
-            _stack.Clear();
-        }
-
-        #endregion
-
-
+        
         #region IYieldInstruction/IEnumerator Interface
 
         bool IRadicalYieldInstruction.IsComplete { get { return this.Finished; } }
@@ -442,13 +447,13 @@ namespace com.spacepuppy
             _currentIEnumeratorYieldValue = null;
 
             //clear completed entries
-            while(_stack.Count > 0)
+            while(_stack.CurrentOperation != null)
             {
                 try
                 {
-                    if(_stack.Peek().IsComplete)
+                    if(_stack.CurrentOperation.IsComplete)
                     {
-                        this.PopStack();
+                        _stack.Pop();
                     }
                     else
                     {
@@ -458,20 +463,20 @@ namespace com.spacepuppy
                 catch(System.Exception ex)
                 {
                     Debug.LogException(ex);
-                    this.PopStack();
+                    _stack.Pop();
                 }
             }
 
-            if (_stack.Count > 0)
+            if (_stack.CurrentOperation != null)
             {
                 //operate
                 object current;
-                var r = _stack.Peek();
+                var r = _stack.CurrentOperation;
                 if (!r.Tick(out current))
                 {
                     //the tick may have forced a tick, which could have popped this yieldinstruction already, this usually means it was an IImmediatelyResumingYieldInstruction
                     //deal with accordingly
-                    if (_stack.Count > 0 && _stack.Peek() == r) this.PopStack();
+                    if (_stack.CurrentOperation == r) _stack.Pop();
 
                     if (this.Cancelled)
                     {
@@ -562,11 +567,16 @@ namespace com.spacepuppy
                     if (instruction is IResettingYieldInstruction) (instruction as IResettingYieldInstruction).Reset();
                     if (instruction is IImmediatelyResumingYieldInstruction) (instruction as IImmediatelyResumingYieldInstruction).Signal += this.OnImmediatelyResumingYieldInstructionSignaled;
 
+                    //we push first, incase the instruction checks if the 'currentoperation' is itself on first tick
+                    _stack.Push(instruction);
                     object yieldObject;
                     if (instruction.Tick(out yieldObject))
                     {
                         _currentIEnumeratorYieldValue = yieldObject;
-                        _stack.Push(instruction);
+                    }
+                    else
+                    {
+                        if (_stack.CurrentOperation == instruction) _stack.Pop();
                     }
                 }
                 else if (current is IEnumerable)
@@ -600,6 +610,23 @@ namespace com.spacepuppy
                         case RadicalCoroutineEndCommand.Cancel:
                             this.Cancel();
                             return false;
+                    }
+                }
+                else if(current == com.spacepuppy.Async.RadicalTask.JumpToAsync)
+                {
+                    //auto async flag
+                    var instruction = com.spacepuppy.Async.RadicalTask.StartTask(this) as IRadicalYieldInstruction;
+
+                    //we push first, incase the instruction checks if the 'currentoperation' is itself on first tick
+                    _stack.Push(instruction);
+                    object yieldObject;
+                    if(instruction.Tick(out yieldObject))
+                    {
+                        _currentIEnumeratorYieldValue = yieldObject;
+                    }
+                    else
+                    {
+                        if (_stack.CurrentOperation == instruction) _stack.Pop();
                     }
                 }
                 else
@@ -639,9 +666,9 @@ namespace com.spacepuppy
         {
             var instruction = sender as IImmediatelyResumingYieldInstruction;
             if (instruction == null) return;
-            if(_stack.Peek() == instruction)
+            if(_stack.CurrentOperation == instruction)
             {
-                this.PopStack();
+                _stack.Pop();
                 this.ForceTick();
             }
             else
@@ -667,7 +694,7 @@ namespace com.spacepuppy
         {
             _state = RadicalCoroutineOperatingState.Inactive;
             _disableMode = RadicalCoroutineDisableMode.Default;
-            _stack.Clear();
+            if (_stack != null) _stack.Clear();
             _currentIEnumeratorYieldValue = null;
             _forcedTick = false;
             this.OnComplete = null;
@@ -806,7 +833,7 @@ namespace com.spacepuppy
                 yield return null;
             }
         }
-
+        
         #endregion
 
         #region Static Pool
@@ -832,7 +859,7 @@ namespace com.spacepuppy
         {
             if (e == null) throw new System.ArgumentNullException("routine");
             var routine = _pool.GetInstance();
-            routine._stack.Push(EnumWrapper.Create(e));
+            routine.OperationStack.Push(EnumWrapper.Create(e));
             return routine;
         }
 
@@ -889,7 +916,7 @@ namespace com.spacepuppy
                 else
                 {
                     yieldObject = null;
-                    if (_owner._stack.Peek() == this)
+                    if (_owner.OperationStack.CurrentOperation == this)
                     {
                         if (_yieldObject is WaitForEndOfFrame || _yieldObject is WaitForFixedUpdate)
                         {
@@ -1002,6 +1029,156 @@ namespace com.spacepuppy
             }
         }
 
+
+        internal class RadicalOperationStack
+        {
+
+            #region Fields
+
+            private RadicalCoroutine _owner;
+            private IRadicalYieldInstruction _currentOperation;
+            private System.Collections.Generic.Stack<IRadicalYieldInstruction> _stack;
+
+            #endregion
+
+            #region CONSTRUCTOR
+
+            internal RadicalOperationStack(RadicalCoroutine owner)
+            {
+                _owner = owner;
+            }
+
+            #endregion
+
+            #region Properties
+
+            public IRadicalYieldInstruction CurrentOperation
+            {
+                get { return _currentOperation; }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    if (_currentOperation == null) return 0;
+                    return (_stack != null) ? _stack.Count + 1 : 1;
+                }
+            }
+
+            #endregion
+
+            #region Methods
+
+            public void Push(IRadicalYieldInstruction op)
+            {
+                if (_currentOperation != null)
+                {
+                    if (_stack == null) _stack = new System.Collections.Generic.Stack<IRadicalYieldInstruction>();
+                    _stack.Push(_currentOperation);
+                }
+
+                _currentOperation = op;
+            }
+
+            public IRadicalYieldInstruction Pop()
+            {
+                var old = _currentOperation;
+                if (_stack != null && _stack.Count > 0)
+                {
+                    _currentOperation = _stack.Pop();
+                }
+                else
+                {
+                    _currentOperation = null;
+                }
+
+                if (old != null)
+                {
+                    if (old is IPooledYieldInstruction) (old as IPooledYieldInstruction).Dispose();
+                    if (old is IImmediatelyResumingYieldInstruction) (old as IImmediatelyResumingYieldInstruction).Signal -= _owner.OnImmediatelyResumingYieldInstructionSignaled;
+                }
+
+                return _currentOperation;
+            }
+
+            public void Clear()
+            {
+                if (_currentOperation != null)
+                {
+                    if (_currentOperation is IPooledYieldInstruction) (_currentOperation as IPooledYieldInstruction).Dispose();
+                    if (_currentOperation is IImmediatelyResumingYieldInstruction) (_currentOperation as IImmediatelyResumingYieldInstruction).Signal -= _owner.OnImmediatelyResumingYieldInstructionSignaled;
+                }
+
+                if(_stack != null && _stack.Count > 0)
+                {
+                    var e = _stack.GetEnumerator();
+                    while(e.MoveNext())
+                    {
+                        if (e.Current is IPooledYieldInstruction) (e.Current as IPooledYieldInstruction).Dispose();
+                        if (e.Current is IImmediatelyResumingYieldInstruction) (e.Current as IImmediatelyResumingYieldInstruction).Signal -= _owner.OnImmediatelyResumingYieldInstructionSignaled;
+                    }
+                    _stack.Clear();
+                }
+                _currentOperation = null;
+            }
+
+
+            public IRadicalYieldInstruction PeekSubOperation()
+            {
+                if (_stack != null && _stack.Count > 0)
+                    return _stack.Peek();
+                else
+                    return null;
+            }
+
+            public void PushSubOperation(IRadicalYieldInstruction op)
+            {
+                if (op == null) throw new System.ArgumentNullException("op");
+
+                if (_stack == null) _stack = new System.Collections.Generic.Stack<IRadicalYieldInstruction>();
+                _stack.Push(op);
+            }
+
+            public IRadicalYieldInstruction PopSubOperation()
+            {
+                if (_stack == null || _stack.Count == 0) return null;
+
+                var old = _stack.Pop();
+                if (old != null)
+                {
+                    if (old is IPooledYieldInstruction) (old as IPooledYieldInstruction).Dispose();
+                    if (old is IImmediatelyResumingYieldInstruction) (old as IImmediatelyResumingYieldInstruction).Signal -= _owner.OnImmediatelyResumingYieldInstructionSignaled;
+                }
+                return old;
+            }
+
+            public void ClearSubOperations()
+            {
+                if (_stack != null && _stack.Count > 0)
+                {
+                    var e = _stack.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (e.Current is IPooledYieldInstruction) (e.Current as IPooledYieldInstruction).Dispose();
+                        if (e.Current is IImmediatelyResumingYieldInstruction) (e.Current as IImmediatelyResumingYieldInstruction).Signal -= _owner.OnImmediatelyResumingYieldInstructionSignaled;
+                    }
+                    _stack.Clear();
+                }
+            }
+
+            public IRadicalYieldInstruction Last()
+            {
+                if (_stack == null || _stack.Count == 0)
+                    return _currentOperation;
+                else
+                    return _stack.Last();
+            }
+
+            #endregion
+
+        }
+
         #endregion
 
         #region Editor Special Types
@@ -1011,8 +1188,8 @@ namespace com.spacepuppy
 
             public static string GetInternalRoutineID(RadicalCoroutine routine)
             {
-                if (routine._stack.Count == 0) return "";
-                var r = routine._stack.Last(); //the bottom of the stack is the actual routine
+                if (routine.OperationStack.Count == 0) return "";
+                var r = routine.OperationStack.Last(); //the bottom of the stack is the actual routine
                 if (r is IRadicalYieldInstruction)
                 {
                     return GetIterableID(r as IRadicalYieldInstruction);
@@ -1046,9 +1223,9 @@ namespace com.spacepuppy
 
             public static string GetDerivativeID(RadicalCoroutine routine)
             {
-                if (routine._stack.Count <= 1) return "";
+                if (routine.OperationStack.Count <= 1) return "";
 
-                return GetIterableID(routine._stack.Peek());
+                return GetIterableID(routine.OperationStack.CurrentOperation);
             }
 
 

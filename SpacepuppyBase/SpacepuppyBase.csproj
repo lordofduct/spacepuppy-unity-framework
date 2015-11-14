@@ -57,6 +57,7 @@
     <Compile Include="Async\AsyncOperationWrapper.cs" />
     <Compile Include="Async\InvokePump.cs" />
     <Compile Include="Async\RadicalAsyncOperation.cs" />
+    <Compile Include="Async\RadicalTask.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Audio\AudioGroup.cs" />
     <Compile Include="Audio\AudioManager.cs" />
