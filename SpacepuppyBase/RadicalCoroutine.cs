@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Linq;
 
-using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
@@ -64,7 +63,7 @@ namespace com.spacepuppy
     public sealed class RadicalCoroutine : IRadicalEnumerator, IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator, System.IDisposable
     {
 
-        #region Events
+#region Events
 
         /// <summary>
         /// The coroutine completed successfully.
@@ -90,6 +89,11 @@ namespace com.spacepuppy
                 if (_owner != null) _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
             }
             catch (System.Exception ex) { Debug.LogException(ex); }
+
+            if(_manager != null)
+            {
+                _manager.UnregisterCoroutine(this);
+            }
 
             var ev = System.EventArgs.Empty;
             try
@@ -120,11 +124,12 @@ namespace com.spacepuppy
 
             _owner = null;
             _token = null;
+            _manager = null;
         }
 
-        #endregion
+#endregion
 
-        #region Fields
+#region Fields
 
         private MonoBehaviour _owner;
         private Coroutine _token;
@@ -135,10 +140,11 @@ namespace com.spacepuppy
 
         private RadicalCoroutineOperatingState _state;
         private bool _forcedTick = false;
+        private RadicalCoroutineManager _manager;
 
-        #endregion
+#endregion
         
-        #region CONSTRUCTOR
+#region CONSTRUCTOR
 
         public RadicalCoroutine(System.Collections.IEnumerable routine)
         {
@@ -159,9 +165,9 @@ namespace com.spacepuppy
             //was created for recycling
         }
 
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
         public RadicalCoroutineDisableMode DisableMode { get { return _disableMode; } }
 
@@ -188,9 +194,9 @@ namespace com.spacepuppy
             get { return _stack; }
         }
 
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
 
         /// <summary>
         /// Starts the coroutine, one should always call this method or the StartRadicalCoroutine extension method. Never pass 
@@ -219,8 +225,14 @@ namespace com.spacepuppy
             if (behaviour is SPComponent && _disableMode > RadicalCoroutineDisableMode.Default && _disableMode != RadicalCoroutineDisableMode.ResumeOnEnable)
             {
                 //no point in managing the routine if it acts in default mode... a flag of 'ResumeOnEnable' is a redundant mode to default
+#if SP_LIB
                 var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
+#else
+                var manager = behaviour.GetComponent<RadicalCoroutineManager>();
+                if (manager == null) manager = behaviour.gameObject.AddComponent<RadicalCoroutineManager>();
+#endif
                 manager.RegisterCoroutine(behaviour as SPComponent, this);
+                _manager = manager;
             }
 
             if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
@@ -233,21 +245,27 @@ namespace com.spacepuppy
 
             _state = RadicalCoroutineOperatingState.Active;
             _owner = behaviour;
-            _stack.Push(com.spacepuppy.Async.RadicalTask.Create(this)); //we start the task as an async operation
             _token = behaviour.StartCoroutine(this);
 
             _disableMode = disableMode;
             if (behaviour is SPComponent && _disableMode > RadicalCoroutineDisableMode.Default && _disableMode != RadicalCoroutineDisableMode.ResumeOnEnable)
             {
                 //no point in managing the routine if it acts in default mode... a flag of 'ResumeOnEnable' is a redundant mode to default
+#if SP_LIB
                 var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
+#else
+                var manager = behaviour.GetComponent<RadicalCoroutineManager>();
+                if (manager == null) manager = behaviour.gameObject.AddComponent<RadicalCoroutineManager>();
+#endif
                 manager.RegisterCoroutine(behaviour as SPComponent, this);
+                _manager = manager;
             }
 
-            //if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
+            if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
+            _stack.Push(com.spacepuppy.Async.RadicalTask.Create(this)); //we start the task as an async operation
         }
 
-        internal void Resume(SPComponent behaviour)
+        internal void Resume(MonoBehaviour behaviour)
         {
             if (_state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
@@ -255,6 +273,19 @@ namespace com.spacepuppy
             _state = RadicalCoroutineOperatingState.Active;
             _owner = behaviour;
             _token = behaviour.StartCoroutine(this);
+
+            if (behaviour is SPComponent && _disableMode > RadicalCoroutineDisableMode.Default && _disableMode != RadicalCoroutineDisableMode.ResumeOnEnable)
+            {
+                //no point in managing the routine if it acts in default mode... a flag of 'ResumeOnEnable' is a redundant mode to default
+#if SP_LIB
+                var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
+#else
+                var manager = behaviour.GetComponent<RadicalCoroutineManager>();
+                if (manager == null) manager = behaviour.gameObject.AddComponent<RadicalCoroutineManager>();
+#endif
+                manager.RegisterCoroutine(behaviour as SPComponent, this);
+                _manager = manager;
+            }
 
             if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
         }
@@ -265,6 +296,15 @@ namespace com.spacepuppy
         /// <param name="behaviour">A reference to the MonoBehaviour that is handling the coroutine.</param>
         public void Stop()
         {
+            this.Stop(false);
+        }
+
+        /// <summary>
+        /// Should only be ever called from RadicalCoroutineManager.
+        /// </summary>
+        /// <param name="stalledByManager"></param>
+        internal void Stop(bool stalledByManager)
+        {
             if (_state == RadicalCoroutineOperatingState.Inactive) return;
 
             if (_state == RadicalCoroutineOperatingState.Cancelling || _state == RadicalCoroutineOperatingState.Completing)
@@ -273,6 +313,15 @@ namespace com.spacepuppy
             }
             else if (_state == RadicalCoroutineOperatingState.Active)
             {
+                if (!stalledByManager && _disableMode != RadicalCoroutineDisableMode.Default)
+                {
+                    var manager = _owner.GetComponent<RadicalCoroutineManager>();
+                    if (manager != null)
+                    {
+                        manager.UnregisterCoroutine(this);
+                    }
+                }
+
                 _state = RadicalCoroutineOperatingState.Inactive;
                 try
                 {
@@ -293,9 +342,22 @@ namespace com.spacepuppy
         {
             _state = RadicalCoroutineOperatingState.Cancelling;
         }
-        
+
+        /// <summary>
+        /// Should only be ever called from RadicalCoroutineManager.
+        /// </summary>
+        /// <param name="cancelledByManager"></param>
+        internal void Cancel(bool cancelledByManager)
+        {
+            _state = RadicalCoroutineOperatingState.Cancelling;
+            if(cancelledByManager)
+            {
+                _manager = null;
+            }
+        }
+
         #endregion
-        
+
         #region Scheduling
 
         public RadicalCoroutine Schedule(MonoBehaviour behaviour, System.Collections.IEnumerator routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
@@ -323,13 +385,13 @@ namespace com.spacepuppy
             };
             return co;
         }
-
-        public RadicalCoroutine Schedule(MonoBehaviour behaviour, CoroutineMethod routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        
+        public RadicalCoroutine Schedule(MonoBehaviour behaviour, System.Func<IEnumerator> routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (routine == null) throw new System.ArgumentNullException("routine");
 
-            var co = new RadicalCoroutine(routine().GetEnumerator());
+            var co = new RadicalCoroutine(routine());
             this.OnComplete += (s, e) =>
             {
                 if (co._state == RadicalCoroutineOperatingState.Inactive) co.Start(behaviour, disableMode);
@@ -348,9 +410,9 @@ namespace com.spacepuppy
             };
         }
 
-        #endregion
+#endregion
 
-        #region Manual Coroutine Methods
+#region Manual Coroutine Methods
 
         /// <summary>
         /// Manually step the coroutine. This is usually done from within a Update event.
@@ -391,9 +453,9 @@ namespace com.spacepuppy
             }
         }
 
-        #endregion
+#endregion
         
-        #region IYieldInstruction/IEnumerator Interface
+#region IYieldInstruction/IEnumerator Interface
 
         bool IRadicalYieldInstruction.IsComplete { get { return this.Finished; } }
 
@@ -604,8 +666,6 @@ namespace com.spacepuppy
                 }
                 else if (current is RadicalCoroutineEndCommand)
                 {
-                    var cmd = (RadicalCoroutineEndCommand)current;
-
                     switch((RadicalCoroutineEndCommand)current)
                     {
                         case RadicalCoroutineEndCommand.Stop:
@@ -652,9 +712,9 @@ namespace com.spacepuppy
             throw new System.NotSupportedException();
         }
 
-        #endregion
+#endregion
 
-        #region IImmediatelyResumingYieldInstruction Interface
+#region IImmediatelyResumingYieldInstruction Interface
 
         event System.EventHandler IImmediatelyResumingYieldInstruction.Signal
         {
@@ -662,9 +722,9 @@ namespace com.spacepuppy
             remove { _immediatelyResumingSignal -= value; }
         }
 
-        #endregion
+#endregion
 
-        #region IImmediatelyResumingYieldInstruction Handler
+#region IImmediatelyResumingYieldInstruction Handler
 
         private void OnImmediatelyResumingYieldInstructionSignaled(object sender, System.EventArgs e)
         {
@@ -681,18 +741,18 @@ namespace com.spacepuppy
             }
         }
 
-        #endregion
+#endregion
 
-        #region IRadicalWaitHandle Interface
+#region IRadicalWaitHandle Interface
 
         void IRadicalWaitHandle.OnComplete(System.Action<IRadicalWaitHandle> callback)
         {
             this.OnFinished += (s,e) => { callback(this); };
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable Interface
+#region IDisposable Interface
 
         public void Dispose()
         {
@@ -709,10 +769,10 @@ namespace com.spacepuppy
             //_pool.Release(this);
         }
 
-        #endregion
+#endregion
 
 
-        #region Static Utils
+#region Static Utils
 
         /// <summary>
         /// A radical coroutine that when running will repeadtly call an action and yield null. Simulating the Update function.
@@ -838,9 +898,9 @@ namespace com.spacepuppy
             }
         }
         
-        #endregion
+#endregion
 
-        #region Static Pool
+#region Static Pool
 
         private static com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine>(1000, 
                                                                                                                                                             () =>
@@ -867,43 +927,43 @@ namespace com.spacepuppy
             return routine;
         }
 
-        #endregion
+#endregion
 
 
 
-        #region Special Types
+#region Special Types
 
         private class ManualWaitForGeneric : IPooledYieldInstruction, System.Collections.IEnumerator
         {
 
-            #region Fields
+#region Fields
 
             private RadicalCoroutine _owner;
             private MonoBehaviour _handle;
             private object _yieldObject;
             private object _enumCurrentValue;
 
-            #endregion
+#endregion
 
-            #region CONSTRUCTOR
+#region CONSTRUCTOR
 
             public ManualWaitForGeneric()
             {
 
             }
 
-            #endregion
+#endregion
 
-            #region Methods
+#region Methods
 
             public void Start()
             {
                 _handle.StartCoroutine(this);
             }
 
-            #endregion
+#endregion
 
-            #region IResettingYieldInstruction Interface
+#region IResettingYieldInstruction Interface
 
             public bool IsComplete
             {
@@ -931,9 +991,9 @@ namespace com.spacepuppy
                 }
             }
 
-            #endregion
+#endregion
 
-            #region IEnumerator Interface
+#region IEnumerator Interface
 
             public object Current
             {
@@ -950,9 +1010,9 @@ namespace com.spacepuppy
                 _enumCurrentValue = null;
             }
 
-            #endregion
+#endregion
 
-            #region IDisposable Interface
+#region IDisposable Interface
 
             private static com.spacepuppy.Collections.ObjectCachePool<ManualWaitForGeneric> _pool = new com.spacepuppy.Collections.ObjectCachePool<ManualWaitForGeneric>(-1, () => new ManualWaitForGeneric());
             public static ManualWaitForGeneric Create(RadicalCoroutine owner, MonoBehaviour handle, object yieldObj)
@@ -972,7 +1032,7 @@ namespace com.spacepuppy
                 _enumCurrentValue = null;
             }
 
-            #endregion
+#endregion
 
         }
 
@@ -1037,24 +1097,24 @@ namespace com.spacepuppy
         internal class RadicalOperationStack
         {
 
-            #region Fields
+#region Fields
 
             private RadicalCoroutine _owner;
             private IRadicalYieldInstruction _currentOperation;
             private System.Collections.Generic.Stack<IRadicalYieldInstruction> _stack;
 
-            #endregion
+#endregion
 
-            #region CONSTRUCTOR
+#region CONSTRUCTOR
 
             internal RadicalOperationStack(RadicalCoroutine owner)
             {
                 _owner = owner;
             }
 
-            #endregion
+#endregion
 
-            #region Properties
+#region Properties
 
             public IRadicalYieldInstruction CurrentOperation
             {
@@ -1070,9 +1130,9 @@ namespace com.spacepuppy
                 }
             }
 
-            #endregion
+#endregion
 
-            #region Methods
+#region Methods
 
             public void Push(IRadicalYieldInstruction op)
             {
@@ -1179,13 +1239,13 @@ namespace com.spacepuppy
                     return _stack.Last();
             }
 
-            #endregion
+#endregion
 
         }
 
-        #endregion
+#endregion
 
-        #region Editor Special Types
+#region Editor Special Types
 
         public static class EditorHelper
         {
@@ -1208,7 +1268,9 @@ namespace com.spacepuppy
             {
                 if (routine._currentIEnumeratorYieldValue is WaitForSeconds)
                 {
-                    float dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(routine._currentIEnumeratorYieldValue, "m_Seconds"));
+                    //float dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(routine._currentIEnumeratorYieldValue, "m_Seconds"));
+                    var field = typeof(WaitForSeconds).GetField("m_Seconds");
+                    float dur = (float)field.GetValue(routine._currentIEnumeratorYieldValue);
                     return string.Format("WaitForSeconds[{0:0.00}]", dur);
                 }
                 else if (routine._currentIEnumeratorYieldValue is YieldInstruction)
@@ -1257,9 +1319,7 @@ namespace com.spacepuppy
 
         }
 
-        #endregion
-
-
+#endregion
         
     }
 

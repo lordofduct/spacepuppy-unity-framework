@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 namespace com.spacepuppy.Async
 {
@@ -73,6 +72,8 @@ namespace com.spacepuppy.Async
 
         private void AsyncWorkerCallback(object state)
         {
+            _state = OperationState.RunningAsync;
+
             if (_state == OperationState.Inactive || 
                 _routine == null || 
                 _routine.OperatingState != RadicalCoroutineOperatingState.Active || 
@@ -81,9 +82,7 @@ namespace com.spacepuppy.Async
                 this.Clear();
                 return;
             }
-
-            _state = OperationState.RunningAsync;
-
+            
         WorkerLoopback:
             var op = _routine.OperationStack.PeekSubOperation();
             if (op == null)
@@ -91,7 +90,7 @@ namespace com.spacepuppy.Async
                 this.Clear();
                 return;
             }
-
+            
             object yieldObject;
             if(op.Tick(out yieldObject))
             {
@@ -134,7 +133,7 @@ namespace com.spacepuppy.Async
             switch(_state)
             {
                 case OperationState.Inactive:
-                    if (_routine != null && ThreadPool.QueueUserWorkItem(this.AsyncWorkerCallback))
+                    if (_routine != null && SPThreadPool.QueueUserWorkItem(this.AsyncWorkerCallback))
                     {
                         _state = OperationState.Initializing;
                         yieldObject = null;

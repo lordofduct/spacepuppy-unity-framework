@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SP_LIB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -29,7 +29,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;SP_LIB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -121,7 +121,7 @@
     <Compile Include="Geom\IntervalInspector.cs" />
     <Compile Include="Base\Inspectors\MultiTagInspector.cs" />
     <Compile Include="Base\Inspectors\SingletonInspector.cs" />
-    <Compile Include="Base\Inspectors\TagDataInspector.cs" />
+    <Compile Include="Project\TagDataInspector.cs" />
     <Compile Include="Base\Inspectors\TagMaskInspector.cs" />
     <Compile Include="Base\Inspectors\TagSelectorPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\TypeReferencePropertyDrawer.cs" />

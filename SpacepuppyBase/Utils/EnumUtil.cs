@@ -11,7 +11,7 @@ namespace com.spacepuppy.Utils
             {
                 return System.Enum.IsDefined(enumType, value);
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return false;
             }
@@ -20,18 +20,6 @@ namespace com.spacepuppy.Utils
         public static bool EnumValueIsDefined<T>(object value)
         {
             return EnumValueIsDefined(value, typeof(T));
-        }
-
-        public static IEnumerable<System.Enum> GetUniqueEnumFlags(System.Type enumType)
-        {
-            if (enumType == null) throw new System.ArgumentNullException("enumType");
-            if (!enumType.IsEnum) throw new System.ArgumentException("Type must be an enum.", "enumType");
-
-            foreach (var e in System.Enum.GetValues(enumType))
-            {
-                var d = System.Convert.ToDecimal(e);
-                if (d > 0 && MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(d))) yield return e as System.Enum;
-            }
         }
 
         public static bool HasFlag(this System.Enum e, System.Enum value)
@@ -48,6 +36,22 @@ namespace com.spacepuppy.Utils
         {
             return (System.Convert.ToInt64(e) & value) != 0;
         }
+
+#if SP_LIB
+
+        public static IEnumerable<System.Enum> GetUniqueEnumFlags(System.Type enumType)
+        {
+            if (enumType == null) throw new System.ArgumentNullException("enumType");
+            if (!enumType.IsEnum) throw new System.ArgumentException("Type must be an enum.", "enumType");
+
+            foreach (var e in System.Enum.GetValues(enumType))
+            {
+                var d = System.Convert.ToDecimal(e);
+                if (d > 0 && MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(d))) yield return e as System.Enum;
+            }
+        }
+
+#endif
 
     }
 }

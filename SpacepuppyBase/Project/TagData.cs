@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace com.spacepuppy
+namespace com.spacepuppy.Project
 {
     public sealed class TagData : ScriptableObject, ISerializationCallbackReceiver, IEnumerable<string>
     {

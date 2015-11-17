@@ -1,13 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using com.spacepuppy;
-using com.spacepuppy.Collections;
-using com.spacepuppy.Project;
-using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Base.Inspectors
 {

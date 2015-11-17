@@ -9,7 +9,7 @@ namespace com.spacepuppy.Utils
 {
     public static class GameObjectUtil
     {
-
+        
         public static GameObject CreateRoot(string name)
         {
             var go = new GameObject(name);
@@ -27,8 +27,8 @@ namespace com.spacepuppy.Utils
             }
             return go;
         }
-
-        #region Get*FromSource
+        
+#region Get*FromSource
 
         public static bool IsGameObjectSource(object obj)
         {
@@ -110,13 +110,13 @@ namespace com.spacepuppy.Utils
 
             return null;
         }
+
+#endregion
+
+
+
+#region Kill Extension Methods
         
-        #endregion
-
-
-
-        #region Kill Extension Methods
-
         /// <summary>
         /// Tests if the object is either destroyed or killed.
         /// </summary>
@@ -218,10 +218,10 @@ namespace com.spacepuppy.Utils
                 }
             }
         }
+        
+#endregion
 
-        #endregion
-
-        #region Layer Methods
+#region Layer Methods
 
         public static IEnumerable<GameObject> FindGameObjectOnLayer(int mask)
         {
@@ -267,9 +267,9 @@ namespace com.spacepuppy.Utils
             return ((1 << obj.layer) & layerMask) != 0;
         }
 
-        #endregion
+#endregion
         
-        #region Search/Find
+#region Search/Find
 
         public static bool CompareName(this GameObject go, string name)
         {
@@ -556,9 +556,9 @@ namespace com.spacepuppy.Utils
             return StringUtil.Release(builder);
         }
 
-        #endregion
+#endregion
 
-        #region Tags
+#region Tags
 
         /**
          * Find
@@ -702,9 +702,9 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        #endregion
+#endregion
 
-        #region Find Root
+#region Find Root
 
         /**
          * HasTrueRoot
@@ -845,9 +845,9 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        #endregion
+#endregion
 
-        #region RigidBody Parenting
+#region RigidBody Parenting
 
         public static Rigidbody FindRigidbody(this GameObject go, bool stopAtRoot = false)
         {
@@ -871,9 +871,9 @@ namespace com.spacepuppy.Utils
             return FindRigidbody(comp.gameObject, stopAtRoot);
         }
 
-        #endregion
+#endregion
 
-        #region Parenting
+#region Parenting
 
         public static IEnumerable<Transform> GetAllChildren(this GameObject go)
         {
@@ -1106,9 +1106,9 @@ namespace com.spacepuppy.Utils
             if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED, SendMessageOptions.DontRequireReceiver);
         }
 
-        #endregion
+#endregion
 
-        #region Transform
+#region Transform
 
         public static void ZeroOut(this GameObject go, bool bIgnoreScale, bool bGlobal = false)
         {
@@ -1180,7 +1180,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        #endregion
+#endregion
 
 
 

@@ -13,9 +13,8 @@ namespace com.spacepuppy
     {
 
         #region Fields
-
-        [System.NonSerialized()]
-        private ListDictionary<SPComponent, RadicalCoroutine> _routines = new ListDictionary<SPComponent, RadicalCoroutine>();
+        
+        private HashSet<ManagedCoroutineInfo> _routines = new HashSet<ManagedCoroutineInfo>(ManagedCoroutineInfoEqualityComparer.Default);
 
         #endregion
 
@@ -23,448 +22,213 @@ namespace com.spacepuppy
 
         public IEnumerable<ManagedCoroutineInfo> GetCoroutineInfo()
         {
-            foreach(var pair in _routines)
+            return _routines;
+        }
+
+        public IEnumerable<ManagedCoroutineInfo> GetCoroutineInfo(MonoBehaviour behaviour)
+        {
+            return (from i in _routines where i.Component == behaviour select i);
+        }
+
+        internal void PurgeCoroutines(SPComponent component)
+        {
+            using (var lst = TempCollection.GetList<ManagedCoroutineInfo>())
             {
-                if(pair.Value.Count > 0)
+                var e = _routines.GetEnumerator();
+                while (e.MoveNext())
                 {
-                    for(int i = 0; i < pair.Value.Count; i++)
+                    if (e.Current.Component == component) lst.Add(e.Current);
+                }
+
+                if(lst.Count > 0)
+                {
+                    for(int i = 0; i < lst.Count; i++)
                     {
-                        yield return new ManagedCoroutineInfo(pair.Key, pair.Value[i]);
+                        lst[i].Routine.Cancel(true);
+                        _routines.Remove(lst[i]);
                     }
                 }
-            }
-        }
-
-        public IEnumerable<ManagedCoroutineInfo> GetCoroutineInfo(SPComponent behaviour)
-        {
-            IList<RadicalCoroutine> lst;
-            if(_routines.Lists.TryGetList(behaviour, out lst))
-            {
-                var arr = lst.ToArray();
-                foreach(var r in arr)
-                {
-                    yield return new ManagedCoroutineInfo(behaviour, r);
-                }
-            }
-        }
-
-        internal void PurgeCoroutines(SPComponent behaviour)
-        {
-            IList<RadicalCoroutine> lst;
-            if (_routines.Lists.TryGetList(behaviour, out lst))
-            {
-                var arr = lst.ToArray();
-                foreach (var r in arr)
-                {
-                    r.Cancel();
-                }
-                _routines.Remove(behaviour);
-            }
-        }
-
-        internal void RegisterCoroutine(SPComponent component, RadicalCoroutine routine)
-        {
-            if (_routines.Contains(routine)) return;
-
-            if(!_routines.ContainsKey(component))
-            {
                 component.OnEnabled -= this.OnComponentEnabled;
                 component.OnDisabled -= this.OnComponentDisabled;
                 component.ComponentDestroyed -= this.OnComponentDestroyed;
+            }
+        }
+
+        /// <summary>
+        /// Must be only called by RadicalCoroutine itself.
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="routine"></param>
+        internal void RegisterCoroutine(SPComponent component, RadicalCoroutine routine)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+
+            var info = new ManagedCoroutineInfo(component, routine);
+            if (_routines.Contains(info)) return;
+
+            if(!this.GetComponentIsCurrentlyManaged(component))
+            {
+                //component.OnEnabled -= this.OnComponentEnabled;
+                //component.OnDisabled -= this.OnComponentDisabled;
+                //component.ComponentDestroyed -= this.OnComponentDestroyed;
                 component.OnEnabled += this.OnComponentEnabled;
                 component.OnDisabled += this.OnComponentDisabled;
                 component.ComponentDestroyed += this.OnComponentDestroyed;
             }
 
-            routine.OnFinished -= this.OnRoutineFinished;
-            routine.OnFinished += this.OnRoutineFinished;
-            _routines.Add(component, routine);
+            _routines.Add(info);
         }
 
-        private void OnRoutineFinished(object sender, System.EventArgs e)
+        /// <summary>
+        /// Must be only called by RadicalCoroutine itself.
+        /// </summary>
+        /// <param name="routine"></param>
+        internal void UnregisterCoroutine(RadicalCoroutine routine)
         {
-            var routine = sender as RadicalCoroutine;
-            if (routine == null) return;
-
-            routine.OnComplete -= this.OnRoutineFinished;
-            var owner = routine.Operator as SPComponent;
-            if (!object.ReferenceEquals(owner, null) && _routines.ContainsKey(owner)) _routines.Lists[owner].Remove(routine);
+            var info = new ManagedCoroutineInfo(routine.Operator, routine);
+            _routines.Remove(info);
         }
-
+        
         private void OnComponentEnabled(object sender, System.EventArgs e)
         {
-            var component = sender as SPComponent;
-            if (!_routines.ContainsKey(component)) return;
-
-            var lst = _routines.Lists[component];
-            this.DealWithEnable(component, lst);
+            var component = sender as MonoBehaviour;
+            if (object.ReferenceEquals(component, null)) return;
+            this.DealWithEnable(component);
         }
 
         private void OnComponentDisabled(object sender, System.EventArgs e)
         {
-            var component = sender as SPComponent;
-            if (!_routines.ContainsKey(component)) return;
-
-            var lst = _routines.Lists[component];
-            this.DealWithDisable(component, lst);
+            var component = sender as MonoBehaviour;
+            if (object.ReferenceEquals(component, null)) return;
+            this.DealWithDisable(component);
         }
 
         private void OnComponentDestroyed(object sender, System.EventArgs e)
         {
-            var component = sender as SPComponent;
-            if (!_routines.ContainsKey(component)) return;
-
-            var lst = _routines.Lists[component];
+            var component = sender as MonoBehaviour;
+            if (object.ReferenceEquals(component, null)) return;
+            this.DealWithDestroy(component);
         }
 
 
-        private void DealWithEnable(SPComponent component, IList<RadicalCoroutine> lst)
+        private void DealWithEnable(MonoBehaviour component)
         {
-            if (lst.Count > 0)
+            using (var lst = TempCollection.GetList<ManagedCoroutineInfo>())
             {
-                RadicalCoroutine routine;
-                for (int i = 0; i < lst.Count; i++)
+                var e = _routines.GetEnumerator();
+                while (e.MoveNext())
                 {
-                    routine = lst[i];
-                    switch (routine.OperatingState)
+                    if (e.Current.Component == component)
                     {
-                        case RadicalCoroutineOperatingState.Active:
-                            //if the routine is currently active, that means the routine was already running. This could be because it 
-                            //was started in Awake, in an override of OnEnable, or the routine is in a mode that does not pause it OnDisable.
-                            continue;
-                        case RadicalCoroutineOperatingState.Inactive:
-                            if (routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
-                            {
-                                routine.Resume(component);
-                            }
-                            else
-                            {
-                                routine.OnFinished -= this.OnRoutineFinished;
-                                lst.RemoveAt(i);
-                                i--;
+                        switch (e.Current.Routine.OperatingState)
+                        {
+                            case RadicalCoroutineOperatingState.Active:
+                                //if the routine is currently active, that means the routine was already running. This could be because it 
+                                //was started in Awake, in an override of OnEnable, or the routine is in a mode that does not pause it OnDisable.
+                                continue;
+                            case RadicalCoroutineOperatingState.Inactive:
+                                if (e.Current.Routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
+                                {
+                                    e.Current.Routine.Resume(component);
+                                }
+                                else
+                                {
+                                    lst.Add(e.Current);
+                                    Debug.LogWarning("A leaked RadicalCoroutine was found and cleaned up.", component);
+                                }
+                                break;
+                            default:
+                                //somehow a finished routine made its way into the collection... remove it
+                                lst.Add(e.Current);
                                 Debug.LogWarning("A leaked RadicalCoroutine was found and cleaned up.", component);
-                            }
-                            break;
-                        default:
-                            //somehow a finished routine made its way into the collection... remove it
-                            routine.OnFinished -= this.OnRoutineFinished;
-                            lst.RemoveAt(i);
-                            i--;
-                            Debug.LogWarning("A leaked RadicalCoroutine was found and cleaned up.", component);
-                            break;
+                                break;
+                        }
+                    }
+                }
+
+                if(lst.Count > 0)
+                {
+                    for(int i = 0; i < lst.Count; i++)
+                    {
+                        _routines.Remove(lst[i]);
                     }
                 }
             }
         }
 
-        private void DealWithDisable(SPComponent component, IList<RadicalCoroutine> lst)
+        private void DealWithDisable(MonoBehaviour component)
         {
-            if (lst.Count > 0)
+            using (var lst = TempCollection.GetList<ManagedCoroutineInfo>())
             {
-                var arr = lst.ToArray();
+                var e = _routines.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current.Component == component) lst.Add(e.Current);
+                }
+
                 var stoppableMode = (this.gameObject.activeInHierarchy) ? RadicalCoroutineDisableMode.StopOnDisable : RadicalCoroutineDisableMode.StopOnDeactivate;
                 RadicalCoroutine routine;
-                for (int i = 0; i < arr.Length; i++)
+                
+                for(int i = 0; i < lst.Count; i++)
                 {
-                    routine = arr[i];
+                    routine = lst[i].Routine;
                     if (routine.DisableMode == RadicalCoroutineDisableMode.CancelOnDeactivate || routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.CancelOnDisable))
                     {
-                        routine.Cancel();
-                        routine.OnFinished -= this.OnRoutineFinished;
-                        lst.Remove(routine);
+                        routine.Cancel(true);
+                        _routines.Remove(lst[i]);
+                        lst.RemoveAt(i);
+                        i--;
                     }
                     else
                     {
                         if (routine.DisableMode.HasFlag(stoppableMode))
                         {
-                            routine.Stop();
+                            routine.Stop(true);
                             if (routine.Finished)
                             {
-                                routine.OnFinished -= this.OnRoutineFinished;
-                                lst.Remove(routine);
-                            }
-                        }
-                        if (!routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
-                        {
-                            routine.OnFinished -= this.OnRoutineFinished;
-                            lst.Remove(routine);
-                        }
-                    }
-                }
-            }
-
-            if(lst.Count == 0)
-            {
-                _routines.Remove(component);
-                component.OnEnabled -= this.OnComponentEnabled;
-                component.OnDisabled -= this.OnComponentDisabled;
-                component.ComponentDestroyed -= this.OnComponentDestroyed;
-            }
-        }
-
-        private void DealWithDestroy(SPComponent component, IList<RadicalCoroutine> lst)
-        {
-            if (lst.Count > 0)
-            {
-                foreach (var routine in lst)
-                {
-                    routine.Cancel();
-                    routine.OnFinished -= this.OnRoutineFinished;
-                }
-            }
-            lst.Clear();
-            _routines.Remove(component);
-            component.OnEnabled -= this.OnComponentEnabled;
-            component.OnDisabled -= this.OnComponentDisabled;
-            component.ComponentDestroyed -= this.OnComponentDestroyed;
-        }
-
-        #endregion
-
-
-        #region Special Types
-
-        public struct ManagedCoroutineInfo
-        {
-            public MonoBehaviour Component;
-            public RadicalCoroutine Routine;
-
-            public ManagedCoroutineInfo(MonoBehaviour c, RadicalCoroutine r)
-            {
-                this.Component = c;
-                this.Routine = r;
-            }
-        }
-
-        #endregion
-
-    }
-
-
-
-    /*
-     * OLD support MonoBehaviour version. Problem is it can't track if the MonoBehaviour is destroyed, or had StopCoroutine or StopAllCoroutines called on them. So references could remain in memory.
-     * So I've removed support for this feature until unity gives me better hooks into Coroutines.
-
-    [DisallowMultipleComponent()]
-    public sealed class RadicalCoroutineManager : MonoBehaviour
-    {
-
-        #region Fields
-
-        [System.NonSerialized()]
-        private ListDictionary<MonoBehaviour, RadicalCoroutine> _routines = new ListDictionary<MonoBehaviour, RadicalCoroutine>();
-
-        #endregion
-
-        #region Messages
-
-        private void OnEnable()
-        {
-            if (this.gameObject.activeInHierarchy) return;
-
-            foreach (var pair in _routines)
-            {
-                if (!(pair.Key is SPComponent))
-                {
-                    this.DealWithEnable(pair.Key, pair.Value);
-                }
-            }
-        }
-
-        private void OnDisable()
-        {
-            foreach (var pair in _routines)
-            {
-                if (!(pair.Key is SPComponent))
-                {
-                    this.DealWithDisable(pair.Key, pair.Value);
-                }
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        public IEnumerable<ManagedCoroutineInfo> GetCoroutineInfo()
-        {
-            foreach (var pair in _routines)
-            {
-                if (pair.Value.Count > 0)
-                {
-                    for (int i = 0; i < pair.Value.Count; i++)
-                    {
-                        yield return new ManagedCoroutineInfo(pair.Key, pair.Value[i]);
-                    }
-                }
-            }
-        }
-
-        public IEnumerable<ManagedCoroutineInfo> GetCoroutineInfo(MonoBehaviour behaviour)
-        {
-            IList<RadicalCoroutine> lst;
-            if (_routines.Lists.TryGetList(behaviour, out lst))
-            {
-                var arr = lst.ToArray();
-                foreach (var r in arr)
-                {
-                    yield return new ManagedCoroutineInfo(behaviour, r);
-                }
-            }
-        }
-
-        internal void PurgeCoroutines(MonoBehaviour behaviour)
-        {
-            IList<RadicalCoroutine> lst;
-            if (_routines.Lists.TryGetList(behaviour, out lst))
-            {
-                var arr = lst.ToArray();
-                foreach (var r in arr)
-                {
-                    r.Cancel();
-                }
-                _routines.Remove(behaviour);
-            }
-        }
-
-        internal void RegisterCoroutine(MonoBehaviour component, RadicalCoroutine routine)
-        {
-            if (_routines.Contains(routine)) return;
-
-            if (!(component is SPComponent) && routine.DisableMode > RadicalCoroutineDisableMode.Default && routine.DisableMode != RadicalCoroutineDisableMode.ResumeOnEnable) Debug.LogWarning("A RadicalCoroutine started by a component that doesn't inherit from SPComponent can not be treated with a DisableMode other than Default.", component);
-
-            if (component is SPComponent && !_routines.ContainsKey(component))
-            {
-                var c = component as SPComponent;
-                c.OnEnabled -= this.OnComponentEnabled;
-                c.OnDisabled -= this.OnComponentDisabled;
-                c.ComponentDestroyed -= this.OnComponentDestroyed;
-                c.OnEnabled += this.OnComponentEnabled;
-                c.OnDisabled += this.OnComponentDisabled;
-                c.ComponentDestroyed += this.OnComponentDestroyed;
-            }
-
-            routine.OnFinished -= this.OnRoutineFinished;
-            routine.OnFinished += this.OnRoutineFinished;
-            _routines.Add(component, routine);
-        }
-
-        private void OnRoutineFinished(object sender, System.EventArgs e)
-        {
-            var routine = sender as RadicalCoroutine;
-            if (routine == null) return;
-
-            routine.OnComplete -= this.OnRoutineFinished;
-            var owner = routine.Operator as MonoBehaviour;
-            if (!object.ReferenceEquals(owner, null) && _routines.ContainsKey(owner)) _routines.Lists[owner].Remove(routine);
-        }
-
-        private void OnComponentEnabled(object sender, System.EventArgs e)
-        {
-            var component = sender as SPComponent;
-            if (!_routines.ContainsKey(component)) return;
-
-            var lst = _routines.Lists[component];
-            this.DealWithEnable(component, lst);
-        }
-
-        private void OnComponentDisabled(object sender, System.EventArgs e)
-        {
-            var component = sender as SPComponent;
-            if (!_routines.ContainsKey(component)) return;
-
-            var lst = _routines.Lists[component];
-            this.DealWithDisable(component, lst);
-        }
-
-        private void OnComponentDestroyed(object sender, System.EventArgs e)
-        {
-            var component = sender as SPComponent;
-            if (!_routines.ContainsKey(component)) return;
-
-            var lst = _routines.Lists[component];
-        }
-
-
-        private void DealWithEnable(MonoBehaviour component, IList<RadicalCoroutine> lst)
-        {
-            if (lst.Count > 0)
-            {
-                RadicalCoroutine routine;
-                for (int i = 0; i < lst.Count; i++)
-                {
-                    routine = lst[i];
-                    switch (routine.OperatingState)
-                    {
-                        case RadicalCoroutineOperatingState.Active:
-                            //if the routine is currently active, that means the routine was already running. This could be because it 
-                            //was started in Awake, in an override of OnEnable, or the routine is in a mode that does not pause it OnDisable.
-                            continue;
-                        case RadicalCoroutineOperatingState.Inactive:
-                            if (routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable) && component is SPComponent)
-                            {
-                                routine.Resume(component as SPComponent);
-                            }
-                            else
-                            {
-                                routine.OnFinished -= this.OnRoutineFinished;
+                                _routines.Remove(lst[i]);
                                 lst.RemoveAt(i);
                                 i--;
-                                Debug.LogWarning("A leaked RadicalCoroutine was found and cleaned up.", component);
-                            }
-                            break;
-                        default:
-                            //somehow a finished routine made its way into the collection... remove it
-                            routine.OnFinished -= this.OnRoutineFinished;
-                            lst.RemoveAt(i);
-                            i--;
-                            Debug.LogWarning("A leaked RadicalCoroutine was found and cleaned up.", component);
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void DealWithDisable(MonoBehaviour component, IList<RadicalCoroutine> lst)
-        {
-            if (lst.Count > 0)
-            {
-                var arr = lst.ToArray();
-                var stoppableMode = (this.gameObject.activeInHierarchy) ? RadicalCoroutineDisableMode.StopOnDisable : RadicalCoroutineDisableMode.StopOnDeactivate;
-                RadicalCoroutine routine;
-                for (int i = 0; i < arr.Length; i++)
-                {
-                    routine = arr[i];
-                    if (routine.DisableMode == RadicalCoroutineDisableMode.CancelOnDeactivate || routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.CancelOnDisable))
-                    {
-                        routine.Cancel();
-                        routine.OnFinished -= this.OnRoutineFinished;
-                        lst.Remove(routine);
-                    }
-                    else
-                    {
-                        if (routine.DisableMode.HasFlag(stoppableMode))
-                        {
-                            routine.Stop();
-                            if (routine.Finished)
-                            {
-                                routine.OnFinished -= this.OnRoutineFinished;
-                                lst.Remove(routine);
                             }
                         }
                         if (!routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.ResumeOnEnable))
                         {
-                            routine.OnFinished -= this.OnRoutineFinished;
-                            lst.Remove(routine);
+                            _routines.Remove(lst[i]);
+                            lst.RemoveAt(i);
+                            i--;
                         }
                     }
                 }
-            }
 
-            if (lst.Count == 0)
+                if (lst.Count == 0 && component is SPComponent)
+                {
+                    var c = component as SPComponent;
+                    c.OnEnabled -= this.OnComponentEnabled;
+                    c.OnDisabled -= this.OnComponentDisabled;
+                    c.ComponentDestroyed -= this.OnComponentDestroyed;
+                }
+            }
+        }
+
+        private void DealWithDestroy(MonoBehaviour component)
+        {
+            using (var lst = TempCollection.GetList<ManagedCoroutineInfo>())
             {
-                _routines.Remove(component);
+                var e = _routines.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current.Component == component) lst.Add(e.Current);
+                }
+
+
+                if(lst.Count > 0)
+                {
+                    for(int i = 0; i < lst.Count; i++)
+                    {
+                        lst[i].Routine.Cancel(true);
+                        _routines.Remove(lst[i]);
+                    }
+                }
                 if (component is SPComponent)
                 {
                     var c = component as SPComponent;
@@ -475,30 +239,21 @@ namespace com.spacepuppy
             }
         }
 
-        private void DealWithDestroy(MonoBehaviour component, IList<RadicalCoroutine> lst)
+
+
+
+        private bool GetComponentIsCurrentlyManaged(MonoBehaviour component)
         {
-            if (lst.Count > 0)
+            var e = _routines.GetEnumerator();
+            while(e.MoveNext())
             {
-                foreach (var routine in lst)
-                {
-                    routine.Cancel();
-                    routine.OnFinished -= this.OnRoutineFinished;
-                }
+                if (e.Current.Component == component) return true;
             }
-            lst.Clear();
-            _routines.Remove(component);
-            if (component is SPComponent)
-            {
-                var c = component as SPComponent;
-                c.OnEnabled -= this.OnComponentEnabled;
-                c.OnDisabled -= this.OnComponentDisabled;
-                c.ComponentDestroyed -= this.OnComponentDestroyed;
-            }
+            return false;
         }
 
         #endregion
-
-
+        
         #region Special Types
 
         public struct ManagedCoroutineInfo
@@ -511,10 +266,29 @@ namespace com.spacepuppy
                 this.Component = c;
                 this.Routine = r;
             }
+            
+        }
+
+        private class ManagedCoroutineInfoEqualityComparer : IEqualityComparer<ManagedCoroutineInfo>
+        {
+
+            private static ManagedCoroutineInfoEqualityComparer _default = new ManagedCoroutineInfoEqualityComparer();
+            public static ManagedCoroutineInfoEqualityComparer Default { get { return _default; } }
+
+            public bool Equals(ManagedCoroutineInfo x, ManagedCoroutineInfo y)
+            {
+                return x.Routine == y.Routine;
+            }
+
+            public int GetHashCode(ManagedCoroutineInfo obj)
+            {
+                if (obj.Routine == null) return 0;
+                return obj.Routine.GetHashCode();
+            }
         }
 
         #endregion
 
     }
-     */
+    
 }

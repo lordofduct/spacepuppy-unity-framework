@@ -438,8 +438,18 @@ namespace com.spacepuppy
             private void SyncTimeScale()
             {
                 float result = this.GetTimeScale();
+                
+                if (MathUtil.FuzzyEqual(result, UnityEngine.Time.timeScale))
+                {
+                    UnityEngine.Time.timeScale = result;
+                }
+                else
+                {
+                    UnityEngine.Time.timeScale = result;
+                    if (this.TimeScaleChanged != null) this.TimeScaleChanged(this, System.EventArgs.Empty);
+                }
 
-                if(MathUtil.FuzzyEqual(result, UnityEngine.Time.timeScale))
+                if(Mathf.Approximately(result, UnityEngine.Time.timeScale))
                 {
                     UnityEngine.Time.timeScale = result;
                 }
@@ -574,19 +584,19 @@ namespace com.spacepuppy
             }
         }
 
-        #endregion
+#endregion
 
-        #region Special Config Types
+#region Special Config Types
 
         [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
         public class Config : System.Attribute
         {
 
-            #region Fields
+#region Fields
 
             public string[] AvailableCustomTimeNames;
 
-            #endregion
+#endregion
 
             public Config(params string[] availableCustomTimeNames)
             {
@@ -595,7 +605,7 @@ namespace com.spacepuppy
 
         }
 
-        #endregion
+#endregion
 
     }
 

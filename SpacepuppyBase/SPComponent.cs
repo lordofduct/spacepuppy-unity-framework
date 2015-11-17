@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppy
 {
@@ -17,16 +16,14 @@ namespace com.spacepuppy
 
         #endregion
 
-        #region Fields
-
-        [System.NonSerialized()]
-        private GameObject _entityRoot;
+#region Fields
+        
         [System.NonSerialized()]
         private bool _started = false;
 
-        #endregion
+#endregion
 
-        #region CONSTRUCTOR
+#region CONSTRUCTOR
 
         protected virtual void Awake()
         {
@@ -63,14 +60,6 @@ namespace com.spacepuppy
             if (this.OnDisabled != null) this.OnDisabled(this, System.EventArgs.Empty);
         }
 
-        /// <summary>
-        /// Occurs if this gameobject or one of its parents is moved in the hierarchy using 'GameObjUtil.AddChild' or 'GameObjUtil.RemoveFromParent'
-        /// </summary>
-        protected virtual void OnTransformHierarchyChanged()
-        {
-            _entityRoot = null;
-        }
-
         protected virtual void OnDespawn()
         {
         }
@@ -84,18 +73,9 @@ namespace com.spacepuppy
             }
         }
 
-        #endregion
+#endregion
 
-        #region Properties
-
-        public GameObject entityRoot
-        {
-            get
-            {
-                if (object.ReferenceEquals(_entityRoot, null)) _entityRoot = this.FindRoot();
-                return _entityRoot;
-            }
-        }
+#region Properties
 
         /// <summary>
         /// Start has been called on this component.
@@ -107,7 +87,21 @@ namespace com.spacepuppy
 
         #endregion
 
-        #region Methods
+        #region Root Methods
+
+#if SP_LIB
+            
+        [System.NonSerialized()]
+        private GameObject _entityRoot;
+
+        public GameObject entityRoot
+        {
+            get
+            {
+                if (object.ReferenceEquals(_entityRoot, null)) _entityRoot = this.FindRoot();
+                return _entityRoot;
+            }
+        }
 
         /// <summary>
         /// Call this to resync the 'root' property incase the hierarchy of this object has changed. This needs to be performed since 
@@ -117,6 +111,16 @@ namespace com.spacepuppy
         {
             _entityRoot = this.FindRoot();
         }
+            
+        /// <summary>
+        /// Occurs if this gameobject or one of its parents is moved in the hierarchy using 'GameObjUtil.AddChild' or 'GameObjUtil.RemoveFromParent'
+        /// </summary>
+        protected virtual void OnTransformHierarchyChanged()
+        {
+            _entityRoot = null;
+        }
+
+#endif
 
         #endregion
 
@@ -140,11 +144,11 @@ namespace com.spacepuppy
             return co;
         }
 
-        public RadicalCoroutine StartRadicalCoroutine(CoroutineMethod routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        public RadicalCoroutine StartRadicalCoroutine(System.Func<System.Collections.IEnumerator> routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
 
-            var co = new RadicalCoroutine(routine().GetEnumerator());
+            var co = new RadicalCoroutine(routine());
             co.Start(this, disableMode);
             return co;
         }
@@ -170,31 +174,23 @@ namespace com.spacepuppy
             return co;
         }
 
-        public RadicalCoroutine StartRadicalCoroutineAsync(CoroutineMethod routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        public RadicalCoroutine StartRadicalCoroutineAsync(System.Func<System.Collections.IEnumerator> routine, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
 
-            var co = new RadicalCoroutine(routine().GetEnumerator());
+            var co = new RadicalCoroutine(routine());
             co.StartAsync(this, disableMode);
             return co;
         }
 
 
-
-
+#if SP_LIB
 
         public RadicalCoroutine InvokeRadical(System.Action method, float delay, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
         {
             if (method == null) throw new System.ArgumentNullException("method");
 
             return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay, -1f, time), disableMode);
-        }
-
-        public RadicalCoroutine InvokeAfterYield(System.Action method, object yieldInstruction, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
-        {
-            if (method == null) throw new System.ArgumentNullException("method");
-
-            return this.StartRadicalCoroutine(CoroutineUtil.InvokeAfterYieldRedirect(method, yieldInstruction), disableMode);
         }
 
         public RadicalCoroutine InvokeRepeatingRadical(System.Action method, float delay, float repeatRate, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
@@ -204,19 +200,30 @@ namespace com.spacepuppy
             return this.StartRadicalCoroutine(CoroutineUtil.RadicalInvokeRedirect(method, delay, repeatRate, time), disableMode);
         }
 
+        public RadicalCoroutine InvokeAfterYield(System.Action method, object yieldInstruction, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
+        {
+            if (method == null) throw new System.ArgumentNullException("method");
+
+            return this.StartRadicalCoroutine(CoroutineUtil.InvokeAfterYieldRedirect(method, yieldInstruction), disableMode);
+        }
+
+#endif
+
+
+
         public new void StopAllCoroutines()
         {
-            RadicalCoroutineManager manager;
-            if(this.GetComponent<RadicalCoroutineManager>(out manager))
+            RadicalCoroutineManager manager = this.GetComponent<RadicalCoroutineManager>();
+            if(manager != null)
             {
                 manager.PurgeCoroutines(this);
             }
             base.StopAllCoroutines();
         }
 
-        #endregion
+#endregion
 
-        #region IComponent Interface
+#region IComponent Interface
 
         bool IComponent.enabled
         {
@@ -235,25 +242,32 @@ namespace com.spacepuppy
         Transform IComponent.transform { get { return this.transform; } }
         */
 
-        #endregion
+#endregion
 
-
-        #region ISPDisposable Interface
-
+#region ISPDisposable Interface
+    
         bool ISPDisposable.IsDisposed
         {
             get
             {
+#if SP_LIB
                 return !ObjUtil.IsObjectAlive(this);
+#else
+                return this == null;
+#endif
             }
         }
 
-        void IDisposable.Dispose()
+        void System.IDisposable.Dispose()
         {
+#if SP_LIB
             ObjUtil.SmartDestroy(this);
+#else
+            Object.Destroy(this);
+#endif
         }
 
-        #endregion
+#endregion
 
     }
 

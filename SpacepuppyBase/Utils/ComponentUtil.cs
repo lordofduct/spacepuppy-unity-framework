@@ -259,8 +259,7 @@ namespace com.spacepuppy.Utils
             return comp;
         }
 
-
-
+        
         public static T AddOrFindComponent<T>(this GameObject obj) where T : Component
         {
             if (obj == null) return null;
@@ -314,10 +313,10 @@ namespace com.spacepuppy.Utils
 
             return comp;
         }
+        
+#endregion
 
-        #endregion
-
-        #region GetComponent
+#region GetComponent
 
         public static T GetComponentAlt<T>(this GameObject obj) where T : class
         {
@@ -373,9 +372,9 @@ namespace com.spacepuppy.Utils
             return (comp != null);
         }
 
-        #endregion
+#endregion
 
-        #region GetComponents
+#region GetComponents
 
         public static T[] GetComponentsAlt<T>(this GameObject obj) where T : class
         {
@@ -476,9 +475,9 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        #endregion
+#endregion
 
-        #region ChildComponent
+#region ChildComponent
 
         public static bool GetComponentInChildren<T>(this GameObject obj, out T comp) where T : class
         {
@@ -536,9 +535,9 @@ namespace com.spacepuppy.Utils
             return obj.GetComponentInChildren(typeof(T)) as T;
         }
 
-        #endregion
+#endregion
 
-        #region Child Components
+#region Child Components
 
         public static IEnumerable<T> GetChildComponents<T>(this GameObject obj, bool bIncludeSelf = false, bool bIncludeInactive = false) where T : class
         {
@@ -658,9 +657,9 @@ namespace com.spacepuppy.Utils
             GetChildComponents(obj.gameObject, tp, coll, bIncludeSelf, bIncludeInactive);
         }
 
-        #endregion
+#endregion
 
-        #region RemoveComponent
+#region RemoveComponent
 
         //public static void RemoveComponent<T>(this GameObject obj) where T : class
         //{
@@ -728,10 +727,9 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        #endregion
-
-
-        #region EntityHasComponent
+#endregion
+        
+#region EntityHasComponent
 
         public static bool EntityHasComponent<T>(this GameObject obj, bool testIfEnabled = false) where T : class
         {
@@ -764,9 +762,9 @@ namespace com.spacepuppy.Utils
             return EntityHasComponent(obj.gameObject, tp, testIfEnabled);
         }
 
-        #endregion
+#endregion
 
-        #region FindComponent
+#region FindComponent
 
         /// <summary>
         /// Finds a component starting at a gameobjects root and digging downward. First component found will be returned. 
@@ -867,9 +865,9 @@ namespace com.spacepuppy.Utils
             return comp != null;
         }
 
-        #endregion
+#endregion
 
-        #region FindComponents
+#region FindComponents
 
         public static IEnumerable<T> FindComponents<T>(this GameObject go, bool bIncludeInactive = false) where T : class
         {
@@ -919,7 +917,7 @@ namespace com.spacepuppy.Utils
             GetChildComponents(c.FindRoot(), coll, true, bIncludeInactive);
         }
 
-        #endregion
+#endregion
         
     }
 }

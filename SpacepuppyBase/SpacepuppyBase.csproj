@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SP_LIB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -30,7 +30,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;SP_LIB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -58,6 +58,7 @@
     <Compile Include="Async\InvokePump.cs" />
     <Compile Include="Async\RadicalAsyncOperation.cs" />
     <Compile Include="Async\RadicalTask.cs" />
+    <Compile Include="Async\SPThreadPool.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Audio\AudioGroup.cs" />
     <Compile Include="Audio\AudioManager.cs" />
@@ -106,10 +107,17 @@
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
     <Compile Include="Dynamic\DynamicObjectAccessor.cs" />
     <Compile Include="Dynamic\IDynamicMemberInfo.cs" />
+    <Compile Include="ExceptionsLite.cs" />
     <Compile Include="FixedPercentDecimal.cs" />
     <Compile Include="FixedPercentLong.cs" />
     <Compile Include="FixedPoint.cs" />
     <Compile Include="ColorHSV.cs" />
+    <Compile Include="IImmediatelyResumingYieldInstruction.cs" />
+    <Compile Include="IPausibleYieldInstruction.cs" />
+    <Compile Include="IPooledYieldInstruction.cs" />
+    <Compile Include="IProgressingYieldInstruction.cs" />
+    <Compile Include="IRadicalEnumerator.cs" />
+    <Compile Include="IRadicalWaitHandle.cs" />
     <Compile Include="ISPDisposable.cs" />
     <Compile Include="Project\AssetBundlePackage.cs" />
     <Compile Include="Project\AssetBundles.cs" />
@@ -159,6 +167,8 @@
     <Compile Include="Project\AssetPool.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
+    <Compile Include="PsuedoSingleton.cs" />
+    <Compile Include="RadicalEnums.cs" />
     <Compile Include="Render\i_SetMaterialProperty.cs" />
     <Compile Include="Render\i_TweenMaterial.cs" />
     <Compile Include="Render\MaterialPropertyReference.cs" />
@@ -239,6 +249,7 @@
     <Compile Include="SPNotifyingComponent.cs" />
     <Compile Include="DiscreteFloat.cs" />
     <Compile Include="SPTime.cs" />
+    <Compile Include="SPTimeEnums.cs" />
     <Compile Include="StateMachine\ComponentStateSupplier.cs" />
     <Compile Include="StateMachine\GenericStateStack.cs" />
     <Compile Include="StateMachine\IStateMachine.cs" />
@@ -248,7 +259,7 @@
     <Compile Include="StateMachine\StateChangedEventArgs.cs" />
     <Compile Include="StateMachine\StateMachine.cs" />
     <Compile Include="StateMachine\TypedStateMachine.cs" />
-    <Compile Include="TagData.cs" />
+    <Compile Include="Project\TagData.cs" />
     <Compile Include="TagMask.cs" />
     <Compile Include="SPTimePeriod.cs" />
     <Compile Include="Timers\BulkTimer.cs" />
@@ -339,6 +350,12 @@
     <Compile Include="VariableStore.cs" />
     <Compile Include="VariantCollection.cs" />
     <Compile Include="VariantReference.cs" />
+    <Compile Include="WaitForComplete.cs" />
+    <Compile Include="WaitForDuration.cs" />
+    <Compile Include="WaitForNotification.cs" />
+    <Compile Include="WaitUntilTime.cs" />
+    <Compile Include="IResettingYieldInstruction.cs" />
+    <Compile Include="NullYieldInstruction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Hooks\EarlyExecutionUpdateEventHooks.cs.meta" />
