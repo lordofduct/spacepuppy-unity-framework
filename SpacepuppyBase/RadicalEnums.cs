@@ -23,10 +23,10 @@ namespace com.spacepuppy
         CancelOnDisable = 1,
         StopOnDeactivate = 2,
         StopOnDisable = 4,
-        ResumeOnEnable = 8,
+        Resumes = 8,
 
-        PausesOnDisable = 9,
         PausesOnDeactivate = 10,
+        PausesOnDisable = 12,
         Pauses = 14
     }
 
@@ -47,9 +47,10 @@ namespace com.spacepuppy
         Cancelled = -2,
         Cancelling = -1,
         Inactive = 0,
-        Active = 1,
-        Completing = 2,
-        Complete = 3
+        Paused = 1,
+        Active = 2,
+        Completing = 3,
+        Complete = 4
     }
 
 }
