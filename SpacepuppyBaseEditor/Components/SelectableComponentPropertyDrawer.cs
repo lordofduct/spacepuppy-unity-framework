@@ -230,7 +230,8 @@ namespace com.spacepuppyeditor.Components
         {
             if (ComponentUtil.IsAcceptableComponentType(_restrictionType))
             {
-                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
+                var fieldObjType = (TypeUtil.IsType(_restrictionType, typeof(UnityEngine.Component))) ? _restrictionType : typeof(UnityEngine.GameObject);
+                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObject);
                 if(this.ForceOnlySelf)
                 {
                     var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
@@ -248,7 +249,8 @@ namespace com.spacepuppyeditor.Components
             }
             else if (this.AllowNonComponents)
             {
-                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, _restrictionType, this.AllowSceneObject);
+                var fieldObjType = (TypeUtil.IsType(_restrictionType, typeof(UnityEngine.Object))) ? _restrictionType : typeof(UnityEngine.Object);
+                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObject);
                 if(this.ForceOnlySelf)
                 {
                     var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);

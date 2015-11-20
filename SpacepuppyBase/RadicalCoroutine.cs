@@ -1275,7 +1275,7 @@ namespace com.spacepuppy
                 if (routine._currentIEnumeratorYieldValue is WaitForSeconds)
                 {
                     //float dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(routine._currentIEnumeratorYieldValue, "m_Seconds"));
-                    var field = typeof(WaitForSeconds).GetField("m_Seconds");
+                    var field = typeof(WaitForSeconds).GetField("m_Seconds", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
                     float dur = (float)field.GetValue(routine._currentIEnumeratorYieldValue);
                     return string.Format("WaitForSeconds[{0:0.00}]", dur);
                 }

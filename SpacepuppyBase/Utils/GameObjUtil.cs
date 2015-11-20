@@ -889,19 +889,40 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<Transform> GetAllChildren(this Transform t)
         {
-            //we do the first children first
-            foreach (Transform trans in t.transform)
-            {
-                yield return trans;
-            }
+            ////we do the first children first
+            //foreach (Transform trans in t.transform)
+            //{
+            //    yield return trans;
+            //}
 
-            //then grandchildren
-            foreach (Transform trans in t.transform)
+            ////then grandchildren
+            //foreach (Transform trans in t.transform)
+            //{
+            //    foreach (var child in GetAllChildren(trans))
+            //    {
+            //        yield return child;
+            //    }
+            //}
+
+            using (var lst = TempCollection.GetList<Transform>())
             {
-                foreach (var child in GetAllChildren(trans))
+                foreach (Transform child in t)
                 {
-                    yield return child;
+                    lst.Add(child);
                 }
+
+                int i = 0;
+                while (i < lst.Count)
+                {
+                    t = lst[i];
+                    foreach (Transform child in t)
+                    {
+                        lst.Add(child);
+                    }
+                    i++;
+                }
+
+                return lst.ToArray();
             }
         }
 
@@ -919,21 +940,39 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<Transform> GetAllChildrenAndSelf(this Transform t)
         {
-            yield return t;
+            //yield return t;
 
-            //we do the first children first
-            foreach (Transform trans in t.transform)
-            {
-                yield return trans;
-            }
+            ////we do the first children first
+            //foreach (Transform trans in t.transform)
+            //{
+            //    yield return trans;
+            //}
 
-            //then grandchildren
-            foreach (Transform trans in t.transform)
+            ////then grandchildren
+            //foreach (Transform trans in t.transform)
+            //{
+            //    foreach (var child in GetAllChildren(trans))
+            //    {
+            //        yield return child;
+            //    }
+            //}
+
+            using (var lst = TempCollection.GetList<Transform>())
             {
-                foreach (var child in GetAllChildren(trans))
+                lst.Add(t);
+
+                int i = 0;
+                while (i < lst.Count)
                 {
-                    yield return child;
+                    t = lst[i];
+                    foreach (Transform child in t)
+                    {
+                        lst.Add(child);
+                    }
+                    i++;
                 }
+
+                return lst.ToArray();
             }
         }
 

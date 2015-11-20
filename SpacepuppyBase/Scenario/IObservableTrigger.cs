@@ -1,10 +1,9 @@
 ﻿namespace com.spacepuppy.Scenario
 {
-    public interface IObservableTrigger : INotificationDispatcher, IComponent
+    public interface IObservableTrigger : IComponent
     {
-
-        bool IsComplex { get; }
-        string[] GetComplexIds();
+        
+        Trigger[] GetTriggers();
 
     }
 

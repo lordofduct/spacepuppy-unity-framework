@@ -64,37 +64,38 @@ namespace com.spacepuppy.Utils
 
         #region Transform
 
-        public static Quaternion IndependentLookRotation(Vector3 dir, Vector3 forwardAxis)
+        /// <summary>
+        /// Create a LookRotation for a non-standard 'forward' axis.
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <param name="forwardAxis"></param>
+        /// <returns></returns>
+        public static Quaternion AltForwardLookRotation(Vector3 dir, Vector3 forwardAxis)
         {
             return Quaternion.LookRotation(dir) * Quaternion.FromToRotation(Vector3.forward, forwardAxis);
         }
 
-        //DEPRECATED - moved to TransformUtil
-
-        ///// <summary>
-        ///// Transforms rotation from local space to world space.
-        ///// </summary>
-        ///// <param name="t"></param>
-        ///// <param name="local"></param>
-        ///// <returns></returns>
-        //public static Quaternion TransformRotation(this Transform t, Quaternion local)
-        //{
-        //    if (t == null) throw new System.ArgumentNullException("transform");
-        //    return t.rotation * local;
-        //}
-
-        ///// <summary>
-        ///// Transforms rotation from world space to local space.
-        ///// </summary>
-        ///// <param name="t"></param>
-        ///// <param name="global"></param>
-        ///// <returns></returns>
-        //public static Quaternion InverseTransformRotation(this Transform t, Quaternion global)
-        //{
-        //    if (t == null) throw new System.ArgumentNullException("transform");
-        //    return Quaternion.Inverse(t.rotation) * global;
-        //}
-
+        /// <summary>
+        /// Create a LookRotation for a non-standard 'forward' axis.
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <param name="forwardAxis"></param>
+        /// <returns></returns>
+        public static Quaternion AltForwardLookRotation(Vector3 dir, Vector3 forwardAxis, Vector3 upAxis)
+        {
+            return Quaternion.LookRotation(dir, upAxis) * Quaternion.FromToRotation(Vector3.forward, forwardAxis);
+        }
+        
+        /// <summary>
+        /// Get the rotated forward axis based on some base forward.
+        /// </summary>
+        /// <param name="rot">The rotation</param>
+        /// <param name="baseForward">Forward with no rotation</param>
+        /// <returns></returns>
+        public static Vector3 GetAltForward(Quaternion rot, Vector3 baseForward)
+        {
+            return rot * baseForward;
+        }
 
         /// <summary>
         /// Returns a rotation of up attempting to face in the general direction of forward.

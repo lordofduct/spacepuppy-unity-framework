@@ -18,8 +18,7 @@ namespace com.spacepuppy.Scenario
         protected override void Awake()
         {
             base.Awake();
-
-            _trigger.ObservableTriggerOwner = this;
+            
             _trigger.ObservableTriggerId = this.GetType().Name;
         }
 
@@ -53,14 +52,9 @@ namespace com.spacepuppy.Scenario
 
         #region IObservableTrigger Interface
 
-        bool IObservableTrigger.IsComplex
+        Trigger[] IObservableTrigger.GetTriggers()
         {
-            get { return false; }
-        }
-
-        string[] IObservableTrigger.GetComplexIds()
-        {
-            return new string[] { this.GetType().Name };
+            return new Trigger[] { _trigger };
         }
 
         #endregion

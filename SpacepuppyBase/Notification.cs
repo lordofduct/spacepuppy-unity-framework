@@ -34,6 +34,15 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Methods
+
+        public void Post(INotificationDispatcher dispatcher, bool bNotifyEntity = false)
+        {
+
+        }
+
+        #endregion
+
         #region Static Interface
 
         private static Dictionary<System.Type, System.Delegate> _globalHandlers = new Dictionary<System.Type, System.Delegate>();
@@ -363,6 +372,14 @@ namespace com.spacepuppy
             }
         }
 
+
+
+
+
+
+
+
+
         /// <summary>
         /// Posts a notification of type T. Returns true if an observer was found and received the notification.
         /// </summary>
@@ -395,36 +412,6 @@ namespace com.spacepuppy
                 return dispatcher != null && dispatcher.PostNotification<T>(notification, bNotifyEntity);
             }
         }
-
-        /*
-        public static bool PostNotification<T>(object sender, T notification, bool bNotifyEntity = false) where T : Notification
-        {
-            if (sender == null) throw new ArgumentNullException("sender");
-            if (notification == null) throw new ArgumentNullException("notification");
-
-            if (sender is INotificationDispatcher)
-            {
-                return (sender as INotificationDispatcher).PostNotification<T>(notification, bNotifyEntity);
-            }
-            else if (GameObjectUtil.IsGameObjectSource(sender))
-            {
-                if (bNotifyEntity)
-                {
-                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher.PostNotification<T>(notification, bNotifyEntity);
-                }
-                else
-                {
-                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher != null && dispatcher.PostNotification<T>(notification, bNotifyEntity);
-                }
-            }
-            else
-            {
-                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
-            }
-        }
-         */
 
         public static bool UnsafePostNotification(INotificationDispatcher sender, Notification notification, bool bNotifyEntity = false)
         {
@@ -461,6 +448,40 @@ namespace com.spacepuppy
                 throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
             }
         }
+
+
+
+
+
+        /*
+        public static bool PostNotification<T>(object sender, T notification, bool bNotifyEntity = false) where T : Notification
+        {
+            if (sender == null) throw new ArgumentNullException("sender");
+            if (notification == null) throw new ArgumentNullException("notification");
+
+            if (sender is INotificationDispatcher)
+            {
+                return (sender as INotificationDispatcher).PostNotification<T>(notification, bNotifyEntity);
+            }
+            else if (GameObjectUtil.IsGameObjectSource(sender))
+            {
+                if (bNotifyEntity)
+                {
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher.PostNotification<T>(notification, bNotifyEntity);
+                }
+                else
+                {
+                    var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
+                    return dispatcher != null && dispatcher.PostNotification<T>(notification, bNotifyEntity);
+                }
+            }
+            else
+            {
+                throw new System.ArgumentException("Sender is not a NotificationDispatcher.", "sender");
+            }
+        }
+         */
 
         #endregion
 

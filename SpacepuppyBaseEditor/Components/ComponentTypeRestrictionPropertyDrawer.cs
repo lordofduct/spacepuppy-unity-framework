@@ -14,9 +14,7 @@ namespace com.spacepuppyeditor.Components
     {
 
         #region Fields
-
-        //private Dictionary<string, System.Type> _overrideBaseTypeDict = new Dictionary<string, System.Type>();
-
+        
         private SelectableComponentPropertyDrawer _selectComponentDrawer;
 
         #endregion
@@ -33,9 +31,6 @@ namespace com.spacepuppyeditor.Components
             return attrib.InheritsFromType == null ||
                 attrib.InheritsFromType.IsInterface ||
                 TypeUtil.IsType(attrib.InheritsFromType, fieldType);
-            //return attrib.InheritsFromType == null ||
-            //    TypeUtil.IsType(attrib.InheritsFromType, fieldType) ||
-            //    TypeUtil.IsType(attrib.InheritsFromType, typeof(IComponent));
         }
 
         #endregion
@@ -68,7 +63,14 @@ namespace com.spacepuppyeditor.Components
             if (attrib.HideTypeDropDown)
             {
                 //draw object field
-                property.objectReferenceValue = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, inheritsFromType, true, fieldType);
+                var fieldObjType = (inheritsFromType.IsInterface) ? typeof(Component) : inheritsFromType;
+                var comp = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, fieldObjType, true, fieldType);
+                if (comp == null)
+                    property.objectReferenceValue = null;
+                else if (TypeUtil.IsType(comp.GetType(), inheritsFromType))
+                    property.objectReferenceValue = comp;
+                else
+                    property.objectReferenceValue = comp.GetComponent(inheritsFromType);
             }
             else
             {

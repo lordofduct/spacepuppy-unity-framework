@@ -64,7 +64,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             var triggerProp = property.FindPropertyRelative("_trigger");
             if (triggerProp == null) return false;
-            return triggerProp.objectReferenceValue != null && triggerProp.objectReferenceValue is IObservableTrigger && (triggerProp.objectReferenceValue as IObservableTrigger).IsComplex;
+            return triggerProp.objectReferenceValue != null && triggerProp.objectReferenceValue is IObservableTrigger && (triggerProp.objectReferenceValue as IObservableTrigger).GetTriggers().Length > 0;
         }
 
 
@@ -88,17 +88,21 @@ namespace com.spacepuppyeditor.Scenario
                 {
                     c = this.Components[i];
                     nm = _componentNames[i];
-                    if (c is IObservableTrigger && (c as IObservableTrigger).IsComplex)
+
+                    if (c is IObservableTrigger)
                     {
-                        var arr = (c as IObservableTrigger).GetComplexIds();
-                        for (int j = 0; j < arr.Length; j++)
+                        var arr = (c as IObservableTrigger).GetTriggers();
+                        if (arr.Length > 0)
                         {
-                            _names.Add(new GUIContent(nm + "/" + arr[j]));
+                            for (int j = 0; j < arr.Length; j++)
+                            {
+                                _names.Add(new GUIContent(nm + "/" + arr[j]));
+                            }
                         }
-                    }
-                    else
-                    {
-                        _names.Add(new GUIContent(nm));
+                        else
+                        {
+                            _names.Add(new GUIContent(nm));
+                        }
                     }
                 }
             }

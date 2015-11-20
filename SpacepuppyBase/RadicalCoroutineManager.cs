@@ -39,6 +39,13 @@ namespace com.spacepuppy
 
         #region Update Messages
 
+        private void OnDisable()
+        {
+            if (_naiveTrackerTable == null || _naiveTrackerTable.Count == 0) return;
+
+            this.TestNaive();
+        }
+
         private void Update()
         {
             if(_naiveTrackerTable == null || _naiveTrackerTable.Count == 0)
@@ -47,34 +54,39 @@ namespace com.spacepuppy
                 return;
             }
 
+            this.TestNaive();
+        }
+
+        private void TestNaive()
+        {
             //yes, this method of tracking may seem convoluted with the weird temp lists
             //this is to keep GC to a minimum, if not zero
             TempList<MonoBehaviour> stateChanged = null;
             var e = _naiveTrackerTable.GetEnumerator();
-            while(e.MoveNext())
+            while (e.MoveNext())
             {
-                if(e.Current.Key == null)
+                if (e.Current.Key == null)
                 {
                     if (stateChanged == null) stateChanged = TempCollection.GetList<MonoBehaviour>();
                     stateChanged.Add(e.Current.Key);
                 }
-                else if(e.Current.Value != e.Current.Key.isActiveAndEnabled)
+                else if (e.Current.Value != e.Current.Key.isActiveAndEnabled)
                 {
                     if (stateChanged == null) stateChanged = TempCollection.GetList<MonoBehaviour>();
                     stateChanged.Add(e.Current.Key);
                 }
             }
 
-            if(stateChanged != null)
+            if (stateChanged != null)
             {
-                for(int i = 0; i < stateChanged.Count; i++)
+                for (int i = 0; i < stateChanged.Count; i++)
                 {
                     var c = stateChanged[i];
-                    if(c == null)
+                    if (c == null)
                     {
                         this.PurgeCoroutines(c);
                     }
-                    else if(c.isActiveAndEnabled)
+                    else if (c.isActiveAndEnabled)
                     {
                         _naiveTrackerTable[c] = true;
                         this.DealWithEnable(c);

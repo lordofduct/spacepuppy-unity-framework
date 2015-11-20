@@ -104,13 +104,15 @@ namespace com.spacepuppyeditor.Base.Inspectors
             var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, desiredWidth), position.height);
 
             var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute, this.TimeUnitsCalculator);
-
-            double dur = this.TimeUnitsCalculator.SecondsToTimeUnits(units, property.floatValue);
+            
+            double dur = property.doubleValue;
+            if (MathUtil.IsReal(dur)) dur = this.TimeUnitsCalculator.SecondsToTimeUnits(units, dur);
             EditorGUI.BeginChangeCheck();
-            dur = EditorGUI.FloatField(r, (float)dur);
+            dur = EditorGUI.DoubleField(r, (float)dur);
             if (EditorGUI.EndChangeCheck())
             {
-                property.floatValue = (float)this.TimeUnitsCalculator.TimeUnitsToSeconds(units, dur);
+                if(MathUtil.IsReal(dur)) dur = this.TimeUnitsCalculator.TimeUnitsToSeconds(units, dur);
+                property.doubleValue = dur;
             }
 
             return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);

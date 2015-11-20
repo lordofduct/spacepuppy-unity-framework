@@ -147,6 +147,16 @@ namespace com.spacepuppy.Async
                 return _instance._maxThreadCount - _instance._activeThreads.Count;
             }
         }
+
+        public static int GetQueueLength()
+        {
+            if (!Initialized)
+            {
+                CreateInstance();
+                _instance.ResizePool(0);
+            }
+            return _instance._taskQueue.Count;
+        }
         
 #endregion
 

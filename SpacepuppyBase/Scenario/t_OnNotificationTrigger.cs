@@ -122,7 +122,7 @@ namespace com.spacepuppy.Scenario
 
         private void OnNotification(object sender, Notification n)
         {
-            this.ActivateTrigger();
+            this.ActivateTrigger(n);
         }
 
         #endregion

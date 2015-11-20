@@ -13,9 +13,10 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [ReorderableArray()]
+        [DisableOnPlay()]
         [SerializeField()]
         private ObservableTargetData[] _observedTargets;
-        [OnChangedInEditor("RegisterListeners", OnlyAtRuntime = true)]
+        [OnChangedInEditor("ResetOnTriggeredChanged", OnlyAtRuntime = true)]
         [SerializeField()]
         private bool _resetOnTriggered;
 
@@ -52,12 +53,10 @@ namespace com.spacepuppy.Scenario
             get { return _resetOnTriggered; }
             set
             {
+                if (_resetOnTriggered == value) return;
+
                 _resetOnTriggered = value;
-                if(_resetOnTriggered && _triggered && this.enabled)
-                {
-                    _triggered = false;
-                    this.RegisterListeners();
-                }
+                this.ResetOnTriggeredChanged();
             }
         }
 
@@ -65,48 +64,44 @@ namespace com.spacepuppy.Scenario
 
         #region Methods
 
+        private void ResetOnTriggeredChanged()
+        {
+            if (_resetOnTriggered && _triggered && this.isActiveAndEnabled)
+            {
+                _triggered = false;
+                this.RegisterListeners();
+            }
+        }
+
         private void RegisterListeners()
         {
             if (_triggered) return;
 
             ObservableTargetData targ;
+            var d = new System.Action<ObservableTargetData>(this.OnTriggerActivated);
             for (int i = 0; i < _observedTargets.Length; i++)
             {
                 targ = _observedTargets[i];
-                if (targ.Trigger != null)
-                {
-                    Notification.RemoveObserver<TriggerActivatedNotification>(targ.Trigger, this.OnTriggerActivated);
-                    Notification.RegisterObserver<TriggerActivatedNotification>(targ.Trigger, this.OnTriggerActivated);
-                }
+                targ.AddHandler(d);
             }
         }
 
         private void UnRegisterListeners()
         {
             ObservableTargetData targ;
+            var d = new System.Action<ObservableTargetData>(this.OnTriggerActivated);
             for (int i = 0; i < _observedTargets.Length; i++)
             {
                 targ = _observedTargets[i];
-                if (targ.Trigger != null)
-                {
-                    Notification.RemoveObserver<TriggerActivatedNotification>(targ.Trigger, this.OnTriggerActivated);
-                }
+                if (targ != null) targ.RemoveHandler(d);
             }
         }
 
-        private void OnTriggerActivated(object sender, TriggerActivatedNotification n)
+        private void OnTriggerActivated(ObservableTargetData sender)
         {
             if (_triggered) return;
 
-            foreach (var targ in _observedTargets)
-            {
-                if (_activatedTriggers.Contains(targ)) continue;
-                if (object.Equals(targ.Trigger, n.Trigger) && (!n.Trigger.IsComplex || n.Trigger.GetComplexIds().Contains(targ.TriggerId)))
-                {
-                    _activatedTriggers.Add(targ);
-                    break;
-                }
-            }
+            _activatedTriggers.Add(sender);
 
             if(_activatedTriggers.SetEquals(_observedTargets))
             {

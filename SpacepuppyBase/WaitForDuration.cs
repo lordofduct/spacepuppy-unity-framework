@@ -221,7 +221,7 @@ namespace com.spacepuppy
         public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
         {
             //var dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(wait, "m_Seconds"));
-            var field = typeof(WaitForSeconds).GetField("m_Seconds");
+            var field = typeof(WaitForSeconds).GetField("m_Seconds", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             float dur = (float)field.GetValue(wait);
             if (returnNullIfZero && dur <= 0f)
             {
@@ -455,7 +455,7 @@ namespace com.spacepuppy
         public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
         {
             //var dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(wait, "m_Seconds"));
-            var field = typeof(WaitForSeconds).GetField("m_Seconds");
+            var field = typeof(WaitForSeconds).GetField("m_Seconds", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             float dur = (float)field.GetValue(wait);
             if (returnNullIfZero && dur <= 0f)
             {

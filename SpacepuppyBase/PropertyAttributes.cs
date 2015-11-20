@@ -176,11 +176,15 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// TODO - consider deprecating since 'SelectableComponentAttribute' mostly does the same thing as this... 
+    /// only that this allows 'hiding the dropdown' and selecting the first component of the restriction type found on the source.
+    /// This had a purpose at one point when there was different 'drop down' modes, but we devised a much better way of choosing the component.
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class ComponentTypeRestrictionAttribute : SPPropertyAttribute
     {
         public System.Type InheritsFromType;
-        public TypeDropDownListingStyle MenuListingStyle = TypeDropDownListingStyle.ComponentMenu;
         public bool HideTypeDropDown;
 
         public ComponentTypeRestrictionAttribute(System.Type inheritsFromType)
@@ -249,12 +253,12 @@ namespace com.spacepuppy
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple=false)]
     public class UnitVectorAttribute : SPPropertyAttribute
     {
-
+        
         public UnitVectorAttribute() : base()
         {
 
         }
-
+        
     }
 
     /// <summary>

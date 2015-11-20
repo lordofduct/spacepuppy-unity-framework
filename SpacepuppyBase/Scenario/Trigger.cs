@@ -13,6 +13,24 @@ namespace com.spacepuppy.Scenario
     public class Trigger : ICollection<TriggerTarget>
     {
 
+        public const string ID_DEFAULT = "Trigger";
+
+        #region Events
+
+        public event System.EventHandler TriggerActivated;
+        protected virtual void OnTriggerActivated(object arg)
+        {
+            if (TriggerActivated != null)
+                TriggerActivated(this, System.EventArgs.Empty);
+
+            //if(_owner != null)
+            //{
+            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
+            //}
+        }
+
+        #endregion
+
         #region Fields
 
         [SerializeField()]
@@ -20,12 +38,7 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         private List<TriggerTarget> _targets = new List<TriggerTarget>();
-
-        [System.NonSerialized()]
-        private System.Action<object> _handlers;
-
-        [System.NonSerialized()]
-        private IObservableTrigger _owner;
+        
         [System.NonSerialized()]
         private string _id;
         
@@ -35,11 +48,23 @@ namespace com.spacepuppy.Scenario
 
         public Trigger()
         {
-
+            _id = ID_DEFAULT;
         }
 
+        public Trigger(string id)
+        {
+            _id = id;
+        }
+        
         public Trigger(bool yielding)
         {
+            _id = ID_DEFAULT;
+            _yield = yielding;
+        }
+
+        public Trigger(string id, bool yielding)
+        {
+            _id = id;
             _yield = yielding;
         }
 
@@ -52,16 +77,7 @@ namespace com.spacepuppy.Scenario
             get { return _yield; }
             set { _yield = value; }
         }
-
-        /// <summary>
-        /// The INotificationDispatcher associated with this trigger that will post the notification of it being triggered.
-        /// </summary>
-        public IObservableTrigger ObservableTriggerOwner
-        {
-            get { return _owner; }
-            set { _owner = value; }
-        }
-
+        
         public string ObservableTriggerId
         {
             get { return _id; }
@@ -73,19 +89,30 @@ namespace com.spacepuppy.Scenario
             get { return _targets; }
         }
 
+        public int Count
+        {
+            get
+            {
+                if (this.TriggerActivated != null)
+                    return _targets.Count + 1;
+                else
+                    return _targets.Count;
+            }
+        }
+
         #endregion
 
         #region Methods
 
-        public void AddHandler(System.Action<object> handler)
-        {
-            _handlers += handler;
-        }
+        //public void AddHandler(System.Action<object> handler)
+        //{
+        //    _handlers += handler;
+        //}
 
-        public void RemoveHandler(System.Action<object> handler)
-        {
-            _handlers -= handler;
-        }
+        //public void RemoveHandler(System.Action<object> handler)
+        //{
+        //    _handlers -= handler;
+        //}
 
 
 
@@ -107,13 +134,8 @@ namespace com.spacepuppy.Scenario
                 }
             }
 
-            if (_handlers != null)
-                _handlers(null);
+            this.OnTriggerActivated(null);
 
-            //if(_owner != null)
-            //{
-            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            //}
         }
 
         public void ActivateTrigger(object arg)
@@ -127,13 +149,7 @@ namespace com.spacepuppy.Scenario
                 }
             }
 
-            if (_handlers != null)
-                _handlers(arg);
-
-            //if (_owner != null)
-            //{
-            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            //}
+            this.OnTriggerActivated(arg);
         }
         
         public void ActivateRandomTrigger(bool considerWeights)
@@ -144,13 +160,7 @@ namespace com.spacepuppy.Scenario
                 trig.Trigger();
             }
 
-            if (_handlers != null)
-                _handlers(null);
-            
-            //if (_owner != null)
-            //{
-            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            //}
+            this.OnTriggerActivated(null);
         }
 
         public void ActivateRandomTrigger(object arg, bool considerWeights)
@@ -161,13 +171,7 @@ namespace com.spacepuppy.Scenario
                 trig.Trigger();
             }
 
-            if (_handlers != null)
-                _handlers(arg);
-
-            //if (_owner != null)
-            //{
-            //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
-            //}
+            this.OnTriggerActivated(arg);
         }
 
         public IRadicalYieldInstruction ActivateTriggerYielding()
@@ -182,8 +186,7 @@ namespace com.spacepuppy.Scenario
                     if (e.Current != null) e.Current.Trigger();
                 }
 
-                if (_handlers != null)
-                    _handlers(null);
+                this.OnTriggerActivated(null);
 
                 return (instruction.Count > 0) ? instruction : null;
             }
@@ -199,8 +202,7 @@ namespace com.spacepuppy.Scenario
                     }
                 }
 
-                if (_handlers != null)
-                    _handlers(null);
+                this.OnTriggerActivated(null);
 
                 return null;
             }
@@ -218,8 +220,7 @@ namespace com.spacepuppy.Scenario
                     if (e.Current != null) e.Current.Trigger(arg);
                 }
 
-                if (_handlers != null)
-                    _handlers(arg);
+                this.OnTriggerActivated(arg);
 
                 return (instruction.Count > 0) ? instruction : null;
             }
@@ -234,8 +235,7 @@ namespace com.spacepuppy.Scenario
                     }
                 }
 
-                if (_handlers != null)
-                    _handlers(arg);
+                this.OnTriggerActivated(arg);
 
                 return null;
             }
@@ -252,8 +252,7 @@ namespace com.spacepuppy.Scenario
                     if (e.Current != null) e.Current.Trigger(arg);
                 }
 
-                if (_handlers != null)
-                    _handlers(arg);
+                this.OnTriggerActivated(arg);
             }
         }
 
@@ -281,14 +280,11 @@ namespace com.spacepuppy.Scenario
             _targets.CopyTo(array, arrayIndex);
         }
 
-        public int Count
+        int ICollection<TriggerTarget>.Count
         {
             get
             {
-                if (_handlers == null)
-                    return _targets.Count;
-                else
-                    return _targets.Count + 1;
+                return this.Count;
             }
         }
 

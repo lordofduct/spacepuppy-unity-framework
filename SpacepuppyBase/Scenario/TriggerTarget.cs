@@ -282,7 +282,17 @@ namespace com.spacepuppy.Scenario
                     if (this._methodName != null)
                     {
                         //CallMethod does not support using the passed in arg
-                        var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
+                        //var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
+
+                        object[] args = null;
+                        if(_triggerableArgs != null && _triggerableArgs.Length > 0)
+                        {
+                            args = new object[_triggerableArgs.Length];
+                            for(int i = 0; i < args.Length; i++)
+                            {
+                                if (_triggerableArgs[i] != null) args[i] = _triggerableArgs[i].Value;
+                            }
+                        }
                         DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
                     }
                     break;

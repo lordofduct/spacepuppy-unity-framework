@@ -4,7 +4,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class i_Trigger : SPNotifyingComponent, ITriggerableMechanism, IObservableTrigger
+    public class i_Trigger : SPComponent, ITriggerableMechanism, IObservableTrigger
     {
 
         #region Fields
@@ -13,7 +13,7 @@ namespace com.spacepuppy.Scenario
         private int _order;
 
         [SerializeField()]
-        private Trigger _trigger = new Trigger();
+        private Trigger _trigger;
 
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("PassAlongTriggerArg")]
@@ -27,15 +27,7 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region CONSTRUCTOR
-
-        protected override void Awake()
-        {
-            base.Awake();
-
-            _trigger.ObservableTriggerOwner = this;
-            _trigger.ObservableTriggerId = "i_Trigger";
-        }
-
+        
         #endregion
 
         #region Properties
@@ -124,14 +116,9 @@ namespace com.spacepuppy.Scenario
 
         #region IObservableTrigger Interface
 
-        bool IObservableTrigger.IsComplex
+        Trigger[] IObservableTrigger.GetTriggers()
         {
-            get { return false; }
-        }
-
-        string[] IObservableTrigger.GetComplexIds()
-        {
-            return new string[] { "i_Trigger" };
+            return new Trigger[] { _trigger };
         }
 
         #endregion

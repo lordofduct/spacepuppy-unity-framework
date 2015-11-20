@@ -76,7 +76,7 @@ namespace com.spacepuppyeditor
             this.OnSPInspectorGUI();
             this.DrawDefaultInspectorFooters();
 
-            if(EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck())
             {
                 //do call onValidate
                 PropertyHandlerValidationUtility.OnInspectorGUIComplete(this.serializedObject, true);
@@ -87,18 +87,18 @@ namespace com.spacepuppyeditor
                 PropertyHandlerValidationUtility.OnInspectorGUIComplete(this.serializedObject, false);
             }
 
-            if(_shownFields != null && UnityEngine.Application.isPlaying)
+            if (_shownFields != null && UnityEngine.Application.isPlaying)
             {
                 GUILayout.Label("Runtime Values", EditorStyles.boldLabel);
 
-                foreach(var info in _shownFields)
+                foreach (var info in _shownFields)
                 {
                     if (info.Attrib.Readonly) GUI.enabled = false;
 
                     var value = info.FieldInfo.GetValue(this.target);
                     EditorGUI.BeginChangeCheck();
                     value = SPEditorGUILayout.DefaultPropertyField(info.Label, value, info.FieldInfo.FieldType);
-                    if(EditorGUI.EndChangeCheck())
+                    if (EditorGUI.EndChangeCheck())
                     {
                         info.FieldInfo.SetValue(this.target, value);
                     }
@@ -136,44 +136,47 @@ namespace com.spacepuppyeditor
             if (_headerDrawers == null)
             {
                 _headerDrawers = new List<GUIDrawer>();
-                var componentType = serializedObject.targetObject.GetType();
-                if(TypeUtil.IsType(componentType, typeof(Component), typeof(ScriptableObject)))
+                if (serializedObject.targetObject != null)
                 {
-                    var attribs = (from o in componentType.GetCustomAttributes(typeof(ComponentHeaderAttribute), true) 
-                                   let a = o as ComponentHeaderAttribute 
-                                   where a != null 
-                                   orderby a.order 
-                                   select a).ToArray();
-                    foreach (var attrib in attribs)
+                    var componentType = serializedObject.targetObject.GetType();
+                    if (TypeUtil.IsType(componentType, typeof(Component), typeof(ScriptableObject)))
                     {
-                        var dtp = ScriptAttributeUtility.GetDrawerTypeForType(attrib.GetType());
-                        if (dtp != null)
+                        var attribs = (from o in componentType.GetCustomAttributes(typeof(ComponentHeaderAttribute), true)
+                                       let a = o as ComponentHeaderAttribute
+                                       where a != null
+                                       orderby a.order
+                                       select a).ToArray();
+                        foreach (var attrib in attribs)
                         {
-                            if(TypeUtil.IsType(dtp, typeof(DecoratorDrawer)))
+                            var dtp = ScriptAttributeUtility.GetDrawerTypeForType(attrib.GetType());
+                            if (dtp != null)
                             {
-                                var decorator = System.Activator.CreateInstance(dtp) as DecoratorDrawer;
-                                DynamicUtil.SetValue(decorator, "m_Attribute", attrib);
-                                _headerDrawers.Add(decorator);
-                            }
-                            else if (TypeUtil.IsType(dtp, typeof(ComponentHeaderDrawer)))
-                            {
-                                var drawer = System.Activator.CreateInstance(dtp) as ComponentHeaderDrawer;
-                                drawer.Init(attrib, componentType);
-                                _headerDrawers.Add(drawer);
+                                if (TypeUtil.IsType(dtp, typeof(DecoratorDrawer)))
+                                {
+                                    var decorator = System.Activator.CreateInstance(dtp) as DecoratorDrawer;
+                                    DynamicUtil.SetValue(decorator, "m_Attribute", attrib);
+                                    _headerDrawers.Add(decorator);
+                                }
+                                else if (TypeUtil.IsType(dtp, typeof(ComponentHeaderDrawer)))
+                                {
+                                    var drawer = System.Activator.CreateInstance(dtp) as ComponentHeaderDrawer;
+                                    drawer.Init(attrib, componentType);
+                                    _headerDrawers.Add(drawer);
+                                }
                             }
                         }
-                    }
 
-                    var obsoleteAttrib = componentType.GetCustomAttributes(typeof(System.ObsoleteAttribute), false).FirstOrDefault() as System.ObsoleteAttribute;
-                    if (obsoleteAttrib != null)
-                    {
-                        _headerDrawers.Add(new ObsoleteHeaderDrawer("This script is considered deprecated:\n\t" + obsoleteAttrib.Message));
-                    }
+                        var obsoleteAttrib = componentType.GetCustomAttributes(typeof(System.ObsoleteAttribute), false).FirstOrDefault() as System.ObsoleteAttribute;
+                        if (obsoleteAttrib != null)
+                        {
+                            _headerDrawers.Add(new ObsoleteHeaderDrawer("This script is considered deprecated:\n\t" + obsoleteAttrib.Message));
+                        }
 
-                    _addons = SPEditorAddonDrawer.GetDrawers(this.serializedObject);
+                        _addons = SPEditorAddonDrawer.GetDrawers(this.serializedObject);
+                    }
                 }
             }
-
+            
             for (int i = 0; i < _headerDrawers.Count; i++)
             {
                 var drawer = _headerDrawers[i];
