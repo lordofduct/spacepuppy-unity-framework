@@ -306,17 +306,20 @@ namespace com.spacepuppyeditor.Scenario
 
                 //var tp = targProp.objectReferenceValue.GetType();
                 //var members = GetAvailableMethods(tp).ToArray();
-                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targProp.objectReferenceValue, System.Reflection.MemberTypes.Method).ToArray();
+
+                //var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targProp.objectReferenceValue, System.Reflection.MemberTypes.Method).ToArray();
+                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targProp.objectReferenceValue, System.Reflection.MemberTypes.All, spacepuppy.Dynamic.DynamicMemberAccess.Write).ToArray();
+                System.Array.Sort(members, (a,b) => string.Compare(a.Name,b.Name, true));
                 var memberNames = members.Select((m) => m.Name).ToArray();
 
                 int index = System.Array.IndexOf(memberNames, methProp.stringValue);
-                index = EditorGUI.Popup(methNameRect, new GUIContent("Method", "The method on the target to call."), index, (from n in memberNames select new GUIContent(n)).ToArray());
+                index = EditorGUI.Popup(methNameRect, new GUIContent("Method", "The method/prop on the target to call."), index, (from n in memberNames select new GUIContent(n)).ToArray());
                 methProp.stringValue = (index >= 0) ? memberNames[index] : null;
                 selectedMember = (index >= 0) ? members[index] : null;
             }
             else
             {
-                EditorGUI.Popup(methNameRect, new GUIContent("Method", "The method on the target to call."), -1, new GUIContent[0]);
+                EditorGUI.Popup(methNameRect, new GUIContent("Method", "The method/prop on the target to call."), -1, new GUIContent[0]);
             }
 
             property.serializedObject.ApplyModifiedProperties();

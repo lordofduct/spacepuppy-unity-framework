@@ -293,7 +293,15 @@ namespace com.spacepuppy.Scenario
                                 if (_triggerableArgs[i] != null) args[i] = _triggerableArgs[i].Value;
                             }
                         }
-                        DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
+
+                        if(args.Length == 1)
+                        {
+                            DynamicUtil.SetValue(this._triggerable, this._methodName, args[0]);
+                        }
+                        else
+                        {
+                            DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
+                        }
                     }
                     break;
             }
