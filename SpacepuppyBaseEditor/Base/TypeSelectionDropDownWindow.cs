@@ -13,6 +13,7 @@ namespace com.spacepuppyeditor.Base
 
         private const string PREF_SEARCHSTRING = "TypeDropDownSearchHistory";
         private static int s_TypePopupHash = "TypeEditorPopup".GetHashCode();
+        private static int s_TypeCustomHash = "TypeEditorCustomDropDown".GetHashCode();
         private const string CNTRL_TYPESEARCH = "TypeSearch";
 
         #region Fields
@@ -470,6 +471,17 @@ namespace com.spacepuppyeditor.Base
             return selectedType;
         }
 
+        public static void ShowAndCallbackOnSelect(Rect positionUnder, System.Type baseType,
+                                           System.Action<System.Type> callback,
+                                           bool allowAbstractTypes = false, bool allowInterfaces = false,
+                                        System.Type defaultType = null, System.Type[] excludedTypes = null,
+                                        TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
+        {
+            int controlID = GUIUtility.GetControlID(TypeSelectionDropDownWindow.s_TypeCustomHash, EditorGUIUtility.native, positionUnder);
+            CallbackInfo.instance = new CallbackInfo(controlID, null, callback);
+            TypeSelectionDropDownWindow.DisplayCustomMenu(positionUnder, GUIContent.none, baseType, null, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType);
+        }
+
         private static void DisplayCustomMenu(Rect position, GUIContent label,
                                                System.Type baseType, System.Type selectedType,
                                                bool allowAbstractTypes = false, bool allowInterfaces = false,
@@ -506,6 +518,7 @@ namespace com.spacepuppyeditor.Base
             private int _controlID;
             private System.Type _selectedType;
             private com.spacepuppyeditor.Internal.GUIViewProxy _sourceView;
+            private System.Action<System.Type> _callback;
 
             public CallbackInfo(int controlId, System.Type tp)
             {
@@ -514,12 +527,21 @@ namespace com.spacepuppyeditor.Base
                 _sourceView = com.spacepuppyeditor.Internal.GUIViewProxy.GetCurrent();
             }
 
+            public CallbackInfo(int controlId, System.Type tp, System.Action<System.Type> callback)
+            {
+                _controlID = controlId;
+                _selectedType = tp;
+                _sourceView = com.spacepuppyeditor.Internal.GUIViewProxy.GetCurrent();
+                _callback = callback;
+            }
+
             public void SignalChange(System.Type tp)
             {
                 if (tp != this._selectedType)
                 {
                     _selectedType = tp;
                     if(_sourceView != null) _sourceView.SendEvent(EditorGUIUtility.CommandEvent(CMND_MENUCHANGED));
+                    if (_callback != null) _callback(_selectedType);
                 }
             }
 

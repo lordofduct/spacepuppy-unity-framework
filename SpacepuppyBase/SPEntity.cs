@@ -116,7 +116,7 @@ namespace com.spacepuppy
 
         #region IIgnorableCollision Interface
         
-        void IIgnorableCollision.IgnoreCollision(Collider coll, bool ignore)
+        public void IgnoreCollision(Collider coll, bool ignore)
         {
             if (coll == null) return;
 
@@ -127,7 +127,7 @@ namespace com.spacepuppy
             }
         }
 
-        void IIgnorableCollision.IgnoreCollision(IIgnorableCollision coll, bool ignore)
+        public void IgnoreCollision(IIgnorableCollision coll, bool ignore)
         {
             if (coll == null) return;
 

@@ -84,6 +84,7 @@ namespace com.spacepuppy.Scenario
             var result = ObjUtil.GetAsFromSource<T>(obj);
             if(result == null && !_configured && ComponentUtil.IsAcceptableComponentType(typeof(T)))
             {
+                //if not configured, and the triggerArg didn't reduce properly, lets search the entity of the 'triggerArg'
                 var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
                 if (go == null) return null;
                 result = go.FindComponent<T>();
@@ -101,6 +102,7 @@ namespace com.spacepuppy.Scenario
             var result = ObjUtil.GetAsFromSource(tp, obj);
             if(result == null && !_configured && ComponentUtil.IsAcceptableComponentType(tp))
             {
+                //if not configured, and the triggerArg didn't reduce properly, lets search the entity of the 'triggerArg'
                 var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
                 if (go == null) return null;
                 result = go.FindComponent(tp);

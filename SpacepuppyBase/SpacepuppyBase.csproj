@@ -182,6 +182,7 @@
     <Compile Include="Scenario\i_Destroy.cs" />
     <Compile Include="Scenario\i_Enable.cs" />
     <Compile Include="Scenario\i_EnableComponent.cs" />
+    <Compile Include="Scenario\i_ModifyCollisionBetweenEntities.cs" />
     <Compile Include="Scenario\i_LookAt.cs" />
     <Compile Include="Scenario\i_PlaySoundEffect.cs" />
     <Compile Include="Scenario\i_PostNotification.cs" />

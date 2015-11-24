@@ -52,6 +52,10 @@ namespace com.spacepuppy.Scenario
                     {
                         (targ as GameObject).Kill();
                     }
+                    else if (targ is Transform)
+                    {
+                        (targ as Transform).gameObject.Kill();
+                    }
                     else
                     {
                         Object.Destroy(targ);
@@ -63,6 +67,10 @@ namespace com.spacepuppy.Scenario
                 if (targ is GameObject)
                 {
                     (targ as GameObject).Kill();
+                }
+                else if (targ is Transform)
+                {
+                    (targ as Transform).gameObject.Kill();
                 }
                 else
                 {

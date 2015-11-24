@@ -177,13 +177,18 @@ namespace com.spacepuppy.Utils
 
             using (var lst = TempCollection.GetList<IKillableEntity>())
             {
+                //this returns in the order from top down, we will loop backwards to kill bottom up
                 obj.GetComponentsInChildren<IKillableEntity>(true, lst);
                 if(lst.Count > 0)
                 {
-                    var e = lst.GetEnumerator();
-                    while(e.MoveNext())
+                    for(int i = lst.Count - 1; i > -1; i--)
                     {
-                        e.Current.Kill();
+                        lst[i].Kill();
+                    }
+
+                    if(lst[0].gameObject != obj)
+                    {
+                        ObjUtil.SmartDestroy(obj);
                     }
                 }
                 else
@@ -906,23 +911,28 @@ namespace com.spacepuppy.Utils
 
             using (var lst = TempCollection.GetList<Transform>())
             {
+                GetAllChildren(t, lst);
+
+                return lst.ToArray();
+            }
+        }
+
+        public static void GetAllChildren(this Transform t, IList<Transform> lst)
+        {
+            foreach (Transform child in t)
+            {
+                lst.Add(child);
+            }
+
+            int i = 0;
+            while (i < lst.Count)
+            {
+                t = lst[i];
                 foreach (Transform child in t)
                 {
                     lst.Add(child);
                 }
-
-                int i = 0;
-                while (i < lst.Count)
-                {
-                    t = lst[i];
-                    foreach (Transform child in t)
-                    {
-                        lst.Add(child);
-                    }
-                    i++;
-                }
-
-                return lst.ToArray();
+                i++;
             }
         }
 
@@ -959,20 +969,24 @@ namespace com.spacepuppy.Utils
 
             using (var lst = TempCollection.GetList<Transform>())
             {
-                lst.Add(t);
-
-                int i = 0;
-                while (i < lst.Count)
-                {
-                    t = lst[i];
-                    foreach (Transform child in t)
-                    {
-                        lst.Add(child);
-                    }
-                    i++;
-                }
-
+                GetAllChildrenAndSelf(t, lst);
                 return lst.ToArray();
+            }
+        }
+
+        public static void GetAllChildrenAndSelf(this Transform t, IList<Transform> lst)
+        {
+            lst.Add(t);
+
+            int i = 0;
+            while (i < lst.Count)
+            {
+                t = lst[i];
+                foreach (Transform child in t)
+                {
+                    lst.Add(child);
+                }
+                i++;
             }
         }
 

@@ -10,21 +10,8 @@ namespace com.spacepuppy
     public interface INotificationDispatcher
     {
 
-        void RegisterObserver<T>(NotificationHandler<T> handler) where T : Notification;
+        NotificationDispatcher Observers { get; }
 
-        void RemoveObserver<T>(NotificationHandler<T> handler) where T : Notification;
-
-        bool HasObserver<T>(bool bNotifyEntity) where T : Notification;
-
-        bool PostNotification<T>(T n, bool bNotifyEntity) where T : Notification;
-
-
-        void UnsafeRegisterObserver(System.Type tp, NotificationHandler handler);
-        void UnsafeRemoveObserver(System.Type tp, NotificationHandler handler);
-        bool HasObserver(System.Type tp, bool bNotifyEntity);
-        bool UnsafePostNotification(Notification n, bool bNotifyEntity);
-
-        void PurgeHandlers();
     }
 
     public class NotificationDispatcher : INotificationDispatcher
@@ -73,7 +60,7 @@ namespace com.spacepuppy
             return _handlers.Keys.Union(_unsafeHandlers.Keys).ToArray();
         }
 
-        #region INotificationDispatcher Interface
+        #region Methods
 
         public void RegisterObserver<T>(NotificationHandler<T> handler) where T : Notification
         {
@@ -194,7 +181,7 @@ namespace com.spacepuppy
 
             if (!object.ReferenceEquals(_ownerGameObject, _owner))
             {
-                if (_ownerGameObject.HasObserver(tp, false)) return true;
+                if (_ownerGameObject.Observers.HasObserver(tp, false)) return true;
             }
 
             if (bNotifyEntity)
@@ -204,7 +191,7 @@ namespace com.spacepuppy
                 GameObjectNotificationDispatcher dispatcher;
                 if (root != _ownerGameObject.gameObject && root.GetComponent<GameObjectNotificationDispatcher>(out dispatcher))
                 {
-                    if (dispatcher._dispatcher.HasObserver_Imp(tp, false)) return true;
+                    if (dispatcher.Observers.HasObserver_Imp(tp, false)) return true;
                 }
             }
 
@@ -222,7 +209,7 @@ namespace com.spacepuppy
             {
                 if (!Object.ReferenceEquals(_owner, _ownerGameObject))
                 {
-                    if (_ownerGameObject._dispatcher.PostNotificationToJustSelf(tp, _owner, n)) handled = true;
+                    if (_ownerGameObject.Observers.PostNotificationToJustSelf(tp, _owner, n)) handled = true;
                 }
 
                 if (bNotifyEntity)
@@ -232,7 +219,7 @@ namespace com.spacepuppy
                     GameObjectNotificationDispatcher dispatcher;
                     if (root != _ownerGameObject.gameObject && root.GetComponent<GameObjectNotificationDispatcher>(out dispatcher))
                     {
-                        if (dispatcher._dispatcher.PostNotificationToJustSelf(tp, _owner, n)) handled = true;
+                        if (dispatcher.Observers.PostNotificationToJustSelf(tp, _owner, n)) handled = true;
                     }
                     //root.BroadcastMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, n, UnityEngine.SendMessageOptions.DontRequireReceiver);
                 }
@@ -336,6 +323,15 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region INotificationDispatcher Interface
+
+        NotificationDispatcher INotificationDispatcher.Observers
+        {
+            get { return this; }
+        }
+
+        #endregion
+
     }
 
     [DisallowMultipleComponent()]
@@ -344,7 +340,7 @@ namespace com.spacepuppy
 
         #region Fields
 
-        internal NotificationDispatcher _dispatcher = new NotificationDispatcher();
+        private NotificationDispatcher _observers = new NotificationDispatcher();
 
         #endregion
 
@@ -352,74 +348,30 @@ namespace com.spacepuppy
 
         private void Awake()
         {
-            _dispatcher.SetOwner(this);
+            _observers.SetOwner(this);
         }
 
         private void OnDestroy()
         {
-            _dispatcher.PurgeHandlers();
+            _observers.PurgeHandlers();
         }
 
         private void OnDespawn()
         {
-            _dispatcher.PurgeHandlers();
+            _observers.PurgeHandlers();
         }
 
         #endregion
 
         public System.Type[] ListObserveredNotifications()
         {
-            return _dispatcher.ListObservedNotifications();
+            return _observers.ListObservedNotifications();
         }
 
-        #region INotificationDispatcher Interface
-
-        public void RegisterObserver<T>(NotificationHandler<T> handler) where T : Notification
+        public NotificationDispatcher Observers
         {
-            _dispatcher.RegisterObserver<T>(handler);
+            get { return _observers; }
         }
-
-        public void RemoveObserver<T>(NotificationHandler<T> handler) where T : Notification
-        {
-            _dispatcher.RemoveObserver<T>(handler);
-        }
-
-        public bool HasObserver<T>(bool bNotifyEntity) where T : Notification
-        {
-            return _dispatcher.HasObserver<T>(bNotifyEntity);
-        }
-
-        public bool PostNotification<T>(T n, bool bNotifyEntity) where T : Notification
-        {
-            return _dispatcher.PostNotification<T>(n, bNotifyEntity);
-        }
-
-        public void UnsafeRegisterObserver(System.Type tp, NotificationHandler handler)
-        {
-            _dispatcher.UnsafeRegisterObserver(tp, handler);
-        }
-
-        public void UnsafeRemoveObserver(System.Type tp, NotificationHandler handler)
-        {
-            _dispatcher.UnsafeRemoveObserver(tp, handler);
-        }
-
-        public bool HasObserver(System.Type tp, bool bNotifyEntity)
-        {
-            return _dispatcher.HasObserver(tp, bNotifyEntity);
-        }
-
-        public bool UnsafePostNotification(Notification n, bool bNotifyEntity)
-        {
-            return _dispatcher.UnsafePostNotification(n, bNotifyEntity);
-        }
-
-        public void PurgeHandlers()
-        {
-            _dispatcher.PurgeHandlers();
-        }
-
-        #endregion
 
     }
 

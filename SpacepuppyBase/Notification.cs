@@ -186,7 +186,7 @@ namespace com.spacepuppy
             if (sender == null) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            sender.RegisterObserver<T>(handler);
+            sender.Observers.RegisterObserver<T>(handler);
         }
 
         public static void RegisterObserver<T>(object sender, NotificationHandler<T> handler) where T : Notification
@@ -196,12 +196,12 @@ namespace com.spacepuppy
 
             if (sender is INotificationDispatcher)
             {
-                (sender as INotificationDispatcher).RegisterObserver<T>(handler);
+                (sender as INotificationDispatcher).Observers.RegisterObserver<T>(handler);
             }
             else if (GameObjectUtil.IsGameObjectSource(sender))
             {
                 var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
-                dispatcher.RegisterObserver<T>(handler);
+                dispatcher.Observers.RegisterObserver<T>(handler);
             }
             else
             {
@@ -214,7 +214,7 @@ namespace com.spacepuppy
             if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            sender.RemoveObserver<T>(handler);
+            sender.Observers.RemoveObserver<T>(handler);
         }
 
         public static void RemoveObserver<T>(object sender, NotificationHandler<T> handler) where T : Notification
@@ -224,12 +224,12 @@ namespace com.spacepuppy
 
             if (sender is INotificationDispatcher)
             {
-                (sender as INotificationDispatcher).RemoveObserver<T>(handler);
+                (sender as INotificationDispatcher).Observers.RemoveObserver<T>(handler);
             }
             else if (GameObjectUtil.IsGameObjectSource(sender))
             {
                 var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
-                if (dispatcher != null) dispatcher.RemoveObserver<T>(handler);
+                if (dispatcher != null) dispatcher.Observers.RemoveObserver<T>(handler);
             }
             else
             {
@@ -244,7 +244,7 @@ namespace com.spacepuppy
             if (sender == null) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            sender.UnsafeRegisterObserver(notificationType, handler);
+            sender.Observers.UnsafeRegisterObserver(notificationType, handler);
         }
 
         public static void UnsafeRegisterObserver(System.Type notificationType, object sender, NotificationHandler handler)
@@ -256,12 +256,12 @@ namespace com.spacepuppy
 
             if (sender is INotificationDispatcher)
             {
-                (sender as INotificationDispatcher).UnsafeRegisterObserver(notificationType, handler);
+                (sender as INotificationDispatcher).Observers.UnsafeRegisterObserver(notificationType, handler);
             }
             else if (GameObjectUtil.IsGameObjectSource(sender))
             {
                 var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
-                dispatcher.UnsafeRegisterObserver(notificationType, handler);
+                dispatcher.Observers.UnsafeRegisterObserver(notificationType, handler);
             }
             else
             {
@@ -276,7 +276,7 @@ namespace com.spacepuppy
             if (object.ReferenceEquals(sender, null)) throw new System.ArgumentNullException("sender");
             if (handler == null) throw new System.ArgumentNullException("handler");
 
-            sender.UnsafeRemoveObserver(notificationType, handler);
+            sender.Observers.UnsafeRemoveObserver(notificationType, handler);
         }
 
         public static void UnsafeRemoveObserver(System.Type notificationType, object sender, NotificationHandler handler)
@@ -288,12 +288,12 @@ namespace com.spacepuppy
 
             if (sender is INotificationDispatcher)
             {
-                (sender as INotificationDispatcher).UnsafeRemoveObserver(notificationType, handler);
+                (sender as INotificationDispatcher).Observers.UnsafeRemoveObserver(notificationType, handler);
             }
             else if (GameObjectUtil.IsGameObjectSource(sender))
             {
                 var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
-                if (dispatcher != null) dispatcher.UnsafeRemoveObserver(notificationType, handler);
+                if (dispatcher != null) dispatcher.Observers.UnsafeRemoveObserver(notificationType, handler);
             }
             else
             {
@@ -305,7 +305,7 @@ namespace com.spacepuppy
         {
             if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
-            return sender.HasObserver<T>(bNotifyEntity);
+            return sender.Observers.HasObserver<T>(bNotifyEntity);
         }
 
         public static bool HasObserver<T>(object sender, bool bNotifyEntity = false) where T : Notification
@@ -314,19 +314,19 @@ namespace com.spacepuppy
 
             if (sender is INotificationDispatcher)
             {
-                return (sender as INotificationDispatcher).HasObserver<T>(bNotifyEntity);
+                return (sender as INotificationDispatcher).Observers.HasObserver<T>(bNotifyEntity);
             }
             else if (GameObjectUtil.IsGameObjectSource(sender))
             {
                 if (bNotifyEntity)
                 {
                     var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher.HasObserver<T>(bNotifyEntity);
+                    return dispatcher.Observers.HasObserver<T>(bNotifyEntity);
                 }
                 else
                 {
                     var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher != null && dispatcher.HasObserver<T>(bNotifyEntity);
+                    return dispatcher != null && dispatcher.Observers.HasObserver<T>(bNotifyEntity);
                 }
             }
             else
@@ -340,7 +340,7 @@ namespace com.spacepuppy
             if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (object.ReferenceEquals(sender, null)) throw new ArgumentNullException("sender");
 
-            return sender.HasObserver(notificationType, bNotifyEntity);
+            return sender.Observers.HasObserver(notificationType, bNotifyEntity);
         }
 
         public static bool HasObserver(System.Type notificationType, object sender, bool bNotifyEntity = false)
@@ -351,19 +351,19 @@ namespace com.spacepuppy
 
             if (sender is INotificationDispatcher)
             {
-                return (sender as INotificationDispatcher).HasObserver(notificationType, bNotifyEntity);
+                return (sender as INotificationDispatcher).Observers.HasObserver(notificationType, bNotifyEntity);
             }
             else if (GameObjectUtil.IsGameObjectSource(sender))
             {
                 if (bNotifyEntity)
                 {
                     var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher.HasObserver(notificationType, bNotifyEntity);
+                    return dispatcher.Observers.HasObserver(notificationType, bNotifyEntity);
                 }
                 else
                 {
                     var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher != null && dispatcher.HasObserver(notificationType, bNotifyEntity);
+                    return dispatcher != null && dispatcher.Observers.HasObserver(notificationType, bNotifyEntity);
                 }
             }
             else
@@ -393,7 +393,7 @@ namespace com.spacepuppy
             if (sender == null) throw new ArgumentNullException("sender");
             if (notification == null) throw new ArgumentNullException("notification");
 
-            return sender.PostNotification<T>(notification, bNotifyEntity);
+            return sender.Observers.PostNotification<T>(notification, bNotifyEntity);
         }
 
         public static bool PostNotification<T>(UnityEngine.GameObject sender, T notification, bool bNotifyEntity = false) where T : Notification
@@ -404,12 +404,12 @@ namespace com.spacepuppy
             if (bNotifyEntity)
             {
                 var dispatcher = sender.AddOrGetComponent<GameObjectNotificationDispatcher>();
-                return dispatcher.PostNotification<T>(notification, bNotifyEntity);
+                return dispatcher.Observers.PostNotification<T>(notification, bNotifyEntity);
             }
             else
             {
                 var dispatcher = sender.GetComponent<GameObjectNotificationDispatcher>();
-                return dispatcher != null && dispatcher.PostNotification<T>(notification, bNotifyEntity);
+                return dispatcher != null && dispatcher.Observers.PostNotification<T>(notification, bNotifyEntity);
             }
         }
 
@@ -418,7 +418,7 @@ namespace com.spacepuppy
             if (sender == null) throw new ArgumentNullException("sender");
             if (notification == null) throw new ArgumentNullException("notification");
 
-            return sender.UnsafePostNotification(notification, bNotifyEntity);
+            return sender.Observers.UnsafePostNotification(notification, bNotifyEntity);
         }
 
         public static bool UnsafePostNotification(object sender, Notification notification, bool bNotifyEntity = false)
@@ -428,19 +428,19 @@ namespace com.spacepuppy
 
             if (sender is INotificationDispatcher)
             {
-                return (sender as INotificationDispatcher).UnsafePostNotification(notification, bNotifyEntity);
+                return (sender as INotificationDispatcher).Observers.UnsafePostNotification(notification, bNotifyEntity);
             }
             else if (GameObjectUtil.IsGameObjectSource(sender))
             {
                 if (bNotifyEntity)
                 {
                     var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).AddOrGetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher.UnsafePostNotification(notification, bNotifyEntity);
+                    return dispatcher.Observers.UnsafePostNotification(notification, bNotifyEntity);
                 }
                 else
                 {
                     var dispatcher = GameObjectUtil.GetGameObjectFromSource(sender).GetComponent<GameObjectNotificationDispatcher>();
-                    return dispatcher != null && dispatcher.UnsafePostNotification(notification, bNotifyEntity);
+                    return dispatcher != null && dispatcher.Observers.UnsafePostNotification(notification, bNotifyEntity);
                 }
             }
             else
@@ -491,7 +491,7 @@ namespace com.spacepuppy
         {
             foreach (var c in go.GetComponentsAlt<INotificationDispatcher>())
             {
-                c.PurgeHandlers();
+                c.Observers.PurgeHandlers();
             }
         }
 

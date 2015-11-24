@@ -60,7 +60,7 @@ namespace com.spacepuppyeditor.Base.Commands
                 {
                     _window = EditorWindow.GetWindow<ComponentSearchWindow>();
                     _window._mode = 0;
-                    _window._targetScript = script;
+                    _window._targetScript = script.GetClass();
                     _window._forceRefresh = true;
                     _window.Show();
                     _window.position = new Rect(20, 80, 500, 300);
@@ -68,7 +68,7 @@ namespace com.spacepuppyeditor.Base.Commands
                 else
                 {
                     _window._mode = 0;
-                    _window._targetScript = script;
+                    _window._targetScript = script.GetClass();
                     _window._forceRefresh = true;
                     _window.Focus();
                 }
@@ -92,7 +92,7 @@ namespace com.spacepuppyeditor.Base.Commands
         private List<GameObject> _sceneResults = new List<GameObject>();
         private bool _forceRefresh;
 
-        private MonoScript _targetScript;
+        private System.Type _targetScript;
 
         private Vector2 _scrollPos;
 
@@ -118,7 +118,8 @@ namespace com.spacepuppyeditor.Base.Commands
             {
                 case 0:
                     EditorGUI.BeginChangeCheck();
-                    _targetScript = EditorGUILayout.ObjectField(_targetScript, typeof(MonoScript), false) as MonoScript;
+                    //_targetScript = EditorGUILayout.ObjectField(_targetScript, typeof(MonoScript), false) as MonoScript;
+                    _targetScript = SPEditorGUILayout.TypeDropDown(GUIContent.none, typeof(Component), _targetScript, false, false);
                     if (EditorGUI.EndChangeCheck() || _forceRefresh)
                     {
                         this.FillBySearchForComponentUsage(false);
@@ -128,7 +129,7 @@ namespace com.spacepuppyeditor.Base.Commands
                         var msgStyle = new GUIStyle(GUI.skin.label);
                         msgStyle.alignment = TextAnchor.MiddleCenter;
                         msgStyle.fontStyle = FontStyle.Bold;
-                        string msg = (_targetScript == null) ? "Choose a script file." : "No prefabs use component " + _targetScript.name;
+                        string msg = (_targetScript == null) ? "Choose a script file." : "No prefabs use component " + _targetScript.FullName;
                         EditorGUI.LabelField(new Rect(0f, this.position.height / 2f, this.position.width, EditorGUIUtility.singleLineHeight), msg, msgStyle);
                     }
                     else
@@ -138,7 +139,8 @@ namespace com.spacepuppyeditor.Base.Commands
                     break;
                 case 1:
                     EditorGUI.BeginChangeCheck();
-                    _targetScript = EditorGUILayout.ObjectField(_targetScript, typeof(MonoScript), false) as MonoScript;
+                    //_targetScript = EditorGUILayout.ObjectField(_targetScript, typeof(MonoScript), false) as MonoScript;
+                    _targetScript = SPEditorGUILayout.TypeDropDown(GUIContent.none, typeof(Component), _targetScript, false, false);
                     if (EditorGUI.EndChangeCheck() || _forceRefresh)
                     {
                         this.FillBySearchForComponentUsage(true);
@@ -148,7 +150,7 @@ namespace com.spacepuppyeditor.Base.Commands
                         var msgStyle = new GUIStyle(GUI.skin.label);
                         msgStyle.alignment = TextAnchor.MiddleCenter;
                         msgStyle.fontStyle = FontStyle.Bold;
-                        string msg = (_targetScript == null) ? "Choose a script file." : "No scene objects use component " + _targetScript.name;
+                        string msg = (_targetScript == null) ? "Choose a script file." : "No scene objects use component " + _targetScript.FullName;
                         EditorGUI.LabelField(new Rect(0f, this.position.height / 2f, this.position.width, EditorGUIUtility.singleLineHeight), msg, msgStyle);
                     }
                     else
@@ -247,12 +249,12 @@ namespace com.spacepuppyeditor.Base.Commands
                 {
                     foreach (var go in GameObject.FindObjectsOfType<GameObject>())
                     {
-                        if (go.HasComponent(_targetScript.GetClass())) _sceneResults.Add(go);
+                        if (go.HasComponent(_targetScript)) _sceneResults.Add(go);
                     }
                 }
                 else
                 {
-                    _prefabResults.AddRange(PrefabHelper.GetAllPrefabAssetPathsDependentOn(_targetScript));
+                    _prefabResults.AddRange(PrefabHelper.GetAllPrefabAssetPathsDependantOn(_targetScript));
                 }
             }
         }

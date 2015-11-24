@@ -16,7 +16,7 @@ namespace com.spacepuppy
         public WaitForNotification(INotificationDispatcher dispatcher, System.Func<T, bool> ignoreCheck = null)
         {
             _dispatcher = dispatcher;
-            _dispatcher.RegisterObserver<T>(this.OnNotification);
+            _dispatcher.Observers.RegisterObserver<T>(this.OnNotification);
             _ignoreCheck = ignoreCheck;
         }
 
@@ -27,7 +27,7 @@ namespace com.spacepuppy
             if (_ignoreCheck != null && _ignoreCheck(n)) return;
 
             _notification = n;
-            _dispatcher.RemoveObserver<T>(this.OnNotification);
+            _dispatcher.Observers.RemoveObserver<T>(this.OnNotification);
             this.SetSignal();
         }
 

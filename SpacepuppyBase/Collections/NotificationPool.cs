@@ -16,8 +16,18 @@ namespace com.spacepuppy.Collections
 
         #region Fields
 
-        private List<INotificationDispatcher> _lst = new List<INotificationDispatcher>();
+        private HashSet<INotificationDispatcher> _coll = new HashSet<INotificationDispatcher>();
         private List<System.Type> _registeredNotifications = new List<System.Type>();
+        private NotificationHandler _genericHandler;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public NotificationPool()
+        {
+            _genericHandler = new NotificationHandler(this.HandleGenericNotification);
+        }
 
         #endregion
 
@@ -29,9 +39,10 @@ namespace com.spacepuppy.Collections
             if (_registeredNotifications.Contains(notificationType)) return;
             _registeredNotifications.Add(notificationType);
 
-            foreach (var d in _lst)
+            var e = _coll.GetEnumerator();
+            while(e.MoveNext())
             {
-                d.UnsafeRegisterObserver(notificationType, this.HandleGenericNotification);
+                e.Current.Observers.UnsafeRegisterObserver(notificationType, _genericHandler);
             }
         }
 
@@ -41,9 +52,10 @@ namespace com.spacepuppy.Collections
             if (_registeredNotifications.Contains(notificationType)) return;
             _registeredNotifications.Add(notificationType);
 
-            foreach (var d in _lst)
+            var e = _coll.GetEnumerator();
+            while (e.MoveNext())
             {
-                d.UnsafeRegisterObserver(notificationType, this.HandleGenericNotification);
+                e.Current.Observers.UnsafeRegisterObserver(notificationType, _genericHandler);
             }
         }
 
@@ -52,9 +64,10 @@ namespace com.spacepuppy.Collections
             var notificationType = typeof(T);
             if (_registeredNotifications.Remove(notificationType))
             {
-                foreach (var d in _lst)
+                var e = _coll.GetEnumerator();
+                while (e.MoveNext())
                 {
-                    d.UnsafeRemoveObserver(notificationType, this.HandleGenericNotification);
+                    e.Current.Observers.UnsafeRemoveObserver(notificationType, _genericHandler);
                 }
             }
         }
@@ -64,9 +77,10 @@ namespace com.spacepuppy.Collections
             if (notificationType == null || !TypeUtil.IsType(notificationType, typeof(Notification))) throw new TypeArgumentMismatchException(notificationType, typeof(Notification), "notificationType");
             if (_registeredNotifications.Remove(notificationType))
             {
-                foreach (var d in _lst)
+                var e = _coll.GetEnumerator();
+                while (e.MoveNext())
                 {
-                    d.UnsafeRemoveObserver(notificationType, this.HandleGenericNotification);
+                    e.Current.Observers.UnsafeRemoveObserver(notificationType, _genericHandler);
                 }
             }
         }
@@ -93,21 +107,32 @@ namespace com.spacepuppy.Collections
         public bool Contains(GameObject go)
         {
             if (go == null) throw new System.ArgumentNullException("go");
-
-            foreach (var d in go.GetComponentsAlt<INotificationDispatcher>())
+            
+            using (var lst = TempCollection.GetList<INotificationDispatcher>())
             {
-                if (this.Contains(d)) return true;
+                go.GetComponentsAlt<INotificationDispatcher>(lst);
+                var e = lst.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    if (this.Contains(e.Current)) return true;
+                }
             }
+
             return false;
         }
 
         public void Remove(GameObject go)
         {
             if (go == null) throw new System.ArgumentNullException("go");
-
-            foreach (var d in go.GetComponentsAlt<INotificationDispatcher>())
+            
+            using (var lst = TempCollection.GetList<INotificationDispatcher>())
             {
-                if (_lst.Contains(d)) this.Remove(d);
+                go.GetComponentsAlt<INotificationDispatcher>(lst);
+                var e = lst.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (_coll.Contains(e.Current)) this.Remove(e.Current);
+                }
             }
         }
 
@@ -126,7 +151,7 @@ namespace com.spacepuppy.Collections
 
         public int Count
         {
-            get { return _lst.Count; }
+            get { return _coll.Count; }
         }
 
         public bool IsReadOnly
@@ -137,45 +162,49 @@ namespace com.spacepuppy.Collections
         public void Add(INotificationDispatcher item)
         {
             if (item == null) throw new System.ArgumentNullException("item");
-            if (_lst.Contains(item)) return;
+            if (_coll.Contains(item)) return;
 
-            _lst.Add(item);
-            foreach (var tp in _registeredNotifications)
+            _coll.Add(item);
+            var e = _registeredNotifications.GetEnumerator();
+            while(e.MoveNext())
             {
-                item.UnsafeRegisterObserver(tp, this.HandleGenericNotification);
+                item.Observers.UnsafeRegisterObserver(e.Current, _genericHandler);
             }
         }
 
         public void Clear()
         {
-            foreach (var d in _lst)
+            var e = _coll.GetEnumerator();
+            while(e.MoveNext())
             {
-                foreach (var tp in _registeredNotifications)
+                var e2 = _registeredNotifications.GetEnumerator();
+                while(e2.MoveNext())
                 {
-                    d.UnsafeRemoveObserver(tp, this.HandleGenericNotification);
+                    e.Current.Observers.UnsafeRemoveObserver(e2.Current, _genericHandler);
                 }
             }
 
-            _lst.Clear();
+            _coll.Clear();
         }
 
         public bool Contains(INotificationDispatcher item)
         {
-            return _lst.Contains(item);
+            return _coll.Contains(item);
         }
 
         public void CopyTo(INotificationDispatcher[] array, int arrayIndex)
         {
-            _lst.CopyTo(array, arrayIndex);
+            _coll.CopyTo(array, arrayIndex);
         }
 
         public bool Remove(INotificationDispatcher item)
         {
-            if (_lst.Remove(item))
+            if (_coll.Remove(item))
             {
-                foreach (var tp in _registeredNotifications)
+                var e = _registeredNotifications.GetEnumerator();
+                while(e.MoveNext())
                 {
-                    item.UnsafeRemoveObserver(tp, this.HandleGenericNotification);
+                    item.Observers.UnsafeRemoveObserver(e.Current, _genericHandler);
                 }
                 return true;
             }
@@ -187,12 +216,12 @@ namespace com.spacepuppy.Collections
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _lst.GetEnumerator();
+            return _coll.GetEnumerator();
         }
 
         public IEnumerator<INotificationDispatcher> GetEnumerator()
         {
-            return _lst.GetEnumerator();
+            return _coll.GetEnumerator();
         }
 
         #endregion
