@@ -294,7 +294,7 @@ namespace com.spacepuppy.Scenario
                             }
                         }
 
-                        if(args.Length == 1)
+                        if(args != null && args.Length == 1)
                         {
                             DynamicUtil.SetValue(this._triggerable, this._methodName, args[0]);
                         }
