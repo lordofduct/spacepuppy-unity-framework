@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Render
 {
     public static class MaterialUtil
@@ -23,6 +25,17 @@ namespace com.spacepuppy.Render
                 else
                     return (obj as Renderer).material;
             }
+
+            //var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            //if(go != null)
+            //{
+            //    var r = go.GetComponent<Renderer>();
+            //    if (useSharedMaterial)
+            //        return r.sharedMaterial;
+            //    else
+            //        return r.material;
+            //}
+
             return null;
         }
 
@@ -36,6 +49,16 @@ namespace com.spacepuppy.Render
                 if (index >= arr.Length) return null;
                 return arr[index];
             }
+
+            //var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            //if (go != null)
+            //{
+            //    var r = go.GetComponent<Renderer>();
+            //    var arr = (useSharedMaterial) ? r.sharedMaterials : r.materials;
+            //    if (index >= arr.Length) return null;
+            //    return arr[index];
+            //}
+
             return null;
         }
 

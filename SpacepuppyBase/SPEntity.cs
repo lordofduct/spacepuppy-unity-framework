@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
@@ -116,25 +117,31 @@ namespace com.spacepuppy
 
         #region IIgnorableCollision Interface
         
-        public void IgnoreCollision(Collider coll, bool ignore)
+        public virtual void IgnoreCollision(Collider coll, bool ignore)
         {
             if (coll == null) return;
-
-            var arr = this.GetComponentsInChildren<Collider>();
-            for(int i = 0; i < arr.Length; i++)
+            
+            using (var lst = TempCollection.GetList<Collider>())
             {
-                Physics.IgnoreCollision(arr[i], coll, ignore);
+                this.GetComponentsInChildren<Collider>(false, lst);
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    Physics.IgnoreCollision(lst[i], coll, ignore);
+                }
             }
         }
 
-        public void IgnoreCollision(IIgnorableCollision coll, bool ignore)
+        public virtual void IgnoreCollision(IIgnorableCollision coll, bool ignore)
         {
             if (coll == null) return;
-
-            var arr = this.GetComponentsInChildren<Collider>();
-            for (int i = 0; i < arr.Length; i++)
+            
+            using (var lst = TempCollection.GetList<Collider>())
             {
-                coll.IgnoreCollision(arr[i], ignore);
+                this.GetComponentsInChildren<Collider>(false, lst);
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    coll.IgnoreCollision(lst[i], ignore);
+                }
             }
         }
 

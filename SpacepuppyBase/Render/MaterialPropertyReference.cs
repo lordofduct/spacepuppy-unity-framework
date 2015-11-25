@@ -104,6 +104,9 @@ namespace com.spacepuppy.Render
                 case MaterialPropertyValueType.Vector:
                     mat.SetVector(_propertyName, ConvertUtil.ToVector4(value));
                     break;
+                case MaterialPropertyValueType.Texture:
+                    mat.SetTexture(_propertyName, value as Texture);
+                    break;
             }
         }
 
@@ -156,6 +159,8 @@ namespace com.spacepuppy.Render
                         return mat.GetColor(_propertyName);
                     case MaterialPropertyValueType.Vector:
                         return mat.GetVector(_propertyName);
+                    case MaterialPropertyValueType.Texture:
+                        return mat.GetTexture(_propertyName);
                 }
             }
             catch

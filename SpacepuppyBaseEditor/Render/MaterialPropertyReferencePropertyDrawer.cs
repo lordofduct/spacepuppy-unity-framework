@@ -6,6 +6,7 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Collections;
 using com.spacepuppy.Render;
+using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Base;
 using com.spacepuppyeditor.Internal;
@@ -47,7 +48,11 @@ namespace com.spacepuppyeditor.Render
             matProp.objectReferenceValue = EditorGUI.ObjectField(r1, matProp.objectReferenceValue, typeof(UnityEngine.Object), true);
             if (EditorGUI.EndChangeCheck())
             {
-                if (!MaterialUtil.IsMaterialSource(matProp.objectReferenceValue)) matProp.objectReferenceValue = null;
+                if (!MaterialUtil.IsMaterialSource(matProp.objectReferenceValue))
+                {
+                    var go = GameObjectUtil.GetGameObjectFromSource(matProp.objectReferenceValue);
+                    matProp.objectReferenceValue = (go != null) ? go.GetComponent<Renderer>() : null;
+                }
             }
 
             var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue, useSharedProp.boolValue);

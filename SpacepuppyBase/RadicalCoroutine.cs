@@ -420,7 +420,15 @@ namespace com.spacepuppy
             if (handle == null) throw new System.ArgumentNullException("handle");
 
             _state = RadicalCoroutineOperatingState.Active;
-            bool result = (this as IEnumerator).MoveNext();
+            bool result = false;
+            try
+            {
+                result = (this as IEnumerator).MoveNext();
+            }
+            catch(System.Exception ex)
+            {
+                Debug.LogException(ex, handle);
+            }
             if (_state == RadicalCoroutineOperatingState.Active) _state = RadicalCoroutineOperatingState.Inactive;
 
             if (result)

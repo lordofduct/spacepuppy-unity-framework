@@ -17,6 +17,9 @@ namespace com.spacepuppy.Render
         [System.NonSerialized()]
         private bool _flashing;
 
+        [System.NonSerialized()]
+        private RadicalCoroutine _flashRoutine;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -45,15 +48,20 @@ namespace com.spacepuppy.Render
             }
             if (!this.enabled) this.enabled = true;
 
+            if(_flashRoutine != null)
+            {
+                _flashRoutine.Cancel();
+                _flashRoutine = null;
+            }
+
             if (_flashing)
             {
                 //already started, just replace
                 _renderer.material = mat;
-
-                this.CancelInvoke("InvokeCallback");
-                if(duration < float.PositiveInfinity)
+                
+                if (duration < float.PositiveInfinity)
                 {
-                    this.Invoke("InvokeCallback", duration);
+                    _flashRoutine = this.InvokeRadical(this.StopSwap, duration);
                 }
             }
             else
@@ -61,10 +69,11 @@ namespace com.spacepuppy.Render
                 //start a new
                 _matCache = _renderer.material;
                 _renderer.material = mat;
+                _flashing = true;
 
                 if (duration < float.PositiveInfinity)
                 {
-                    this.Invoke("InvokeCallback", duration);
+                    _flashRoutine = this.InvokeRadical(this.StopSwap, duration);
                 }
             }
         }
@@ -78,13 +87,14 @@ namespace com.spacepuppy.Render
                 _flashing = false;
                 this.enabled = false;
             }
-        }
 
-        private void InvokeCallback()
-        {
-            this.StopSwap();
+            if (_flashRoutine != null)
+            {
+                _flashRoutine.Cancel();
+                _flashRoutine = null;
+            }
         }
-
+        
         #endregion
 
         #region Static Factory

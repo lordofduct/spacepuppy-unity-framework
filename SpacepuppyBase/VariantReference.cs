@@ -943,6 +943,19 @@ namespace com.spacepuppy
 
         #region Methods
 
+        /// <summary>
+        /// If variant reference is in Property mode, this will SET the target property.
+        /// </summary>
+        /// <param name="value"></param>
+        public void ModifyProperty(object value)
+        {
+            if (_mode != RefMode.Property) return;
+
+
+
+            DynamicUtil.SetValue(_unityObjectReference, _string, value);
+        }
+
         public void SetToProperty(UnityEngine.Object obj, string property)
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
