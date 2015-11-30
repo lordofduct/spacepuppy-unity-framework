@@ -321,6 +321,33 @@ namespace com.spacepuppy.Utils
             return v + axis * d;
         }
 
+        public static Vector2 Average(Vector2 a, Vector2 b)
+        {
+            return (a + b) / 2f;
+        }
+
+        public static Vector2 Average(Vector2 a, Vector2 b, Vector2 c)
+        {
+            return (a + b + c) / 3f;
+        }
+
+        public static Vector2 Average(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
+        {
+            return (a + b + c + d) / 4f;
+        }
+
+        public static Vector2 Average(params Vector2[] values)
+        {
+            if (values == null || values.Length == 0) return Vector3.zero;
+
+            Vector2 v = Vector2.zero;
+            for (int i = 0; i < values.Length; i++)
+            {
+                v += values[i];
+            }
+            return v / values.Length;
+        }
+
         #endregion
 
         #region Vector3 Mod
@@ -336,6 +363,33 @@ namespace com.spacepuppy.Utils
             axis.Normalize();
             var d = len - Vector3.Dot(v, axis);
             return v + axis * d;
+        }
+
+        public static Vector3 Average(Vector3 a, Vector3 b)
+        {
+            return (a + b) / 2f;
+        }
+
+        public static Vector3 Average(Vector3 a, Vector3 b, Vector3 c)
+        {
+            return (a + b + c) / 3f;
+        }
+
+        public static Vector3 Average(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            return (a + b + c + d) / 4f;
+        }
+
+        public static Vector3 Average(params Vector3[] values)
+        {
+            if (values == null || values.Length == 0) return Vector3.zero;
+
+            Vector3 v = Vector3.zero;
+            for(int i = 0; i < values.Length; i++)
+            {
+                v += values[i];
+            }
+            return v / values.Length;
         }
 
         #endregion

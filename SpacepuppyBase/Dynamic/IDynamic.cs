@@ -565,6 +565,30 @@ namespace com.spacepuppy.Dynamic
             //    return null;
         }
 
+        public static object GetValueWithMember(MemberInfo info, object targObj)
+        {
+            if (info == null) return null;
+
+            try
+            {
+                switch (info.MemberType)
+                {
+                    case MemberTypes.Field:
+                        return (info as FieldInfo).GetValue(targObj);
+                    case MemberTypes.Property:
+                        return (info as PropertyInfo).GetValue(targObj, null);
+                    case MemberTypes.Method:
+                        return (info as MethodInfo).Invoke(targObj, null);
+                }
+            }
+            catch
+            {
+
+            }
+            
+            return null;
+        }
+
         public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(object obj, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite)
         {
             if (obj == null) yield break;

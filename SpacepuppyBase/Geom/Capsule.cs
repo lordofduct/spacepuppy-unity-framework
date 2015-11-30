@@ -72,6 +72,7 @@ namespace com.spacepuppy.Geom
             {
                 var c = this.Center;
                 var up = (_end - _start).normalized;
+                if (up == Vector3.zero) up = Vector3.up;
                 var change = up * (value - (_rad * 2.0f));
                 _start = c - change;
                 _end = c + change;

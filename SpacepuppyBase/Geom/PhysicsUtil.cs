@@ -20,7 +20,7 @@ namespace com.spacepuppy.Geom
 
             for (int i = 0; i < 32; i++)
             {
-                if (Physics.GetIgnoreLayerCollision(layer, i)) mask = mask | (1 << i);
+                if (!Physics.GetIgnoreLayerCollision(layer, i)) mask = mask | (1 << i);
             }
 
             return mask;
@@ -194,7 +194,7 @@ namespace com.spacepuppy.Geom
 
         public static Vector3 RepairHitSurfaceNormal(RaycastHit hit, int layerMask)
         {
-            if(hit.collider is MeshCollider)
+            if(hit.collider is MeshCollider && !(hit.collider as MeshCollider).convex)
             {
                 var collider = hit.collider as MeshCollider;
                 var mesh = collider.sharedMesh;

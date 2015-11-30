@@ -494,6 +494,21 @@ namespace com.spacepuppy.Utils
             return avg / values.Length;
         }
 
+        public static float Average(float a, float b)
+        {
+            return (a + b) / 2f;
+        }
+
+        public static float Average(float a, float b, float c)
+        {
+            return (a + b + c) / 3f;
+        }
+
+        public static float Average(float a, float b, float c, float d)
+        {
+            return (a + b + c + d) / 4f;
+        }
+
         public static float Average(params float[] values)
         {
             float avg = 0;

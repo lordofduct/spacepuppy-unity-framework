@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
 using com.spacepuppy.Geom;
 using com.spacepuppy.Utils;
 using com.spacepuppy.Dynamic;
@@ -867,18 +868,21 @@ namespace com.spacepuppyeditor
             if (targObj != null)
             {
                 var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property).ToArray();
+                var entries = new GUIContent[members.Length];
 
                 int index = -1;
                 for (int i = 0; i < members.Length; i++)
                 {
-                    if(members[i].Name == selectedMemberName)
+                    var m = members[i];
+                    entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj)));
+
+                    if (index < 0 && m.Name == selectedMemberName)
                     {
                         index = i;
-                        break;
                     }
                 }
-
-                index = EditorGUI.Popup(position, label, index, (from m in members select new GUIContent(string.Format("{0} ({1})", m.Name, DynamicUtil.GetReturnType(m).Name))).ToArray());
+                
+                index = EditorGUI.Popup(position, label, index, entries);
                 selectedMember = (index >= 0) ? members[index] : null;
                 return (selectedMember != null) ? selectedMember.Name : null;
             }

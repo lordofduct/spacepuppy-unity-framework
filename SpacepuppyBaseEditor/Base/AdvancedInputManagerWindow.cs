@@ -94,7 +94,7 @@ namespace com.spacepuppyeditor.Base
             if (_axesList.index < 0 || _axesList.index >= _axesList.serializedProperty.arraySize) return;
 
             var el = _axesList.serializedProperty.GetArrayElementAtIndex(_axesList.index);
-
+            el.isExpanded = true;
             EditorGUILayout.PropertyField(el, true);
         }
 
