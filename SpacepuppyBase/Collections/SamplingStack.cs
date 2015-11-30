@@ -148,14 +148,14 @@ namespace com.spacepuppy.Collections
 
         #region IEnumerable Interface
 
-        public IEnumerator<T> GetEnumerator()
+        public Enumerator GetEnumerator()
         {
-            int index = _head;
-            for(int i = 0; i < _count; i++)
-            {
-                yield return _values[index];
-                index = (index > 0) ? index - 1 : _values.Length - 1;
-            }
+            return new Enumerator(this);
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
