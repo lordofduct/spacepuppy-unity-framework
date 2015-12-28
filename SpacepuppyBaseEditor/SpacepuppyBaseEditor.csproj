@@ -63,6 +63,9 @@
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
+    <Compile Include="Cameras\CameraControllerInspector.cs" />
+    <Compile Include="Cameras\CameraMovementControllerInspector.cs" />
+    <Compile Include="Cameras\MultiCameraControllerInspector.cs" />
     <Compile Include="Components\SelectableObjectPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\SPEntityInspector.cs" />
     <Compile Include="Base\Inspectors\SPTimePropertyDrawer.cs" />

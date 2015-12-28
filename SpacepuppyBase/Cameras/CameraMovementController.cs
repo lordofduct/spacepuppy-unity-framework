@@ -15,24 +15,33 @@ namespace com.spacepuppy.Cameras
 
         #region Fields
 
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("TargetCamera")]
         [DefaultFromSelf()]
-        public Transform TargetCamera;
+        private Transform _targetCamera;
 
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("TetherTarget")]
         [Tooltip("A target that can be used by a movement style when updating the camera position.")]
-        public Transform TetherTarget;
+        private Transform _tetherTarget;
 
-        public UpdateSequence UseUpdateSequence = UpdateSequence.Update;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("UseUpdateSequence")]
+        private UpdateSequence _useUpdateSequence = UpdateSequence.Update;
 
         [DisableOnPlay()]
         [SerializeField()]
         [Tooltip("Camera states can be attached to GameObject children of this. Note - this makes changing states slower.")]
         private bool _allowStatesAsChildren;
         
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("StartingCameraStyle")]
+        private Component _startingCameraStyle;
+
+
+
         [System.NonSerialized()]
         private ITypedStateMachine<ICameraMovementControllerState> _stateMachine;
-
-        [SerializeField()]
-        public Component StartingCameraStyle;
 
         [System.NonSerialized()]
         private Coroutine _updateRoutine;
@@ -60,11 +69,11 @@ namespace com.spacepuppy.Cameras
         {
             base.Start();
 
-            if (this.StartingCameraStyle is ICameraMovementControllerState)
+            if (_startingCameraStyle is ICameraMovementControllerState)
             {
-                if (_stateMachine.Contains(this.StartingCameraStyle as ICameraMovementControllerState))
+                if (_stateMachine.Contains(_startingCameraStyle as ICameraMovementControllerState))
                 {
-                    _stateMachine.ChangeState(this.StartingCameraStyle as ICameraMovementControllerState);
+                    _stateMachine.ChangeState(_startingCameraStyle as ICameraMovementControllerState);
                 }
             }
         }
@@ -98,6 +107,30 @@ namespace com.spacepuppy.Cameras
 
         #region Properties
 
+        public Transform TargetCamera
+        {
+            get { return _targetCamera; }
+            set { _targetCamera = value; }
+        }
+
+        public Transform TetherTarget
+        {
+            get { return _tetherTarget; }
+            set { _tetherTarget = value; }
+        }
+
+        public UpdateSequence UseUpdateSequence
+        {
+            get { return _useUpdateSequence; }
+            set { _useUpdateSequence = value; }
+        }
+
+        public ICameraMovementControllerState StartingCameraStyle
+        {
+            get { return _startingCameraStyle as ICameraMovementControllerState; }
+            set { _startingCameraStyle = value as Component; }
+        }
+
         public ITypedStateMachine<ICameraMovementControllerState> States { get { return _stateMachine; } }
 
         #endregion
@@ -124,7 +157,7 @@ namespace com.spacepuppy.Cameras
 
             Restart:
 
-            switch(this.UseUpdateSequence)
+            switch(_useUpdateSequence)
             {
                 case UpdateSequence.None:
                 case UpdateSequence.Update:
@@ -138,7 +171,7 @@ namespace com.spacepuppy.Cameras
                     break;
             }
 
-            if (this.UseUpdateSequence != UpdateSequence.None && _stateMachine.Current != null)
+            if (_useUpdateSequence != UpdateSequence.None && _stateMachine.Current != null)
             {
                 _stateMachine.Current.UpdateMovement();
             }

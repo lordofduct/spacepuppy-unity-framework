@@ -32,7 +32,7 @@ namespace com.spacepuppyeditor
         protected virtual void OnEnable()
         {
             var tp = this.target.GetType();
-            var fields = tp.GetFields();
+            var fields = tp.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
             foreach(var f in fields)
             {
                 var attribs = f.GetCustomAttributes(typeof(ShowNonSerializedPropertyAttribute), false) as ShowNonSerializedPropertyAttribute[];

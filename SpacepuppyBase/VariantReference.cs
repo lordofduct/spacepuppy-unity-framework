@@ -943,6 +943,49 @@ namespace com.spacepuppy
 
         #region Methods
 
+        public object GetValue(VariantType etp)
+        {
+            switch (etp)
+            {
+                case VariantType.Object:
+                    return this.ObjectValue;
+                case VariantType.Null:
+                    return null;
+                case VariantType.String:
+                    return this.StringValue;
+                case VariantType.Boolean:
+                    return this.BoolValue;
+                case VariantType.Integer:
+                    return this.IntValue;
+                case VariantType.Float:
+                    return this.FloatValue;
+                case VariantType.Double:
+                    return this.DoubleValue;
+                case VariantType.Vector2:
+                    return this.Vector2Value;
+                case VariantType.Vector3:
+                    return this.Vector3Value;
+                case VariantType.Vector4:
+                    return this.Vector4Value;
+                case VariantType.Quaternion:
+                    return this.QuaternionValue;
+                case VariantType.Color:
+                    return this.ColorValue;
+                case VariantType.DateTime:
+                    return this.DateValue;
+                case VariantType.GameObject:
+                    return this.GameObjectValue;
+                case VariantType.Component:
+                    return this.ComponentValue;
+                case VariantType.LayerMask:
+                    return this.LayerMaskValue;
+                case VariantType.Rect:
+                    return this.RectValue;
+                default:
+                    return null;
+            }
+        }
+
         /// <summary>
         /// If variant reference is in Property mode, this will SET the target property.
         /// </summary>
@@ -950,9 +993,7 @@ namespace com.spacepuppy
         public void ModifyProperty(object value)
         {
             if (_mode != RefMode.Property) return;
-
-
-
+            
             DynamicUtil.SetValue(_unityObjectReference, _string, value);
         }
 

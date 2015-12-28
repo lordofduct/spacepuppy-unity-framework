@@ -22,8 +22,7 @@ namespace com.spacepuppy.Utils
                 if (meth != null)
                     _isObjectAlive = System.Delegate.CreateDelegate(typeof(System.Func<UnityEngine.Object, bool>), meth) as System.Func<UnityEngine.Object, bool>;
                 else
-                    _isObjectAlive = (a) => a == null;
-                //_isObjectAlive = (a) => a != null;
+                    _isObjectAlive = (a) => a != null;
             }
             catch
             {

@@ -45,7 +45,9 @@ namespace com.spacepuppy.Cameras
 
         #region Fields
 
-        public bool DestroyOnComplete;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("DestroyOnComplete")]
+        private bool _destroyOnComplete;
 
         private ITimeSupplier _timeSupplier;
 
@@ -57,6 +59,12 @@ namespace com.spacepuppy.Cameras
         #endregion
 
         #region Properties
+
+        public bool DestroyOnComplete
+        {
+            get { return _destroyOnComplete; }
+            set { _destroyOnComplete = value; }
+        }
         
         public ITimeSupplier TimeSupplier
         {

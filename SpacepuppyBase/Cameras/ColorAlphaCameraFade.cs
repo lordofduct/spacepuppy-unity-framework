@@ -11,10 +11,30 @@ namespace com.spacepuppy.Cameras
 
         #region Fields
 
-        public Color Color;
-        public int DrawDepth;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("Color")]
+        private Color _color;
+        [SerializeField()]
+        [UnityEngine.Serialization.FormerlySerializedAs("DrawDepth")]
+        private int _drawDepth;
 
         private float _currentOpacity = 0f;
+
+        #endregion
+
+        #region Properties
+
+        public Color Color
+        {
+            get { return _color; }
+            set { _color = value; }
+        }
+
+        public int DrawDepth
+        {
+            get { return _drawDepth; }
+            set { _drawDepth = value; }
+        }
 
         #endregion
 
@@ -29,10 +49,10 @@ namespace com.spacepuppy.Cameras
         {
             if (!this.IsActiveFade) return;
 
-            var c = this.Color;
+            var c = _color;
             c.a = _currentOpacity;
             GUI.color = c;
-            GUI.depth = DrawDepth;
+            GUI.depth = _drawDepth;
             GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), SPAssets.WhiteTexture);
         }
 

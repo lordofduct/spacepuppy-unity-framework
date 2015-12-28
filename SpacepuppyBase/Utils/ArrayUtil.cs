@@ -14,7 +14,14 @@ namespace com.spacepuppy.Utils
 
         public static bool IsEmpty(this IEnumerable lst)
         {
-            return !lst.GetEnumerator().MoveNext();
+            if(lst is IList)
+            {
+                return (lst as IList).Count == 0;
+            }
+            else
+            {
+                return !lst.GetEnumerator().MoveNext();
+            }
         }
 
         /// <summary>

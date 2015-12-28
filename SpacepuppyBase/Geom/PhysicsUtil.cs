@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Geom
@@ -84,6 +86,34 @@ namespace com.spacepuppy.Geom
             if (geom == null) throw new System.ArgumentNullException("geom");
 
             return geom.Overlap(layerMask).ToArray();
+        }
+
+        public static bool OverlapGeom(IPhysicsGeom geom, IList<Collider> lst)
+        {
+            if (geom == null) throw new System.ArgumentNullException("geom");
+
+            var e = LightEnumerator.Create(geom.Overlap(Physics.AllLayers));
+            bool added = false;
+            while (e.MoveNext())
+            {
+                added = true;
+                lst.Add(e.Current);
+            }
+            return added;
+        }
+
+        public static bool OverlapGeom(IPhysicsGeom geom, int layerMask, IList<Collider> lst)
+        {
+            if (geom == null) throw new System.ArgumentNullException("geom");
+
+            var e = LightEnumerator.Create(geom.Overlap(layerMask));
+            bool added = false;
+            while (e.MoveNext())
+            {
+                added = true;
+                lst.Add(e.Current);
+            }
+            return added;
         }
 
         #endregion
@@ -180,6 +210,24 @@ namespace com.spacepuppy.Geom
             for (int i = 0; i < detail; i++)
             {
                 var v = VectorUtil.RotateBy(initialAxis, a * i);
+                foreach (var h in geom.CastAll(v, dist, layerMask))
+                {
+                    yield return h;
+                }
+            }
+        }
+
+        public static IEnumerable<RaycastHit> RadialCast(IPhysicsGeom geom, float dist, int detail, int layerMask, Vector3 initialAxis, Vector3 rotationalAxis)
+        {
+            if (VectorUtil.NearZeroVector(initialAxis))
+                initialAxis = Vector2.right;
+            else
+                initialAxis.Normalize();
+            var a = 360f / (float)detail;
+
+            for (int i = 0; i < detail; i++)
+            {
+                var v = VectorUtil.RotateAroundAxis(initialAxis, a * i, rotationalAxis);
                 foreach (var h in geom.CastAll(v, dist, layerMask))
                 {
                     yield return h;
