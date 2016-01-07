@@ -543,7 +543,7 @@ namespace com.spacepuppyeditor
         public static System.Type TypeDropDown(Rect position, GUIContent label, 
                                                System.Type baseType, System.Type selectedType, 
                                                bool allowAbstractTypes = false, bool allowInterfaces = false, 
-                                               System.Type defaultType = null, System.Type[] excludedTypes = null, 
+                                               System.Type defaultType = null, System.Type[] excludedTypes = null,
                                                TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
         {
             /*

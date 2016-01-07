@@ -255,17 +255,17 @@ namespace com.spacepuppy.Collections
 
         #region Methods
 
-        public new void Add(T del)
+        public void Add(T del)
         {
             base.Add(del as Delegate);
         }
 
-        public new void Add(T del, float precedence, object tag = null)
+        public void Add(T del, float precedence, object tag = null)
         {
             base.Add(del as Delegate, precedence, tag);
         }
 
-        public new bool Remove(T del)
+        public bool Remove(T del)
         {
             return base.Remove(del as Delegate);
         }

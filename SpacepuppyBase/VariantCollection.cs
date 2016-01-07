@@ -80,6 +80,21 @@ namespace com.spacepuppy
             return this[key];
         }
 
+        public bool TryGetValue(string skey, out object result)
+        {
+            VariantReference v;
+            if(_table.TryGetValue(skey, out v))
+            {
+                result = v.Value;
+                return true;
+            }
+            else
+            {
+                result = null;
+                return false;
+            }
+        }
+
         public void SetValue(string key, object value)
         {
             this[key] = value;
@@ -127,7 +142,7 @@ namespace com.spacepuppy
         /// were property names on that object.
         /// </summary>
         /// <param name="obj"></param>
-        public void DynamicallyCopyTo(object obj)
+        public void CopyTo(object obj)
         {
             var e = _table.GetEnumerator();
             while(e.MoveNext())
@@ -141,7 +156,7 @@ namespace com.spacepuppy
         /// key to the value pulled from a property on object.
         /// </summary>
         /// <param name="obj"></param>
-        public void DynamicallyCopyFrom(object obj)
+        public void CopyFrom(object obj)
         {
             var e = _table.GetEnumerator();
             while(e.MoveNext())
@@ -150,7 +165,31 @@ namespace com.spacepuppy
             }
         }
 
-        public void DynamicallyTweenTo(com.spacepuppy.Tween.TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur)
+        /// <summary>
+        /// Lerp the target objects values to the state of the VarianteCollection. If the member doesn't have a current state/undefined, 
+        /// then the member is set to the current state in this VariantCollection.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="t"></param>
+        public void LerpTo(object obj, float t)
+        {
+            var e = _table.GetEnumerator();
+            while (e.MoveNext())
+            {
+                object value;
+                if (DynamicUtil.TryGetValue(obj, e.Current.Key, out value))
+                {
+                    value = Evaluator.TryLerp(value, e.Current.Value.Value, t);
+                    DynamicUtil.SetValue(obj, e.Current.Key, value);
+                }
+                else
+                {
+                    DynamicUtil.SetValue(obj, e.Current.Key, e.Current.Value.Value);
+                }
+            }
+        }
+
+        public void TweenTo(com.spacepuppy.Tween.TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur)
         {
             var e = _table.GetEnumerator();
             while (e.MoveNext())
@@ -173,7 +212,7 @@ namespace com.spacepuppy
                         break;
                 }
             }
-        } 
+        }
 
         #endregion
 
@@ -194,6 +233,11 @@ namespace com.spacepuppy
         object IDynamic.GetValue(string sMemberName, params object[] args)
         {
             return this[sMemberName];
+        }
+
+        bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
+        {
+            return this.TryGetValue(sMemberName, out result);
         }
 
         object IDynamic.InvokeMethod(string sMemberName, params object[] args)

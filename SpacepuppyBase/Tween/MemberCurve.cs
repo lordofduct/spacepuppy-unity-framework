@@ -113,7 +113,7 @@ namespace com.spacepuppy.Tween
             get { return _delay + _dur; }
         }
 
-        protected internal sealed override void Update(object targ, float dt, float t)
+        public sealed override void Update(object targ, float dt, float t)
         {
             if (t < _delay) return;
 

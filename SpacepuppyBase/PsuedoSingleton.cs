@@ -74,6 +74,11 @@ namespace com.spacepuppy
             return DynamicUtil.GetValue(PsuedoSingleton<T>.Instance, sMemberName, args);
         }
 
+        bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
+        {
+            return DynamicUtil.TryGetValue(PsuedoSingleton<T>.Instance, sMemberName, out result, args);
+        }
+
         bool IDynamic.HasMember(string sMemberName, bool includeNonPublic)
         {
             return DynamicUtil.HasMember(PsuedoSingleton<T>.Instance, sMemberName, includeNonPublic);

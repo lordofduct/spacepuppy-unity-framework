@@ -27,6 +27,8 @@
         ITweenHash OnWrap(System.Action<Tweener> d);
         ITweenHash OnFinish(System.EventHandler d);
         ITweenHash OnFinish(System.Action<Tweener> d);
+        ITweenHash OnStopped(System.EventHandler d);
+        ITweenHash OnStopped(System.Action<Tweener> d);
 
         ITweenHash AutoKill();
         ITweenHash AutoKill(object token);

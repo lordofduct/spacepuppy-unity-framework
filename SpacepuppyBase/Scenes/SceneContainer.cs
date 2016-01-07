@@ -79,7 +79,7 @@ namespace com.spacepuppy.Scenes
 
         public abstract Scene GetChild(int index);
 
-        public IEnumerable<Scene> Find(string id)
+        public new IEnumerable<Scene> Find(string id)
         {
             if (this.Id == id) yield return this;
 

@@ -170,7 +170,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
                 {
                     _defaultCalculator = System.Activator.CreateInstance(selectedType) as ITimeUnitsCalculator;
                 }
-                catch(System.Exception ex)
+                catch
                 {
                     Debug.LogWarning("Failed to create an override time units calculator of type '" + selectedType.FullName + "'");
                 }

@@ -10,15 +10,28 @@ namespace com.spacepuppy.Tween
 
         #region Events
 
+        /// <summary>
+        /// Raised every tick of the tweener
+        /// </summary>
         public event System.EventHandler OnStep;
+        /// <summary>
+        /// Raised every time a looping/ping-ponging tweener reaches a peek.
+        /// </summary>
         public event System.EventHandler OnWrap;
+        /// <summary>
+        /// Raised when the tween successfully finishes
+        /// </summary>
         public event System.EventHandler OnFinish;
+        /// <summary>
+        /// Raised when the tween is stopped, killed, or finished. You can determine if the tween finished or was 
+        /// killed on this event by testing the 'IsComplete' and 'IsDead' properties respectively. 
+        /// </summary>
         public event System.EventHandler OnStopped;
-
+        
         #endregion
 
         #region Fields
-        
+
         private UpdateSequence _updateType;
         private ITimeSupplier _timeSupplier = SPTime.Normal;
         private TweenWrapMode _wrap;
@@ -269,8 +282,8 @@ namespace com.spacepuppy.Tween
 
         public virtual void Kill()
         {
-            this.Stop();
-            _time = float.NaN;
+            SPTween.RemoveReference(this);
+            this.SetKilled();
         }
 
         /// <summary>
@@ -280,6 +293,11 @@ namespace com.spacepuppy.Tween
         {
             _isPlaying = false;
             _time = float.NaN;
+            if (this.OnStopped != null) this.OnStopped(this, System.EventArgs.Empty);
+            this.OnFinish = null;
+            this.OnStopped = null;
+            this.OnStep = null;
+            this.OnWrap = null;
         }
 
         public virtual void Reset()

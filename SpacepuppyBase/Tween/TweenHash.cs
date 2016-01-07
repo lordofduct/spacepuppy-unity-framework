@@ -41,6 +41,7 @@ namespace com.spacepuppy.Tween
         private System.EventHandler _onStep;
         private System.EventHandler _onWrap;
         private System.EventHandler _onFinish;
+        private System.EventHandler _onStopped;
 
         #endregion
 
@@ -221,6 +222,20 @@ namespace com.spacepuppy.Tween
             return this;
         }
 
+        public TweenHash OnStopped(System.EventHandler d)
+        {
+            if (d == null) return this;
+            _onStopped += d;
+            return this;
+        }
+
+        public TweenHash OnStopped(System.Action<Tweener> d)
+        {
+            if (d == null) return this;
+            _onStopped += (s, e) => d(s as Tweener);
+            return this;
+        }
+
         #endregion
 
         #region Curve Methods
@@ -242,6 +257,7 @@ namespace com.spacepuppy.Tween
             hash._onStep = _onStep;
             hash._onWrap = _onWrap;
             hash._onFinish = _onFinish;
+            hash._onStopped = _onStopped;
             return hash;
         }
 
@@ -497,6 +513,7 @@ namespace com.spacepuppy.Tween
             if (_onStep != null) tween.OnStep += _onStep;
             if (_onWrap != null) tween.OnWrap += _onWrap;
             if (_onFinish != null) tween.OnFinish += _onFinish;
+            if (_onStopped != null) tween.OnStopped += _onStopped;
 
             return tween;
         }
@@ -695,6 +712,16 @@ namespace com.spacepuppy.Tween
             return this.OnFinish(d);
         }
 
+        ITweenHash ITweenHash.OnStopped(System.EventHandler d)
+        {
+            return this.OnStopped(d);
+        }
+
+        ITweenHash ITweenHash.OnStopped(System.Action<Tweener> d)
+        {
+            return this.OnFinish(d);
+        }
+
         ITweenHash ITweenHash.AutoKill()
         {
             return this.AutoKill();
@@ -736,6 +763,7 @@ namespace com.spacepuppy.Tween
             hash._onStep = _onStep;
             hash._onWrap = _onWrap;
             hash._onFinish = _onFinish;
+            hash._onStopped = _onStopped;
             return hash;
         }
 

@@ -69,6 +69,11 @@ namespace com.spacepuppy
             return this.Instance.GetValue(sMemberName, args);
         }
 
+        bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
+        {
+            return this.Instance.TryGetValue(sMemberName, out result, args);
+        }
+
         object IDynamic.InvokeMethod(string sMemberName, params object[] args)
         {
             return this.Instance.InvokeMethod(sMemberName, args);
@@ -129,6 +134,11 @@ namespace com.spacepuppy
         object IDynamic.GetValue(string sMemberName, params object[] args)
         {
             return this.ConcreteInstance.GetValue(sMemberName, args);
+        }
+
+        bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
+        {
+            return this.ConcreteInstance.TryGetValue(sMemberName, out result, args);
         }
 
         object IDynamic.InvokeMethod(string sMemberName, params object[] args)

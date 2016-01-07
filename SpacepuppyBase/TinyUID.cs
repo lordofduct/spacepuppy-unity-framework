@@ -110,7 +110,7 @@
         /// <summary>
         /// Implicitly converts the ShortGuid to it's string equivilent
         /// </summary>
-        /// <param name="shortGuid"></param>
+        /// <param name="uid"></param>
         /// <returns></returns>
         public static implicit operator string(TinyUid uid)
         {

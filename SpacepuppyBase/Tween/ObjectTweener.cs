@@ -11,7 +11,6 @@ namespace com.spacepuppy.Tween
         private object _target;
         private TweenCurve _curve;
         private object _id;
-        private object _tokenUid;
 
         #endregion
         
@@ -45,13 +44,7 @@ namespace com.spacepuppy.Tween
         }
 
         public object Target { get { return _target; } }
-
-        public object AutoKillToken
-        {
-            get { return _tokenUid; }
-            set { _tokenUid = value; }
-        }
-
+        
         #endregion
 
         #region Tweener Interface

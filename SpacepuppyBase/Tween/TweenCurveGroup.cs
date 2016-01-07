@@ -58,7 +58,7 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        protected internal override void Update(object targ, float dt, float t)
+        public override void Update(object targ, float dt, float t)
         {
             for (int i = 0; i < _curves._lst.Count; i++)
             {

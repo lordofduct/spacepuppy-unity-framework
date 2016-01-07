@@ -24,9 +24,11 @@ namespace com.spacepuppyeditor.Project
         #region Inspector
 
         private TagData.EditorHelper _helper;
-
-        void OnEnable()
+        
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             _helper = new TagData.EditorHelper(this.target as TagData);
         }
 

@@ -599,6 +599,46 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
+        public static object TryLerp(object a, object b, float t)
+        {
+            if (a == null) return b;
+            if (b == null) return a;
+
+            var atp = a.GetType();
+            if (ConvertUtil.IsNumericType(atp))
+            {
+                return ConvertUtil.ToPrim(MathUtil.Interpolate(ConvertUtil.ToSingle(a), ConvertUtil.ToSingle(b), t), atp);
+            }
+            else if (atp == typeof(UnityEngine.Vector2))
+            {
+                return UnityEngine.Vector2.LerpUnclamped(ConvertUtil.ToVector2(a), ConvertUtil.ToVector2(b), t);
+            }
+            else if (atp == typeof(UnityEngine.Vector3))
+            {
+                return UnityEngine.Vector3.LerpUnclamped(ConvertUtil.ToVector3(a), ConvertUtil.ToVector3(b), t);
+            }
+            else if (atp == typeof(UnityEngine.Vector4))
+            {
+                return UnityEngine.Vector4.LerpUnclamped(ConvertUtil.ToVector4(a), ConvertUtil.ToVector4(b), t);
+            }
+            else if (atp == typeof(UnityEngine.Quaternion))
+            {
+                return UnityEngine.Quaternion.LerpUnclamped(ConvertUtil.ToQuaternion(a), ConvertUtil.ToQuaternion(b), t);
+            }
+            else if (atp == typeof(UnityEngine.Color))
+            {
+                return UnityEngine.Color.LerpUnclamped(ConvertUtil.ToColor(a), ConvertUtil.ToColor(b), t);
+            }
+            else if (atp == typeof(UnityEngine.Color32))
+            {
+                return UnityEngine.Color32.LerpUnclamped(ConvertUtil.ToColor32(a), ConvertUtil.ToColor32(b), t);
+            }
+            else
+            {
+                return (t < 0.5f) ? a : b;
+            }
+        }
+
         public static bool WillArithmeticallyCompute(System.Type tp)
         {
             if (ConvertUtil.IsNumericType(tp)) return true;

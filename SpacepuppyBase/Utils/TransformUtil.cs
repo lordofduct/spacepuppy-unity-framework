@@ -156,6 +156,17 @@ namespace com.spacepuppy.Utils
 
         #region Transform Methods
 
+        public static Vector3 GetRelativePosition(this Transform t1, Transform t2)
+        {
+            return t1.position - t2.position;
+        }
+
+        public static Quaternion GetRelativeRotation(this Transform t1, Transform t2)
+        {
+            //return t1.rotation * Quaternion.Inverse(t2.rotation);
+            return Quaternion.Inverse(t2.rotation) * t1.rotation;
+        }
+
         /// <summary>
         /// Multiply a vector by only the scale part of a transformation
         /// </summary>

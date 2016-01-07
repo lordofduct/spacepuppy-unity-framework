@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Geom;
+using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy.Cameras
 {
-    public class CameraNode : SPComponent
+    public class CameraNode : SPComponent, IStateModifier
     {
-
+        
         #region Fields
 
         [SerializeField()]
@@ -16,39 +19,40 @@ namespace com.spacepuppy.Cameras
         #endregion
 
         #region Properties
-
-        public Vector3 LocalPosition {  get { return this.transform.localPosition; } }
-
-        public Vector3 Position { get { return this.transform.position; } }
-
-        public Quaternion LocalRotation { get { return this.transform.localRotation; } }
-
-        public Quaternion Rotation { get { return this.transform.rotation; } }
-
-        public Trans LocalTrans { get { return new Trans(this.transform.localPosition, this.transform.localRotation); } }
-
-        public Trans Trans { get { return new Trans(this.transform.position, this.transform.rotation); } }
-
+        
         public VariantCollection CameraSettings
         {
             get { return _cameraSettings; }
         }
 
         #endregion
+        
+        #region IModifier Interface
 
-        #region Methods
-
-        public void ApplyToCamera(Camera camera)
+        void IStateModifier.CopyTo(StateToken token)
         {
-            camera.transform.position = this.transform.position;
-            camera.transform.rotation = this.transform.rotation;
-            _cameraSettings.DynamicallyCopyTo(camera);
+            _cameraSettings.CopyTo(token);
         }
 
-        public void TweenTo(com.spacepuppy.Tween.TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur)
+        void IStateModifier.LerpTo(StateToken token, float t)
         {
-            hash.To("*GlobalTrans", ease, this.Trans, dur);
-            _cameraSettings.DynamicallyTweenTo(hash, ease, dur);
+            _cameraSettings.LerpTo(token, t);
+        }
+
+        void IStateModifier.Modify(object targ)
+        {
+            var cam = ComponentUtil.GetComponentFromSource<Camera>(targ);
+            if (cam == null) return;
+
+            _cameraSettings.CopyTo(cam);
+        }
+
+        void IStateModifier.ModifyWith(object targ, StateToken token)
+        {
+            var cam = ComponentUtil.GetComponentFromSource<Camera>(targ);
+            if (cam == null) return;
+
+            token.CopyTo(cam);
         }
 
         #endregion

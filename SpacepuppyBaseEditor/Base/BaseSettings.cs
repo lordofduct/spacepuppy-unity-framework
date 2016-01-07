@@ -59,7 +59,7 @@ namespace com.spacepuppyeditor.Base
             else
                 Object.DestroyImmediate(this);
 
-            this.title = "Base Settings";
+            this.titleContent = new GUIContent("Base Settings");
 
             _gameSettings = AssetDatabase.LoadAssetAtPath(GameSettingsBase.PATH_DEFAULTSETTINGS_FULL, typeof(GameSettingsBase)) as GameSettingsBase;
             _timeLayersData = AssetDatabase.LoadAssetAtPath(CustomTimeLayersData.PATH_DEFAULTSETTINGS_FULL, typeof(CustomTimeLayersData)) as CustomTimeLayersData;

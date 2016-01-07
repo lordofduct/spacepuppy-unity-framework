@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Dynamic
 {
-    public class StateToken : IDynamic, System.Collections.IEnumerable
+    public class StateToken : IDynamic, IEnumerable<KeyValuePair<string, object>>, System.IDisposable
     {
+
+        private const int TEMP_STACKSIZE = 3;
 
         #region Fields
 
@@ -45,6 +49,21 @@ namespace com.spacepuppy.Dynamic
             _table[skey] = value;
         }
 
+        public bool LerpValue(string skey, object value, float t)
+        {
+            object a;
+            if(_table.TryGetValue(skey, out a))
+            {
+                a = Evaluator.TryLerp(a, value, t);
+                _table[skey] = a;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public object GetValue(string skey)
         {
             if (_table.ContainsKey(skey))
@@ -53,22 +72,136 @@ namespace com.spacepuppy.Dynamic
                 return null;
         }
 
+        public bool TryGetValue(string skey, out object result)
+        {
+            return _table.TryGetValue(skey, out result);
+        }
+
         public T GetValue<T>(string skey)
         {
-            if (_table.ContainsKey(skey))
+            object obj;
+            if(_table.TryGetValue(skey, out obj))
             {
-                var obj = _table[skey];
                 if (obj is T) return (T)obj;
                 if (ConvertUtil.IsSupportedType(typeof(T))) return ConvertUtil.ToPrim<T>(obj);
                 return default(T);
             }
             else
+            {
                 return default(T);
+            }
+        }
+
+        public bool TryGetValue<T>(string skey, out T result)
+        {
+            object obj;
+            if (_table.TryGetValue(skey, out obj))
+            {
+                if (obj is T)
+                {
+                    result = (T)obj;
+                    return true;
+                }
+                else if (ConvertUtil.IsSupportedType(typeof(T)))
+                {
+                    result = ConvertUtil.ToPrim<T>(obj);
+                    return true;
+                }
+            }
+
+            result = default(T);
+            return false;
         }
 
         public bool HasKey(string skey)
         {
             return _table.ContainsKey(skey);
+        }
+
+        /// <summary>
+        /// Iterates over members of the collection and attempts to set them to an object as if they 
+        /// were property names on that object.
+        /// </summary>
+        /// <param name="obj"></param>
+        public void CopyTo(object obj)
+        {
+            var e = _table.GetEnumerator();
+            while (e.MoveNext())
+            {
+                DynamicUtil.SetValue(obj, e.Current.Key, e.Current.Value);
+            }
+        }
+
+        /// <summary>
+        /// Iterates over keys in this collection and attempts to update the values associated with that 
+        /// key to the value pulled from a property on object.
+        /// </summary>
+        /// <param name="obj"></param>
+        public void CopyFrom(object obj)
+        {
+            using (var lst = TempCollection.GetList<string>())
+            {
+                var e = _table.Keys.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    lst.Add(e.Current);
+                }
+
+                var e2 = lst.GetEnumerator();
+                while(e2.MoveNext())
+                {
+                    _table[e2.Current] = DynamicUtil.GetValue(obj, e2.Current);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Lerp the target objects values to the state of the StateToken. If the member doesn't have a current state/undefined, 
+        /// then the member is set to the current state in this StateToken.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="t"></param>
+        public void LerpTo(object obj, float t)
+        {
+            var e = _table.GetEnumerator();
+            while (e.MoveNext())
+            {
+                object value;
+                if (DynamicUtil.TryGetValue(obj, e.Current.Key, out value))
+                {
+                    value = Evaluator.TryLerp(value, e.Current.Value, t);
+                    DynamicUtil.SetValue(obj, e.Current.Key, value);
+                }
+                else
+                {
+                    DynamicUtil.SetValue(obj, e.Current.Key, e.Current.Value);
+                }
+            }
+        }
+
+        public void TweenTo(com.spacepuppy.Tween.TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur)
+        {
+            var e = _table.GetEnumerator();
+            while (e.MoveNext())
+            {
+                var value = e.Current.Value;
+                if (value == null) continue;
+
+                switch (VariantReference.GetVariantType(value.GetType()))
+                {
+                    case VariantType.Integer:
+                    case VariantType.Float:
+                    case VariantType.Double:
+                    case VariantType.Vector2:
+                    case VariantType.Vector3:
+                    case VariantType.Vector4:
+                    case VariantType.Quaternion:
+                    case VariantType.Color:
+                    case VariantType.Rect:
+                        hash.To(e.Current.Key, ease, value, dur);
+                        break;
+                }
+            }
         }
 
         #endregion
@@ -96,6 +229,11 @@ namespace com.spacepuppy.Dynamic
         object IDynamic.GetValue(string sMemberName, params object[] args)
         {
             return this.GetValue(sMemberName);
+        }
+
+        bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
+        {
+            return this.TryGetValue(sMemberName, out result);
         }
 
         object IDynamic.InvokeMethod(string sMemberName, params object[] args)
@@ -129,9 +267,49 @@ namespace com.spacepuppy.Dynamic
 
         #region IEnumerable Interface
 
+        public Dictionary<string, object>.Enumerator GetEnumerator()
+        {
+            return _table.GetEnumerator();
+        }
+
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
+        {
+            return _table.GetEnumerator();
+        }
+
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _table.Values.GetEnumerator();
+            return _table.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+
+        void IDisposable.Dispose()
+        {
+            _table.Clear();
+            if (_tempTokens == null) _tempTokens = new SamplingStack<StateToken>(TEMP_STACKSIZE);
+            _tempTokens.Push(this);
+        }
+
+        #endregion
+
+        #region Static Utils
+        
+        private static SamplingStack<StateToken> _tempTokens;
+
+        public static StateToken GetTempToken()
+        {
+            StateToken t;
+            if(_tempTokens != null && _tempTokens.TryPop(out t))
+            {
+                return t;
+            }
+            else
+            {
+                return new StateToken();
+            }
         }
 
         #endregion

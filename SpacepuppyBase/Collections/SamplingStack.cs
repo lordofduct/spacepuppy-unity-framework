@@ -67,6 +67,22 @@ namespace com.spacepuppy.Collections
             return result;
         }
 
+        public bool TryPop(out T result)
+        {
+            if(_count == 0)
+            {
+                result = default(T);
+                return false;
+            }
+
+            result = _values[_head];
+            _values[_head] = default(T);
+            _head = (_head > 0) ? _head - 1 : _values.Length - 1;
+            _count--;
+            _version++;
+            return true;
+        }
+
         public T Shift()
         {
             if (_count == 0) throw new InvalidOperationException("SamplingStack is empty.");
@@ -78,6 +94,23 @@ namespace com.spacepuppy.Collections
             _count--;
             _version++;
             return result;
+        }
+
+        public bool TryShift(out T result)
+        {
+            if (_count == 0)
+            {
+                result = default(T);
+                return false;
+            }
+
+            int index = (_head - _count + 1);
+            if (index < 0) index += _values.Length;
+            result = _values[index];
+            _values[index] = default(T);
+            _count--;
+            _version++;
+            return true;
         }
 
         public T Peek()

@@ -102,6 +102,15 @@ namespace com.spacepuppy
             }
         }
 
+        public static UpdateEventHooks TardyHook
+        {
+            get
+            {
+                if (_instance == null) GameLoopEntry.Init();
+                return _instance._tardyUpdateHook;
+            }
+        }
+
         /// <summary>
         /// Returns which event sequence that code is currently operating as. 
         /// WARNING - during 'OnMouseXXX' messages this will report that we're in the FixedUpdate sequence. 

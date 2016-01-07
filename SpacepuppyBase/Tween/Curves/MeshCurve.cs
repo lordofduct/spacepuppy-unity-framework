@@ -88,7 +88,7 @@ namespace com.spacepuppy.Tween.Curves
             get { return _dur; }
         }
 
-        protected internal override void Update(object targ, float dt, float t)
+        public override void Update(object targ, float dt, float t)
         {
             t = (_dur == 0f) ? 1f : _ease(t, 0f, 1f, _dur);
             if (targ is MeshFilter) this.SetMorph(targ as MeshFilter, t);

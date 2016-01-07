@@ -26,6 +26,44 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Methods
+
+        public override bool Equals(object obj)
+        {
+            if (obj is DiscreteFloat)
+            {
+                return _value == ((DiscreteFloat)obj)._value;
+            }
+            else if (obj is System.IConvertible)
+            {
+                try
+                {
+                    var f = System.Convert.ToSingle(obj);
+                    return _value == f;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return _value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return _value.ToString();
+        }
+
+        #endregion
+
         #region Static/Constants
 
         public static DiscreteFloat Zero

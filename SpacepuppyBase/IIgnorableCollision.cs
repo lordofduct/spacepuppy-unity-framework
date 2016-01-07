@@ -115,7 +115,7 @@ namespace com.spacepuppy
 
         public void IgnoreCollision(IIgnorableCollision coll, bool ignore)
         {
-            if (_collider == null || coll == null || this == coll) return;
+            if (_collider == null || coll == null || object.ReferenceEquals(this, coll)) return;
 
             coll.IgnoreCollision(_collider, ignore);
         }

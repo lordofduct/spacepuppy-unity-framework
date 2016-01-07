@@ -71,6 +71,24 @@ namespace com.spacepuppy.Scenario
             get { return _target; }
             set { _target = value; }
         }
+
+        public FindCommand Find
+        {
+            get { return _find; }
+            set { _find = value; }
+        }
+
+        public ResolveByCommand ResolveBy
+        {
+            get { return _resolveBy; }
+            set { _resolveBy = value; }
+        }
+
+        public string ResolveByQuery
+        {
+            get { return _queryString; }
+            set { _queryString = value; }
+        }
         
         #endregion
 

@@ -9,21 +9,11 @@ namespace com.spacepuppy.Scenario
     /// TODO - Need to remove the old float for interval that is now replaced with TimePeriod. It's kept for now 
     /// until all the scripts are updated. Remove ISerializationCallbackReceiver when that is done.
     /// </summary>
-    public class t_Interval : AutoTriggerComponent, ISerializationCallbackReceiver
+    public class t_Interval : AutoTriggerComponent
     {
 
         #region Fields
-
-        [HideInInspector()]
-        [SerializeField()]
-        [UnityEngine.Serialization.FormerlySerializedAs("Interval")]
-        [System.Obsolete("This needs to be removed.")]
-        private float _interval_old;
-
-
-
-
-
+        
         [SerializeField()]
         private SPTimePeriod _interval = new SPTimePeriod(1f);
 
@@ -121,24 +111,7 @@ namespace com.spacepuppy.Scenario
         }
 
         #endregion
-
-
-        #region Temp ISerializationCallbackReceiver Interface
-
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-            if(_interval_old != 0f)
-                _interval.Seconds = _interval_old;
-        }
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            if (_interval_old != 0f)
-                _interval_old = 0f;
-        }
-
-        #endregion
-
+        
     }
 
     [System.Obsolete("Use t_Interval instead.")]

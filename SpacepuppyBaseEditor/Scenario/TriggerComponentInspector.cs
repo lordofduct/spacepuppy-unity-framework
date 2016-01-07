@@ -24,8 +24,10 @@ namespace com.spacepuppyeditor.Scenario
         private ReorderableList _targetList;
         private bool _foldoutTargetExtra;
 
-        void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             _targetList = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_TARGETS), true, true, true, true);
             _targetList.drawHeaderCallback = _targetList_DrawHeader;
             _targetList.drawElementCallback = _targetList_DrawElement;

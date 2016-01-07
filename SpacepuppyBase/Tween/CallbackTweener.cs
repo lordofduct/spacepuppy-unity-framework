@@ -236,6 +236,20 @@ namespace com.spacepuppy.Tween
             return this;
         }
 
+        ITweenHash ITweenHash.OnStopped(EventHandler d)
+        {
+            if (d == null) return this;
+            this.OnStopped += d;
+            return this;
+        }
+
+        ITweenHash ITweenHash.OnStopped(Action<Tweener> d)
+        {
+            if (d == null) return this;
+            this.OnStopped += (s, e) => d(this);
+            return this;
+        }
+
         ITweenHash ITweenHash.AutoKill()
         {
             //do nothing, this mode should not be used

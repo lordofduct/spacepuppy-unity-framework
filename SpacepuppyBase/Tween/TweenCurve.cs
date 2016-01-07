@@ -53,7 +53,7 @@ namespace com.spacepuppy.Tween
         /// </summary>
         /// <param name="dt">The change in time since last update.</param>
         /// <param name="t">A value from 0 to TotalDuration representing the position the curve aught to be at.</param>
-        protected internal abstract void Update(object targ, float dt, float t);
+        public abstract void Update(object targ, float dt, float t);
 
         #endregion
 
@@ -167,7 +167,7 @@ namespace com.spacepuppy.Tween
                 get { return 0f; }
             }
 
-            protected internal override void Update(object targ, float dt, float t)
+            public override void Update(object targ, float dt, float t)
             {
             }
         }

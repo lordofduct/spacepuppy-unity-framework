@@ -85,12 +85,19 @@ namespace com.spacepuppy
         #endregion
 
         #region CONSTRUCTOR
-        
-        protected override void Start()
-        {
-            base.Start();
 
+        //protected override void Start()
+        //{
+        //    this.AddTag(SPConstants.TAG_ROOT);
+
+        //    base.Start();
+        //}
+
+        protected override void Awake()
+        {
             this.AddTag(SPConstants.TAG_ROOT);
+
+            base.Awake();
         }
 
         protected override void OnStartOrEnable()

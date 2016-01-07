@@ -55,6 +55,11 @@ namespace com.spacepuppy
             return (_variables as IDynamic).GetValue(sMemberName, args);
         }
 
+        bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
+        {
+            return (_variables as IDynamic).TryGetValue(sMemberName, out result, args);
+        }
+
         bool IDynamic.HasMember(string sMemberName, bool includeNonPublic)
         {
             return (_variables as IDynamic).HasMember(sMemberName, includeNonPublic);

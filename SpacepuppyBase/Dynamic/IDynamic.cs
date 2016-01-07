@@ -14,14 +14,15 @@ namespace com.spacepuppy.Dynamic
 
         bool SetValue(string sMemberName, object value, params object[] index);
         object GetValue(string sMemberName, params object[] args);
+        bool TryGetValue(string sMemberName, out object result, params object[] args);
         object InvokeMethod(string sMemberName, params object[] args);
 
         bool HasMember(string sMemberName, bool includeNonPublic);
         IEnumerable<MemberInfo> GetMembers(bool includeNonPublic);
         MemberInfo GetMember(string sMemberName, bool includeNonPublic);
-
+        
     }
-
+    
     [System.Flags()]
     public enum DynamicMemberAccess
     {
@@ -104,6 +105,32 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
+        public static bool TryGetValue(this object obj, string sMemberName, out object result, params object[] args)
+        {
+            if(obj == null)
+            {
+                result = null;
+                return false;
+            }
+
+            if(obj is IDynamic)
+            {
+                try
+                {
+                    return (obj as IDynamic).TryGetValue(sMemberName, out result, args);
+                }
+                catch
+                {
+                    result = null;
+                    return false;
+                }
+            }
+            else
+            {
+                return TryGetValueDirect(obj, sMemberName, out result, args);
+            }
+        }
+
         public static object InvokeMethod(this object obj, string name, params object[] args)
         {
             if (obj == null) return false;
@@ -168,7 +195,7 @@ namespace com.spacepuppy.Dynamic
                 return GetMemberFromType(obj.GetType(), sMemberName, includeNonPublic);
             }
         }
-
+        
         #endregion
 
         #region Direct Reflection
@@ -263,6 +290,65 @@ namespace com.spacepuppy.Dynamic
 
             }
             return null;
+        }
+
+        public static bool TryGetValueDirect(object obj, string sprop, out object result, params object[] args)
+        {
+            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            result = null;
+            if (obj == null) return false;
+
+            try
+            {
+                var tp = obj.GetType();
+
+                while (tp != null)
+                {
+                    var members = tp.GetMember(sprop, BINDING);
+                    if (members == null || members.Length == 0) return false;
+
+                    foreach (var member in members)
+                    {
+                        switch (member.MemberType)
+                        {
+                            case System.Reflection.MemberTypes.Field:
+                                var field = member as System.Reflection.FieldInfo;
+                                result = field.GetValue(obj);
+                                return true;
+
+                            case System.Reflection.MemberTypes.Property:
+                                {
+                                    var prop = member as System.Reflection.PropertyInfo;
+                                    var paramInfos = prop.GetIndexParameters();
+                                    if (prop.CanRead && DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                                    {
+                                        result = prop.GetValue(obj, args);
+                                        return true;
+                                    }
+                                    break;
+                                }
+                            case System.Reflection.MemberTypes.Method:
+                                {
+                                    var meth = member as System.Reflection.MethodInfo;
+                                    var paramInfos = meth.GetParameters();
+                                    if (DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                                    {
+                                        result = meth.Invoke(obj, args);
+                                        return true;
+                                    }
+                                    break;
+                                }
+                        }
+                    }
+
+                    tp = tp.BaseType;
+                }
+            }
+            catch
+            {
+
+            }
+            return false;
         }
 
         public static object InvokeMethodDirect(object obj, string name, params object[] args)

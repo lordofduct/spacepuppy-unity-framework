@@ -109,7 +109,7 @@ namespace com.spacepuppyeditor.Scenario
 
             this.Init(property, label);
 
-            const float WIDTH_FOLDOUT = 5f;
+            //const float WIDTH_FOLDOUT = 5f;
             //if(!_alwaysExpanded) property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
             if (!_alwaysExpanded) property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none, true);
 

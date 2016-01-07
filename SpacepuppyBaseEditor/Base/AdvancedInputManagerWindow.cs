@@ -53,7 +53,7 @@ namespace com.spacepuppyeditor.Base
             else
                 Object.DestroyImmediate(this);
 
-            this.title = "Advanced Input Manager";
+            this.titleContent = new GUIContent("Advanced Input Manager");
 
             var asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset").FirstOrDefault();
             if (asset != null)
