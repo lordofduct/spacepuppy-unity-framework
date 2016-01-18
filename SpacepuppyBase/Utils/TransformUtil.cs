@@ -156,15 +156,16 @@ namespace com.spacepuppy.Utils
 
         #region Transform Methods
 
-        public static Vector3 GetRelativePosition(this Transform t1, Transform t2)
+        public static Vector3 GetRelativePosition(this Transform trans, Transform relativeTo)
         {
-            return t1.position - t2.position;
+            return relativeTo.InverseTransformPoint(trans.position);
         }
 
-        public static Quaternion GetRelativeRotation(this Transform t1, Transform t2)
+        public static Quaternion GetRelativeRotation(this Transform trans, Transform relativeTo)
         {
-            //return t1.rotation * Quaternion.Inverse(t2.rotation);
-            return Quaternion.Inverse(t2.rotation) * t1.rotation;
+            //return trans.rotation * Quaternion.Inverse(relativeTo.rotation);
+            return Quaternion.Inverse(relativeTo.rotation) * trans.rotation;
+            //return Quaternion.Inverse(trans.rotation) * relativeTo.rotation;
         }
 
         /// <summary>
@@ -231,17 +232,20 @@ namespace com.spacepuppy.Utils
 
         public static Quaternion InverseTranformRotation(this Matrix4x4 m, Quaternion rot)
         {
-            return rot * Quaternion.Inverse(m.GetRotation());
+            //return rot * Quaternion.Inverse(m.GetRotation());
+            return Quaternion.Inverse(m.GetRotation()) * rot;
         }
 
         public static Quaternion InverseTransformRotation(Trans t, Quaternion rot)
         {
-            return rot * Quaternion.Inverse(t.Rotation);
+            //return rot * Quaternion.Inverse(t.Rotation);
+            return Quaternion.Inverse(t.Rotation) * rot;
         }
 
         public static Quaternion InverseTransformRotation(this Transform t, Quaternion rot)
         {
-            return rot * Quaternion.Inverse(t.rotation);
+            //return rot * Quaternion.Inverse(t.rotation);
+            return Quaternion.Inverse(t.rotation) * rot;
         }
 
         /// <summary>

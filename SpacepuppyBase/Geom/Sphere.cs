@@ -79,6 +79,11 @@ namespace com.spacepuppy.Geom
 
         #region IGeom Interface
 
+        public void Move(Vector3 mv)
+        {
+            _cent += mv;
+        }
+
         public AxisInterval Project(Vector3 axis)
         {
             axis.Normalize();
@@ -110,24 +115,24 @@ namespace com.spacepuppy.Geom
 
         #region IPhysicsGeom Interface
 
-        public bool TestOverlap(int layerMask)
+        public bool TestOverlap(int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            return Physics.CheckSphere(_cent, _rad, layerMask);
+            return Physics.CheckSphere(_cent, _rad, layerMask, query);
         }
 
-        public IEnumerable<Collider> Overlap(int layerMask)
+        public int Overlap(ICollection<Collider> results, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            return Physics.OverlapSphere(_cent, _rad, layerMask);
+            return PhysicsUtil.OverlapSphere(this.Center, this.Radius, results, layerMask, query);
         }
 
-        public bool Cast(Vector3 direction, out RaycastHit hitinfo, float distance, int layerMask)
+        public bool Cast(Vector3 direction, out RaycastHit hitinfo, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            return Physics.SphereCast(_cent, _rad, direction, out hitinfo, distance, layerMask);
+            return Physics.SphereCast(_cent, _rad, direction, out hitinfo, distance, layerMask, query);
         }
 
-        public IEnumerable<RaycastHit> CastAll(Vector3 direction, float distance, int layerMask)
+        public int CastAll(Vector3 direction, ICollection<RaycastHit> results, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            return Physics.SphereCastAll(_cent, _rad, direction, distance, layerMask);
+            return PhysicsUtil.SphereCastAll(_cent, _rad, direction, results, distance, layerMask, query);
         }
 
         #endregion

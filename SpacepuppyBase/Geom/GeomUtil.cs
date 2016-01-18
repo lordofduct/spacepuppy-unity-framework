@@ -324,7 +324,7 @@ namespace com.spacepuppy.Geom
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        public static IGeom GetGeom(this Collider c, bool local = false)
+        public static IPhysicsGeom GetGeom(this Collider c, bool local = false)
         {
             return GetGeom(c, GeomUtil.DefaultBoundingSphereAlgorithm, local);
         }
@@ -334,7 +334,7 @@ namespace com.spacepuppy.Geom
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        public static IGeom GetGeom(this Collider c, BoundingSphereAlgorithm algorithm, bool local = false)
+        public static IPhysicsGeom GetGeom(this Collider c, BoundingSphereAlgorithm algorithm, bool local = false)
         {
             if(c == null) return null;
 
@@ -348,7 +348,7 @@ namespace com.spacepuppy.Geom
             }
             else if (c is BoxCollider)
             {
-                return AABBox.FromCollider(c as BoxCollider, local);
+                return Box.FromCollider(c as BoxCollider, local);
             }
             else if (c is SphereCollider)
             {

@@ -117,6 +117,12 @@ namespace com.spacepuppy.Geom
 
         #region IGeom Interface
 
+        public void Move(Vector3 mv)
+        {
+            _start += mv;
+            _end += mv;
+        }
+
         public AxisInterval Project(Vector3 axis)
         {
             axis.Normalize();
@@ -188,61 +194,44 @@ namespace com.spacepuppy.Geom
 
         #region IPhysicsGeom Interface
 
-        public bool TestOverlap(int layerMask)
+        public bool TestOverlap(int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (_start == _end)
             {
-                return Physics.CheckSphere(_start, _rad, layerMask);
+                return Physics.CheckSphere(_start, _rad, layerMask, query);
             }
             else
             {
-                return Physics.CheckCapsule(_start, _end, _rad, layerMask);
+                return Physics.CheckCapsule(_start, _end, _rad, layerMask, query);
             }
         }
 
-        public IEnumerable<Collider> Overlap(int layerMask)
+        public int Overlap(ICollection<Collider> results, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            var hits = new List<Collider>();
-
-            //first overlap start sphere
-            hits.AddRange(Physics.OverlapSphere(_start, _rad, layerMask));
-            //now overlap the end sphere, don't add duplicates
-            foreach (var c in Physics.OverlapSphere(_end, _rad, layerMask))
-            {
-                if (!hits.Contains(c)) hits.Add(c);
-            }
-            //lastly cast from start to end, don't add duplicates
-            var dir = _end - _start;
-            var dist = dir.magnitude;
-            foreach (var h in Physics.SphereCastAll(_start, _rad, dir, dist, layerMask))
-            {
-                if (!hits.Contains(h.collider)) hits.Add(h.collider);
-            }
-
-            return hits;
+            return PhysicsUtil.OverlapCapsule(_start, _end, _rad, results, layerMask, query);
         }
 
-        public bool Cast(Vector3 direction, out RaycastHit hitinfo, float distance, int layerMask)
+        public bool Cast(Vector3 direction, out RaycastHit hitinfo, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (_start == _end)
             {
-                return Physics.SphereCast(_start, _rad, direction, out hitinfo, distance, layerMask);
+                return Physics.SphereCast(_start, _rad, direction, out hitinfo, distance, layerMask, query);
             }
             else
             {
-                return Physics.CapsuleCast(_start, _end, _rad, direction, out hitinfo, distance, layerMask);
+                return Physics.CapsuleCast(_start, _end, _rad, direction, out hitinfo, distance, layerMask, query);
             }
         }
 
-        public IEnumerable<RaycastHit> CastAll(Vector3 direction, float distance, int layerMask)
+        public int CastAll(Vector3 direction, ICollection<RaycastHit> results, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            if (_start == _end)
+            if(_start == _end)
             {
-                return Physics.SphereCastAll(_start, _rad, direction, distance, layerMask);
+                return PhysicsUtil.SphereCastAll(_start, _rad, direction, results, distance, layerMask, query);
             }
             else
             {
-                return Physics.CapsuleCastAll(_start, _end, _rad, direction, distance, layerMask);
+                return PhysicsUtil.CapsuleCastAll(_start, _end, _rad, direction, results, distance, layerMask, query);
             }
         }
 

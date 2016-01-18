@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace com.spacepuppy.Geom
 {
     [System.Serializable]
-    public struct AABBox : IGeom, System.Runtime.Serialization.ISerializable
+    public struct AABBox : IGeom, System.Runtime.Serialization.ISerializable, IPhysicsGeom
     {
 
         #region Fields
@@ -55,6 +55,11 @@ namespace com.spacepuppy.Geom
         #endregion
 
         #region IGeom Interface
+
+        public void Move(Vector3 mv)
+        {
+            _center += mv;
+        }
 
         public AxisInterval Project(Vector3 axis)
         {
@@ -130,8 +135,32 @@ namespace com.spacepuppy.Geom
          */
 
         #endregion
-        
-        
+
+        #region IPhysicsGeom Interface
+
+        public bool TestOverlap(int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            return Physics.CheckBox(_center, this.Extents, Quaternion.identity, layerMask, query);
+        }
+
+        public int Overlap(ICollection<Collider> results, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            return PhysicsUtil.OverlapBox(_center, this.Extents, results, Quaternion.identity, layerMask, query);
+        }
+
+        public bool Cast(Vector3 direction, out RaycastHit hitinfo, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            return Physics.BoxCast(_center, this.Extents, direction, out hitinfo, Quaternion.identity, distance, layerMask, query);
+        }
+
+        public int CastAll(Vector3 direction, ICollection<RaycastHit> results, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            return PhysicsUtil.BoxCastAll(_center, this.Extents, direction, results, Quaternion.identity, distance, layerMask, query);
+        }
+
+        #endregion
+
+
         #region ISerializable Interface
 
         private AABBox(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)

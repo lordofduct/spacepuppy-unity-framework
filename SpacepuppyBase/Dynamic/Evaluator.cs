@@ -638,7 +638,7 @@ namespace com.spacepuppy.Dynamic
                 return (t < 0.5f) ? a : b;
             }
         }
-
+        
         public static bool WillArithmeticallyCompute(System.Type tp)
         {
             if (ConvertUtil.IsNumericType(tp)) return true;

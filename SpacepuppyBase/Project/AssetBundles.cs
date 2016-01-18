@@ -24,7 +24,7 @@ namespace com.spacepuppy.Project
 
         public static IAssetBundle LoadFromFile(string path)
         {
-            return ExtractBundleMonitor(AssetBundle.CreateFromFile(path));
+            return ExtractBundleMonitor(AssetBundle.LoadFromFile(path));
         }
 
         /// <summary>

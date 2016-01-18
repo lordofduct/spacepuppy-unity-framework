@@ -58,58 +58,30 @@ namespace com.spacepuppy.Collections
 
         public static TempList<T> GetList<T>()
         {
-            if(TempList<T>._instance == null)
-            {
-                return new TempList<T>()
-                {
-                    _global = true
-                };
-            }
-            else
-            {
-                var coll = TempList<T>._instance;
-                TempList<T>._instance = null;
-                return coll;
-            }
+            return TempList<T>.GetList();
         }
 
         public static TempList<T> GetList<T>(IEnumerable<T> e)
         {
-            if (TempList<T>._instance == null)
-            {
-                return new TempList<T>(e)
-                {
-                    _global = true
-                };
-            }
-            else
-            {
-                var coll = TempList<T>._instance;
-                TempList<T>._instance = null;
-                coll.AddRange(e);
-                return coll;
-            }
+            return TempList<T>.GetList();
         }
 
         public static TempList<T> GetList<T>(int count)
         {
-            if (TempList<T>._instance == null)
-            {
-                return new TempList<T>(count)
-                {
-                    _global = true
-                };
-            }
-            else
-            {
-                var coll = TempList<T>._instance;
-                TempList<T>._instance = null;
-                if (coll.Capacity < count) coll.Capacity = count;
-                return coll;
-            }
+            return TempList<T>.GetList(count);
+        }
+
+        public static TempHashSet<T> GetSet<T>()
+        {
+            return TempHashSet<T>.GetSet();
+        }
+
+        public static TempHashSet<T> GetSet<T>(IEnumerable<T> e)
+        {
+            return TempHashSet<T>.GetSet(e);
         }
 
         #endregion
-        
+
     }
 }

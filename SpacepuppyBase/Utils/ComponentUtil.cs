@@ -8,13 +8,7 @@ namespace com.spacepuppy.Utils
 {
     public static class ComponentUtil
     {
-
-        #region Fields
         
-        private static TempList<Component> _recycledList = new TempList<Component>();
-
-        #endregion
-
         public static bool IsComponentType(System.Type tp)
         {
             if (tp == null) return false;
@@ -383,13 +377,13 @@ namespace com.spacepuppy.Utils
 
             if (obj == null) return ArrayUtil.Empty<T>();
 
-            using (_recycledList)
+            using (var tmpLst = TempCollection.GetList<Component>())
             {
-                obj.GetComponents(typeof(T), _recycledList);
-                T[] result = new T[_recycledList.Count];
-                for (int i = 0; i < _recycledList.Count; i++)
+                obj.GetComponents(typeof(T), tmpLst);
+                T[] result = new T[tmpLst.Count];
+                for (int i = 0; i < tmpLst.Count; i++)
                 {
-                    result[i] = _recycledList[i] as T;
+                    result[i] = tmpLst[i] as T;
                 }
                 return result;
             }
@@ -405,10 +399,10 @@ namespace com.spacepuppy.Utils
         {
             if (obj == null) return;
 
-            using (_recycledList)
+            using (var tmpLst = TempCollection.GetList<Component>())
             {
-                obj.GetComponents(typeof(T), _recycledList);
-                var e = _recycledList.GetEnumerator();
+                obj.GetComponents(typeof(T), tmpLst);
+                var e = tmpLst.GetEnumerator();
                 T c = null;
                 while (e.MoveNext())
                 {
@@ -430,10 +424,10 @@ namespace com.spacepuppy.Utils
             if (obj == null) return;
             if (filter == null) return;
 
-            using (_recycledList)
+            using (var tmpLst = TempCollection.GetList<Component>())
             {
-                obj.GetComponents(typeof(Component), _recycledList);
-                var e = _recycledList.GetEnumerator();
+                obj.GetComponents(typeof(Component), tmpLst);
+                var e = tmpLst.GetEnumerator();
                 T c;
                 while (e.MoveNext())
                 {
@@ -455,13 +449,13 @@ namespace com.spacepuppy.Utils
         {
             if (obj == null) return ArrayUtil.Empty<Component>();
 
-            using (_recycledList)
+            using (var tmpLst = TempCollection.GetList<Component>())
             {
                 foreach (var tp in types)
                 {
-                    obj.GetComponents(tp, _recycledList);
+                    obj.GetComponents(tp, tmpLst);
                 }
-                return _recycledList.ToArray();
+                return tmpLst.ToArray();
             }
         }
 
@@ -469,9 +463,18 @@ namespace com.spacepuppy.Utils
         {
             if (obj == null) return;
 
-            foreach (var tp in types)
+            using (var tmpLst = TempCollection.GetList<Component>())
             {
-                obj.GetComponents(tp, _recycledList);
+                foreach (var tp in types)
+                {
+                    obj.GetComponents(tp, tmpLst);
+                }
+
+                var e = tmpLst.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    lst.Add(e.Current);
+                }
             }
         }
 
@@ -567,24 +570,46 @@ namespace com.spacepuppy.Utils
             if (coll == null) throw new System.ArgumentNullException("coll");
             if (obj == null) return;
 
-            using (_recycledList)
+            //using (var tmpLst = TempCollection.GetList<Component>())
+            //{
+            //    if (bIncludeSelf)
+            //    {
+            //        obj.GetComponentsInChildren<Component>(bIncludeInactive, tmpLst);
+            //        var e = tmpLst.GetEnumerator();
+            //        while (e.MoveNext())
+            //        {
+            //            if (e.Current is T) coll.Add(e.Current as T);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        obj.GetComponentsInChildren<Component>(bIncludeInactive, tmpLst);
+            //        var e = tmpLst.GetEnumerator();
+            //        while (e.MoveNext())
+            //        {
+            //            if (e.Current is T && e.Current.gameObject != obj) coll.Add(e.Current as T);
+            //        }
+            //    }
+            //}
+
+            using (var tmpLst = TempCollection.GetList<T>())
             {
-                if (bIncludeSelf)
+                if(bIncludeSelf)
                 {
-                    obj.GetComponentsInChildren<Component>(bIncludeInactive, _recycledList);
-                    var e = _recycledList.GetEnumerator();
-                    while (e.MoveNext())
+                    obj.GetComponentsInChildren<T>(bIncludeInactive, tmpLst);
+                    var e = tmpLst.GetEnumerator();
+                    while(e.MoveNext())
                     {
-                        if (e.Current is T) coll.Add(e.Current as T);
+                        coll.Add(e.Current);
                     }
                 }
                 else
                 {
-                    obj.GetComponentsInChildren<Component>(bIncludeInactive, _recycledList);
-                    var e = _recycledList.GetEnumerator();
-                    while (e.MoveNext())
+                    obj.GetComponentsInChildren<T>(bIncludeInactive, tmpLst);
+                    var e = tmpLst.GetEnumerator();
+                    while(e.MoveNext())
                     {
-                        if (e.Current is T && e.Current.gameObject != obj) coll.Add(e.Current as T);
+                        if ((e.Current as Component).gameObject != obj) coll.Add(e.Current);
                     }
                 }
             }
@@ -628,12 +653,12 @@ namespace com.spacepuppy.Utils
             if (coll == null) throw new System.ArgumentNullException("coll");
             if (obj == null) return;
 
-            using (_recycledList)
+            using (var tmpLst = TempCollection.GetList<Component>())
             {
                 if (bIncludeSelf)
                 {
-                    obj.GetComponentsInChildren<Component>(bIncludeInactive, _recycledList);
-                    var e = _recycledList.GetEnumerator();
+                    obj.GetComponentsInChildren<Component>(bIncludeInactive, tmpLst);
+                    var e = tmpLst.GetEnumerator();
                     while (e.MoveNext())
                     {
                         if (TypeUtil.IsType(e.Current.GetType(), tp)) coll.Add(e.Current);
@@ -641,8 +666,8 @@ namespace com.spacepuppy.Utils
                 }
                 else
                 {
-                    obj.GetComponentsInChildren<Component>(bIncludeInactive, _recycledList);
-                    var e = _recycledList.GetEnumerator();
+                    obj.GetComponentsInChildren<Component>(bIncludeInactive, tmpLst);
+                    var e = tmpLst.GetEnumerator();
                     while (e.MoveNext())
                     {
                         if (e.Current.gameObject != obj && TypeUtil.IsType(e.Current.GetType(), tp)) coll.Add(e.Current);
@@ -909,12 +934,12 @@ namespace com.spacepuppy.Utils
         public static void FindComponents(this GameObject go, System.Type tp, ICollection<Component> coll, bool bIncludeInactive = false)
         {
             if (go == null) return;
-            GetChildComponents(go.FindRoot(), coll, true, bIncludeInactive);
+            GetChildComponents(go.FindRoot(), tp, coll, true, bIncludeInactive);
         }
         public static void FindComponents(this Component c, System.Type tp, ICollection<Component> coll, bool bIncludeInactive = false)
         {
             if (c == null) return;
-            GetChildComponents(c.FindRoot(), coll, true, bIncludeInactive);
+            GetChildComponents(c.FindRoot(), tp, coll, true, bIncludeInactive);
         }
 
 #endregion

@@ -90,7 +90,18 @@ namespace com.spacepuppyeditor.Internal
             if (_drawer == null)
             {
                 //no drawer has been set before... lets see if we got one
-                if (drawer != null)
+                if(drawer is PropertyModifier)
+                {
+                    if (_modifiers == null) _modifiers = new List<PropertyModifier>();
+                    _modifiers.Add(drawer as PropertyModifier);
+                    
+                    if(this.Field.FieldType.IsListType())
+                    {
+                        _drawer = new ArrayPropertyDrawer(null);
+                        this.InternalDrawer = _drawer;
+                    }
+                }
+                else if(drawer != null)
                 {
                     //we got a new drawer, set it
                     if (this.Field.FieldType.IsListType()) drawer = new ArrayPropertyDrawer(drawer);
@@ -244,7 +255,10 @@ namespace com.spacepuppyeditor.Internal
 
                 if (!property.isArray)
                 {
-                    return _drawer.GetPropertyHeight(property, label);
+                    if (_drawer != null)
+                        return _drawer.GetPropertyHeight(property, label);
+                    else
+                        return SPEditorGUI.GetDefaultPropertyHeight(property);
                 }
                 else
                 {
@@ -256,7 +270,10 @@ namespace com.spacepuppyeditor.Internal
                     for (int i = 0; i < property.arraySize; i++)
                     {
                         var pchild = property.GetArrayElementAtIndex(i);
-                        h += _drawer.GetPropertyHeight(pchild, EditorHelper.TempContent(pchild.displayName)) + 2f;
+                        if(_drawer != null)
+                            h += _drawer.GetPropertyHeight(pchild, EditorHelper.TempContent(pchild.displayName)) + 2f;
+                        else
+                            h += SPEditorGUI.GetPropertyHeight(pchild, EditorHelper.TempContent(pchild.displayName)) + 2f;
                     }
                     return h;
                 }
@@ -268,7 +285,10 @@ namespace com.spacepuppyeditor.Internal
 
                 if (!property.isArray)
                 {
-                    _drawer.OnGUI(position, property, label);
+                    if (_drawer != null)
+                        _drawer.OnGUI(position, property, label);
+                    else
+                        SPEditorGUI.DefaultPropertyField(position, property, label);
                 }
                 else
                 {
@@ -286,9 +306,18 @@ namespace com.spacepuppyeditor.Internal
                         {
                             var pchild = property.GetArrayElementAtIndex(i);
                             lbl.text = pchild.displayName;
-                            var h = _drawer.GetPropertyHeight(pchild, lbl);
-                            rect = new Rect(rect.xMin, rect.yMax + 2f, rect.width, h);
-                            _drawer.OnGUI(rect, pchild, lbl);
+                            if(_drawer != null)
+                            {
+                                var h = _drawer.GetPropertyHeight(pchild, lbl);
+                                rect = new Rect(rect.xMin, rect.yMax + 2f, rect.width, h);
+                                _drawer.OnGUI(rect, pchild, lbl);
+                            }
+                            else
+                            {
+                                var h = SPEditorGUI.GetDefaultPropertyHeight(pchild, lbl);
+                                rect = new Rect(rect.xMin, rect.yMax + 2f, rect.width, h);
+                                SPEditorGUI.DefaultPropertyField(rect, pchild, lbl);
+                            }
                         }
 
                         EditorGUI.indentLevel--;

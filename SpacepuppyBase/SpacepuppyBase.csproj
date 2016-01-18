@@ -96,6 +96,7 @@
     <Compile Include="Collections\SamplingStack.cs" />
     <Compile Include="Collections\SerializableDictionaryBase.cs" />
     <Compile Include="Collections\TempCollection.cs" />
+    <Compile Include="Collections\TempHashSet.cs" />
     <Compile Include="Collections\TempList.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
     <Compile Include="Collections\UniqueHashSet.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="FixedPoint.cs" />
     <Compile Include="ColorHSV.cs" />
     <Compile Include="Geom\BezierSpline.cs" />
+    <Compile Include="Geom\Box.cs" />
     <Compile Include="Geom\CatmullRomSpline.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
     <Compile Include="IImmediatelyResumingYieldInstruction.cs" />

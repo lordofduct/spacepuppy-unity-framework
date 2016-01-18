@@ -4,15 +4,39 @@ using System.Linq;
 
 using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy.Geom
 {
-    public class PhysicsUtil
+    public static class PhysicsUtil
     {
 
-        #region Properties
+        #region Fields/Properties
 
         public static float Detail = 0.1f;
+
+        private const int MAX_BUFFER = 1024;
+        private static Collider[] _nonallocColliderBuffer;
+        private static RaycastHit[] _nonallocRaycastBuffer;
+
+        private class RaycastHitDistanceComparer : IComparer<RaycastHit>
+        {
+            private static RaycastHitDistanceComparer _default;
+            public static RaycastHitDistanceComparer Default
+            {
+                get
+                {
+                    if (_default == null)
+                        _default = new RaycastHitDistanceComparer();
+                    return _default;
+                }
+            }
+
+            public int Compare(RaycastHit x, RaycastHit y)
+            {
+                return x.distance.CompareTo(y.distance);
+            }
+        }
 
         #endregion
 
@@ -28,178 +52,542 @@ namespace com.spacepuppy.Geom
             return mask;
         }
 
-        #region CheckGeom
 
-        public static bool CheckGeom(IPhysicsGeom geom)
+        #region Physics Forwards
+
+        public static int OverlapLine(Vector3 start, Vector3 end, ICollection<Collider> results, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            if (geom == null) throw new System.ArgumentNullException("geom");
+            if (results == null) throw new System.ArgumentNullException("results");
 
-            if (geom is Sphere)
+            if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+            var dir = end - start;
+            var dist = dir.magnitude;
+            int cnt = Physics.RaycastNonAlloc(new Ray(start, dir), _nonallocRaycastBuffer, dist, layerMask, query);
+
+            if(results is Collider[])
             {
-                var s = (Sphere)geom;
-                return Physics.CheckSphere(s.Center, s.Radius);
-            }
-            else if (geom is Capsule)
-            {
-                var c = (Capsule)geom;
-                return Physics.CheckCapsule(c.Start, c.End, c.Radius);
+                var arr = results as Collider[];
+                if (arr.Length < cnt) cnt = arr.Length;
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    arr[i] = _nonallocRaycastBuffer[i].collider;
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+                return cnt;
             }
             else
             {
-                return geom.TestOverlap(Physics.AllLayers);
+                if (results is List<Collider>)
+                {
+                    var lst = results as List<Collider>;
+                    var num = cnt + lst.Count;
+                    if (lst.Capacity < num) lst.Capacity = num;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    results.Add(_nonallocRaycastBuffer[i].collider);
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+                return cnt;
             }
         }
 
-        public static bool CheckGeom(IPhysicsGeom geom, int layerMask)
+        public static int RaycastAll(Vector3 origin, Vector3 dir, ICollection<RaycastHit> results, float maxDistance = float.PositiveInfinity, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            return RaycastAll(new Ray(origin, dir), results, maxDistance, layerMask, query);
+        }
+
+        public static int RaycastAll(Ray ray, ICollection<RaycastHit> results, float maxDistance = float.PositiveInfinity, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+
+            if (results is RaycastHit[])
+            {
+                return Physics.RaycastNonAlloc(ray, results as RaycastHit[], maxDistance, layerMask, query);
+            }
+            else
+            {
+                if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+                int cnt = Physics.RaycastNonAlloc(ray, results as RaycastHit[], maxDistance, layerMask, query);
+                if (results is List<RaycastHit>)
+                {
+                    var lst = results as List<RaycastHit>;
+                    var num = cnt + lst.Count;
+                    if (lst.Capacity < num) lst.Capacity = num;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    results.Add(_nonallocRaycastBuffer[i]);
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+                return cnt;
+            }
+        }
+
+
+        /// <summary>
+        /// Find all colliders touching or inside the given box, and store them into the buffer.
+        /// 
+        /// If the buffer is an array, the array is filled from index 0, up to either capacity or the number of colliders found, whichever is smaller.
+        /// If the buffer is a List or or collection, all found colliders are appended to the collection.
+        /// </summary>
+        /// <param name="center"></param>
+        /// <param name="halfExtents"></param>
+        /// <param name="results"></param>
+        /// <param name="orientation"></param>
+        /// <param name="layerMask"></param>
+        /// <param name="query"></param>
+        /// <returns>The amount of colliders stored in results</returns>
+        public static int OverlapBox(Vector3 center, Vector3 halfExtents, ICollection<Collider> results, 
+                                     Quaternion orientation, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+
+            if (results is Collider[])
+            {
+                return Physics.OverlapBoxNonAlloc(center, halfExtents, results as Collider[], orientation, layerMask, query);
+            }
+            else
+            {
+                if (_nonallocColliderBuffer == null) _nonallocColliderBuffer = new Collider[MAX_BUFFER];
+
+                int cnt = Physics.OverlapBoxNonAlloc(center, halfExtents, _nonallocColliderBuffer, orientation, layerMask, query);
+                if (results is List<Collider>)
+                {
+                    var lst = results as List<Collider>;
+                    var num = cnt + lst.Count;
+                    if (lst.Capacity < num) lst.Capacity = num;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    results.Add(_nonallocColliderBuffer[i]);
+                    _nonallocColliderBuffer[i] = null;
+                }
+                return cnt;
+            }
+        }
+
+        public static int BoxCastAll(Vector3 center, Vector3 halfExtents, Vector3 direction, ICollection<RaycastHit> results, 
+                                  Quaternion orientation, float maxDistance = float.PositiveInfinity, 
+                                  int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+
+            if (results is RaycastHit[])
+            {
+                return Physics.BoxCastNonAlloc(center, halfExtents, direction, results as RaycastHit[], orientation, maxDistance, layerMask, query);
+            }
+            else
+            {
+                if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+                int cnt = Physics.OverlapBoxNonAlloc(center, halfExtents, _nonallocColliderBuffer, orientation, layerMask, query);
+                if (results is List<RaycastHit>)
+                {
+                    var lst = results as List<RaycastHit>;
+                    var num = cnt + lst.Count;
+                    if (lst.Capacity < num) lst.Capacity = num;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    results.Add(_nonallocRaycastBuffer[i]);
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+                return cnt;
+            }
+        }
+
+        public static int OverlapSphere(Vector3 center, float radius, ICollection<Collider> results,
+                                        int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+
+            if (results is Collider[])
+            {
+                return Physics.OverlapSphereNonAlloc(center, radius, results as Collider[], layerMask, query);
+            }
+            else
+            {
+                if (_nonallocColliderBuffer == null) _nonallocColliderBuffer = new Collider[MAX_BUFFER];
+
+                int cnt = Physics.OverlapSphereNonAlloc(center, radius, results as Collider[], layerMask, query);
+                if (results is List<Collider>)
+                {
+                    var lst = results as List<Collider>;
+                    var num = cnt + lst.Count;
+                    if (lst.Capacity < num) lst.Capacity = num;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    results.Add(_nonallocColliderBuffer[i]);
+                    _nonallocColliderBuffer[i] = null;
+                }
+                return cnt;
+            }
+        }
+
+        public static int SphereCastAll(Vector3 center, float radius, Vector3 direction, ICollection<RaycastHit> results,
+                                     float maxDistance = float.PositiveInfinity,
+                                     int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+
+            if (results is RaycastHit[])
+            {
+                return Physics.SphereCastNonAlloc(center, radius, direction, results as RaycastHit[], maxDistance, layerMask, query);
+            }
+            else
+            {
+                if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+                int cnt = Physics.SphereCastNonAlloc(center, radius, direction, results as RaycastHit[], maxDistance, layerMask, query);
+                if (results is List<RaycastHit>)
+                {
+                    var lst = results as List<RaycastHit>;
+                    var num = cnt + lst.Count;
+                    if (lst.Capacity < num) lst.Capacity = num;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    results.Add(_nonallocRaycastBuffer[i]);
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+                return cnt;
+            }
+        }
+
+        public static int OverlapCapsule(Vector3 point1, Vector3 point2, float radius, ICollection<Collider> results,
+                                         int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+
+            //note, HashSets are inherently unique collections... so no need to check if contains during second and third overlaps
+            using (var tmpSet = TempCollection.GetSet<Collider>())
+            {
+                if (VectorUtil.FuzzyEquals(point1, point2))
+                {
+                    int cnt = Physics.OverlapSphereNonAlloc(point1, radius, _nonallocColliderBuffer, layerMask, query);
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        tmpSet.Add(_nonallocColliderBuffer[i]);
+                        _nonallocColliderBuffer[i] = null;
+                    }
+                }
+                else
+                {
+                    if (_nonallocColliderBuffer == null) _nonallocColliderBuffer = new Collider[MAX_BUFFER];
+                    if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+                    int cnt;
+                    cnt = Physics.OverlapSphereNonAlloc(point1, radius, _nonallocColliderBuffer, layerMask, query);
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        tmpSet.Add(_nonallocColliderBuffer[i]);
+                        _nonallocColliderBuffer[i] = null;
+                    }
+
+                    cnt = Physics.OverlapSphereNonAlloc(point2, radius, _nonallocColliderBuffer, layerMask, query);
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        tmpSet.Add(_nonallocColliderBuffer[i]);
+                        _nonallocColliderBuffer[i] = null;
+                    }
+
+                    var dir = point2 - point1;
+                    var dist = dir.magnitude;
+                    cnt = Physics.SphereCastNonAlloc(point1, radius, dir.normalized, _nonallocRaycastBuffer, dist, layerMask, query);
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        tmpSet.Add(_nonallocRaycastBuffer[i].collider);
+                        _nonallocRaycastBuffer[i] = default(RaycastHit);
+                    }
+                }
+
+                //done, now fill collection
+                if (results is Collider[])
+                {
+                    var arr = results as Collider[];
+                    int cnt = Mathf.Min(arr.Length, tmpSet.Count);
+                    int i = -1;
+                    var e = tmpSet.GetEnumerator();
+                    while (e.MoveNext() && ++i < cnt)
+                    {
+                        arr[i] = e.Current;
+                    }
+                    return cnt;
+                }
+                else
+                {
+                    if (results is List<Collider>)
+                    {
+                        var lst = results as List<Collider>;
+                        var num = tmpSet.Count + lst.Count;
+                        if (lst.Capacity < num) lst.Capacity = num;
+                    }
+
+                    var e = tmpSet.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        results.Add(e.Current);
+                    }
+                    return tmpSet.Count;
+                }
+            }
+        }
+
+        public static int CapsuleCastAll(Vector3 point1, Vector3 point2, float radius, Vector3 direction, ICollection<RaycastHit> results,
+                                     float maxDistance = float.PositiveInfinity,
+                                     int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+
+            if (results is RaycastHit[])
+            {
+                return Physics.CapsuleCastNonAlloc(point1, point2, radius, direction, results as RaycastHit[], maxDistance, layerMask, query);
+            }
+            else
+            {
+                if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+                int cnt = Physics.CapsuleCastNonAlloc(point1, point2, radius, direction, results as RaycastHit[], maxDistance, layerMask, query);
+                if (results is List<RaycastHit>)
+                {
+                    var lst = results as List<RaycastHit>;
+                    var num = cnt + lst.Count;
+                    if (lst.Capacity < num) lst.Capacity = num;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    results.Add(_nonallocRaycastBuffer[i]);
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+                return cnt;
+            }
+        }
+
+        #endregion
+
+
+        #region CheckGeom
+
+        public static bool CheckGeom(IPhysicsGeom geom, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
             if (geom is Sphere)
             {
                 var s = (Sphere)geom;
-                return Physics.CheckSphere(s.Center, s.Radius, layerMask);
+                return Physics.CheckSphere(s.Center, s.Radius, Physics.AllLayers,  query);
             }
             else if (geom is Capsule)
             {
                 var c = (Capsule)geom;
-                return Physics.CheckCapsule(c.Start, c.End, c.Radius, layerMask);
+                return Physics.CheckCapsule(c.Start, c.End, c.Radius, Physics.AllLayers, query);
             }
             else
             {
-                return geom.TestOverlap(layerMask);
+                return geom.TestOverlap(Physics.AllLayers, query);
+            }
+        }
+
+        public static bool CheckGeom(IPhysicsGeom geom, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (geom == null) throw new System.ArgumentNullException("geom");
+
+            if (geom is Sphere)
+            {
+                var s = (Sphere)geom;
+                return Physics.CheckSphere(s.Center, s.Radius, layerMask, query);
+            }
+            else if (geom is Capsule)
+            {
+                var c = (Capsule)geom;
+                return Physics.CheckCapsule(c.Start, c.End, c.Radius, layerMask, query);
+            }
+            else
+            {
+                return geom.TestOverlap(layerMask, query);
             }
         }
 
         #endregion
 
         #region OverlapGeom
-
-        public static Collider[] OverlapGeom(IPhysicsGeom geom)
+        
+        public static Collider[] OverlapGeom(IPhysicsGeom geom, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
-
-            return geom.Overlap(Physics.AllLayers).ToArray();
-        }
-
-        public static Collider[] OverlapGeom(IPhysicsGeom geom, int layerMask)
-        {
-            if (geom == null) throw new System.ArgumentNullException("geom");
-
-            return geom.Overlap(layerMask).ToArray();
-        }
-
-        public static bool OverlapGeom(IPhysicsGeom geom, IList<Collider> lst)
-        {
-            if (geom == null) throw new System.ArgumentNullException("geom");
-
-            var e = LightEnumerator.Create(geom.Overlap(Physics.AllLayers));
-            bool added = false;
-            while (e.MoveNext())
+            
+            using (var lst = TempCollection.GetList<Collider>())
             {
-                added = true;
-                lst.Add(e.Current);
+                geom.Overlap(lst, layerMask, query);
+                return lst.ToArray();
             }
-            return added;
         }
-
-        public static bool OverlapGeom(IPhysicsGeom geom, int layerMask, IList<Collider> lst)
+        
+        public static int OverlapGeom(IPhysicsGeom geom, IList<Collider> results, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
-
-            var e = LightEnumerator.Create(geom.Overlap(layerMask));
-            bool added = false;
-            while (e.MoveNext())
-            {
-                added = true;
-                lst.Add(e.Current);
-            }
-            return added;
+            
+            return geom.Overlap(results, layerMask, query);
         }
 
         #endregion
 
         #region Cast
 
-        public static bool Cast(IPhysicsGeom geom, Vector3 dir)
+        public static bool Cast(IPhysicsGeom geom, Vector3 dir, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
             RaycastHit hit;
-            return geom.Cast(dir, out hit, float.PositiveInfinity, Physics.AllLayers);
+            return geom.Cast(dir, out hit, float.PositiveInfinity, Physics.AllLayers, query);
         }
 
-        public static bool Cast(IPhysicsGeom geom, Vector3 dir, float dist)
+        public static bool Cast(IPhysicsGeom geom, Vector3 dir, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
             RaycastHit hit;
-            return geom.Cast(dir, out hit, dist, Physics.AllLayers);
+            return geom.Cast(dir, out hit, dist, Physics.AllLayers, query);
         }
 
-        public static bool Cast(IPhysicsGeom geom, Vector3 dir, out RaycastHit hitInfo)
+        public static bool Cast(IPhysicsGeom geom, Vector3 dir, out RaycastHit hitInfo, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
-            return geom.Cast(dir, out hitInfo, float.PositiveInfinity, Physics.AllLayers);
+            return geom.Cast(dir, out hitInfo, float.PositiveInfinity, Physics.AllLayers, query);
         }
 
-        public static bool Cast(IPhysicsGeom geom, Vector3 dir, float dist, int layerMask)
+        public static bool Cast(IPhysicsGeom geom, Vector3 dir, float dist, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
             RaycastHit hit;
-            return geom.Cast(dir, out hit, dist, layerMask);
+            return geom.Cast(dir, out hit, dist, layerMask, query);
         }
 
-        public static bool Cast(IPhysicsGeom geom, Vector3 dir, out RaycastHit hitInfo, float dist)
+        public static bool Cast(IPhysicsGeom geom, Vector3 dir, out RaycastHit hitInfo, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
-            return geom.Cast(dir, out hitInfo, dist, Physics.AllLayers);
+            return geom.Cast(dir, out hitInfo, dist, Physics.AllLayers, query);
         }
 
-        public static bool Cast(IPhysicsGeom geom, Vector3 dir, out RaycastHit hitInfo, float dist, int layerMask)
+        public static bool Cast(IPhysicsGeom geom, Vector3 dir, out RaycastHit hitInfo, float dist, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
-            return geom.Cast(dir, out hitInfo, dist, layerMask);
+            return geom.Cast(dir, out hitInfo, dist, layerMask, query);
         }
 
         #endregion
 
         #region CastAll
 
-        public static RaycastHit[] CastAll(IPhysicsGeom geom, Vector3 dir)
+        public static RaycastHit[] CastAll(IPhysicsGeom geom, Vector3 dir, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
-            return geom.CastAll(dir, float.PositiveInfinity, Physics.AllLayers).ToArray();
+            //return geom.CastAll(dir, float.PositiveInfinity, Physics.AllLayers, query).ToArray();
+
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                geom.CastAll(dir, lst, float.PositiveInfinity, Physics.AllLayers, query);
+                return lst.ToArray();
+            }
         }
 
-        public static RaycastHit[] CastAll(IPhysicsGeom geom, Vector3 dir, float dist)
+        public static RaycastHit[] CastAll(IPhysicsGeom geom, Vector3 dir, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
-            return geom.CastAll(dir, dist, Physics.AllLayers).ToArray();
+            //return geom.CastAll(dir, dist, Physics.AllLayers, query).ToArray();
+
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                geom.CastAll(dir, lst, dist, Physics.AllLayers, query);
+                return lst.ToArray();
+            }
         }
 
-        public static RaycastHit[] CastAll(IPhysicsGeom geom, Vector3 dir, float dist, int layerMask)
+        public static RaycastHit[] CastAll(IPhysicsGeom geom, Vector3 dir, float dist, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (geom == null) throw new System.ArgumentNullException("geom");
 
-            return geom.CastAll(dir, dist, layerMask).ToArray();
+            //return geom.CastAll(dir, dist, layerMask, query).ToArray();
+
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                geom.CastAll(dir, lst, dist, layerMask, query);
+                return lst.ToArray();
+            }
+        }
+
+        public static int CastAll(IPhysicsGeom geom, Vector3 dir, ICollection<RaycastHit> results, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (geom == null) throw new System.ArgumentNullException("geom");
+            
+            return geom.CastAll(dir, results, float.PositiveInfinity, Physics.AllLayers, query);
+        }
+
+        public static int CastAll(IPhysicsGeom geom, Vector3 dir, ICollection<RaycastHit> results, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (geom == null) throw new System.ArgumentNullException("geom");
+
+            return geom.CastAll(dir, results, dist, Physics.AllLayers, query);
+        }
+
+        public static int CastAll(IPhysicsGeom geom, Vector3 dir, ICollection<RaycastHit> results, float dist, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            if (geom == null) throw new System.ArgumentNullException("geom");
+
+            return geom.CastAll(dir, results, dist, layerMask, query);
         }
 
         #endregion
 
         #region RadialCast
 
-        public static IEnumerable<RaycastHit> RadialCast(IPhysicsGeom geom, float dist, int detail, int layerMask)
+        public static RaycastHit[] RadialCast(IPhysicsGeom geom, float dist, int detail, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
-            return RadialCast(geom, dist, detail, layerMask, Vector2.right);
+            return RadialCast(geom, dist, detail, layerMask, Vector2.right, query);
         }
 
-        public static IEnumerable<RaycastHit> RadialCast(IPhysicsGeom geom, float dist, int detail, int layerMask, Vector2 initialAxis)
+        public static RaycastHit[] RadialCast(IPhysicsGeom geom, float dist, int detail, int layerMask, Vector2 initialAxis, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                RadialCast(geom, lst, dist, detail, layerMask, initialAxis, query);
+                return lst.ToArray();
+            }
+        }
+
+        public static RaycastHit[] RadialCast(IPhysicsGeom geom, float dist, int detail, int layerMask, Vector3 initialAxis, Vector3 rotationalAxis, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                RadialCast(geom, lst, dist, detail, layerMask, initialAxis, rotationalAxis, query);
+                return lst.ToArray();
+            }
+        }
+
+        public static bool RadialCast(IPhysicsGeom geom, ICollection<RaycastHit> results, float dist, int detail, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            return RadialCast(geom, results, dist, detail, layerMask, Vector2.right, query);
+        }
+
+        public static bool RadialCast(IPhysicsGeom geom, ICollection<RaycastHit> results, float dist, int detail, int layerMask, Vector2 initialAxis, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (VectorUtil.NearZeroVector(initialAxis))
                 initialAxis = Vector2.right;
@@ -207,17 +595,16 @@ namespace com.spacepuppy.Geom
                 initialAxis.Normalize();
             var a = 360f / (float)detail;
 
+            int cnt = results.Count;
             for (int i = 0; i < detail; i++)
             {
                 var v = VectorUtil.RotateBy(initialAxis, a * i);
-                foreach (var h in geom.CastAll(v, dist, layerMask))
-                {
-                    yield return h;
-                }
+                geom.CastAll(v, results, dist, layerMask, query);
             }
+            return results.Count - cnt > 0;
         }
 
-        public static IEnumerable<RaycastHit> RadialCast(IPhysicsGeom geom, float dist, int detail, int layerMask, Vector3 initialAxis, Vector3 rotationalAxis)
+        public static bool RadialCast(IPhysicsGeom geom, ICollection<RaycastHit> results, float dist, int detail, int layerMask, Vector3 initialAxis, Vector3 rotationalAxis, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
         {
             if (VectorUtil.NearZeroVector(initialAxis))
                 initialAxis = Vector2.right;
@@ -225,17 +612,273 @@ namespace com.spacepuppy.Geom
                 initialAxis.Normalize();
             var a = 360f / (float)detail;
 
+            int cnt = results.Count;
             for (int i = 0; i < detail; i++)
             {
                 var v = VectorUtil.RotateAroundAxis(initialAxis, a * i, rotationalAxis);
-                foreach (var h in geom.CastAll(v, dist, layerMask))
-                {
-                    yield return h;
-                }
+                geom.CastAll(v, results, dist, layerMask, query);
             }
+            return results.Count - cnt > 0;
         }
 
         #endregion
+
+        #region Selective Overlap
+
+
+
+        #endregion
+
+        #region Selective Cast
+
+        /// <summary>
+        /// Raycast against a collection of colliders.
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <param name="dir"></param>
+        /// <param name="colliders"></param>
+        /// <returns></returns>
+        public static bool RaycastAgainst(Vector3 pos, Vector3 dir, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            return RaycastAgainst(new Ray(pos, dir), colliders, maxDistance);
+        }
+
+        /// <summary>
+        /// Raycast against a collection of colliders.
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <param name="dir"></param>
+        /// <param name="colliders"></param>
+        /// <returns></returns>
+        public static bool RaycastAgainst(Ray ray, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            RaycastHit hit;
+            var e = LightEnumerator.Create<Collider>(colliders);
+            while (e.MoveNext())
+            {
+                if (e.Current.Raycast(ray, out hit, maxDistance)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Raycast against a collection of colliders.
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <param name="dir"></param>
+        /// <param name="colliders"></param>
+        /// <returns></returns>
+        public static bool RaycastAgainst(Vector3 pos, Vector3 dir, out RaycastHit hit, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            return RaycastAgainst(new Ray(pos, dir), out hit, colliders, maxDistance);
+        }
+
+        /// <summary>
+        /// Raycast against a collection of colliders.
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <param name="dir"></param>
+        /// <param name="colliders"></param>
+        /// <returns></returns>
+        public static bool RaycastAgainst(Ray ray, out RaycastHit hit, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            if (colliders == null)
+            {
+                hit = default(RaycastHit);
+                return false;
+            }
+            
+            if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+            int cnt = Physics.RaycastNonAlloc(ray, _nonallocRaycastBuffer, maxDistance, Physics.AllLayers, QueryTriggerInteraction.Collide);
+            if(cnt > 0)
+            {
+                System.Array.Sort(_nonallocRaycastBuffer, 0, cnt, RaycastHitDistanceComparer.Default);
+                
+                for(int i = 0; i < cnt; i++)
+                {
+                    if(colliders.Contains(_nonallocRaycastBuffer[i].collider))
+                    {
+                        hit = _nonallocRaycastBuffer[i];
+                        System.Array.Clear(_nonallocRaycastBuffer, 0, cnt);
+                        return true;
+                    }
+                }
+
+                System.Array.Clear(_nonallocRaycastBuffer, 0, cnt);
+            }
+
+            hit = default(RaycastHit);
+            return false;
+        }
+
+        public static bool RaycastIgnoring(Vector3 pos, Vector3 dir, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            RaycastHit hit;
+            return RaycastIgnoring(new Ray(pos, dir), out hit, ignoredColliders, maxDistance);
+        }
+        
+        public static bool RaycastIgnoring(Ray ray, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            RaycastHit hit;
+            return RaycastIgnoring(ray, out hit, ignoredColliders, maxDistance);
+        }
+        
+        public static bool RaycastIgnoring(Vector3 pos, Vector3 dir, out RaycastHit hit, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            return RaycastIgnoring(new Ray(pos, dir), out hit, ignoredColliders, maxDistance);
+        }
+        
+        public static bool RaycastIgnoring(Ray ray, out RaycastHit hit, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+            int cnt = Physics.RaycastNonAlloc(ray, _nonallocRaycastBuffer, maxDistance, Physics.AllLayers, QueryTriggerInteraction.Collide);
+
+            if (cnt > 0)
+            {
+                System.Array.Sort<RaycastHit>(_nonallocRaycastBuffer, 0, cnt, RaycastHitDistanceComparer.Default);
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    if (!ignoredColliders.Contains(_nonallocRaycastBuffer[i].collider))
+                    {
+                        hit = _nonallocRaycastBuffer[i];
+                        System.Array.Clear(_nonallocRaycastBuffer, 0, cnt);
+                        return true;
+                    }
+                }
+
+                System.Array.Clear(_nonallocRaycastBuffer, 0, cnt);
+            }
+
+            hit = default(RaycastHit);
+            return false;
+        }
+
+        #endregion
+
+        #region Selective CastAll
+
+        public static RaycastHit[] RaycastAllAgainst(Vector3 origin, Vector3 dir, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                RaycastAllAgainst(new Ray(origin, dir), lst, colliders, maxDistance);
+                return lst.ToArray();
+            }
+        }
+
+        public static RaycastHit[] RaycastAllAgainst(Ray ray, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                RaycastAllAgainst(ray, lst, colliders, maxDistance);
+                return lst.ToArray();
+            }
+        }
+
+        public static int RaycastAllAgainst(Vector3 origin, Vector3 dir, ICollection<RaycastHit> results, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            return RaycastAllAgainst(new Ray(origin, dir), results, colliders, maxDistance);
+        }
+
+        public static int RaycastAllAgainst(Ray ray, ICollection<RaycastHit> results, IEnumerable<Collider> colliders, float maxDistance = float.PositiveInfinity)
+        {
+            if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+            int cnt = Physics.RaycastNonAlloc(ray, _nonallocRaycastBuffer, maxDistance, Physics.AllLayers, QueryTriggerInteraction.Collide);
+            
+            if(results is RaycastHit[])
+            {
+                var arr = results as RaycastHit[];
+                int j = 0;
+                for (int i = 0; i < cnt; i++)
+                {
+                    if(j < arr.Length && colliders.Contains(_nonallocRaycastBuffer[i].collider))
+                    {
+                        arr[j] = _nonallocRaycastBuffer[i];
+                        j++;
+                    }
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < cnt; i++)
+                {
+                    if (colliders.Contains(_nonallocRaycastBuffer[i].collider))
+                    {
+                        results.Add(_nonallocRaycastBuffer[i]);
+                    }
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+            }
+
+            return cnt;
+        }
+
+        public static RaycastHit[] RaycastAllIgnoring(Vector3 origin, Vector3 dir, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                RaycastAllIgnoring(new Ray(origin, dir), lst, ignoredColliders, maxDistance);
+                return lst.ToArray();
+            }
+        }
+
+        public static RaycastHit[] RaycastAllIgnoring(Ray ray, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                RaycastAllIgnoring(ray, lst, ignoredColliders, maxDistance);
+                return lst.ToArray();
+            }
+        }
+
+        public static int RaycastAllIgnoring(Vector3 origin, Vector3 dir, ICollection<RaycastHit> results, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            return RaycastAllIgnoring(new Ray(origin, dir), results, ignoredColliders, maxDistance);
+        }
+
+        public static int RaycastAllIgnoring(Ray ray, ICollection<RaycastHit> results, IEnumerable<Collider> ignoredColliders, float maxDistance = float.PositiveInfinity)
+        {
+            if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
+
+            int cnt = Physics.RaycastNonAlloc(ray, _nonallocRaycastBuffer, maxDistance, Physics.AllLayers, QueryTriggerInteraction.Collide);
+
+            if (results is RaycastHit[])
+            {
+                var arr = results as RaycastHit[];
+                int j = 0;
+                for (int i = 0; i < cnt; i++)
+                {
+                    if (j < arr.Length && !ignoredColliders.Contains(_nonallocRaycastBuffer[i].collider))
+                    {
+                        arr[j] = _nonallocRaycastBuffer[i];
+                        j++;
+                    }
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < cnt; i++)
+                {
+                    if (!ignoredColliders.Contains(_nonallocRaycastBuffer[i].collider))
+                    {
+                        results.Add(_nonallocRaycastBuffer[i]);
+                    }
+                    _nonallocRaycastBuffer[i] = default(RaycastHit);
+                }
+            }
+
+            return cnt;
+        }
+
+        #endregion
+
 
 
         #region RepairHitSurfaceNormal
@@ -267,6 +910,6 @@ namespace com.spacepuppy.Geom
         }
 
         #endregion
-
+        
     }
 }

@@ -11,11 +11,10 @@ namespace com.spacepuppy.Collections
 
         #region Fields
 
-        internal static TempList<T> _instance;
+        private static ObjectCachePool<TempList<T>> _pool = new ObjectCachePool<TempList<T>>(-1, () => new TempList<T>());
 
         private int _maxCapacityOnRelease;
         private int _version;
-        internal bool _global;
 
         #endregion
 
@@ -28,7 +27,6 @@ namespace com.spacepuppy.Collections
             int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
             _version = 1;
-            _global = true;
         }
 
         public TempList(IEnumerable<T> e)
@@ -38,7 +36,6 @@ namespace com.spacepuppy.Collections
             int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
             _version = 1;
-            _global = true;
         }
 
         public TempList(int count)
@@ -48,7 +45,6 @@ namespace com.spacepuppy.Collections
             int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
             _version = 1;
-            _global = true;
         }
 
         #endregion
@@ -58,16 +54,56 @@ namespace com.spacepuppy.Collections
         public void Dispose()
         {
             this.Clear();
-            if (_instance != null) return;
-
-            if (_global && _instance == null) _instance = this;
-            if (this.Capacity > _maxCapacityOnRelease / Math.Min(_version, 4))
+            if(_pool.Release(this))
             {
-                this.Capacity = _maxCapacityOnRelease / Math.Min(_version, 4);
-                _version = 0;
+                if(this.Capacity > _maxCapacityOnRelease / Math.Min(_version, 4))
+                {
+                    this.Capacity = _maxCapacityOnRelease / Math.Min(_version, 4);
+                    _version = 1;
+                }
+                else
+                {
+                    _version++;
+                }
             }
+        }
 
-            _version++;
+        #endregion
+
+        #region Static Methods
+
+        public static TempList<T> GetList()
+        {
+            return _pool.GetInstance();
+        }
+
+        public static TempList<T> GetList(IEnumerable<T> e)
+        {
+            TempList<T> result;
+            if(_pool.TryGetInstance(out result))
+            {
+                result.AddRange(e);
+            }
+            else
+            {
+                result = new TempList<T>(e);
+            }
+            return result;
+        }
+
+        public static TempList<T> GetList(int count)
+        {
+            TempList<T> result;
+            if (_pool.TryGetInstance(out result))
+            {
+                if (result.Capacity < count) result.Capacity = count;
+                return result;
+            }
+            else
+            {
+                result = new TempList<T>(count);
+            }
+            return result;
         }
 
         #endregion

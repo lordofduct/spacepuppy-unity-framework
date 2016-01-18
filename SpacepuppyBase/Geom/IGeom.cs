@@ -6,6 +6,8 @@ namespace com.spacepuppy.Geom
     public interface IGeom
     {
 
+        void Move(Vector3 mv);
+
         AxisInterval Project(Vector3 axis);
         Bounds GetBounds();
         Sphere GetBoundingSphere();
@@ -18,10 +20,10 @@ namespace com.spacepuppy.Geom
     public interface IPhysicsGeom : IGeom
     {
 
-        bool TestOverlap(int layerMask);
-        IEnumerable<Collider> Overlap(int layerMask);
-        bool Cast(Vector3 direction, out RaycastHit hitinfo, float distance, int layerMask);
-        IEnumerable<RaycastHit> CastAll(Vector3 direction, float distance, int layerMask);
+        bool TestOverlap(int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal);
+        int Overlap(ICollection<Collider> results, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal);
+        bool Cast(Vector3 direction, out RaycastHit hitinfo, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal);
+        int CastAll(Vector3 direction, ICollection<RaycastHit> results, float distance, int layerMask, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal);
 
     }
 

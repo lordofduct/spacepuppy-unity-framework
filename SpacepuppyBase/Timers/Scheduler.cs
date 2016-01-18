@@ -38,14 +38,41 @@ namespace com.spacepuppy.Timers
 
         #region Methods
 
-        public ScheduledEvent ScheduleOnce(double duration, System.Action<ScheduledEvent> callback)
+        /// <summary>
+        /// Schedule an event to occur at some point in time.
+        /// </summary>
+        /// <param name="time">The time of the event</param>
+        /// <param name="callback">Callback to respond to the event</param>
+        /// <returns></returns>
+        public ScheduledEvent ScheduleOnceAt(double time, System.Action<ScheduledEvent> callback)
+        {
+            var ev = new ScheduledEvent(time, 0d, callback, 0);
+            this.Add(ev);
+            return ev;
+        }
+
+        /// <summary>
+        /// Schedule an event that raises at some duration from the current time.
+        /// </summary>
+        /// <param name="duration">Amount of time from now the event occurs</param>
+        /// <param name="callback">Callback to respond to the event</param>
+        /// <returns></returns>
+        public ScheduledEvent ScheduleOnceFromNow(double duration, System.Action<ScheduledEvent> callback)
         {
             var ev = new ScheduledEvent(duration, _time.TotalPrecise, callback, 0);
             this.Add(ev);
             return ev;
         }
 
-        public ScheduledEvent ScheduleRepeating(double duration, double repeatFrequency, System.Action<ScheduledEvent> callback, int repeatCount = -1)
+        /// <summary>
+        /// Schedule an event that raises at some duration from the current time.
+        /// </summary>
+        /// <param name="duration">Amount of time from now the first event occurs</param>
+        /// <param name="repeatFrequency">Frequency of the event</param>
+        /// <param name="callback">Callback to respond to the event</param>
+        /// <param name="repeatCount">Number of times the event occurs</param>
+        /// <returns></returns>
+        public ScheduledEvent ScheduleFromNow(double duration, double repeatFrequency, System.Action<ScheduledEvent> callback, int repeatCount = -1)
         {
             var ev = new ScheduledEvent(repeatFrequency, _time.TotalPrecise + duration - repeatFrequency, callback, repeatCount);
             this.Add(ev);
@@ -55,12 +82,12 @@ namespace com.spacepuppy.Timers
         /// <summary>
         /// Create an event that occurs on some interval.
         /// </summary>
-        /// <param name="interval">The interval of the event.</param>
-        /// <param name="offset"></param>
-        /// <param name="callback"></param>
-        /// <param name="count"></param>
+        /// <param name="interval">The interval of the event</param>
+        /// <param name="offset">The time at which the interval begins counting, good for repeating intervals</param>
+        /// <param name="callback">Callback to respond to the event</param>
+        /// <param name="count">Number of times to repeat, negative values are treated as infinite</param>
         /// <returns></returns>
-        public ScheduledEvent Add(double interval, double offset, System.Action<ScheduledEvent> callback, int count = 0)
+        public ScheduledEvent Schedule(double interval, double offset, System.Action<ScheduledEvent> callback, int count = 0)
         {
             var ev = new ScheduledEvent(interval, offset, callback, count);
             this.Add(ev);
@@ -401,10 +428,17 @@ namespace com.spacepuppy.Timers
 
         #region CONSTRUCTOR
 
+        /// <summary>
+        /// Creates a Scheduled Event
+        /// </summary>
+        /// <param name="interval">The interval of the event</param>
+        /// <param name="offset">The time at which the interval begins counting, good for repeating intervals</param>
+        /// <param name="callback">Callback to respond to the event</param>
+        /// <param name="count">Number of times to repeat, negative values are treated as infinite</param>
         public ScheduledEvent(double interval, double offset, System.Action<ScheduledEvent> callback, int repeatCount)
         {
-            _interval = interval;
             _offset = offset;
+            _interval = interval;
             _callback = callback;
             _repeatCount = repeatCount;
         }

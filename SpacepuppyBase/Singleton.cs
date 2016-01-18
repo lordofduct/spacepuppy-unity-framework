@@ -39,7 +39,7 @@ namespace com.spacepuppy
     /// AlwaysReplace - if a singleton of this type already exists when this singleton starts, it will replace the older one
     /// LiveForeverAndAlwaysReplace - acts like LivesForever and AlwaysReplace
     /// </summary>
-    public abstract class Singleton : SPComponent, ISingleton
+    public abstract class Singleton : SPNotifyingComponent, ISingleton
     {
 
         #region Static Interface
