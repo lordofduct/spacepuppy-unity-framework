@@ -55,7 +55,8 @@ namespace com.spacepuppyeditor.Render
                 }
             }
 
-            var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue, useSharedProp.boolValue);
+            //var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue, useSharedProp.boolValue);
+            var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue, true);
             if (mat != null && mat.shader != null)
             {
                 int cnt = ShaderUtil.GetPropertyCount(mat.shader);

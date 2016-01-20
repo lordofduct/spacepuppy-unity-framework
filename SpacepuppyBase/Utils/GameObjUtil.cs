@@ -506,6 +506,36 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+
+        public static Transform[] FindAllByName(this Transform trans, string sname, bool bIgnoreCase = false)
+        {
+            if (trans == null) return ArrayUtil.Empty<Transform>();
+
+            using (var results = TempCollection.GetList<Transform>())
+            {
+                FindAllByName(trans, sname, results, bIgnoreCase);
+                return results.ToArray();
+            }
+        }
+
+        public static void FindAllByName(this Transform trans, string sname, ICollection<Transform> results, bool bIgnoreCase = false)
+        {
+            if (trans == null) return;
+            
+            using (var lst = TempCollection.GetList<Transform>())
+            {
+                trans.GetAllChildrenAndSelf(lst);
+                var e = lst.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (StringUtil.Equals(e.Current.name, sname, bIgnoreCase))
+                    {
+                        results.Add(e.Current);
+                    }
+                }
+            }
+        }
+
         public static GameObject FindParentWithName(this GameObject go, string sname, bool bIgnoreCase = false)
         {
             if (go == null) return null;

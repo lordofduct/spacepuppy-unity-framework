@@ -6,7 +6,7 @@ namespace com.spacepuppy.Render
 {
     public class RendererMaterialSwap : MonoBehaviour
     {
-
+        
         #region Fields
 
         [System.NonSerialized()]
@@ -34,6 +34,8 @@ namespace com.spacepuppy.Render
         #region Properties
 
         public bool Flashing { get { return _flashing; } }
+        
+        public Material ActiveMaterial { get { return _renderer.sharedMaterial; } }
 
         #endregion
 
@@ -57,7 +59,7 @@ namespace com.spacepuppy.Render
             if (_flashing)
             {
                 //already started, just replace
-                _renderer.material = mat;
+                _renderer.sharedMaterial = mat;
                 
                 if (duration < float.PositiveInfinity)
                 {
@@ -67,8 +69,8 @@ namespace com.spacepuppy.Render
             else
             {
                 //start a new
-                _matCache = _renderer.material;
-                _renderer.material = mat;
+                _matCache = _renderer.sharedMaterial;
+                _renderer.sharedMaterial = mat;
                 _flashing = true;
 
                 if (duration < float.PositiveInfinity)
@@ -82,7 +84,7 @@ namespace com.spacepuppy.Render
         {
             if (_flashing)
             {
-                _renderer.material = _matCache;
+                _renderer.sharedMaterial = _matCache;
                 _matCache = null;
                 _flashing = false;
                 this.enabled = false;
@@ -107,6 +109,29 @@ namespace com.spacepuppy.Render
             swap._renderer = renderer;
             swap.StartSwap(material, dur);
             return swap;
+        }
+
+        public static RendererMaterialSwap[] SwapAll(GameObject root, Material material, float dur, bool bIncludeInactiveRenderers = false)
+        {
+            if (root == null) throw new System.ArgumentNullException("root");
+            if (material == null) throw new System.ArgumentNullException("material");
+
+            using (var results = com.spacepuppy.Collections.TempCollection.GetList<RendererMaterialSwap>())
+            {
+                using (var rendererList = com.spacepuppy.Collections.TempCollection.GetList<Renderer>())
+                {
+                    root.GetComponentsInChildren<Renderer>(bIncludeInactiveRenderers, rendererList);
+                    var e = rendererList.GetEnumerator();
+                    while(e.MoveNext())
+                    {
+                        var swap = e.Current.AddOrGetComponent<RendererMaterialSwap>();
+                        swap._renderer = e.Current;
+                        swap.StartSwap(material, dur);
+                        results.Add(swap);
+                    }
+                }
+                return results.ToArray();
+            }
         }
 
         #endregion

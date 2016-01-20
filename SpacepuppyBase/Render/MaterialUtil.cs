@@ -15,7 +15,7 @@ namespace com.spacepuppy.Render
             return false;
         }
 
-        public static Material GetMaterialFromSource(object obj, bool useSharedMaterial = false)
+        public static Material GetMaterialFromSource(object obj, bool useSharedMaterial)
         {
             if (obj is Material) return obj as Material;
             if (obj is Renderer)
@@ -39,7 +39,7 @@ namespace com.spacepuppy.Render
             return null;
         }
 
-        public static Material GetMaterialFromSource(object obj, int index, bool useSharedMaterial = false)
+        public static Material GetMaterialFromSource(object obj, int index, bool useSharedMaterial)
         {
             if (obj is Material) return obj as Material;
             if (obj is Renderer)

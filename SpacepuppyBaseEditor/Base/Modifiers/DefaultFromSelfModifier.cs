@@ -6,7 +6,6 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppyeditor.Modifiers
 {

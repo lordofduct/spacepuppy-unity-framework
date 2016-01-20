@@ -584,9 +584,9 @@ namespace com.spacepuppy
             }
         }
 
-#endregion
+        #endregion
 
-#region Special Config Types
+        #region Special Config Types
 
         [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
         public class Config : System.Attribute
