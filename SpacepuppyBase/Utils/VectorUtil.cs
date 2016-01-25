@@ -268,12 +268,9 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis)
         {
-            v.Normalize();
-            Vector3 right = Vector3.Cross(axis, forward).normalized;
-            forward = Vector3.Cross(right, axis).normalized;
-            Vector2 v2 = new Vector2(Vector3.Dot(v, forward), Vector3.Dot(v, right));
-            v2.Normalize();
-            return VectorUtil.Angle(v2);
+            Vector3 right = Vector3.Cross(axis, forward);
+            forward = Vector3.Cross(right, axis);
+            return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * MathUtil.RAD_TO_DEG;
         }
 
         public static Vector3 RotateAroundAxis(Vector3 v, float a, Vector3 axis, bool bUseRadians = false)
