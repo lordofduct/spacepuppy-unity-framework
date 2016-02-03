@@ -95,6 +95,7 @@
     <Compile Include="Collections\PrimeHelper.cs" />
     <Compile Include="Collections\SamplingStack.cs" />
     <Compile Include="Collections\SerializableDictionaryBase.cs" />
+    <Compile Include="Collections\ReusableStringReader.cs" />
     <Compile Include="Collections\TempCollection.cs" />
     <Compile Include="Collections\TempHashSet.cs" />
     <Compile Include="Collections\TempList.cs" />

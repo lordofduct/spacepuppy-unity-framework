@@ -89,10 +89,12 @@ namespace com.spacepuppy.Dynamic
 
         #region Fields
 
-        private SamplingCharEnumerator _e = new SamplingCharEnumerator();
+        //private SamplingCharEnumerator _e = new SamplingCharEnumerator();
+        private com.spacepuppy.Collections.ReusableStringReader _reader = new com.spacepuppy.Collections.ReusableStringReader();
         private object _x;
         private StringBuilder _strBuilder = new StringBuilder();
         private int _parenCount;
+        private char _current;
 
         #endregion
 
@@ -100,111 +102,129 @@ namespace com.spacepuppy.Dynamic
 
         public double EvalStatement(string command, object x)
         {
+            _reader.Reset(command);
+            _x = x;
+            _strBuilder.Length = 0;
             _parenCount = 0;
-            _e.Reset(command);
-            this._x = x;
-            var result = this.EvalStatement();
+            _current = (char)0;
+
+            double result = this.EvalStatement();
+
+            _reader.Dispose();
             _x = null;
-            _e.Dispose();
+            _strBuilder.Length = 0;
+            _parenCount = 0;
+            _current = (char)0;
 
             return result;
         }
 
         private double EvalStatement()
         {
-            var result = EvalNextValue();
-            if (_parenCount > 0 && _e.Current == ')')
+            int i = _reader.Read();
+            for (; i >= 0 && char.IsWhiteSpace((char)i); i = _reader.Read())
+            {
+            }
+            if (i < 0) return 0d;
+
+            _current = (char)i;
+            if(!IsValidWordPrefix(_current)) throw new System.InvalidOperationException("Failed to parse the command.");
+            double result = this.EvalNextValue();
+
+            if (_parenCount > 0 && _current == ')')
             {
                 _parenCount--;
                 return result;
             }
 
-            while(_e.MoveNext())
+            for (i = _current; i >= 0; i = _reader.Read())
             {
-                if (char.IsWhiteSpace(_e.Current)) continue;
+                _current = (char)i;
 
-                switch(_e.Current)
+                if (char.IsWhiteSpace(_current)) continue;
+
+                switch(_current)
                 {
                     case '+':
-                        result += EvalNextValue();
+                        result += this.EvalStatement();
                         break;
                     case '*':
-                        result *= EvalNextValue();
+                        result *= this.EvalStatement();
                         break;
                     case '-':
-                        result -= EvalNextValue();
+                        result -= this.EvalStatement();
                         break;
                     case '/':
-                        result /= EvalNextValue();
+                        result /= this.EvalStatement();
                         break;
                     case '^':
-                        result = Math.Pow(result, EvalNextValue());
+                        result = Math.Pow(result, this.EvalStatement());
                         break;
                     case '%':
-                        result %= EvalNextValue();
+                        result %= this.EvalStatement();
                         break;
                     case '=':
                         {
-                            if(_e.Peek() == '=')
+                            if(_reader.Peek() == '=')
                             {
-                                _e.MoveNext();
-                                result = MathUtil.FuzzyEqual((float)result, (float)EvalNextValue()) ? 1d : 0d;
+                                _reader.Read();
+                                result = MathUtil.FuzzyEqual((float)result, (float)this.EvalStatement()) ? 1d : 0d;
                             }
                             else
                             {
-                                result = MathUtil.FuzzyEqual((float)result, (float)EvalNextValue()) ? 1d : 0d;
+                                result = MathUtil.FuzzyEqual((float)result, (float)this.EvalStatement()) ? 1d : 0d;
                             }
                         }
                         break;
                     case '<':
                         {
-                            if (_e.Peek() == '=')
+                            if (_reader.Peek() == '=')
                             {
-                                _e.MoveNext();
-                                result = (result <= EvalNextValue()) ? 1d : 0d;
+                                _reader.Read();
+                                result = (result <= this.EvalStatement()) ? 1d : 0d;
                             }
                             else
                             {
-                                result = (result < EvalNextValue()) ? 1d : 0d;
+                                result = (result < this.EvalStatement()) ? 1d : 0d;
                             }
                         }
                         break;
                     case '>':
                         {
-                            if (_e.Peek() == '=')
+                            if (_reader.Peek() == '=')
                             {
-                                _e.MoveNext();
-                                result = (result >= EvalNextValue()) ? 1d : 0d;
+                                _reader.Read();
+                                result = (result >= this.EvalStatement()) ? 1d : 0d;
                             }
                             else
                             {
-                                result = (result > EvalNextValue()) ? 1d : 0d;
+                                result = (result > this.EvalStatement()) ? 1d : 0d;
                             }
                         }
                         break;
                     case '|':
                         {
-                            if (_e.Peek() == '|')
+                            if (_reader.Peek() == '|')
                             {
-                                _e.MoveNext();
-                                result = (ConvertUtil.ToBool(result) || ConvertUtil.ToBool(EvalNextValue())) ? 1d : 0d;
+                                _reader.Read();
+                                result = (ConvertUtil.ToBool(result) || ConvertUtil.ToBool(this.EvalStatement())) ? 1d : 0d;
                             }
                             else
                             {
-                                result = (double)((int)result | (int)EvalNextValue());
+                                result = (double)((int)result | (int)this.EvalStatement());
                             }
                         }
                         break;
                     case '&':
                         {
-                            if (_e.Peek() == '&')
+                            if (_reader.Peek() == '&')
                             {
-                                _e.MoveNext();
-                                result = (ConvertUtil.ToBool(result) && ConvertUtil.ToBool(EvalNextValue())) ? 1d : 0d;
+                                _reader.Read();
+                                result = (ConvertUtil.ToBool(result) && ConvertUtil.ToBool(this.EvalStatement())) ? 1d : 0d;
                             }
                             else
                             {
-                                result = (double)((int)result & (int)EvalNextValue());
+                                result = (double)((int)result & (int)this.EvalStatement());
                             }
                         }
                         break;
@@ -220,81 +240,75 @@ namespace com.spacepuppy.Dynamic
 
         private double EvalNextValue()
         {
-            while (_e.MoveNext())
+            if (char.IsDigit(_current))
             {
-                if (char.IsWhiteSpace(_e.Current)) continue;
-                if (char.IsDigit(_e.Current))
-                {
-                    return EvalNumber();
-                }
-                if (char.IsLetter(_e.Current))
-                {
-                    return EvalFunc();
-                }
-
-                switch (_e.Current)
-                {
-                    case '$':
-                        return EvalVariable();
-                    case '(':
-                        _parenCount++;
-                        return EvalStatement();
-                    case '-':
-                        return -EvalNextValue();
-                    case ')':
-                        return 0d;
-                    default:
-                        throw new System.InvalidOperationException("Failed to parse the command.");
-                }
-
+                return EvalNumber();
+            }
+            if (char.IsLetter(_current))
+            {
+                return EvalFunc();
             }
 
-            //ran out of statement... this shouldn't happen
-            throw new System.InvalidOperationException("Failed to parse the command.");
+            switch (_current)
+            {
+                case '$':
+                    return this.EvalVariable();
+                case '(':
+                    _parenCount++;
+                    return this.EvalStatement();
+                case '+':
+                    return this.EvalStatement();
+                case '-':
+                    return -this.EvalStatement();
+                case ')':
+                    return 0d;
+                default:
+                    throw new System.InvalidOperationException("Failed to parse the command.");
+            }
         }
 
         private double EvalNumber()
         {
             const int CHAR_0 = (int)'0';
-            long high = ((int)_e.Current - CHAR_0);
+            long high = ((int)_current - CHAR_0);
             long low = 0;
             int lowLen = -1;
-
-            while (_e.MoveNext())
+            
+            for (int i = _reader.Read(); i >= 0; i = _reader.Read())
             {
-                if (char.IsDigit(_e.Current))
+                _current = (char)i;
+
+                if (char.IsDigit(_current))
                 {
                     if(lowLen < 0)
-                        high = (high * 10) + ((int)_e.Current - CHAR_0);
+                        high = (high * 10) + ((int)_current - CHAR_0);
                     else
                     {
-                        low = (low * 10) + ((int)_e.Current - CHAR_0);
+                        low = (low * 10) + ((int)_current - CHAR_0);
                         lowLen++;
                     }
                 }
-                else if(_e.Current == '.')
+                else if(_current == '.')
                 {
                     if (lowLen < 0)
                         lowLen = 0;
                     else
                         throw new System.InvalidOperationException("Failed to parse the command.");
                 }
-                else if (_e.Current == ',')
+                else if (_current == ',')
                 {
                     continue;
                 }
-                else if (char.IsWhiteSpace(_e.Current))
+                else if (char.IsWhiteSpace(_current))
                 {
                     break;
                 }
-                else if (_e.Current == ')')
+                else if (_current == ')')
                 {
-                    _e.MovePrevious();
                     break;
                 }
-                else if (IsArithmeticSymbol(_e.Current))
+                else if (IsArithmeticSymbol(_current))
                 {
-                    _e.MovePrevious();
                     break;
                 }
                 else
@@ -306,55 +320,27 @@ namespace com.spacepuppy.Dynamic
                 return (double)high + ((double)low / Math.Pow(10, lowLen));
             else
                 return (double)high;
-
-
-
-            //_strBuilder.Length = 0;
-            //_strBuilder.Append(_e.Current);
-
-            //while(_e.MoveNext())
-            //{
-            //    if (char.IsDigit(_e.Current) || _e.Current == '.')
-            //        _strBuilder.Append(_e.Current);
-            //    else if (_e.Current == ',')
-            //        continue;
-            //    else if (char.IsWhiteSpace(_e.Current))
-            //        break;
-            //    else if (_e.Current == ')')
-            //    {
-            //        _e.MovePrevious();
-            //        break;
-            //    }
-            //    else if (IsArithmeticSymbol(_e.Current))
-            //    {
-            //        _e.MovePrevious();
-            //        break;
-            //    }
-            //    else
-            //        throw new System.InvalidOperationException("Failed to parse the command.");
-
-            //}
-
-            //var str = _strBuilder.ToString();
-            //_strBuilder.Length = 0;
-            //return ConvertUtil.ToDouble(str);
         }
 
         private double EvalVariable()
         {
             _strBuilder.Length = 0;
-            if (!_e.MoveNext()) return ConvertUtil.ToDouble(_x);
+            int i = _reader.Read();
+            if (i < 0) return ConvertUtil.ToDouble(_x);
 
-            if(_e.Current == '.')
+            _current = (char)i;
+            if (_current == '.')
             {
                 //access x
-                while (_e.MoveNext())
+                for (i = _reader.Read(); i >= 0; i = _reader.Read())
                 {
-                    if (char.IsLetterOrDigit(_e.Current) || _e.Current == '_')
+                    _current = (char)i;
+
+                    if (char.IsLetterOrDigit(_current) || _current == '_')
                     {
-                        _strBuilder.Append(_e.Current);
+                        _strBuilder.Append(_current);
                     }
-                    else if (char.IsWhiteSpace(_e.Current))
+                    else if (char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')')
                         break;
                     else
                         throw new System.InvalidOperationException("Failed to parse the command.");
@@ -364,18 +350,20 @@ namespace com.spacepuppy.Dynamic
                 _strBuilder.Length = 0;
                 return ConvertUtil.ToDouble(DynamicUtil.GetValue(_x, str));
             }
-            else if (char.IsLetterOrDigit(_e.Current) || _e.Current == '_' || _e.Current == '-')
+            else if (char.IsLetterOrDigit(_current) || _current == '_' || _current == '-')
             {
                 //global
-                _strBuilder.Append(char.ToLower(_e.Current));
+                _strBuilder.Append(char.ToLower(_current));
 
-                while (_e.MoveNext())
+                for (i = _reader.Read(); i >= 0; i = _reader.Read())
                 {
-                    if (char.IsLetterOrDigit(_e.Current) || _e.Current == '_')
+                    _current = (char)i;
+
+                    if (char.IsLetterOrDigit(_current) || _current == '_')
                     {
-                        _strBuilder.Append(char.ToLower(_e.Current));
+                        _strBuilder.Append(char.ToLower(_current));
                     }
-                    else if (char.IsWhiteSpace(_e.Current))
+                    else if (char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')')
                         break;
                     else
                         throw new System.InvalidOperationException("Failed to parse the command.");
@@ -421,7 +409,7 @@ namespace com.spacepuppy.Dynamic
                         return 0d;
                 }
             }
-            else if(char.IsWhiteSpace(_e.Current) || IsArithmeticSymbol(_e.Current) || _e.Current == ')')
+            else if(char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')')
             {
                 return ConvertUtil.ToDouble(_x);
             }
@@ -436,15 +424,17 @@ namespace com.spacepuppy.Dynamic
         private double EvalFunc()
         {
             _strBuilder.Length = 0;
-            _strBuilder.Append(char.ToLower(_e.Current));
-
-            while(_e.MoveNext())
+            _strBuilder.Append(char.ToLower(_current));
+            
+            for (int i = _reader.Read(); i >= 0; i = _reader.Read())
             {
-                if (char.IsLetterOrDigit(_e.Current))
+                _current = (char)i;
+
+                if (char.IsLetterOrDigit(_current))
                 {
-                    _strBuilder.Append(char.ToLower(_e.Current));
+                    _strBuilder.Append(char.ToLower(_current));
                 }
-                else if (_e.Current == '(')
+                else if (_current == '(')
                     break;
                 else
                     throw new System.InvalidOperationException("Failed to parse the command.");
@@ -480,7 +470,7 @@ namespace com.spacepuppy.Dynamic
                     throw new System.InvalidOperationException("Failed to parse the command: Unknown Function");
             }
         }
-
+        
         #endregion
 
 
@@ -666,8 +656,13 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        #endregion
+        private static bool IsValidWordPrefix(char c)
+        {
+            return char.IsLetterOrDigit(c) || c == '$' || c == '_' || c == '+' || c == '-' || c == '(';
+        }
         
+        #endregion
+
     }
 
 }

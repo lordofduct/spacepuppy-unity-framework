@@ -1185,6 +1185,7 @@ namespace com.spacepuppy.Utils
         /// doesn't read blank: ""
         /// doesn't read false (not case-sensitive)
         /// doesn't read 0
+        /// doesn't read off (not case-sensitive)
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
