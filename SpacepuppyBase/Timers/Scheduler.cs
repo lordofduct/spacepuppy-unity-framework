@@ -4,6 +4,13 @@ using System.Collections.Generic;
 namespace com.spacepuppy.Timers
 {
 
+    public enum SchedulingStyle
+    {
+        FromZero = 0,
+        FromNow = 1,
+        FromRelative = 2
+    }
+
     public class Scheduler : ICollection<ScheduledEvent>
     {
 
@@ -39,14 +46,114 @@ namespace com.spacepuppy.Timers
         #region Methods
 
         /// <summary>
+        /// Reschedule an event that was previously cancelled based on the time that schedule was initially started. 
+        /// This is useful for saving and loading scheduled events. You can serialize the start time, and calculate 
+        /// and restart the event based on that.
+        /// </summary>
+        /// <param name="style"></param>
+        /// <param name="originalStartTime"></param>
+        /// <param name="time"></param>
+        /// <param name="repeatInterval"></param>
+        /// <param name="repeatCount"></param>
+        /// <param name="callback"></param>
+        /// <returns>Returns the ScheduledEvent toke. Will return null if no event will occur, for example, if the current time is pass the time the event would have occurred.</returns>
+        public ScheduledEvent Reschedule(SchedulingStyle style, double originalStartTime, double time, double repeatInterval, int repeatCount, System.Action<ScheduledEvent> callback)
+        {
+            switch(style)
+            {
+                case SchedulingStyle.FromZero:
+                    {
+                        //calculate next time to schedule at
+                        var currentTime = _time.TotalPrecise;
+                        var next = System.Math.Ceiling((currentTime - time) / repeatInterval) * repeatInterval + time;
+
+
+                        //determine how many repeats are left based on the _startTime, this is necessary incase this was loaded and started again
+                        if (repeatCount < 0)
+                        {
+                            repeatCount = -1; //negative is infinite
+                        }
+                        else
+                        {
+                            repeatCount = repeatCount - (int)System.Math.Round((next - time) / repeatInterval);
+                            if (repeatCount < 0) return null; //completed, so don't start
+                        }
+
+                        this.Schedule(next, repeatInterval, repeatCount, callback);
+                    }
+                    break;
+                case SchedulingStyle.FromNow:
+                    {
+                        //calculate next time to schedule at
+                        var currentTime = _time.TotalPrecise;
+                        var firstTime = originalStartTime + time;
+                        var next = System.Math.Ceiling((currentTime - firstTime) / repeatInterval) * repeatInterval + firstTime;
+
+
+                        //determine how many repeats are left based on the _startTime, this is necessary incase this was loaded and started again
+                        if (repeatCount < 0)
+                        {
+                            repeatCount = -1; //negative is infinite
+                        }
+                        else
+                        {
+                            repeatCount = repeatCount - (int)System.Math.Round((next - firstTime) / repeatInterval);
+                            if (repeatCount < 0) return null; //completed, so don't start
+                        }
+
+                        this.Schedule(next, repeatInterval, repeatCount, callback);
+                    }
+                    break;
+                case SchedulingStyle.FromRelative:
+                    {
+                        //calculate next time to schedule at
+                        var currentTime = _time.TotalPrecise;
+                        var next = System.Math.Ceiling((currentTime - time) / repeatInterval) * repeatInterval + time;
+
+
+                        //determine how many repeats are left based on the _startTime, this is necessary incase this was loaded and started again
+                        if (repeatCount < 0)
+                        {
+                            repeatCount = -1; //negative is infinite
+                        }
+                        else
+                        {
+                            var first = System.Math.Ceiling((originalStartTime - time) / repeatInterval) * repeatInterval + time;
+                            repeatCount = repeatCount - (int)System.Math.Round((next - first) / repeatInterval);
+                            if (repeatCount < 0) return null; //completed, so don't start
+                        }
+
+                        this.Schedule(next, repeatInterval, repeatCount, callback);
+                    }
+                    break;
+            }
+
+            return null;
+        }
+        
+        /// <summary>
         /// Schedule an event to occur at some point in time.
         /// </summary>
         /// <param name="time">The time of the event</param>
         /// <param name="callback">Callback to respond to the event</param>
         /// <returns></returns>
-        public ScheduledEvent ScheduleOnceAt(double time, System.Action<ScheduledEvent> callback)
+        public ScheduledEvent Schedule(double time, System.Action<ScheduledEvent> callback)
         {
-            var ev = new ScheduledEvent(time, 0d, callback, 0);
+            var ev = new ScheduledEvent(time, 0d, 0, callback);
+            this.Add(ev);
+            return ev;
+        }
+        /// <summary>
+        /// Create an event that occurs on some interval.
+        /// </summary>
+        /// <param name="time">The time at which the interval begins counting, good for repeating intervals</param>
+        /// <param name="interval">The interval of the event</param>
+        /// <param name="repeatCount">Number of times to repeat, negative values are treated as infinite</param>
+        /// <param name="callback">Callback to respond to the event</param>
+        /// <returns></returns>
+        public ScheduledEvent Schedule(double time, double interval, int repeatCount, System.Action<ScheduledEvent> callback)
+        {
+            var ev = new ScheduledEvent(time, interval, repeatCount, callback);
             this.Add(ev);
             return ev;
         }
@@ -57,9 +164,9 @@ namespace com.spacepuppy.Timers
         /// <param name="duration">Amount of time from now the event occurs</param>
         /// <param name="callback">Callback to respond to the event</param>
         /// <returns></returns>
-        public ScheduledEvent ScheduleOnceFromNow(double duration, System.Action<ScheduledEvent> callback)
+        public ScheduledEvent ScheduleFromNow(double duration, System.Action<ScheduledEvent> callback)
         {
-            var ev = new ScheduledEvent(duration, _time.TotalPrecise, callback, 0);
+            var ev = new ScheduledEvent(_time.TotalPrecise + duration, 0d, 0, callback);
             this.Add(ev);
             return ev;
         }
@@ -69,27 +176,50 @@ namespace com.spacepuppy.Timers
         /// </summary>
         /// <param name="duration">Amount of time from now the first event occurs</param>
         /// <param name="repeatFrequency">Frequency of the event</param>
-        /// <param name="callback">Callback to respond to the event</param>
         /// <param name="repeatCount">Number of times the event occurs</param>
+        /// <param name="callback">Callback to respond to the event</param>
         /// <returns></returns>
-        public ScheduledEvent ScheduleFromNow(double duration, double repeatFrequency, System.Action<ScheduledEvent> callback, int repeatCount = -1)
+        public ScheduledEvent ScheduleFromNow(double duration, double repeatFrequency, int repeatCount, System.Action<ScheduledEvent> callback)
         {
-            var ev = new ScheduledEvent(repeatFrequency, _time.TotalPrecise + duration - repeatFrequency, callback, repeatCount);
+            var ev = new ScheduledEvent(_time.TotalPrecise + duration, repeatFrequency, repeatCount, callback);
             this.Add(ev);
             return ev;
         }
 
         /// <summary>
-        /// Create an event that occurs on some interval.
+        /// Schedules an event relative to current time so that it would have been at the repeated time of 'interval' of a scheduled time at 'offset'. 
+        /// 
+        /// For example if you wanted to schedule an event for on the half hour past the current hour. You'd pass in 30 minutes for 'firstTime' and 'hour' 
+        /// for interval. It'll calculate the next half hour on the hour from now, and schedule an event for it.
         /// </summary>
-        /// <param name="interval">The interval of the event</param>
-        /// <param name="offset">The time at which the interval begins counting, good for repeating intervals</param>
-        /// <param name="callback">Callback to respond to the event</param>
-        /// <param name="count">Number of times to repeat, negative values are treated as infinite</param>
+        /// <param name="firstTime"></param>
+        /// <param name="interval"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public ScheduledEvent Schedule(double interval, double offset, System.Action<ScheduledEvent> callback, int count = 0)
+        public ScheduledEvent ScheduleOnIntervalFromNow(double firstTime, double interval,  System.Action<ScheduledEvent> callback)
         {
-            var ev = new ScheduledEvent(interval, offset, callback, count);
+            var t = Math.Ceiling((_time.TotalPrecise - firstTime) / interval) * interval + firstTime;
+            var ev = new ScheduledEvent(t, 0d, 0, callback);
+            this.Add(ev);
+            return ev;
+        }
+
+        /// <summary>
+        /// Schedules an event relative to current time so that it would have been at the repeated time of 'interval' of a scheduled time at 'offset'. 
+        /// And then repeat that interval 'repeatCount' times.
+        /// 
+        /// For example if you wanted to schedule an event for on the half hour past the current hour. You'd pass in 30 minutes for 'firstTime' and 'hour' 
+        /// for interval. It'll calculate the next half hour on the hour from now, and schedule an event for it.
+        /// </summary>
+        /// <param name="firstTime"></param>
+        /// <param name="interval"></param>
+        /// <param name="repeatCount"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public ScheduledEvent ScheduleOnIntervalFromNow(double firstTime, double interval, int repeatCount, System.Action<ScheduledEvent> callback)
+        {
+            var t = Math.Ceiling((_time.TotalPrecise - firstTime) / interval) * interval + firstTime;
+            var ev = new ScheduledEvent(t, interval, repeatCount, callback);
             this.Add(ev);
             return ev;
         }
@@ -413,8 +543,8 @@ namespace com.spacepuppy.Timers
 
         #region Fields
 
+        private double _time;
         private double _interval;
-        private double _offset;
         private int _repeatCount;
         private int _currentCount;
         private System.Action<ScheduledEvent> _callback;
@@ -431,13 +561,13 @@ namespace com.spacepuppy.Timers
         /// <summary>
         /// Creates a Scheduled Event
         /// </summary>
+        /// <param name="time">The time at which the interval begins counting, good for repeating intervals</param>
         /// <param name="interval">The interval of the event</param>
-        /// <param name="offset">The time at which the interval begins counting, good for repeating intervals</param>
+        /// <param name="repeatCount">Number of times to repeat, negative values are treated as infinite</param>
         /// <param name="callback">Callback to respond to the event</param>
-        /// <param name="count">Number of times to repeat, negative values are treated as infinite</param>
-        public ScheduledEvent(double interval, double offset, System.Action<ScheduledEvent> callback, int repeatCount)
+        public ScheduledEvent(double time, double interval, int repeatCount, System.Action<ScheduledEvent> callback)
         {
-            _offset = offset;
+            _time = time;
             _interval = interval;
             _callback = callback;
             _repeatCount = repeatCount;
@@ -448,22 +578,22 @@ namespace com.spacepuppy.Timers
         #region #region Properties
 
         /// <summary>
-        /// The interval after 'Offset' that the event should raise.
+        /// The time of the scheduled event.
+        /// </summary>
+        public double Time { get { return _time; } }
+
+        /// <summary>
+        /// The interval after 'Time' that the event should repeat, if it repeats.
         /// </summary>
         public double Interval { get { return _interval; } }
 
-        /// <summary>
-        /// An offset for the start of the first interval. If Interval was 3, and offset was 2, events would occur on 5, 8, 11, 14...
-        /// </summary>
-        public double Offset { get { return _offset; } }
-        
         /// <summary>
         /// Number of times the interval should repeat before completing, values &lt 0 repeat forever.
         /// </summary>
         public int RepeatCount { get { return _repeatCount; } }
 
         /// <summary>
-        /// Number of times the interval has passed.
+        /// Number of times the event has occurred.
         /// </summary>
         public int CurrentCount { get { return _currentCount; } }
 
@@ -504,30 +634,40 @@ namespace com.spacepuppy.Timers
         /// <returns></returns>
         public double GetNextScheduledTime(double time)
         {
+            //if (this.Complete) return double.NaN;
+            //if (_interval <= 0f) return double.NaN;
+
+            //if (time < _time) return _time + _interval;
+            //var t = time - _time;
+            //int cnt = (int)Math.Floor(t / _interval);
+            //if (_repeatCount >= 0 && cnt > _repeatCount) return double.NaN;
+
+            //return _time + (_interval * (cnt + 1));
+
             if (this.Complete) return double.NaN;
-            if (_interval <= 0f) return double.NaN;
-            
-            if (time < _offset) return _offset + _interval;
-            var t = time - _offset;
+
+            if (time < _time) return _time;
+            if (_repeatCount == 0) return double.NaN;
+
+            var t = time - _time;
             int cnt = (int)Math.Floor(t / _interval);
             if (_repeatCount >= 0 && cnt > _repeatCount) return double.NaN;
 
-            //return _offset + (_interval * (cnt + 1)) + (t % _interval);
-            return _offset + (_interval * (cnt + 1));
+            return _time + (_interval * (cnt + 1));
         }
 
-        public float GetProgress()
-        {
-            double t = (_owner != null && _owner.TimeSupplier != null) ? _owner.TimeSupplier.TotalPrecise : 0d;
-            double tf = GetNextScheduledTime(t);
-            double t0 = tf - _interval;
+        //public float GetProgress()
+        //{
+        //    double t = (_owner != null && _owner.TimeSupplier != null) ? _owner.TimeSupplier.TotalPrecise : 0d;
+        //    double tf = GetNextScheduledTime(t);
+        //    double t0 = tf - _interval;
 
-            float p = com.spacepuppy.Utils.MathUtil.Clamp01((float)((t - t0) / (tf - t0)));
-            if (com.spacepuppy.Utils.MathUtil.IsReal(p))
-                return p;
-            else
-                return 1f;
-        }
+        //    float p = com.spacepuppy.Utils.MathUtil.Clamp01((float)((t - t0) / (tf - t0)));
+        //    if (com.spacepuppy.Utils.MathUtil.IsReal(p))
+        //        return p;
+        //    else
+        //        return 1f;
+        //}
 
         protected internal virtual void Signal()
         {
@@ -546,7 +686,7 @@ namespace com.spacepuppy.Timers
                 _owner.Remove(this);
 
             _interval = 0f;
-            _offset = 0f;
+            _time = 0f;
             _callback = null;
             _repeatCount = 0;
         }

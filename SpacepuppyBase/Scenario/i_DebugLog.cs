@@ -8,7 +8,7 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField()]
-        private VariantReference _message;
+        private VariantReference _message = new VariantReference(string.Empty);
 
         #endregion
 

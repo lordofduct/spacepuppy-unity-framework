@@ -100,6 +100,11 @@ namespace com.spacepuppy
             return float.IsNegativeInfinity(value._value);
         }
 
+        public static bool IsReal(DiscreteFloat value)
+        {
+            return !(float.IsNaN(value._value) || float.IsInfinity(value._value));
+        }
+
         #endregion
 
         #region Operators

@@ -15,37 +15,33 @@ namespace com.spacepuppy.Render
             return false;
         }
 
-        public static Material GetMaterialFromSource(object obj, bool useSharedMaterial)
+        public static Material GetMaterialFromSource(object obj)
         {
             if (obj is Material) return obj as Material;
             if (obj is Renderer)
             {
-                if (useSharedMaterial)
-                    return (obj as Renderer).sharedMaterial;
-                else
-                    return (obj as Renderer).material;
+                return (obj as Renderer).sharedMaterial;
             }
 
             //var go = GameObjectUtil.GetGameObjectFromSource(obj);
-            //if(go != null)
+            //if (go != null)
             //{
             //    var r = go.GetComponent<Renderer>();
-            //    if (useSharedMaterial)
-            //        return r.sharedMaterial;
-            //    else
-            //        return r.material;
+            //    if (r == null) return null;
+
+            //    return r.sharedMaterial;
             //}
 
             return null;
         }
 
-        public static Material GetMaterialFromSource(object obj, int index, bool useSharedMaterial)
+        public static Material GetMaterialFromSource(object obj, int index)
         {
             if (obj is Material) return obj as Material;
             if (obj is Renderer)
             {
                 if(index < 0) return null;
-                var arr = (useSharedMaterial) ? (obj as Renderer).sharedMaterials : (obj as Renderer).materials;
+                var arr = (obj as Renderer).sharedMaterials;
                 if (index >= arr.Length) return null;
                 return arr[index];
             }
@@ -54,12 +50,25 @@ namespace com.spacepuppy.Render
             //if (go != null)
             //{
             //    var r = go.GetComponent<Renderer>();
-            //    var arr = (useSharedMaterial) ? r.sharedMaterials : r.materials;
+            //    if (r == null) return null;
+
+            //    var arr = r.sharedMaterials;
             //    if (index >= arr.Length) return null;
             //    return arr[index];
             //}
 
             return null;
+        }
+
+        public static Material GetUniqueMaterial(this Renderer renderer, bool forceUnique = false)
+        {
+            if (renderer == null) throw new System.ArgumentNullException("renderer");
+
+            var source = MaterialSource.GetMaterialSource(renderer);
+            if (!source.IsUnique || forceUnique)
+                return source.GetUniqueMaterial();
+            else
+                return source.Material;
         }
 
     }

@@ -40,7 +40,7 @@ namespace com.spacepuppyeditor.Render
             lst.elementHeight = EditorGUIUtility.singleLineHeight;
 
             h = lst.GetHeight();
-            h += EditorGUIUtility.singleLineHeight * 3.5f; //material line, position slider, and a small padding
+            h += EditorGUIUtility.singleLineHeight * 2.5f; //material line, position slider, and a small padding
             return h;
         }
 
@@ -59,11 +59,7 @@ namespace com.spacepuppyeditor.Render
             position = new Rect(position.xMin, r0.yMax, position.width, position.height - r0.height);
 
             EditorGUI.indentLevel++;
-
-            var r1 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
-            SPEditorGUI.PropertyField(r1, property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_USESHARED));
-            position = new Rect(position.xMin, r1.yMax, position.width, position.height - r1.height);
-
+            
             _valuesProp = property.FindPropertyRelative(PROP_VALUES);
             var lst = CachedReorderableList.GetListDrawer(_valuesProp, _valuesList_DrawHeader, _valuesList_DrawElement);
             lst.headerHeight = 0f;

@@ -19,7 +19,6 @@ namespace com.spacepuppyeditor.Render
     {
 
         public const string PROP_MATERIAL = "_material";
-        public const string PROP_USESHARED = "_useSharedMaterial";
         public const string PROP_VALUETYPE = "_valueType";
         public const string PROP_PROPERTYNAME = "_propertyName";
 
@@ -38,7 +37,6 @@ namespace com.spacepuppyeditor.Render
             var r1 = new Rect(r0.xMax, r0.yMin, position.width - r0.width, r0.height);
 
             var matProp = property.FindPropertyRelative(PROP_MATERIAL);
-            var useSharedProp = property.FindPropertyRelative(PROP_USESHARED);
             var valTypeProp = property.FindPropertyRelative(PROP_VALUETYPE);
             var propNameProp = property.FindPropertyRelative(PROP_PROPERTYNAME);
 
@@ -54,9 +52,8 @@ namespace com.spacepuppyeditor.Render
                     matProp.objectReferenceValue = (go != null) ? go.GetComponent<Renderer>() : null;
                 }
             }
-
-            //var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue, useSharedProp.boolValue);
-            var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue, true);
+            
+            var mat = MaterialUtil.GetMaterialFromSource(matProp.objectReferenceValue);
             if (mat != null && mat.shader != null)
             {
                 int cnt = ShaderUtil.GetPropertyCount(mat.shader);

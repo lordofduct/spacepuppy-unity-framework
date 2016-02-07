@@ -180,6 +180,7 @@
     <Compile Include="Render\i_SetMaterialProperty.cs" />
     <Compile Include="Render\i_TweenMaterial.cs" />
     <Compile Include="Render\MaterialPropertyReference.cs" />
+    <Compile Include="Render\MaterialSource.cs" />
     <Compile Include="Render\MaterialTransition.cs" />
     <Compile Include="Render\MaterialUtil.cs" />
     <Compile Include="Render\RenderEnums.cs" />

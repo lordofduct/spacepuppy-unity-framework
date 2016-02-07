@@ -149,6 +149,7 @@
     <Compile Include="Project\ResourcePackageInspector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Render\MaterialPropertyReferencePropertyDrawer.cs" />
+    <Compile Include="Render\MaterialSourceInspector.cs" />
     <Compile Include="Render\MaterialTransitionPropertyDrawer.cs" />
     <Compile Include="ReorderableListHelper.cs" />
     <Compile Include="Scenario\ITriggerableMechanismAddonDrawer.cs" />

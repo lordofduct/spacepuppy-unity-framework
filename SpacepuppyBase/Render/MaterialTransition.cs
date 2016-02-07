@@ -17,8 +17,6 @@ namespace com.spacepuppy.Render
         [DisableOnPlay()]
         private UnityEngine.Object _material;
         [SerializeField()]
-        private bool _useSharedMaterial = true;
-        [SerializeField()]
         private MaterialPropertyValueType _valueType;
         [SerializeField()]
         private string _propertyName;
@@ -35,16 +33,10 @@ namespace com.spacepuppy.Render
 
         public Material Material
         {
-            get { return MaterialUtil.GetMaterialFromSource(_material, _useSharedMaterial); }
+            get { return MaterialUtil.GetMaterialFromSource(_material); }
             set { _material = value; }
         }
-
-        public bool UseSharedMaterial
-        {
-            get { return _useSharedMaterial; }
-            set { _useSharedMaterial = value; }
-        }
-
+        
         public MaterialPropertyValueType PropertyValueType
         {
             get { return _valueType; }

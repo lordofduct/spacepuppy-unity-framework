@@ -64,34 +64,6 @@ namespace com.spacepuppy.Geom
 
         public static bool ClosestPoints(Line line1, Line line2, out Vector3 line1ClosestPoint, out Vector3 line2ClosestPoint)
         {
-            /*
-            float a = Vector3.Dot(line1.Direction, line1.Direction);
-            float b = Vector3.Dot(line1.Direction, line2.Direction);
-            float e = Vector3.Dot(line2.Direction, line2.Direction);
-
-            float d = a * e - b * b;
-            if (d != 0.0f)
-            {
-                var r = line1.Point - line2.Point;
-                float c = Vector3.Dot(line1.Direction, r);
-                float f = Vector3.Dot(line2.Direction, r);
-
-                float s = (b * f - c * e) / d;
-                float t = (a * f - c * b) / d;
-
-                line1ClosestPoint = line1.Point + line1.Direction * s;
-                line2ClosestPoint = line2.Point + line2.Direction * t;
-                return true;
-            }
-            else
-            {
-                //parrallel, can't compute
-                line1ClosestPoint = Vector3.zero;
-                line2ClosestPoint = Vector3.zero;
-                return false;
-            }
-            */
-            
             //a and e are going to be 1, drop them out...
             float b = Vector3.Dot(line1.Direction, line2.Direction);
 
@@ -119,20 +91,25 @@ namespace com.spacepuppy.Geom
 
         public static Vector3 ClosestPoint(Line line, Vector3 point)
         {
-            if (line.Point == point) return point;
+            //if (line.Point == point) return point;
 
-            var v = (line.Point - point).normalized;
-            v = Vector3.Cross(line.Direction, v);
+            //var v = (line.Point - point).normalized;
+            //v = Vector3.Cross(line.Direction, v);
 
-            float b = Vector3.Dot(line.Direction, v);
+            //float b = Vector3.Dot(line.Direction, v);
 
-            float d = 1 - b * b;
-            var r = line.Point - point;
-            float c = Vector3.Dot(line.Direction, r);
-            float f = Vector3.Dot(v, r);
+            //float d = 1 - b * b;
+            //var r = line.Point - point;
+            //float c = Vector3.Dot(line.Direction, r);
+            //float f = Vector3.Dot(v, r);
 
-            float s = (b * f - c) / d;
-            return line.Point + line.Direction * s;
+            //float s = (b * f - c) / d;
+            //return line.Point + line.Direction * s;
+
+
+            var v = point - line.Point;
+            var t = Vector3.Dot(v, line.Direction);
+            return line.Point + line.Direction * t;
         }
 
         #endregion
