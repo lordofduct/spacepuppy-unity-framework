@@ -634,16 +634,6 @@ namespace com.spacepuppy.Timers
         /// <returns></returns>
         public double GetNextScheduledTime(double time)
         {
-            //if (this.Complete) return double.NaN;
-            //if (_interval <= 0f) return double.NaN;
-
-            //if (time < _time) return _time + _interval;
-            //var t = time - _time;
-            //int cnt = (int)Math.Floor(t / _interval);
-            //if (_repeatCount >= 0 && cnt > _repeatCount) return double.NaN;
-
-            //return _time + (_interval * (cnt + 1));
-
             if (this.Complete) return double.NaN;
 
             if (time < _time) return _time;
@@ -655,20 +645,7 @@ namespace com.spacepuppy.Timers
 
             return _time + (_interval * (cnt + 1));
         }
-
-        //public float GetProgress()
-        //{
-        //    double t = (_owner != null && _owner.TimeSupplier != null) ? _owner.TimeSupplier.TotalPrecise : 0d;
-        //    double tf = GetNextScheduledTime(t);
-        //    double t0 = tf - _interval;
-
-        //    float p = com.spacepuppy.Utils.MathUtil.Clamp01((float)((t - t0) / (tf - t0)));
-        //    if (com.spacepuppy.Utils.MathUtil.IsReal(p))
-        //        return p;
-        //    else
-        //        return 1f;
-        //}
-
+        
         protected internal virtual void Signal()
         {
             if (this.Complete) return;
