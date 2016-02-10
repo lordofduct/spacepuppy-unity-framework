@@ -19,7 +19,7 @@ namespace com.spacepuppy.Geom
         private static Collider[] _nonallocColliderBuffer;
         private static RaycastHit[] _nonallocRaycastBuffer;
 
-        private class RaycastHitDistanceComparer : IComparer<RaycastHit>
+        public class RaycastHitDistanceComparer : IComparer<RaycastHit>
         {
             private static RaycastHitDistanceComparer _default;
             public static RaycastHitDistanceComparer Default
@@ -37,7 +37,7 @@ namespace com.spacepuppy.Geom
                 return x.distance.CompareTo(y.distance);
             }
         }
-
+        
         #endregion
 
         public static int CalculateLayerMaskAgainst(int layer)
@@ -376,7 +376,6 @@ namespace com.spacepuppy.Geom
         }
 
         #endregion
-
 
         #region CheckGeom
 
