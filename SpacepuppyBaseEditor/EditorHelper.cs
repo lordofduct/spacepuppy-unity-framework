@@ -566,19 +566,50 @@ namespace com.spacepuppyeditor
             c.tooltip = tooltip;
             return c;
         }
+        
+        #endregion
+
+        #region Indent Helper
+
+        private static Stack<int> _indents = new Stack<int>();
+
+        public static void SuppressIndentLevel()
+        {
+            _indents.Push(EditorGUI.indentLevel);
+            EditorGUI.indentLevel = 0;
+        }
+
+        public static void SuppressIndentLevel(int tempLevel)
+        {
+            _indents.Push(EditorGUI.indentLevel);
+            EditorGUI.indentLevel = tempLevel;
+        }
+
+        public static void ResumeIndentLevel()
+        {
+            if (_indents.Count > 0)
+            {
+                EditorGUI.indentLevel = _indents.Pop();
+            }
+        }
+
+        #endregion
 
 
 
+
+        #region Event Handlers
 
         private static void OnSceneGUI(SceneView scene)
         {
             GuiDisabled = 0;
-            foreach(var c in _temp_text.ActiveMembers.ToArray())
+            foreach (var c in _temp_text.ActiveMembers.ToArray())
             {
                 _temp_text.Release(c);
             }
-        }
 
+            _indents.Clear();
+        }
 
         #endregion
 

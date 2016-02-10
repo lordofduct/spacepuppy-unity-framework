@@ -72,7 +72,7 @@ namespace com.spacepuppy.Geom
             {
                 if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
 
-                int cnt = Physics.RaycastNonAlloc(ray, results as RaycastHit[], maxDistance, layerMask, query);
+                int cnt = Physics.RaycastNonAlloc(ray, _nonallocRaycastBuffer, maxDistance, layerMask, query);
                 if (results is List<RaycastHit>)
                 {
                     var lst = results as List<RaycastHit>;
@@ -186,8 +186,8 @@ namespace com.spacepuppy.Geom
             else
             {
                 if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
-
-                int cnt = Physics.OverlapBoxNonAlloc(center, halfExtents, _nonallocColliderBuffer, orientation, layerMask, query);
+                
+                int cnt = Physics.BoxCastNonAlloc(center, halfExtents, direction, _nonallocRaycastBuffer, orientation, maxDistance, layerMask);
                 if (results is List<RaycastHit>)
                 {
                     var lst = results as List<RaycastHit>;
@@ -217,7 +217,7 @@ namespace com.spacepuppy.Geom
             {
                 if (_nonallocColliderBuffer == null) _nonallocColliderBuffer = new Collider[MAX_BUFFER];
 
-                int cnt = Physics.OverlapSphereNonAlloc(center, radius, results as Collider[], layerMask, query);
+                int cnt = Physics.OverlapSphereNonAlloc(center, radius, _nonallocColliderBuffer, layerMask, query);
                 if (results is List<Collider>)
                 {
                     var lst = results as List<Collider>;
@@ -248,7 +248,7 @@ namespace com.spacepuppy.Geom
             {
                 if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
 
-                int cnt = Physics.SphereCastNonAlloc(center, radius, direction, results as RaycastHit[], maxDistance, layerMask, query);
+                int cnt = Physics.SphereCastNonAlloc(center, radius, direction, _nonallocRaycastBuffer, maxDistance, layerMask, query);
                 if (results is List<RaycastHit>)
                 {
                     var lst = results as List<RaycastHit>;
@@ -358,7 +358,7 @@ namespace com.spacepuppy.Geom
             {
                 if (_nonallocRaycastBuffer == null) _nonallocRaycastBuffer = new RaycastHit[MAX_BUFFER];
 
-                int cnt = Physics.CapsuleCastNonAlloc(point1, point2, radius, direction, results as RaycastHit[], maxDistance, layerMask, query);
+                int cnt = Physics.CapsuleCastNonAlloc(point1, point2, radius, direction, _nonallocRaycastBuffer, maxDistance, layerMask, query);
                 if (results is List<RaycastHit>)
                 {
                     var lst = results as List<RaycastHit>;

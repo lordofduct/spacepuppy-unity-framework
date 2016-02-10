@@ -40,8 +40,7 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
-
-
+        
         #region Internal EditorGUI Methods
 
         public static float GetSinglePropertyHeight(SerializedProperty property, GUIContent label)

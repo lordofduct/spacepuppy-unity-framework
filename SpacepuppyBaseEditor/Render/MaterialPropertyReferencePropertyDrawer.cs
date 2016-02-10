@@ -33,6 +33,10 @@ namespace com.spacepuppyeditor.Render
             position = EditorGUI.PrefixLabel(position, label);
 
 
+            //START DRAW WITH NO INDENTS
+            EditorHelper.SuppressIndentLevel();
+
+
             var r0 = new Rect(position.xMin, position.yMin, position.width / 2f, position.height);
             var r1 = new Rect(r0.xMax, r0.yMin, position.width - r0.width, r0.height);
 
@@ -109,6 +113,10 @@ namespace com.spacepuppyeditor.Render
                     }
                 }
             }
+
+
+            //SET INDENT BACK
+            EditorHelper.ResumeIndentLevel();
         }
 
 

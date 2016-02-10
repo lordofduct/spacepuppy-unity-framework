@@ -10,7 +10,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Project
 {
 
-    [CustomEditor(typeof(ResourcePackage))]
+    [CustomEditor(typeof(ResourcePackage), true)]
     public class ResourcePackageInspector : SPEditor
     {
 
@@ -29,7 +29,7 @@ namespace com.spacepuppyeditor.Project
             if (Path.HasExtension(spath)) spath = Path.GetDirectoryName(spath);
 
             if (!spath.EndsWith("/")) spath += "/";
-            spath += "ResourcePackage.asset";
+            spath += "InventoryResourcePackage.asset";
 
             ScriptableObjectHelper.CreateAsset<ResourcePackage>(spath);
         }
@@ -49,27 +49,36 @@ namespace com.spacepuppyeditor.Project
         protected override void OnSPInspectorGUI()
         {
             this.serializedObject.Update();
-            this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
-            
-            EditorGUILayout.LabelField("Relative Path", this.serializedObject.FindProperty(PROP_RELATIVEPATH).stringValue, EditorStyles.textField);
 
-            var pathsProp = this.serializedObject.FindProperty(PROP_PATHS);
-            EditorGUILayout.BeginVertical("Box");
-            EditorGUI.indentLevel++;
-            for (int i = 0; i < pathsProp.arraySize; i++)
-            {
-                EditorGUILayout.LabelField(pathsProp.GetArrayElementAtIndex(i).stringValue, EditorStyles.textField);
-            }
-            EditorGUI.indentLevel--;
-            EditorGUILayout.EndVertical();
+            this.DrawDefaultInspectorExcept(PROP_RELATIVEPATH, PROP_PATHS);
+
+            this.DrawEntries();
             
             this.DrawSyncButton();
             
             this.serializedObject.ApplyModifiedProperties();
         }
 
+        protected void DrawEntries()
+        {
+            EditorGUILayout.LabelField("Relative Path", this.serializedObject.FindProperty(PROP_RELATIVEPATH).stringValue, EditorStyles.textField);
 
-        private void DrawSyncButton()
+            var pathsProp = this.serializedObject.FindProperty(PROP_PATHS);
+            pathsProp.isExpanded = EditorGUILayout.Foldout(pathsProp.isExpanded, "Resources");
+            if(pathsProp.isExpanded)
+            {
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUI.indentLevel++;
+                for (int i = 0; i < pathsProp.arraySize; i++)
+                {
+                    EditorGUILayout.LabelField(pathsProp.GetArrayElementAtIndex(i).stringValue, EditorStyles.textField);
+                }
+                EditorGUI.indentLevel--;
+                EditorGUILayout.EndVertical();
+            }
+        }
+
+        protected void DrawSyncButton()
         {
             if (this.serializedObject.isEditingMultipleObjects) return;
 
@@ -105,6 +114,7 @@ namespace com.spacepuppyeditor.Project
                     }
                 }
 
+                this.serializedObject.FindProperty(PROP_PATHS).isExpanded = true;
                 this.serializedObject.ApplyModifiedProperties();
             }
         }
