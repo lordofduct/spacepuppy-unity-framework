@@ -66,4 +66,11 @@
         Rect = 15
     }
 
+    public enum EntityRelativity
+    {
+        Entity = 0,
+        Self = 1,
+        SelfAndChildren = 2
+    }
+
 }

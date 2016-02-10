@@ -118,7 +118,6 @@ namespace com.spacepuppyeditor.Base.Commands
             {
                 case 0:
                     EditorGUI.BeginChangeCheck();
-                    //_targetScript = EditorGUILayout.ObjectField(_targetScript, typeof(MonoScript), false) as MonoScript;
                     _targetScript = SPEditorGUILayout.TypeDropDown(GUIContent.none, typeof(Component), _targetScript, false, false);
                     if (EditorGUI.EndChangeCheck() || _forceRefresh)
                     {
@@ -139,7 +138,6 @@ namespace com.spacepuppyeditor.Base.Commands
                     break;
                 case 1:
                     EditorGUI.BeginChangeCheck();
-                    //_targetScript = EditorGUILayout.ObjectField(_targetScript, typeof(MonoScript), false) as MonoScript;
                     _targetScript = SPEditorGUILayout.TypeDropDown(GUIContent.none, typeof(Component), _targetScript, false, false);
                     if (EditorGUI.EndChangeCheck() || _forceRefresh)
                     {

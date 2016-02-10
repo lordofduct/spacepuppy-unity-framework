@@ -67,19 +67,6 @@ namespace com.spacepuppyeditor.Render
                     EditorGUILayout.HelpBox("MaterialSource can not find a Renderer on that GameObject it's attached to.", MessageType.Error);
                     return;
                 }
-                //else if (renderers.Length == 1)
-                //{
-                //    var sources = go.GetComponents<MaterialSource>();
-                //    if (sources.Length > 1)
-                //    {
-                //        Debug.LogWarning("There are too many MaterialSources attached to this GameObject. Removing extra.", go);
-                //        UnityEngine.Object.DestroyImmediate(this.target);
-                //        return;
-                //    }
-                //    prop.objectReferenceValue = renderers[0];
-
-                //    EditorGUILayout.ObjectField("Renderer", renderers[0], typeof(Renderer), true);
-                //}
                 else
                 {
                     var sources = go.GetComponents<MaterialSource>();

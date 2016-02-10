@@ -55,6 +55,7 @@ namespace com.spacepuppyeditor.Internal
             {
                 _drawer = PropertyDrawerActivator.Create(fieldTypePropertyDrawerType, null, _fieldInfo);
                 if (_drawer != null && _fieldInfo.FieldType.IsListType()) _drawer = new ArrayPropertyDrawer(_drawer);
+                this.InternalDrawer = _drawer;
             }
 
 

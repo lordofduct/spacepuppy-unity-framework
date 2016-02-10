@@ -64,6 +64,7 @@
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
+    <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Cameras\CameraControllerInspector.cs" />
     <Compile Include="Cameras\CameraMovementControllerInspector.cs" />
     <Compile Include="Cameras\MultiCameraControllerInspector.cs" />

@@ -44,8 +44,7 @@ namespace com.spacepuppyeditor.Render
             var valTypeProp = property.FindPropertyRelative(PROP_VALUETYPE);
             var propNameProp = property.FindPropertyRelative(PROP_PROPERTYNAME);
 
-
-            //matProp.objectReferenceValue = EditorGUI.ObjectField(r1, matProp.objectReferenceValue, typeof(Material), true);
+            
             EditorGUI.BeginChangeCheck();
             matProp.objectReferenceValue = EditorGUI.ObjectField(r1, matProp.objectReferenceValue, typeof(UnityEngine.Object), true);
             if (EditorGUI.EndChangeCheck())

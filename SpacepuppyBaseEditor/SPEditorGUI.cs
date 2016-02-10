@@ -382,6 +382,58 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region ObjectField w/ X-btn
+
+        public static void ObjectFieldX(Rect position, SerializedProperty property, GUIContent label)
+        {
+            if (SPEditorGUI.XButton(ref position, "Clear Selected Object", true))
+            {
+                property.objectReferenceValue = null;
+            }
+            EditorGUI.ObjectField(position, property, label);
+        }
+
+        public static UnityEngine.Object ObjectFieldX(Rect position, UnityEngine.Object obj, System.Type objType, bool allowSceneObjects)
+        {
+            if (SPEditorGUI.XButton(ref position, "Clear Selected Object", true))
+            {
+                obj = null;
+            }
+            obj = EditorGUI.ObjectField(position, obj, objType, allowSceneObjects);
+            return obj;
+        }
+
+        public static void ObjectFieldX(Rect position, SerializedProperty property, System.Type objType, GUIContent label)
+        {
+            if (SPEditorGUI.XButton(ref position, "Clear Selected Object", true))
+            {
+                property.objectReferenceValue = null;
+            }
+            EditorGUI.ObjectField(position, property, objType, label);
+        }
+
+        public static UnityEngine.Object ObjectFieldX(Rect position, GUIContent label, UnityEngine.Object obj, System.Type objType, bool allowSceneObjects)
+        {
+            if (SPEditorGUI.XButton(ref position, "Clear Selected Object", true))
+            {
+                obj = null;
+            }
+            obj = EditorGUI.ObjectField(position, label, obj, objType, allowSceneObjects);
+            return obj;
+        }
+
+        public static UnityEngine.Object ObjectFieldX(Rect position, string label, UnityEngine.Object obj, System.Type objType, bool allowSceneObjects)
+        {
+            if (SPEditorGUI.XButton(ref position, "Clear Selected Object", true))
+            {
+                obj = null;
+            }
+            obj = EditorGUI.ObjectField(position, label, obj, objType, allowSceneObjects);
+            return obj;
+        }
+
+        #endregion
+
         #region LayerMaskField
 
         public static LayerMask LayerMaskField(Rect position, string label, int selectedMask)

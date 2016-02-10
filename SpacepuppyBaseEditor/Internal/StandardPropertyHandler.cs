@@ -52,10 +52,7 @@ namespace com.spacepuppyeditor.Internal
         }
 
         #endregion
-
-
-
-
+        
     }
 
 

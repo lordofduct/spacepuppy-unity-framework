@@ -399,6 +399,7 @@ namespace com.spacepuppy
     /// You whil still have to initialize the value on Awake if null. The cost of doing it automatically is too high for all 
     /// components to test themselves for this attribute.
     /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class FindInSelfAttribute : PropertyModifierAttribute
     {
         public string Name;
@@ -407,6 +408,18 @@ namespace com.spacepuppy
         public FindInSelfAttribute(string name)
         {
             this.Name = name;
+        }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class ForceFromSelfAttribute : PropertyModifierAttribute
+    {
+
+        public EntityRelativity Relativity;
+
+        public ForceFromSelfAttribute(EntityRelativity relativity)
+        {
+            this.Relativity = relativity;
         }
     }
 
