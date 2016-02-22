@@ -347,10 +347,10 @@ namespace com.spacepuppy.Collections
 
             public bool Contains(IList<TValue> item)
             {
-                var e = _listDict._dict.Values.GetEnumerator();
+                var e = _listDict._dict.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    if (e.Current == item) return true;
+                    if (e.Current.Value == item) return true;
                 }
                 return false;
             }
@@ -374,6 +374,12 @@ namespace com.spacepuppy.Collections
             {
                 throw new NotImplementedException("Mutating a value collection derived from a dictionary is not allowed.");
             }
+
+            #endregion
+
+            #region IEnumerable Interface
+
+            //TODO - implement propert Enumerator, remember dict.Values allocates mem in mono... ugh
 
             public IEnumerator<IList<TValue>> GetEnumerator()
             {

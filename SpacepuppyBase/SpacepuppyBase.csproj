@@ -120,6 +120,7 @@
     <Compile Include="Geom\Box.cs" />
     <Compile Include="Geom\CatmullRomSpline.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
+    <Compile Include="IEntityAwakeHandler.cs" />
     <Compile Include="IImmediatelyResumingYieldInstruction.cs" />
     <Compile Include="IPausibleYieldInstruction.cs" />
     <Compile Include="IPooledYieldInstruction.cs" />

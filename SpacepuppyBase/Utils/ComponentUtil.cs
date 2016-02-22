@@ -419,10 +419,9 @@ namespace com.spacepuppy.Utils
             GetComponentsAlt<T>(obj.gameObject, lst);
         }
 
-        public static void GetComponents<T>(this GameObject obj, ICollection<T> lst, System.Func<Component, T> filter)
+        public static void GetComponents<T>(this GameObject obj, ICollection<T> lst, System.Func<Component, T> filter) where T : class
         {
             if (obj == null) return;
-            if (filter == null) return;
 
             using (var tmpLst = TempCollection.GetList<Component>())
             {
@@ -431,13 +430,13 @@ namespace com.spacepuppy.Utils
                 T c;
                 while (e.MoveNext())
                 {
-                    c = filter(e.Current);
+                    c = (filter != null) ? filter(e.Current) : e.Current as T;
                     if (c != null) lst.Add(c);
                 }
             }
         }
 
-        public static void GetComponents<T>(this Component obj, ICollection<T> lst, System.Func<Component, T> filter)
+        public static void GetComponents<T>(this Component obj, ICollection<T> lst, System.Func<Component, T> filter) where T : class
         {
             if (obj == null) return;
 

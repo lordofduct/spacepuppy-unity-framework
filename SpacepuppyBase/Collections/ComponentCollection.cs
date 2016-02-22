@@ -272,6 +272,8 @@ namespace com.spacepuppy.Collections
 
         #region IEnumerable Interface
 
+        //TODO - implement propert Enumerator, remember dict.Values allocates mem in mono... ugh
+
         public IEnumerator<TBase> GetEnumerator()
         {
             return _coll.Values.GetEnumerator();

@@ -325,9 +325,10 @@ namespace com.spacepuppy
         {
             if(_customTimes.Count > 0)
             {
-                foreach (var ct in _customTimes.Values)
+                var e = _customTimes.GetEnumerator();
+                while(e.MoveNext())
                 {
-                    ct.Update(isFixed);
+                    e.Current.Value.Update(isFixed);
                 }
             }
         }
@@ -465,10 +466,10 @@ namespace com.spacepuppy
                 float result = 1f;
                 if (_scales.Count > 0)
                 {
-                    var e = _scales.Values.GetEnumerator();
+                    var e = _scales.GetEnumerator();
                     while (e.MoveNext())
                     {
-                        result *= e.Current;
+                        result *= e.Current.Value;
                     }
                 }
                 return result;

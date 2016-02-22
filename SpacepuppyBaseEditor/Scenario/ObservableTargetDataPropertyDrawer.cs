@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
@@ -74,92 +75,121 @@ namespace com.spacepuppyeditor.Scenario
         {
 
             public SerializedProperty TriggerIdProp;
-            private List<GUIContent> _names = new List<GUIContent>();
-            private string[] _componentNames;
+            private List<TriggerEntry> _entries = new List<TriggerEntry>();
+            private static GUIContent _nothingContent = new GUIContent("Nothing...");
 
             protected override void OnBeforeGUI()
             {
-                _componentNames = DefaultComponentChoiceSelector.GetUniqueComponentNames(this.Components).ToArray();
-                _names.Clear();
-                _names.Add(new GUIContent("Nothing..."));
+                var componentNames = DefaultComponentChoiceSelector.GetUniqueComponentNames(this.Components).ToArray();
+                _entries.Clear();
                 Component c;
                 string nm;
                 for (int i = 0; i < this.Components.Length; i++)
                 {
                     c = this.Components[i];
-                    nm = _componentNames[i];
+                    nm = componentNames[i];
 
                     if (c is IObservableTrigger)
                     {
                         var arr = (c as IObservableTrigger).GetTriggers();
-                        if (arr.Length > 0)
+                        if (arr.Length == 1)
+                        {
+                            var tid = arr[0].ObservableTriggerId;
+                            var scont = string.IsNullOrEmpty(tid) ? nm : string.Format("{0} -> {1}", nm, tid);
+                            _entries.Add(new TriggerEntry()
+                            {
+                                component = c,
+                                triggerId = tid,
+                                popupName = new GUIContent(scont)
+                            });
+                        }
+                        else if(arr.Length > 1)
                         {
                             for (int j = 0; j < arr.Length; j++)
                             {
-                                _names.Add(new GUIContent(nm + "/" + arr[j]));
+                                var tid = arr[j].ObservableTriggerId;
+                                var scont = string.IsNullOrEmpty(tid) ? string.Format("{0}/Trigger_{1}", nm, j) : string.Format("{0}/{1}", nm, tid);
+                                _entries.Add(new TriggerEntry()
+                                {
+                                    component = c,
+                                    triggerId = tid,
+                                    popupName = new GUIContent(scont)
+                                });
                             }
                         }
-                        else
-                        {
-                            _names.Add(new GUIContent(nm));
-                        }
+                    }
+                }
+            }
+
+            protected override void OnGUIComplete(int selectedIndex)
+            {
+                if(TriggerIdProp != null)
+                {
+                    if(selectedIndex <= 0 || selectedIndex > _entries.Count)
+                    {
+                        TriggerIdProp.stringValue = string.Empty;
+                    }
+                    else
+                    {
+                        TriggerIdProp.stringValue = _entries[selectedIndex - 1].triggerId;
                     }
                 }
             }
 
             public override GUIContent[] GetPopupEntries()
             {
-                if (_componentNames == null) return new GUIContent[] { };
-
-                return _names.ToArray();
+                using (var lst = TempCollection.GetList<GUIContent>())
+                {
+                    lst.Add(_nothingContent);
+                    var e = _entries.GetEnumerator();
+                    while(e.MoveNext())
+                    {
+                        lst.Add(e.Current.popupName);
+                    }
+                    return lst.ToArray();
+                }
             }
 
             public override int GetPopupIndexOfComponent(Component comp)
             {
-                if (_componentNames == null) return -1;
-
                 int entryIndex = this.Components.IndexOf(comp);
+                if (entryIndex < 0) return 0;
+
                 if (this.TriggerIdProp != null && !string.IsNullOrEmpty(this.TriggerIdProp.stringValue))
                 {
-                    var nm = _componentNames[entryIndex] + "/" + this.TriggerIdProp.stringValue;
-                    for (int i = 0; i < _names.Count; i++)
+                    var tid = this.TriggerIdProp.stringValue;
+                    for(int i = 0; i < _entries.Count; i++)
                     {
-                        if (_names[i].text == nm) return i;
+                        if (_entries[i].component == comp && _entries[i].triggerId == tid) return i + 1;
                     }
                 }
-                for (int i = 0; i < _names.Count; i++)
+                for (int i = 0; i < _entries.Count; i++)
                 {
-                    if (_names[i].text.StartsWith(_componentNames[entryIndex])) return i;
+                    if (_entries[i].component == comp) return i + 1;
                 }
-                return -1;
+                return 0;
             }
 
 
             public override Component GetComponentAtPopupIndex(int index)
             {
-                if (_componentNames == null) return null;
-                if (index == 0) return null;
+                if (index <= 0) return null;
 
-                if (index < 0 || index >= _names.Count)
+                if (index < 1 || index > _entries.Count)
                 {
                     if (this.TriggerIdProp != null) this.TriggerIdProp.stringValue = null;
                     return null;
                 }
 
-                var componentNames = DefaultComponentChoiceSelector.GetUniqueComponentNames(this.Components).ToArray();
-                var arr = StringUtil.SplitFixedLength(_names[index].text, "/", 2);
+                return _entries[index - 1].component;
+            }
 
-                for (int i = 0; i < _names.Count; i++)
-                {
-                    if(componentNames[i] == arr[0])
-                    {
-                        if (this.TriggerIdProp != null) this.TriggerIdProp.stringValue = arr[1];
-                        return this.Components[i];
-                    }
-                }
 
-                if (this.TriggerIdProp != null) this.TriggerIdProp.stringValue = null;
-                return null;
+            private struct TriggerEntry
+            {
+                public Component component;
+                public string triggerId;
+                public GUIContent popupName;
             }
 
         }

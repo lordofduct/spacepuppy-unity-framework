@@ -18,7 +18,7 @@ namespace com.spacepuppyeditor.Components
         int GetPopupIndexOfComponent(Component comp);
         Component GetComponentAtPopupIndex(int index);
 
-        void GUIComplete(SerializedProperty property);
+        void GUIComplete(SerializedProperty property, int selectedIndex);
 
     }
 
@@ -47,7 +47,7 @@ namespace com.spacepuppyeditor.Components
 
         }
 
-        protected virtual void OnGUIComplete()
+        protected virtual void OnGUIComplete(int selectedIndex)
         {
 
         }
@@ -101,9 +101,9 @@ namespace com.spacepuppyeditor.Components
             return _components[index];
         }
 
-        void IComponentChoiceSelector.GUIComplete(SerializedProperty property)
+        void IComponentChoiceSelector.GUIComplete(SerializedProperty property, int selectedIndex)
         {
-            this.OnGUIComplete();
+            this.OnGUIComplete(selectedIndex);
             _property = null;
             _restrictionType = null;
             _components = null;

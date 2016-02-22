@@ -8,6 +8,12 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// Place on the root of a GameObject hierarchy, or a prefab, to signify that it is a complete entity.
+    /// 
+    /// If this class is derived from, make sure to set its execution order to the last executed script! 
+    /// Failure to do so will result in IEntityAwakeHandler receivers to be messaged out of order.
+    /// </summary>
     [DisallowMultipleComponent()]
     public class SPEntity : SPNotifyingComponent, IIgnorableCollision
     {
@@ -37,19 +43,19 @@ namespace com.spacepuppy
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
 
-            var e = _pool.Values.GetEnumerator();
+            var e = _pool.GetEnumerator();
             if(predicate == null)
             {
                 while (e.MoveNext())
                 {
-                    coll.Add(e.Current);
+                    coll.Add(e.Current.Value);
                 }
             }
             else
             {
                 while (e.MoveNext())
                 {
-                    if (predicate(e.Current)) coll.Add(e.Current);
+                    if (predicate(e.Current.Value)) coll.Add(e.Current.Value);
                 }
             }
         }
@@ -58,19 +64,19 @@ namespace com.spacepuppy
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
 
-            var e = _pool.Values.GetEnumerator();
+            var e = _pool.GetEnumerator();
             if(predicate == null)
             {
                 while (e.MoveNext())
                 {
-                    if (e.Current is T) coll.Add(e.Current as T);
+                    if (e.Current.Value is T) coll.Add(e.Current.Value as T);
                 }
             }
             else
             {
                 while (e.MoveNext())
                 {
-                    if (e.Current is T && predicate(e.Current as T)) coll.Add(e.Current as T);
+                    if (e.Current.Value is T && predicate(e.Current.Value as T)) coll.Add(e.Current.Value as T);
                 }
             }
         }
@@ -81,6 +87,9 @@ namespace com.spacepuppy
 
         [System.NonSerialized()]
         private Transform _trans;
+
+        [System.NonSerialized()]
+        private bool _isAwake;
 
         #endregion
 
@@ -98,6 +107,20 @@ namespace com.spacepuppy
             this.AddTag(SPConstants.TAG_ROOT);
 
             base.Awake();
+
+            _isAwake = true;
+
+            using (var lst = TempCollection.GetList<IEntityAwakeHandler>())
+            {
+                this.gameObject.GetComponentsInChildren<IEntityAwakeHandler>(true, lst);
+                if(lst.Count > 0)
+                {
+                    for(int i = 0; i < lst.Count; i++)
+                    {
+                        lst[i].OnEntityAwake(this);
+                    }
+                }
+            }
         }
 
         protected override void OnStartOrEnable()
@@ -119,6 +142,8 @@ namespace com.spacepuppy
         #region Properties
 
         public new Transform transform { get { return _trans ?? base.transform; } }
+
+        public bool IsAwake { get { return _isAwake; } }
 
         #endregion
 

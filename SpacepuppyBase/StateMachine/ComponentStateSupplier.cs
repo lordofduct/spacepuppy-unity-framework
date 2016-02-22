@@ -37,6 +37,31 @@ namespace com.spacepuppy.StateMachine
 
         #region ITypedStateSupplier Interface
 
+        public int Count
+        {
+            get
+            {
+                using (var lst = com.spacepuppy.Collections.TempCollection.GetList<T>())
+                {
+                    _container.GetComponents<T>(lst);
+                    return lst.Count;
+                }
+            }
+        }
+
+        public T GetStateAt(int index)
+        {
+            if (_container == null) return null;
+            if (index < 0) throw new System.IndexOutOfRangeException();
+
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<T>())
+            {
+                _container.GetComponents<T>(lst);
+                if (index < lst.Count) return lst[index];
+                else throw new System.IndexOutOfRangeException();
+            }
+        }
+
         public bool Contains<TSub>() where TSub : class, T
         {
             if (_container == null) return false;
@@ -71,7 +96,12 @@ namespace com.spacepuppy.StateMachine
         public T GetNext(T current)
         {
             if (_container == null) return null;
-            return this.GetValueAfterOrDefault(current, true);
+            //return this.GetValueAfterOrDefault(current, true);
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<T>())
+            {
+                _container.GetComponents<T>(lst);
+                return lst.GetValueAfterOrDefault(current, true);
+            }
         }
 
         #endregion

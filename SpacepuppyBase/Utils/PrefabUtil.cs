@@ -22,16 +22,36 @@ namespace com.spacepuppy.Utils
         {
             if (parent == null) return Create(prefab);
 
-            prefab.AddOrGetComponent<EarlyParentSetter>().Init(parent);
-            return UnityEngine.Object.Instantiate(prefab, parent.position, parent.rotation) as GameObject;
+            //NOTE - old method, no longer works in unity 5.3.x, replaced with new version
+            //prefab.AddOrGetComponent<EarlyParentSetter>().Init(parent);
+            //return UnityEngine.Object.Instantiate(prefab, parent.position, parent.rotation) as GameObject;
+
+            //NOTE - this appears to work, thanks to help from @Polymorphik
+            bool isActive = prefab.activeSelf;
+            prefab.SetActive(false);
+            var result = UnityEngine.Object.Instantiate(prefab, parent.position, parent.rotation) as GameObject;
+            result.transform.parent = parent;
+            result.SetActive(isActive);
+            prefab.SetActive(isActive);
+            return result;
         }
 
         public static GameObject Create(GameObject prefab, Vector3 pos, Quaternion rot, Transform parent)
         {
             if (parent == null) return Create(prefab, pos, rot);
 
-            prefab.AddOrGetComponent<EarlyParentSetter>().Init(parent);
-            return UnityEngine.Object.Instantiate(prefab, pos, rot) as GameObject;
+            //NOTE - old method, no longer works in unity 5.3.x, replaced with new version
+            //prefab.AddOrGetComponent<EarlyParentSetter>().Init(parent);
+            //return UnityEngine.Object.Instantiate(prefab, pos, rot) as GameObject;
+
+            //NOTE - this appears to work, thanks to help from @Polymorphik
+            bool isActive = prefab.activeSelf;
+            prefab.SetActive(false);
+            var result = UnityEngine.Object.Instantiate(prefab, pos, rot) as GameObject;
+            result.transform.parent = parent;
+            result.SetActive(isActive);
+            prefab.SetActive(isActive);
+            return result;
         }
         
     }

@@ -9,6 +9,7 @@ namespace com.spacepuppy.StateMachine
         event StateChangedEventHandler<T> StateChanged;
 
         T Current { get; }
+        //int Count { get; }
 
         bool Contains(T state);
         T ChangeState(T state);

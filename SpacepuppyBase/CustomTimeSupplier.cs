@@ -163,10 +163,10 @@ namespace com.spacepuppy
             double result = 1d;
             if (_scales.Count > 0)
             {
-                var e = _scales.Values.GetEnumerator();
+                var e = _scales.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    result *= e.Current;
+                    result *= e.Current.Value;
                 }
             }
             if(System.Math.Abs(result - _scale) > 0.0000001d)

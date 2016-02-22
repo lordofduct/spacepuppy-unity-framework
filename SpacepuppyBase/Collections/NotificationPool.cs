@@ -110,7 +110,7 @@ namespace com.spacepuppy.Collections
             
             using (var lst = TempCollection.GetList<INotificationDispatcher>())
             {
-                go.GetComponentsAlt<INotificationDispatcher>(lst);
+                go.GetComponents<INotificationDispatcher>(lst);
                 var e = lst.GetEnumerator();
                 while(e.MoveNext())
                 {
@@ -127,7 +127,7 @@ namespace com.spacepuppy.Collections
             
             using (var lst = TempCollection.GetList<INotificationDispatcher>())
             {
-                go.GetComponentsAlt<INotificationDispatcher>(lst);
+                go.GetComponents<INotificationDispatcher>(lst);
                 var e = lst.GetEnumerator();
                 while (e.MoveNext())
                 {

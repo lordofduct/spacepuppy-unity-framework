@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using com.spacepuppy.Utils;
 
@@ -7,6 +8,8 @@ namespace com.spacepuppy.StateMachine
 
     public interface IStateSupplier<T> : IEnumerable<T> where T : class
     {
+
+        int Count { get; }
 
         bool Contains(T state);
         T GetNext(T current);
@@ -52,7 +55,7 @@ namespace com.spacepuppy.StateMachine
         #endregion
 
         #region ITypedStateSupplier Interface
-
+        
         public bool Contains<TSub>() where TSub : class, T
         {
             if (this.Count == 0) return false;

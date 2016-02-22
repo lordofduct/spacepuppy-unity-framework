@@ -116,28 +116,28 @@ namespace com.spacepuppy.Project
 
         public void LoadAll()
         {
-            var e = _table.Values.GetEnumerator();
+            var e = _table.GetEnumerator();
             while(e.MoveNext())
             {
-                e.Current.Load();
+                e.Current.Value.Load();
             }
         }
 
         public void UnloadAll()
         {
-            var e = _table.Values.GetEnumerator();
+            var e = _table.GetEnumerator();
             while(e.MoveNext())
             {
-                e.Current.Unload();
+                e.Current.Value.Unload();
             }
         }
 
         public bool AnyLoaded()
         {
-            var e = _table.Values.GetEnumerator();
+            var e = _table.GetEnumerator();
             while(e.MoveNext())
             {
-                if (e.Current.Loaded) return true;
+                if (e.Current.Value.Loaded) return true;
             }
             return false;
         }

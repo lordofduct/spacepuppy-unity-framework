@@ -23,9 +23,6 @@ namespace com.spacepuppy
         //sent by SPComponent when enabled and disabled
         //public const string MSG_ONSPCOMPONENTENABLED = "OnSPComponentEnabled";
         //public const string MSG_ONSPCOMPONENTDISABLED = "OnSPComponentDisabled";
-
-        //sent by Notification to all members of some entity
-        public const string MSG_AUTONOTIFICATIONMESSAGEHANDLER = "AutoNotificationMessageHandler";
         
         //Broadcasted to all children when AddChild or RemoveFromParent is called for a GameObject, allows scripts in that hierarchy to react to the add/remove
         //Calling addchild/RemoveFromParent during this message can result in a stack overflow if the hierarchies intersect

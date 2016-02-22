@@ -102,6 +102,9 @@ namespace com.spacepuppy.Collections
         #endregion
 
         #region IEnumerable Interface
+
+        //TODO - implement propert Enumerator, remember dict.Values allocates mem in mono... ugh
+
         public IEnumerator<CooldownPool<T>.CooldownInfo> GetEnumerator()
         {
             return _table.Values.GetEnumerator();

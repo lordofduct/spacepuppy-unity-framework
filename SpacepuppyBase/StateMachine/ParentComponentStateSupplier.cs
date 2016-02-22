@@ -15,7 +15,9 @@ namespace com.spacepuppy.StateMachine
         private GameObject _container;
         private bool _includeStatesOnContainer;
         private bool _isStatic;
-        private T[] _staticStates;
+
+        private List<T> _states = new List<T>();
+        private bool _clean;
 
         #endregion
 
@@ -43,6 +45,9 @@ namespace com.spacepuppy.StateMachine
             get { return _includeStatesOnContainer; }
         }
 
+        /// <summary>
+        /// Set true if the hierarchy doesn't change.
+        /// </summary>
         public bool IsStatic
         {
             get { return _isStatic; }
@@ -60,19 +65,24 @@ namespace com.spacepuppy.StateMachine
 
         public void SetDirty()
         {
-            _staticStates = null;
+            _clean = false;
         }
 
-        private IEnumerable<T> GetStates()
+        private void SyncStates()
         {
             if (_isStatic)
             {
-                if (_staticStates == null) _staticStates = ParentComponentStateSupplier<T>.GetComponentsOnTarg(_container, _includeStatesOnContainer).ToArray();
-                return _staticStates;
+                if(!_clean)
+                {
+                    _states.Clear();
+                    if(_container != null) ParentComponentStateSupplier<T>.GetComponentsOnTarg(_container, _states, _includeStatesOnContainer);
+                    _clean = true;
+                }
             }
             else
             {
-                return ParentComponentStateSupplier<T>.GetComponentsOnTarg(_container, _includeStatesOnContainer);
+                _states.Clear();
+                if (_container != null) ParentComponentStateSupplier<T>.GetComponentsOnTarg(_container, _states, _includeStatesOnContainer);
             }
         }
 
@@ -80,8 +90,8 @@ namespace com.spacepuppy.StateMachine
         {
             if (_isStatic)
             {
-                if (_staticStates == null) _staticStates = ParentComponentStateSupplier<T>.GetComponentsOnTarg(_container, _includeStatesOnContainer).ToArray();
-                return (from s in _staticStates where s is TSub select s as TSub);
+                this.SyncStates();
+                return (from s in _states where s is TSub select s as TSub);
             }
             else
             {
@@ -93,8 +103,8 @@ namespace com.spacepuppy.StateMachine
         {
             if (_isStatic)
             {
-                if (_staticStates == null) _staticStates = ParentComponentStateSupplier<T>.GetComponentsOnTarg(_container, _includeStatesOnContainer).ToArray();
-                return (from s in _staticStates where tp.IsAssignableFrom(s.GetType()) select s);
+                this.SyncStates();
+                return (from s in _states where tp.IsAssignableFrom(s.GetType()) select s);
             }
             else
             {
@@ -106,18 +116,53 @@ namespace com.spacepuppy.StateMachine
 
         #region ITypedStateSupplier Interface
 
+        public int Count
+        {
+            get
+            {
+                this.SyncStates();
+                return _states.Count;
+            }
+        }
+
+        public T GetStateAt(int index)
+        {
+            if (index < 0) throw new System.IndexOutOfRangeException();
+
+            this.SyncStates();
+            if (index < _states.Count) return _states[index];
+            else throw new System.IndexOutOfRangeException();
+        }
+
         public bool Contains<TSub>() where TSub : class, T
         {
-            if (_container == null) return false;
-            T comp = this.GetStates<TSub>().FirstOrDefault();
-            return !comp.IsNullOrDestroyed();
+            //if (_container == null) return false;
+            //T comp = this.GetStates<TSub>().FirstOrDefault();
+            //return !comp.IsNullOrDestroyed();
+
+            this.SyncStates();
+            var e = _states.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (e.Current is TSub && !e.Current.IsNullOrDestroyed()) return true;
+            }
+            return false;
         }
 
         public bool Contains(System.Type tp)
         {
-            if (_container == null) return false;
-            var comp = this.GetStates(tp).FirstOrDefault();
-            return !comp.IsNullOrDestroyed();
+            if (tp == null) throw new System.ArgumentNullException("tp");
+            //if (_container == null) return false;
+            //var comp = this.GetStates(tp).FirstOrDefault();
+            //return !comp.IsNullOrDestroyed();
+
+            this.SyncStates();
+            var e = _states.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (TypeUtil.IsType(e.Current.GetType(), tp) && !e.Current.IsNullOrDestroyed()) return true;
+            }
+            return false;
         }
 
         public bool Contains(T state)
@@ -135,28 +180,47 @@ namespace com.spacepuppy.StateMachine
 
         public TSub GetState<TSub>() where TSub : class, T
         {
-            if (_container == null) return null;
-            TSub comp = this.GetStates<TSub>().FirstOrDefault();
-            if (!comp.IsNullOrDestroyed())
-                return comp;
-            else
-                return null;
+            //if (_container == null) return null;
+            //TSub comp = this.GetStates<TSub>().FirstOrDefault();
+            //if (!comp.IsNullOrDestroyed())
+            //    return comp;
+            //else
+            //    return null;
+
+            this.SyncStates();
+            var e = _states.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (e.Current is TSub && !e.Current.IsNullOrDestroyed()) return e.Current as TSub;
+            }
+            return null;
         }
 
         public T GetState(System.Type tp)
         {
-            if (_container == null) return null;
-            T comp = this.GetStates(tp).FirstOrDefault();
-            if (!comp.IsNullOrDestroyed())
-                return comp;
-            else
-                return null;
+            //if (_container == null) return null;
+            //T comp = this.GetStates(tp).FirstOrDefault();
+            //if (!comp.IsNullOrDestroyed())
+            //    return comp;
+            //else
+            //    return null;
+
+            this.SyncStates();
+            var e = _states.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (TypeUtil.IsType(e.Current.GetType(), tp) && !e.Current.IsNullOrDestroyed()) return e.Current;
+            }
+            return null;
         }
 
         public T GetNext(T current)
         {
-            if (_container == null) return null;
-            return this.GetValueAfterOrDefault(current, true);
+            //if (_container == null) return null;
+            //return this.GetValueAfterOrDefault(current, true);
+
+            this.SyncStates();
+            return _states.GetValueAfterOrDefault(current, true);
         }
 
         #endregion
@@ -166,75 +230,84 @@ namespace com.spacepuppy.StateMachine
         public IEnumerator<T> GetEnumerator()
         {
             if (_container == null) return System.Linq.Enumerable.Empty<T>().GetEnumerator();
-            return this.GetStates().GetEnumerator();
+            return (GetComponentsOnTarg(_container, _includeStatesOnContainer) as IEnumerable<T>).GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             if (_container == null) return System.Linq.Enumerable.Empty<T>().GetEnumerator();
-            return this.GetStates().GetEnumerator();
+            return GetComponentsOnTarg(_container, _includeStatesOnContainer).GetEnumerator();
         }
 
         #endregion
 
         #region Static Interface
 
-        public static IEnumerable<T> GetComponentsOnTarg(GameObject container, bool includeComponentsOnContainer)
+        public static T[] GetComponentsOnTarg(GameObject container, bool includeComponentsOnContainer)
         {
-            if (includeComponentsOnContainer)
+            using (var set = com.spacepuppy.Collections.TempCollection.GetSet<T>())
             {
-                foreach (var s in container.GetComponentsAlt<T>())
-                {
-                    yield return s;
-                }
-            }
-
-            foreach (Transform t in container.transform)
-            {
-                foreach (var s in t.GetComponentsAlt<T>())
-                {
-                    yield return s;
-                }
+                GetComponentsOnTarg(container, set, includeComponentsOnContainer);
+                return set.ToArray();
             }
         }
 
-        public static IEnumerable<TSub> GetComponentsOnTarg<TSub>(GameObject container, bool includeComponentsOnContainer) where TSub : class, T
+        public static void GetComponentsOnTarg(GameObject container, ICollection<T> coll, bool includeComponentsOnContainer)
         {
             if (includeComponentsOnContainer)
             {
-                foreach (var s in container.GetComponentsAlt<TSub>())
-                {
-                    yield return s;
-                }
+                ComponentUtil.GetComponentsAlt<T>(container, coll);
             }
 
-            foreach (Transform t in container.transform)
+            for (int i = 0; i < container.transform.childCount; i++)
             {
-                foreach (var s in t.GetComponentsAlt<TSub>())
-                {
-                    yield return s;
-                }
+                ComponentUtil.GetComponentsAlt<T>(container.transform.GetChild(i), coll);
             }
         }
 
-        public static IEnumerable<T> GetComponentsOnTarg(System.Type tp, GameObject container, bool includeComponentsOnContainer)
+        public static TSub[] GetComponentsOnTarg<TSub>(GameObject container, bool includeComponentsOnContainer) where TSub : class, T
+        {
+            using (var set = com.spacepuppy.Collections.TempCollection.GetSet<TSub>())
+            {
+                if (includeComponentsOnContainer)
+                {
+                    ComponentUtil.GetComponentsAlt<TSub>(container, set);
+                }
+
+                for (int i = 0; i < container.transform.childCount; i++)
+                {
+                    ComponentUtil.GetComponentsAlt<TSub>(container.transform.GetChild(i), set);
+                }
+
+                return set.ToArray();
+            }
+        }
+
+        public static T[] GetComponentsOnTarg(System.Type tp, GameObject container, bool includeComponentsOnContainer)
         {
             if (!TypeUtil.IsType(tp, typeof(T))) throw new TypeArgumentMismatchException(tp, typeof(T), "tp");
 
-            if (includeComponentsOnContainer)
+            using (var set = com.spacepuppy.Collections.TempCollection.GetSet<T>())
             {
-                foreach (var s in container.GetComponents(tp))
+                System.Func<Component, T> filter = (c) =>
                 {
-                    yield return s as T;
-                }
-            }
+                    if (object.ReferenceEquals(c, null)) return null;
 
-            foreach (Transform t in container.transform)
-            {
-                foreach (var s in t.GetComponents(tp))
+                    if (tp.IsAssignableFrom(c.GetType())) return c as T;
+                    else return null;
+                };
+
+                if (includeComponentsOnContainer)
                 {
-                    yield return s as T;
+                    ComponentUtil.GetComponents<T>(container, set, filter);
                 }
+
+                for (int i = 0; i < container.transform.childCount; i++)
+                {
+                    ComponentUtil.GetComponents<T>(container.transform.GetChild(i), set, filter);
+                }
+
+                return set.ToArray();
             }
         }
 

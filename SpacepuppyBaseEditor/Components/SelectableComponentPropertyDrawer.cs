@@ -158,6 +158,8 @@ namespace com.spacepuppyeditor.Components
                         property.objectReferenceValue = null;
                         fullsize = this.DrawDotDotButton(fullsize, property);
                         this.DrawObjectRefField(fullsize, property);
+
+                        this.ChoiceSelector.GUIComplete(property, -1);
                     }
                     else
                     {
@@ -181,9 +183,9 @@ namespace com.spacepuppyeditor.Components
                             //else
                             //    property.objectReferenceValue = targGo;
                         }
-                    }
 
-                    this.ChoiceSelector.GUIComplete(property);
+                        this.ChoiceSelector.GUIComplete(property, ni);
+                    }
                 }
             }
             else
@@ -198,6 +200,8 @@ namespace com.spacepuppyeditor.Components
                     property.objectReferenceValue = null;
                     fullsize = this.DrawDotDotButton(fullsize, property);
                     this.DrawObjectRefField(fullsize, property);
+
+                    this.ChoiceSelector.GUIComplete(property, -1);
                 }
                 else
                 {
@@ -206,9 +210,10 @@ namespace com.spacepuppyeditor.Components
                     int oi = this.ChoiceSelector.GetPopupIndexOfComponent(property.objectReferenceValue as Component);
                     int ni = EditorGUI.Popup(position, oi, names);
                     if (oi != ni) property.objectReferenceValue = this.ChoiceSelector.GetComponentAtPopupIndex(ni);
+
+                    this.ChoiceSelector.GUIComplete(property, ni);
                 }
 
-                this.ChoiceSelector.GUIComplete(property);
             }
         }
 
