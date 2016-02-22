@@ -84,24 +84,14 @@ namespace com.spacepuppy
         #endregion
 
         #region Fields
-
-        [System.NonSerialized()]
-        private Transform _trans;
-
+        
         [System.NonSerialized()]
         private bool _isAwake;
 
         #endregion
 
         #region CONSTRUCTOR
-
-        //protected override void Start()
-        //{
-        //    this.AddTag(SPConstants.TAG_ROOT);
-
-        //    base.Start();
-        //}
-
+        
         protected override void Awake()
         {
             this.AddTag(SPConstants.TAG_ROOT);
@@ -140,9 +130,7 @@ namespace com.spacepuppy
         #endregion
 
         #region Properties
-
-        public new Transform transform { get { return _trans ?? base.transform; } }
-
+        
         public bool IsAwake { get { return _isAwake; } }
 
         #endregion
