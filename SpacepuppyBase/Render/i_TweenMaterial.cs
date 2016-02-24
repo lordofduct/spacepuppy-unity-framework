@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0649 // variable declared but not used.
+
+using UnityEngine;
 
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Tween;
@@ -130,8 +132,7 @@ namespace com.spacepuppy.Render
                              .FromTo("Position", 0f, 1f, _duration)
                              .SetId(this.AutoKillId)
                              .Use(_timeSupplier.TimeSupplier)
-                             .Ease(EaseMethods.GetEase(_ease))
-                             .AutoKill();
+                             .Ease(EaseMethods.GetEase(_ease));
             
             if (_onComplete.Count > 0)
                 twn.OnFinish((t) => _onComplete.ActivateTrigger());
@@ -139,7 +140,7 @@ namespace com.spacepuppy.Render
             if (_onTick.Count > 0)
                 twn.OnStep((t) => _onTick.ActivateTrigger());
 
-            twn.Play();
+            twn.Play(true);
 
             return true;
         }

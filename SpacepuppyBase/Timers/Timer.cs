@@ -14,9 +14,7 @@
         #endregion
 
         #region Fields
-
-        private string _name;
-
+        
         private float _interval;
         private int _repeatCount;
 

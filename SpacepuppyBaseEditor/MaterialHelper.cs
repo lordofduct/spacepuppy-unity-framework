@@ -11,7 +11,7 @@ namespace com.spacepuppyeditor
         private static Material _defaultMaterial;
         private static Material _defaultLineMaterial;
 
-        private static Texture2D _outlineTexture;
+        //private static Texture2D _outlineTexture;
 
         public static Material DefaultMaterial
         {
@@ -19,7 +19,9 @@ namespace com.spacepuppyeditor
             {
                 if (_defaultMaterial == null)
                 {
-                    _defaultMaterial = new Material("Shader \"SPEditor/DefaultShader\"{   SubShader   {      Pass      {         BindChannels { Bind \"Color\", color }         Blend SrcAlpha OneMinusSrcAlpha         ZWrite Off Cull Off Fog { Mode Off }         Color(1, 1, 1, 1)      }   }}");
+                    //_defaultMaterial = new Material("Shader \"SPEditor/DefaultShader\"{   SubShader   {      Pass      {         BindChannels { Bind \"Color\", color }         Blend SrcAlpha OneMinusSrcAlpha         ZWrite Off Cull Off Fog { Mode Off }         Color(1, 1, 1, 1)      }   }}");
+                    var shader = Shader.Find("SPEditor/DefaultShader");
+                    _defaultMaterial = new Material(shader);
                     _defaultMaterial.hideFlags = HideFlags.HideAndDontSave;
                     _defaultMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
                 }
@@ -33,7 +35,9 @@ namespace com.spacepuppyeditor
             {
                 if (_defaultLineMaterial == null)
                 {
-                    _defaultLineMaterial = new Material("Shader \"SPEditor/LineShader\"{   SubShader   {      Pass      {         BindChannels { Bind \"Color\", color }         Blend SrcAlpha OneMinusSrcAlpha         ZWrite Off Cull Off Fog { Mode Off }      }   }}");
+                    //_defaultLineMaterial = new Material("Shader \"SPEditor/LineShader\"{   SubShader   {      Pass      {         BindChannels { Bind \"Color\", color }         Blend SrcAlpha OneMinusSrcAlpha         ZWrite Off Cull Off Fog { Mode Off }      }   }}");
+                    var shader = Shader.Find("SPEditor/LineShader");
+                    _defaultLineMaterial = new Material(shader);
                     _defaultLineMaterial.hideFlags = HideFlags.HideAndDontSave;
                     _defaultLineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
                 }

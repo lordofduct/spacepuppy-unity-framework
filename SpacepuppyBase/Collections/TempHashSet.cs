@@ -15,7 +15,7 @@ namespace com.spacepuppy.Collections
         private static ObjectCachePool<TempHashSet<T>> _pool = new ObjectCachePool<TempHashSet<T>>(-1, () => new TempHashSet<T>());
 
         private int _maxCapacityOnRelease;
-        private int _version;
+        //private int _version;
 
         #endregion
 
@@ -27,7 +27,7 @@ namespace com.spacepuppy.Collections
             var tp = typeof(T);
             int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-            _version = 1;
+            //_version = 1;
         }
 
         public TempHashSet(IEnumerable<T> e)
@@ -36,7 +36,7 @@ namespace com.spacepuppy.Collections
             var tp = typeof(T);
             int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
-            _version = 1;
+            //_version = 1;
         }
 
         #endregion

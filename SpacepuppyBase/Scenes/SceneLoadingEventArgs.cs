@@ -6,18 +6,18 @@ namespace com.spacepuppy.Scenes
     public class SceneLoadingEventArgs : System.EventArgs
     {
 
-        private SceneManager _manager;
+        private SPSceneManager _manager;
         private ISceneLoadOptions _options;
 
         private List<object> _stallInstructions;
 
-        public SceneLoadingEventArgs(SceneManager manager, ISceneLoadOptions loadOptions)
+        public SceneLoadingEventArgs(SPSceneManager manager, ISceneLoadOptions loadOptions)
         {
             _manager = manager;
             _options = loadOptions;
         }
 
-        public SceneManager Manager { get { return _manager; } }
+        public SPSceneManager Manager { get { return _manager; } }
 
         public ISceneLoadOptions LoadOptions { get { return _options; } }
 

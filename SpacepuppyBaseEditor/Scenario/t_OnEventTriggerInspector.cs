@@ -19,8 +19,7 @@ namespace com.spacepuppyeditor.Scenario
         private const string PROP_EVENTID = "EventID";
 
         private TriggerPropertyDrawer _drawer;
-
-        private SerializedProperty _triggerProp;
+        
         private List<EventTriggerType> _toAdd = new List<EventTriggerType>();
 
         protected override void OnEnable()

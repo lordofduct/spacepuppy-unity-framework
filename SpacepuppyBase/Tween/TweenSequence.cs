@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace com.spacepuppy.Tween
 {
@@ -10,9 +12,6 @@ namespace com.spacepuppy.Tween
 
         private object _id;
         private TweenSequenceCollection _sequence;
-        private Tweener _current;
-        private int _currentIndex = -1;
-        private float _nextTweenTime;
 
         #endregion
         
@@ -39,110 +38,50 @@ namespace com.spacepuppy.Tween
             }
         }
 
-        public IList<Tweener> Tweens { get { return _sequence; } }
+        public TweenSequenceCollection Tweens { get { return _sequence; } }
 
         #endregion
-
-        #region Methods
-
-        #endregion
-
+        
         #region Tweener Interface
 
         protected internal override float GetPlayHeadLength()
         {
-            throw new System.NotImplementedException();
-        }
-
-        public override void Play(float playHeadPosition)
-        {
-            base.Play(playHeadPosition);
-
-
-            float t = 0f;
-            float nt = 0f;
-            Tweener twn = null;
-            int twnIndex = -1;
-            for (int i = 0; i < _sequence.Count; i++)
+            float dur = 0f;
+            var e = _sequence.GetEnumerator();
+            while(e.MoveNext())
             {
-                nt = t + _sequence[i].TotalTime;
-                if (playHeadPosition < nt)
-                {
-                    twnIndex = i;
-                    twn = _sequence[i];
-                    break;
-                }
-                else
-                {
-                    t = nt;
-                }
+                dur += e.Current.GetPlayHeadLength();
             }
-
-            if (_current != null && _current != twn)
-            {
-                _current.Stop();
-                _current = null;
-            }
-
-            if (twn != null)
-            {
-                _current = twn;
-                _currentIndex = twnIndex;
-                _nextTweenTime = nt;
-                _current.Play(playHeadPosition - t);
-            }
-            else
-            {
-                _nextTweenTime = float.PositiveInfinity;
-                _currentIndex = -1;
-            }
-
-            //for (int i = 0; i < _sequence.Count; i++)
-            //{
-            //    _sequence[i].SetIsInPlayingGroupOrSequence(true);
-            //}
-        }
-
-        public override void Stop()
-        {
-            base.Stop();
-
-            //for (int i = 0; i < _sequence.Count; i++)
-            //{
-            //    _sequence[i].SetIsInPlayingGroupOrSequence(false);
-            //}
+            return dur;
         }
 
         protected internal override void DoUpdate(float dt, float t)
         {
-            if (_currentIndex < 0) return;
 
-            if (t > _nextTweenTime)
+            float _lastT = 0f;
+            float totalTime = 0f;
+            var e = _sequence.GetEnumerator();
+            while(e.MoveNext())
             {
-                if (_current != null) _current.Stop(); //make sure that the current is stopped
-                if (_currentIndex == _sequence.Count - 1) return;
-                _currentIndex++;
-                _current = _sequence[_currentIndex];
-                _current.Play(t - _nextTweenTime);
-                _nextTweenTime += _current.TotalTime;
+                totalTime = e.Current.TotalTime;
+                if (t < _lastT + totalTime)
+                {
+                    e.Current.DoUpdate(dt, t - _lastT);
+                    break;
+                }
+                else
+                {
+                    _lastT += totalTime;
+                }
             }
+
         }
-
-        //internal override void SetIsInPlayingGroupOrSequence(bool value)
-        //{
-        //    base.SetIsInPlayingGroupOrSequence(value);
-
-        //    for (int i = 0; i < _sequence.Count; i++)
-        //    {
-        //        _sequence[i].SetIsInPlayingGroupOrSequence(value);
-        //    }
-        //}
 
         #endregion
 
         #region Special Types
 
-        private class TweenSequenceCollection : IList<Tweener>
+        public class TweenSequenceCollection : IList<Tweener>
         {
             private TweenSequence _owner;
             private List<Tweener> _lst = new List<Tweener>();
@@ -161,11 +100,16 @@ namespace com.spacepuppy.Tween
 
             public void Insert(int index, Tweener item)
             {
+                if (item == null) throw new System.ArgumentNullException("item");
+
+
                 _lst.Insert(index, item);
             }
 
             public void RemoveAt(int index)
             {
+                if (_owner.IsPlaying) throw new System.InvalidOperationException("Cannot modify TweenSequence while it is playing.");
+
                 _lst.RemoveAt(index);
             }
 
@@ -177,17 +121,24 @@ namespace com.spacepuppy.Tween
                 }
                 set
                 {
+                    if (_lst[index] == value) return;
+
+                    if (_owner.IsPlaying) throw new System.InvalidOperationException("Cannot modify TweenSequence while it is playing.");
                     _lst[index] = value;
                 }
             }
 
             public void Add(Tweener item)
             {
+                if (_owner.IsPlaying) throw new System.InvalidOperationException("Cannot modify TweenSequence while it is playing.");
+
                 _lst.Add(item);
             }
 
             public void Clear()
             {
+                if (_owner.IsPlaying) throw new System.InvalidOperationException("Cannot modify TweenSequence while it is playing.");
+
                 _lst.Clear();
             }
 
@@ -208,28 +159,101 @@ namespace com.spacepuppy.Tween
 
             public bool IsReadOnly
             {
-                get { return false; }
+                get { return _owner.IsPlaying; }
             }
 
             public bool Remove(Tweener item)
             {
+                if (_owner.IsPlaying) throw new System.InvalidOperationException("Cannot modify TweenSequence while it is playing.");
+
                 return _lst.Remove(item);
             }
 
-            public IEnumerator<Tweener> GetEnumerator()
+            #endregion
+
+            #region IEnumerable Interface
+
+            public Enumerator GetEnumerator()
             {
-                return _lst.GetEnumerator();
+                return new Enumerator(this);
+            }
+
+            IEnumerator<Tweener> IEnumerable<Tweener>.GetEnumerator()
+            {
+                return this.GetEnumerator();
             }
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             {
-                return _lst.GetEnumerator();
+                return this.GetEnumerator();
             }
 
             #endregion
+
+            #region Special Types
+
+            public struct Enumerator : IEnumerator<Tweener>
+            {
+
+                #region Fields
+
+                private List<Tweener>.Enumerator _e;
+
+                #endregion
+
+                #region CONSTRUCTOR
+
+                public Enumerator(TweenSequenceCollection coll)
+                {
+                    if (coll == null) throw new System.ArgumentNullException("coll");
+                    _e = coll._lst.GetEnumerator();
+                }
+
+                #endregion
+
+                #region IEnumerator Interface
+
+                public Tweener Current
+                {
+                    get
+                    {
+                        return _e.Current;
+                    }
+                }
+
+                object IEnumerator.Current
+                {
+                    get
+                    {
+                        return _e.Current;
+                    }
+                }
+
+                public void Dispose()
+                {
+                    _e.Dispose();
+                }
+
+                public bool MoveNext()
+                {
+                    return _e.MoveNext();
+                }
+
+                void IEnumerator.Reset()
+                {
+                    (_e as IEnumerator).Reset();
+                }
+
+                #endregion
+
+            }
+
+            #endregion
+
         }
 
         #endregion
+
     }
 
 }

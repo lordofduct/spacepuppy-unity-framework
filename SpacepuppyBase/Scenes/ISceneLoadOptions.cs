@@ -5,15 +5,15 @@ namespace com.spacepuppy.Scenes
     public interface ISceneLoadOptions
     {
 
-        Scene GetScene(SceneManager manager);
+        Scene GetScene(SPSceneManager manager);
 
-        ISceneBehaviour LoadCustomSceneBehaviour(SceneManager manager);
+        ISceneBehaviour LoadCustomSceneBehaviour(SPSceneManager manager);
 
-        void OnBeforeSceneLoaded(SceneManager manager, SceneLoadingEventArgs e);
+        void OnBeforeSceneLoaded(SPSceneManager manager, SceneLoadingEventArgs e);
 
-        void OnSceneLoaded(SceneManager manager, SceneLoadingEventArgs e);
+        void OnSceneLoaded(SPSceneManager manager, SceneLoadingEventArgs e);
 
-        void OnSceneStarted(SceneManager manager, SceneLoadingEventArgs e);
+        void OnSceneStarted(SPSceneManager manager, SceneLoadingEventArgs e);
 
     }
 
@@ -52,49 +52,49 @@ namespace com.spacepuppy.Scenes
 
         #region ISceneLoadOptions Interface
 
-        protected virtual Scene GetScene(SceneManager manager)
+        protected virtual Scene GetScene(SPSceneManager manager)
         {
             return _scene;
         }
-        Scene ISceneLoadOptions.GetScene(SceneManager manager)
+        Scene ISceneLoadOptions.GetScene(SPSceneManager manager)
         {
             return this.GetScene(manager);
         }
 
-        protected virtual ISceneBehaviour LoadCustomSceneBehaviour(SceneManager manager)
+        protected virtual ISceneBehaviour LoadCustomSceneBehaviour(SPSceneManager manager)
         {
             return SceneBehaviour.SceneLoadedInstance;
         }
-        ISceneBehaviour ISceneLoadOptions.LoadCustomSceneBehaviour(SceneManager manager)
+        ISceneBehaviour ISceneLoadOptions.LoadCustomSceneBehaviour(SPSceneManager manager)
         {
             return this.LoadCustomSceneBehaviour(manager);
         }
 
 
 
-        protected virtual void OnBeforeSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
+        protected virtual void OnBeforeSceneLoaded(SPSceneManager manager, SceneLoadingEventArgs e)
         {
 
         }
-        void ISceneLoadOptions.OnBeforeSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
+        void ISceneLoadOptions.OnBeforeSceneLoaded(SPSceneManager manager, SceneLoadingEventArgs e)
         {
             this.OnBeforeSceneLoaded(manager, e);
         }
 
-        protected virtual void OnSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
+        protected virtual void OnSceneLoaded(SPSceneManager manager, SceneLoadingEventArgs e)
         {
 
         }
-        void ISceneLoadOptions.OnSceneLoaded(SceneManager manager, SceneLoadingEventArgs e)
+        void ISceneLoadOptions.OnSceneLoaded(SPSceneManager manager, SceneLoadingEventArgs e)
         {
             this.OnSceneLoaded(manager, e);
         }
 
-        protected virtual void OnSceneStarted(SceneManager manager, SceneLoadingEventArgs e)
+        protected virtual void OnSceneStarted(SPSceneManager manager, SceneLoadingEventArgs e)
         {
 
         }
-        void ISceneLoadOptions.OnSceneStarted(SceneManager manager, SceneLoadingEventArgs e)
+        void ISceneLoadOptions.OnSceneStarted(SPSceneManager manager, SceneLoadingEventArgs e)
         {
             this.OnSceneStarted(manager, e);
         }
@@ -123,7 +123,7 @@ namespace com.spacepuppy.Scenes
         #endregion
 
 
-        protected override ISceneBehaviour LoadCustomSceneBehaviour(SceneManager manager)
+        protected override ISceneBehaviour LoadCustomSceneBehaviour(SPSceneManager manager)
         {
             var result = SceneBehaviour.SceneLoadedInstance as T;
             if (result != null) return result;

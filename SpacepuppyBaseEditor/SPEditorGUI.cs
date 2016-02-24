@@ -24,7 +24,7 @@ namespace com.spacepuppyeditor
         private static int s_FoldoutHash = "Foldout".GetHashCode();
 
         private static System.Func<Rect, int, GUIContent, int, Rect> _imp_MultiFieldPrefixLabel;
-        private static System.Action<Rect, GUIContent[], float[], float> _imp_MultiFloatField_01;
+        //private static System.Action<Rect, GUIContent[], float[], float> _imp_MultiFloatField_01;
         private static System.Func<SerializedProperty, GUIContent, float> _imp_GetSinglePropertyHeight;
         private static System.Func<GUIContent, Rect, Gradient, Gradient> _imp_GradientField;
         private static System.Func<Rect, string, string> _imp_SearchField;

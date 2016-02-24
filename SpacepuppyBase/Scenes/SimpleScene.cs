@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace com.spacepuppy.Scenes
 {
@@ -33,22 +34,26 @@ namespace com.spacepuppy.Scenes
 
         protected internal override void DoLoad()
         {
-            Application.LoadLevel(_sceneAssetId);
+            //Application.LoadLevel(_sceneAssetId);
+            SceneManager.LoadScene(_sceneAssetId, LoadSceneMode.Single);
         }
 
         protected internal override IProgressingYieldInstruction DoLoadAsync()
         {
-            return new com.spacepuppy.Async.AsyncOperationWrapper(Application.LoadLevelAsync(_sceneAssetId));
+            //return new com.spacepuppy.Async.AsyncOperationWrapper(Application.LoadLevelAsync(_sceneAssetId));
+            return new com.spacepuppy.Async.AsyncOperationWrapper(SceneManager.LoadSceneAsync(_sceneAssetId, LoadSceneMode.Single));
         }
 
         protected internal override void DoLoadAdditive()
         {
-            Application.LoadLevelAdditive(_sceneAssetId);
+            //Application.LoadLevelAdditive(_sceneAssetId);
+            SceneManager.LoadScene(_sceneAssetId, LoadSceneMode.Additive);
         }
 
         protected internal override IProgressingYieldInstruction DoLoadAdditiveAsync()
         {
-            return new com.spacepuppy.Async.AsyncOperationWrapper(Application.LoadLevelAdditiveAsync(_sceneAssetId));
+            //return new com.spacepuppy.Async.AsyncOperationWrapper(Application.LoadLevelAdditiveAsync(_sceneAssetId));
+            return new com.spacepuppy.Async.AsyncOperationWrapper(SceneManager.LoadSceneAsync(_sceneAssetId, LoadSceneMode.Additive));
         }
 
         #endregion

@@ -84,6 +84,11 @@ namespace com.spacepuppy.Geom
             _cent += mv;
         }
 
+        public void RotateAroundPoint(Vector3 point, Quaternion rot)
+        {
+            _cent = point + rot * (_cent - point);
+        }
+
         public AxisInterval Project(Vector3 axis)
         {
             axis.Normalize();

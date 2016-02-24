@@ -99,7 +99,7 @@ namespace com.spacepuppy.Cameras
                 _tween = SPTween.Tween(this.OnTweenStep, dur)
                                 .Use(_timeSupplier ?? SPTime.Real)
                                 .OnFinish(this.OnFadeOutComplete)
-                                .Play();
+                                .Play(false);
             }
         }
 
@@ -118,7 +118,7 @@ namespace com.spacepuppy.Cameras
             _tween = SPTween.Tween(this.OnTweenStep, dur)
                             .Use(_timeSupplier ?? SPTime.Real)
                             .OnFinish(this.OnFadeInComplete)
-                            .Play();
+                            .Play(false);
         }
 
         private void OnTweenStep(Tweener twn, float dt, float t)

@@ -131,7 +131,11 @@ namespace com.spacepuppy.Tween
 
 
 
-
+        public static bool IsActiveAutoKill(object id, object autoKillToken)
+        {
+            var token = new TokenPairing(id, autoKillToken);
+            return _autoKillDict.ContainsKey(token);
+        }
 
         /// <summary>
         /// Flag a Tweener that implements IAutoKillableTweener to be auto killed if another tween targeting the same object is played. 

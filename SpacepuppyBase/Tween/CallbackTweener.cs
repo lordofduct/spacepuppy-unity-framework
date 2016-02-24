@@ -249,30 +249,26 @@ namespace com.spacepuppy.Tween
             this.OnStopped += (s, e) => d(this);
             return this;
         }
-
-        ITweenHash ITweenHash.AutoKill()
-        {
-            //do nothing, this mode should not be used
-            return this;
-        }
-
-        ITweenHash ITweenHash.AutoKill(object token)
-        {
-            this.AutoKillToken = token;
-            return this;
-        }
-
-        Tweener ITweenHash.Play()
+        
+        Tweener ITweenHash.Play(bool autoKill, object autoKillToken)
         {
             this.Play();
-            if (this.AutoKillToken != null) SPTween.AutoKill(this);
+            if (autoKill)
+            {
+                this.AutoKillToken = autoKillToken;
+                SPTween.AutoKill(this);
+            }
             return this;
         }
 
-        Tweener ITweenHash.Play(float playHeadPosition)
+        Tweener ITweenHash.Play(float playHeadPosition, bool autoKill, object autoKillToken)
         {
             this.Play(playHeadPosition);
-            if (this.AutoKillToken != null) SPTween.AutoKill(this);
+            if (autoKill)
+            {
+                this.AutoKillToken = autoKillToken;
+                SPTween.AutoKill(this);
+            }
             return this;
         }
 

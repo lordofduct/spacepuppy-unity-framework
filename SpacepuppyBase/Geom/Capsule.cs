@@ -123,6 +123,12 @@ namespace com.spacepuppy.Geom
             _end += mv;
         }
 
+        public void RotateAroundPoint(Vector3 point, Quaternion rot)
+        {
+            _start = point + rot * (_start - point);
+            _end = point + rot * (_end - point);
+        }
+
         public AxisInterval Project(Vector3 axis)
         {
             axis.Normalize();

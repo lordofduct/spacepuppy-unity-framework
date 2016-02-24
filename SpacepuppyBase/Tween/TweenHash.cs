@@ -23,7 +23,7 @@ namespace com.spacepuppy.Tween
 
         #region Fields
 
-        private TweenHash _chainLink;
+        private TweenHash _prevNode;
 
         private object _id;
         private object _targ;
@@ -36,8 +36,6 @@ namespace com.spacepuppy.Tween
         private int _wrapCount;
         private bool _reverse;
         private float _speedScale = 1.0f;
-        private bool _autoKill;
-        private object _autoKillToken;
         private System.EventHandler _onStep;
         private System.EventHandler _onWrap;
         private System.EventHandler _onFinish;
@@ -69,9 +67,15 @@ namespace com.spacepuppy.Tween
 
         #region Config Methods
 
+        /// <summary>
+        /// Sets the id for the tween, if a FollowOn sequence, the entire sequence id is updated.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public TweenHash SetId(object id)
         {
             _id = id;
+            if (_prevNode != null) _prevNode.SetId(id);
             return this;
         }
 
@@ -238,26 +242,22 @@ namespace com.spacepuppy.Tween
 
         #endregion
 
+        
+
         #region Curve Methods
 
-        public TweenHash Chain(object targ)
+        /// <summary>
+        /// Follow this tween with another tween.
+        /// 
+        /// Inherits updateType and timeSupplier, unless otherwise changed.
+        /// </summary>
+        /// <returns></returns>
+        public TweenHash FollowOn()
         {
-            var hash = new TweenHash(targ, _id);
-            hash._chainLink = this;
-            hash._defaultEase = _defaultEase;
-            hash._delay = _delay;
+            var hash = new TweenHash(_targ, _id);
+            hash._prevNode = this;
             hash._updateType = _updateType;
             hash._timeSupplier = _timeSupplier;
-            hash._wrap = _wrap;
-            hash._wrapCount = _wrapCount;
-            hash._reverse = _reverse;
-            hash._speedScale = _speedScale;
-            hash._autoKill = _autoKill;
-            hash._autoKillToken = _autoKillToken;
-            hash._onStep = _onStep;
-            hash._onWrap = _onWrap;
-            hash._onFinish = _onFinish;
-            hash._onStopped = _onStopped;
             return hash;
         }
 
@@ -380,51 +380,17 @@ namespace com.spacepuppy.Tween
         }
 
         #endregion
-
-        #region AutoKill
-
-        public TweenHash AutoKill()
-        {
-            _autoKill = true;
-            _autoKillToken = null;
-            return this;
-        }
-
-        /// <summary>
-        /// On play the Tweener will be flagged to auto-kill with the included token.
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public TweenHash AutoKill(object token)
-        {
-            _autoKill = true;
-            _autoKillToken = token;
-            return this;
-        }
-
-        /// <summary>
-        /// Cancel the setting of AutoKill for this hash table.
-        /// </summary>
-        /// <returns></returns>
-        public TweenHash CancelAutoKill()
-        {
-            _autoKill = false;
-            _autoKillToken = null;
-            return this;
-        }
-
-        #endregion
-
+        
         #region Play Methods
 
-        public Tweener Play()
+        public Tweener Play(bool autoKill, object autoKillToken = null)
         {
             if (_targ == null) return null;
 
             var tween = this.Create();
-            if (_autoKill)
+            if (autoKill)
             {
-                tween.AutoKillToken = _autoKillToken;
+                tween.AutoKillToken = autoKillToken;
                 tween.Play();
                 SPTween.AutoKill(tween);
             }
@@ -435,14 +401,14 @@ namespace com.spacepuppy.Tween
             return tween;
         }
 
-        public Tweener Play(float playHeadPos)
+        public Tweener Play(float playHeadPos, bool autoKill, object autoKillToken = null)
         {
             if (_targ == null) return null;
 
             var tween = this.Create();
-            if (_autoKill)
+            if (autoKill)
             {
-                tween.AutoKillToken = _autoKillToken;
+                tween.AutoKillToken = autoKillToken;
                 tween.Play(playHeadPos);
                 SPTween.AutoKill(tween);
             }
@@ -452,6 +418,7 @@ namespace com.spacepuppy.Tween
             }
             return tween;
         }
+        
         public Tweener Create()
         {
             if (_targ == null) return null;
@@ -471,7 +438,7 @@ namespace com.spacepuppy.Tween
                 }
                 tween = new ObjectTweener(_targ, grp);
             }
-            else if(_props.Count == 1)
+            else if (_props.Count == 1)
             {
                 var curve = this.CreateCurve(_props[0]);
                 if (curve == null)
@@ -487,25 +454,11 @@ namespace com.spacepuppy.Tween
                 tween = new ObjectTweener(_targ, TweenCurve.Null);
             }
 
-            if(_chainLink != null)
-            {
-                using (var lst = com.spacepuppy.Collections.TempCollection.GetList<Tweener>())
-                {
-                    lst.Add(tween);
-                    var link = _chainLink;
-                    while(link != null)
-                    {
-                        lst.Add(link.Create());
-                        link = link._chainLink;
-                    }
-                    tween = new TweenerGroup(lst.ToArray());
-                }
-            }
-
             //set props
             if (_id != null) tween.Id = _id;
             tween.UpdateType = _updateType;
             tween.TimeSupplier = _timeSupplier;
+            tween.SpeedScale = _speedScale;
             tween.WrapMode = _wrap;
             tween.WrapCount = _wrapCount;
             tween.Reverse = _reverse;
@@ -514,10 +467,26 @@ namespace com.spacepuppy.Tween
             if (_onWrap != null) tween.OnWrap += _onWrap;
             if (_onFinish != null) tween.OnFinish += _onFinish;
             if (_onStopped != null) tween.OnStopped += _onStopped;
+            
+            if(_prevNode != null)
+            {
+                var seq = new TweenSequence();
+                seq.Id = tween.Id;
+                seq.Tweens.Add(tween);
+
+                var node = _prevNode;
+                while(node != null)
+                {
+                    seq.Tweens.Insert(0, node.Create());
+                    node = node._prevNode;
+                }
+
+                tween = seq;
+            }
 
             return tween;
         }
-        
+
         private TweenCurve CreateCurve(PropInfo prop)
         {
             try
@@ -549,45 +518,7 @@ namespace com.spacepuppy.Tween
 
             return null;
         }
-
-        #endregion
-
-        #region Special Types
-
-        private struct PropInfo
-        {
-            public AnimMode mode;
-            public string name;
-            public Ease ease;
-            public object value;
-            public float dur;
-            public object altValue;
-            public object option;
-
-            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option)
-            {
-                this.mode = mode;
-                this.name = nm;
-                this.ease = e;
-                this.value = v;
-                this.dur = d;
-                this.altValue = null;
-                this.option = option;
-            }
-
-            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option, object altV)
-            {
-                this.mode = mode;
-                this.name = nm;
-                this.ease = e;
-                this.value = v;
-                this.dur = d;
-                this.altValue = altV;
-                this.option = option;
-            }
-
-        }
-
+        
         #endregion
 
         #region ITweenHash Interface
@@ -722,24 +653,14 @@ namespace com.spacepuppy.Tween
             return this.OnFinish(d);
         }
 
-        ITweenHash ITweenHash.AutoKill()
+        Tweener ITweenHash.Play(bool autoKill, object autoKillToken)
         {
-            return this.AutoKill();
+            return this.Play(autoKill, autoKillToken);
         }
 
-        ITweenHash ITweenHash.AutoKill(object token)
+        Tweener ITweenHash.Play(float playHeadPosition, bool autoKill, object autoKillToken)
         {
-            return this.AutoKill(token);
-        }
-
-        Tweener ITweenHash.Play()
-        {
-            return this.Play();
-        }
-
-        Tweener ITweenHash.Play(float playHeadPosition)
-        {
-            return this.Play(playHeadPosition);
+            return this.Play(playHeadPosition, autoKill, autoKillToken);
         }
 
         #endregion
@@ -758,8 +679,6 @@ namespace com.spacepuppy.Tween
             hash._wrapCount = _wrapCount;
             hash._reverse = _reverse;
             hash._speedScale = _speedScale;
-            hash._autoKill = _autoKill;
-            hash._autoKillToken = _autoKillToken;
             hash._onStep = _onStep;
             hash._onWrap = _onWrap;
             hash._onFinish = _onFinish;
@@ -770,6 +689,46 @@ namespace com.spacepuppy.Tween
         object System.ICloneable.Clone()
         {
             return this.Clone();
+        }
+
+        #endregion
+
+
+
+        #region Special Types
+
+        private struct PropInfo
+        {
+            public AnimMode mode;
+            public string name;
+            public Ease ease;
+            public object value;
+            public float dur;
+            public object altValue;
+            public object option;
+
+            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option)
+            {
+                this.mode = mode;
+                this.name = nm;
+                this.ease = e;
+                this.value = v;
+                this.dur = d;
+                this.altValue = null;
+                this.option = option;
+            }
+
+            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option, object altV)
+            {
+                this.mode = mode;
+                this.name = nm;
+                this.ease = e;
+                this.value = v;
+                this.dur = d;
+                this.altValue = altV;
+                this.option = option;
+            }
+
         }
 
         #endregion

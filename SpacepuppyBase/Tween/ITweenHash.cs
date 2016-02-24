@@ -29,13 +29,9 @@
         ITweenHash OnFinish(System.Action<Tweener> d);
         ITweenHash OnStopped(System.EventHandler d);
         ITweenHash OnStopped(System.Action<Tweener> d);
-
-        ITweenHash AutoKill();
-        ITweenHash AutoKill(object token);
-
-
-        Tweener Play();
-        Tweener Play(float playHeadPosition);
+        
+        Tweener Play(bool autoKill, object autoKillToken = null);
+        Tweener Play(float playHeadPosition, bool autoKill, object autoKillToken = null);
 
     }
 }

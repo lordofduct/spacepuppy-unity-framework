@@ -7,7 +7,7 @@ namespace com.spacepuppy.Scenes
 {
 
     [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, LifeCycleReadOnly = true)]
-    public class SceneManager : Singleton
+    public class SPSceneManager : Singleton
     {
 
         #region Events
@@ -135,7 +135,7 @@ namespace com.spacepuppy.Scenes
 
             #region Fields
 
-            private SceneManager _manager;
+            private SPSceneManager _manager;
             private ISceneLoadOptions _options;
             private ISceneBehaviour _lastScene;
 
@@ -148,7 +148,7 @@ namespace com.spacepuppy.Scenes
 
             #region Properties
 
-            public SceneManager Manager { get { return _manager; } }
+            public SPSceneManager Manager { get { return _manager; } }
 
             public ISceneLoadOptions LoadOptions { get { return _options; } }
 
@@ -160,7 +160,7 @@ namespace com.spacepuppy.Scenes
 
             #region Methods
 
-            public void Start(SceneManager manager, ISceneLoadOptions options, ISceneBehaviour lastScene)
+            public void Start(SPSceneManager manager, ISceneLoadOptions options, ISceneBehaviour lastScene)
             {
                 _manager = manager;
                 _options = options;

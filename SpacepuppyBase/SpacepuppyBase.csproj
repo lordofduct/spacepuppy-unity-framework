@@ -247,7 +247,7 @@
     <Compile Include="Scenes\Scene.cs" />
     <Compile Include="Scenes\SceneContainer.cs" />
     <Compile Include="Scenes\SceneLoadingEventArgs.cs" />
-    <Compile Include="Scenes\SceneManager.cs" />
+    <Compile Include="Scenes\SPSceneManager.cs" />
     <Compile Include="Scenes\SceneBehaviourSequence.cs" />
     <Compile Include="Scenes\SceneSequence.cs" />
     <Compile Include="Scenes\SimpleScene.cs" />

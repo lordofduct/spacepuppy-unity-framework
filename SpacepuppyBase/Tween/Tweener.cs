@@ -50,7 +50,7 @@ namespace com.spacepuppy.Tween
         private int _currentWrapCount;
 
         private object _autoKillToken;
-
+        
         #endregion
 
         #region Configurable Properties
@@ -309,6 +309,10 @@ namespace com.spacepuppy.Tween
             _normalizedPlayHeadPosition = 0f;
         }
 
+        /// <summary>
+        /// Moves the playhead to the end and raises the finished event. 
+        /// </summary>
+        /// <returns></returns>
         public bool CompleteImmediately()
         {
             if (!this.IsPlaying) return false;
@@ -347,6 +351,10 @@ namespace com.spacepuppy.Tween
             return false;
         }
 
+        /// <summary>
+        /// Move the playhead an amount of change.
+        /// </summary>
+        /// <param name="dt"></param>
         public virtual void Scrub(float dt)
         {
             if (this.IsDead) return;
@@ -509,83 +517,7 @@ namespace com.spacepuppy.Tween
         }
 
         #endregion
-
+        
     }
-
-
-    public class TweenerGroup : Tweener
-    {
-
-        #region Fields
-
-        private object _id;
-        private Tweener[] _tweens;
-
-        #endregion
-
-        #region CONSTRUCTOR
-
-        public TweenerGroup(IEnumerable<Tweener> tweens)
-        {
-            _tweens = tweens.ToArray();
-        }
-
-        internal TweenerGroup(Tweener[] tweens)
-        {
-            _tweens = tweens;
-        }
-
-        #endregion
-
-
-        public override object Id
-        {
-            get
-            {
-                if (_id != null) return _id;
-
-                foreach (var twn in _tweens)
-                {
-                    var id = twn.Id;
-                    if (id != null) return id;
-                }
-
-                return null;
-            }
-            set
-            {
-                _id = value;
-            }
-        }
-
-        internal override void Update()
-        {
-            base.Update();
-
-            foreach (var twn in _tweens)
-            {
-                twn.Update();
-            }
-        }
-
-        protected internal override void DoUpdate(float dt, float t)
-        {
-            //do nothing
-        }
-
-        protected internal override float GetPlayHeadLength()
-        {
-            float length = 0f;
-
-            foreach (var twn in _tweens)
-            {
-                float l = twn.GetPlayHeadLength();
-                if (l > length) length = l;
-            }
-
-            return length;
-        }
-
-    }
-
+    
 }

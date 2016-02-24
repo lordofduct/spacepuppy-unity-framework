@@ -21,7 +21,6 @@ namespace com.spacepuppy.Collections
     /// If you're in a separate thread, it's best to cache your own list local to there, and don't even bother with 
     /// this.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public static class TempCollection
     {
 

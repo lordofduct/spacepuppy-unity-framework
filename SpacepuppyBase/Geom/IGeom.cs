@@ -7,6 +7,7 @@ namespace com.spacepuppy.Geom
     {
 
         void Move(Vector3 mv);
+        void RotateAroundPoint(Vector3 point, Quaternion rot);
 
         AxisInterval Project(Vector3 axis);
         Bounds GetBounds();

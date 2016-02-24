@@ -371,13 +371,13 @@ namespace com.spacepuppy
 
         #region Special Types
 
-        private class NaiveComponentTracker
-        {
+        //private class NaiveComponentTracker
+        //{
 
-            public MonoBehaviour Component;
-            public bool Active;
+        //    public MonoBehaviour Component;
+        //    public bool Active;
 
-        }
+        //}
 
         #endregion
 
