@@ -23,6 +23,7 @@ namespace com.spacepuppy
         CancelOnDisable = 1,
         StopOnDeactivate = 2,
         StopOnDisable = 4,
+        Stops = 6,
         Resumes = 8,
 
         PausesOnDeactivate = 10,

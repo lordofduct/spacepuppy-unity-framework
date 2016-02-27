@@ -64,16 +64,16 @@ namespace com.spacepuppy.Utils
 
         #region Transform
 
-        /// <summary>
-        /// Create a LookRotation for a non-standard 'forward' axis.
-        /// </summary>
-        /// <param name="dir"></param>
-        /// <param name="forwardAxis"></param>
-        /// <returns></returns>
-        public static Quaternion AltForwardLookRotation(Vector3 dir, Vector3 forwardAxis)
-        {
-            return Quaternion.LookRotation(dir) * Quaternion.FromToRotation(Vector3.forward, forwardAxis);
-        }
+        ///// <summary>
+        ///// Create a LookRotation for a non-standard 'forward' axis.
+        ///// </summary>
+        ///// <param name="dir"></param>
+        ///// <param name="forwardAxis"></param>
+        ///// <returns></returns>
+        //public static Quaternion AltForwardLookRotation(Vector3 dir, Vector3 forwardAxis)
+        //{
+        //    return Quaternion.LookRotation(dir) * Quaternion.FromToRotation(forwardAxis, Vector3.forward);
+        //}
 
         /// <summary>
         /// Create a LookRotation for a non-standard 'forward' axis.
@@ -83,7 +83,8 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static Quaternion AltForwardLookRotation(Vector3 dir, Vector3 forwardAxis, Vector3 upAxis)
         {
-            return Quaternion.LookRotation(dir, upAxis) * Quaternion.FromToRotation(Vector3.forward, forwardAxis);
+            //return Quaternion.LookRotation(dir, upAxis) * Quaternion.FromToRotation(forwardAxis, Vector3.forward);
+            return Quaternion.LookRotation(dir) * Quaternion.Inverse(Quaternion.LookRotation(forwardAxis, upAxis));
         }
         
         /// <summary>

@@ -218,12 +218,12 @@ namespace com.spacepuppy
         /// <param name="wait"></param>
         /// <param name="returnNullIfZero"></param>
         /// <returns></returns>
-        public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
+        public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnObjEvenIfZero = false)
         {
             //var dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(wait, "m_Seconds"));
             var field = typeof(WaitForSeconds).GetField("m_Seconds", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             float dur = (float)field.GetValue(wait);
-            if (returnNullIfZero && dur <= 0f)
+            if (dur <= 0f && !returnObjEvenIfZero)
             {
                 return null;
             }
@@ -452,12 +452,12 @@ namespace com.spacepuppy
         /// <param name="wait"></param>
         /// <param name="returnNullIfZero"></param>
         /// <returns></returns>
-        public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnNullIfZero = true)
+        public static WaitForDuration FromWaitForSeconds(WaitForSeconds wait, bool returnObjEvenIfZero = false)
         {
             //var dur = ConvertUtil.ToSingle(DynamicUtil.GetValue(wait, "m_Seconds"));
             var field = typeof(WaitForSeconds).GetField("m_Seconds", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             float dur = (float)field.GetValue(wait);
-            if (returnNullIfZero && dur <= 0f)
+            if (dur <= 0f && !returnObjEvenIfZero)
             {
                 return null;
             }
