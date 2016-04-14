@@ -49,7 +49,7 @@ namespace com.spacepuppy.Geom
             var pnorm1 = Vector3.Cross(line1.Direction, line2.Direction);
             var pnorm2 = Vector3.Cross(dir3, line2.Direction);
 
-            if (Mathf.Abs(Vector3.Dot(dir3, pnorm1)) < EPSILON)
+            if (Mathf.Abs(Vector3.Dot(dir3, pnorm1)) < EPSILON && pnorm1.sqrMagnitude > EPSILON)
             {
                 float s = Vector3.Dot(pnorm2, pnorm1) / pnorm1.sqrMagnitude;
                 point = line1.Point + (line1.Direction * s);
