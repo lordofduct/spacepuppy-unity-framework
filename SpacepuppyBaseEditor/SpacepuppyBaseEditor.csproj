@@ -126,6 +126,7 @@
     <Compile Include="Geom\IntervalInspector.cs" />
     <Compile Include="Base\Inspectors\MultiTagInspector.cs" />
     <Compile Include="Base\Inspectors\SingletonInspector.cs" />
+    <Compile Include="Project\ResourceLinkPropertyDrawer.cs" />
     <Compile Include="Project\TagDataInspector.cs" />
     <Compile Include="Base\Inspectors\TagMaskInspector.cs" />
     <Compile Include="Base\Inspectors\TagSelectorPropertyDrawer.cs" />

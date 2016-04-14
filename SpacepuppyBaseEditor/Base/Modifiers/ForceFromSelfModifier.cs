@@ -58,7 +58,7 @@ namespace com.spacepuppyeditor.Modifiers
                     }
                     break;
                 case EntityRelativity.SelfAndChildren:
-                    if(go != self || !self.IsParentOf(go))
+                    if(go != self && !self.IsParentOf(go))
                     {
                         property.objectReferenceValue = null;
                     }

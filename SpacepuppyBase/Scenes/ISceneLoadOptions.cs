@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenes
 {
@@ -23,6 +24,7 @@ namespace com.spacepuppy.Scenes
         #region Fields
 
         private Scene _scene;
+        private System.Type _sceneBehaviourType;
 
         #endregion
 
@@ -38,6 +40,17 @@ namespace com.spacepuppy.Scenes
             _scene = scene;
         }
 
+        public SceneLoadOptions(System.Type sceneBehaviourType)
+        {
+            this.SceneBehaviourType = sceneBehaviourType;
+        }
+
+        public SceneLoadOptions(Scene scene, System.Type sceneBehaviourType)
+        {
+            _scene = scene;
+            this.SceneBehaviourType = sceneBehaviourType;
+        }
+
         #endregion
 
         #region Properties
@@ -46,6 +59,17 @@ namespace com.spacepuppy.Scenes
         {
             get { return _scene; }
             set { _scene = value; }
+        }
+
+        public System.Type SceneBehaviourType
+        {
+            get { return _sceneBehaviourType; }
+            set
+            {
+                if (!TypeUtil.IsType(value, typeof(ISceneBehaviour)) || !TypeUtil.IsType(value, typeof(Component)))
+                    throw new System.ArgumentException("SceneBehaviourType must be a Component and implement ISceneBehaviour.");
+                _sceneBehaviourType = value;
+            }
         }
 
         #endregion
@@ -63,7 +87,22 @@ namespace com.spacepuppy.Scenes
 
         protected virtual ISceneBehaviour LoadCustomSceneBehaviour(SPSceneManager manager)
         {
-            return SceneBehaviour.SceneLoadedInstance;
+            if(_sceneBehaviourType != null)
+            {
+                var result = SceneBehaviour.SceneLoadedInstance;
+                if (result != null && TypeUtil.IsType(result.GetType(), _sceneBehaviourType)) return result;
+                if (manager == null) return null;
+
+                var go = new GameObject("SceneBehaviour." + _sceneBehaviourType.Name);
+                result = go.AddComponent(_sceneBehaviourType) as ISceneBehaviour;
+                go.transform.parent = manager.transform;
+                go.transform.localPosition = Vector3.zero;
+                return result;
+            }
+            else
+            {
+                return SceneBehaviour.SceneLoadedInstance;
+            }
         }
         ISceneBehaviour ISceneLoadOptions.LoadCustomSceneBehaviour(SPSceneManager manager)
         {

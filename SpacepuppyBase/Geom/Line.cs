@@ -44,22 +44,22 @@ namespace com.spacepuppy.Geom
         {
             const float EPSILON = 0.0001f;
 
-            point = Vector3.zero;
 
             var dir3 = line2.Point - line1.Point;
             var pnorm1 = Vector3.Cross(line1.Direction, line2.Direction);
             var pnorm2 = Vector3.Cross(dir3, line2.Direction);
 
-            if (Mathf.Abs(Vector3.Dot(dir3, pnorm1)) > EPSILON) return false; //lines aren't coplanar
-
-            float s = Vector3.Dot(pnorm2, pnorm1) / pnorm1.sqrMagnitude;
-            if (s >= 0 && s <= 1.0f)
+            if (Mathf.Abs(Vector3.Dot(dir3, pnorm1)) < EPSILON)
             {
+                float s = Vector3.Dot(pnorm2, pnorm1) / pnorm1.sqrMagnitude;
                 point = line1.Point + (line1.Direction * s);
                 return true;
             }
-
-            return false;
+            else
+            {
+                point = Vector3.zero;
+                return false;
+            }
         }
 
         public static bool ClosestPoints(Line line1, Line line2, out Vector3 line1ClosestPoint, out Vector3 line2ClosestPoint)
