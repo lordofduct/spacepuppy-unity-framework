@@ -47,8 +47,8 @@ namespace com.spacepuppyeditor.Render
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (EditorHelper.AssertMultiObjectEditingNotSupported(position, property, label)) return;
-
-            if (Application.isPlaying) GUI.enabled = false;
+            
+            var cache = SPGUI.DisableIfPlaying();
 
             _property = property;
 
@@ -76,7 +76,7 @@ namespace com.spacepuppyeditor.Render
             _property = null;
             _valuesProp = null;
 
-            if (Application.isPlaying) GUI.enabled = true;
+            cache.Reset();
         }
         
 

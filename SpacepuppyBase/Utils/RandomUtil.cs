@@ -136,7 +136,7 @@ namespace com.spacepuppy.Utils
 
         public static int Range(this IRandom rng, int max, int min = 0)
         {
-            return rng.Next(max, min);
+            return rng.Next(min, max);
         }
 
         #endregion
@@ -151,23 +151,29 @@ namespace com.spacepuppy.Utils
 
             public float Next()
             {
-                return Random.value;
+                //return Random.value;
+                //because unity's Random returns in range 0->1, which is dumb
+                //why you might say? Well it means that the 1 is the least likely value to generate, so for generating indices you get uneven results
+                return Random.value * 0.9999f;
             }
 
             public double NextDouble()
             {
-                return (double)Random.value;
+                //return (double)Random.value;
+                //because unity's Random returns in range 0->1, which is dumb
+                //why you might say? Well it means that the 1 is the least likely value to generate, so for generating indices you get uneven results
+                return (double)Random.value * 0.99999999d;
             }
 
             public int Next(int size)
             {
-                return (int)((float)size * Random.value);
+                return (int)((double)size * NextDouble());
             }
 
 
             public int Next(int low, int high)
             {
-                return (int)(Random.value * (high - low)) + low;
+                return (int)(NextDouble() * (high - low)) + low;
             }
         }
 

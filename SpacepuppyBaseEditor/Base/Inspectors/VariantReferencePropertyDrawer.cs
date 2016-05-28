@@ -118,24 +118,22 @@ namespace com.spacepuppyeditor.Base
 
             var r0 = new Rect(position.xMin, position.yMin, 90.0f, EditorGUIUtility.singleLineHeight);
             var r1 = new Rect(r0.xMax, position.yMin, position.xMax - r0.xMax, EditorGUIUtility.singleLineHeight);
-
-            if (this.RestrictVariantType) GUI.enabled = false;
-
+            
+            var cache = SPGUI.DisableIf(this.RestrictVariantType);
             EditorGUI.BeginChangeCheck();
             var valueType = (VariantType)EditorGUI.EnumPopup(r0, GUIContent.none, variant.ValueType);
             if (EditorGUI.EndChangeCheck())
             {
                 helper.PrepareForValueTypeChange(valueType);
             }
-
-            if (this.RestrictVariantType) GUI.enabled = true;
+            cache.Reset();
 
             switch (valueType)
             {
                 case VariantType.Null:
-                    GUI.enabled = false;
+                    cache = SPGUI.Disable();
                     EditorGUI.TextField(r1, "Null");
-                    GUI.enabled = true;
+                    cache.Reset();
                     break;
                 case VariantType.String:
                     variant.StringValue = EditorGUI.TextField(r1, variant.StringValue);

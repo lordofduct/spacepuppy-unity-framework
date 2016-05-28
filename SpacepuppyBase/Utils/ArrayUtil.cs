@@ -274,7 +274,7 @@ namespace com.spacepuppy.Utils
                 if (rng == null) rng = RandomUtil.Standard;
                 var a = lst as IList<T>;
                 if (a.Count == 0) return default(T);
-                return a[rng.Range(0, a.Count)];
+                return a[rng.Range(a.Count)];
             }
             else
             {

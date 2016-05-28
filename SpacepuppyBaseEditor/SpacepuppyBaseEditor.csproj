@@ -173,6 +173,7 @@
     <Compile Include="SPEditorGUI.cs" />
     <Compile Include="SPEditorGUILayout.cs" />
     <Compile Include="SPEditorStyles.cs" />
+    <Compile Include="SPGUI.cs" />
     <Compile Include="SPMenu.cs" />
     <Compile Include="Base\TypeSelectionDropDownWindow.cs" />
     <Compile Include="Utils\Diminish\DiminishingWeightOverDurationPropertyDrawer.cs" />

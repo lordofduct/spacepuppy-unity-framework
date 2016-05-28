@@ -52,7 +52,7 @@ namespace com.spacepuppy.Utils
             {
                 var tp = typeof(T);
                 if (typeof(SPEntity).IsAssignableFrom(tp))
-                    return SPEntity.GetEntityFromSource(tp, go) as T;
+                    return SPEntity.Pool.GetFromSource(tp, go) as T;
                 else if (ComponentUtil.IsAcceptableComponentType(tp))
                     return go.GetComponent(tp) as T;
             }
@@ -78,7 +78,7 @@ namespace com.spacepuppy.Utils
             if(go != null)
             {
                 if (typeof(SPEntity).IsAssignableFrom(tp))
-                    return SPEntity.GetEntityFromSource(tp, go);
+                    return SPEntity.Pool.GetFromSource(tp, go);
                 else if (ComponentUtil.IsAcceptableComponentType(tp))
                     return go.GetComponent(tp);
             }

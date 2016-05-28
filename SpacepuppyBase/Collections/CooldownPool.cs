@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace com.spacepuppy.Collections
 {
@@ -103,16 +105,19 @@ namespace com.spacepuppy.Collections
 
         #region IEnumerable Interface
 
-        //TODO - implement propert Enumerator, remember dict.Values allocates mem in mono... ugh
-
-        public IEnumerator<CooldownPool<T>.CooldownInfo> GetEnumerator()
+        public Enumerator GetEnumerator()
         {
-            return _table.Values.GetEnumerator();
+            return new Enumerator(this);
+        }
+
+        IEnumerator<CooldownPool<T>.CooldownInfo> IEnumerable<CooldownInfo>.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _table.Values.GetEnumerator();
+            return this.GetEnumerator();
         }
 
         #endregion
@@ -144,6 +149,49 @@ namespace com.spacepuppy.Collections
                 internal set { _dur = value; }
             }
 
+        }
+
+        public struct Enumerator : IEnumerator<CooldownInfo>
+        {
+
+            private Dictionary<T, CooldownInfo>.Enumerator _e;
+
+            public Enumerator(CooldownPool<T> pool)
+            {
+                if (pool == null) throw new System.ArgumentNullException();
+                _e = pool._table.GetEnumerator();
+            }
+
+            public CooldownInfo Current
+            {
+                get
+                {
+                    return _e.Current.Value;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return _e.Current.Value;
+                }
+            }
+
+            public void Dispose()
+            {
+                _e.Dispose();
+            }
+
+            public bool MoveNext()
+            {
+                return _e.MoveNext();
+            }
+
+            void System.Collections.IEnumerator.Reset()
+            {
+                throw new System.NotSupportedException();
+            }
         }
 
         #endregion

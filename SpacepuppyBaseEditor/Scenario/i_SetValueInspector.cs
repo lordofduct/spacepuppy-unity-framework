@@ -48,9 +48,9 @@ namespace com.spacepuppyeditor.Scenario
                 {
                     //EditorGUILayout.LabelField(EditorHelper.TempContent(valueProp.displayName), EditorHelper.TempContent(propType.Name));
                     var evtp = VariantReference.GetVariantType(propType);
-                    GUI.enabled = false;
+                    var cache = SPGUI.Disable();
                     EditorGUILayout.EnumPopup(EditorHelper.TempContent(valueProp.displayName), evtp);
-                    GUI.enabled = true;
+                    cache.Reset();
                 }
                 else
                 {

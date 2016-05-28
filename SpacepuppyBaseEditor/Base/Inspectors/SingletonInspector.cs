@@ -181,9 +181,9 @@ namespace com.spacepuppyeditor.Base
             var prop = this.serializedObject.FindProperty("_maintainer._lifeCycle");
             if (prop.GetEnumValue<SingletonLifeCycleRule>() != attrib.DefaultLifeCycle) prop.SetEnumValue(attrib.DefaultLifeCycle);
 
-            GUI.enabled = false;
+            var cache = SPGUI.Disable();
             EditorGUILayout.EnumPopup("Life Cycle", prop.GetEnumValue<SingletonLifeCycleRule>());
-            GUI.enabled = true;
+            cache.Reset();
 
             this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, "_maintainer");
         }

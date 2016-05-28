@@ -70,8 +70,8 @@ namespace com.spacepuppyeditor.Base.Inspectors
                 }
                 else
                     index = (int)e;
-
-                if (Application.isPlaying) GUI.enabled = false;
+                
+                var cache = SPGUI.DisableIfPlaying();
                 EditorGUI.BeginChangeCheck();
                 index = Mathf.Max(EditorGUI.Popup(position, index, lst.ToArray()), 0);
                 if (EditorGUI.EndChangeCheck())
@@ -87,7 +87,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
                         tsNameProp.stringValue = lst[index];
                     }
                 }
-                if (Application.isPlaying) GUI.enabled = true;
+                cache.Reset();
             }
 
             return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);

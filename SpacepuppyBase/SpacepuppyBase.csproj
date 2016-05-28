@@ -77,6 +77,7 @@
     <Compile Include="Cameras\UnityCamera.cs" />
     <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\LightEnumerator.cs" />
+    <Compile Include="Collections\MultitonPool.cs" />
     <Compile Include="Collections\SamplingCharEnumerator.cs" />
     <Compile Include="Collections\BiDictionary.cs" />
     <Compile Include="Collections\CircularQueue.cs" />

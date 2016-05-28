@@ -18,71 +18,6 @@ namespace com.spacepuppy
     public class SPEntity : SPNotifyingComponent, IIgnorableCollision
     {
         
-        #region Static Multiton
-
-        private static Dictionary<GameObject, SPEntity> _pool = new Dictionary<GameObject, SPEntity>(com.spacepuppy.Collections.ObjectInstanceIDEqualityComparer<GameObject>.Default);
-        private static List<SPEntity> _findList;
-
-        /// <summary>
-        /// A readonly list of all active entities.
-        /// </summary>
-        public static ICollection<SPEntity> ActiveEntities { get { return _pool.Values; } }
-
-        public static SPEntity[] FindAll(System.Func<SPEntity, bool> predicate)
-        {
-            if (_findList == null) _findList = new List<SPEntity>();
-            if (_findList.Count > 0) throw new System.InvalidOperationException("FindAll can only be called once at a time. Do not call inside the predicate, or from a thread other than the main thread.");
-
-            FindAll(_findList, predicate);
-            var arr = _findList.ToArray();
-            _findList.Clear();
-            return arr;
-        }
-
-        public static void FindAll(ICollection<SPEntity> coll, System.Func<SPEntity, bool> predicate)
-        {
-            if (coll == null) throw new System.ArgumentNullException("coll");
-
-            var e = _pool.GetEnumerator();
-            if(predicate == null)
-            {
-                while (e.MoveNext())
-                {
-                    coll.Add(e.Current.Value);
-                }
-            }
-            else
-            {
-                while (e.MoveNext())
-                {
-                    if (predicate(e.Current.Value)) coll.Add(e.Current.Value);
-                }
-            }
-        }
-
-        public static void FindAll<T>(ICollection<T> coll, System.Func<T, bool> predicate) where T : SPEntity
-        {
-            if (coll == null) throw new System.ArgumentNullException("coll");
-
-            var e = _pool.GetEnumerator();
-            if(predicate == null)
-            {
-                while (e.MoveNext())
-                {
-                    if (e.Current.Value is T) coll.Add(e.Current.Value as T);
-                }
-            }
-            else
-            {
-                while (e.MoveNext())
-                {
-                    if (e.Current.Value is T && predicate(e.Current.Value as T)) coll.Add(e.Current.Value as T);
-                }
-            }
-        }
-
-        #endregion
-
         #region Fields
         
         [System.NonSerialized()]
@@ -115,22 +50,22 @@ namespace com.spacepuppy
 
         protected override void OnStartOrEnable()
         {
-            base.OnStartOrEnable();
+            _pool.AddReference(this);
 
-            _pool[this.gameObject] = this;
+            base.OnStartOrEnable();
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            _pool.Remove(this.gameObject);
+            _pool.RemoveReference(this);
         }
 
         #endregion
 
         #region Properties
-        
+
         public bool IsAwake { get { return _isAwake; } }
 
         #endregion
@@ -167,134 +102,76 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Multiton Interface
 
+        private static UniqueToEntityMultitonPool<SPEntity> _pool = new UniqueToEntityMultitonPool<SPEntity>();
+        public static UniqueToEntityMultitonPool<SPEntity> Pool { get { return _pool; } }
+        
+        
+        [System.Obsolete("Access SPEntity.Pool instead.")]
+        public static SPEntity[] FindAll(System.Func<SPEntity, bool> predicate)
+        {
+            return SPEntity.Pool.FindAll(predicate);
+        }
 
-        #region Static Utils
+        [System.Obsolete("Access SPEntity.Pool instead.")]
+        public static void FindAll(ICollection<SPEntity> coll, System.Func<SPEntity, bool> predicate)
+        {
+            SPEntity.Pool.FindAll(coll, predicate);
+        }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
+        public static void FindAll<T>(ICollection<T> coll, System.Func<T, bool> predicate) where T : SPEntity
+        {
+            SPEntity.Pool.FindAll<T>(coll, predicate);
+        }
+
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static bool IsEntitySource(object obj)
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(obj);
-            if (go == null) return false;
-
-            go = go.FindTrueRoot();
-            if (go == null) return false;
-            return _pool.Contains(go) || go.HasComponent<SPEntity>();
+            return SPEntity.Pool.IsSource(obj);
         }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static bool IsEntitySource<T>(object obj) where T : SPEntity
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(obj);
-            if (go == null) return false;
-
-            go = go.FindTrueRoot();
-            if (go == null) return false;
-            SPEntity e;
-            return (_pool.TryGetValue(go, out e) && e is T) || go.HasComponent<T>();
+            return SPEntity.Pool.IsSource<T>(obj);
         }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static SPEntity GetEntityFromSource(object obj)
         {
-            var go = GameObjectUtil.GetTrueRootFromSource(obj);
-            if (go == null) return null;
-
-            SPEntity e;
-            if (_pool.TryGetValue(go, out e)) return e;
-            else return go.GetComponent<SPEntity>();
+            return SPEntity.GetEntityFromSource(obj);
         }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static SPEntity GetEntityFromSource(System.Type tp, object obj)
         {
-            if (tp == null) throw new System.ArgumentNullException("tp");
-            var go = GameObjectUtil.GetTrueRootFromSource(obj);
-            if (go == null) return null;
-
-            SPEntity e;
-            if (_pool.TryGetValue(go, out e) && TypeUtil.IsType(e.GetType(), tp))
-            {
-                return e;
-            }
-            else if(TypeUtil.IsType(tp, typeof(SPEntity)))
-            {
-                return go.GetComponent(tp) as SPEntity;
-            }
-
-            return null;
+            return SPEntity.Pool.GetFromSource(tp, obj);
         }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static T GetEntityFromSource<T>(object obj) where T : SPEntity
         {
-            var go = GameObjectUtil.GetTrueRootFromSource(obj);
-            if (go == null) return null;
-
-            SPEntity e;
-            if (_pool.TryGetValue(go, out e) && e is T)
-            {
-                return e as T;
-            }
-            else
-            {
-                return go.GetComponent<T>();
-            }
+            return SPEntity.Pool.GetFromSource<T>(obj);
         }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static bool GetEntityFromSource(object obj, out SPEntity entity)
         {
-            entity = null;
-            var go = GameObjectUtil.GetTrueRootFromSource(obj);
-            if (go == null) return false;
-
-            SPEntity e;
-            if (_pool.TryGetValue(go, out e))
-            {
-                entity = e;
-                return true;
-            }
-            else
-            {
-                entity = go.GetComponent<SPEntity>();
-                return entity != null;
-            }
+            return SPEntity.Pool.GetFromSource(obj, out entity);
         }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static bool GetEntityFromSource(System.Type tp, object obj, out SPEntity entity)
         {
-            if (tp == null) throw new System.ArgumentNullException("tp");
-            entity = null;
-            var go = GameObjectUtil.GetTrueRootFromSource(obj);
-            if (go == null) return false;
-
-            SPEntity e;
-            if (_pool.TryGetValue(go, out e) && TypeUtil.IsType(e.GetType(), tp))
-            {
-                entity = e;
-                return true;
-            }
-            else if (TypeUtil.IsType(tp, typeof(SPEntity)))
-            {
-                entity = go.GetComponent(tp) as SPEntity;
-                return entity != null;
-            }
-
-            return false;
+            return SPEntity.Pool.GetFromSource(tp, obj, out entity);
         }
 
+        [System.Obsolete("Access SPEntity.Pool instead.")]
         public static bool GetEntityFromSource<T>(object obj, out T entity) where T : SPEntity
         {
-            entity = null;
-            var go = GameObjectUtil.GetTrueRootFromSource(obj);
-            if (go == null) return false;
-
-            SPEntity e;
-            if (_pool.TryGetValue(go, out e) && e is T)
-            {
-                entity = e as T;
-                return true;
-            }
-            else
-            {
-                entity = go.GetComponent<T>();
-                return entity != null;
-            }
+            return SPEntity.GetEntityFromSource<T>(obj, out entity);
         }
 
         #endregion

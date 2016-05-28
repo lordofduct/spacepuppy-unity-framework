@@ -43,10 +43,10 @@ namespace com.spacepuppyeditor.Render
 
             if(Application.isPlaying)
             {
-                GUI.enabled = false;
+                var cache = SPGUI.Disable();
                 this.DrawPropertyField(PROP_RENDERER);
                 this.DrawPropertyField(PROP_MAKEUNIQUEONSTART);
-                GUI.enabled = true;
+                cache.Reset();
             }
             else
             {

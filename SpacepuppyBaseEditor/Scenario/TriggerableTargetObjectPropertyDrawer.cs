@@ -151,10 +151,10 @@ namespace com.spacepuppyeditor.Scenario
                 {
                     case TriggerableTargetObject.ResolveByCommand.Nothing:
                         {
-                            GUI.enabled = false;
+                            var cache = SPGUI.Disable();
                             EditorGUI.TextField(r2, string.Empty);
                             queryProp.stringValue = string.Empty;
-                            GUI.enabled = true;
+                            cache.Reset();
                         }
                         break;
                     case TriggerableTargetObject.ResolveByCommand.WithTag:

@@ -25,8 +25,8 @@ namespace com.spacepuppyeditor.Scenario
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
 
 
-
-            if (Application.isPlaying) GUI.enabled = false;
+            
+            var cache = SPGUI.DisableIfPlaying();
 
             this.DrawPropertyField(PROP_NOTIFTYPE);
 
@@ -43,7 +43,7 @@ namespace com.spacepuppyeditor.Scenario
                 SPEditorGUILayout.PropertyField(targetProp);
             }
 
-            GUI.enabled = true;
+            cache.Reset();
 
 
 

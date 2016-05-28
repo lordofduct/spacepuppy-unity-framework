@@ -93,7 +93,7 @@ namespace com.spacepuppyeditor
 
                 foreach (var info in _shownFields)
                 {
-                    if (info.Attrib.Readonly) GUI.enabled = false;
+                    var cache = SPGUI.DisableIf(info.Attrib.Readonly);
 
                     var value = info.FieldInfo.GetValue(this.target);
                     EditorGUI.BeginChangeCheck();
@@ -103,7 +103,7 @@ namespace com.spacepuppyeditor
                         info.FieldInfo.SetValue(this.target, value);
                     }
 
-                    if (info.Attrib.Readonly) GUI.enabled = true;
+                    cache.Reset();
                 }
             }
         }

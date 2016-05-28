@@ -339,9 +339,9 @@ namespace com.spacepuppyeditor.Scenario
                     argArrayProp.serializedObject.ApplyModifiedProperties();
                 }
 
-                GUI.enabled = false;
+                var cache = SPGUI.Disable();
                 EditorGUI.LabelField(argRect, _methodArgLabel, new GUIContent("*Zero Parameter Count*"));
-                GUI.enabled = true;
+                cache.Reset();
             }
             else
             {
