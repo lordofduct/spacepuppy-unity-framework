@@ -26,6 +26,7 @@ namespace com.spacepuppy.Dynamic
     [System.Flags()]
     public enum DynamicMemberAccess
     {
+        Inaccessible = 0,
         Read = 1,
         Write = 2,
         ReadWrite = 3
@@ -601,6 +602,7 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
+        [System.Obsolete("Poorly named method and return type. Use GetDynamicParameterInfo instead.")]
         public static System.Type[] GetParameters(MemberInfo info)
         {
             switch(info.MemberType)
@@ -620,7 +622,30 @@ namespace com.spacepuppy.Dynamic
                         return arr;
                     }
                 default:
-                    return new System.Type[] {};
+                    return ArrayUtil.Empty<System.Type>();
+            }
+        }
+
+        public static DynamicParameterInfo[] GetDynamicParameterInfo(MemberInfo info)
+        {
+            switch (info.MemberType)
+            {
+                case MemberTypes.Field:
+                    return new DynamicParameterInfo[] { new DynamicParameterInfo(info, info.Name, (info as FieldInfo).FieldType) };
+                case MemberTypes.Property:
+                    return new DynamicParameterInfo[] { new DynamicParameterInfo(info, info.Name, (info as PropertyInfo).PropertyType) };
+                case MemberTypes.Method:
+                    {
+                        var paramInfos = (info as MethodBase).GetParameters();
+                        DynamicParameterInfo[] arr = new DynamicParameterInfo[paramInfos.Length];
+                        for (int i = 0; i < arr.Length; i++)
+                        {
+                            arr[i] = new DynamicParameterInfo( paramInfos[i]);
+                        }
+                        return arr;
+                    }
+                default:
+                    return ArrayUtil.Empty<DynamicParameterInfo>();
             }
         }
 
@@ -651,6 +676,31 @@ namespace com.spacepuppy.Dynamic
             //    return null;
         }
 
+        public static DynamicMemberAccess GetMemberAccessLevel(MemberInfo info)
+        {
+            if (info == null) return DynamicMemberAccess.Inaccessible;
+
+            switch (info.MemberType)
+            {
+                case MemberTypes.Field:
+                    return DynamicMemberAccess.ReadWrite;
+                case MemberTypes.Property:
+                    var pinfo = info as PropertyInfo;
+                    if (pinfo.CanRead)
+                        return (pinfo.CanWrite) ? DynamicMemberAccess.ReadWrite : DynamicMemberAccess.Read;
+                    else
+                        return (pinfo.CanWrite) ? DynamicMemberAccess.Write : DynamicMemberAccess.Inaccessible;
+                case MemberTypes.Method:
+                    var minfo = info as MethodInfo;
+                    if (minfo.ReturnType != typeof(void))
+                        return DynamicMemberAccess.ReadWrite;
+                    else
+                        return DynamicMemberAccess.Write;
+                default:
+                    return DynamicMemberAccess.Inaccessible;
+            }
+        }
+
         public static object GetValueWithMember(MemberInfo info, object targObj)
         {
             if (info == null) return null;
@@ -675,6 +725,15 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
+
+        /// <summary>
+        /// Returns members that return/accept types that are considered easily serializable. 
+        /// Easily serialized types are those that can be referenced by a VariantReference.
+        /// </summary>
+        /// <param name="obj">Object to find member of</param>
+        /// <param name="mask">MemberType mask</param>
+        /// <param name="access">Access mask</param>
+        /// <returns></returns>
         public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembers(object obj, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite)
         {
             if (obj == null) yield break;

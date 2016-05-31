@@ -139,7 +139,7 @@ namespace com.spacepuppyeditor.Base.Inspectors
                 var variantRect = new Rect(nameRect.xMax + 1f, area.yMin, area.width - (nameRect.width + 1f), area.height);
                 if (i >= 0)
                 {
-                    var propType = com.spacepuppy.Dynamic.DynamicUtil.GetParameters(_propertyListMembers[i]).FirstOrDefault();
+                    var propType = com.spacepuppy.Dynamic.DynamicUtil.GetReturnType(_propertyListMembers[i]);
                     var argType = VariantReference.GetVariantType(propType);
                     _variantDrawer.RestrictVariantType = true;
                     _variantDrawer.VariantTypeRestrictedTo = argType;

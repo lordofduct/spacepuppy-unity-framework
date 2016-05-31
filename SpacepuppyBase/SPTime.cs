@@ -117,8 +117,10 @@ namespace com.spacepuppy
         {
             get { return _timeSupplierType == DeltaTimeType.Custom; }
         }
-
+        
         #endregion
+
+
 
 
         #region Static Interface

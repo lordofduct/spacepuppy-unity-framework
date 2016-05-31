@@ -30,7 +30,6 @@ namespace com.spacepuppyeditor.Scenario
         private GUIContent _defaultArgLabel = new GUIContent("Triggerable Arg");
         private GUIContent _undefinedArgLabel = new GUIContent("Undefined Arg", "The argument is not explicitly defined unless the trigger's event defines it.");
         private GUIContent _messageArgLabel = new GUIContent("Message Arg", "A parameter to be passed to the message if one is desired.");
-        private GUIContent _methodArgLabel = new GUIContent("Method Arg", "A parameter to be passed to the method if needed.");
         private GUIContent _argBtnLabel = new GUIContent("||", "Change between accepting a configured argument or not.");
         private VariantReferencePropertyDrawer _variantDrawer = new VariantReferencePropertyDrawer();
         private int _callMethodModeExtraLines = 0;
@@ -325,7 +324,7 @@ namespace com.spacepuppyeditor.Scenario
             property.serializedObject.ApplyModifiedProperties();
 
             //Draw Triggerable Arg
-            var parr = (selectedMember != null) ? com.spacepuppy.Dynamic.DynamicUtil.GetParameters(selectedMember) : null;
+            var parr = (selectedMember != null) ? com.spacepuppy.Dynamic.DynamicUtil.GetDynamicParameterInfo(selectedMember) : null;
             if (parr == null || parr.Length == 0)
             {
                 //NO PARAMETERS
@@ -340,7 +339,7 @@ namespace com.spacepuppyeditor.Scenario
                 }
 
                 var cache = SPGUI.Disable();
-                EditorGUI.LabelField(argRect, _methodArgLabel, new GUIContent("*Zero Parameter Count*"));
+                EditorGUI.LabelField(argRect, GUIContent.none, new GUIContent("*Zero Parameter Count*"));
                 cache.Reset();
             }
             else
@@ -355,9 +354,11 @@ namespace com.spacepuppyeditor.Scenario
                     argArrayProp.arraySize = parr.Length;
                     argArrayProp.serializedObject.ApplyModifiedProperties();
                 }
+
+                EditorGUI.indentLevel++;
                 for (int i = 0; i < parr.Length; i++)
                 {
-                    var paramType = parr[i];
+                    var paramType = parr[i].ParameterType;
                     var argRect = new Rect(area.xMin, methNameRect.yMax + i * EditorGUIUtility.singleLineHeight, area.width, EditorGUIUtility.singleLineHeight);
                     var argProp = argArrayProp.GetArrayElementAtIndex(i);
 
@@ -366,7 +367,7 @@ namespace com.spacepuppyeditor.Scenario
                         //draw the default variant as the method accepts anything
                         _variantDrawer.RestrictVariantType = false;
                         _variantDrawer.ForcedObjectType = null;
-                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+                        _variantDrawer.OnGUI(argRect, argProp, EditorHelper.TempContent("Arg " + i.ToString() + ": " + parr[i].ParameterName, "A parameter to be passed to the method if needed."));
                     }
                     else
                     {
@@ -374,9 +375,10 @@ namespace com.spacepuppyeditor.Scenario
                         _variantDrawer.RestrictVariantType = true;
                         _variantDrawer.VariantTypeRestrictedTo = argType;
                         _variantDrawer.ForcedObjectType = (paramType.IsInterface || TypeUtil.IsType(paramType, typeof(Component))) ? paramType : null;
-                        _variantDrawer.OnGUI(argRect, argProp, _methodArgLabel);
+                        _variantDrawer.OnGUI(argRect, argProp, EditorHelper.TempContent("Arg " + i.ToString() + ": " + parr[i].ParameterName, "A parameter to be passed to the method if needed."));
                     }
                 }
+                EditorGUI.indentLevel--;
             }
             
         }

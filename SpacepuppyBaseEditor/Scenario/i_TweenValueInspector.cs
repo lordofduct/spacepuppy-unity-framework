@@ -100,7 +100,7 @@ namespace com.spacepuppyeditor.Scenario
 
             if(selectedMember != null)
             {
-                var propType = com.spacepuppy.Dynamic.DynamicUtil.GetParameters(selectedMember).FirstOrDefault();
+                var propType = com.spacepuppy.Dynamic.DynamicUtil.GetReturnType(selectedMember);
 
                 switch (el.FindPropertyRelative(PROP_DATA_MODE).GetEnumValue<TweenHash.AnimMode>())
                 {

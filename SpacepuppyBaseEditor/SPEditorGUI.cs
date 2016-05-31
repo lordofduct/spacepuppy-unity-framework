@@ -918,14 +918,17 @@ namespace com.spacepuppyeditor
         {
             if (targObj != null)
             {
-                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property).ToArray();
+                var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, DynamicMemberAccess.Read).ToArray();
                 var entries = new GUIContent[members.Length];
 
                 int index = -1;
                 for (int i = 0; i < members.Length; i++)
                 {
                     var m = members[i];
-                    entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj)));
+                    if((DynamicUtil.GetMemberAccessLevel(m) & DynamicMemberAccess.Write) != 0)
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj)));
+                    else
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj)));
 
                     if (index < 0 && m.Name == selectedMemberName)
                     {

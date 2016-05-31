@@ -110,6 +110,7 @@
     <Compile Include="CollisionExclusion.cs" />
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
     <Compile Include="Dynamic\DynamicObjectAccessor.cs" />
+    <Compile Include="Dynamic\DynamicParameterInfo.cs" />
     <Compile Include="Dynamic\IDynamicMemberInfo.cs" />
     <Compile Include="Dynamic\IStateModifier.cs" />
     <Compile Include="ExceptionsLite.cs" />
@@ -180,6 +181,7 @@
     <Compile Include="Project\IAssetBundle.cs" />
     <Compile Include="PsuedoSingleton.cs" />
     <Compile Include="RadicalEnums.cs" />
+    <Compile Include="RateOfChange.cs" />
     <Compile Include="Render\i_SetMaterialProperty.cs" />
     <Compile Include="Render\i_TweenMaterial.cs" />
     <Compile Include="Render\MaterialPropertyReference.cs" />
