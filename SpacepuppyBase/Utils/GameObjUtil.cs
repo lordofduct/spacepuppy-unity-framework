@@ -910,35 +910,20 @@ namespace com.spacepuppy.Utils
 
 #region Parenting
 
-        public static IEnumerable<Transform> GetAllChildren(this GameObject go)
+        public static Transform[] GetAllChildren(this GameObject go)
         {
             if (go == null) return null;
             return GetAllChildren(go.transform);
         }
 
-        public static IEnumerable<Transform> GetAllChildren(this Component c)
+        public static Transform[] GetAllChildren(this Component c)
         {
             if (c == null) return null;
             return GetAllChildren(c.transform);
         }
 
-        public static IEnumerable<Transform> GetAllChildren(this Transform t)
+        public static Transform[] GetAllChildren(this Transform t)
         {
-            ////we do the first children first
-            //foreach (Transform trans in t.transform)
-            //{
-            //    yield return trans;
-            //}
-
-            ////then grandchildren
-            //foreach (Transform trans in t.transform)
-            //{
-            //    foreach (var child in GetAllChildren(trans))
-            //    {
-            //        yield return child;
-            //    }
-            //}
-
             using (var lst = TempCollection.GetList<Transform>())
             {
                 GetAllChildren(t, lst);
@@ -947,14 +932,32 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        public static void GetAllChildren(this Transform t, ICollection<Transform> coll)
+        {
+            if(coll is IList<Transform>)
+            {
+                GetAllChildren(t, coll as IList<Transform>);
+            }
+            else
+            {
+                using (var lst = TempCollection.GetList<Transform>())
+                {
+                    GetAllChildren(t, lst);
+                    var e = lst.GetEnumerator();
+                    while (e.MoveNext()) coll.Add(e.Current);
+                }
+            }
+        }
+
         public static void GetAllChildren(this Transform t, IList<Transform> lst)
         {
+            int i = lst.Count;
+
             foreach (Transform child in t)
             {
                 lst.Add(child);
             }
 
-            int i = 0;
             while (i < lst.Count)
             {
                 t = lst[i];
@@ -966,37 +969,20 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<Transform> GetAllChildrenAndSelf(this GameObject go)
+        public static Transform[] GetAllChildrenAndSelf(this GameObject go)
         {
             if (go == null) return null;
             return GetAllChildrenAndSelf(go.transform);
         }
 
-        public static IEnumerable<Transform> GetAllChildrenAndSelf(this Component c)
+        public static Transform[] GetAllChildrenAndSelf(this Component c)
         {
             if (c == null) return null;
             return GetAllChildrenAndSelf(c.transform);
         }
 
-        public static IEnumerable<Transform> GetAllChildrenAndSelf(this Transform t)
+        public static Transform[] GetAllChildrenAndSelf(this Transform t)
         {
-            //yield return t;
-
-            ////we do the first children first
-            //foreach (Transform trans in t.transform)
-            //{
-            //    yield return trans;
-            //}
-
-            ////then grandchildren
-            //foreach (Transform trans in t.transform)
-            //{
-            //    foreach (var child in GetAllChildren(trans))
-            //    {
-            //        yield return child;
-            //    }
-            //}
-
             using (var lst = TempCollection.GetList<Transform>())
             {
                 GetAllChildrenAndSelf(t, lst);
@@ -1004,11 +990,28 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        public static void GetAllChildrenAndSelf(this Transform t, ICollection<Transform> coll)
+        {
+            if (coll is IList<Transform>)
+            {
+                GetAllChildrenAndSelf(t, coll as IList<Transform>);
+            }
+            else
+            {
+                using (var lst = TempCollection.GetList<Transform>())
+                {
+                    GetAllChildrenAndSelf(t, lst);
+                    var e = lst.GetEnumerator();
+                    while (e.MoveNext()) coll.Add(e.Current);
+                }
+            }
+        }
+
         public static void GetAllChildrenAndSelf(this Transform t, IList<Transform> lst)
         {
+            int i = lst.Count;
             lst.Add(t);
 
-            int i = 0;
             while (i < lst.Count)
             {
                 t = lst[i];
