@@ -952,18 +952,18 @@ namespace com.spacepuppy.Utils
         public static void GetAllChildren(this Transform t, IList<Transform> lst)
         {
             int i = lst.Count;
-
-            foreach (Transform child in t)
+            
+            for(int j = 0; j < t.childCount; j++)
             {
-                lst.Add(child);
+                lst.Add(t.GetChild(j));
             }
 
             while (i < lst.Count)
             {
                 t = lst[i];
-                foreach (Transform child in t)
+                for (int j = 0; j < t.childCount; j++)
                 {
-                    lst.Add(child);
+                    lst.Add(t.GetChild(j));
                 }
                 i++;
             }
@@ -1015,9 +1015,9 @@ namespace com.spacepuppy.Utils
             while (i < lst.Count)
             {
                 t = lst[i];
-                foreach (Transform child in t)
+                for(int j = 0; j < t.childCount; j++)
                 {
-                    lst.Add(child);
+                    lst.Add(t.GetChild(j));
                 }
                 i++;
             }
