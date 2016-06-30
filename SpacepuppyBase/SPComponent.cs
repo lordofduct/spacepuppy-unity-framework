@@ -11,6 +11,7 @@ namespace com.spacepuppy
         #region Events
 
         public event System.EventHandler OnEnabled;
+        public event System.EventHandler OnStartOrEnabled;
         public event System.EventHandler OnDisabled;
         public event System.EventHandler ComponentDestroyed;
 
@@ -35,6 +36,7 @@ namespace com.spacepuppy
             _started = true;
             //this.SyncEntityRoot();
             this.OnStartOrEnable();
+            if (this.OnStartOrEnabled != null) this.OnStartOrEnabled(this, System.EventArgs.Empty);
         }
 
         /// <summary>
@@ -51,7 +53,11 @@ namespace com.spacepuppy
             //this.SendMessage(SPConstants.MSG_ONSPCOMPONENTENABLED, this, SendMessageOptions.DontRequireReceiver);
             if (this.OnEnabled != null) this.OnEnabled(this, System.EventArgs.Empty);
 
-            if (_started) this.OnStartOrEnable();
+            if (_started)
+            {
+                this.OnStartOrEnable();
+                if (this.OnStartOrEnabled != null) this.OnStartOrEnabled(this, System.EventArgs.Empty);
+            }
         }
 
         protected virtual void OnDisable()
