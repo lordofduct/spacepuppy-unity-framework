@@ -41,3 +41,16 @@ Now you're fully set up.
 I've updated Spacepuppy Framework to work with Unity 5. A final version of 4.6.x support exists as a tagged branch of the project as 1.0.0.198, and is also included as a build in the builds section of the git page. You can fork off this branch to continue work in a 4.6.x setting if you want. All future versions will be number 2.x and will be Unity 5 exclusive.
 
 A unitypackage is still a possibility, but really all it would do is paste the dll's into the folder as described in 'Quick Import', so really, I don't see the need for it.
+
+
+
+
+
+#License
+Copyright (c) 2015, Dylan Engelman, Jupiter Lighthouse Studio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
