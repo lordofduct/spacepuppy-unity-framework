@@ -31,6 +31,8 @@ com.spacepuppy.Utils.SpecializedCoponents.EarlyParentSetter : -31980
 
 com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks : 32000
 
+com.spacepuppy.SPEntity: 32000
+
 Lastly, make sure to go to "Spacepuppy->Settings->Sync TagData".
 
 This will add the required 'MultiTag' and 'Root' tags, as well as sync any of your existing tags to a resource that can be read at runtime. Any time you add new tags you must sync the tag data again by either clicking this same menu item, or going into /Assets/Resources/TagData and clicking "Sync TagData" in the inspector there.
