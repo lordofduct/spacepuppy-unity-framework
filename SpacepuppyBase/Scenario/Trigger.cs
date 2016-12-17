@@ -17,12 +17,16 @@ namespace com.spacepuppy.Scenario
 
         #region Events
 
-        public event System.EventHandler TriggerActivated;
+        public event System.EventHandler<TempEventArgs> TriggerActivated;
         protected virtual void OnTriggerActivated(object arg)
         {
             if (TriggerActivated != null)
-                TriggerActivated(this, System.EventArgs.Empty);
-
+            {
+                var e = TempEventArgs.Create(arg);
+                TriggerActivated(this, e);
+                TempEventArgs.Release(e);
+            }
+            
             //if(_owner != null)
             //{
             //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
@@ -41,7 +45,7 @@ namespace com.spacepuppy.Scenario
         
         [System.NonSerialized()]
         private string _id;
-        
+
         #endregion
 
         #region CONSTRUCTOR
@@ -103,26 +107,14 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region Methods
-
-        //public void AddHandler(System.Action<object> handler)
-        //{
-        //    _handlers += handler;
-        //}
-
-        //public void RemoveHandler(System.Action<object> handler)
-        //{
-        //    _handlers -= handler;
-        //}
-
-
-
+        
         public TriggerTarget AddNew()
         {
             var targ = new TriggerTarget();
             _targets.Add(targ);
             return targ;
         }
-
+        
         public void ActivateTrigger()
         {
             if (_targets.Count > 0)
@@ -151,6 +143,28 @@ namespace com.spacepuppy.Scenario
 
             this.OnTriggerActivated(arg);
         }
+
+        public void ActivateTriggerAt(int index)
+        {
+            if(index >= 0 && index < _targets.Count)
+            {
+                TriggerTarget trig = _targets[index];
+                trig.Trigger();
+            }
+
+            this.OnTriggerActivated(null);
+        }
+
+        public void ActivateTriggerAt(int index, object arg)
+        {
+            if (index >= 0 && index < _targets.Count)
+            {
+                TriggerTarget trig = _targets[index];
+                trig.Trigger(arg);
+            }
+
+            this.OnTriggerActivated(arg);
+        }
         
         public void ActivateRandomTrigger(bool considerWeights)
         {
@@ -173,7 +187,7 @@ namespace com.spacepuppy.Scenario
 
             this.OnTriggerActivated(arg);
         }
-
+        
         public IRadicalYieldInstruction ActivateTriggerYielding()
         {
             if (_yield && _targets.Count > 0)

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
+using System;
+using System.Collections;
 
 namespace com.spacepuppy.Cameras
 {
 
     [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
-    public class CameraManager : Singleton
+    public class CameraManager : Singleton, IEnumerable<ICamera>
     {
 
         #region Singleton Interface
@@ -20,6 +22,14 @@ namespace com.spacepuppy.Cameras
             {
                 if (object.ReferenceEquals(_instance, null)) _instance = Singleton.CreateSpecialInstance<CameraManager>("Spacepuppy.CameraManager", SingletonLifeCycleRule.LivesForever);
                 return _instance;
+            }
+        }
+
+        public static IEnumerable<ICamera> Cameras
+        {
+            get
+            {
+                return Instance;
             }
         }
 
@@ -235,7 +245,21 @@ namespace com.spacepuppy.Cameras
         }
 
         #endregion
-        
+
+        #region IEnumerable Interface
+
+        public IEnumerator<ICamera> GetEnumerator()
+        {
+            return _cameras.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _cameras.GetEnumerator();
+        }
+
+        #endregion
+
         #endregion
 
     }

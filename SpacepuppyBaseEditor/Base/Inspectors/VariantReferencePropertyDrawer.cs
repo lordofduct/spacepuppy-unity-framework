@@ -20,7 +20,10 @@ namespace com.spacepuppyeditor.Base
         const float REF_SELECT_WIDTH = 70f;
 
         public bool RestrictVariantType = false;
-        public VariantType VariantTypeRestrictedTo;
+
+        
+        private VariantType _variantTypeRestrictedTo;
+        private System.Type _typeRestrictedTo = typeof(UnityEngine.Object);
         private System.Type _forcedObjectType = typeof(UnityEngine.Object);
 
         private VariantReference.EditorHelper _helper = new VariantReference.EditorHelper(new VariantReference());
@@ -29,7 +32,25 @@ namespace com.spacepuppyeditor.Base
         #endregion
 
         #region Properties
+        
+        public VariantType VariantTypeRestrictedTo
+        {
+            get { return _variantTypeRestrictedTo; }
+        }
 
+        public System.Type TypeRestrictedTo
+        {
+            get { return _typeRestrictedTo; }
+            set
+            {
+                _typeRestrictedTo = value ?? typeof(UnityEngine.Object);
+                _variantTypeRestrictedTo = VariantReference.GetVariantType(_typeRestrictedTo);
+            }
+        }
+
+        /// <summary>
+        /// Unity Object type restriction, if the restricted type is a UnityEngine.Object.
+        /// </summary>
         public System.Type ForcedObjectType
         {
             get { return _forcedObjectType; }
@@ -128,125 +149,133 @@ namespace com.spacepuppyeditor.Base
             }
             cache.Reset();
 
-            switch (valueType)
+            if(_typeRestrictedTo.IsEnum)
             {
-                case VariantType.Null:
-                    cache = SPGUI.Disable();
-                    EditorGUI.TextField(r1, "Null");
-                    cache.Reset();
-                    break;
-                case VariantType.String:
-                    variant.StringValue = EditorGUI.TextField(r1, variant.StringValue);
-                    break;
-                case VariantType.Boolean:
-                    variant.BoolValue = EditorGUI.Toggle(r1, variant.BoolValue);
-                    break;
-                case VariantType.Integer:
-                    variant.IntValue = EditorGUI.IntField(r1, variant.IntValue);
-                    break;
-                case VariantType.Float:
-                    variant.FloatValue = EditorGUI.FloatField(r1, variant.FloatValue);
-                    break;
-                case VariantType.Double:
-                    variant.DoubleValue = ConvertUtil.ToDouble(EditorGUI.TextField(r1, variant.DoubleValue.ToString()));
-                    break;
-                case VariantType.Vector2:
-                    variant.Vector2Value = EditorGUI.Vector2Field(r1, GUIContent.none, variant.Vector2Value);
-                    break;
-                case VariantType.Vector3:
-                    variant.Vector3Value = EditorGUI.Vector3Field(r1, GUIContent.none, variant.Vector3Value);
-                    break;
-                case VariantType.Vector4:
-                    variant.Vector4Value = EditorGUI.Vector4Field(r1, null, variant.Vector4Value);
-                    break;
-                case VariantType.Quaternion:
-                    variant.QuaternionValue = SPEditorGUI.QuaternionField(r1, GUIContent.none, variant.QuaternionValue);
-                    break;
-                case VariantType.Color:
-                    variant.ColorValue = EditorGUI.ColorField(r1, variant.ColorValue);
-                    break;
-                case VariantType.DateTime:
-                    variant.DateValue = ConvertUtil.ToDate(EditorGUI.TextField(r1, variant.DateValue.ToString()));
-                    break;
-                case VariantType.GameObject:
-                    variant.GameObjectValue = EditorGUI.ObjectField(r1, variant.GameObjectValue, typeof(GameObject), true) as GameObject;
-                    break;
-                case VariantType.Component:
-                    {
-                        _selectComponentDrawer.AllowNonComponents = false;
-                        _selectComponentDrawer.RestrictionType = _forcedObjectType;
-                        _selectComponentDrawer.ShowXButton = true;
-                        var targProp = property.FindPropertyRelative("_unityObjectReference");
-                        EditorGUI.BeginChangeCheck();
-                        _selectComponentDrawer.OnGUI(r1, targProp);
-                        if (EditorGUI.EndChangeCheck())
+                variant.IntValue = ConvertUtil.ToInt(EditorGUI.EnumPopup(r1, ConvertUtil.ToEnumOfType(_typeRestrictedTo, variant.IntValue)));
+            }
+            else
+            {
+                switch (valueType)
+                {
+                    case VariantType.Null:
+                        cache = SPGUI.Disable();
+                        EditorGUI.TextField(r1, "Null");
+                        cache.Reset();
+                        break;
+                    case VariantType.String:
+                        variant.StringValue = EditorGUI.TextField(r1, variant.StringValue);
+                        break;
+                    case VariantType.Boolean:
+                        variant.BoolValue = EditorGUI.Toggle(r1, variant.BoolValue);
+                        break;
+                    case VariantType.Integer:
+                        variant.IntValue = EditorGUI.IntField(r1, variant.IntValue);
+                        break;
+                    case VariantType.Float:
+                        variant.FloatValue = EditorGUI.FloatField(r1, variant.FloatValue);
+                        break;
+                    case VariantType.Double:
+                        variant.DoubleValue = ConvertUtil.ToDouble(EditorGUI.TextField(r1, variant.DoubleValue.ToString()));
+                        break;
+                    case VariantType.Vector2:
+                        variant.Vector2Value = EditorGUI.Vector2Field(r1, GUIContent.none, variant.Vector2Value);
+                        break;
+                    case VariantType.Vector3:
+                        variant.Vector3Value = EditorGUI.Vector3Field(r1, GUIContent.none, variant.Vector3Value);
+                        break;
+                    case VariantType.Vector4:
+                        variant.Vector4Value = EditorGUI.Vector4Field(r1, (string)null, variant.Vector4Value);
+                        break;
+                    case VariantType.Quaternion:
+                        variant.QuaternionValue = SPEditorGUI.QuaternionField(r1, GUIContent.none, variant.QuaternionValue);
+                        break;
+                    case VariantType.Color:
+                        variant.ColorValue = EditorGUI.ColorField(r1, variant.ColorValue);
+                        break;
+                    case VariantType.DateTime:
+                        variant.DateValue = ConvertUtil.ToDate(EditorGUI.TextField(r1, variant.DateValue.ToString()));
+                        break;
+                    case VariantType.GameObject:
+                        variant.GameObjectValue = EditorGUI.ObjectField(r1, variant.GameObjectValue, typeof(GameObject), true) as GameObject;
+                        break;
+                    case VariantType.Component:
                         {
-                            variant.ComponentValue = targProp.objectReferenceValue as Component;
-                        }
-                    }
-                    break;
-                case VariantType.Object:
-                    {
-                        var obj = variant.ObjectValue;
-                        if(ComponentUtil.IsAcceptableComponentType(_forcedObjectType))
-                        {
-                            if (obj is GameObject || obj is Component)
+                            _selectComponentDrawer.AllowNonComponents = false;
+                            _selectComponentDrawer.RestrictionType = _forcedObjectType;
+                            _selectComponentDrawer.ShowXButton = true;
+                            var targProp = property.FindPropertyRelative("_unityObjectReference");
+                            EditorGUI.BeginChangeCheck();
+                            _selectComponentDrawer.OnGUI(r1, targProp);
+                            if (EditorGUI.EndChangeCheck())
                             {
-                                _selectComponentDrawer.AllowNonComponents = false;
-                                _selectComponentDrawer.RestrictionType = _forcedObjectType;
-                                _selectComponentDrawer.ShowXButton = true;
-                                var targProp = property.FindPropertyRelative("_unityObjectReference");
-                                EditorGUI.BeginChangeCheck();
-                                _selectComponentDrawer.OnGUI(r1, targProp);
-                                if (EditorGUI.EndChangeCheck())
+                                variant.ComponentValue = targProp.objectReferenceValue as Component;
+                            }
+                        }
+                        break;
+                    case VariantType.Object:
+                        {
+                            var obj = variant.ObjectValue;
+                            if(ComponentUtil.IsAcceptableComponentType(_forcedObjectType))
+                            {
+                                if (obj is GameObject || obj is Component)
                                 {
-                                    variant.ObjectValue = targProp.objectReferenceValue as Component;
+                                    _selectComponentDrawer.AllowNonComponents = false;
+                                    _selectComponentDrawer.RestrictionType = _forcedObjectType;
+                                    _selectComponentDrawer.ShowXButton = true;
+                                    var targProp = property.FindPropertyRelative("_unityObjectReference");
+                                    EditorGUI.BeginChangeCheck();
+                                    _selectComponentDrawer.OnGUI(r1, targProp);
+                                    if (EditorGUI.EndChangeCheck())
+                                    {
+                                        variant.ObjectValue = targProp.objectReferenceValue as Component;
+                                    }
+                                }
+                                else
+                                {
+                                    EditorGUI.BeginChangeCheck();
+                                    obj = EditorGUI.ObjectField(r1, obj, typeof(UnityEngine.Object), true);
+                                    if(EditorGUI.EndChangeCheck())
+                                    {
+                                        if(obj == null)
+                                        {
+                                            variant.ObjectValue = null;
+                                        }
+                                        else if(TypeUtil.IsType(obj.GetType(), _forcedObjectType))
+                                        {
+                                            variant.ObjectValue = obj;
+                                        }
+                                        else
+                                        {
+                                            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+                                            if (go != null)
+                                                variant.ObjectValue = go.GetComponent(_forcedObjectType);
+                                            else
+                                                variant.ObjectValue = null;
+                                        }
+                                    }
                                 }
                             }
                             else
                             {
-                                EditorGUI.BeginChangeCheck();
-                                obj = EditorGUI.ObjectField(r1, obj, typeof(UnityEngine.Object), true);
-                                if(EditorGUI.EndChangeCheck())
-                                {
-                                    if(obj == null)
-                                    {
-                                        variant.ObjectValue = null;
-                                    }
-                                    else if(TypeUtil.IsType(obj.GetType(), _forcedObjectType))
-                                    {
-                                        variant.ObjectValue = obj;
-                                    }
-                                    else
-                                    {
-                                        var go = GameObjectUtil.GetGameObjectFromSource(obj);
-                                        if (go != null)
-                                            variant.ObjectValue = go.GetComponent(_forcedObjectType);
-                                        else
-                                            variant.ObjectValue = null;
-                                    }
-                                }
+                                variant.ObjectValue = EditorGUI.ObjectField(r1, obj, _forcedObjectType, true);
                             }
                         }
-                        else
+                        break;
+                    case VariantType.LayerMask:
                         {
-                            variant.ObjectValue = EditorGUI.ObjectField(r1, obj, _forcedObjectType, true);
+                            variant.LayerMaskValue = SPEditorGUI.LayerMaskField(r1, GUIContent.none, (int)variant.LayerMaskValue);
                         }
-                    }
-                    break;
-                case VariantType.LayerMask:
-                    {
-                        variant.LayerMaskValue = SPEditorGUI.LayerMaskField(r1, GUIContent.none, (int)variant.LayerMaskValue);
-                    }
-                    break;
-                case VariantType.Rect:
-                    {
-                        variant.RectValue = EditorGUI.RectField(r1, variant.RectValue);
-                    }
-                    break;
+                        break;
+                    case VariantType.Rect:
+                        {
+                            variant.RectValue = EditorGUI.RectField(r1, variant.RectValue);
+                        }
+                        break;
+                }
+
             }
         }
-
+        
         private void DrawValueFieldInPropertyMode(Rect position, SerializedProperty property, VariantReference.EditorHelper helper)
         {
             _selectComponentDrawer.AllowNonComponents = true;
@@ -264,7 +293,7 @@ namespace com.spacepuppyeditor.Base
                 var r1 = new Rect(position.xMin, position.yMin, position.width * 0.4f, position.height);
                 var r2 = new Rect(r1.xMax, position.yMin, position.width - r1.width, position.height);
                 _selectComponentDrawer.OnGUI(r1, targProp);
-                memberProp.stringValue = SPEditorGUI.ReflectedPropertyField(r2, targProp.objectReferenceValue, memberProp.stringValue);
+                memberProp.stringValue = SPEditorGUI.ReflectedPropertyField(r2, targProp.objectReferenceValue, memberProp.stringValue, com.spacepuppy.Dynamic.DynamicMemberAccess.Read);
             }
         }
 

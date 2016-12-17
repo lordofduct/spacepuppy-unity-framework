@@ -146,7 +146,7 @@ namespace com.spacepuppy
                 return _type;
             }
         }
-
+        
         public string StringValue
         {
             get
@@ -1335,6 +1335,7 @@ namespace com.spacepuppy
             else if (typeof(UnityEngine.Object).IsAssignableFrom(tp)) return true;
             else if (typeof(IComponent).IsAssignableFrom(tp)) return true;
             else if (tp.IsInterface) return true;
+            else if (tp == typeof(Variant)) return true;
             else return false;
         }
 
@@ -1374,6 +1375,44 @@ namespace com.spacepuppy
             return VariantType.Null;
         }
 
+        public static System.Type GetTypeFromVariantType(VariantType etp)
+        {
+            switch (etp)
+            {
+                case VariantType.Object:
+                    return typeof(UnityEngine.Object);
+                case VariantType.String:
+                    return typeof(string);
+                case VariantType.Boolean:
+                    return typeof(bool);
+                case VariantType.Integer:
+                    return typeof(System.Int32);
+                case VariantType.Float:
+                    return typeof(float);
+                case VariantType.Double:
+                    return typeof(double);
+                case VariantType.Vector2:
+                    return typeof(Vector2);
+                case VariantType.Vector3:
+                    return typeof(Vector3);
+                case VariantType.Quaternion:
+                    return typeof(Quaternion);
+                case VariantType.Color:
+                    return typeof(UnityEngine.Color);
+                case VariantType.DateTime:
+                    return typeof(System.DateTime);
+                case VariantType.GameObject:
+                    return typeof(GameObject);
+                case VariantType.Component:
+                    return typeof(Component);
+                case VariantType.LayerMask:
+                    return typeof(LayerMask);
+                case VariantType.Rect:
+                    return typeof(Rect);
+            }
+
+            return typeof(object);
+        }
 
         private static void EncodeDateTime(System.DateTime dt, out double low, out float high)
         {

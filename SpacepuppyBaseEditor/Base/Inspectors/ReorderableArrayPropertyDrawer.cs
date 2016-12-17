@@ -39,7 +39,14 @@ namespace com.spacepuppyeditor.Base
             if(property.arraySize > 0)
             {
                 var pchild = property.GetArrayElementAtIndex(0);
-                lst.elementHeight = (_internalDrawer != null) ? _internalDrawer.GetPropertyHeight(pchild, label) : SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1;
+                if (_internalDrawer != null)
+                {
+                    lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
+                }
+                else
+                {
+                    lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1;
+                }
             }
             else
             {
@@ -220,7 +227,6 @@ namespace com.spacepuppyeditor.Base
         }
 
         #endregion
-
-
+        
     }
 }

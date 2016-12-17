@@ -371,9 +371,8 @@ namespace com.spacepuppyeditor.Scenario
                     }
                     else
                     {
-                        var argType = VariantReference.GetVariantType(paramType);
                         _variantDrawer.RestrictVariantType = true;
-                        _variantDrawer.VariantTypeRestrictedTo = argType;
+                        _variantDrawer.TypeRestrictedTo = paramType;
                         _variantDrawer.ForcedObjectType = (paramType.IsInterface || TypeUtil.IsType(paramType, typeof(Component))) ? paramType : null;
                         _variantDrawer.OnGUI(argRect, argProp, EditorHelper.TempContent("Arg " + i.ToString() + ": " + parr[i].ParameterName, "A parameter to be passed to the method if needed."));
                     }

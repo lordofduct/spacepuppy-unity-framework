@@ -46,11 +46,11 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Unity\Editor\Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Unity\Editor\Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\UnityEngine.UI.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +113,7 @@
     <Compile Include="Dynamic\DynamicParameterInfo.cs" />
     <Compile Include="Dynamic\IDynamicMemberInfo.cs" />
     <Compile Include="Dynamic\IStateModifier.cs" />
+    <Compile Include="Dynamic\Variant.cs" />
     <Compile Include="ExceptionsLite.cs" />
     <Compile Include="FixedPercentDecimal.cs" />
     <Compile Include="FixedPercentLong.cs" />
@@ -204,6 +205,7 @@
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThen.cs" />
+    <Compile Include="Scenario\i_TriggerSequence.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
     <Compile Include="Scenario\t_OnClick.cs" />
     <Compile Include="Scenario\t_OnEnable.cs" />
@@ -277,6 +279,7 @@
     <Compile Include="Project\TagData.cs" />
     <Compile Include="TagMask.cs" />
     <Compile Include="SPTimePeriod.cs" />
+    <Compile Include="TempEventArgs.cs" />
     <Compile Include="Timers\BulkTimer.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
     <Compile Include="Timers\GameTimers.cs" />

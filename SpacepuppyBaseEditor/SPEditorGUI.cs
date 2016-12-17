@@ -914,11 +914,11 @@ namespace com.spacepuppyeditor
         /// <summary>
         /// Reflects the available properties and shows them in a dropdown
         /// </summary>
-        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember)
         {
             if (targObj != null)
             {
-                var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, DynamicMemberAccess.Read).ToArray();
+                var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, access).ToArray();
                 var entries = new GUIContent[members.Length];
 
                 int index = -1;
@@ -948,21 +948,21 @@ namespace com.spacepuppyeditor
             }
         }
         
-        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName)
+        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access)
         {
             System.Reflection.MemberInfo selectedMember;
-            return ReflectedPropertyField(position, label, targObj, selectedMemberName, out selectedMember);
+            return ReflectedPropertyField(position, label, targObj, selectedMemberName, access, out selectedMember);
         }
 
-        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember)
         {
-            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, out selectedMember);
+            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, access, out selectedMember);
         }
 
-        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName)
+        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, DynamicMemberAccess access)
         {
             System.Reflection.MemberInfo selectedMember;
-            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, out selectedMember);
+            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, access, out selectedMember);
         }
 
 

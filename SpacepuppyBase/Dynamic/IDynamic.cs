@@ -748,7 +748,7 @@ namespace com.spacepuppy.Dynamic
                 if (mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
                     mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||
                     mi.DeclaringType.IsAssignableFrom(typeof(SPNotifyingComponent))) continue;
-
+                
                 switch (mi.MemberType)
                 {
                     case System.Reflection.MemberTypes.Method:
@@ -866,6 +866,16 @@ namespace com.spacepuppy.Dynamic
                 }
 
             }
+        }
+
+        /// <summary>
+        /// Returns true if the type is either System.Object or Variant.
+        /// </summary>
+        /// <param name="tp"></param>
+        /// <returns></returns>
+        public static bool TypeIsVariantSupported(System.Type tp)
+        {
+            return tp == typeof(object) || tp == typeof(Variant);
         }
 
         #endregion

@@ -9,7 +9,7 @@ namespace com.spacepuppy.Cameras
 
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent()]
-    public class UnityCamera : MonoBehaviour, ICamera
+    public sealed class UnityCamera : MonoBehaviour, ICamera
     {
 
         #region Fields
@@ -23,7 +23,19 @@ namespace com.spacepuppy.Cameras
         void Awake()
         {
             _camera = this.GetComponent<Camera>();
-            if (_camera == null) ObjUtil.SmartDestroy(this);
+            if (_camera == null)
+            {
+                ObjUtil.SmartDestroy(this);
+            }
+            else
+            {
+                CameraManager.Register(this);
+            }
+        }
+
+        void OnDestroy()
+        {
+            CameraManager.UnRegister(this);
         }
 
         #endregion

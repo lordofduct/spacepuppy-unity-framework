@@ -90,6 +90,7 @@ namespace com.spacepuppyeditor.Scenario
                                                                         EditorHelper.TempContent("Property", "The property on the target to set."),
                                                                         _targetProp.objectReferenceValue,
                                                                         memberProp.stringValue,
+                                                                        com.spacepuppy.Dynamic.DynamicMemberAccess.ReadWrite,
                                                                         out selectedMember);
 
             position = CalcNextRect(ref area);
@@ -150,7 +151,7 @@ namespace com.spacepuppyeditor.Scenario
 
         private void DrawVariant(Rect position, GUIContent label, System.Type propType, SerializedProperty valueProp)
         {
-            if (propType == typeof(object))
+            if (com.spacepuppy.Dynamic.DynamicUtil.TypeIsVariantSupported(propType))
             {
                 //draw the default variant as the method accepts anything
                 _variantDrawer.RestrictVariantType = false;
@@ -159,9 +160,8 @@ namespace com.spacepuppyeditor.Scenario
             }
             else
             {
-                var argType = VariantReference.GetVariantType(propType);
                 _variantDrawer.RestrictVariantType = true;
-                _variantDrawer.VariantTypeRestrictedTo = argType;
+                _variantDrawer.TypeRestrictedTo = propType;
                 _variantDrawer.ForcedObjectType = (TypeUtil.IsType(propType, typeof(Component))) ? propType : null;
                 _variantDrawer.OnGUI(position, valueProp, label);
             }

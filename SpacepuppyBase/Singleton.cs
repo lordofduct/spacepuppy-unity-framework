@@ -468,6 +468,22 @@ namespace com.spacepuppy
 
     }
 
+    public abstract class Singleton<T> : Singleton where T : Component, ISingleton
+    {
+
+        private static T _instance;
+
+        public static T Instance
+        {
+            get
+            {
+                if (_instance == null) _instance = Singleton.GetInstance<T>(false);
+                return _instance;
+            }
+        }
+
+    }
+
     /// <summary>
     /// Attach to a component that has more than one Singleton on it, it handles group management of Singletons on the same GameObject.
     /// </summary>

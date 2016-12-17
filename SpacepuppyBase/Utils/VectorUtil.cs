@@ -279,7 +279,7 @@ namespace com.spacepuppy.Utils
             var q = Quaternion.AngleAxis(a, axis);
             return q * v;
         }
-
+        
         #endregion
 
         #region Vector2 Mod

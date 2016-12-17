@@ -122,12 +122,13 @@ namespace com.spacepuppy.Collections
         public T[] FindAll(System.Func<T, bool> predicate)
         {
             if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
-            _querying = true;
 
             try
             {
                 if (predicate == null)
                 {
+                    _querying = true;
+
                     T[] arr = new T[_pool.Count];
                     var e = _pool.GetEnumerator();
                     int i = 0;
@@ -418,12 +419,13 @@ namespace com.spacepuppy.Collections
         public T[] FindAll(System.Func<T, bool> predicate)
         {
             if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
-            _querying = true;
 
             try
             {
                 if (predicate == null)
                 {
+                    _querying = true;
+
                     T[] arr = new T[_pool.Count];
                     var e = _pool.GetEnumerator();
                     int i = 0;
@@ -751,12 +753,13 @@ namespace com.spacepuppy.Collections
         public T[] FindAll(System.Func<T, bool> predicate)
         {
             if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
-            _querying = true;
 
             try
             {
                 if (predicate == null)
                 {
+                    _querying = true;
+
                     T[] arr = new T[_pool.Count];
                     var e = _pool.GetEnumerator();
                     int i = 0;

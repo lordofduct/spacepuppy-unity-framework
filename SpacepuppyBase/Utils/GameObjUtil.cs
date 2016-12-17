@@ -205,10 +205,12 @@ namespace com.spacepuppy.Utils
         public static void KillEntity(this GameObject obj)
         {
             if (obj.IsNullOrDestroyed()) return;
-            
+
+            obj = obj.FindRoot();
+
             using (var lst = TempCollection.GetList<IKillableEntity>())
             {
-                obj.FindComponents<IKillableEntity>(lst, true);
+                obj.GetComponentsInChildren<IKillableEntity>(true, lst);
                 if (lst.Count > 0)
                 {
                     var e = lst.GetEnumerator();
@@ -816,7 +818,7 @@ namespace com.spacepuppy.Utils
         public static GameObject FindTrueRoot(this Component c)
         {
             if (c == null) return null;
-            return FindTrueRoot(c.gameObject);
+            return FindParentWithTag(c.transform, SPConstants.TAG_ROOT);
         }
 
         /**

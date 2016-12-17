@@ -90,7 +90,8 @@ namespace com.spacepuppyeditor.Render
         private void _valuesList_DrawElement(Rect area, int index, bool isActive, bool isFocused)
         {
             var valueProp = _valuesProp.GetArrayElementAtIndex(index);
-            _variantDrawer.VariantTypeRestrictedTo = GetVariantType(_property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>());
+            //_variantDrawer.VariantTypeRestrictedTo = GetVariantType(_property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>());
+            _variantDrawer.TypeRestrictedTo = GetType(_property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>());
             _variantDrawer.OnGUI(area, valueProp, GUIContent.none);
         }
 
@@ -108,6 +109,21 @@ namespace com.spacepuppyeditor.Render
                     return VariantType.Vector4;
                 default:
                     return VariantType.Float;
+            }
+        }
+
+        private static System.Type GetType(MaterialPropertyValueType etp)
+        {
+            switch (etp)
+            {
+                case MaterialPropertyValueType.Float:
+                    return typeof(float);
+                case MaterialPropertyValueType.Color:
+                    return typeof(UnityEngine.Color);
+                case MaterialPropertyValueType.Vector:
+                    return typeof(UnityEngine.Vector4);
+                default:
+                    return typeof(float);
             }
         }
 

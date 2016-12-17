@@ -35,6 +35,7 @@ namespace com.spacepuppyeditor.Scenario
             memberProp.stringValue = SPEditorGUILayout.ReflectedPropertyField(EditorHelper.TempContent("Property", "The property on the target to set."), 
                                                                               targProp.objectReferenceValue, 
                                                                               memberProp.stringValue, 
+                                                                              com.spacepuppy.Dynamic.DynamicMemberAccess.ReadWrite,
                                                                               out selectedMember);
             this.serializedObject.ApplyModifiedProperties();
 
@@ -54,7 +55,7 @@ namespace com.spacepuppyeditor.Scenario
                 }
                 else
                 {
-                    if (propType == typeof(object))
+                    if (com.spacepuppy.Dynamic.DynamicUtil.TypeIsVariantSupported(propType))
                     {
                         //draw the default variant as the method accepts anything
                         _variantDrawer.RestrictVariantType = false;
@@ -63,9 +64,8 @@ namespace com.spacepuppyeditor.Scenario
                     }
                     else
                     {
-                        var argType = VariantReference.GetVariantType(propType);
                         _variantDrawer.RestrictVariantType = true;
-                        _variantDrawer.VariantTypeRestrictedTo = argType;
+                        _variantDrawer.TypeRestrictedTo = propType;
                         _variantDrawer.ForcedObjectType = propType;
                         _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
                     }

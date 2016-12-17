@@ -65,9 +65,8 @@ namespace com.spacepuppyeditor.Scenario
                     }
                     else
                     {
-                        var argType = VariantReference.GetVariantType(propType);
                         _variantDrawer.RestrictVariantType = true;
-                        _variantDrawer.VariantTypeRestrictedTo = argType;
+                        _variantDrawer.TypeRestrictedTo = propType;
                         _variantDrawer.ForcedObjectType = (TypeUtil.IsType(propType, typeof(Component))) ? propType : null;
                         _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
                     }

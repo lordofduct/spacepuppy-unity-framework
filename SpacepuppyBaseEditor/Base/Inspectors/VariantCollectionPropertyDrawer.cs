@@ -140,9 +140,8 @@ namespace com.spacepuppyeditor.Base.Inspectors
                 if (i >= 0)
                 {
                     var propType = com.spacepuppy.Dynamic.DynamicUtil.GetReturnType(_propertyListMembers[i]);
-                    var argType = VariantReference.GetVariantType(propType);
                     _variantDrawer.RestrictVariantType = true;
-                    _variantDrawer.VariantTypeRestrictedTo = argType;
+                    _variantDrawer.TypeRestrictedTo = propType;
                     _variantDrawer.ForcedObjectType = propType;
                     _variantDrawer.DrawValueField(variantRect, variantProp);
                 }

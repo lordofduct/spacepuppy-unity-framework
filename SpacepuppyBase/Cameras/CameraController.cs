@@ -8,17 +8,17 @@ namespace com.spacepuppy.Cameras
     {
 
         #region CONSTRUCTOR
-
-        protected override void OnEnable()
+        
+        protected override void Awake()
         {
-            base.OnEnable();
+            base.Awake();
 
             CameraManager.Register(this);
         }
 
-        protected override void OnDisable()
+        protected override void OnDestroy()
         {
-            base.OnDisable();
+            base.OnDestroy();
 
             CameraManager.UnRegister(this);
         }

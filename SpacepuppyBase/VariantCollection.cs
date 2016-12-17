@@ -254,18 +254,44 @@ namespace com.spacepuppy
         IEnumerable<System.Reflection.MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
         {
             var tp = this.GetType();
-            foreach(var key in _table.Keys)
+            if(Application.isEditor && !Application.isPlaying)
             {
-                yield return new DynamicPropertyInfo(key, tp);
+                var ptp = typeof(Variant);
+                for(int i = 0; i < _keys.Length; i++)
+                {
+                    yield return new DynamicPropertyInfo(_keys[i], tp, ptp);
+                }
             }
+            else
+            {
+                var ptp = typeof(Variant);
+                var e = _table.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    yield return new DynamicPropertyInfo(e.Current.Key, tp, ptp);
+                }
+            }
+
+            foreach(var p in DynamicUtil.GetMembersFromType(tp, includeNonPublic))
+            {
+                yield return p;
+            }
+
+            yield break;
         }
 
         System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
         {
-            if (_table.ContainsKey(sMemberName))
-                return new DynamicPropertyInfo(sMemberName, this.GetType());
-            else
-                return null;
+            if (Application.isEditor && !Application.isPlaying)
+            {
+                if(_keys.Contains(sMemberName)) return new DynamicPropertyInfo(sMemberName, this.GetType(), typeof(Variant));
+            }
+            else if(_table.ContainsKey(sMemberName))
+            {
+                return new DynamicPropertyInfo(sMemberName, this.GetType(), typeof(Variant));
+            }
+
+            return DynamicUtil.GetMemberFromType(this.GetType(), sMemberName, includeNonPublic);
         }
 
         #endregion
@@ -281,8 +307,8 @@ namespace com.spacepuppy
                 _table.Add(_keys[i], _values[i]);
             }
 
-            _keys = null;
-            _values = null;
+            //_keys = null;
+            //_values = null;
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
