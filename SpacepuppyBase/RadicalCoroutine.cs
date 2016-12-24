@@ -405,6 +405,14 @@ namespace com.spacepuppy
             };
         }
 
+        public void Schedule(System.Action callback)
+        {
+            this.OnComplete += (s, e) =>
+            {
+                callback();
+            };
+        }
+
         #endregion
 
         #region Manual Coroutine Methods
