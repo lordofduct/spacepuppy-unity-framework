@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -320,7 +321,7 @@ namespace com.spacepuppy
                 {
                     this.EnforceThisAsSingleton();
                     _target.ComponentDestroyed += this.OnComponentDestroyed;
-                    GameLoopEntry.LevelWasLoaded += this.OnLevelWasLoaded;
+                    SceneManager.sceneLoaded += this.OnLevelWasLoaded;
                     return true;
                 }
                 else
@@ -351,7 +352,7 @@ namespace com.spacepuppy
 
             private void OnComponentDestroyed(object sender, System.EventArgs e)
             {
-                GameLoopEntry.LevelWasLoaded -= this.OnLevelWasLoaded;
+                SceneManager.sceneLoaded -= OnLevelWasLoaded;
                 this.RemoveThisAsSingleton();
 
                 //if this isn't on the GameObjectSource, we should check if we need to delete our GameObject.
@@ -367,8 +368,8 @@ namespace com.spacepuppy
                     }
                 }
             }
-
-            private void OnLevelWasLoaded(object sender, GameLoopEntry.LevelWasLoadedEventArgs e)
+            
+            private void OnLevelWasLoaded(Scene sc, LoadSceneMode mode)
             {
                 if (_lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)) return;
                 if (_target.component == null) return;
@@ -468,22 +469,6 @@ namespace com.spacepuppy
 
     }
 
-    public abstract class Singleton<T> : Singleton where T : Component, ISingleton
-    {
-
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null) _instance = Singleton.GetInstance<T>(false);
-                return _instance;
-            }
-        }
-
-    }
-
     /// <summary>
     /// Attach to a component that has more than one Singleton on it, it handles group management of Singletons on the same GameObject.
     /// </summary>
@@ -506,6 +491,14 @@ namespace com.spacepuppy
             base.Awake();
             
             this.UpdateMaintainOnLoadStatus();
+            SceneManager.sceneLoaded += this.OnSceneWasLoaded;
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            SceneManager.sceneLoaded -= this.OnSceneWasLoaded;
         }
 
         #endregion
@@ -542,8 +535,8 @@ namespace com.spacepuppy
                 _flaggedSelfMaintaining = true;
             }
         }
-
-        private void OnLevelWasLoaded(int level)
+        
+        private void OnSceneWasLoaded(Scene sc, LoadSceneMode mode)
         {
             if (this.MaintainOnLoad) return;
 

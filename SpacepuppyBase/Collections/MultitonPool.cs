@@ -16,7 +16,6 @@ namespace com.spacepuppy.Collections
         bool RemoveReference(T obj);
 
         T Find(System.Func<T, bool> predicate);
-        bool Any(System.Func<T, bool> predicate);
 
         T[] FindAll(System.Func<T, bool> predicate);
         int FindAll(ICollection<T> coll, System.Func<T, bool> predicate);
@@ -108,36 +107,6 @@ namespace com.spacepuppy.Collections
                     if (predicate(e.Current)) return e.Current;
                 }
                 return null;
-            }
-            finally
-            {
-                if (_queryCompleteAction != null)
-                {
-                    _queryCompleteAction();
-                    _queryCompleteAction = null;
-                }
-                _querying = false;
-            }
-        }
-
-        public bool Any(System.Func<T, bool> predicate)
-        {
-            if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
-            _querying = true;
-
-            try
-            {
-                if (predicate == null)
-                {
-                    return _pool.Count > 0;
-                }
-
-                var e = _pool.GetEnumerator();
-                while (e.MoveNext())
-                {
-                    if (predicate(e.Current)) return true;
-                }
-                return false;
             }
             finally
             {
@@ -435,36 +404,6 @@ namespace com.spacepuppy.Collections
                     if (predicate(e.Current.Value)) return e.Current.Value;
                 }
                 return null;
-            }
-            finally
-            {
-                if (_queryCompleteAction != null)
-                {
-                    _queryCompleteAction();
-                    _queryCompleteAction = null;
-                }
-                _querying = false;
-            }
-        }
-
-        public bool Any(System.Func<T, bool> predicate)
-        {
-            if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
-            _querying = true;
-
-            try
-            {
-                if (predicate == null)
-                {
-                    return _pool.Count > 0;
-                }
-
-                var e = _pool.GetEnumerator();
-                while (e.MoveNext())
-                {
-                    if (predicate(e.Current.Value)) return true;
-                }
-                return false;
             }
             finally
             {
@@ -799,36 +738,6 @@ namespace com.spacepuppy.Collections
                     if (predicate(e.Current.Value)) return e.Current.Value;
                 }
                 return null;
-            }
-            finally
-            {
-                if (_queryCompleteAction != null)
-                {
-                    _queryCompleteAction();
-                    _queryCompleteAction = null;
-                }
-                _querying = false;
-            }
-        }
-
-        public bool Any(System.Func<T, bool> predicate)
-        {
-            if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
-            _querying = true;
-
-            try
-            {
-                if (predicate == null)
-                {
-                    return _pool.Count > 0;
-                }
-
-                var e = _pool.GetEnumerator();
-                while (e.MoveNext())
-                {
-                    if (predicate(e.Current.Value)) return true;
-                }
-                return false;
             }
             finally
             {

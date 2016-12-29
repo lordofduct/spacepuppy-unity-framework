@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
-using System;
 using System.Collections;
 
 namespace com.spacepuppy.Cameras
@@ -174,9 +174,18 @@ namespace com.spacepuppy.Cameras
             {
                 CameraManager.ForceSyncTaggedMainCamera();
             }
+
+            SceneManager.sceneLoaded += this.OnSceneWasLoaded;
         }
 
-        private void OnLevelWasLoaded(int index)
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            SceneManager.sceneLoaded -= this.OnSceneWasLoaded;
+        }
+        
+        private void OnSceneWasLoaded(Scene sc, LoadSceneMode mode)
         {
             if (this.MainNeedsSyncing())
             {

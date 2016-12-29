@@ -159,7 +159,7 @@ namespace com.spacepuppy
 
         static CollisionExclusion()
         {
-            GameLoopEntry.LevelWasLoaded += OnGlobalLevelWasLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnGlobalLevelWasLoaded;
         }
 
         public static void CleanLinks()
@@ -182,8 +182,8 @@ namespace com.spacepuppy
                 }
             }
         }
-
-        private static void OnGlobalLevelWasLoaded(object sender, GameLoopEntry.LevelWasLoadedEventArgs ev)
+        
+        private static void OnGlobalLevelWasLoaded(UnityEngine.SceneManagement.Scene sc, UnityEngine.SceneManagement.LoadSceneMode mode)
         {
             CleanLinks();
         }
@@ -374,7 +374,7 @@ namespace com.spacepuppy
 
         static ColliderExclusion()
         {
-            GameLoopEntry.LevelWasLoaded += OnGlobalLevelWasLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnGlobalLevelWasLoaded;
         }
 
         public static void CleanLinks()
@@ -397,8 +397,8 @@ namespace com.spacepuppy
                 }
             }
         }
-
-        private static void OnGlobalLevelWasLoaded(object sender, GameLoopEntry.LevelWasLoadedEventArgs ev)
+        
+        private static void OnGlobalLevelWasLoaded(UnityEngine.SceneManagement.Scene sc, UnityEngine.SceneManagement.LoadSceneMode mode)
         {
             CleanLinks();
         }

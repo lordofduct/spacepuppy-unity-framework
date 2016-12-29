@@ -171,18 +171,26 @@ namespace com.spacepuppy.Async
 
         private object _lock = new object();
 
-#endregion
+        #endregion
 
-#region CONSTRUCTOR
+        #region CONSTRUCTOR
+
+        protected override void OnValidAwake()
+        {
+            base.OnValidAwake();
+
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += this.OnSceneWasLoaded;
+        }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
 
             this.PurgeThreads();
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= this.OnSceneWasLoaded;
         }
-
-        private void OnLevelWasLoaded()
+        
+        private void OnSceneWasLoaded(UnityEngine.SceneManagement.Scene sc, UnityEngine.SceneManagement.LoadSceneMode mode)
         {
             this.PurgeCancellableTasks();
         }
