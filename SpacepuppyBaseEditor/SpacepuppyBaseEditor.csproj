@@ -156,6 +156,7 @@
     <Compile Include="ReorderableListHelper.cs" />
     <Compile Include="Scenario\ITriggerableMechanismAddonDrawer.cs" />
     <Compile Include="Scenario\i_SetValueInspector.cs" />
+    <Compile Include="Scenario\i_SetValueOnEntityInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArgInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
     <Compile Include="Scenario\i_TweenValueInspector.cs" />

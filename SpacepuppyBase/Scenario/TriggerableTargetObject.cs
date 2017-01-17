@@ -172,10 +172,11 @@ namespace com.spacepuppy.Scenario
                             case ResolveByCommand.Nothing:
                                 if (trans.childCount > 0)
                                 {
-                                    foreach (Transform child in trans)
-                                    {
-                                        return child;
-                                    }
+                                    //foreach (Transform child in trans)
+                                    //{
+                                    //    return child;
+                                    //}
+                                    return (trans.childCount > 0) ? trans.GetChild(0) : null;
                                 }
                                 break;
                             case ResolveByCommand.WithTag:

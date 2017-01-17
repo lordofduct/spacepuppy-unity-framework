@@ -7,6 +7,8 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
+
+    [System.Obsolete("Use i_SetValueOnEntity Instead.")]
     public class i_SetValueOnTriggerArg : TriggerableMechanism
     {
 

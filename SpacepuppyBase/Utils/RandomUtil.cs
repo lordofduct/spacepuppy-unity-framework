@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using BitConverter = System.BitConverter;
 
 namespace com.spacepuppy.Utils
 {
@@ -19,6 +21,16 @@ namespace com.spacepuppy.Utils
         public static IRandom CreateRNG()
         {
             return new MicrosoftRNG();
+        }
+
+        public static VB_RNG CreateVB_RNG()
+        {
+            return new VB_RNG();
+        }
+
+        public static VB_RNG CreateVB_RNG(double seed)
+        {
+            return new VB_RNG(seed);
         }
 
         #endregion
@@ -210,6 +222,91 @@ namespace com.spacepuppy.Utils
             {
                 return this.Next(low, high);
             }
+        }
+
+        public class VB_RNG : IRandom
+        {
+
+            #region Fields
+
+            private int _seed;
+
+            #endregion
+
+            #region Constructor
+
+            public VB_RNG()
+            {
+                this.Randomize();
+            }
+
+            public VB_RNG(double seed)
+            {
+                this.Randomize(seed);
+            }
+
+            #endregion
+
+            #region Methods
+            
+            public float Next()
+            {
+                return this.VBNext(1f);
+            }
+
+            public int Next(int size)
+            {
+                return (int)(this.Next() * size);
+            }
+
+            public int Next(int low, int high)
+            {
+                return (int)(this.Next() * (high - low)) + low;
+            }
+
+            public double NextDouble()
+            {
+                return (double)this.Next();
+            }
+
+            public float VBNext(float num)
+            {
+                int num1 = _seed;
+                if ((double)num != 0.0)
+                {
+                    if ((double)num < 0.0)
+                    {
+                        long num2 = (long)BitConverter.ToInt32(BitConverter.GetBytes(num), 0) & (long)uint.MaxValue;
+                        num1 = checked((int)(num2 + (num2 >> 24) & 16777215L));
+                    }
+                    num1 = checked((int)((long)num1 * 1140671485L + 12820163L & 16777215L));
+                }
+                _seed = num1;
+                return (float)num1 / 1.677722E+07f;
+            }
+
+            public void Randomize()
+            {
+                DateTime now = DateTime.Now;
+                float timer = (float)checked((60 * now.Hour + now.Minute) * 60 + now.Second) + (float)now.Millisecond / 1000f;
+                int num1 = _seed;
+                int num2 = BitConverter.ToInt32(BitConverter.GetBytes(timer), 0);
+                int num3 = (num2 & (int)ushort.MaxValue ^ num2 >> 16) << 8;
+                int num4 = num1 & -16776961 | num3;
+                _seed = num4;
+            }
+
+            public void Randomize(double num)
+            {
+                int num1 = _seed;
+                int num2 = !BitConverter.IsLittleEndian ? BitConverter.ToInt32(BitConverter.GetBytes(num), 0) : BitConverter.ToInt32(BitConverter.GetBytes(num), 4);
+                int num3 = (num2 & (int)ushort.MaxValue ^ num2 >> 16) << 8;
+                int num4 = num1 & -16776961 | num3;
+                _seed = num4;
+            }
+
+            #endregion
+
         }
 
         #endregion

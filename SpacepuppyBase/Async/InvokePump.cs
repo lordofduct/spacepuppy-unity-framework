@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace com.spacepuppy.Async
@@ -14,10 +15,11 @@ namespace com.spacepuppy.Async
 
         private int _threadId;
 
-        private Action _invoking;
+        //private Action _invoking;
+        private Queue<Action> _invoking;
         private object _invokeLock = new object();
         private EventWaitHandle _waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-        private EventWaitHandle _waitHandleAlt = new EventWaitHandle(false, EventResetMode.AutoReset);
+        //private EventWaitHandle _waitHandleAlt = new EventWaitHandle(false, EventResetMode.AutoReset);
 
         #endregion
 
@@ -32,6 +34,8 @@ namespace com.spacepuppy.Async
         public InvokePump(Thread ownerThread)
         {
             _threadId = (ownerThread != null) ? ownerThread.ManagedThreadId : System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+            _invoking = new Queue<Action>();
         }
 
         #endregion
@@ -62,7 +66,8 @@ namespace com.spacepuppy.Async
 
             lock (_invokeLock)
             {
-                _invoking += action;
+                //_invoking += action;
+                _invoking.Enqueue(action);
             }
             _waitHandle.WaitOne(); //block until it's called
         }
@@ -78,7 +83,8 @@ namespace com.spacepuppy.Async
 
             lock (_invokeLock)
             {
-                _invoking += action;
+                //_invoking += action;
+                _invoking.Enqueue(action);
             }
         }
 
@@ -90,6 +96,7 @@ namespace com.spacepuppy.Async
             if (_threadId == 0) return; //we're destroyed
             if (this.InvokeRequired) throw new System.InvalidOperationException("InvokePump.Update can only be updated on the thread that was designated its owner.");
 
+            /*
             if (_invoking != null)
             {
                 Action act;
@@ -109,6 +116,24 @@ namespace com.spacepuppy.Async
                 //release waits
                 handle.Set();
             }
+            */
+
+            //record the current length so we only activate those actions added at this point
+            //any newly added actions should wait until NEXT update
+            int cnt = _invoking.Count;
+            for(int i = 0; i < cnt; i++)
+            {
+                Action act;
+                lock (_invokeLock)
+                {
+                    act = _invoking.Dequeue();
+                }
+
+                if (act != null) act();
+            }
+
+            //release waits
+            _waitHandle.Set();
         }
 
         #endregion
@@ -120,8 +145,10 @@ namespace com.spacepuppy.Async
             base.Close();
 
             if (_threadId == 0) return; //already was destroyed
+            //_invoking = null;
+            _invoking.Clear();
             _waitHandle.Close();
-            _waitHandleAlt.Close();
+            //_waitHandleAlt.Close();
             _threadId = 0;
         }
 
@@ -130,8 +157,10 @@ namespace com.spacepuppy.Async
             base.Dispose(explicitDisposing);
 
             if (_threadId == 0) return; //already was destroyed
+            //_invoking = null;
+            _invoking.Clear();
             (_waitHandle as IDisposable).Dispose();
-            (_waitHandleAlt as IDisposable).Dispose();
+            //(_waitHandleAlt as IDisposable).Dispose();
             _threadId = 0;
         }
 

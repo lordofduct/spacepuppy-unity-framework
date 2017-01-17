@@ -201,6 +201,7 @@
     <Compile Include="Scenario\i_LookAt.cs" />
     <Compile Include="Scenario\i_PlaySoundEffect.cs" />
     <Compile Include="Scenario\i_PostNotification.cs" />
+    <Compile Include="Scenario\i_SetValueOnEntity.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />

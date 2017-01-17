@@ -18,7 +18,7 @@ namespace com.spacepuppyeditor.Base
 
         #region Fields
 
-        private Styles _style = new Styles();
+        private Styles _style;
 
         private System.Type _baseType = typeof(object);
         private System.Type _defaultType = null;
@@ -37,6 +37,26 @@ namespace com.spacepuppyeditor.Base
         private Vector2 _scrollPosition;
         private int _selectedIndex = -1;
         private bool _scrollToSelected;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        protected virtual void Awake()
+        {
+            _style = new Styles();
+        }
+
+        protected virtual void OnEnable()
+        {
+            _search = EditorPrefs.GetString(PREF_SEARCHSTRING, string.Empty);
+            this.wantsMouseMove = true;
+        }
+
+        protected virtual void OnDestroy()
+        {
+            if (object.ReferenceEquals(this, _window)) _window = null;
+        }
 
         #endregion
 
@@ -133,17 +153,6 @@ namespace com.spacepuppyeditor.Base
         #endregion
 
         #region Methods
-
-        protected virtual void OnEnable()
-        {
-            _search = EditorPrefs.GetString(PREF_SEARCHSTRING, string.Empty);
-            this.wantsMouseMove = true;
-        }
-
-        protected virtual void OnDestroy()
-        {
-            if (object.ReferenceEquals(this, _window)) _window = null;
-        }
 
         protected virtual void OnGUI()
         {
