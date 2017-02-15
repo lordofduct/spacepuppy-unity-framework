@@ -9,7 +9,7 @@ using System.Collections;
 namespace com.spacepuppy.Collections
 {
 
-    public interface IMultitonPool<T> : IEnumerable<T>
+    public interface IMultitonPool<T> : IEnumerable<T> where T : class
     {
 
         void AddReference(T obj);
@@ -19,7 +19,7 @@ namespace com.spacepuppy.Collections
 
         T[] FindAll(System.Func<T, bool> predicate);
         int FindAll(ICollection<T> coll, System.Func<T, bool> predicate);
-        int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : T;
+        int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : class, T;
 
     }
 
@@ -201,7 +201,7 @@ namespace com.spacepuppy.Collections
             }
         }
 
-        public int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : T
+        public int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : class, T
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
             if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
@@ -498,7 +498,7 @@ namespace com.spacepuppy.Collections
             }
         }
 
-        public int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : T
+        public int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : class, T
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
             if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
@@ -750,6 +750,39 @@ namespace com.spacepuppy.Collections
             }
         }
 
+        public TSub Find<TSub>(System.Func<TSub, bool> predicate) where TSub : class, T
+        {
+            if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
+            _querying = true;
+
+            try
+            {
+                var e = _pool.GetEnumerator();
+                if (predicate == null)
+                {
+                    while(e.MoveNext())
+                    {
+                        if (e.Current.Value is TSub) return e.Current.Value as TSub;
+                    }
+                }
+
+                while (e.MoveNext())
+                {
+                    if (e.Current.Value is TSub && predicate(e.Current.Value as TSub)) return e.Current.Value as TSub;
+                }
+                return null;
+            }
+            finally
+            {
+                if (_queryCompleteAction != null)
+                {
+                    _queryCompleteAction();
+                    _queryCompleteAction = null;
+                }
+                _querying = false;
+            }
+        }
+
         public T[] FindAll(System.Func<T, bool> predicate)
         {
             if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
@@ -832,7 +865,30 @@ namespace com.spacepuppy.Collections
             }
         }
 
-        public int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : T
+        public TSub[] FindAll<TSub>(System.Func<TSub, bool> predicate) where TSub : class, T
+        {
+            if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");
+
+            try
+            {
+                using (var lst = TempCollection.GetList<TSub>())
+                {
+                    FindAll<TSub>(lst, predicate);
+                    return lst.ToArray();
+                }
+            }
+            finally
+            {
+                if (_queryCompleteAction != null)
+                {
+                    _queryCompleteAction();
+                    _queryCompleteAction = null;
+                }
+                _querying = false;
+            }
+        }
+
+        public int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : class, T
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
             if (_querying) throw new System.InvalidOperationException("MultitonPool is already in the process of a query.");

@@ -162,7 +162,7 @@ namespace com.spacepuppy.Utils
                 axis.Normalize();
             }
         }
-
+        
         #endregion
 
     }

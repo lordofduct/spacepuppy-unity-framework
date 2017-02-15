@@ -35,6 +35,116 @@ namespace com.spacepuppy.Utils
         
         #endregion
 
+        public static UnityEngine.Object Find(SearchBy search, string query)
+        {
+            switch(search)
+            {
+                case SearchBy.Nothing:
+                    return null;
+                case SearchBy.Tag:
+                    return GameObjectUtil.FindWithMultiTag(query);
+                case SearchBy.Name:
+                    return UnityEngine.GameObject.Find(query);
+                case SearchBy.Type:
+                    return UnityEngine.Object.FindObjectOfType(TypeUtil.FindType(query));
+                default:
+                    return null;
+            }
+        }
+
+        public static T Find<T>(SearchBy search, string query) where T : class
+        {
+            switch (search)
+            {
+                case SearchBy.Nothing:
+                    return null;
+                case SearchBy.Tag:
+                    return ObjUtil.GetAsFromSource<T>(GameObjectUtil.FindWithMultiTag(query));
+                case SearchBy.Name:
+                    return ObjUtil.GetAsFromSource<T>(UnityEngine.GameObject.Find(query));
+                case SearchBy.Type:
+                    return ObjUtil.GetAsFromSource<T>(UnityEngine.Object.FindObjectOfType(TypeUtil.FindType(query)));
+                default:
+                    return null;
+            }
+        }
+
+        public static UnityEngine.Object[] FindAll(SearchBy search, string query)
+        {
+            switch (search)
+            {
+                case SearchBy.Nothing:
+                    return ArrayUtil.Empty<UnityEngine.Object>();
+                case SearchBy.Tag:
+                    return GameObjectUtil.FindGameObjectsWithMultiTag(query);
+                case SearchBy.Name:
+                    {
+                        using (var tmp = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.GameObject>())
+                        {
+                            GameObjectUtil.FindAllByName(query, tmp);
+                            return tmp.ToArray();
+                        }
+                    }
+                case SearchBy.Type:
+                    return UnityEngine.Object.FindObjectsOfType(TypeUtil.FindType(query));
+                default:
+                    return null;
+            }
+        }
+
+        public static T[] FindAll<T>(SearchBy search, string query) where T : class
+        {
+            switch (search)
+            {
+                case SearchBy.Nothing:
+                    return ArrayUtil.Empty<T>();
+                case SearchBy.Tag:
+                    {
+                        using (var tmp = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.GameObject>())
+                        using (var results = com.spacepuppy.Collections.TempCollection.GetList<T>())
+                        {
+                            GameObjectUtil.FindGameObjectsWithMultiTag(query, tmp);
+                            var e = tmp.GetEnumerator();
+                            while(e.MoveNext())
+                            {
+                                var o = ObjUtil.GetAsFromSource<T>(e.Current);
+                                if (o != null) results.Add(o);
+                            }
+                            return results.ToArray();
+                        }
+                    }
+                case SearchBy.Name:
+                    {
+                        using (var tmp = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.GameObject>())
+                        using (var results = com.spacepuppy.Collections.TempCollection.GetList<T>())
+                        {
+                            GameObjectUtil.FindAllByName(query, tmp);
+                            var e = tmp.GetEnumerator();
+                            while (e.MoveNext())
+                            {
+                                var o = ObjUtil.GetAsFromSource<T>(e.Current);
+                                if (o != null) results.Add(o);
+                            }
+                            return results.ToArray();
+                        }
+                    }
+                case SearchBy.Type:
+                    {
+                        using (var results = com.spacepuppy.Collections.TempCollection.GetList<T>())
+                        {
+                            foreach(var o in UnityEngine.Object.FindObjectsOfType(TypeUtil.FindType(query)))
+                            {
+                                var o2 = ObjUtil.GetAsFromSource<T>(o);
+                                if (o2 != null) results.Add(o2);
+                            }
+                            return results.ToArray();
+                        }
+                    }
+                default:
+                    return null;
+            }
+        }
+
         public static T GetAsFromSource<T>(object obj) where T : class
         {
             if (obj == null) return null;

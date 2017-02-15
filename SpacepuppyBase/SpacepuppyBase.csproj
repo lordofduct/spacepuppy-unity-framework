@@ -180,8 +180,10 @@
     <Compile Include="Project\ResourceLink.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
+    <Compile Include="ProxyTarget.cs" />
     <Compile Include="PsuedoSingleton.cs" />
     <Compile Include="RadicalEnums.cs" />
+    <Compile Include="RadicalState.cs" />
     <Compile Include="RateOfChange.cs" />
     <Compile Include="Render\i_SetMaterialProperty.cs" />
     <Compile Include="Render\i_TweenMaterial.cs" />
@@ -193,6 +195,7 @@
     <Compile Include="Render\RendererMaterialSwap.cs" />
     <Compile Include="Scenario\AutoTriggerableMechanism.cs" />
     <Compile Include="Scenario\AutoTriggerComponent.cs" />
+    <Compile Include="Scenario\i_ChangeStateOfSimpleStateMachine.cs" />
     <Compile Include="Scenario\i_DebugLog.cs" />
     <Compile Include="Scenario\i_Destroy.cs" />
     <Compile Include="Scenario\i_Enable.cs" />
@@ -274,6 +277,7 @@
     <Compile Include="StateMachine\IStateStack.cs" />
     <Compile Include="StateMachine\IStateSupplier.cs" />
     <Compile Include="StateMachine\ParentComponentStateSupplier.cs" />
+    <Compile Include="Scenario\t_StateMachine.cs" />
     <Compile Include="StateMachine\StateChangedEventArgs.cs" />
     <Compile Include="StateMachine\StateMachine.cs" />
     <Compile Include="StateMachine\TypedStateMachine.cs" />

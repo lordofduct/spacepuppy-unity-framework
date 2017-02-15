@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using BitConverter = System.BitConverter;
 
 namespace com.spacepuppy.Utils
@@ -287,7 +286,7 @@ namespace com.spacepuppy.Utils
 
             public void Randomize()
             {
-                DateTime now = DateTime.Now;
+                System.DateTime now = System.DateTime.Now;
                 float timer = (float)checked((60 * now.Hour + now.Minute) * 60 + now.Second) + (float)now.Millisecond / 1000f;
                 int num1 = _seed;
                 int num2 = BitConverter.ToInt32(BitConverter.GetBytes(timer), 0);

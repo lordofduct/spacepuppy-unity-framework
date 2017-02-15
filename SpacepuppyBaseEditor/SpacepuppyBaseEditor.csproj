@@ -63,6 +63,7 @@
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\ProxyTargetPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Cameras\CameraControllerInspector.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Scenario\TriggerTargetProps.cs" />
     <Compile Include="Scenario\t_OnEventTriggerInspector.cs" />
     <Compile Include="Scenario\t_OnNotificationTriggerInspector.cs" />
+    <Compile Include="Scenario\t_StateMachineInspector.cs" />
     <Compile Include="ScriptableObjectHelper.cs" />
     <Compile Include="SPEditor.cs" />
     <Compile Include="SPEditorAddonDrawer.cs" />

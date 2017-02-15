@@ -167,6 +167,14 @@ namespace com.spacepuppyeditor.Scenario
                             queryProp.stringValue = EditorGUI.TextField(r2, queryProp.stringValue);
                         }
                         break;
+                    case TriggerableTargetObject.ResolveByCommand.WithType:
+                        {
+                            var tp = TypeUtil.FindType(queryProp.stringValue);
+                            if (!TypeUtil.IsType(tp, typeof(UnityEngine.Object))) tp = null;
+                            tp = SPEditorGUI.TypeDropDown(r2, GUIContent.none, typeof(UnityEngine.Object), tp);
+                            queryProp.stringValue = (tp != null) ? tp.FullName : null;
+                        }
+                        break;
                 }
 
             }

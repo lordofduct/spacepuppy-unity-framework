@@ -5,7 +5,7 @@ namespace com.spacepuppy.Collections
 {
     public class ReusableStringReader : System.IO.TextReader
     {
-
+        
         #region Fields
 
         private string _source;
@@ -130,6 +130,6 @@ namespace com.spacepuppy.Collections
         }
 
         #endregion
-
+        
     }
 }

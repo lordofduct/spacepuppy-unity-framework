@@ -69,6 +69,13 @@ namespace com.spacepuppy
         /// </summary>
         public event System.EventHandler OnComplete;
         /// <summary>
+        /// Called when the coroutine is flagged to be cancelled.
+        /// OnCancelled may take a frame or more to actually occur 
+        /// depending the state of the coroutine, where as this is 
+        /// immediate.
+        /// </summary>
+        public event System.EventHandler OnCancelling;
+        /// <summary>
         /// The coroutine was cancelled.
         /// </summary>
         public event System.EventHandler OnCancelled;
@@ -149,14 +156,23 @@ namespace com.spacepuppy
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
             _stack = new RadicalOperationStack(this);
-            _stack.Push(EnumWrapper.Create(routine.GetEnumerator()));
+
+            var e = routine.GetEnumerator();
+            if (e is IRadicalYieldInstruction)
+                _stack.Push(e as IRadicalYieldInstruction);
+            else
+                _stack.Push(EnumWrapper.Create(e));
         }
 
         public RadicalCoroutine(System.Collections.IEnumerator routine)
         {
             if (routine == null) throw new System.ArgumentNullException("routine");
             _stack = new RadicalOperationStack(this);
-            _stack.Push(EnumWrapper.Create(routine));
+
+            if (routine is IRadicalYieldInstruction)
+                _stack.Push(routine as IRadicalYieldInstruction);
+            else
+                _stack.Push(EnumWrapper.Create(routine));
         }
 
         private RadicalCoroutine()
@@ -335,7 +351,9 @@ namespace com.spacepuppy
         /// </summary>
         public void Cancel()
         {
+            if (this.Finished) return;
             _state = RadicalCoroutineOperatingState.Cancelling;
+            if (this.OnCancelling != null) this.OnCancelling(this, System.EventArgs.Empty);
         }
 
         /// <summary>
@@ -344,11 +362,13 @@ namespace com.spacepuppy
         /// <param name="cancelledByManager"></param>
         internal void Cancel(bool cancelledByManager)
         {
+            if (this.Finished) return;
             _state = RadicalCoroutineOperatingState.Cancelling;
             if (cancelledByManager)
             {
                 _manager = null;
             }
+            if (this.OnCancelling != null) this.OnCancelling(this, System.EventArgs.Empty);
         }
 
         #endregion
@@ -767,6 +787,8 @@ namespace com.spacepuppy
 
         public void Dispose()
         {
+            if (this.Active) this.Stop(false);
+
             _state = RadicalCoroutineOperatingState.Inactive;
             _disableMode = RadicalCoroutineDisableMode.Default;
             if (_stack != null) _stack.Clear();
@@ -1058,7 +1080,7 @@ namespace com.spacepuppy
 
         }
 
-        private class EnumWrapper : IRadicalYieldInstruction, IPooledYieldInstruction
+        internal class EnumWrapper : IRadicalYieldInstruction, IRadicalEnumerator, IPooledYieldInstruction
         {
 
             private static com.spacepuppy.Collections.ObjectCachePool<EnumWrapper> _pool = new com.spacepuppy.Collections.ObjectCachePool<EnumWrapper>(-1, () => new EnumWrapper());
@@ -1066,7 +1088,6 @@ namespace com.spacepuppy
             {
                 var w = _pool.GetInstance();
                 w._e = e;
-                w._complete = false;
                 return w;
             }
 
@@ -1094,8 +1115,8 @@ namespace com.spacepuppy
                 }
                 else
                 {
-                    _complete = true;
                     yieldObject = null;
+                    _e = null;
                     return false;
                 }
             }
@@ -1104,8 +1125,26 @@ namespace com.spacepuppy
             {
                 get
                 {
-                    return _complete;
+                    return _e == null;
                 }
+            }
+
+            public object Current
+            {
+                get
+                {
+                    return _e != null ? _e.Current : null;
+                }
+            }
+
+            public bool MoveNext()
+            {
+                return _e != null ? _e.MoveNext() : false;
+            }
+
+            public void Reset()
+            {
+                if (_e != null) _e.Reset();
             }
 
             void System.IDisposable.Dispose()
@@ -1113,6 +1152,7 @@ namespace com.spacepuppy
                 _e = null;
                 _pool.Release(this);
             }
+
         }
 
 
@@ -1265,7 +1305,7 @@ namespace com.spacepuppy
 
         }
 
-#endregion
+        #endregion
 
 #region Editor Special Types
 

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 using System.Linq;
 
+using com.spacepuppy.Collections;
+
 namespace com.spacepuppy.Utils
 {
 
@@ -124,9 +126,14 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<T> Append<T>(this IEnumerable<T> lst, T obj)
         {
-            foreach (var o in lst)
+            //foreach (var o in lst)
+            //{
+            //    yield return o;
+            //}
+            var e = new LightEnumerator<T>(lst);
+            while (e.MoveNext())
             {
-                yield return o;
+                yield return e.Current;
             }
             yield return obj;
         }
@@ -134,26 +141,41 @@ namespace com.spacepuppy.Utils
         public static IEnumerable<T> Prepend<T>(this IEnumerable<T> lst, T obj)
         {
             yield return obj;
-            foreach (var o in lst)
+            //foreach (var o in lst)
+            //{
+            //    yield return o;
+            //}
+            var e = new LightEnumerator<T>(lst);
+            while(e.MoveNext())
             {
-                yield return o;
+                yield return e.Current;
             }
         }
 
         public static bool Contains(this IEnumerable lst, object obj)
         {
-            foreach (var o in lst)
+            //foreach (var o in lst)
+            //{
+            //    if (Object.Equals(o, obj)) return true;
+            //}
+            var e = new LightEnumerator(lst);
+            while(e.MoveNext())
             {
-                if (Object.Equals(o, obj)) return true;
+                if (Object.Equals(e.Current, obj)) return true;
             }
             return false;
         }
 
         public static void AddRange<T>(this ICollection<T> lst, IEnumerable<T> elements)
         {
-            foreach (var e in elements)
+            //foreach (var e in elements)
+            //{
+            //    lst.Add(e);
+            //}
+            var e = new LightEnumerator<T>(elements);
+            while(e.MoveNext())
             {
-                lst.Add(e);
+                lst.Add(e.Current);
             }
         }
 

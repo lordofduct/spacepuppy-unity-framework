@@ -73,4 +73,16 @@
         SelfAndChildren = 2
     }
 
+    /// <summary>
+    /// Search parameter type
+    /// </summary>
+    public enum SearchBy
+    {
+        Nothing = 0,
+        Tag = 1,
+        Name = 2,
+        Type = 3
+    }
+
+
 }

@@ -119,7 +119,7 @@ namespace com.spacepuppy
         {
             SPEntity.Pool.FindAll(coll, predicate);
         }
-
+        
         [System.Obsolete("Access SPEntity.Pool instead.")]
         public static void FindAll<T>(ICollection<T> coll, System.Func<T, bool> predicate) where T : SPEntity
         {

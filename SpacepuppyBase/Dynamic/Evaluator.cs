@@ -70,6 +70,7 @@ namespace com.spacepuppy.Dynamic
         #region Static Interface
 
         private static com.spacepuppy.Collections.ObjectCachePool<Evaluator> _pool = new Collections.ObjectCachePool<Evaluator>(64);
+        private static com.spacepuppy.Collections.ObjectCachePool<ReusableStringReader> _readerPool = new Collections.ObjectCachePool<ReusableStringReader>(64);
 
         public static double Eval(string command, object x)
         {
@@ -88,9 +89,8 @@ namespace com.spacepuppy.Dynamic
 
 
         #region Fields
-
-        //private SamplingCharEnumerator _e = new SamplingCharEnumerator();
-        private com.spacepuppy.Collections.ReusableStringReader _reader = new com.spacepuppy.Collections.ReusableStringReader();
+        
+        private System.IO.TextReader _reader;
         private object _x;
         private StringBuilder _strBuilder = new StringBuilder();
         private int _parenCount;
@@ -102,7 +102,32 @@ namespace com.spacepuppy.Dynamic
 
         public double EvalStatement(string command, object x)
         {
-            _reader.Reset(command);
+            var r = _readerPool.GetInstance();
+            r.Reset(command);
+
+            _reader = r;
+            _x = x;
+            _strBuilder.Length = 0;
+            _parenCount = 0;
+            _current = (char)0;
+
+            double result = this.EvalStatement();
+
+            _reader.Dispose();
+            _readerPool.Release(_reader as ReusableStringReader);
+            _x = null;
+            _strBuilder.Length = 0;
+            _parenCount = 0;
+            _current = (char)0;
+
+            return result;
+        }
+
+        public double EvalStatement(System.IO.TextReader command, object x)
+        {
+            if (command == null) throw new System.ArgumentNullException("command");
+
+            _reader = command;
             _x = x;
             _strBuilder.Length = 0;
             _parenCount = 0;

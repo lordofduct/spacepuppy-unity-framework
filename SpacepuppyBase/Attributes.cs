@@ -70,4 +70,10 @@ namespace com.spacepuppy
 
     }
 
+    //[System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false)]
+    //public class DynamicallyAccessibleMemberAttribute : System.Attribute
+    //{
+
+    //}
+
 }

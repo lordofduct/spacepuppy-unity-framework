@@ -249,7 +249,8 @@ namespace com.spacepuppyeditor.Components
                 }
                 else
                 {
-                    property.objectReferenceValue = obj;
+                    //property.objectReferenceValue = obj;
+                    property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
                 }
             }
             else if (this.AllowNonComponents)
@@ -263,12 +264,14 @@ namespace com.spacepuppyeditor.Components
                     if (targGo == ngo ||
                        (this.SearchChildren && targGo.IsParentOf(ngo)))
                     {
-                        property.objectReferenceValue = obj;
+                        //property.objectReferenceValue = obj;
+                        property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
                     }
                 }
                 else
                 {
-                    property.objectReferenceValue = obj;
+                    //property.objectReferenceValue = obj;
+                    property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
                 }
             }
             else
@@ -283,12 +286,14 @@ namespace com.spacepuppyeditor.Components
                         if (targGo == ngo ||
                             (this.SearchChildren && targGo.IsParentOf(ngo)))
                         {
-                            property.objectReferenceValue = ngo.GetComponent(_restrictionType);
+                            //property.objectReferenceValue = ngo.GetComponent(_restrictionType);
+                            property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
                         }
                     }
                     else
                     {
-                        property.objectReferenceValue = (ngo == null) ? null : ngo.GetComponent(_restrictionType);
+                        //property.objectReferenceValue = (ngo == null) ? null : ngo.GetComponent(_restrictionType);
+                        property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
                     }
                 }
             }

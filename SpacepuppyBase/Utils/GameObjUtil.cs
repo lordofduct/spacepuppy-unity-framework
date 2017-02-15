@@ -508,6 +508,24 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+        public static IEnumerable<GameObject> FindAllByName(string sname, bool bIgnoreCase = false)
+        {
+            foreach (var go in Object.FindObjectsOfType<GameObject>())
+            {
+                if (StringUtil.Equals(go.name, sname, bIgnoreCase)) yield return go;
+            }
+        }
+
+        public static void FindAllByName(string sname, ICollection<GameObject> results, bool bIgnoreCase = false)
+        {
+            if (results == null) throw new System.ArgumentNullException("results");
+            
+            foreach (var go in Object.FindObjectsOfType<GameObject>())
+            {
+                if (StringUtil.Equals(go.name, sname, bIgnoreCase)) results.Add(go);
+            }
+        }
+
 
         public static Transform[] FindAllByName(this Transform trans, string sname, bool bIgnoreCase = false)
         {
@@ -522,6 +540,7 @@ namespace com.spacepuppy.Utils
 
         public static void FindAllByName(this Transform trans, string sname, ICollection<Transform> results, bool bIgnoreCase = false)
         {
+            if (results == null) throw new System.ArgumentNullException("results");
             if (trans == null) return;
             
             using (var lst = TempCollection.GetList<Transform>())
@@ -601,31 +620,38 @@ namespace com.spacepuppy.Utils
          * Find
          */
 
-        public static IEnumerable<GameObject> FindGameObjectsWithMultiTag(string tag)
+        public static GameObject[] FindGameObjectsWithMultiTag(string tag)
         {
             if (tag == SPConstants.TAG_MULTITAG)
             {
-                foreach (var go in GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG))
-                {
-                    yield return go;
-                }
+                return GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG);
             }
             else
             {
-                foreach (var go in GameObject.FindGameObjectsWithTag(tag))
+                using (var tmp = TempList<GameObject>.GetList())
                 {
-                    yield return go;
-                }
+                    foreach (var go in GameObject.FindGameObjectsWithTag(tag)) tmp.Add(go);
 
-                //MultiTag comp;
-                //foreach (var go in GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG))
-                //{
-                //    if (go.GetComponent<MultiTag>(out comp))
-                //    {
-                //        if (comp.ContainsTag(tag)) yield return go;
-                //    }
-                //}
-                foreach (var c in MultiTag.FindAll(tag)) yield return c.gameObject;
+                    foreach (var c in MultiTag.FindAll(tag)) tmp.Add(c.gameObject);
+
+                    return tmp.ToArray();
+                }
+            }
+        }
+
+        public static void FindGameObjectsWithMultiTag(string tag, ICollection<UnityEngine.GameObject> coll)
+        {
+            if (coll == null) throw new System.ArgumentNullException("coll");
+
+            if(tag == SPConstants.TAG_MULTITAG)
+            {
+                coll.AddRange(GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG));
+            }
+            else
+            {
+                foreach (var go in GameObject.FindGameObjectsWithTag(tag)) coll.Add(go);
+
+                foreach (var c in MultiTag.FindAll(tag)) coll.Add(c.gameObject);
             }
         }
 

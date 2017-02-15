@@ -418,6 +418,8 @@ namespace com.spacepuppy.Dynamic
                 if ((m.MemberType & MASK) != 0)
                 {
                     yield return m;
+
+                    
                 }
             }
 
