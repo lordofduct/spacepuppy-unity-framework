@@ -344,11 +344,7 @@ namespace com.spacepuppy.Utils
             if (coll == null) throw new System.ArgumentNullException("coll");
             if (rng == null) rng = RandomUtil.Standard;
 
-            IList<T> buffer;
-            if (coll is IList<T>)
-                buffer = coll as IList<T>;
-            else
-                buffer = coll.ToList();
+            IList<T> buffer = coll.ToList();
             int j;
             for (int i = 0; i < buffer.Count; i++)
             {
