@@ -62,7 +62,7 @@ namespace com.spacepuppy.Collections
 
         public static TempList<T> GetList<T>(IEnumerable<T> e)
         {
-            return TempList<T>.GetList();
+            return TempList<T>.GetList(e);
         }
 
         public static TempList<T> GetList<T>(int count)

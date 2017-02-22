@@ -343,14 +343,16 @@ namespace com.spacepuppy.Utils
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
             if (rng == null) rng = RandomUtil.Standard;
-
-            IList<T> buffer = coll.ToList();
-            int j;
-            for (int i = 0; i < buffer.Count; i++)
+            
+            using (var buffer = TempCollection.GetList<T>(coll))
             {
-                j = rng.Next(i, buffer.Count);
-                yield return buffer[j];
-                buffer[j] = buffer[i];
+                int j;
+                for (int i = 0; i < buffer.Count; i++)
+                {
+                    j = rng.Next(i, buffer.Count);
+                    yield return buffer[j];
+                    buffer[j] = buffer[i];
+                }
             }
         }
 

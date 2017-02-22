@@ -82,7 +82,12 @@ namespace com.spacepuppy.Collections
             TempList<T> result;
             if(_pool.TryGetInstance(out result))
             {
-                result.AddRange(e);
+                //result.AddRange(e);
+                var e2 = new LightEnumerator<T>(e);
+                while(e2.MoveNext())
+                {
+                    result.Add(e2.Current);
+                }
             }
             else
             {
