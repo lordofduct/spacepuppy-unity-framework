@@ -16,6 +16,8 @@ namespace com.spacepuppyeditor.Base
     public class ReorderableArrayPropertyDrawer : PropertyDrawer, IArrayHandlingPropertyDrawer
     {
 
+        private const float BOTTOM_PAD = 2f;
+
         #region Fields
 
         public string Label;
@@ -24,6 +26,8 @@ namespace com.spacepuppyeditor.Base
         private bool _disallowFoldout;
         private bool _removeBackgroundWhenCollapsed;
         private bool _draggable = true;
+        private bool _drawElementAtBottom;
+        private string _childPropertyAsLabel;
 
         private PropertyDrawer _internalDrawer;
 
@@ -38,14 +42,21 @@ namespace com.spacepuppyeditor.Base
 
             if(property.arraySize > 0)
             {
-                var pchild = property.GetArrayElementAtIndex(0);
-                if (_internalDrawer != null)
+                if(_drawElementAtBottom)
                 {
-                    lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
+                    lst.elementHeight = EditorGUIUtility.singleLineHeight;
                 }
                 else
                 {
-                    lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1;
+                    var pchild = property.GetArrayElementAtIndex(0);
+                    if (_internalDrawer != null)
+                    {
+                        lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
+                    }
+                    else
+                    {
+                        lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1f;
+                    }
                 }
             }
             else
@@ -58,26 +69,30 @@ namespace com.spacepuppyeditor.Base
 
         private void StartOnGUI(SerializedProperty property, GUIContent label)
         {
-            _lst = this.GetList(property, label);
-            if (_lst.index >= _lst.count) _lst.index = -1;
-
             var attrib = this.attribute as ReorderableArrayAttribute;
             if (attrib != null)
             {
                 _disallowFoldout = attrib.DisallowFoldout;
                 _removeBackgroundWhenCollapsed = attrib.RemoveBackgroundWhenCollapsed;
                 _draggable = attrib.Draggable;
+                _drawElementAtBottom = attrib.DrawElementAtBottom;
+                _childPropertyAsLabel = attrib.ChildPropertyToDrawAsElementLabel;
             }
             else
             {
                 _disallowFoldout = false;
                 _removeBackgroundWhenCollapsed = false;
                 _draggable = true;
+                _drawElementAtBottom = false;
+                _childPropertyAsLabel = null;
             }
 
             _label = label;
+
+            _lst = this.GetList(property, label);
+            if (_lst.index >= _lst.count) _lst.index = -1;
         }
-        
+
         private void EndOnGUI(SerializedProperty property, GUIContent label)
         {
             _lst.serializedProperty = null;
@@ -101,19 +116,36 @@ namespace com.spacepuppyeditor.Base
 
             if (property.isArray)
             {
+                this.StartOnGUI(property, label);
                 if (_disallowFoldout || property.isExpanded)
                 {
-                    return this.GetList(property, label).GetHeight();
+                    h = _lst.GetHeight();
+                    if(_drawElementAtBottom && _lst.index >= 0 && _lst.index < property.arraySize)
+                    {
+                        var pchild = property.GetArrayElementAtIndex(_lst.index);
+                        bool cache = pchild.isExpanded;
+                        pchild.isExpanded = true;
+                        if (_internalDrawer != null)
+                        {
+                            h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD;
+                        }
+                        else
+                        {
+                            h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + BOTTOM_PAD;
+                        }
+                        pchild.isExpanded = cache;
+                    }
                 }
                 else
                 {
-                    return EditorGUIUtility.singleLineHeight;
+                    h = EditorGUIUtility.singleLineHeight;
                 }
             }
             else
             {
-                return EditorGUIUtility.singleLineHeight;
+                h = EditorGUIUtility.singleLineHeight;
             }
+            return h;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -125,7 +157,8 @@ namespace com.spacepuppyeditor.Base
                 if(_disallowFoldout)
                 {
                     this.StartOnGUI(property, label);
-                    _lst.DoList(EditorGUI.IndentedRect(position));
+                    //_lst.DoList(EditorGUI.IndentedRect(position));
+                    _lst.DoList(position);
                     this.EndOnGUI(property, label);
                 }
                 else
@@ -135,7 +168,8 @@ namespace com.spacepuppyeditor.Base
                     {
                         this.StartOnGUI(property, label);
                         property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
-                        _lst.DoList(EditorGUI.IndentedRect(position));
+                        //_lst.DoList(EditorGUI.IndentedRect(position));
+                        _lst.DoList(position);
                         this.EndOnGUI(property, label);
                     }
                     else
@@ -147,11 +181,41 @@ namespace com.spacepuppyeditor.Base
                         else
                         {
                             property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, WIDTH_FOLDOUT, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
-                            ReorderableListHelper.DrawRetractedHeader(EditorGUI.IndentedRect(position), label);
+                            //ReorderableListHelper.DrawRetractedHeader(EditorGUI.IndentedRect(position), label);
+                            ReorderableListHelper.DrawRetractedHeader(position, label);
                         }
                     }
                 }
 
+                if(_drawElementAtBottom && _lst.index >= 0 && _lst.index < property.arraySize)
+                {
+                    var pchild = property.GetArrayElementAtIndex(_lst.index);
+                    var label2 = TempElementLabel(pchild, _lst.index); //(string.IsNullOrEmpty(_childPropertyAsLabel)) ? TempElementLabel(_lst.index) : GUIContent.none;
+
+                    pchild.isExpanded = true;
+                    float h;
+                    if (_internalDrawer != null)
+                    {
+                        h = _internalDrawer.GetPropertyHeight(pchild, label2) + BOTTOM_PAD;
+                    }
+                    else
+                    {
+                        h = SPEditorGUI.GetDefaultPropertyHeight(pchild, label2, true) + BOTTOM_PAD;
+                    }
+                    var area = new Rect(position.x, position.yMax - h, position.width, h);
+
+                    GUI.BeginGroup(area, label2, GUI.skin.box);
+                    GUI.EndGroup();
+
+                    if (_internalDrawer != null)
+                    {
+                        _internalDrawer.OnGUI(area, pchild, label2);
+                    }
+                    else
+                    {
+                        SPEditorGUI.DefaultPropertyField(area, pchild, GUIContent.none, true);
+                    }
+                }
             }
             else
             {
@@ -195,13 +259,29 @@ namespace com.spacepuppyeditor.Base
                 }
             }
 
-            if(_internalDrawer != null)
+            if(_drawElementAtBottom)
             {
-                _internalDrawer.OnGUI(area, element, label);
+                EditorGUI.LabelField(area, TempElementLabel(element, index));
+                //var propLabel = (!string.IsNullOrEmpty(_childPropertyAsLabel)) ? element.FindPropertyRelative(_childPropertyAsLabel) : null;
+                //if(propLabel != null)
+                //{
+                //    SPEditorGUI.PropertyField(area, propLabel);
+                //}
+                //else
+                //{
+                //    EditorGUI.LabelField(area, TempElementLabel(element, index));
+                //}
             }
             else
             {
-                SPEditorGUI.DefaultPropertyField(area, element, label);
+                if (_internalDrawer != null)
+                {
+                    _internalDrawer.OnGUI(area, element, label);
+                }
+                else
+                {
+                    SPEditorGUI.DefaultPropertyField(area, element, label, false);
+                }
             }
 
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_lst, area, index, isActive, isFocused);
@@ -210,7 +290,25 @@ namespace com.spacepuppyeditor.Base
         #endregion
 
 
+        //private static Rect ElementIndentedRect(Rect rect)
+        //{
+        //    return new Rect(rect.x + 15f, rect.y, rect.width - 15f, rect.height);
+        //}
 
+        private GUIContent TempElementLabel(SerializedProperty element, int index)
+        {
+            var propLabel = (!string.IsNullOrEmpty(_childPropertyAsLabel)) ? element.FindPropertyRelative(_childPropertyAsLabel) : null;
+            string slbl = null;
+            
+            if (propLabel != null)
+                slbl = ConvertUtil.ToString(EditorHelper.GetPropertyValue(propLabel));
+
+            if (string.IsNullOrEmpty(slbl))
+                slbl = string.Format("Element {0:00}", index);
+
+            return EditorHelper.TempContent(slbl);
+            //return EditorHelper.TempContent(string.Format("Element {0:00}", index));
+        }
 
         #region IArrayHandlingPropertyDrawer Interface
 

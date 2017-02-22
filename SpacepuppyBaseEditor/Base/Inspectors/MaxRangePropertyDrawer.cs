@@ -16,13 +16,18 @@ namespace com.spacepuppyeditor.Base
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var attrib = this.attribute as MaxRangeAttribute;
-            if (attrib != null && property.propertyType == SerializedPropertyType.Float)
+
+            switch (attrib != null ? property.propertyType : SerializedPropertyType.Generic)
             {
-                property.floatValue = Mathf.Min(EditorGUI.FloatField(position, label, property.floatValue), attrib.Max);
-            }
-            else
-            {
-                SPEditorGUI.DefaultPropertyField(position, property, label);
+                case SerializedPropertyType.Float:
+                    property.floatValue = Mathf.Min(EditorGUI.FloatField(position, label, property.floatValue), attrib.Max);
+                    break;
+                case SerializedPropertyType.Integer:
+                    property.intValue = (int)Mathf.Min(EditorGUI.IntField(position, label, property.intValue), attrib.Max);
+                    break;
+                default:
+                    SPEditorGUI.DefaultPropertyField(position, property, label);
+                    break;
             }
         }
 

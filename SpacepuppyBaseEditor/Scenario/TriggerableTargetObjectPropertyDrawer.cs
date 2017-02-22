@@ -113,6 +113,7 @@ namespace com.spacepuppyeditor.Scenario
             else
             {
                 _objectDrawer.RestrictionType = (_configAttrib != null) ? _configAttrib.TargetType : null;
+                _objectDrawer.SearchChildren = (_configAttrib != null) ? _configAttrib.SearchChildren : false;
                 _objectDrawer.OnGUI(r1, targetProp, GUIContent.none);
             }
 
@@ -222,7 +223,9 @@ namespace com.spacepuppyeditor.Scenario
                         {
                             UnityEngine.Object obj = property.serializedObject.targetObject;
                             if (targetType != null)
-                                obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;
+                            {
+                                obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;  
+                            }
                             property.objectReferenceValue = obj;
                         }
                     }

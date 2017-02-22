@@ -16,14 +16,22 @@ namespace com.spacepuppyeditor
 
         public static bool DefaultPropertyField(SerializedProperty property)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, GUIContent.none, false, null);
+            //return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, GUIContent.none, false, null);
+            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.SharedNullPropertyHandler.OnGUILayout(property, GUIContent.none, false, null);
         }
 
         public static bool DefaultPropertyField(SerializedProperty property, GUIContent label)
         {
-            return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, label, false, null);
+            //return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, label, false, null);
+            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.SharedNullPropertyHandler.OnGUILayout(property, label, false, null);
         }
-        
+
+        public static bool DefaultPropertyField(SerializedProperty property, GUIContent label, bool includeChildren)
+        {
+            //return com.spacepuppyeditor.Internal.DefaultPropertyHandler.Instance.OnGUILayout(property, label, false, null);
+            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.SharedNullPropertyHandler.OnGUILayout(property, label, includeChildren, null);
+        }
+
         public static object DefaultPropertyField(string label, object value, System.Type valueType)
         {
             return SPEditorGUI.DefaultPropertyField(EditorGUILayout.GetControlRect(true), EditorHelper.TempContent(label), value, valueType);

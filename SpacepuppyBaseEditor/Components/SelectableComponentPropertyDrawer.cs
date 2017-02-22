@@ -235,7 +235,7 @@ namespace com.spacepuppyeditor.Components
         {
             if (ComponentUtil.IsAcceptableComponentType(_restrictionType))
             {
-                var fieldObjType = (TypeUtil.IsType(_restrictionType, typeof(UnityEngine.Component))) ? _restrictionType : typeof(UnityEngine.GameObject);
+                var fieldObjType = (!this.SearchChildren && TypeUtil.IsType(_restrictionType, typeof(UnityEngine.Component))) ? _restrictionType : typeof(UnityEngine.GameObject);
                 var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObject);
                 if(this.ForceOnlySelf)
                 {
@@ -244,13 +244,21 @@ namespace com.spacepuppyeditor.Components
                     if(targGo == ngo ||
                        (this.SearchChildren && targGo.IsParentOf(ngo)))
                     {
-                        property.objectReferenceValue = obj;
+                        //property.objectReferenceValue = obj;
+                        var o = obj;
+                        if (this.SearchChildren && o == null)
+                            o = ngo.GetComponentInChildren(_restrictionType);
+                        property.objectReferenceValue = o;
                     }
                 }
                 else
                 {
                     //property.objectReferenceValue = obj;
-                    property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    var o = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    if (this.SearchChildren && o == null && GameObjectUtil.GetGameObjectFromSource(obj) != null)
+                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(_restrictionType);
+                    property.objectReferenceValue = o;
                 }
             }
             else if (this.AllowNonComponents)
@@ -265,13 +273,21 @@ namespace com.spacepuppyeditor.Components
                        (this.SearchChildren && targGo.IsParentOf(ngo)))
                     {
                         //property.objectReferenceValue = obj;
-                        property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                        //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                        var o = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                        if (this.SearchChildren && o == null)
+                            o = ngo.GetComponentInChildren(_restrictionType);
+                        property.objectReferenceValue = o;
                     }
                 }
                 else
                 {
                     //property.objectReferenceValue = obj;
-                    property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    var o = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    if (this.SearchChildren && o == null && GameObjectUtil.GetGameObjectFromSource(obj) != null)
+                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(_restrictionType);
+                    property.objectReferenceValue = o;
                 }
             }
             else
@@ -287,13 +303,21 @@ namespace com.spacepuppyeditor.Components
                             (this.SearchChildren && targGo.IsParentOf(ngo)))
                         {
                             //property.objectReferenceValue = ngo.GetComponent(_restrictionType);
-                            property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                            //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                            var o = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                            if (this.SearchChildren && o == null)
+                                o = ngo.GetComponentInChildren(_restrictionType);
+                            property.objectReferenceValue = o;
                         }
                     }
                     else
                     {
                         //property.objectReferenceValue = (ngo == null) ? null : ngo.GetComponent(_restrictionType);
-                        property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                        //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                        var o = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                        if (this.SearchChildren && o == null)
+                            o = ngo.GetComponentInChildren(_restrictionType);
+                        property.objectReferenceValue = o;
                     }
                 }
             }

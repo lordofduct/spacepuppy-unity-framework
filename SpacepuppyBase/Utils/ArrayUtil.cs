@@ -166,6 +166,19 @@ namespace com.spacepuppy.Utils
             return false;
         }
 
+        public static bool Contains<T>(this T[,] arr, T value)
+        {
+            for(int i = 0; i < arr.GetLength(0); i++)
+            {
+                for(int j = 0; j < arr.GetLength(1); j++)
+                {
+                    if (EqualityComparer<T>.Default.Equals(arr[i, j], value)) return true;
+                }
+            }
+
+            return false;
+        }
+
         public static void AddRange<T>(this ICollection<T> lst, IEnumerable<T> elements)
         {
             //foreach (var e in elements)
@@ -273,12 +286,69 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> lst, IRandom rng = null)
+        public static void Shuffle<T>(T[,] arr, IRandom rng = null)
+        {
+            if (arr == null) throw new System.ArgumentNullException("arr");
+            if (rng == null) rng = RandomUtil.Standard;
+            
+            int width = arr.GetLength(0);
+            for (int i = 0; i < arr.Length; i++)
+            {
+                int j = rng.Next(arr.Length);
+                int ix = i % width;
+                int iy = (int)(i / width);
+                int jx = j % width;
+                int jy = (int)(j / width);
+                T temp = arr[jx, jy];
+                arr[jx, jy] = arr[ix, iy];
+                arr[ix, iy] = temp;
+            }
+        }
+
+        public static void Shuffle(IList lst, IRandom rng = null)
         {
             if (lst == null) throw new System.ArgumentNullException("lst");
             if (rng == null) rng = RandomUtil.Standard;
 
-            var buffer = lst.ToList();
+            int j;
+            object temp;
+            int cnt = lst.Count;
+            for (int i = 0; i < cnt; i++)
+            {
+                j = rng.Next(cnt);
+                temp = lst[j];
+                lst[j] = lst[i];
+                lst[i] = temp;
+            }
+        }
+
+        public static void Shuffle<T>(IList<T> lst, IRandom rng = null)
+        {
+            if (lst == null) throw new System.ArgumentNullException("lst");
+            if (rng == null) rng = RandomUtil.Standard;
+
+            int j;
+            T temp;
+            int cnt = lst.Count;
+            for (int i = 0; i < cnt; i++)
+            {
+                j = rng.Next(cnt);
+                temp = lst[j];
+                lst[j] = lst[i];
+                lst[i] = temp;
+            }
+        }
+
+        public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> coll, IRandom rng = null)
+        {
+            if (coll == null) throw new System.ArgumentNullException("coll");
+            if (rng == null) rng = RandomUtil.Standard;
+
+            IList<T> buffer;
+            if (coll is IList<T>)
+                buffer = coll as IList<T>;
+            else
+                buffer = coll.ToList();
             int j;
             for (int i = 0; i < buffer.Count; i++)
             {
@@ -306,7 +376,7 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> lst, int count, IRandom rng = null)
         {
-            return lst.Shuffle(rng).Take(count);
+            return lst.Shuffled(rng).Take(count);
         }
 
         public static T PickRandom<T>(this IEnumerable<T> lst, System.Func<T, float> weightPredicate, IRandom rng = null)
@@ -451,6 +521,7 @@ namespace com.spacepuppy.Utils
                 }
             }
         }
+        
 
         #endregion
 

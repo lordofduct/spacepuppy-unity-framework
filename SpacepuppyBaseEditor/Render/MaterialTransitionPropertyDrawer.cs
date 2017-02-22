@@ -68,7 +68,8 @@ namespace com.spacepuppyeditor.Render
             var r2 = new Rect(position.xMin, position.yMin, position.width, lst.GetHeight());
             var r3 = new Rect(position.xMin, position.yMax - EditorGUIUtility.singleLineHeight * 1.25f, position.width, EditorGUIUtility.singleLineHeight);
 
-            lst.DoList(EditorGUI.IndentedRect(r2));
+            //lst.DoList(EditorGUI.IndentedRect(r2));
+            lst.DoList(r2);
             EditorGUI.PropertyField(r3, property.FindPropertyRelative(PROP_POSITION));
 
             EditorGUI.indentLevel--;

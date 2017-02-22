@@ -99,13 +99,12 @@ namespace com.spacepuppyeditor.Internal
                     if(this.Field.FieldType.IsListType())
                     {
                         _drawer = new ArrayPropertyDrawer(null);
-                        this.InternalDrawer = _drawer;
                     }
                 }
                 else if(drawer != null)
                 {
                     //we got a new drawer, set it
-                    if (this.Field.FieldType.IsListType()) drawer = new ArrayPropertyDrawer(drawer);
+                    if (!(drawer is IArrayHandlingPropertyDrawer) && this.Field.FieldType.IsListType()) drawer = new ArrayPropertyDrawer(drawer);
                     _drawer = drawer;
                 }
             }
@@ -116,7 +115,6 @@ namespace com.spacepuppyeditor.Internal
                 {
                     if (_modifiers == null) _modifiers = new List<PropertyModifier>();
                     _modifiers.Add(drawer as PropertyModifier);
-                    this.InternalDrawer = _drawer;
                 }
                 else if (drawer is IArrayHandlingPropertyDrawer)
                 {
@@ -142,7 +140,6 @@ namespace com.spacepuppyeditor.Internal
                 {
                     //got an internal drawer for the existing array drawer
                     (_drawer as IArrayHandlingPropertyDrawer).InternalDrawer = drawer;
-                    this.InternalDrawer = _drawer;
                 }
                 else
                 {
@@ -150,7 +147,6 @@ namespace com.spacepuppyeditor.Internal
                     if (this.Field.FieldType.IsListType())
                     {
                         _drawer = new ArrayPropertyDrawer(drawer);
-                        this.InternalDrawer = _drawer;
                     }
                     else
                     {
@@ -158,6 +154,9 @@ namespace com.spacepuppyeditor.Internal
                     }
                 }
             }
+
+            //ensure internal drawer is set appropriately
+            this.InternalDrawer = _drawer;
         }
 
 

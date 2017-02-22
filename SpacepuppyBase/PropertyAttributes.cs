@@ -233,6 +233,12 @@ namespace com.spacepuppy
         public bool RemoveBackgroundWhenCollapsed;
         public bool Draggable = true;
         public float ElementPadding = 0f;
+        public bool DrawElementAtBottom = false;
+
+        /// <summary>
+        /// If DrawElementAtBottom is true, this child element can be displayed as the label in the reorderable list.
+        /// </summary>
+        public string ChildPropertyToDrawAsElementLabel;
 
         public ReorderableArrayAttribute()
         {
@@ -447,6 +453,7 @@ namespace com.spacepuppy
 
     #region Decorator Attributes
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = true)]
     public class InsertButtonAttribute : PropertyAttribute
     {
 

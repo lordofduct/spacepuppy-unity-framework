@@ -123,6 +123,11 @@
     <Compile Include="Geom\Box.cs" />
     <Compile Include="Geom\CatmullRomSpline.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
+    <Compile Include="Graphs\Exceptions.cs" />
+    <Compile Include="Graphs\GridGraph.cs" />
+    <Compile Include="Graphs\IGraph.cs" />
+    <Compile Include="Graphs\INode.cs" />
+    <Compile Include="Graphs\LinkedNodeGraph.cs" />
     <Compile Include="IEntityAwakeHandler.cs" />
     <Compile Include="IImmediatelyResumingYieldInstruction.cs" />
     <Compile Include="IPausibleYieldInstruction.cs" />

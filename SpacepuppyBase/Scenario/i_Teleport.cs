@@ -20,6 +20,9 @@ namespace com.spacepuppy.Scenario
         [TriggerableTargetObject.Config(typeof(Transform))]
         private TriggerableTargetObject _location = new TriggerableTargetObject();
 
+        [SerializeField]
+        private bool _orientWithLocationRotation;
+
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("TeleportEntireEntity")]
         private bool _teleportEntireEntity = true;
@@ -60,6 +63,8 @@ namespace com.spacepuppy.Scenario
             if (targ == null || loc == null) return false;
 
             targ.position = loc.position;
+            if (_orientWithLocationRotation)
+                targ.rotation = loc.rotation;
 
             return true;
         }

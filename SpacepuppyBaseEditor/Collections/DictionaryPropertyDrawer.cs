@@ -45,7 +45,7 @@ namespace com.spacepuppyeditor.Collections
                 for(int i = 0; i < cnt; i++)
                 {
                     r = GetNextRect(ref position);
-                    r = EditorGUI.IndentedRect(r);
+                    //r = EditorGUI.IndentedRect(r);
                     var w = r.width / 2f;
                     var r0 = new Rect(r.xMin, r.yMin, w, r.height);
                     var r1 = new Rect(r0.xMax, r.yMin, w, r.height);

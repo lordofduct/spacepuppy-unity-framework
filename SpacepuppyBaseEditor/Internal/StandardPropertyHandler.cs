@@ -59,7 +59,11 @@ namespace com.spacepuppyeditor.Internal
     /// <summary>
     /// Handler that simulates the default drawing for a SerializedProperty with no special behaviour. Does NOT support arrays.
     /// 
-    /// TODO - add array/list support.
+    /// Potential candiate for obsolescence, was designed for the 'DefaultPropertyField' methods in SPEditorGUI and SPEditorGUILayout. But because it 
+    /// still pulled the PropertyDrawer, it doesn't perform what I suspect it was originally intended for (drawing properties without any custom editor. 
+    /// 
+    /// In the same regard, I can't remember if that IS what DefaultPropertyDrawer was intended for either... so holding onto just in case 
+    /// SPEditor.DefaultPropertyField isn't working as expected... since it has several dependencies around.
     /// </summary>
     internal class DefaultPropertyHandler : IPropertyHandler
     {
@@ -110,22 +114,23 @@ namespace com.spacepuppyeditor.Internal
 
                 var tp = fieldInfo.FieldType;
                 if (tp.IsListType()) tp = tp.GetElementTypeOfListType();
-                if (_fieldTypeToDrawer.ContainsKey(tp))
+
+                PropertyDrawer drawer = null;
+                if (_fieldTypeToDrawer.TryGetValue(tp, out drawer))
                 {
-                    var result = _fieldTypeToDrawer[tp];
-                    if(result != null) PropertyDrawerActivator.InitializePropertyDrawer(result, null, fieldInfo);
-                    return result;
+                    if(drawer != null) PropertyDrawerActivator.InitializePropertyDrawer(drawer, null, fieldInfo);
+                    return drawer;
                 }
 
                 var drawerType = ScriptAttributeUtility.GetDrawerTypeForType(tp);
                 if (drawerType == null)
                 {
-                    _fieldTypeToDrawer.Add(tp, null);
+                    _fieldTypeToDrawer[tp] = null;
                     return null;
                 }
 
-                var drawer = PropertyDrawerActivator.Create(drawerType, null, fieldInfo);
-                _fieldTypeToDrawer.Add(tp, drawer);
+                drawer = PropertyDrawerActivator.Create(drawerType, null, fieldInfo);
+                _fieldTypeToDrawer[tp] = drawer;
                 return drawer;
             }
 

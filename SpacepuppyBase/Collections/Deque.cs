@@ -39,6 +39,7 @@ A "contributor" is any person that distributes its contribution under this licen
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -271,19 +272,24 @@ namespace com.spacepuppy.Collections
             return true;
         }
 
+        #endregion
+
+        #region IEnumerable Interface
+
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
         /// <summary>
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
         /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<T> GetEnumerator()
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            int count = this.Count;
-            for (int i = 0; i != count; ++i)
-            {
-                yield return DoGetItem(i);
-            }
+            return this.GetEnumerator();
         }
 
         /// <summary>
@@ -297,7 +303,60 @@ namespace com.spacepuppy.Collections
             return this.GetEnumerator();
         }
 
+        public struct Enumerator : IEnumerator<T>
+        {
+            private Deque<T> _coll;
+            private T _current;
+            private int _index;
+
+            public Enumerator(Deque<T> coll)
+            {
+                if (coll == null) throw new System.ArgumentNullException("coll");
+                _coll = coll;
+                _current = default(T);
+                _index = 0;
+            }
+
+            public T Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
+
+            public bool MoveNext()
+            {
+                if (_index >= _coll.Count) return false;
+
+                _current = _coll.DoGetItem(_index);
+                _index++;
+                return true;
+            }
+
+            void IEnumerator.Reset()
+            {
+                _index = 0;
+            }
+
+            public void Dispose()
+            {
+                _coll = null;
+                _current = default(T);
+            }
+
+        }
+
         #endregion
+
         #region ObjectListImplementations
 
         /// <summary>
@@ -417,6 +476,7 @@ namespace com.spacepuppy.Collections
         }
 
         #endregion
+        
         #region GenericListHelpers
 
         /// <summary>

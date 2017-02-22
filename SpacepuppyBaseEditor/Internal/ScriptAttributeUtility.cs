@@ -13,6 +13,8 @@ namespace com.spacepuppyeditor.Internal
     internal static class ScriptAttributeUtility
     {
 
+        public static readonly IPropertyHandler SharedNullPropertyHandler = new UnityInternalPropertyHandler();
+
         #region Fields
 
         private static PropertyHandlerCache _handlerCache = new PropertyHandlerCache();

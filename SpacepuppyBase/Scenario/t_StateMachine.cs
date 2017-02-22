@@ -13,6 +13,7 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField]
+        [ReorderableArray(DrawElementAtBottom = true, ChildPropertyToDrawAsElementLabel = "_name")]
         private State[] _states;
 
         [SerializeField]

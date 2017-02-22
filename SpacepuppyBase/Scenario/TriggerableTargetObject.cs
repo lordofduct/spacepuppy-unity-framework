@@ -495,6 +495,7 @@ namespace com.spacepuppy.Scenario
         {
 
             public System.Type TargetType;
+            public bool SearchChildren;
 
             public ConfigAttribute()
             {
