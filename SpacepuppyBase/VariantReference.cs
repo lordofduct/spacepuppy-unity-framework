@@ -1196,7 +1196,7 @@ namespace com.spacepuppy
                             case VariantType.Vector3:
                             case VariantType.Quaternion:
                             case VariantType.Color:
-                                info.SetValue("value", string.Join(",", ArrayUtil.Temp<string>(_x.ToString(), _y.ToString(), _z.ToString(), _w.ToString())));
+                                info.SetValue("value", string.Format("{0},{1},{2},{3}", _x, _y, _z, _w));
                                 break;
                             case VariantType.DateTime:
                                 info.SetValue("value", this.DateValue);

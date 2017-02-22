@@ -658,20 +658,23 @@ namespace com.spacepuppy.Utils
                 if (arr == null) return;
                 System.Array.Clear(arr, 0, arr.Length);
 
-                switch (arr.Length)
+                lock(_lock)
                 {
-                    case 1:
-                        _oneArray = arr;
-                        break;
-                    case 2:
-                        _twoArray = arr;
-                        break;
-                    case 3:
-                        _threeArray = arr;
-                        break;
-                    case 4:
-                        _fourArray = arr;
-                        break;
+                    switch (arr.Length)
+                    {
+                        case 1:
+                            _oneArray = arr;
+                            break;
+                        case 2:
+                            _twoArray = arr;
+                            break;
+                        case 3:
+                            _threeArray = arr;
+                            break;
+                        case 4:
+                            _fourArray = arr;
+                            break;
+                    }
                 }
             }
         }
