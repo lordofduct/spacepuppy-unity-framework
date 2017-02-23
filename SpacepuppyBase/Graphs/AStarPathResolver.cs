@@ -14,7 +14,6 @@ namespace com.spacepuppy.Graphs
 
         private IGraph<T> _graph;
         private IHeuristic<T> _heuristic;
-        private System.Func<T, float> _g_score;
 
         private BinaryHeap<VertexInfo> _open;
         private HashSet<T> _closed;
@@ -32,20 +31,10 @@ namespace com.spacepuppy.Graphs
         {
             _graph = graph;
             _heuristic = heuristic;
-            _g_score = (n) => 0f;
             _open = new BinaryHeap<VertexInfo>(graph.Count, VertexComparer.Default);
             _closed = new HashSet<T>();
         }
-
-        public AStarPathResolver(IGraph<T> graph, IHeuristic<T> heuristic, System.Func<T, float> g_score)
-        {
-            _graph = graph;
-            _heuristic = heuristic;
-            _g_score = g_score;
-            _open = new BinaryHeap<VertexInfo>(graph.Count, VertexComparer.Default);
-            _closed = new HashSet<T>();
-        }
-
+        
         #endregion
 
         #region Properties
@@ -105,7 +94,7 @@ namespace com.spacepuppy.Graphs
                 _open.Clear();
                 _closed.Clear();
 
-                _open.Add(this.CreateInfo(start, _g_score(start), goal));
+                _open.Add(this.CreateInfo(start, _heuristic.Weight(start), goal));
 
                 while (_open.Count > 0)
                 {
@@ -130,8 +119,7 @@ namespace com.spacepuppy.Graphs
                     {
                         if (_closed.Contains(n)) continue;
 
-                        float g = u.g + _heuristic.Distance(u.Node, n);
-                        //g += _getWeight(n);
+                        float g = u.g + _heuristic.Distance(u.Node, n) + _heuristic.Weight(n);
 
                         int i = GetInfo(_open, n);
                         if (i < 0)

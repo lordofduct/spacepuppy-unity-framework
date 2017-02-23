@@ -117,7 +117,7 @@ namespace com.spacepuppy.Graphs
                         var index = GetInfo(_open, n);
                         if (index < 0) continue;
 
-                        var d = u.Distance + _heuristic.Distance(u.Node, n);
+                        var d = u.Distance + _heuristic.Distance(u.Node, n) + _heuristic.Weight(n);
                         if (d < _open[index].Distance)
                         {
                             _open[index].Distance = d;
