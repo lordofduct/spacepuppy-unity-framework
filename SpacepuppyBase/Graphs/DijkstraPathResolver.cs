@@ -15,6 +15,7 @@ namespace com.spacepuppy.Graphs
         private IGraph<T> _graph;
         private IHeuristic<T> _heuristic;
         private BinaryHeap<VertexInfo> _open;
+        private List<T> _neighbours = new List<T>();
 
         private T _start;
         private T _goal;
@@ -85,6 +86,8 @@ namespace com.spacepuppy.Graphs
             try
             {
                 _open.Clear();
+                _neighbours.Clear();
+
                 foreach (var n in _graph)
                 {
                     float d = n == _goal ? 0f : float.PositiveInfinity;
@@ -112,8 +115,11 @@ namespace com.spacepuppy.Graphs
                         return cnt + 1;
                     }
 
-                    foreach (var n in _graph.GetNeighbours(u.Node))
+                    _graph.GetNeighbours(u.Node, _neighbours);
+                    var e = _neighbours.GetEnumerator();
+                    while (e.MoveNext())
                     {
+                        var n = e.Current;
                         var index = GetInfo(_open, n);
                         if (index < 0) continue;
 
@@ -125,12 +131,14 @@ namespace com.spacepuppy.Graphs
                             _open.Update(index);
                         }
                     }
+                    _neighbours.Clear();
                 }
 
                 return 0;
             }
             finally
             {
+                _open.Clear();
                 _calculating = false;
             }
         }

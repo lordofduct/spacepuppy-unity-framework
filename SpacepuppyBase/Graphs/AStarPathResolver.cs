@@ -16,7 +16,9 @@ namespace com.spacepuppy.Graphs
         private IHeuristic<T> _heuristic;
 
         private BinaryHeap<VertexInfo> _open;
-        private HashSet<T> _closed;
+        private HashSet<T> _closed = new HashSet<T>();
+        private HashSet<VertexInfo> _tracked = new HashSet<VertexInfo>();
+        private List<T> _neighbours = new List<T>();
 
         private T _start;
         private T _goal;
@@ -32,7 +34,6 @@ namespace com.spacepuppy.Graphs
             _graph = graph;
             _heuristic = heuristic;
             _open = new BinaryHeap<VertexInfo>(graph.Count, VertexComparer.Default);
-            _closed = new HashSet<T>();
         }
         
         #endregion
@@ -93,6 +94,8 @@ namespace com.spacepuppy.Graphs
             {
                 _open.Clear();
                 _closed.Clear();
+                _tracked.Clear();
+                _neighbours.Clear();
 
                 _open.Add(this.CreateInfo(start, _heuristic.Weight(start), goal));
 
@@ -115,8 +118,11 @@ namespace com.spacepuppy.Graphs
 
                     _closed.Add(u.Node);
 
-                    foreach (var n in _graph.GetNeighbours(u.Node))
+                    _graph.GetNeighbours(u.Node, _neighbours);
+                    var e = _neighbours.GetEnumerator();
+                    while(e.MoveNext())
                     {
+                        var n = e.Current;
                         if (_closed.Contains(n)) continue;
 
                         float g = u.g + _heuristic.Distance(u.Node, n) + _heuristic.Weight(n);
@@ -137,11 +143,20 @@ namespace com.spacepuppy.Graphs
                             _open.Update(i);
                         }
                     }
+                    _neighbours.Clear();
                 }
 
             }
             finally
             {
+                var e = _tracked.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    _pool.Release(e.Current);
+                }
+                _open.Clear();
+                _closed.Clear();
+                _tracked.Clear();
                 _calculating = false;
             }
 
@@ -151,13 +166,13 @@ namespace com.spacepuppy.Graphs
 
         private VertexInfo CreateInfo(T node, float g, T goal)
         {
-            var v = new VertexInfo();
+            var v = _pool.GetInstance();
             v.Node = node;
             v.Next = null;
             v.g = g;
             v.h = _heuristic.Distance(node, goal);
             v.f = g + v.f;
-
+            _tracked.Add(v);
             return v;
         }
 
@@ -173,6 +188,15 @@ namespace com.spacepuppy.Graphs
         #endregion
 
         #region Special Types
+
+        private static ObjectCachePool<VertexInfo> _pool = new ObjectCachePool<VertexInfo>(-1, () => new VertexInfo(), (v) =>
+        {
+            v.Node = null;
+            v.Next = null;
+            v.g = 0f;
+            v.h = 0f;
+            v.f = 0f;
+        });
 
         private class VertexInfo
         {

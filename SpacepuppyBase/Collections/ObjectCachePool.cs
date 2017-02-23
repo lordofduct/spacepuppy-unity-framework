@@ -9,7 +9,7 @@ namespace com.spacepuppy.Collections
     /// There is a max cache size, if set to 0 or less, it's considered endless in size.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ObjectCachePool<T> where T : class
+    public class ObjectCachePool<T> : ICachePool<T> where T : class
     {
 
         #region Fields
@@ -89,8 +89,65 @@ namespace com.spacepuppy.Collections
 
         #region Methods
 
+        public bool TryGetInstance(out T result)
+        {
+            result = null;
+            lock(_inactive)
+            {
+                if(_inactive.Count > 0)
+                {
+                    result = _inactive.Pop();
+                }
+            }
+            if (result != null)
+            {
+                if(_resetOnGet && _resetObjectDelegate != null)
+                    _resetObjectDelegate(result);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+            /*
+            if (_inactive.Count > 0)
+            {
+                result = _inactive.Pop();
+                if (_resetOnGet && _resetObjectDelegate != null)
+                    _resetObjectDelegate(result);
+                return true;
+            }
+            else
+            {
+                result = null;
+                return false;
+            }
+            */
+        }
+
         public T GetInstance()
         {
+            T result = null;
+            lock(_inactive)
+            {
+                if(_inactive.Count > 0)
+                {
+                    result = _inactive.Pop();
+                }
+            }
+            if (result != null)
+            {
+                if (_resetOnGet && _resetObjectDelegate != null)
+                    _resetObjectDelegate(result);
+                return result;
+            }
+            else
+            {
+                return _constructorDelegate();
+            }
+
+            /*
             //## stack
             if (_inactive.Count > 0)
             {
@@ -103,28 +160,28 @@ namespace com.spacepuppy.Collections
             {
                 return _constructorDelegate();
             }
-        }
-
-        public bool TryGetInstance(out T result)
-        {
-            if(_inactive.Count > 0)
-            {
-                result = _inactive.Pop();
-                if (_resetOnGet && _resetObjectDelegate != null)
-                    _resetObjectDelegate(result);
-                return true;
-            }
-            else
-            {
-                result = null;
-                return false;
-            }
+            */
         }
 
         public bool Release(T obj)
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
+            
+            int cacheSize = _cacheSize > 0 ? _cacheSize : 1024;
+            if (!_resetOnGet && _resetObjectDelegate != null && _inactive.Count < cacheSize) _resetObjectDelegate(obj);
 
+            lock(_inactive)
+            {
+                if(_inactive.Count < cacheSize)
+                {
+                    _inactive.Push(obj);
+                    return true;
+                }
+            }
+
+            return false;
+
+            /*
             if(_cacheSize > 0)
             {
                 if(_inactive.Count < _cacheSize)
@@ -149,6 +206,13 @@ namespace com.spacepuppy.Collections
             }
 
             return false;
+            
+            */
+        }
+
+        void ICachePool<T>.Release(T obj)
+        {
+            this.Release(obj);
         }
 
         public bool IsTreatedAsInactive(T obj)
