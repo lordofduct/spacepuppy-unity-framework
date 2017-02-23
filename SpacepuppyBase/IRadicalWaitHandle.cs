@@ -5,6 +5,8 @@ namespace com.spacepuppy
     public interface IRadicalWaitHandle : IRadicalYieldInstruction
     {
 
+        bool Cancelled { get; }
+
         void OnComplete(System.Action<IRadicalWaitHandle> callback);
 
     }
@@ -30,6 +32,15 @@ namespace com.spacepuppy
 
         #region Methods
 
+        public void SignalCancelled()
+        {
+            if (_complete) return;
+
+            _complete = true;
+            this.Cancelled = true;
+            if (_callback != null) _callback(this);
+        }
+
         public void SignalComplete()
         {
             if (_complete) return;
@@ -47,6 +58,12 @@ namespace com.spacepuppy
         #endregion
 
         #region IRadicalWaitHandle Interface
+
+        public bool Cancelled
+        {
+            get;
+            private set;
+        }
 
         public bool IsComplete
         {

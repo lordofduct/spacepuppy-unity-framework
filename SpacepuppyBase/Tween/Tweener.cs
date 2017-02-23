@@ -516,8 +516,13 @@ namespace com.spacepuppy.Tween
             this.OnStopped += d;
         }
 
+        bool IRadicalWaitHandle.Cancelled
+        {
+            get { return float.IsNaN(_time); }
+        }
+
         #endregion
-        
+
     }
-    
+
 }

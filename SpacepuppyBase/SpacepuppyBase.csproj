@@ -76,6 +76,7 @@
     <Compile Include="Cameras\MultiCameraController.cs" />
     <Compile Include="Cameras\UnityCamera.cs" />
     <Compile Include="CancellableNotification.cs" />
+    <Compile Include="Collections\BinaryHeap.cs" />
     <Compile Include="Collections\LightEnumerator.cs" />
     <Compile Include="Collections\MultitonPool.cs" />
     <Compile Include="Collections\SamplingCharEnumerator.cs" />
@@ -123,10 +124,14 @@
     <Compile Include="Geom\Box.cs" />
     <Compile Include="Geom\CatmullRomSpline.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
+    <Compile Include="Graphs\AStarPathResolver.cs" />
+    <Compile Include="Graphs\DijkstraPathResolver.cs" />
     <Compile Include="Graphs\Exceptions.cs" />
     <Compile Include="Graphs\GridGraph.cs" />
     <Compile Include="Graphs\IGraph.cs" />
+    <Compile Include="Graphs\IHeuristic.cs" />
     <Compile Include="Graphs\INode.cs" />
+    <Compile Include="Graphs\IPathResolver.cs" />
     <Compile Include="Graphs\LinkedNodeGraph.cs" />
     <Compile Include="IEntityAwakeHandler.cs" />
     <Compile Include="IImmediatelyResumingYieldInstruction.cs" />

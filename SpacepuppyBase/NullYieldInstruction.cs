@@ -37,6 +37,11 @@ namespace com.spacepuppy
             //do nothing
         }
 
+        bool IRadicalWaitHandle.Cancelled
+        {
+            get { return false; }
+        }
+
         #endregion
 
         #region Static Interface
