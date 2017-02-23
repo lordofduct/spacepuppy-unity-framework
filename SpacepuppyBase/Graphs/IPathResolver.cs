@@ -14,4 +14,26 @@ namespace com.spacepuppy.Graphs
         int Reduce(IList<T> path);
 
     }
+
+    public interface ISteppingPathResolver<T> : IPathResolver<T> where T : INode
+    {
+        /// <summary>
+        /// Start the stepping path resolver for reducing.
+        /// </summary>
+        void BeginSteppedReduce();
+        /// <summary>
+        /// Take a step at reducing the path resolver.
+        /// </summary>
+        /// <returns>Returns true if reached goal.</returns>
+        bool Step();
+        /// <summary>
+        /// Get the result of reducing the path.
+        /// </summary>
+        /// <param name="path"></param>
+        int EndSteppedReduce(IList<T> path);
+        /// <summary>
+        /// Reset the resolver so a new Step sequence could be started.
+        /// </summary>
+        void Reset();
+    }
 }
