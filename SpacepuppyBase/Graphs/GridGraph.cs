@@ -28,24 +28,27 @@ namespace com.spacepuppy.Graphs
         private int _colCount;
         private T[] _data;
         private IEqualityComparer<T> _comparer;
+        private bool _includeDiagonals;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        public GridGraph(int width, int height)
+        public GridGraph(int width, int height, bool includeDiagonals)
         {
             _rowCount = height;
             _colCount = width;
             _data = new T[Math.Max(_rowCount * _colCount, 0)];
+            _includeDiagonals = includeDiagonals;
             _comparer = EqualityComparer<T>.Default;
         }
 
-        public GridGraph(int width, int height, IEqualityComparer<T> comparer)
+        public GridGraph(int width, int height, bool includeDiagonals, IEqualityComparer<T> comparer)
         {
             _rowCount = height;
             _colCount = width;
             _data = new T[Math.Max(_rowCount * _colCount, 0)];
+            _includeDiagonals = includeDiagonals;
             _comparer = comparer ?? EqualityComparer<T>.Default;
         }
 
@@ -53,16 +56,39 @@ namespace com.spacepuppy.Graphs
 
         #region Properties
 
+        /// <summary>
+        /// The width of the grid
+        /// </summary>
         public int Width
         {
             get { return _colCount; }
         }
 
+        /// <summary>
+        /// The height of the grid
+        /// </summary>
         public int Height
         {
             get { return _rowCount; }
         }
 
+        /// <summary>
+        /// If diagonals are considered neighbours when calling 'GetNeighbours'. 
+        /// Calling GetNeighbour/s with a GridNeighbour enum ignores this property.
+        /// </summary>
+        public bool IncludeDiagonals
+        {
+            get { return _includeDiagonals; }
+            set { _includeDiagonals = value; }
+        }
+
+        /// <summary>
+        /// Access a node by its x,y position in the grid.
+        /// Returns null if out of range.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public T this[int x, int y]
         {
             get
@@ -81,6 +107,9 @@ namespace com.spacepuppy.Graphs
             }
         }
 
+        /// <summary>
+        /// Comparer used when comparing nodes.
+        /// </summary>
         public IEqualityComparer<T> Comparer
         {
             get { return _comparer; }
@@ -89,6 +118,50 @@ namespace com.spacepuppy.Graphs
         #endregion
 
         #region Methods
+        
+        public T GetNeighbour(int x, int y, GridNeighbour side)
+        {
+            switch (side)
+            {
+                case GridNeighbour.North:
+                    return this[x, y + 1];
+                case GridNeighbour.NE:
+                    return this[x + 1, y + 1];
+                case GridNeighbour.East:
+                    return this[x + 1, y];
+                case GridNeighbour.SE:
+                    return this[x + 1, y - 1];
+                case GridNeighbour.South:
+                    return this[x, y - 1];
+                case GridNeighbour.SW:
+                    return this[x - 1, y - 1];
+                case GridNeighbour.West:
+                    return this[x - 1, y];
+                case GridNeighbour.NW:
+                    return this[x - 1, y + 1];
+                default:
+                    return default(T);
+            }
+
+            return default(T);
+        }
+
+        public T GetNeighbour(int index, GridNeighbour side)
+        {
+            return GetNeighbour(index % _colCount, index / _colCount, side);
+        }
+
+        public T GetNeighbour(T node, GridNeighbour side)
+        {
+            if (node == null) throw new ArgumentNullException("node");
+
+            int index = this.IndexOf(node);
+            if (index < 0) return default(T);
+
+            return GetNeighbour(index % _colCount, index / _colCount, side);
+        }
+        
+
 
         public IEnumerable<T> GetNeighbours(int index)
         {
@@ -99,13 +172,21 @@ namespace com.spacepuppy.Graphs
         public IEnumerable<T> GetNeighbours(int x, int y)
         {
             if (x >= 0 && x < _colCount && y > -1 && y < _rowCount - 1)
-                yield return this[x, y + 1];
+                yield return this[x, y + 1]; //n
+            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > -1 && y < _rowCount - 1)
+                yield return this[x + 1, y + 1]; //ne
             if (x >= -1 && x < _colCount - 1 && y >= 0 && y < _rowCount)
-                yield return this[x + 1, y];
+                yield return this[x + 1, y]; //e
+            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > 0 && y < _rowCount)
+                yield return this[x + 1, y - 1]; //se
             if (x >= 0 && x < _colCount && y > 0 && y <= _rowCount)
-                yield return this[x, y - 1];
-            if (x > 0 && x <= _rowCount && y >= 0 && y < _rowCount)
-                yield return this[x - 1, y];
+                yield return this[x, y - 1]; //s
+            if (_includeDiagonals && x > 0 && x <= _colCount && y > 0 && y <= _rowCount)
+                yield return this[x - 1, y - 1]; //sw
+            if (x > 0 && x <= _colCount && y >= 0 && y < _rowCount)
+                yield return this[x - 1, y]; //w
+            if (_includeDiagonals && x > 0 && x <= _colCount && y > -1 && y < _rowCount - 1)
+                yield return this[x - 1, y + 1]; //nw
         }
 
         public int GetNeighbours(int index, ICollection<T> buffer)
@@ -120,14 +201,102 @@ namespace com.spacepuppy.Graphs
 
             int cnt = buffer.Count;
             if (x >= 0 && x < _colCount && y > -1 && y < _rowCount - 1)
-                buffer.Add(this[x, y + 1]);
+                buffer.Add(this[x, y + 1]); //n
+            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > -1 && y < _rowCount - 1)
+                buffer.Add(this[x + 1, y + 1]); //ne
             if (x >= -1 && x < _colCount - 1 && y >= 0 && y < _rowCount)
-                buffer.Add(this[x + 1, y]);
+                buffer.Add(this[x + 1, y]); //e
+            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > 0 && y < _rowCount)
+                buffer.Add(this[x + 1, y - 1]); //se
             if (x >= 0 && x < _colCount && y > 0 && y <= _rowCount)
-                buffer.Add(this[x, y - 1]);
-            if (x > 0 && x <= _rowCount && y >= 0 && y < _rowCount)
-                buffer.Add(this[x - 1, y]);
+                buffer.Add(this[x, y - 1]); //s
+            if (_includeDiagonals && x > 0 && x <= _colCount && y > 0 && y <= _rowCount)
+                buffer.Add(this[x - 1, y - 1]); //sw
+            if (x > 0 && x <= _colCount && y >= 0 && y < _rowCount)
+                buffer.Add(this[x - 1, y]); //w
+            if (_includeDiagonals && x > 0 && x <= _colCount && y > -1 && y < _rowCount - 1)
+                buffer.Add(this[x - 1, y + 1]); //nw
+
             return buffer.Count - cnt;
+        }
+
+
+        public IEnumerable<T> GetNeighbours(int x, int y, GridNeighbour sides)
+        {
+            int e = (int)sides;
+            for (int i = 0; i < 8; i++)
+            {
+                int f = 1 << i;
+                if ((e & (1 << i)) != 0) yield return this.GetNeighbour(x, y, (GridNeighbour)f);
+            }
+        }
+
+        public int GetNeighbours(int x, int y, GridNeighbour sides, ICollection<T> buffer)
+        {
+            if (buffer == null) throw new ArgumentNullException("buffer");
+
+            int cnt = 0;
+            int e = (int)sides;
+            for (int i = 0; i < 8; i++)
+            {
+                int f = 1 << i;
+                if ((e & (1 << i)) != 0)
+                {
+                    buffer.Add(this.GetNeighbour(x, y, (GridNeighbour)f));
+                    cnt++;
+                }
+            }
+            return cnt;
+        }
+
+        public IEnumerable<T> GetNeighbours(int index, GridNeighbour sides)
+        {
+            return GetNeighbours(index % _colCount, index / _colCount, sides);
+        }
+
+        public int GetNeighbours(int index, GridNeighbour sides, ICollection<T> buffer)
+        {
+            return GetNeighbours(index % _colCount, index / _colCount, sides, buffer);
+        }
+
+        public IEnumerable<T> GetNeighbours(T node, GridNeighbour sides) 
+        {
+            if (node == null) throw new ArgumentNullException("node");
+
+            int index = this.IndexOf(node);
+            if (index < 0) return Enumerable.Empty<T>();
+
+            return GetNeighbours(index % _colCount, index / _colCount, sides);
+        }
+
+        public int GetNeighbours(T node, GridNeighbour sides, ICollection<T> buffer)
+        {
+            if (node == null) throw new ArgumentNullException("node");
+
+            int index = this.IndexOf(node);
+            if (index < 0) return 0;
+
+            return GetNeighbours(index % _colCount, index / _colCount, sides, buffer);
+        }
+
+
+
+        public GridNeighbour GetSide(T from, T to)
+        {
+            int index = this.IndexOf(from);
+            if (index < 0) return GridNeighbour.None;
+            if (!this.Contains(to)) return GridNeighbour.None;
+
+            int x = index % _colCount;
+            int y = index / _colCount;
+
+            for(int i = 0; i < 8; i++)
+            {
+                GridNeighbour f = (GridNeighbour)(1 << i);
+                if (_comparer.Equals(this.GetNeighbour(x, y, f), to)) return f;
+            }
+
+            return GridNeighbour.None;
         }
 
         #endregion
@@ -175,10 +344,7 @@ namespace com.spacepuppy.Graphs
 
         public void Clear()
         {
-            for (int i = 0; i < _data.Length; i++)
-            {
-                _data[i] = default(T);
-            }
+            Array.Clear(_data, 0, _data.Length);
         }
 
         public bool Contains(T item)
@@ -279,13 +445,21 @@ namespace com.spacepuppy.Graphs
             int y = index / _colCount;
             int cnt = buffer.Count;
             if (x >= 0 && x < _colCount && y > -1 && y < _rowCount - 1)
-                buffer.Add(this[x, y + 1]);
+                buffer.Add(this[x, y + 1]); //n
+            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > -1 && y < _rowCount - 1)
+                buffer.Add(this[x + 1, y + 1]); //ne
             if (x >= -1 && x < _colCount - 1 && y >= 0 && y < _rowCount)
-                buffer.Add(this[x + 1, y]);
+                buffer.Add(this[x + 1, y]); //e
+            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > 0 && y < _rowCount)
+                buffer.Add(this[x + 1, y - 1]); //se
             if (x >= 0 && x < _colCount && y > 0 && y <= _rowCount)
-                buffer.Add(this[x, y - 1]);
-            if (x > 0 && x <= _rowCount && y >= 0 && y < _rowCount)
-                buffer.Add(this[x - 1, y]);
+                buffer.Add(this[x, y - 1]); //s
+            if (_includeDiagonals && x > 0 && x <= _colCount && y > 0 && y <= _rowCount)
+                buffer.Add(this[x - 1, y - 1]); //sw
+            if (x > 0 && x <= _colCount && y >= 0 && y < _rowCount)
+                buffer.Add(this[x - 1, y]); //w
+            if (_includeDiagonals && x > 0 && x <= _colCount && y > -1 && y < _rowCount - 1)
+                buffer.Add(this[x - 1, y + 1]); //nw
             return buffer.Count - cnt;
         }
         
