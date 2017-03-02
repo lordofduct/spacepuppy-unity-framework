@@ -32,14 +32,14 @@ namespace com.spacepuppy.Dynamic
     /// Does not respect order of operations, use parens to define order.
     /// 
     /// ##Functions
-    /// Abs(...)
-    /// Sqrt(...)
-    /// Cos(...)
-    /// Sin(...)
-    /// Tan(...)
-    /// Acos(...)
-    /// Asin(...)
-    /// Atan(...)
+    /// Abs(x)
+    /// Sqrt(x)
+    /// Cos(x)
+    /// Sin(x)
+    /// Tan(x)
+    /// Acos(x)
+    /// Asin(x)
+    /// Atan(x)
     /// Atan2(y, x)
     /// Rand(max)
     /// Rand(min, max)
@@ -48,12 +48,14 @@ namespace com.spacepuppy.Dynamic
     /// vec(x)
     /// vec(x,y)
     /// vec(x,y,z)
-    /// vec(z,y,z,w)
+    /// vec(x,y,z,w)
     /// rot(x,y,z)
     /// 
     /// These function names are not case sensitive
     /// 
     /// #Variables
+    /// $true
+    /// $false
     /// $pi
     /// $2pi
     /// $pi_2
@@ -374,6 +376,20 @@ namespace com.spacepuppy.Dynamic
                             }
                         }
                         break;
+                    case '!':
+                        {
+                            if (_reader.Peek() == '=')
+                            {
+                                _reader.Read();
+                                v = this.EvalNextValue(out temp);
+                                result = DoNotEquals(result, v, state, temp, out state);
+                            }
+                            else
+                            {
+                                throw new System.InvalidOperationException("Failed to parse the command.");
+                            }
+                        }
+                        break;
                     case '<':
                         {
                             state = State.None;
@@ -468,7 +484,7 @@ namespace com.spacepuppy.Dynamic
 
             //ran out of statement with no errors, must be the end
             if (requireClosingParen)
-                throw new System.InvalidOperationException("Failed to parse the command: malformed function parameters.");
+                throw new System.InvalidOperationException("Failed to parse the command.");
 
             reachedEndOfParams = true;
             return result;
@@ -640,6 +656,12 @@ namespace com.spacepuppy.Dynamic
 
                 switch (str)
                 {
+                    case "true":
+                        state = State.None;
+                        return Vector4.one;
+                    case "false":
+                        state = State.None;
+                        return Vector4.zero;
                     case "pi":
                         state = State.Scalar;
                         return new Vector4((float)System.Math.PI, 0f);
@@ -1300,6 +1322,25 @@ namespace com.spacepuppy.Dynamic
                 default:
                     state = State.None;
                     result = VectorUtil.FuzzyEquals(left, right) ? Vector4.one : Vector4.zero;
+                    break;
+            }
+            return result;
+        }
+
+        private static Vector4 DoNotEquals(Vector4 left, Vector4 right, State sleft, State sright, out State state)
+        {
+            state = State.None;
+            Vector4 result = Vector4.zero;
+
+            switch (sleft)
+            {
+                case State.Scalar:
+                    state = State.None;
+                    result = MathUtil.FuzzyEqual(left.x, right.x) ? Vector4.zero : Vector4.one;
+                    break;
+                default:
+                    state = State.None;
+                    result = VectorUtil.FuzzyEquals(left, right) ? Vector4.zero : Vector4.one;
                     break;
             }
             return result;
