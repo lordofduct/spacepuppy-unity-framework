@@ -38,12 +38,12 @@ namespace com.spacepuppy.Scenario
 
         #region Methods
 
-        public void ActivateTrigger()
+        public virtual void ActivateTrigger()
         {
             _trigger.ActivateTrigger();
         }
 
-        public void ActivateTrigger(object arg)
+        public virtual void ActivateTrigger(object arg)
         {
             _trigger.ActivateTrigger(arg);
         }

@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace com.spacepuppy.Graphs
 {
-    public interface IHeuristic<T> where T : INode
+    public interface IHeuristic<T>
     {
         float Weight(T n);
         float Distance(T x, T y);
     }
 
-    public class ComponentHeuristic<T> : IHeuristic<T> where T : INode, IComponent
+    public class ComponentHeuristic<T> : IHeuristic<T> where T : IComponent
     {
 
         private static ComponentHeuristic<T> _default;

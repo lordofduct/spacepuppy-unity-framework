@@ -19,7 +19,7 @@ namespace com.spacepuppy.Graphs
     /// This is as opposed to index access which throws exceptions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class GridGraph<T> : IGraph<T>, IList<T> where T : INode
+    public class GridGraph<T> : IGraph<T>, IList<T>
     {
         
         #region Fields
@@ -396,7 +396,7 @@ namespace com.spacepuppy.Graphs
 
         #region IGraph Interface
 
-        int IGraph.Count
+        int IGraph<T>.Count
         {
             get { return _data.Length; }
         }
@@ -410,17 +410,6 @@ namespace com.spacepuppy.Graphs
 
             return this.GetNeighbours(index % _colCount, index / _colCount);
         }
-
-        IEnumerable<INode> IGraph.GetNeighbours(INode node)
-        {
-            if (node == null) throw new ArgumentNullException("node");
-            if (!(node is T)) throw new NonMemberNodeException();
-
-            int index = this.IndexOf((T)node);
-            if (index < 0) return Enumerable.Empty<INode>();
-
-            return this.GetNeighbours(index % _colCount, index / _colCount).Cast<INode>();
-        }
         
         public int GetNeighbours(T node, ICollection<T> buffer)
         {
@@ -430,37 +419,6 @@ namespace com.spacepuppy.Graphs
             if (index < 0) return 0;
 
             return this.GetNeighbours(index % _colCount, index / _colCount, buffer);
-        }
-
-        int IGraph.GetNeighbours(INode node, ICollection<INode> buffer)
-        {
-            if (node == null) throw new ArgumentNullException("node");
-            if (!(node is T)) throw new NonMemberNodeException();
-            if (buffer == null) throw new ArgumentNullException("buffer");
-
-            int index = this.IndexOf((T)node);
-            if (index < 0) return 0;
-
-            int x = index % _colCount;
-            int y = index / _colCount;
-            int cnt = buffer.Count;
-            if (x >= 0 && x < _colCount && y > -1 && y < _rowCount - 1)
-                buffer.Add(this[x, y + 1]); //n
-            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > -1 && y < _rowCount - 1)
-                buffer.Add(this[x + 1, y + 1]); //ne
-            if (x >= -1 && x < _colCount - 1 && y >= 0 && y < _rowCount)
-                buffer.Add(this[x + 1, y]); //e
-            if (_includeDiagonals && x >= -1 && x < _colCount - 1 && y > 0 && y < _rowCount)
-                buffer.Add(this[x + 1, y - 1]); //se
-            if (x >= 0 && x < _colCount && y > 0 && y <= _rowCount)
-                buffer.Add(this[x, y - 1]); //s
-            if (_includeDiagonals && x > 0 && x <= _colCount && y > 0 && y <= _rowCount)
-                buffer.Add(this[x - 1, y - 1]); //sw
-            if (x > 0 && x <= _colCount && y >= 0 && y < _rowCount)
-                buffer.Add(this[x - 1, y]); //w
-            if (_includeDiagonals && x > 0 && x <= _colCount && y > -1 && y < _rowCount - 1)
-                buffer.Add(this[x - 1, y + 1]); //nw
-            return buffer.Count - cnt;
         }
         
         #endregion

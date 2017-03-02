@@ -7,7 +7,7 @@ using com.spacepuppy.Dynamic;
 namespace com.spacepuppy.Scenario
 {
 
-    public class i_SetValue : TriggerableMechanism
+    public class i_SetValue : AutoTriggerableMechanism
     {
 
         public enum SetMode
@@ -22,6 +22,7 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         [SelectableObject()]
+        [DefaultFromSelf()]
         private UnityEngine.Object _target;
         [SerializeField()]
         private string _memberName;
@@ -39,7 +40,7 @@ namespace com.spacepuppy.Scenario
         {
             get
             {
-                return base.CanTrigger && _target != null && _memberName != null && _value != null;
+                return base.CanTrigger && _target != null && !string.IsNullOrEmpty(_memberName);
             }
         }
 

@@ -148,11 +148,20 @@ namespace com.spacepuppy
         private System.Collections.Generic.List<object> _instructions;
         private System.Collections.Generic.List<object> _waitingRoutines = new System.Collections.Generic.List<object>();
         private bool _signalNextTime;
+        private object _signaledInstruction;
 
         public WaitForAnyComplete(MonoBehaviour handle, params object[] instructions)
         {
             _handle = handle;
             _instructions = new System.Collections.Generic.List<object>(instructions);
+        }
+
+        /// <summary>
+        /// The instruction that caused this WaitForAny to signal complete.
+        /// </summary>
+        public object SignaledInstruction
+        {
+            get { return _signaledInstruction; }
         }
 
         protected override void SetSignal()
@@ -180,6 +189,7 @@ namespace com.spacepuppy
                 return false;
             }
 
+            _signaledInstruction = null;
             object current;
             for (int i = 0; i < _instructions.Count; i++)
             {
@@ -198,6 +208,7 @@ namespace com.spacepuppy
                 {
                     if ((current as RadicalCoroutine).Complete)
                     {
+                        _signaledInstruction = current;
                         this.SetSignal();
                         return false;
                     }
@@ -216,6 +227,7 @@ namespace com.spacepuppy
                     }
                     else
                     {
+                        _signaledInstruction = current;
                         this.SetSignal();
                         return false;
                     }
@@ -238,21 +250,16 @@ namespace com.spacepuppy
         private IEnumerator WaitForStandard(object inst)
         {
             yield return inst;
+            if (!this.IsComplete)
+                _signaledInstruction = inst;
             this.SetSignal();
-        }
-
-        private IEnumerator WaitForRadicalYield(IRadicalYieldInstruction inst)
-        {
-            object yieldObject;
-            while (inst.Tick(out yieldObject))
-            {
-                yield return yieldObject;
-            }
         }
 
         private IEnumerator WaitForRadical(object inst)
         {
             yield return inst;
+            if (!this.IsComplete)
+                _signaledInstruction = inst;
             this.SetSignal();
         }
 

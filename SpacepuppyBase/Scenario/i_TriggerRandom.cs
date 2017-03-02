@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class i_TriggerRandom : TriggerableMechanism
+    public class i_TriggerRandom : AutoTriggerableMechanism
     {
 
         #region Fields

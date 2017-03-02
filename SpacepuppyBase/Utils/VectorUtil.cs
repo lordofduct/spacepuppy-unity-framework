@@ -469,6 +469,16 @@ namespace com.spacepuppy.Utils
             return MathUtil.FuzzyEqual(Vector3.SqrMagnitude(a - b), 0f, epsilon);
         }
 
+        public static bool FuzzyEquals(this Vector4 a, Vector4 b)
+        {
+            return MathUtil.FuzzyEqual(Vector4.SqrMagnitude(a - b), 0f, MathUtil.EPSILON_SQR);
+        }
+
+        public static bool FuzzyEquals(this Vector4 a, Vector4 b, float epsilon)
+        {
+            return MathUtil.FuzzyEqual(Vector4.SqrMagnitude(a - b), 0f, epsilon);
+        }
+
         #endregion
 
         #region Lerp Like
@@ -743,6 +753,11 @@ namespace com.spacepuppy.Utils
         {
             return System.String.Format("<{0}, {1}, {2}>", v.x, v.y, v.z);
         }
+        public static string ToDetailedString(this Vector4 v)
+        {
+            return System.String.Format("<{0}, {1}, {2}, {3}>", v.x, v.y, v.z, v.w);
+        }
+
 
     }
 }

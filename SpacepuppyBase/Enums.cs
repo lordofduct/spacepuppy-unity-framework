@@ -84,5 +84,12 @@
         Type = 3
     }
 
+    public enum QuitState
+    {
+        None,
+        BeforeQuit,
+        Quit
+    }
+
 
 }

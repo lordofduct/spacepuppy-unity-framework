@@ -69,7 +69,41 @@ namespace com.spacepuppy
         {
             get
             {
-                return this.Evaluate();
+                switch (_type)
+                {
+                    case VariantType.Object:
+                        return this.ObjectValue;
+                    case VariantType.String:
+                        return this.StringValue;
+                    case VariantType.Boolean:
+                        return this.BoolValue;
+                    case VariantType.Integer:
+                        return this.IntValue;
+                    case VariantType.Float:
+                        return this.FloatValue;
+                    case VariantType.Double:
+                        return this.DoubleValue;
+                    case VariantType.Vector2:
+                        return this.Vector2Value;
+                    case VariantType.Vector3:
+                        return this.Vector3Value;
+                    case VariantType.Quaternion:
+                        return this.QuaternionValue;
+                    case VariantType.Color:
+                        return this.ColorValue;
+                    case VariantType.DateTime:
+                        return this.DateValue;
+                    case VariantType.GameObject:
+                        return this.GameObjectValue;
+                    case VariantType.Component:
+                        return this.ComponentValue;
+                    case VariantType.LayerMask:
+                        return this.LayerMaskValue;
+                    case VariantType.Rect:
+                        return this.RectValue;
+                }
+
+                return null;
             }
             set
             {
@@ -159,9 +193,17 @@ namespace com.spacepuppy
                         else
                             return null;
                     case RefMode.Property:
-                        return System.Convert.ToString(this.Evaluate());
+                        return System.Convert.ToString(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return this.EvaluateStatement().ToString();
+                        try
+                        {
+                            return Evaluator.EvalString(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return null;
             }
@@ -212,9 +254,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToBool(this.Evaluate());
+                        return ConvertUtil.ToBool(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return !MathUtil.FuzzyEqual((float)this.EvaluateStatement(), 0f);
+                        try
+                        {
+                            return Evaluator.EvalBool(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return false;
             }
@@ -270,9 +320,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToInt(this.Evaluate());
+                        return ConvertUtil.ToInt(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return (int)this.EvaluateStatement();
+                        try
+                        {
+                            return (int)Evaluator.EvalNumber(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return 0;
             }
@@ -327,9 +385,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToSingle(this.Evaluate());
+                        return ConvertUtil.ToSingle(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return (float)this.EvaluateStatement();
+                        try
+                        {
+                            return Evaluator.EvalNumber(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return 0f;
             }
@@ -384,9 +450,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToDouble(this.Evaluate());
+                        return ConvertUtil.ToDouble(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return this.EvaluateStatement();
+                        try
+                        {
+                            return (double)Evaluator.EvalNumber(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return 0d;
             }
@@ -441,9 +515,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToVector2(this.Evaluate());
+                        return ConvertUtil.ToVector2(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return new Vector2((float)this.EvaluateStatement(), 0f);
+                        try
+                        {
+                            return Evaluator.EvalVector2(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return Vector2.zero;
             }
@@ -498,9 +580,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToVector3(this.Evaluate());
+                        return ConvertUtil.ToVector3(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return new Vector3((float)this.EvaluateStatement(), 0f, 0f);
+                        try
+                        {
+                            return Evaluator.EvalVector3(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return Vector3.zero;
             }
@@ -555,9 +645,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToVector4(this.Evaluate());
+                        return ConvertUtil.ToVector4(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return new Vector4((float)this.EvaluateStatement(), 0f, 0f, 0f);
+                        try
+                        {
+                            return Evaluator.Eval(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return Vector4.zero;
             }
@@ -585,13 +683,23 @@ namespace com.spacepuppy
                         else
                             return Quaternion.identity;
                     case RefMode.Property:
-                        var obj = this.Evaluate();
+                        var obj = this.EvaluateProperty();
                         if (obj is Quaternion)
                             return (Quaternion)obj;
                         else if (obj is Vector3)
                             return Quaternion.Euler((Vector3)obj);
                         else
                             return Quaternion.identity;
+                    case RefMode.Eval:
+                        try
+                        {
+                            return Evaluator.EvalQuaternion(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return Quaternion.identity;
             }
@@ -649,9 +757,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToColor(this.Evaluate());
+                        return ConvertUtil.ToColor(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return ConvertUtil.ToColor((int)this.EvaluateStatement());
+                        try
+                        {
+                            return Evaluator.EvalColor(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return Color.black;
             }
@@ -702,7 +818,7 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToDate(this.Evaluate());
+                        return ConvertUtil.ToDate(this.EvaluateProperty());
                 }
                 return new System.DateTime(0L);
             }
@@ -726,7 +842,7 @@ namespace com.spacepuppy
                     case RefMode.Value:
                         return _unityObjectReference as GameObject;
                     case RefMode.Property:
-                        return GameObjectUtil.GetGameObjectFromSource(this.Evaluate());
+                        return GameObjectUtil.GetGameObjectFromSource(this.EvaluateProperty());
                 }
                 return null;
             }
@@ -751,7 +867,7 @@ namespace com.spacepuppy
                     case RefMode.Value:
                         return _unityObjectReference as Component;
                     case RefMode.Property:
-                        var obj = this.Evaluate();
+                        var obj = this.EvaluateProperty();
                         if (obj is Component)
                             return obj as Component;
                         else if (obj is IComponent)
@@ -782,7 +898,7 @@ namespace com.spacepuppy
                     case RefMode.Value:
                         return _unityObjectReference;
                     case RefMode.Property:
-                        var obj = this.Evaluate();
+                        var obj = this.EvaluateProperty();
                         if (obj is UnityEngine.Object)
                             return obj as UnityEngine.Object;
                         else if (obj is IComponent)
@@ -851,9 +967,17 @@ namespace com.spacepuppy
                         }
                         break;
                     case RefMode.Property:
-                        return ConvertUtil.ToInt(this.Evaluate());
+                        return ConvertUtil.ToInt(this.EvaluateProperty());
                     case RefMode.Eval:
-                        return (int)this.EvaluateStatement();
+                        try
+                        {
+                            return (int)Evaluator.EvalNumber(_string, _unityObjectReference);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                            return 0;
+                        }
                 }
                 return 0;
             }
@@ -912,17 +1036,22 @@ namespace com.spacepuppy
                         break;
                     case RefMode.Property:
                         {
-                            var r = this.Evaluate();
+                            var r = this.EvaluateProperty();
                             if (r is Rect)
                                 return (Rect)r;
                             else
                                 return new Rect();
                         }
                     case RefMode.Eval:
+                        try
                         {
-                            var v = new Vector4((float)this.EvaluateStatement(), 0f, 0f, 0f);
-                            return new Rect(v.x, 0f, 0f, 0f);
+                            return Evaluator.EvalRect(_string, _unityObjectReference);
                         }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                        }
+                        break;
                 }
                 return new Rect();
             }
@@ -1036,70 +1165,10 @@ namespace com.spacepuppy
             _unityObjectReference = optionalParam;
         }
 
-        private object Evaluate()
+        private object EvaluateProperty()
         {
-            switch(_mode)
-            {
-                case RefMode.Value:
-                    {
-                        switch (_type)
-                        {
-                            case VariantType.Object:
-                                return this.ObjectValue;
-                            case VariantType.String:
-                                return this.StringValue;
-                            case VariantType.Boolean:
-                                return this.BoolValue;
-                            case VariantType.Integer:
-                                return this.IntValue;
-                            case VariantType.Float:
-                                return this.FloatValue;
-                            case VariantType.Double:
-                                return this.DoubleValue;
-                            case VariantType.Vector2:
-                                return this.Vector2Value;
-                            case VariantType.Vector3:
-                                return this.Vector3Value;
-                            case VariantType.Quaternion:
-                                return this.QuaternionValue;
-                            case VariantType.Color:
-                                return this.ColorValue;
-                            case VariantType.DateTime:
-                                return this.DateValue;
-                            case VariantType.GameObject:
-                                return this.GameObjectValue;
-                            case VariantType.Component:
-                                return this.ComponentValue;
-                            case VariantType.LayerMask:
-                                return this.LayerMaskValue;
-                            case VariantType.Rect:
-                                return this.RectValue;
-                        }
-                    }
-                    break;
-                case RefMode.Property:
-                    {
-                        if (_unityObjectReference == null) return null;
-                        return DynamicUtil.GetValue(_unityObjectReference, _string);
-                    }
-                case RefMode.Eval:
-                    return this.EvaluateStatement();
-            }
-            
-            return null;
-        }
-
-        private double EvaluateStatement()
-        {
-            try
-            {
-                return Evaluator.Eval(_string, _unityObjectReference);
-            }
-            catch
-            {
-                Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
-                return 0d;
-            }
+            if (_unityObjectReference == null) return null;
+            return DynamicUtil.GetValue(_unityObjectReference, _string);
         }
 
         #endregion
@@ -1559,7 +1628,7 @@ namespace com.spacepuppy
                         _variant._type = VariantType.Null;
                         break;
                     case RefMode.Eval:
-                        _variant._type = VariantType.Double;
+                        //_variant._type = VariantType.Double;
                         break;
                 }
             }

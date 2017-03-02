@@ -12,6 +12,7 @@ namespace com.spacepuppy
 
         #region Events
 
+        public static event System.EventHandler BeforeApplicationQuit;
         public static event System.EventHandler ApplicatinQuit;
 
         public static event System.EventHandler EarlyUpdate;
@@ -30,7 +31,7 @@ namespace com.spacepuppy
 
         private static GameLoopEntry _instance;
         private static UpdateSequence _currentSequence;
-        private static bool _applicationClosing;
+        private static QuitState _quitState;
         private static System.Action<bool> _internalEarlyUpdate;
 
         private UpdateEventHooks _updateHook;
@@ -118,10 +119,12 @@ namespace com.spacepuppy
         /// </summary>
         public static UpdateSequence CurrentSequence { get { return _currentSequence; } }
 
+        public static QuitState QuitState { get { return _quitState; } }
+
         /// <summary>
         /// Returns true if the OnApplicationQuit message has been received.
         /// </summary>
-        public static bool ApplicationClosing { get { return _applicationClosing; } }
+        public static bool ApplicationClosing { get { return _quitState == QuitState.Quit; } }
 
         public static com.spacepuppy.Async.InvokePump UpdatePump { get { return _invokePump; } }
 
@@ -129,11 +132,57 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Methods
+        
+        /// <summary>
+        /// Preferred method of closing application.
+        /// </summary>
+        public static void QuitApplication()
+        {
+            if(_quitState == QuitState.None)
+            {
+                _quitState = QuitState.BeforeQuit;
+                if (BeforeApplicationQuit != null) BeforeApplicationQuit(_instance, System.EventArgs.Empty);
+
+                if(_quitState == QuitState.BeforeQuit)
+                {
+                    //wasn't cancelled, or force quit
+                    if (UnityEngine.Application.isEditor)
+                    {
+                        try
+                        {
+                            var tp = com.spacepuppy.Utils.TypeUtil.FindType("UnityEditor.EditorApplication");
+                            tp.GetProperty("isPlaying").SetValue(null, false, null);
+                        }
+                        catch
+                        {
+                            UnityEngine.Debug.Log("Failed to stop play in editor.");
+                        }
+                    }
+                    else
+                    {
+                        UnityEngine.Application.Quit();
+                    }
+                    
+                }
+            }
+        }
+
+        public static void CancelQuit()
+        {
+            if(_quitState == QuitState.BeforeQuit)
+            {
+                _quitState = QuitState.None;
+            }
+        }
+
+        #endregion
+
         #region Event Handlers
 
         private void OnApplicationQuit()
         {
-            _applicationClosing = true;
+            _quitState = QuitState.Quit;
             if (ApplicatinQuit != null) ApplicatinQuit(this, System.EventArgs.Empty);
         }
         

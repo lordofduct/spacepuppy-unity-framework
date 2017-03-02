@@ -93,6 +93,10 @@ namespace com.spacepuppy.Scenario
             get { return _targets; }
         }
 
+        /// <summary>
+        /// Count is total count of targets including the TriggerActivated event. 
+        /// Check the count of 'Targets' for the direct targets only.
+        /// </summary>
         public int Count
         {
             get
@@ -149,7 +153,7 @@ namespace com.spacepuppy.Scenario
             if(index >= 0 && index < _targets.Count)
             {
                 TriggerTarget trig = _targets[index];
-                trig.Trigger();
+                if (trig != null) trig.Trigger();
             }
 
             this.OnTriggerActivated(null);
@@ -160,7 +164,7 @@ namespace com.spacepuppy.Scenario
             if (index >= 0 && index < _targets.Count)
             {
                 TriggerTarget trig = _targets[index];
-                trig.Trigger(arg);
+                if(trig != null) trig.Trigger(arg);
             }
 
             this.OnTriggerActivated(arg);
@@ -171,7 +175,7 @@ namespace com.spacepuppy.Scenario
             if (_targets.Count > 0)
             {
                 TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
-                trig.Trigger();
+                if (trig != null) trig.Trigger();
             }
 
             this.OnTriggerActivated(null);
@@ -182,7 +186,7 @@ namespace com.spacepuppy.Scenario
             if (_targets.Count > 0)
             {
                 TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
-                trig.Trigger();
+                if (trig != null) trig.Trigger();
             }
 
             this.OnTriggerActivated(arg);

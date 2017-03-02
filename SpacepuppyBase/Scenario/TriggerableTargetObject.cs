@@ -17,7 +17,8 @@ namespace com.spacepuppy.Scenario
             FindParent = 1,
             FindInChildren = 2,
             FindInEntity = 3,
-            FindInScene = 4
+            FindInScene = 4,
+            FindEntityInScene = 5
         }
 
         public enum ResolveByCommand
@@ -290,6 +291,43 @@ namespace com.spacepuppy.Scenario
                         }
                     }
                     break;
+                case FindCommand.FindEntityInScene:
+                    {
+                        switch(_resolveBy)
+                        {
+                            case ResolveByCommand.Nothing:
+                                return GameObjectUtil.GetGameObjectFromSource((_configured) ? _target : triggerArg);
+                            case ResolveByCommand.WithTag:
+                                {
+                                    var e = SPEntity.Pool.GetEnumerator();
+                                    while(e.MoveNext())
+                                    {
+                                        if (e.Current.HasTag(_queryString)) return e.Current;
+                                    }
+                                }
+                                break;
+                            case ResolveByCommand.WithName:
+                                {
+                                    var e = SPEntity.Pool.GetEnumerator();
+                                    while (e.MoveNext())
+                                    {
+                                        if (e.Current.CompareName(_queryString)) return e.Current;
+                                    }
+                                }
+                                break;
+                            case ResolveByCommand.WithType:
+                                {
+                                    var e = SPEntity.Pool.GetEnumerator();
+                                    var tp = TypeUtil.FindType(_queryString);
+                                    while (e.MoveNext())
+                                    {
+                                        if (e.Current.HasComponent(tp)) return e.Current;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    break;
             }
 
             return null;
@@ -478,6 +516,47 @@ namespace com.spacepuppy.Scenario
                                     foreach (var o in ObjUtil.FindAll(SearchBy.Type, _queryString))
                                     {
                                         yield return o;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case FindCommand.FindEntityInScene:
+                    {
+                        switch (_resolveBy)
+                        {
+                            case ResolveByCommand.Nothing:
+                                {
+                                    var go = GameObjectUtil.GetGameObjectFromSource((_configured) ? _target : triggerArg);
+                                    if (go != null) yield return go;
+                                }
+                                break;
+                            case ResolveByCommand.WithTag:
+                                {
+                                    var e = SPEntity.Pool.GetEnumerator();
+                                    while (e.MoveNext())
+                                    {
+                                        if (e.Current.HasTag(_queryString)) yield return e.Current;
+                                    }
+                                }
+                                break;
+                            case ResolveByCommand.WithName:
+                                {
+                                    var e = SPEntity.Pool.GetEnumerator();
+                                    while (e.MoveNext())
+                                    {
+                                        if (e.Current.CompareName(_queryString)) yield return e.Current;
+                                    }
+                                }
+                                break;
+                            case ResolveByCommand.WithType:
+                                {
+                                    var e = SPEntity.Pool.GetEnumerator();
+                                    var tp = TypeUtil.FindType(_queryString);
+                                    while (e.MoveNext())
+                                    {
+                                        if (e.Current.HasComponent(tp)) yield return e.Current;
                                     }
                                 }
                                 break;

@@ -9,7 +9,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Internal
 {
-    public class UnityInternalPropertyHandler : IPropertyHandler
+    internal class UnityInternalPropertyHandler : IPropertyHandler
     {
 
         #region Fields

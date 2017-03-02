@@ -68,6 +68,14 @@ namespace com.spacepuppyeditor.Modifiers
                     property.serializedObject.ApplyModifiedProperties();
                 }
             }
+            else if(TypeUtil.IsType(fieldInfo.FieldType, typeof(UnityEngine.Object)) && property.objectReferenceValue == null)
+            {
+                var obj = property.serializedObject.targetObject;
+                if (GameObjectUtil.IsGameObjectSource(obj))
+                    obj = GameObjectUtil.GetGameObjectFromSource(obj);
+                property.objectReferenceValue = obj;
+                property.serializedObject.ApplyModifiedProperties();
+            }
             else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(VariantReference)))
             {
                 var variant = EditorHelper.GetTargetObjectOfProperty(property) as VariantReference;
@@ -132,6 +140,15 @@ namespace com.spacepuppyeditor.Modifiers
                     }
                     property.serializedObject.ApplyModifiedProperties();
                 }
+            }
+            else if (TypeUtil.IsType(elementType, typeof(UnityEngine.Object)))
+            {
+                property.arraySize = 1;
+                var obj = property.serializedObject.targetObject;
+                if (GameObjectUtil.IsGameObjectSource(obj))
+                    obj = GameObjectUtil.GetGameObjectFromSource(obj);
+                property.GetArrayElementAtIndex(0).objectReferenceValue = obj;
+                property.serializedObject.ApplyModifiedProperties();
             }
         }
 

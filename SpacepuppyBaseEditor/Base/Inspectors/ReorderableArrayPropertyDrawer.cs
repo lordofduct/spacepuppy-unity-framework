@@ -16,6 +16,7 @@ namespace com.spacepuppyeditor.Base
     public class ReorderableArrayPropertyDrawer : PropertyDrawer, IArrayHandlingPropertyDrawer
     {
 
+        private const float TOP_PAD = 2f;
         private const float BOTTOM_PAD = 2f;
 
         #region Fields
@@ -28,6 +29,7 @@ namespace com.spacepuppyeditor.Base
         private bool _draggable = true;
         private bool _drawElementAtBottom;
         private string _childPropertyAsLabel;
+        private ReorderableList.AddCallbackDelegate _addCallback;
 
         private PropertyDrawer _internalDrawer;
 
@@ -37,7 +39,7 @@ namespace com.spacepuppyeditor.Base
 
         private CachedReorderableList GetList(SerializedProperty property, GUIContent label)
         {
-            var lst = CachedReorderableList.GetListDrawer(property, _maskList_DrawHeader, _maskList_DrawElement);
+            var lst = CachedReorderableList.GetListDrawer(property, _maskList_DrawHeader, _maskList_DrawElement, _addCallback);
             lst.draggable = _draggable;
 
             if(property.arraySize > 0)
@@ -78,14 +80,6 @@ namespace com.spacepuppyeditor.Base
                 _drawElementAtBottom = attrib.DrawElementAtBottom;
                 _childPropertyAsLabel = attrib.ChildPropertyToDrawAsElementLabel;
             }
-            else
-            {
-                _disallowFoldout = false;
-                _removeBackgroundWhenCollapsed = false;
-                _draggable = true;
-                _drawElementAtBottom = false;
-                _childPropertyAsLabel = null;
-            }
 
             _label = label;
 
@@ -103,7 +97,41 @@ namespace com.spacepuppyeditor.Base
 
         #region Properties
 
-        
+        public bool DisallowFoldout
+        {
+            get { return _disallowFoldout; }
+            set { _disallowFoldout = value; }
+        }
+
+        public bool RemoveBackgroundWhenCollapsed
+        {
+            get { return _removeBackgroundWhenCollapsed; }
+            set { _removeBackgroundWhenCollapsed = value; }
+        }
+
+        public bool Draggable
+        {
+            get { return _draggable; }
+            set { _draggable = value; }
+        }
+
+        public bool DrawElementAtBottom
+        {
+            get { return _drawElementAtBottom; }
+            set { _drawElementAtBottom = value; }
+        }
+
+        public string ChildPropertyAsLabel
+        {
+            get { return _childPropertyAsLabel; }
+            set { _childPropertyAsLabel = value; }
+        }
+
+        public ReorderableList.AddCallbackDelegate OnAddCallback
+        {
+            get { return _addCallback; }
+            set { _addCallback = value; }
+        }
 
         #endregion
 
@@ -127,11 +155,11 @@ namespace com.spacepuppyeditor.Base
                         pchild.isExpanded = true;
                         if (_internalDrawer != null)
                         {
-                            h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD;
+                            h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD + TOP_PAD;
                         }
                         else
                         {
-                            h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + BOTTOM_PAD;
+                            h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + BOTTOM_PAD + TOP_PAD;
                         }
                         pchild.isExpanded = cache;
                     }
@@ -196,24 +224,25 @@ namespace com.spacepuppyeditor.Base
                     float h;
                     if (_internalDrawer != null)
                     {
-                        h = _internalDrawer.GetPropertyHeight(pchild, label2) + BOTTOM_PAD;
+                        h = _internalDrawer.GetPropertyHeight(pchild, label2) + BOTTOM_PAD + TOP_PAD;
                     }
                     else
                     {
-                        h = SPEditorGUI.GetDefaultPropertyHeight(pchild, label2, true) + BOTTOM_PAD;
+                        h = SPEditorGUI.GetDefaultPropertyHeight(pchild, label2, true) + BOTTOM_PAD + TOP_PAD;
                     }
                     var area = new Rect(position.x, position.yMax - h, position.width, h);
+                    var drawArea = new Rect(area.x, area.y + TOP_PAD, area.width, area.height - TOP_PAD);
 
                     GUI.BeginGroup(area, label2, GUI.skin.box);
                     GUI.EndGroup();
 
                     if (_internalDrawer != null)
                     {
-                        _internalDrawer.OnGUI(area, pchild, label2);
+                        _internalDrawer.OnGUI(drawArea, pchild, label2);
                     }
                     else
                     {
-                        SPEditorGUI.DefaultPropertyField(area, pchild, GUIContent.none, true);
+                        SPEditorGUI.DefaultPropertyField(drawArea, pchild, GUIContent.none, true);
                     }
                 }
             }
@@ -297,6 +326,7 @@ namespace com.spacepuppyeditor.Base
 
         private GUIContent TempElementLabel(SerializedProperty element, int index)
         {
+            /*
             var propLabel = (!string.IsNullOrEmpty(_childPropertyAsLabel)) ? element.FindPropertyRelative(_childPropertyAsLabel) : null;
             string slbl = null;
             
@@ -307,7 +337,22 @@ namespace com.spacepuppyeditor.Base
                 slbl = string.Format("Element {0:00}", index);
 
             return EditorHelper.TempContent(slbl);
-            //return EditorHelper.TempContent(string.Format("Element {0:00}", index));
+            */
+
+            var target = EditorHelper.GetTargetObjectOfProperty(element);
+            string slbl = ConvertUtil.ToString(com.spacepuppy.Dynamic.DynamicUtil.GetValue(target, _childPropertyAsLabel));
+
+            if(string.IsNullOrEmpty(slbl))
+            {
+                var propLabel = (!string.IsNullOrEmpty(_childPropertyAsLabel)) ? element.FindPropertyRelative(_childPropertyAsLabel) : null;
+                if (propLabel != null)
+                    slbl = ConvertUtil.ToString(EditorHelper.GetPropertyValue(propLabel));
+            }
+
+            if(string.IsNullOrEmpty(slbl))
+                slbl = string.Format("Element {0:00}", index);
+
+            return EditorHelper.TempContent(slbl);
         }
 
         #region IArrayHandlingPropertyDrawer Interface

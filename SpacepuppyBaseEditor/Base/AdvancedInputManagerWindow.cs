@@ -69,6 +69,11 @@ namespace com.spacepuppyeditor.Base
         private void OnDisable()
         {
             if (_openWindow == this) _openWindow = null;
+            if (_inputManagerAsset != null)
+            {
+                _inputManagerAsset.Dispose();
+                _inputManagerAsset = null;
+            }
         }
 
         private void OnGUI()
@@ -115,6 +120,34 @@ namespace com.spacepuppyeditor.Base
         }
 
         #endregion
+
+
+
+        #region Static Utils
+
+        public static string[] GetAllAvailableInputs()
+        {
+            var asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset").FirstOrDefault();
+            if (asset != null)
+            {
+                var obj = new SerializedObject(asset);
+                var axes = obj.FindProperty(PROP_AXES);
+                string[] arr = new string[axes.arraySize];
+                for(int i = 0; i < arr.Length; i++)
+                {
+                    arr[i] = axes.GetArrayElementAtIndex(i).FindPropertyRelative("m_Name").stringValue;
+                }
+                obj.Dispose();
+                return arr;
+            }
+            else
+            {
+                return com.spacepuppy.Utils.ArrayUtil.Empty<string>();
+            }
+        }
+
+        #endregion
+
 
     }
 

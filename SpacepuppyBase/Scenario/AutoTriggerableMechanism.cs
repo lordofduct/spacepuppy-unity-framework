@@ -6,22 +6,11 @@ namespace com.spacepuppy.Scenario
 {
     public abstract class AutoTriggerableMechanism : TriggerableMechanism
     {
-
-        [System.Flags()]
-        public enum ActivateEventSettings
-        {
-
-            None = 0,
-            OnStart = 1,
-            OnEnable = 2,
-            OnStartAndEnable = 3
-
-        }
-
+        
         #region Fields
 
         [SerializeField()]
-        private ActivateEventSettings _activateOn = ActivateEventSettings.None;
+        private ActivateEvent _activateOn = ActivateEvent.None;
 
         #endregion
 
@@ -31,7 +20,7 @@ namespace com.spacepuppy.Scenario
         {
             base.Start();
 
-            if (_activateOn.HasFlag(ActivateEventSettings.OnStart))
+            if (_activateOn.HasFlag(ActivateEvent.OnStart))
             {
                 this.Trigger();
             }
@@ -41,11 +30,11 @@ namespace com.spacepuppy.Scenario
         {
             base.OnEnable();
 
-            if (_activateOn.HasFlag(ActivateEventSettings.OnStart) && !this.started) return;
+            if (_activateOn.HasFlag(ActivateEvent.OnStart) && !this.started) return;
 
-            if (_activateOn.HasFlag(ActivateEventSettings.OnEnable))
+            if (_activateOn.HasFlag(ActivateEvent.OnEnable))
             {
-                this.Trigger();
+                this.Trigger(null);
             }
         }
 
@@ -53,7 +42,7 @@ namespace com.spacepuppy.Scenario
 
         #region Properties
 
-        public ActivateEventSettings ActivateOn
+        public ActivateEvent ActivateOn
         {
             get { return _activateOn; }
             set { _activateOn = value; }

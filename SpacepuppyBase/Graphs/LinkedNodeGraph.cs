@@ -6,7 +6,7 @@ using System.Text;
 
 namespace com.spacepuppy.Graphs
 {
-    public class LinkedNodeGraph<T> : IGraph<T>, ICollection<T> where T : INode
+    public class LinkedNodeGraph<T> : IGraph<T>, ICollection<T>
     {
 
         #region Fields
@@ -220,23 +220,7 @@ namespace com.spacepuppy.Graphs
         #endregion
 
         #region IGraph Interface
-
-        IEnumerable<INode> IGraph.GetNeighbours(INode node)
-        {
-            if (node == null) throw new ArgumentNullException("node");
-            if (!(node is T)) throw new NonMemberNodeException();
-
-            NeighbourInfo info;
-            if (_entries.TryGetValue((T)node, out info))
-            {
-                while (info != null)
-                {
-                    yield return info.Value;
-                    info = info.Next;
-                }
-            }
-        }
-
+        
         public IEnumerable<T> GetNeighbours(T node)
         {
             if (node == null) throw new ArgumentNullException("node");
@@ -251,26 +235,7 @@ namespace com.spacepuppy.Graphs
                 }
             }
         }
-
-        int IGraph.GetNeighbours(INode node, ICollection<INode> buffer)
-        {
-            if (node == null) throw new ArgumentNullException("node");
-            if (!(node is T)) throw new NonMemberNodeException();
-            if (buffer == null) throw new ArgumentNullException("buffer");
-
-            int cnt = buffer.Count;
-            NeighbourInfo info;
-            if (_entries.TryGetValue((T)node, out info))
-            {
-                while (info != null)
-                {
-                    buffer.Add(info.Value);
-                    info = info.Next;
-                }
-            }
-            return buffer.Count - cnt;
-        }
-
+        
         public int GetNeighbours(T node, ICollection<T> buffer)
         {
             if (node == null) throw new ArgumentNullException("node");

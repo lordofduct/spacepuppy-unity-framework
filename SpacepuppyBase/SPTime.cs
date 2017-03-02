@@ -35,7 +35,7 @@ namespace com.spacepuppy
     /// could add event callbacks to one time supplier, but later remove it from another.
     /// </summary>
     [System.Serializable()]
-    public struct SPTime
+    public struct SPTime : ITimeSupplier
     {
 
         #region Fields
@@ -117,7 +117,55 @@ namespace com.spacepuppy
         {
             get { return _timeSupplierType == DeltaTimeType.Custom; }
         }
-        
+
+        public float Total
+        {
+            get
+            {
+                var ts = this.TimeSupplier;
+                if (ts != null)
+                    return ts.Total;
+                else
+                    return 0f;
+            }
+        }
+
+        public float Delta
+        {
+            get
+            {
+                var ts = this.TimeSupplier;
+                if (ts != null)
+                    return ts.Delta;
+                else
+                    return 0f;
+            }
+        }
+
+        public float Scale
+        {
+            get
+            {
+                var ts = this.TimeSupplier;
+                if (ts != null)
+                    return ts.Scale;
+                else
+                    return 0f;
+            }
+        }
+
+        public double TotalPrecise
+        {
+            get
+            {
+                var ts = this.TimeSupplier;
+                if (ts != null)
+                    return ts.TotalPrecise;
+                else
+                    return 0d;
+            }
+        }
+
         #endregion
 
 

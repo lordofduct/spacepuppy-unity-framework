@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Graphs
 {
-    public interface IPathResolver<T> where T : INode
+    public interface IPathResolver<T>
     {
 
         T Start { get; set; }
@@ -15,7 +15,7 @@ namespace com.spacepuppy.Graphs
 
     }
 
-    public interface ISteppingPathResolver<T> : IPathResolver<T> where T : INode
+    public interface ISteppingPathResolver<T> : IPathResolver<T>
     {
         /// <summary>
         /// Start the stepping path resolver for reducing.

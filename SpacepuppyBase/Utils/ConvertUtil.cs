@@ -732,6 +732,21 @@ namespace com.spacepuppy.Utils
             return ToSingle(System.Convert.ToInt32(value));
         }
 
+        public static float ToSingle(Vector2 value)
+        {
+            return value.x;
+        }
+
+        public static float ToSingle(Vector3 value)
+        {
+            return value.x;
+        }
+
+        public static float ToSingle(Vector4 value)
+        {
+            return value.x;
+        }
+        
         public static float ToSingle(object value)
         {
             if (value == null)
@@ -748,6 +763,18 @@ namespace com.spacepuppy.Utils
                 {
                     return 0;
                 }
+            }
+            else if(value is Vector2)
+            {
+                return ToSingle((Vector2)value);
+            }
+            else if(value is Vector3)
+            {
+                return ToSingle((Vector3)value);
+            }
+            else if (value is Vector4)
+            {
+                return ToSingle((Vector3)value);
             }
             else
             {
@@ -831,6 +858,21 @@ namespace com.spacepuppy.Utils
             return ToDouble(System.Convert.ToInt32(value));
         }
 
+        public static double ToDouble(Vector2 value)
+        {
+            return value.x;
+        }
+
+        public static double ToDouble(Vector3 value)
+        {
+            return value.x;
+        }
+
+        public static double ToDouble(Vector4 value)
+        {
+            return value.x;
+        }
+        
         public static double ToDouble(object value)
         {
             if (value == null)
@@ -847,6 +889,18 @@ namespace com.spacepuppy.Utils
                 {
                     return 0;
                 }
+            }
+            else if (value is Vector2)
+            {
+                return ToDouble((Vector2)value);
+            }
+            else if (value is Vector3)
+            {
+                return ToDouble((Vector3)value);
+            }
+            else if (value is Vector4)
+            {
+                return ToDouble((Vector3)value);
             }
             else
             {
@@ -1056,6 +1110,21 @@ namespace com.spacepuppy.Utils
             return ToDecimal(System.Convert.ToInt32(value));
         }
 
+        public static decimal ToDecimal(Vector2 value)
+        {
+            return (decimal)value.x;
+        }
+
+        public static decimal ToDecimal(Vector3 value)
+        {
+            return (decimal)value.x;
+        }
+
+        public static decimal ToDecimal(Vector4 value)
+        {
+            return (decimal)value.x;
+        }
+
         public static decimal ToDecimal(object value)
         {
             if (value == null)
@@ -1072,6 +1141,18 @@ namespace com.spacepuppy.Utils
                 {
                     return 0;
                 }
+            }
+            else if (value is Vector2)
+            {
+                return ToDecimal((Vector2)value);
+            }
+            else if (value is Vector3)
+            {
+                return ToDecimal((Vector3)value);
+            }
+            else if (value is Vector4)
+            {
+                return ToDecimal((Vector3)value);
             }
             else
             {
@@ -1733,6 +1814,11 @@ namespace com.spacepuppy.Utils
             return new Vector2(ConvertUtil.ToSingle(arr[0]), ConvertUtil.ToSingle(arr[1]));
         }
 
+        public static Vector2 ToVector2(float value)
+        {
+            return new Vector2(value, 0f);
+        }
+
         /// <summary>
         /// Creates Vector2 from X and Y values of a Vector3
         /// </summary>
@@ -1772,6 +1858,11 @@ namespace com.spacepuppy.Utils
                 var q = (Quaternion)value;
                 return new Vector2(q.x, q.y);
             }
+            if (value is Color)
+            {
+                var c = (Color)value;
+                return new Vector2(c.r, c.g);
+            }
             if (ValueIsNumericType(value))
             {
                 return new Vector2(ToSingle(value), 0f);
@@ -1782,6 +1873,11 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region ToVector3
+
+        public static Vector3 ToVector3(float value)
+        {
+            return new Vector3(value, 0f, 0f);
+        }
 
         public static Vector3 ToVector3(Vector2 vec)
         {
@@ -1829,6 +1925,11 @@ namespace com.spacepuppy.Utils
                 var q = (Quaternion)value;
                 return new Vector3(q.x, q.y, q.z);
             }
+            if (value is Color)
+            {
+                var c = (Color)value;
+                return new Vector3(c.r, c.g, c.b);
+            }
             if (ValueIsNumericType(value))
             {
                 return new Vector3(ToSingle(value), 0f);
@@ -1839,6 +1940,11 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region ToVector4
+
+        public static Vector4 ToVector4(float value)
+        {
+            return new Vector4(value, 0f, 0f, 0f);
+        }
 
         public static Vector4 ToVector4(Vector2 vec)
         {
@@ -1885,6 +1991,16 @@ namespace com.spacepuppy.Utils
             {
                 var q = (Quaternion)value;
                 return new Vector4(q.x, q.y, q.z, q.w);
+            }
+            if (value is Color)
+            {
+                var c = (Color)value;
+                return new Vector4(c.r, c.g, c.b, c.a);
+            }
+            if (value is Rect)
+            {
+                var r = (Rect)value;
+                return new Vector4(r.x, r.y, r.width, r.height);
             }
             if (ValueIsNumericType(value))
             {

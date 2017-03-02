@@ -7,7 +7,7 @@ using com.spacepuppy.Collections;
 namespace com.spacepuppy.Graphs
 {
 
-    public class AStarPathResolver<T> : ISteppingPathResolver<T> where T : class, INode
+    public class AStarPathResolver<T> : ISteppingPathResolver<T> where T : class
     {
 
         #region Fields

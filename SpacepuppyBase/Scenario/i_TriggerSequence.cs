@@ -3,13 +3,14 @@
 using UnityEngine;
 
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy.Scenario
 {
-    public class i_TriggerSequence : SPComponent, ITriggerableMechanism
+    public class i_TriggerSequence : AutoTriggerableMechanism
     {
 
-        public enum SequenceMode
+        public enum WrapMode
         {
             Oblivion,
             Clamp,
@@ -17,14 +18,21 @@ namespace com.spacepuppy.Scenario
             PingPong
         }
 
+        public enum SignalMode
+        {
+            Manual,
+            Auto
+        }
+
 
         #region Fields
-
+        
         [SerializeField()]
-        private int _order;
+        [UnityEngine.Serialization.FormerlySerializedAs("_mode")]
+        private WrapMode _wrapMode;
 
-        [SerializeField()]
-        private SequenceMode _mode;
+        [SerializeField]
+        private SignalMode _signal;
 
         [SerializeField()]
         private Trigger _trigger;
@@ -34,22 +42,40 @@ namespace com.spacepuppy.Scenario
 
         [System.NonSerialized()]
         private int _currentIndex = 0;
-        
+
+
+        [System.NonSerialized()]
+        private RadicalCoroutine _routine;
+
         #endregion
 
         #region CONSTRUCTOR
 
+        protected override void OnStartOrEnable()
+        {
+            base.OnStartOrEnable();
+
+            if(this.ActivateOn == ActivateEvent.None)
+                this.AttemptAutoStart();
+        }
+
         #endregion
 
         #region Properties
-        
-        public SequenceMode Mode
+
+        public WrapMode Wrap
         {
-            get { return _mode; }
-            set { _mode = value; }
+            get { return _wrapMode; }
+            set { _wrapMode = value; }
         }
 
-        public Trigger Trigger
+        public SignalMode Signal
+        {
+            get { return _signal; }
+            set { _signal = value; }
+        }
+
+        public Trigger TriggerSequence
         {
             get
             {
@@ -73,15 +99,15 @@ namespace com.spacepuppy.Scenario
         {
             get
             {
-                switch (_mode)
+                switch (_wrapMode)
                 {
-                    case SequenceMode.Oblivion:
+                    case WrapMode.Oblivion:
                         return _currentIndex;
-                    case SequenceMode.Clamp:
+                    case WrapMode.Clamp:
                         return Mathf.Clamp(_currentIndex, 0, _trigger.Targets.Count - 1);
-                    case SequenceMode.Loop:
+                    case WrapMode.Loop:
                         return _currentIndex % _trigger.Targets.Count;
-                    case SequenceMode.PingPong:
+                    case WrapMode.PingPong:
                         return (int)Mathf.PingPong(_currentIndex, _trigger.Targets.Count - 1);
                     default:
                         return _currentIndex;
@@ -93,49 +119,94 @@ namespace com.spacepuppy.Scenario
 
         #region Methods
 
+        public void Reset()
+        {
+            if (_routine != null)
+            {
+                _routine.Cancel();
+                _routine = null;
+            }
+
+            _currentIndex = 0;
+
+            if (Application.isPlaying && this.enabled)
+            {
+                this.AttemptAutoStart();
+            }
+        }
+
+        private void AttemptAutoStart()
+        {
+            if (_signal == SignalMode.Auto && _trigger.Targets.Count > 0 && _trigger.Targets[0].Target != null)
+            {
+                var signal = _trigger.Targets[0].Target.GetComponentInChildren<IAutoSequenceSignal>();
+                if (signal != null)
+                {
+                    _routine = this.StartRadicalCoroutine(this.DoAutoSequence(signal), RadicalCoroutineDisableMode.Pauses);
+                }
+            }
+        }
+        
+        private System.Collections.IEnumerator DoAutoSequence(IAutoSequenceSignal signal)
+        {
+            if (signal != null)
+            {
+                yield return signal.Wait();
+                _currentIndex++;
+            }
+
+            while (true)
+            {
+                int i = this.CurrentIndexNormalized;
+                if (i < 0 || i >= _trigger.Targets.Count) yield break;
+                _currentIndex++;
+
+                if (_trigger.Targets[i].Target != null && _trigger.Targets[i].Target.GetComponentInChildren<IAutoSequenceSignal>(out signal))
+                {
+                    var handle = signal.Wait();
+                    _trigger.ActivateTriggerAt(i);
+                    yield return handle;
+                }
+                else
+                {
+                    _trigger.ActivateTriggerAt(i);
+                    yield return null;
+                }
+            }
+        }
+
         #endregion
 
         #region ITriggerableMechanism Interface
-
-        public int Order
-        {
-            get { return _order; }
-        }
-
-        public bool CanTrigger
-        {
-            get { return this.isActiveAndEnabled; }
-        }
-
-        public void ActivateTrigger()
-        {
-            this.ActivateTrigger(null);
-        }
-
-        public bool ActivateTrigger(object arg)
+        
+        public override bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
 
-            if (_passAlongTriggerArg)
-                _trigger.ActivateTriggerAt(this.CurrentIndexNormalized, arg);
-            else
-                _trigger.ActivateTriggerAt(this.CurrentIndexNormalized);
 
-            _currentIndex++;
+            switch (_signal)
+            {
+                case SignalMode.Manual:
+                    {
+                        if (_passAlongTriggerArg)
+                            _trigger.ActivateTriggerAt(this.CurrentIndexNormalized, arg);
+                        else
+                            _trigger.ActivateTriggerAt(this.CurrentIndexNormalized);
+
+                        _currentIndex++;
+                    }
+                    break;
+                case SignalMode.Auto:
+                    {
+                        if (_routine != null) _routine.Cancel();
+                        _routine = this.StartRadicalCoroutine(this.DoAutoSequence(null), RadicalCoroutineDisableMode.Pauses);
+                    }
+                    break;
+            }
 
             return true;
         }
-
-        void ITriggerableMechanism.Trigger()
-        {
-            this.ActivateTrigger(null);
-        }
-
-        bool ITriggerableMechanism.Trigger(object arg)
-        {
-            return this.ActivateTrigger(arg);
-        }
-
+        
         #endregion
 
     }

@@ -22,16 +22,30 @@ namespace com.spacepuppyeditor.Scenario
         private const string PROP_INITIALSTATE = "_initialState";
         private const string PROP_NOTIFYONSTART = "_notifyFirstStateOnStart";
 
-        private TriggerPropertyDrawer _triggerDrawer = new TriggerPropertyDrawer();
-        
+        private ReorderableArrayPropertyDrawer _arrayDrawer = new ReorderableArrayPropertyDrawer()
+        {
+            DrawElementAtBottom = true,
+            ChildPropertyAsLabel = PROP_STATENAME
+        };
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            _arrayDrawer.OnAddCallback = this.OnStateAdded;
+        }
+
         protected override void OnSPInspectorGUI()
         {
             this.serializedObject.Update();
 
-            //this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
-            this.DrawDefaultInspectorExcept(PROP_INITIALSTATE);
+            this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
 
             var statesProp = this.serializedObject.FindProperty(PROP_STATES);
+            var label = EditorHelper.TempContent("States");
+            var r = EditorGUILayout.GetControlRect(true, _arrayDrawer.GetPropertyHeight(statesProp, label));
+            _arrayDrawer.OnGUI(r, statesProp, label);
+
             string[] states = new string[statesProp.arraySize];
             for (int i = 0; i < statesProp.arraySize; i++)
             {
@@ -39,26 +53,35 @@ namespace com.spacepuppyeditor.Scenario
             }
 
             //notify on state
-            //this.DrawPropertyField(PROP_NOTIFYONSTART);
+            this.DrawPropertyField(PROP_NOTIFYONSTART);
 
             //initial state
             var initialStateProp = this.serializedObject.FindProperty(PROP_INITIALSTATE);
             initialStateProp.intValue = EditorGUILayout.Popup("Initial State", initialStateProp.intValue, states);
 
-            //draw actual states
-            //TODO - draw pretty like
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_STATES, PROP_INITIALSTATE, PROP_NOTIFYONSTART);
 
-            if(Application.isPlaying)
+            if (Application.isPlaying)
             {
                 var obj = this.serializedObject.targetObject as t_StateMachine;
                 if (obj != null)
-                    EditorGUILayout.LabelField("Current State", obj.Current);
+                    EditorGUILayout.LabelField("Current State", (obj.Current != null) ? obj.Current.Name : string.Empty);
             }
 
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        
+
+        private void OnStateAdded(ReorderableList lst)
+        {
+            lst.serializedProperty.arraySize++;
+            lst.index = lst.serializedProperty.arraySize - 1;
+            
+            var stateProp = lst.serializedProperty.GetArrayElementAtIndex(lst.index);
+            stateProp.FindPropertyRelative(PROP_STATENAME).stringValue = "State " + lst.serializedProperty.arraySize.ToString();
+        }
+
+
     }
 
 }

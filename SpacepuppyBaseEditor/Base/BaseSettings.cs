@@ -146,7 +146,7 @@ namespace com.spacepuppyeditor.Base
             EditorGUILayout.Space();
             EditorGUILayout.Space();
 
-            this.DrawDebugBuildScenes();
+            this.DrawScenes();
 
 
             //EditorGUIUtility.labelWidth = labelWidthCache;
@@ -157,14 +157,14 @@ namespace com.spacepuppyeditor.Base
 
         #region Debug Build Scenes
 
-        private void DrawDebugBuildScenes()
+        private void DrawScenes()
         {
-            EditorGUILayout.LabelField("Scenes Available In Editor Mode", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Scenes in Build", EditorStyles.boldLabel);
 
             EditorGUI.indentLevel++;
 
             _scenesScrollBarPosition = EditorGUILayout.BeginScrollView(_scenesScrollBarPosition, GUI.skin.box, GUILayout.Height(200f));
-
+            
             EditorGUI.BeginChangeCheck();
             var scenes = EditorBuildSettings.scenes;
             foreach (var scene in scenes)
@@ -176,23 +176,88 @@ namespace com.spacepuppyeditor.Base
 
             EditorGUILayout.EndScrollView();
 
+            //DRAG & DROP ON SCROLLVIEW
+            var dropArea = GUILayoutUtility.GetLastRect();
+
+            var ev = Event.current;
+            switch (ev.type)
+            {
+                case EventType.DragUpdated:
+                    if (dropArea.Contains(ev.mousePosition) && (from o in DragAndDrop.objectReferences where o is SceneAsset select o).Any())
+                        DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                    break;
+                case EventType.DragPerform:
+                    if (dropArea.Contains(ev.mousePosition) && (from o in DragAndDrop.objectReferences where o is SceneAsset select o).Any())
+                    {
+                        DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                        DragAndDrop.AcceptDrag();
+
+                        var lst = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+                        foreach (var o in DragAndDrop.objectReferences)
+                        {
+                            var scene = o as SceneAsset;
+                            if (scene == null) continue;
+
+                            var p = AssetDatabase.GetAssetPath(scene);
+                            if (!(from s in lst where s.path == p select s).Any())
+                            {
+                                lst.Add(new EditorBuildSettingsScene(p, true));
+                            }
+                        }
+                        EditorBuildSettings.scenes = lst.ToArray();
+                    }
+                    break;
+
+            }
+
+
+
+            ////////////////
+            //BUTTONS!
+            var rect = EditorGUILayout.GetControlRect();
+
+            //DESELECT
+            var selectAllPosition = new Rect(rect.xMin, rect.yMin, 100f, rect.height);
+            if (GUI.Button(selectAllPosition, new GUIContent("Select All")))
+            {
+                var arr = EditorBuildSettings.scenes;
+                foreach (var s in arr)
+                {
+                    s.enabled = true;
+                }
+                EditorBuildSettings.scenes = arr;
+            }
+
+            //DESELECT
+            var deselectPosition = new Rect(rect.xMin + 105f, rect.yMin, 100f, rect.height);
+            if(GUI.Button(deselectPosition, new GUIContent("Deselect All")))
+            {
+                var arr = EditorBuildSettings.scenes;
+                foreach (var s in arr)
+                {
+                    s.enabled = false;
+                }
+                EditorBuildSettings.scenes = arr;
+            }
 
             //CLEAR
-            var rect = EditorGUILayout.GetControlRect();
-            var cancelPosition = new Rect(rect.xMax - 110f, rect.yMax, 50f, rect.height);
+            var cancelPosition = new Rect(rect.xMax - 110f, rect.yMin, 50f, rect.height);
             if (GUI.Button(cancelPosition, new GUIContent("Clear")))
             {
                 EditorBuildSettings.scenes = new EditorBuildSettingsScene[] { };
             }
             //SYNC
-            var applyPosition = new Rect(rect.xMax - 55f, rect.yMax, 50f, rect.height);
+            var applyPosition = new Rect(rect.xMax - 55f, rect.yMin, 50f, rect.height);
+            var oldScenes = EditorBuildSettings.scenes;
             if (GUI.Button(applyPosition, new GUIContent("Sync")))
             {
                 var lst = new List<EditorBuildSettingsScene>();
                 var mainFolder = Application.dataPath.EnsureNotEndsWith("Assets");
                 foreach (var file in Directory.GetFiles(Application.dataPath + "/Scenes", "*.unity", SearchOption.AllDirectories))
                 {
-                    lst.Add(new EditorBuildSettingsScene(file.EnsureNotStartWith(mainFolder), true));
+                    var normalizedFile = file.EnsureNotStartWith(mainFolder);
+                    bool enabled = (from s in oldScenes where s.enabled && s.path == normalizedFile select s).Any();
+                    lst.Add(new EditorBuildSettingsScene(normalizedFile, enabled));
                 }
                 EditorBuildSettings.scenes = lst.ToArray();
             }

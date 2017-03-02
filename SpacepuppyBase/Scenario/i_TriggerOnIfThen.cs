@@ -7,7 +7,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenario
 {
 
-    public class i_TriggerOnIfThen : TriggerableMechanism
+    public class i_TriggerOnIfThen : AutoTriggerableMechanism
     {
 
         #region Fields

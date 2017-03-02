@@ -24,15 +24,31 @@ namespace com.spacepuppy.Utils
 
         public static bool HasFlag(this System.Enum e, System.Enum value)
         {
+            long v = System.Convert.ToInt64(value);
+            return (System.Convert.ToInt64(e) & v) == v;
+        }
+        
+        public static bool HasFlag(this System.Enum e, ulong value)
+        {
+            return (System.Convert.ToUInt64(e) & value) == value;
+        }
+
+        public static bool HasFlag(this System.Enum e, long value)
+        {
+            return (System.Convert.ToInt64(e) & value) == value;
+        }
+
+        public static bool HasAnyFlag(this System.Enum e, System.Enum value)
+        {
             return (System.Convert.ToInt64(e) & System.Convert.ToInt64(value)) != 0;
         }
 
-        public static bool HasFlag(this System.Enum e, ulong value)
+        public static bool HasAnyFlag(this System.Enum e, ulong value)
         {
             return (System.Convert.ToUInt64(e) & value) != 0;
         }
 
-        public static bool HasFlag(this System.Enum e, long value)
+        public static bool HasAnyFlag(this System.Enum e, long value)
         {
             return (System.Convert.ToInt64(e) & value) != 0;
         }

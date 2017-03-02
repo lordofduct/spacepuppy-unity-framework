@@ -30,12 +30,13 @@ namespace com.spacepuppy.Graphs
         public static GridNeighbour Opposite(this GridNeighbour side)
         {
             int e = (int)side;
+            int result = 0;
             for(int i = 0; i < 8; i++)
             {
                 int f = 1 << i;
-                if ((e & (1 << i)) != 0) e |= (i < 4) ? f << 4 : f >> 4;
+                if ((e & (1 << i)) != 0) result |= (i < 4) ? f << 4 : f >> 4;
             }
-            return (GridNeighbour)e;
+            return (GridNeighbour)result;
         }
 
     }

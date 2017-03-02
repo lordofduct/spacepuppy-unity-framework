@@ -7,7 +7,7 @@ using com.spacepuppy.Collections;
 namespace com.spacepuppy.Graphs
 {
 
-    public class DijkstraPathResolver<T> : IPathResolver<T> where T : class, INode
+    public class DijkstraPathResolver<T> : IPathResolver<T> where T : class
     {
 
         #region Fields

@@ -8,7 +8,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class i_SetValueOnEntity : TriggerableMechanism
+    public class i_SetValueOnEntity : AutoTriggerableMechanism
     {
 
         public enum SetMode

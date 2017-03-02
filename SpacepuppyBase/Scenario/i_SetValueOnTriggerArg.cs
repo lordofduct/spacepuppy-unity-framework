@@ -9,7 +9,7 @@ namespace com.spacepuppy.Scenario
 {
 
     [System.Obsolete("Use i_SetValueOnEntity Instead.")]
-    public class i_SetValueOnTriggerArg : TriggerableMechanism
+    public class i_SetValueOnTriggerArg : AutoTriggerableMechanism
     {
 
         public enum SetMode

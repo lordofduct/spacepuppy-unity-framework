@@ -69,6 +69,11 @@ namespace com.spacepuppyeditor.Base
 
         #region Methods
 
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var labelWidthCache = EditorGUIUtility.labelWidth;

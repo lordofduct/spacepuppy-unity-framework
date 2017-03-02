@@ -30,6 +30,7 @@ namespace com.spacepuppy
         protected override void Awake()
         {
             this.AddTag(SPConstants.TAG_ROOT);
+            _pool.AddReference(this);
 
             base.Awake();
 
@@ -48,16 +49,23 @@ namespace com.spacepuppy
             }
         }
 
-        protected override void OnStartOrEnable()
-        {
-            _pool.AddReference(this);
+        //protected override void OnStartOrEnable()
+        //{
+        //    _pool.AddReference(this);
 
-            base.OnStartOrEnable();
-        }
+        //    base.OnStartOrEnable();
+        //}
 
-        protected override void OnDisable()
+        //protected override void OnDisable()
+        //{
+        //    base.OnDisable();
+
+        //    _pool.RemoveReference(this);
+        //}
+
+        protected override void OnDestroy()
         {
-            base.OnDisable();
+            base.OnDestroy();
 
             _pool.RemoveReference(this);
         }
@@ -70,8 +78,22 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Methods
+
+        private string _cachedName;
+        public bool CompareName(string value)
+        {
+            if(_cachedName == null)
+            {
+                _cachedName = this.gameObject.name;
+            }
+            return _cachedName == value;
+        }
+
+        #endregion
+
         #region IIgnorableCollision Interface
-        
+
         public virtual void IgnoreCollision(Collider coll, bool ignore)
         {
             if (coll == null) return;

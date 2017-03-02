@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 
 using com.spacepuppy.StateMachine;
-using System;
 using System.Collections;
 
 namespace com.spacepuppy.Scenario
 {
-    public class t_StateMachine : SPComponent, IStateMachine<string>
+    public class t_StateMachine : SPComponent, IStateMachine<string>, IEnumerable<t_StateMachine.State>
     {
 
         #region Fields
@@ -44,11 +43,74 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
+        #region Properties
+
+        public int NumOfStates
+        {
+            get { return _states.Length; }
+        }
+
+        public State Current
+        {
+            get { return _currentState; }
+        }
+
+        public string CurrentStateName
+        {
+            get { return _currentState != null ? _currentState.Name : null; }
+        }
+
+        public int CurrentStateIndex
+        {
+            get { return System.Array.IndexOf(_states, _currentState); }
+        }
+
+        public State this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= _states.Length) throw new System.IndexOutOfRangeException();
+                return _states[index];
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        public int IndexOf(State state)
+        {
+            return System.Array.IndexOf(_states, state);
+        }
+
+        public bool Contains(State state)
+        {
+            return System.Array.IndexOf(_states, state) >= 0;
+        }
+        
+        public State ChangeState(int index)
+        {
+            if (index < 0 || index >= _states.Length) throw new System.IndexOutOfRangeException();
+
+            var s = _states[index];
+            if (_currentState == s) return s;
+
+            var lastState = _currentState;
+            _currentState = s;
+            if (lastState != null) lastState.NotifyStateExited();
+            if (_currentState != null) _currentState.NotifyStateEntered();
+
+            if (this.StateChanged != null) this.StateChanged(this, new StateChangedEventArgs<string>(lastState != null ? lastState.Name : null, _currentState != null ? _currentState.Name : null));
+            return _currentState;
+        }
+
+        #endregion
+
         #region StateMachine Interface
 
         public event StateChangedEventHandler<string> StateChanged;
 
-        public string Current
+        string IStateMachine<string>.Current
         {
             get
             {
@@ -89,12 +151,21 @@ namespace com.spacepuppy.Scenario
             return null;
         }
 
-        public IEnumerator<string> GetEnumerator()
+        IEnumerator<string> IEnumerable<string>.GetEnumerator()
         {
             foreach(var s in _states)
             {
                 yield return s.Name;
             }
+        }
+
+        #endregion
+
+        #region IEnumerable Interface
+        
+        public IEnumerator<State> GetEnumerator()
+        {
+            return (_states as IList<State>).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -133,7 +204,6 @@ namespace com.spacepuppy.Scenario
         }
 
         #endregion
-
 
     }
 }
