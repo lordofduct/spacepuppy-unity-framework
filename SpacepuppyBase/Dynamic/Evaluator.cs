@@ -53,7 +53,7 @@ namespace com.spacepuppy.Dynamic
     /// 
     /// These function names are not case sensitive
     /// 
-    /// #Variables
+    /// #Constants
     /// $true
     /// $false
     /// $pi
@@ -80,6 +80,8 @@ namespace com.spacepuppy.Dynamic
     /// and the name of the property. The property is case sensitive and must be spelled as it appears in code.
     /// 
     /// $.CurrentTime / $secsInHour % 24
+    /// 
+    /// rotation summation requires using the * operator instead of +
     /// </summary>
     public class Evaluator
     {
@@ -172,7 +174,7 @@ namespace com.spacepuppy.Dynamic
             var obj = _pool.GetInstance();
             try
             {
-                return ConvertUtil.ToBool(obj.EvalStatement(command, x).x);
+                return !MathUtil.FuzzyEqual(obj.EvalStatement(command, x).x, 0f);
             }
             finally
             {
