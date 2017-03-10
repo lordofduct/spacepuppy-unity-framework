@@ -757,20 +757,43 @@ namespace com.spacepuppy
 
         #region IImmediatelyResumingYieldInstruction Handler
 
-        private void OnImmediatelyResumingYieldInstructionSignaled(object sender, System.EventArgs e)
+        private System.EventHandler _onImmediatelyResumingYieldInstructionSignaled;
+        private System.EventHandler OnImmediatelyResumingYieldInstructionSignaled
         {
-            var instruction = sender as IImmediatelyResumingYieldInstruction;
-            if (instruction == null) return;
-            if (_stack.CurrentOperation == instruction)
+            get
             {
-                _stack.Pop();
-                this.ForceTick();
-            }
-            else
-            {
-                instruction.Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
+                if (_onImmediatelyResumingYieldInstructionSignaled == null)
+                    _onImmediatelyResumingYieldInstructionSignaled = (sender, e) =>
+                    {
+                        var instruction = sender as IImmediatelyResumingYieldInstruction;
+                        if (instruction == null) return;
+                        if (_stack.CurrentOperation == instruction)
+                        {
+                            _stack.Pop();
+                            this.ForceTick();
+                        }
+                        else
+                        {
+                            instruction.Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
+                        }
+                    };
+                return _onImmediatelyResumingYieldInstructionSignaled;
             }
         }
+        //private void OnImmediatelyResumingYieldInstructionSignaled(object sender, System.EventArgs e)
+        //{
+        //    var instruction = sender as IImmediatelyResumingYieldInstruction;
+        //    if (instruction == null) return;
+        //    if (_stack.CurrentOperation == instruction)
+        //    {
+        //        _stack.Pop();
+        //        this.ForceTick();
+        //    }
+        //    else
+        //    {
+        //        instruction.Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
+        //    }
+        //}
 
         #endregion
 

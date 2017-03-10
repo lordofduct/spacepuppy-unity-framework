@@ -62,6 +62,9 @@ namespace com.spacepuppyeditor
 
         private static bool PrefabHasComponent(GameObject prefab, System.Type tp)
         {
+            if (object.ReferenceEquals(prefab, null)) return false;
+
+            /*
             Component c = prefab.GetComponent(tp);
             if (!object.ReferenceEquals(c, null)) return true;
 
@@ -70,8 +73,9 @@ namespace com.spacepuppyeditor
                 c = child.GetComponent(tp);
                 if (!object.ReferenceEquals(c, null)) return true;
             }
-
             return false;
+            */
+            return !object.ReferenceEquals(prefab.GetComponentInChildren(tp, true), null);
         }
 
         #endregion

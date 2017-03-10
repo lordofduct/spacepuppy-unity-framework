@@ -17,6 +17,8 @@ namespace com.spacepuppy.Scenario
         private LayerMask _layerMask = -1;
 
         [SerializeField()]
+        [ReorderableArray]
+        [TagSelector()]
         private string[] _tags;
 
         #endregion

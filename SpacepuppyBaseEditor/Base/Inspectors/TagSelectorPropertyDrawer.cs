@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
 
 namespace com.spacepuppyeditor.Base
 {
@@ -30,16 +31,16 @@ namespace com.spacepuppyeditor.Base
                     var tags = (from s in UnityEditorInternal.InternalEditorUtility.tags where s != SPConstants.TAG_UNTAGGED select new GUIContent(s)).ToArray();
                     var stag = property.stringValue;
                     int index = -1;
-                    for(int i = 0; i < tags.Length; i++)
+                    for (int i = 0; i < tags.Length; i++)
                     {
-                        if(tags[i].text == stag)
+                        if (tags[i].text == stag)
                         {
                             index = i;
                             break;
                         }
                     }
                     index = EditorGUI.Popup(position, label, index, tags);
-                    if(index >= 0)
+                    if (index >= 0)
                     {
                         property.stringValue = tags[index].text;
                     }

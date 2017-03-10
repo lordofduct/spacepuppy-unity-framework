@@ -18,29 +18,40 @@ namespace com.spacepuppyeditor.Internal
 
         public float GetHeight(SerializedProperty property, GUIContent label, bool includeChildren)
         {
+            if (label == null) label = EditorHelper.TempContent(property.displayName);
+
             if (!includeChildren || !property.hasVisibleChildren)
             {
                 return ScriptAttributeUtility.SharedNullInternalPropertyHandler.GetHeight(property, label, includeChildren);
+                //return EditorGUI.GetPropertyHeight(property, label, includeChildren);
             }
             
             float h = EditorGUIUtility.singleLineHeight;
-            var iterator = property.Copy();
-            var end = property.GetEndProperty();
-            for(bool enterChildren = true; iterator.Next(enterChildren); enterChildren = false)
-            {
-                if (SerializedProperty.EqualContents(iterator, end))
-                    break;
 
-                h += SPEditorGUI.GetPropertyHeight(iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren);
+            if (property.isExpanded)
+            {
+                var iterator = property.Copy();
+                var end = property.GetEndProperty();
+                for (bool enterChildren = true; iterator.Next(enterChildren); enterChildren = false)
+                {
+                    if (SerializedProperty.EqualContents(iterator, end))
+                        break;
+
+                    h += SPEditorGUI.GetPropertyHeight(iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren);
+                }
             }
+
             return h;
         }
 
         public bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
+            if (label == null) label = EditorHelper.TempContent(property.displayName);
+
             if (!includeChildren || !property.hasVisibleChildren)
             {
                 return ScriptAttributeUtility.SharedNullInternalPropertyHandler.OnGUI(position, property, label, includeChildren);
+                //return EditorGUI.PropertyField(position, property, label, includeChildren);
             }
 
             float h;
@@ -54,27 +65,34 @@ namespace com.spacepuppyeditor.Internal
             property.isExpanded = EditorGUI.Foldout(r, property.isExpanded, label);
 
             //draw children
-            var iterator = property.Copy();
-            var end = property.GetEndProperty();
-            for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
+            if(property.isExpanded)
             {
-                if (SerializedProperty.EqualContents(iterator, end))
-                    break;
+                var iterator = property.Copy();
+                var end = property.GetEndProperty();
+                for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
+                {
+                    if (SerializedProperty.EqualContents(iterator, end))
+                        break;
 
-                h = SPEditorGUI.GetPropertyHeight(iterator);
-                r = new Rect(position.xMin, position.yMin, position.width, h);
-                position = new Rect(r.xMin, r.yMax, r.width, position.height - h);
+                    h = SPEditorGUI.GetPropertyHeight(iterator);
+                    r = new Rect(position.xMin, position.yMin, position.width, h);
+                    position = new Rect(r.xMin, r.yMax, r.width, position.height - h);
 
-                SPEditorGUI.PropertyField(r, iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren);
+                    SPEditorGUI.PropertyField(r, iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren);
+                }
             }
+
             return EditorGUI.EndChangeCheck();
         }
 
         public bool OnGUILayout(SerializedProperty property, GUIContent label, bool includeChildren, GUILayoutOption[] options)
         {
-            if(!includeChildren || !property.hasVisibleChildren)
+            if (label == null) label = EditorHelper.TempContent(property.displayName);
+
+            if (!includeChildren || !property.hasVisibleChildren)
             {
-                return ScriptAttributeUtility.SharedNullInternalPropertyHandler.OnGUILayout(property, label, includeChildren, options);
+                //return ScriptAttributeUtility.SharedNullInternalPropertyHandler.OnGUILayout(property, label, includeChildren, options);
+                return EditorGUILayout.PropertyField(property, label, includeChildren, options);
             }
 
             EditorGUI.BeginChangeCheck();
@@ -83,14 +101,17 @@ namespace com.spacepuppyeditor.Internal
             property.isExpanded = EditorGUILayout.Foldout(property.isExpanded, label);
 
             //draw children
-            var iterator = property.Copy();
-            var end = property.GetEndProperty();
-            for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
+            if (property.isExpanded)
             {
-                if (SerializedProperty.EqualContents(iterator, end))
-                    break;
+                var iterator = property.Copy();
+                var end = property.GetEndProperty();
+                for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
+                {
+                    if (SerializedProperty.EqualContents(iterator, end))
+                        break;
 
-                SPEditorGUILayout.PropertyField(iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren, options);
+                    SPEditorGUILayout.PropertyField(iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren, options);
+                }
             }
 
             return EditorGUI.EndChangeCheck();

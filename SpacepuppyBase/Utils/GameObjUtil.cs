@@ -245,7 +245,7 @@ namespace com.spacepuppy.Utils
             if (go == null) yield break;
             if (((1 << go.layer) & mask) != 0) yield return go;
 
-            foreach (Transform child in go.GetAllChildren())
+            foreach (Transform child in go.transform.IterateAllChildren())
             {
                 if (((1 << child.gameObject.layer) & mask) != 0) yield return child.gameObject;
             }
@@ -500,11 +500,10 @@ namespace com.spacepuppy.Utils
         public static Transform FindByName(this Transform trans, string sname, bool bIgnoreCase = false)
         {
             if (trans == null) return null;
-            foreach (var child in trans.GetAllChildren())
+            foreach (var child in trans.IterateAllChildren())
             {
                 if (StringUtil.Equals(child.name, sname, bIgnoreCase)) return child;
             }
-
             return null;
         }
 
@@ -684,7 +683,7 @@ namespace com.spacepuppy.Utils
         {
             if (MultiTagHelper.HasTag(go, tag)) return go;
 
-            foreach (var child in go.transform.GetAllChildren())
+            foreach (var child in go.transform.IterateAllChildren())
             {
                 if (MultiTagHelper.HasTag(child.gameObject, tag)) return child.gameObject;
             }
@@ -696,7 +695,7 @@ namespace com.spacepuppy.Utils
         {
             if (MultiTagHelper.HasTag(go)) yield return go;
 
-            foreach(var child in go.transform.GetAllChildren())
+            foreach(var child in go.transform.IterateAllChildren())
             {
                 if (MultiTagHelper.HasTag(child.gameObject, tag)) yield return child.gameObject;
             }
@@ -937,6 +936,20 @@ namespace com.spacepuppy.Utils
 #endregion
 
 #region Parenting
+
+        public static IEnumerable<Transform> IterateAllChildren(this Transform trans)
+        {
+            for(int i = 0; i < trans.childCount; i++)
+            {
+                yield return trans.GetChild(i);
+            }
+            
+            for(int i = 0; i < trans.childCount; i++)
+            {
+                foreach (var c in IterateAllChildren(trans.GetChild(i)))
+                    yield return c;
+            }
+        }
 
         public static Transform[] GetAllChildren(this GameObject go)
         {

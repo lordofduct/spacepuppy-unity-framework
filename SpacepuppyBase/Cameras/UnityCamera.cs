@@ -7,34 +7,46 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Cameras
 {
 
-    [RequireComponent(typeof(Camera))]
+    [RequireComponentInEntity(typeof(Camera))]
     [DisallowMultipleComponent()]
-    public sealed class UnityCamera : MonoBehaviour, ICamera
+    public class UnityCamera : SPComponent, ICamera
     {
 
         #region Fields
 
+        [SerializeField]
+        [DefaultFromSelf(UseEntity = true)]
         private Camera _camera;
 
         #endregion
 
         #region CONSTRUCTOR
 
-        void Awake()
+        protected override void Awake()
         {
-            _camera = this.GetComponent<Camera>();
-            if (_camera == null)
-            {
-                ObjUtil.SmartDestroy(this);
-            }
-            else
+            base.Awake();
+
+            //_camera = this.GetComponent<Camera>();
+            //if (_camera == null)
+            //{
+            //    ObjUtil.SmartDestroy(this);
+            //}
+            //else
+            //{
+            //    CameraManager.Register(this);
+            //}
+
+
+            if(_camera != null)
             {
                 CameraManager.Register(this);
             }
         }
 
-        void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
+
             CameraManager.UnRegister(this);
         }
 

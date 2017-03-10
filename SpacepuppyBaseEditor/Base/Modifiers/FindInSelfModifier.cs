@@ -45,7 +45,7 @@ namespace com.spacepuppyeditor.Modifiers
                     
                     foreach(var obj in root.transform.FindAllByName(name))
                     {
-                        var c = obj.GetComponent(fieldInfo.FieldType);
+                        var c = obj.GetComponent(componentType);
                         if(c != null)
                         {
                             property.objectReferenceValue = c;

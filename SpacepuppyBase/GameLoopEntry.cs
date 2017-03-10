@@ -37,8 +37,14 @@ namespace com.spacepuppy
         private UpdateEventHooks _updateHook;
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
-        private static com.spacepuppy.Async.InvokePump _invokePump;
-        private static com.spacepuppy.Async.InvokePump _fixedInvokePump;
+        private static UpdatePump _updatePump;
+        private static UpdatePump _fixedUpdatePump;
+        private static UpdatePump _lateUpdatePump;
+
+        private static com.spacepuppy.Async.InvokePump _updateInvokeHandle;
+        private static com.spacepuppy.Async.InvokePump _fixedUpdateInvokeHandle;
+
+        
 
         #endregion
 
@@ -66,8 +72,12 @@ namespace com.spacepuppy
             _updateHook.LateUpdateHook += _updateHook_LateUpdate;
             _tardyUpdateHook.LateUpdateHook += _tardyUpdateHook_LateUpdate;
 
-            _invokePump = new com.spacepuppy.Async.InvokePump();
-            _fixedInvokePump = new com.spacepuppy.Async.InvokePump();
+            _updatePump = new UpdatePump();
+            _fixedUpdatePump = new UpdatePump();
+            _lateUpdatePump = new UpdatePump();
+
+            _updateInvokeHandle = new com.spacepuppy.Async.InvokePump();
+            _fixedUpdateInvokeHandle = new com.spacepuppy.Async.InvokePump();
         }
 
         /// <summary>
@@ -126,9 +136,15 @@ namespace com.spacepuppy
         /// </summary>
         public static bool ApplicationClosing { get { return _quitState == QuitState.Quit; } }
 
-        public static com.spacepuppy.Async.InvokePump UpdatePump { get { return _invokePump; } }
+        public static UpdatePump UpdatePump { get { return _updatePump; } }
 
-        public static com.spacepuppy.Async.InvokePump FixedUpdatePump { get { return _fixedInvokePump; } }
+        public static UpdatePump FixedUpdatePump { get { return _fixedUpdatePump; } }
+
+        public static UpdatePump LateUpdatePump { get { return _lateUpdatePump; } }
+
+        public static com.spacepuppy.Async.InvokePump UpdateHandle { get { return _updateInvokeHandle; } }
+
+        public static com.spacepuppy.Async.InvokePump FixedUpdateHandle { get { return _fixedUpdateInvokeHandle; } }
 
         #endregion
 
@@ -195,7 +211,7 @@ namespace com.spacepuppy
 
             if (_internalEarlyUpdate != null) _internalEarlyUpdate(false);
 
-            _invokePump.Update();
+            _updateInvokeHandle.Update();
 
             if (EarlyUpdate != null) EarlyUpdate(this, System.EventArgs.Empty);
         }
@@ -203,6 +219,7 @@ namespace com.spacepuppy
         private void _updateHook_Update(object sender, System.EventArgs e)
         {
             if (OnUpdate != null) OnUpdate(this, e);
+            _updatePump.Update();
         }
 
         private void _tardyUpdateHook_Update(object sender, System.EventArgs e)
@@ -219,7 +236,7 @@ namespace com.spacepuppy
 
             if (_internalEarlyUpdate != null) _internalEarlyUpdate(true);
 
-            _fixedInvokePump.Update();
+            _fixedUpdateInvokeHandle.Update();
 
             if (EarlyFixedUpdate != null) EarlyFixedUpdate(this, System.EventArgs.Empty);
         }
@@ -227,6 +244,7 @@ namespace com.spacepuppy
         private void _updateHook_FixedUpdate(object sender, System.EventArgs e)
         {
             if (OnFixedUpdate != null) OnFixedUpdate(this, e);
+            _fixedUpdatePump.Update();
         }
 
         private void _tardyUpdateHook_FixedUpdate(object sender, System.EventArgs e)
@@ -248,6 +266,7 @@ namespace com.spacepuppy
         private void _updateHook_LateUpdate(object sender, System.EventArgs e)
         {
             if (OnLateUpdate != null) OnLateUpdate(this, e);
+            _lateUpdatePump.Update();
         }
 
         private void _tardyUpdateHook_LateUpdate(object sender, System.EventArgs e)

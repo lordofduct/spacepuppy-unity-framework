@@ -15,62 +15,25 @@ namespace com.spacepuppyeditor.Modifiers
     {
 
         #region Fields
-
-        private bool _initialized = false;
-        private PropertyDrawer _subDrawer;
-
-        internal void Init(bool bIsVisibleDrawer)
+        
+        public bool IsDrawer
         {
-            if(_initialized) return;
-
-            if(bIsVisibleDrawer)
-            {
-                var drawerTp = ScriptAttributeUtility.GetDrawerTypeForType(this.fieldInfo.FieldType);
-                if (drawerTp != null)
-                {
-                    _subDrawer = PropertyDrawerActivator.Create(drawerTp, null, this.fieldInfo);
-                }
-            }
-
-            _initialized = true;
+            get;
+            internal set;
         }
 
         #endregion
-
+        
         #region Draw
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (!_initialized) this.Init(true);
-
-            if (_subDrawer != null)
-                return _subDrawer.GetPropertyHeight(property, label);
-            else
-                return base.GetPropertyHeight(property, label);
+            return ScriptAttributeUtility.SharedNullPropertyHandler.GetHeight(property, label, true);
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (!_initialized) this.Init(true);
-
-            this.OnBeforeGUI(property);
-
-            if (_subDrawer != null)
-            {
-                _subDrawer.OnGUI(position, property, label);
-            }
-            else
-            {
-                bool includeChildren = false;
-                if (this.attribute is PropertyModifierAttribute)
-                {
-                    includeChildren = (this.attribute as PropertyModifierAttribute).IncludeChidrenOnDraw;
-                }
-
-                SPEditorGUI.DefaultPropertyField(position, property, label, includeChildren);
-            }
-
-            this.OnPostGUI(property);
+            ScriptAttributeUtility.SharedNullPropertyHandler.OnGUI(position, property, label, true);
         }
 
         #endregion

@@ -47,7 +47,7 @@ namespace com.spacepuppyeditor.Base
         private static BaseSettings _openWindow;
 
 
-        private GameSettingsBase _gameSettings;
+        private GameSettings _gameSettings;
         private CustomTimeLayersData _timeLayersData;
 
         private Vector2 _scenesScrollBarPosition;
@@ -61,7 +61,7 @@ namespace com.spacepuppyeditor.Base
 
             this.titleContent = new GUIContent("Base Settings");
 
-            _gameSettings = AssetDatabase.LoadAssetAtPath(GameSettingsBase.PATH_DEFAULTSETTINGS_FULL, typeof(GameSettingsBase)) as GameSettingsBase;
+            _gameSettings = AssetDatabase.LoadAssetAtPath(GameSettings.PATH_DEFAULTSETTINGS_FULL, typeof(GameSettings)) as GameSettings;
             _timeLayersData = AssetDatabase.LoadAssetAtPath(CustomTimeLayersData.PATH_DEFAULTSETTINGS_FULL, typeof(CustomTimeLayersData)) as CustomTimeLayersData;
         }
 
@@ -108,14 +108,14 @@ namespace com.spacepuppyeditor.Base
 
                 if (GUI.Button(rect, "Create Default GameSettings Data Resource"))
                 {
-                    var tps = (from t in TypeUtil.GetTypesAssignableFrom(typeof(GameSettingsBase)) where !t.IsAbstract && !t.IsInterface select t).ToArray();
+                    var tps = (from t in TypeUtil.GetTypesAssignableFrom(typeof(GameSettings)) where !t.IsAbstract && !t.IsInterface select t).ToArray();
                     
                     var menu = new GenericMenu();
                     foreach(var tp in tps)
                     {
                         menu.AddItem(EditorHelper.TempContent(tp.Name), false, () =>
                         {
-                            _gameSettings = ScriptableObjectHelper.CreateAsset(tp, GameSettingsBase.PATH_DEFAULTSETTINGS_FULL) as GameSettingsBase;
+                            _gameSettings = ScriptableObjectHelper.CreateAsset(tp, GameSettings.PATH_DEFAULTSETTINGS_FULL) as GameSettings;
                         });
                     }
                     menu.ShowAsContext();
@@ -123,7 +123,7 @@ namespace com.spacepuppyeditor.Base
             }
             else
             {
-                EditorGUILayout.ObjectField("Game Settings", _gameSettings, typeof(GameSettingsBase), false);
+                EditorGUILayout.ObjectField("Game Settings", _gameSettings, typeof(GameSettings), false);
             }
 
             if (_timeLayersData == null)

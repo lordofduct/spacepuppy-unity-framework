@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
@@ -223,28 +224,33 @@ namespace com.spacepuppy.Scenario
                             case ResolveByCommand.WithTag:
                                 if (trans.childCount > 0)
                                 {
-                                    foreach (Transform child in GameObjectUtil.GetAllChildren(trans))
+                                    using (var lst = TempCollection.GetList<Transform>())
                                     {
-                                        if (child.HasTag(_queryString)) return child;
+                                        GameObjectUtil.GetAllChildren(trans, lst);
+                                        for(int i = 0; i < lst.Count; i++)
+                                        {
+                                            if (lst[i].HasTag(_queryString)) return lst[i];
+                                        }
                                     }
                                 }
                                 break;
                             case ResolveByCommand.WithName:
                                 if (trans.childCount > 0)
                                 {
-                                    foreach (Transform child in GameObjectUtil.GetAllChildren(trans))
-                                    {
-                                        if (child.CompareName(_queryString)) return child;
-                                    }
+                                    return trans.FindByName(_queryString);
                                 }
                                 break;
                             case ResolveByCommand.WithType:
                                 if(trans.childCount > 0)
                                 {
                                     var tp = TypeUtil.FindType(_queryString);
-                                    foreach (Transform child in GameObjectUtil.GetAllChildren(trans))
+                                    using (var lst = TempCollection.GetList<Transform>())
                                     {
-                                        if (ObjUtil.GetAsFromSource(tp, child) != null) return child;
+                                        GameObjectUtil.GetAllChildren(trans, lst);
+                                        for(int i = 0; i < lst.Count; i++)
+                                        {
+                                            if (ObjUtil.GetAsFromSource(tp, lst[i]) != null) return lst[i];
+                                        }
                                     }
                                 }
                                 break;
@@ -419,18 +425,26 @@ namespace com.spacepuppy.Scenario
                             case ResolveByCommand.WithTag:
                                 if (trans.childCount > 0)
                                 {
-                                    foreach (Transform child in GameObjectUtil.GetAllChildren(trans))
+                                    using (var lst = TempCollection.GetList<Transform>())
                                     {
-                                        if (child.HasTag(_queryString)) yield return child;
+                                        GameObjectUtil.GetAllChildren(trans, lst);
+                                        for(int i = 0; i < lst.Count; i++)
+                                        {
+                                            if (lst[i].HasTag(_queryString)) yield return lst[i];
+                                        }
                                     }
                                 }
                                 break;
                             case ResolveByCommand.WithName:
                                 if (trans.childCount > 0)
                                 {
-                                    foreach (Transform child in GameObjectUtil.GetAllChildren(trans))
+                                    using (var lst = TempCollection.GetList<Transform>())
                                     {
-                                        if (child.CompareName(_queryString)) yield return child;
+                                        GameObjectUtil.GetAllChildren(trans, lst);
+                                        for(int i = 0; i < lst.Count; i++)
+                                        {
+                                            if (lst[i].CompareName(_queryString)) yield return lst[i];
+                                        }
                                     }
                                 }
                                 break;
@@ -438,9 +452,13 @@ namespace com.spacepuppy.Scenario
                                 if (trans.childCount > 0)
                                 {
                                     var tp = TypeUtil.FindType(_queryString);
-                                    foreach (Transform child in GameObjectUtil.GetAllChildren(trans))
+                                    using (var lst = TempCollection.GetList<Transform>())
                                     {
-                                        if (ObjUtil.GetAsFromSource(tp, child) != null) yield return child;
+                                        GameObjectUtil.GetAllChildren(trans, lst);
+                                        for (int i = 0; i < lst.Count; i++)
+                                        {
+                                            if (ObjUtil.GetAsFromSource(tp, lst[i]) != null) yield return lst[i];
+                                        }
                                     }
                                 }
                                 break;
@@ -476,9 +494,13 @@ namespace com.spacepuppy.Scenario
                             case ResolveByCommand.WithType:
                                 {
                                     var tp = TypeUtil.FindType(_queryString);
-                                    foreach (var t in GameObjectUtil.GetAllChildrenAndSelf(entity))
+                                    using (var lst = TempCollection.GetList<Transform>())
                                     {
-                                        if (ObjUtil.GetAsFromSource(tp, t) != null) yield return t;
+                                        GameObjectUtil.GetAllChildrenAndSelf(entity.transform, lst);
+                                        for(int i = 0; i < lst.Count; i++)
+                                        {
+                                            if (ObjUtil.GetAsFromSource(tp, tp) != null) yield return tp;
+                                        }
                                     }
                                 }
                                 break;

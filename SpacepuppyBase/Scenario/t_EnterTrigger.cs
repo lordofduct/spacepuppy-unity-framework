@@ -7,7 +7,7 @@ namespace com.spacepuppy.Scenario
     public class t_EnterTrigger : TriggerComponent
     {
 
-        public ScenarioActivatorMask Mask;
+        public ScenarioActivatorMask Mask = new ScenarioActivatorMask(-1);
         public float CooldownInterval = 1.0f;
         public bool IncludeColliderAsTriggerArg = true;
 

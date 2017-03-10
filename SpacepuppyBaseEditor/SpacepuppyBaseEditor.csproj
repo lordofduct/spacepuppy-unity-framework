@@ -66,6 +66,7 @@
     <Compile Include="Base\Inspectors\ProxyTargetPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
+    <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
     <Compile Include="Cameras\CameraControllerInspector.cs" />
     <Compile Include="Cameras\CameraMovementControllerInspector.cs" />
     <Compile Include="Cameras\MultiCameraControllerInspector.cs" />
@@ -114,7 +115,6 @@
     <Compile Include="Internal\GUIViewProxy.cs" />
     <Compile Include="Internal\PropertyHandlerValidationUtility.cs" />
     <Compile Include="Internal\MultiPropertyAttributePropertyHandler.cs" />
-    <Compile Include="Internal\SPPropertyAttributePropertyHandler.cs" />
     <Compile Include="Base\Modifiers\InsertButtonModifier.cs" />
     <Compile Include="EditorHelper.cs" />
     <Compile Include="EditorProjectPrefs.cs" />
@@ -144,7 +144,6 @@
     <Compile Include="MaterialHelper.cs" />
     <Compile Include="Base\Modifiers\DefaultFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\DisableOnPlayModifier.cs" />
-    <Compile Include="Base\Modifiers\ModifierChainPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\OnChangedInEditorModifier.cs" />
     <Compile Include="Base\Modifiers\PropertyModifier.cs" />
     <Compile Include="PrefabHelper.cs" />

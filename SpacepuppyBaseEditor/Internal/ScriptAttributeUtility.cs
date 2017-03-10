@@ -71,35 +71,26 @@ namespace com.spacepuppyeditor.Internal
 
             //TEST FOR SPECIAL CASE HANDLER
             var fieldInfo = ScriptAttributeUtility.GetFieldInfoFromProperty(property);
-            if(fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(PropertyAttribute)))
+            if(fieldInfo != null)
             {
                 var attribs = fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), false) as PropertyAttribute[];
-                //if (attribs.Length > 1)
-                //{
-                //    if (attribs.Any((a) => a is SPPropertyAttribute))
-                //    {
-                //        result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
-                //        _handlerCache.SetHandler(property, result);
-                //        return result;
-                //    }
-                //}
-                //else if (attribs[0] is SPPropertyAttribute)
-                //{
-                //    result = new SPPropertyAttributePropertyHandler(fieldInfo, attribs[0] as SPPropertyAttribute);
-                //    _handlerCache.SetHandler(property, result);
-                //    return result;
-                //}
-
-                if (attribs.Any((a) => a is SPPropertyAttribute))
-                {
-                    result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
-                    _handlerCache.SetHandler(property, result);
-                    return result;
-                }
+                result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
+                _handlerCache.SetHandler(property, result);
+                return result;
             }
+            //if(fieldInfo != null && System.Attribute.IsDefined(fieldInfo, typeof(PropertyAttribute)))
+            //{
+            //    var attribs = fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), false) as PropertyAttribute[];
+            //    if (attribs.Any((a) => a is SPPropertyAttribute))
+            //    {
+            //        result = new MultiPropertyAttributePropertyHandler(fieldInfo, attribs);
+            //        _handlerCache.SetHandler(property, result);
+            //        return result;
+            //    }
+            //}
 
             //USE STANDARD HANDLER if none was found
-            var handler = StandardPropertyHandler.Instance;
+            var handler = ScriptAttributeUtility.SharedNullPropertyHandler; //StandardPropertyHandler.Instance;
             _handlerCache.SetHandler(property, handler);
             return handler;
         }

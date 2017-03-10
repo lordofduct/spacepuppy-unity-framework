@@ -144,6 +144,7 @@
     <Compile Include="IRadicalEnumerator.cs" />
     <Compile Include="IRadicalWaitHandle.cs" />
     <Compile Include="ISPDisposable.cs" />
+    <Compile Include="IUpdateable.cs" />
     <Compile Include="Pathfinding\IPath.cs" />
     <Compile Include="Pathfinding\IPathSeeker.cs" />
     <Compile Include="Pathfinding\PathArgumentException.cs" />
@@ -401,6 +402,7 @@
     <Compile Include="VariantReference.cs" />
     <Compile Include="WaitForComplete.cs" />
     <Compile Include="WaitForDuration.cs" />
+    <Compile Include="WaitForLateUpdate.cs" />
     <Compile Include="WaitForNotification.cs" />
     <Compile Include="WaitUntilTime.cs" />
     <Compile Include="IResettingYieldInstruction.cs" />

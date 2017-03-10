@@ -30,8 +30,7 @@ namespace com.spacepuppyeditor.Cameras
             var targ = this.target as MultiCameraController;
 
             var prop = this.serializedObject.FindProperty("_defaultCamera");
-            var cameras = (from go in targ.GetAllChildren()
-                           let c = go.GetComponent<Camera>()
+            var cameras = (from c in targ.GetComponentsInChildren<Camera>(true)
                            where c != null && c.IsEnabled()
                            select c).ToArray();
             if(cameras.Length > 0)

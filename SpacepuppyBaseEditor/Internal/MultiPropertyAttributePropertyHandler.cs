@@ -58,10 +58,30 @@ namespace com.spacepuppyeditor.Internal
                 this.InternalDrawer = _drawer;
             }
 
-
-            foreach(var attrib in attribs)
+            if (attribs != null)
             {
-                this.HandleAttribute(attrib, _fieldInfo, fieldType);
+                foreach (var attrib in attribs)
+                {
+                    this.HandleAttribute(attrib, _fieldInfo, fieldType);
+                }
+            }
+
+            if(_drawer == null)
+            {
+                if (_modifiers != null && _modifiers.Count > 0)
+                {
+                    var modifier = _modifiers.Last();
+                    modifier.IsDrawer = true;
+                    _drawer = modifier;
+                    if (_fieldInfo.FieldType.IsListType()) _drawer = new ArrayPropertyDrawer(_drawer);
+                    this.InternalDrawer = _drawer;
+                }
+                else
+                {
+                    _drawer = DefaultPropertyDrawer.SharedInstance;
+                    if (_drawer != null && _fieldInfo.FieldType.IsListType()) _drawer = new ArrayPropertyDrawer(_drawer);
+                    this.InternalDrawer = _drawer;
+                }
             }
         }
 
@@ -73,7 +93,6 @@ namespace com.spacepuppyeditor.Internal
                 if (TypeUtil.IsType(mtp, typeof(PropertyModifier)))
                 {
                     var modifier = PropertyDrawerActivator.Create(mtp, attribute, field) as PropertyModifier;
-                    modifier.Init(false);
                     if (_modifiers == null) _modifiers = new List<PropertyModifier>();
                     _modifiers.Add(modifier);
                 }
@@ -347,6 +366,23 @@ namespace com.spacepuppyeditor.Internal
 
             #endregion
 
+        }
+
+        
+
+        private class DefaultPropertyDrawer : PropertyDrawer
+        {
+            public readonly static DefaultPropertyDrawer SharedInstance = new DefaultPropertyDrawer();
+
+            public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+            {
+                return ScriptAttributeUtility.SharedNullPropertyHandler.GetHeight(property, label, property.hasVisibleChildren);
+            }
+
+            public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+            {
+                ScriptAttributeUtility.SharedNullPropertyHandler.OnGUI(position, property, label, property.hasVisibleChildren);
+            }
         }
 
         #endregion

@@ -373,21 +373,6 @@ namespace com.spacepuppy
     }
 
     /// <summary>
-    /// Process a series of PropertyModifierAttributes before drawing the inspector for this property. The order of processing 
-    /// is determined by the 'order' value of the attribute, with the highest order acting as the visual drawn.
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class ModifierChainAttribute : PropertyAttribute
-    {
-
-        public ModifierChainAttribute()
-        {
-            this.order = int.MinValue;
-        }
-
-    }
-
-    /// <summary>
     /// While in the editor, if the value is ever null, an attempt is made to get the value from self. You will still 
     /// have to initialize the value on Awake if null. The cost of doing it automatically is too high for all components 
     /// to test themselves for this attribute.
@@ -431,6 +416,12 @@ namespace com.spacepuppy
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class DisableOnPlayAttribute : PropertyModifierAttribute
+    {
+
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class ReadOnlyAttribute : PropertyModifierAttribute
     {
 
     }

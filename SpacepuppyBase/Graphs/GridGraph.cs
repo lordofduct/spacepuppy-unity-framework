@@ -33,7 +33,7 @@ namespace com.spacepuppy.Graphs
         #endregion
 
         #region CONSTRUCTOR
-
+        
         public GridGraph(int width, int height, bool includeDiagonals)
         {
             _rowCount = height;
@@ -119,6 +119,19 @@ namespace com.spacepuppy.Graphs
 
         #region Methods
         
+        public void GetXY(int index, out int x, out int y)
+        {
+            x = index % _colCount;
+            y = index / _colCount;
+        }
+
+        public void GetXY(T node, out int x, out int y)
+        {
+            int index = this.IndexOf(node);
+            x = index % _colCount;
+            y = index / _colCount;
+        }
+
         public T GetNeighbour(int x, int y, GridNeighbour side)
         {
             switch (side)

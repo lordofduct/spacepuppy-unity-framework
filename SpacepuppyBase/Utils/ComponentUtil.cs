@@ -449,10 +449,12 @@ namespace com.spacepuppy.Utils
             if (obj == null) return ArrayUtil.Empty<Component>();
 
             using (var tmpLst = TempCollection.GetList<Component>())
+            using (var set = ReduceLikeTypes(types))
             {
-                foreach (var tp in types)
+                var e = set.GetEnumerator();
+                while(e.MoveNext())
                 {
-                    obj.GetComponents(tp, tmpLst);
+                    obj.GetComponents(e.Current, tmpLst);
                 }
                 return tmpLst.ToArray();
             }
@@ -463,16 +465,18 @@ namespace com.spacepuppy.Utils
             if (obj == null) return;
 
             using (var tmpLst = TempCollection.GetList<Component>())
+            using (var set = ReduceLikeTypes(types))
             {
-                foreach (var tp in types)
+                var e = set.GetEnumerator();
+                while (e.MoveNext())
                 {
-                    obj.GetComponents(tp, tmpLst);
+                    obj.GetComponents(e.Current, tmpLst);
                 }
 
-                var e = tmpLst.GetEnumerator();
-                while(e.MoveNext())
+                var e2 = tmpLst.GetEnumerator();
+                while(e2.MoveNext())
                 {
-                    lst.Add(e.Current);
+                    lst.Add(e2.Current);
                 }
             }
         }
@@ -893,28 +897,28 @@ namespace com.spacepuppy.Utils
 
 #region FindComponents
 
-        public static IEnumerable<T> FindComponents<T>(this GameObject go, bool bIncludeInactive = false) where T : class
+        public static T[] FindComponents<T>(this GameObject go, bool bIncludeInactive = false) where T : class
         {
-            if (go == null) return Enumerable.Empty<T>();
+            if (go == null) return ArrayUtil.Empty<T>();
 
             var tp = typeof(T);
             var root = go.FindRoot();
-            return root.GetComponentsInChildren(tp, bIncludeInactive).Cast<T>();
+            return root.GetComponentsInChildren<T>(bIncludeInactive);
         }
-        public static IEnumerable<T> FindComponents<T>(this Component c, bool bIncludeInactive = false) where T : class
+        public static T[] FindComponents<T>(this Component c, bool bIncludeInactive = false) where T : class
         {
-            if (c == null) return Enumerable.Empty<T>();
+            if (c == null) return ArrayUtil.Empty<T>();
             return FindComponents<T>(c.gameObject, bIncludeInactive);
         }
 
-        public static IEnumerable<Component> FindComponents(this GameObject go, System.Type tp, bool bIncludeInactive = false)
+        public static Component[] FindComponents(this GameObject go, System.Type tp, bool bIncludeInactive = false)
         {
-            if (go == null) return Enumerable.Empty<Component>();
+            if (go == null) return ArrayUtil.Empty<Component>();
             return go.FindRoot().GetComponentsInChildren(tp, bIncludeInactive);
         }
-        public static IEnumerable<Component> FindComponents(this Component c, System.Type tp, bool bIncludeInactive = false)
+        public static Component[] FindComponents(this Component c, System.Type tp, bool bIncludeInactive = false)
         {
-            if (c == null) return Enumerable.Empty<Component>();
+            if (c == null) return ArrayUtil.Empty<Component>();
             return FindComponents(c.gameObject, tp, bIncludeInactive);
         }
 
@@ -941,7 +945,91 @@ namespace com.spacepuppy.Utils
             GetChildComponents(c.FindRoot(), tp, coll, true, bIncludeInactive);
         }
 
-#endregion
-        
+        public static Component[] FindComponents(this GameObject go, System.Type[] types, bool bIncludeInactive = false)
+        {
+            if (go == null) return ArrayUtil.Empty<Component>();
+
+            go = go.FindRoot();
+            using (var lst = TempCollection.GetList<Component>())
+            using (var set = ReduceLikeTypes(types))
+            {
+                var e = set.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    GetChildComponents(go, e.Current, lst, true, bIncludeInactive);
+                }
+                return lst.ToArray();
+            }
+        }
+
+        public static Component[] FindComponents(this Component c, System.Type[] types, bool bIncludeInactive = false)
+        {
+            if (c == null) return ArrayUtil.Empty<Component>();
+
+            return FindComponents(c.gameObject, types, bIncludeInactive);
+        }
+
+        public static void FindComponents(this GameObject go, System.Type[] types, ICollection<Component> coll, bool bIncludeInactive = false)
+        {
+            if (go == null) return;
+
+            go = go.FindRoot();
+            using (var set = ReduceLikeTypes(types))
+            {
+                var e = set.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    GetChildComponents(go, e.Current, coll, true, bIncludeInactive);
+                }
+            }
+        }
+
+        public static void FindComponents(this Component c, System.Type[] types, ICollection<Component> coll, bool bIncludeInactive = false)
+        {
+            if (c == null) return;
+
+            FindComponents(c.gameObject, types, coll,bIncludeInactive);
+        }
+
+        #endregion
+
+
+
+
+
+
+        #region Utils
+
+        private static TempHashSet<System.Type> ReduceLikeTypes(System.Type[] arr)
+        {
+            var set = TempCollection.GetSet<System.Type>();
+            foreach(var tp in arr)
+            {
+                if (set.Contains(tp)) continue;
+
+                var e = set.GetEnumerator();
+                bool donotadd = false;
+                while(e.MoveNext())
+                {
+                    if (TypeUtil.IsType(tp, e.Current))
+                    {
+                        donotadd = true;
+                        break;
+                    }
+                    if (TypeUtil.IsType(e.Current, tp))
+                    {
+                        set.Remove(e.Current);
+                        break;
+                    }
+                }
+
+                if (!donotadd)
+                    set.Add(tp);
+            }
+            return set;
+        }
+
+        #endregion
+
     }
 }
