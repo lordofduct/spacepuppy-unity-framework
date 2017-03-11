@@ -354,7 +354,7 @@ namespace com.spacepuppyeditor
                     prop.stringValue = ConvertUtil.ToString(value);
                     break;
                 case SerializedPropertyType.Color:
-                    prop.colorValue = (Color)value;
+                    prop.colorValue = ConvertUtil.ToColor(value);
                     break;
                 case SerializedPropertyType.ObjectReference:
                     prop.objectReferenceValue = value as Object;
@@ -367,13 +367,13 @@ namespace com.spacepuppyeditor
                     prop.SetEnumValue(value);
                     break;
                 case SerializedPropertyType.Vector2:
-                    prop.vector2Value = (Vector2)value;
+                    prop.vector2Value = ConvertUtil.ToVector2(value);
                     break;
                 case SerializedPropertyType.Vector3:
-                    prop.vector3Value = (Vector3)value;
+                    prop.vector3Value = ConvertUtil.ToVector3(value);
                     break;
                 case SerializedPropertyType.Vector4:
-                    prop.vector4Value = (Vector4)value;
+                    prop.vector4Value = ConvertUtil.ToVector4(value);
                     break;
                 case SerializedPropertyType.Rect:
                     prop.rectValue = (Rect)value;
