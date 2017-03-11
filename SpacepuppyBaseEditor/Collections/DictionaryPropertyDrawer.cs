@@ -63,7 +63,7 @@ namespace com.spacepuppyeditor.Collections
                 if(GUI.Button(pRect, "+"))
                 {
                     keysProp.arraySize++;
-                    EditorHelper.SetPropertyValue(keysProp.GetArrayElementAtIndex(keysProp.arraySize - 1), null);
+                    SetPropertyDefault(keysProp.GetArrayElementAtIndex(keysProp.arraySize - 1));
                     valuesProp.arraySize = keysProp.arraySize;
                 }
                 if(GUI.Button(mRect, "-"))
@@ -81,6 +81,65 @@ namespace com.spacepuppyeditor.Collections
             var h = EditorGUIUtility.singleLineHeight + 1f;
             position = new Rect(position.xMin, position.yMin + h, position.width, position.height = h);
             return r;
+        }
+
+        private static void SetPropertyDefault(SerializedProperty prop)
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+
+            switch (prop.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    prop.intValue = 0;
+                    break;
+                case SerializedPropertyType.Boolean:
+                    prop.boolValue = false;
+                    break;
+                case SerializedPropertyType.Float:
+                    prop.floatValue = 0f;
+                    break;
+                case SerializedPropertyType.String:
+                    prop.stringValue = string.Empty;
+                    break;
+                case SerializedPropertyType.Color:
+                    prop.colorValue = Color.black;
+                    break;
+                case SerializedPropertyType.ObjectReference:
+                    prop.objectReferenceValue = null;
+                    break;
+                case SerializedPropertyType.LayerMask:
+                    prop.intValue = -1;
+                    break;
+                case SerializedPropertyType.Enum:
+                    prop.enumValueIndex = 0;
+                    break;
+                case SerializedPropertyType.Vector2:
+                    prop.vector2Value = Vector2.zero;
+                    break;
+                case SerializedPropertyType.Vector3:
+                    prop.vector3Value = Vector3.zero;
+                    break;
+                case SerializedPropertyType.Vector4:
+                    prop.vector4Value = Vector4.zero;
+                    break;
+                case SerializedPropertyType.Rect:
+                    prop.rectValue = Rect.zero;
+                    break;
+                case SerializedPropertyType.ArraySize:
+                    prop.arraySize = 0;
+                    break;
+                case SerializedPropertyType.Character:
+                    prop.intValue = 0;
+                    break;
+                case SerializedPropertyType.AnimationCurve:
+                    prop.animationCurveValue = null;
+                    break;
+                case SerializedPropertyType.Bounds:
+                    prop.boundsValue = default(Bounds);
+                    break;
+                case SerializedPropertyType.Gradient:
+                    throw new System.InvalidOperationException("Can not handle Gradient types.");
+            }
         }
 
     }
