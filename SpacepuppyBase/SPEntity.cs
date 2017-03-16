@@ -193,7 +193,7 @@ namespace com.spacepuppy
         [System.Obsolete("Access SPEntity.Pool instead.")]
         public static bool GetEntityFromSource<T>(object obj, out T entity) where T : SPEntity
         {
-            return SPEntity.GetEntityFromSource<T>(obj, out entity);
+            return SPEntity.Pool.GetFromSource<T>(obj, out entity);
         }
 
         #endregion

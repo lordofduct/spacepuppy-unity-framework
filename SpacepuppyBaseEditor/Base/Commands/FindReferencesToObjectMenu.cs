@@ -21,20 +21,45 @@ namespace com.spacepuppyeditor.Base.Commands
         //    return true;
         //}
 
-        [MenuItem("CONTEXT/ALT/Find References To", priority = 100)]
+        [MenuItem("CONTEXT/Transform/Find References To", priority = 100)]
         private static void Menu_Search(MenuCommand cmnd)
         {
             if (cmnd.context == null) return;
             if (_defaultSearchTool == null) _defaultSearchTool = new FindReferencesToObjectMenu();
 
-            int iid = cmnd.context.GetInstanceID();
-            var arr = _defaultSearchTool.Search_Imp(iid);
-            Selection.objects = arr;
+            GameObject go = GameObjectUtil.GetGameObjectFromSource(cmnd.context);
+            if (go == null) return;
 
-            //foreach(var obj in arr)
-            //{
-            //    EditorGUIUtility.PingObject(obj.GetInstanceID());
-            //}
+            int iid = go.GetInstanceID();
+            var arr = _defaultSearchTool.Search_Imp(iid);
+            //Selection.objects = arr;
+
+            foreach (var obj in arr)
+            {
+                Debug.Log(obj.GetType().FullName, obj);
+                if(obj is Component)
+                EditorGUIUtility.PingObject(obj.gameObject.GetInstanceID());
+            }
+        }
+
+        [MenuItem("GameObject/Find References To", false, 0)]
+        private static void Menu_GO_Search(MenuCommand cmnd)
+        {
+            if (cmnd.context == null) return;
+            if (_defaultSearchTool == null) _defaultSearchTool = new FindReferencesToObjectMenu();
+
+            GameObject go = GameObjectUtil.GetGameObjectFromSource(cmnd.context);
+            if (go == null) return;
+
+            int iid = go.GetInstanceID();
+            var arr = _defaultSearchTool.Search_Imp(iid);
+            //Selection.objects = arr;
+
+            foreach (var obj in arr)
+            {
+                Debug.Log(obj.GetType().FullName, obj);
+                EditorGUIUtility.PingObject(obj.gameObject.GetInstanceID());
+            }
         }
 
         #endregion
@@ -43,36 +68,36 @@ namespace com.spacepuppyeditor.Base.Commands
         #region Fields
 
         private Dictionary<System.Type, FieldInfo[]> _fieldTable = new Dictionary<System.Type, FieldInfo[]>();
-        private HashSet<GameObject> _hits = new HashSet<GameObject>();
+        private HashSet<Component> _hits = new HashSet<Component>();
         private HashSet<object> _referenceLoopHits = new HashSet<object>();
 
         #endregion
 
         #region Methods
 
-        public GameObject[] Search(GameObject target)
+        public Component[] Search(GameObject target)
         {
             if (target == null) throw new System.ArgumentNullException("target");
 
             return this.Search_Imp(target.GetInstanceID());
         }
 
-        public GameObject[] Search(int instanceId)
+        public Component[] Search(int instanceId)
         {
             var obj = EditorUtility.InstanceIDToObject(instanceId);
-            if (obj == null) return ArrayUtil.Empty<GameObject>();
+            if (obj == null) return ArrayUtil.Empty<Component>();
 
             return this.Search_Imp(instanceId);
         }
 
-        private GameObject[] Search_Imp(int instanceId)
+        private Component[] Search_Imp(int instanceId)
         {
             _hits.Clear();
             var comps = Object.FindObjectsOfType<Component>();
 
             foreach (var c in comps)
             {
-                if (_hits.Contains(c.gameObject)) continue;
+                if (_hits.Contains(c)) continue;
 
                 _referenceLoopHits.Clear();
                 var tp = c.GetType();
@@ -82,7 +107,7 @@ namespace com.spacepuppyeditor.Base.Commands
                 {
                     if (TestField(instanceId, field, c))
                     {
-                        _hits.Add(c.gameObject);
+                        _hits.Add(c);
                         break;
                     }
                 }
@@ -150,7 +175,7 @@ namespace com.spacepuppyeditor.Base.Commands
             {
             }
 
-            if (fieldValue != null)
+            if (fieldValue != null && !GameObjectUtil.IsGameObjectSource(fieldValue))
             {
                 var infos = GetRelevantFieldInfos(ftp);
                 foreach (var subfield in infos)

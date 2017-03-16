@@ -13,12 +13,17 @@ namespace com.spacepuppyeditor.Modifiers
     [CustomPropertyDrawer(typeof(DefaultFromSelfAttribute))]
     public class DefaultFromSelfModifier : PropertyModifier
     {
-        
+
+        private bool _handled = false;
+
         protected internal override void OnBeforeGUI(SerializedProperty property)
         {
-            bool bUseEntity = (this.attribute as DefaultFromSelfAttribute).UseEntity;
+            if (_handled) return;
 
-            if(property.isArray && TypeUtil.IsListType(fieldInfo.FieldType, true))
+            bool bUseEntity = (this.attribute as DefaultFromSelfAttribute).UseEntity;
+            _handled = (this.attribute as DefaultFromSelfAttribute).HandleOnce;
+
+            if (property.isArray && TypeUtil.IsListType(fieldInfo.FieldType, true))
             {
                 this.ApplyDefaultAsList(property, TypeUtil.GetElementTypeOfListType(this.fieldInfo.FieldType), bUseEntity);
             }
@@ -28,7 +33,6 @@ namespace com.spacepuppyeditor.Modifiers
             }
             
         }
-
 
 
 

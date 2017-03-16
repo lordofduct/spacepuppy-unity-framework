@@ -22,7 +22,7 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         [SelectableObject()]
-        [DefaultFromSelf()]
+        [DefaultFromSelf(HandleOnce =true)]
         private UnityEngine.Object _target;
         [SerializeField()]
         private string _memberName;
