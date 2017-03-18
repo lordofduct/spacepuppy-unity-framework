@@ -239,14 +239,7 @@ namespace com.spacepuppy.Utils
                 return !_isObjectAlive((obj as IComponent).component);
             else if (obj is IGameObjectSource)
                 return !_isObjectAlive((obj as IGameObjectSource).gameObject);
-
-            //if (obj is UnityEngine.Object)
-            //    return (obj as UnityEngine.Object) == null;
-            //else if (obj is IComponent)
-            //    return (obj as IComponent).component == null;
-            //else if (obj is IGameObjectSource)
-            //    return (obj as IGameObjectSource).gameObject == null;
-
+            
             return false;
         }
 
