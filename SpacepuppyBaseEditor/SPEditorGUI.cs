@@ -509,7 +509,43 @@ namespace com.spacepuppyeditor
             int i = EnumFlagField(position, enumType, label, System.Convert.ToInt32(value));
             return System.Enum.ToObject(enumType, i) as System.Enum;
         }
-        
+
+        public static int EnumFlagField(Rect position, System.Type enumType, int[] acceptedFlags, GUIContent label, int value)
+        {
+            if (enumType == null) throw new System.ArgumentNullException("enumType");
+            if (!enumType.IsEnum) throw new System.ArgumentException("Must be an enum type.", "enumType");
+
+            using (var lst = TempCollection.GetList<int>())
+            {
+                foreach (var e in acceptedFlags)
+                {
+                    if (MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(e)) && EnumUtil.EnumValueIsDefined(e, enumType)) lst.Add(System.Convert.ToInt32(e));
+                }
+
+                var evalue = ConvertUtil.ToEnumOfType(enumType, value);
+                int normalizedValue = 0;
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    if (EnumUtil.HasFlag(evalue, lst[i]))
+                    {
+                        normalizedValue |= (1 << i);
+                    }
+                }
+
+                normalizedValue = EditorGUI.MaskField(position, label, normalizedValue, (from e in lst select System.Enum.GetName(enumType, e)).ToArray());
+
+                value = 0;
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    int j = (1 << i);
+                    if ((normalizedValue & j) == j)
+                        value |= lst[i];
+                }
+
+                return value;
+            }
+        }
+
         public static WrapMode WrapModeField(Rect position, string label, WrapMode mode, bool allowDefault = false)
         {
             return WrapModeField(position, EditorHelper.TempContent(label), mode, allowDefault);

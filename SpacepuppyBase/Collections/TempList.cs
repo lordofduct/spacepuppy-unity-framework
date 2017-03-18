@@ -24,7 +24,7 @@ namespace com.spacepuppy.Collections
             : base()
         {
             var tp = typeof(T);
-            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+            int sz = (tp.IsValueType && !tp.IsEnum) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
             _version = 1;
         }
@@ -33,7 +33,7 @@ namespace com.spacepuppy.Collections
             : base(e)
         {
             var tp = typeof(T);
-            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+            int sz = (tp.IsValueType && !tp.IsEnum) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
             _version = 1;
         }
@@ -42,7 +42,7 @@ namespace com.spacepuppy.Collections
             : base(count)
         {
             var tp = typeof(T);
-            int sz = (tp.IsValueType) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
+            int sz = (tp.IsValueType && !tp.IsEnum) ? System.Runtime.InteropServices.Marshal.SizeOf(tp) : 4;
             _maxCapacityOnRelease = MAX_SIZE_INBYTES / sz;
             _version = 1;
         }

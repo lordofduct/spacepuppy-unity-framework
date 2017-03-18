@@ -33,14 +33,24 @@ namespace com.spacepuppy.Utils
 
         public static bool EnumValueIsDefined(object value, System.Type enumType)
         {
+            if (enumType == null) throw new System.ArgumentNullException("enumType");
+            if (!enumType.IsEnum) throw new System.ArgumentException("Must be enum type.", "enumType");
+
             try
             {
-                return System.Enum.IsDefined(enumType, value);
+                if(value is string)
+                    return System.Enum.IsDefined(enumType, value);
+                else if(ConvertUtil.IsNumeric(value))
+                {
+                    value = ToEnumsNumericType(System.Convert.ToUInt64(value), System.Type.GetTypeCode(enumType));
+                    return System.Enum.IsDefined(enumType, value);
+                }
             }
-            catch (System.Exception)
+            catch
             {
-                return false;
             }
+
+            return false;
         }
 
         public static bool EnumValueIsDefined<T>(object value)

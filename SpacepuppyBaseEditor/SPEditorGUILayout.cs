@@ -166,6 +166,12 @@ namespace com.spacepuppyeditor
             return System.Enum.ToObject(enumType, i) as System.Enum;
         }
 
+        public static int EnumFlagField(System.Type enumType, int[] acceptedFlags, GUIContent label, int value)
+        {
+            var position = EditorGUILayout.GetControlRect(true);
+            return SPEditorGUI.EnumFlagField(position, enumType, acceptedFlags, label, value);
+        }
+
         public static WrapMode WrapModeField(string label, WrapMode mode, bool allowDefault = false)
         {
             var position = EditorGUILayout.GetControlRect(true);
