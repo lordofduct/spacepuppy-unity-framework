@@ -22,6 +22,16 @@ namespace com.spacepuppy.Pathfinding
 
         #endregion
 
+        #region Properties
+
+        public Vector3 Target
+        {
+            get;
+            set;
+        }
+
+        #endregion
+
         #region IPath Interface
 
         public IList<Vector3> Waypoints
@@ -31,7 +41,7 @@ namespace com.spacepuppy.Pathfinding
                 return _path.corners;
             }
         }
-
+        
         public PathCalculateStatus Status
         {
             get
@@ -54,16 +64,20 @@ namespace com.spacepuppy.Pathfinding
 
         #region Static Interface
 
-        public static UnityPath CreatePath()
+        public static UnityPath CreatePath(Vector3 target)
         {
-            return new UnityPath();
+            return new UnityPath()
+            {
+                Target = target
+            };
         }
         
-        public static void CalculatePath(Vector3 start, Vector3 target, int areaMask, IPath path)
+        public static bool CalculatePath(Vector3 start, IPath path, int areaMask)
         {
             if (!(path is UnityPath)) throw new PathArgumentException();
 
-            NavMesh.CalculatePath(start, target, areaMask, (path as UnityPath)._path);
+            var p = path as UnityPath;
+            return NavMesh.CalculatePath(start, p.Target, areaMask, (path as UnityPath)._path);
         }
 
         #endregion

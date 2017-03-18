@@ -20,9 +20,9 @@ namespace com.spacepuppy.Pathfinding
 
         #region IPathSeeker Interface
 
-        public IPath CreatePath()
+        public IPath CreatePath(Vector3 target)
         {
-            return UnityPath.CreatePath();
+            return UnityPath.CreatePath(target);
         }
 
         public bool ValidPath(IPath path)
@@ -30,16 +30,13 @@ namespace com.spacepuppy.Pathfinding
             return (path is UnityPath);
         }
 
-        public void CalculatePath(Vector3 target, IPath path)
+        public void CalculatePath(IPath path)
         {
-            UnityPath.CalculatePath(this.entityRoot.transform.position, target, _areaMask, path);
+            if (!(path is UnityPath)) throw new PathArgumentException();
+            
+            UnityPath.CalculatePath(this.entityRoot.transform.position, path, _areaMask);
         }
-
-        public void CalculatePath(Vector3 start, Vector3 target, IPath path)
-        {
-            UnityPath.CalculatePath(start, target, _areaMask, path);
-        }
-
+        
         #endregion
 
     }

@@ -41,9 +41,9 @@ namespace com.spacepuppy.Pathfinding
 
         #region IPathAgent Interface
 
-        public IPath CreatePath()
+        public IPath CreatePath(Vector3 target)
         {
-            return UnityPath.CreatePath();
+            return UnityPath.CreatePath(target);
         }
 
         public bool ValidPath(IPath path)
@@ -51,22 +51,15 @@ namespace com.spacepuppy.Pathfinding
             return (path is UnityPath);
         }
 
-        public void CalculatePath(Vector3 target, IPath path)
+        public void CalculatePath(IPath path)
         {
             if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
             if (!(path is UnityPath)) throw new PathArgumentException();
 
-            _agent.CalculatePath(target, (path as UnityPath)._path);
+            var p = (path as UnityPath);
+            _agent.CalculatePath(p.Target, p._path);
         }
-
-        public void CalculatePath(Vector3 start, Vector3 target, IPath path)
-        {
-            if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
-            if (!(path is UnityPath)) throw new PathArgumentException();
-
-            NavMesh.CalculatePath(start, target, _agent.areaMask, (path as UnityPath)._path);
-        }
-
+        
         public void SetPath(IPath path)
         {
             if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
@@ -79,6 +72,16 @@ namespace com.spacepuppy.Pathfinding
         {
             if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
             _agent.SetDestination(target);
+        }
+
+        public void PathTo(IPath path)
+        {
+            if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
+            if (!(path is UnityPath)) throw new PathArgumentException();
+
+            var p = (path as UnityPath);
+            _agent.CalculatePath(p.Target, p._path);
+            this.SetPath(path);
         }
 
         public void ResetPath()

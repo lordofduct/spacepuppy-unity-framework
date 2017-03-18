@@ -33,6 +33,16 @@ namespace com.spacepuppy.Utils
             return float.IsNaN(v.sqrMagnitude);
         }
 
+        public static float SqrDistance(Vector2 a, Vector2 b)
+        {
+            return (a - b).sqrMagnitude;
+        }
+
+        public static float SqrDistance(Vector3 a, Vector3 b)
+        {
+            return (a - b).sqrMagnitude;
+        }
+
         #region Vector Convert
 
         public static string Stringify(Vector2 v)
