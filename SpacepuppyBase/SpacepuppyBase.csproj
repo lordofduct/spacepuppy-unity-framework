@@ -149,6 +149,7 @@
     <Compile Include="Pathfinding\IPathSeeker.cs" />
     <Compile Include="Pathfinding\PathArgumentException.cs" />
     <Compile Include="Pathfinding\PathCalculateStatus.cs" />
+    <Compile Include="Pathfinding\PathUtil.cs" />
     <Compile Include="Pathfinding\UnityPath.cs" />
     <Compile Include="Pathfinding\UnityPathSeeker.cs" />
     <Compile Include="Pathfinding\UnityStandardPathAgent.cs" />
