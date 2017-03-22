@@ -240,6 +240,11 @@ namespace com.spacepuppy
         /// </summary>
         public string ChildPropertyToDrawAsElementLabel;
 
+        /// <summary>
+        /// If DrawElementAtBottom is true, this child element can be displayed as the modifiable entry in the reorderable list.
+        /// </summary>
+        public string ChildPropertyToDrawAsElementEntry;
+
         public ReorderableArrayAttribute()
         {
 

@@ -359,6 +359,36 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region FlatPropertyField
+
+        /// <summary>
+        /// Draws all children of a property
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static bool FlatChildPropertyField(Rect position, SerializedProperty property)
+        {
+            if (property == null) throw new System.ArgumentNullException("property");
+
+            EditorGUI.BeginChangeCheck();
+            var iterator = property.Copy();
+            var end = property.GetEndProperty();
+            for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
+            {
+                if (SerializedProperty.EqualContents(iterator, end))
+                    break;
+
+                var h = GetPropertyHeight(iterator);
+                var rect = new Rect(position.xMin, position.yMin, position.width, h);
+                position = new Rect(position.xMin, rect.yMax, position.width, position.height - h);
+                PropertyField(rect, iterator, EditorHelper.TempContent(iterator.displayName), true);
+            }
+            return EditorGUI.EndChangeCheck();
+        }
+
+        #endregion
+
         #region PropertyFields
 
         public static float GetPropertyHeight(SerializedProperty property)
