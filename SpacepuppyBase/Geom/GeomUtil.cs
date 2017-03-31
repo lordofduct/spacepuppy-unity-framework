@@ -319,6 +319,20 @@ namespace com.spacepuppy.Geom
 
         #region GetColliderGeom
 
+        public static Vector3 GetCenter(this Collider c, bool local = false)
+        {
+            if (c is CharacterController)
+                return (local) ? (c as CharacterController).center : c.transform.TransformPoint((c as CharacterController).center);
+            else if (c is CapsuleCollider)
+                return (local) ? (c as CapsuleCollider).center : c.transform.TransformPoint((c as CapsuleCollider).center);
+            else if (c is SphereCollider)
+                return (local) ? (c as SphereCollider).center : c.transform.TransformPoint((c as SphereCollider).center);
+            else if (c is BoxCollider)
+                return (local) ? (c as BoxCollider).center : c.transform.TransformPoint((c as BoxCollider).center);
+            else
+                return (local) ? c.transform.InverseTransformPoint(c.bounds.center) : c.bounds.center;
+        }
+
         /// <summary>
         /// Attempts to calculate geometry for a collider. Not tested yet.
         /// </summary>

@@ -9,13 +9,6 @@ namespace com.spacepuppy.Scenario
     public class i_EnableComponent : TriggerableMechanism
     {
 
-        public enum EnableMode
-        {
-            Enable = 0,
-            Disable = 1,
-            Toggle = 2
-        }
-
         #region Fields
 
         [SerializeField()]

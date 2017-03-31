@@ -90,6 +90,13 @@
         BeforeQuit,
         Quit
     }
+    
+    public enum EnableMode
+    {
+        Enable = 0,
+        Disable = 1,
+        Toggle = 2
+    }
 
 
 }

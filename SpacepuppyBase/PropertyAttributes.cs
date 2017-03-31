@@ -182,14 +182,26 @@ namespace com.spacepuppy
     /// This had a purpose at one point when there was different 'drop down' modes, but we devised a much better way of choosing the component.
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class ComponentTypeRestrictionAttribute : SPPropertyAttribute
+    public class TypeRestrictionAttribute : SPPropertyAttribute
     {
         public System.Type InheritsFromType;
         public bool HideTypeDropDown;
 
-        public ComponentTypeRestrictionAttribute(System.Type inheritsFromType)
+        public TypeRestrictionAttribute(System.Type inheritsFromType)
         {
             this.InheritsFromType = inheritsFromType;
+        }
+
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    [System.Obsolete("Use TypeRestrictionAttribute Instead")]
+    public class ComponentTypeRestrictionAttribute : TypeRestrictionAttribute
+    {
+        public ComponentTypeRestrictionAttribute(System.Type inheritsFromType)
+            : base(inheritsFromType)
+        {
+
         }
 
     }

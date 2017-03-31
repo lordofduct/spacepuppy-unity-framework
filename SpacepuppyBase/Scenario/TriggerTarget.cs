@@ -226,81 +226,109 @@ namespace com.spacepuppy.Scenario
             switch (this._activationType)
             {
                 case TriggerActivationType.TriggerAllOnTarget:
-                    if(_triggerAllCache == null)
                     {
-                        //_triggerAllCache = (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t).ToArray();
-                        _triggerAllCache = _triggerable.GetComponentsAlt<ITriggerableMechanism>();
-                        System.Array.Sort(_triggerableArgs, MechanismComparer.Default);
-                    }
-                    if(instruction != null)
-                    {
-                        foreach (var t in _triggerAllCache)
+                        if (_triggerAllCache == null)
                         {
-                            if (t.component != null && t.CanTrigger)
+                            //_triggerAllCache = (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t).ToArray();
+                            _triggerAllCache = _triggerable.GetComponentsAlt<ITriggerableMechanism>();
+                            System.Array.Sort(_triggerableArgs, MechanismComparer.Default);
+                        }
+                        if (instruction != null)
+                        {
+                            foreach (var t in _triggerAllCache)
                             {
-                                if (t is IBlockingTriggerableMechanism)
-                                    (t as IBlockingTriggerableMechanism).Trigger(arg, instruction);
-                                else
-                                    t.Trigger(arg);
+                                if (t.component != null && t.CanTrigger)
+                                {
+                                    if (t is IBlockingTriggerableMechanism)
+                                        (t as IBlockingTriggerableMechanism).Trigger(arg, instruction);
+                                    else
+                                        t.Trigger(arg);
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        foreach (var t in _triggerAllCache)
+                        else
                         {
-                            if (t.component != null && t.CanTrigger)
+                            foreach (var t in _triggerAllCache)
                             {
-                                t.Trigger(arg);
+                                if (t.component != null && t.CanTrigger)
+                                {
+                                    t.Trigger(arg);
+                                }
                             }
                         }
                     }
                     break;
                 case TriggerActivationType.TriggerSelectedTarget:
-                    if (_triggerable != null && _triggerable is ITriggerableMechanism)
                     {
-                        if(instruction != null && _triggerable is IBlockingTriggerableMechanism)
+                        if (_triggerable != null && _triggerable is ITriggerableMechanism)
                         {
-                            var t = _triggerable as IBlockingTriggerableMechanism;
-                            if (t.CanTrigger) t.Trigger(arg);
-                        }
-                        else
-                        {
-                            var t = _triggerable as ITriggerableMechanism;
-                            if (t.CanTrigger) t.Trigger(arg);
+                            if (instruction != null && _triggerable is IBlockingTriggerableMechanism)
+                            {
+                                var t = _triggerable as IBlockingTriggerableMechanism;
+                                if (t.CanTrigger) t.Trigger(arg);
+                            }
+                            else
+                            {
+                                var t = _triggerable as ITriggerableMechanism;
+                                if (t.CanTrigger) t.Trigger(arg);
+                            }
                         }
                     }
                     break;
                 case TriggerActivationType.SendMessage:
-                    var go = GameObjectUtil.GetGameObjectFromSource(this._triggerable);
-                    if (go != null && this._methodName != null)
                     {
-                        go.SendMessage(this._methodName, arg, SendMessageOptions.DontRequireReceiver);
+                        var go = GameObjectUtil.GetGameObjectFromSource(this._triggerable);
+                        if (go != null && this._methodName != null)
+                        {
+                            go.SendMessage(this._methodName, arg, SendMessageOptions.DontRequireReceiver);
+                        }
                     }
                     break;
                 case TriggerActivationType.CallMethodOnSelectedTarget:
-                    if (this._methodName != null)
                     {
-                        //CallMethod does not support using the passed in arg
-                        //var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
-
-                        object[] args = null;
-                        if(_triggerableArgs != null && _triggerableArgs.Length > 0)
+                        if (this._methodName != null)
                         {
-                            args = new object[_triggerableArgs.Length];
-                            for(int i = 0; i < args.Length; i++)
+                            //CallMethod does not support using the passed in arg
+                            //var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
+
+                            object[] args = null;
+                            if (_triggerableArgs != null && _triggerableArgs.Length > 0)
                             {
-                                if (_triggerableArgs[i] != null) args[i] = _triggerableArgs[i].Value;
+                                args = new object[_triggerableArgs.Length];
+                                for (int i = 0; i < args.Length; i++)
+                                {
+                                    if (_triggerableArgs[i] != null) args[i] = _triggerableArgs[i].Value;
+                                }
+                            }
+
+                            if (args != null && args.Length == 1)
+                            {
+                                DynamicUtil.SetValue(this._triggerable, this._methodName, args[0]);
+                            }
+                            else
+                            {
+                                DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
                             }
                         }
-
-                        if(args != null && args.Length == 1)
+                    }
+                    break;
+                case TriggerActivationType.EnableTarget:
+                    {
+                        var go = GameObjectUtil.GetGameObjectFromSource(_triggerable);
+                        if(go != null)
                         {
-                            DynamicUtil.SetValue(this._triggerable, this._methodName, args[0]);
-                        }
-                        else
-                        {
-                            DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
+                            switch(ConvertUtil.ToEnum<EnableMode>(_methodName))
+                            {
+                                case EnableMode.Disable:
+                                    go.SetActive(false);
+                                    break;
+                                case EnableMode.Enable:
+                                    go.SetActive(true);
+                                    break;
+                                case EnableMode.Toggle:
+                                    go.SetActive(!go.activeSelf);
+                                    break;
+                            }
                         }
                     }
                     break;

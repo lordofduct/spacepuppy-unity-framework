@@ -40,7 +40,8 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private bool _passAlongTriggerArg;
 
-        [System.NonSerialized()]
+        [SerializeField]
+        [MinRange(0)]
         private int _currentIndex = 0;
 
 
@@ -137,9 +138,12 @@ namespace com.spacepuppy.Scenario
 
         private void AttemptAutoStart()
         {
-            if (_signal == SignalMode.Auto && _trigger.Targets.Count > 0 && _trigger.Targets[0].Target != null)
+            int i = this.CurrentIndexNormalized;
+            if (i < 0 || i >= _trigger.Targets.Count) return;
+
+            if (_signal == SignalMode.Auto && _trigger.Targets[i].Target != null)
             {
-                var signal = _trigger.Targets[0].Target.GetComponentInChildren<IAutoSequenceSignal>();
+                var signal = _trigger.Targets[i].Target.GetComponentInChildren<IAutoSequenceSignal>();
                 if (signal != null)
                 {
                     _routine = this.StartRadicalCoroutine(this.DoAutoSequence(signal), RadicalCoroutineDisableMode.Pauses);
@@ -164,21 +168,21 @@ namespace com.spacepuppy.Scenario
                 if (_trigger.Targets[i].Target != null && _trigger.Targets[i].Target.GetComponentInChildren<IAutoSequenceSignal>(out signal))
                 {
                     var handle = signal.Wait();
-                    _trigger.ActivateTriggerAt(i);
+                    _trigger.ActivateTriggerAt(i, this, null);
                     yield return handle;
                 }
                 else
                 {
-                    _trigger.ActivateTriggerAt(i);
+                    _trigger.ActivateTriggerAt(i, this, null);
                     yield return null;
                 }
             }
         }
-
+        
         #endregion
 
         #region ITriggerableMechanism Interface
-        
+
         public override bool Trigger(object arg)
         {
             if (!this.CanTrigger) return false;
@@ -188,11 +192,7 @@ namespace com.spacepuppy.Scenario
             {
                 case SignalMode.Manual:
                     {
-                        if (_passAlongTriggerArg)
-                            _trigger.ActivateTriggerAt(this.CurrentIndexNormalized, arg);
-                        else
-                            _trigger.ActivateTriggerAt(this.CurrentIndexNormalized);
-
+                        _trigger.ActivateTriggerAt(this.CurrentIndexNormalized, this, _passAlongTriggerArg ? arg : null);
                         _currentIndex++;
                     }
                     break;

@@ -39,7 +39,7 @@ namespace com.spacepuppyeditor.Modifiers
                 var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
                 if (targ != null)
                 {
-                    var restrictAttrib = this.fieldInfo.GetCustomAttributes(typeof(ComponentTypeRestrictionAttribute), false).FirstOrDefault() as ComponentTypeRestrictionAttribute;
+                    var restrictAttrib = this.fieldInfo.GetCustomAttributes(typeof(TypeRestrictionAttribute), false).FirstOrDefault() as TypeRestrictionAttribute;
                     var componentType = (restrictAttrib != null && restrictAttrib.InheritsFromType != null) ? restrictAttrib.InheritsFromType : this.fieldInfo.FieldType;
                     var root = (bUseEntity) ? targ.FindRoot() : targ;
                     

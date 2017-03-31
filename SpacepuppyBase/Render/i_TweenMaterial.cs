@@ -135,10 +135,10 @@ namespace com.spacepuppy.Render
                              .Ease(EaseMethods.GetEase(_ease));
             
             if (_onComplete.Count > 0)
-                twn.OnFinish((t) => _onComplete.ActivateTrigger());
+                twn.OnFinish((t) => _onComplete.ActivateTrigger(this, null));
 
             if (_onTick.Count > 0)
-                twn.OnStep((t) => _onTick.ActivateTrigger());
+                twn.OnStep((t) => _onTick.ActivateTrigger(this, null));
 
             twn.Play(true);
 

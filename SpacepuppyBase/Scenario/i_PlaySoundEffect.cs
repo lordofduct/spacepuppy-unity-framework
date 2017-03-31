@@ -61,7 +61,7 @@ namespace com.spacepuppy.Scenario
         private void OnAudioComplete()
         {
             _completeRoutine = null;
-            _onAudioComplete.ActivateTrigger();
+            _onAudioComplete.ActivateTrigger(this, null);
         }
 
         #endregion

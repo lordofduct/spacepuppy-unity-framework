@@ -40,12 +40,12 @@ namespace com.spacepuppy.Scenario
 
         public virtual void ActivateTrigger()
         {
-            _trigger.ActivateTrigger();
+            _trigger.ActivateTrigger(this, null);
         }
 
         public virtual void ActivateTrigger(object arg)
         {
-            _trigger.ActivateTrigger(arg);
+            _trigger.ActivateTrigger(this, arg);
         }
 
         #endregion

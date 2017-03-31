@@ -57,6 +57,9 @@ namespace com.spacepuppyeditor.Scenario
                 case TriggerActivationType.CallMethodOnSelectedTarget:
                     h += EditorGUIUtility.singleLineHeight * (3.0f + _callMethodModeExtraLines);
                     break;
+                case TriggerActivationType.EnableTarget:
+                    h += EditorGUIUtility.singleLineHeight * 2.0f;
+                    break;
             }
 
             return h;
@@ -88,6 +91,9 @@ namespace com.spacepuppyeditor.Scenario
                     break;
                 case TriggerActivationType.CallMethodOnSelectedTarget:
                     this.DrawAdvanced_CallMethodOnSelected(area, property);
+                    break;
+                case TriggerActivationType.EnableTarget:
+                    this.DrawAdvanced_EnableTarget(area, property);
                     break;
             }
 
@@ -382,7 +388,34 @@ namespace com.spacepuppyeditor.Scenario
             
         }
 
+        private void DrawAdvanced_EnableTarget(Rect area, SerializedProperty property)
+        {
+            //Draw Target
+            var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
+            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
+            var targLabel = new GUIContent("Triggerable Target");
+            //targProp.objectReferenceValue = SPEditorGUI.ComponentField(targRect,
+            //                                                           targLabel,
+            //                                                            ValidateTriggerableTargAsMechanism(targProp.objectReferenceValue),
+            //                                                            typeof(Transform),
+            //                                                            true);
+            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
+            var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
+            if (newTargGo != targGo)
+            {
+                targGo = newTargGo;
+                targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
+            }
 
+
+            //Draw Triggerable Arg
+            var argRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
+            var argProp = property.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME);
+
+            var e = ConvertUtil.ToEnum<EnableMode>(argProp.stringValue, EnableMode.Enable);
+            e = (EnableMode)EditorGUI.EnumPopup(argRect, "Mode", e);
+            argProp.stringValue = e.ToString();
+        }
 
 
 

@@ -56,7 +56,7 @@ namespace com.spacepuppy
             {
                 if(Application.isPlaying)
                 {
-                    if (object.ReferenceEquals(_gameObject, null) && !GameLoopEntry.ApplicationClosing)
+                    if (_gameObject == null && !GameLoopEntry.ApplicationClosing)
                     {
                         _gameObject = GameObject.Find(GAMEOBJECT_NAME);
                         if (_gameObject == null)

@@ -9,8 +9,8 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor.Components
 {
 
-    [CustomPropertyDrawer(typeof(ComponentTypeRestrictionAttribute))]
-    public class ComponentTypeRestrictionPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(TypeRestrictionAttribute))]
+    public class TypeRestrictionPropertyDrawer : PropertyDrawer
     {
 
         #region Fields
@@ -25,9 +25,11 @@ namespace com.spacepuppyeditor.Components
         {
             bool isArray = this.fieldInfo.FieldType.IsListType();
             var fieldType = (isArray) ? this.fieldInfo.FieldType.GetElementTypeOfListType() : this.fieldInfo.FieldType;
-            if (!TypeUtil.IsType(fieldType, typeof(Component))) return false;
+            if (!TypeUtil.IsType(fieldType, typeof(UnityEngine.Object)))
+                return false;
+            //if (!TypeUtil.IsType(fieldType, typeof(Component))) return false;
 
-            var attrib = this.attribute as ComponentTypeRestrictionAttribute;
+            var attrib = this.attribute as TypeRestrictionAttribute;
             return attrib.InheritsFromType == null ||
                 attrib.InheritsFromType.IsInterface ||
                 TypeUtil.IsType(attrib.InheritsFromType, fieldType);
@@ -39,7 +41,7 @@ namespace com.spacepuppyeditor.Components
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            var attrib = this.attribute as ComponentTypeRestrictionAttribute;
+            var attrib = this.attribute as TypeRestrictionAttribute;
             if (attrib.HideTypeDropDown)
                 return EditorGUIUtility.singleLineHeight;
             else
@@ -61,28 +63,43 @@ namespace com.spacepuppyeditor.Components
             EditorGUI.BeginProperty(position, label, property);
 
             //get base type
-            var attrib = this.attribute as ComponentTypeRestrictionAttribute;
-            var inheritsFromType = attrib.InheritsFromType ?? typeof(Component);
+            var attrib = this.attribute as TypeRestrictionAttribute;
 
             bool isArray = this.fieldInfo.FieldType.IsListType();
             var fieldType = (isArray) ? this.fieldInfo.FieldType.GetElementTypeOfListType() : this.fieldInfo.FieldType;
+            bool fieldIsComponentType = TypeUtil.IsType(fieldType, typeof(Component));
+            bool objIsComponentType = property.objectReferenceValue is Component;
+            var inheritsFromType = attrib.InheritsFromType ?? ((fieldIsComponentType) ? typeof(Component) : fieldType);
 
-            if (attrib.HideTypeDropDown)
+            if (attrib.HideTypeDropDown || !objIsComponentType)
             {
                 //draw object field
-                var fieldObjType = (inheritsFromType.IsInterface) ? typeof(Component) : inheritsFromType;
-                var comp = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, fieldObjType, true, fieldType);
-                if (comp == null)
-                    property.objectReferenceValue = null;
-                else if (TypeUtil.IsType(comp.GetType(), inheritsFromType))
-                    property.objectReferenceValue = comp;
+                if(fieldIsComponentType)
+                {
+                    var fieldCompType = (TypeUtil.IsType(fieldType, typeof(Component))) ? fieldType : typeof(Component);
+                    var comp = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, inheritsFromType, true, fieldCompType);
+                    if (comp == null)
+                        property.objectReferenceValue = null;
+                    else
+                        property.objectReferenceValue = ObjUtil.GetAsFromSource(inheritsFromType, comp) as UnityEngine.Object;
+                    //else if (TypeUtil.IsType(comp.GetType(), inheritsFromType))
+                    //    property.objectReferenceValue = comp;
+                    //else
+                    //    property.objectReferenceValue = comp.GetComponent(inheritsFromType);
+                }
                 else
-                    property.objectReferenceValue = comp.GetComponent(inheritsFromType);
+                {
+                    var obj = EditorGUI.ObjectField(position, label, property.objectReferenceValue, fieldType, true);
+                    if (obj == null)
+                        property.objectReferenceValue = null;
+                    else
+                        property.objectReferenceValue = ObjUtil.GetAsFromSource(inheritsFromType, obj) as UnityEngine.Object;
+                }
             }
             else
             {
                 //draw complex field
-                if(_selectComponentDrawer == null)
+                if (_selectComponentDrawer == null)
                 {
                     _selectComponentDrawer = new SelectableComponentPropertyDrawer();
                 }
@@ -98,6 +115,14 @@ namespace com.spacepuppyeditor.Components
         
         #endregion
 
+
+    }
+
+
+    [System.Obsolete("Use TypeRestrictionPropertyDrawer Instead")]
+    [CustomPropertyDrawer(typeof(ComponentTypeRestrictionAttribute))]
+    public class ComponentTypeRestrictionPropertyDrawer : TypeRestrictionPropertyDrawer
+    {
 
     }
 }

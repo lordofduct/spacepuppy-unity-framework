@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 using com.spacepuppy.Utils;
 
@@ -14,7 +15,7 @@ namespace com.spacepuppy
     /// When using Unsafe access for adding and removing handlers. You must use the same for both. If you add a handler with Unsafe 
     /// you must remove it with Unsafe. If you add with the standard generic method, you must remove with the standard generic method.
     /// </summary>
-    public abstract class Notification : System.EventArgs
+    public abstract class Notification : System.EventArgs, ICloneable
     {
 
         #region Fields
@@ -39,6 +40,15 @@ namespace com.spacepuppy
         public void Post(INotificationDispatcher dispatcher, bool bNotifyEntity = false)
         {
 
+        }
+
+        #endregion
+
+        #region ICloneable Interface
+
+        public virtual object Clone()
+        {
+            return this.MemberwiseClone();
         }
 
         #endregion
@@ -499,5 +509,93 @@ namespace com.spacepuppy
 
         #endregion
 
+
+        #region Temp Interface
+
+        private static Dictionary<System.Type, TempState> _tempNotifTable;
+
+        /// <summary>
+        /// Attempts to get a cached version of the notification, or creates a new one. 
+        /// Use this in tandem with Release to create temp notifications with low GC footprint.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        protected static bool TryGetCache<T>(out T obj) where T : Notification
+        {
+            if (_tempNotifTable == null)
+                _tempNotifTable = new Dictionary<Type, TempState>();
+
+            var tp = typeof(T);
+            TempState state;
+            if (_tempNotifTable.TryGetValue(tp, out state))
+            {
+                if(state != null && state.Notif != null)
+                {
+                    obj = state.Notif as T;
+                    state.Notif = null;
+                    return true;
+                }
+                else
+                {
+                    obj = null;
+                    return false;
+                }
+            }
+            else
+            {
+                _tempNotifTable[tp] = null; //add the key with no state, to represent this is the first potential of caching
+                obj = null;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Release a temporary notification so it can be recycled for later use. The notification should have been created using 
+        /// a static Create method on the notification type itself.
+        /// </summary>
+        /// <param name="notif"></param>
+        public static void Release(Notification notif)
+        {
+            if (notif == null) throw new System.ArgumentNullException("notif");
+            if (_tempNotifTable == null) return;
+
+            var tp = notif.GetType();
+            TempState state;
+            if (!_tempNotifTable.TryGetValue(tp, out state))
+                return; //if the key wasn't in there, then this notif type shouldn't be cached
+
+            if(state != null)
+            {
+                if (state.Notif != null) return;
+
+                state.Notif = notif;
+            }
+            else
+            {
+                state = new TempState();
+                state.Notif = notif;
+                state.Fields = tp.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                _tempNotifTable[tp] = state;
+            }
+
+            foreach(var f in state.Fields)
+            {
+                try
+                {
+                    f.SetValue(notif, null);
+                }
+                catch { }
+            }
+        }
+        
+        private class TempState
+        {
+            public Notification Notif;
+            public FieldInfo[] Fields;
+        }
+
+        #endregion
+
     }
+    
 }

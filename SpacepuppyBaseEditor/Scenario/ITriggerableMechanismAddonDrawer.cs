@@ -18,15 +18,22 @@ namespace com.spacepuppyeditor.Scenario
             var targ = this.SerializedObject.targetObject as ITriggerableMechanism;
             if (targ == null) return;
 
-            var rect = EditorGUILayout.GetControlRect(false, 24f);
-            var w = rect.width * 0.6f;
-            var pad = (rect.width - w) / 2f;
-            rect = new Rect(rect.xMin + pad, rect.yMin + 2f, w, 20f);
+            var rect = GetActivateButtonControlRect();
 
             if(GUI.Button(rect, "Activate"))
             {
                 targ.Trigger();
             }
+        }
+
+
+        public static Rect GetActivateButtonControlRect()
+        {
+            var rect = EditorGUILayout.GetControlRect(false, 24f);
+            var w = rect.width * 0.6f;
+            var pad = (rect.width - w) / 2f;
+            rect = new Rect(rect.xMin + pad, rect.yMin + 2f, w, 20f);
+            return rect;
         }
 
     }

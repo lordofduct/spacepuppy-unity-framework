@@ -48,9 +48,9 @@ namespace com.spacepuppy.Scenario
         private void DoTriggerNext(object arg)
         {
             if (this._passAlongTriggerArg)
-                _targets.ActivateRandomTrigger(arg, true);
+                _targets.ActivateRandomTrigger(this, arg, true);
             else
-                _targets.ActivateRandomTrigger(true);
+                _targets.ActivateRandomTrigger(this, null, true);
         }
 
         #endregion

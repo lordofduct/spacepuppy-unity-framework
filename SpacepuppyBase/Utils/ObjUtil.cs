@@ -28,7 +28,7 @@ namespace com.spacepuppy.Utils
             {
                 //incase there was a change to the UnityEngine.dll
                 _isObjectAlive = (a) => a != null;
-                UnityEngine.Debug.LogWarning("This version of Spacepuppy Framework does not support the version of Unity it's being used with.");
+                UnityEngine.Debug.LogWarning("This version of Spacepuppy Framework does not support the version of Unity it's being used with. (ObjUtil)");
                 //throw new System.InvalidOperationException("This version of Spacepuppy Framework does not support the version of Unity it's being used with.");
             }
         }

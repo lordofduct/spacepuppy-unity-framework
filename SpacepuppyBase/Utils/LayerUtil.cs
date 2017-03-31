@@ -65,5 +65,20 @@ namespace com.spacepuppy.Utils
             return names;
         }
 
+        public static bool Intersects(this LayerMask mask, int layer)
+        {
+            return (mask.value & (1 << layer)) != 0;
+        }
+
+        public static bool Intersects(this LayerMask mask, GameObject go)
+        {
+            return (mask.value & (1 << go.layer)) != 0;
+        }
+
+        public static bool Intersects(this LayerMask mask, Component c)
+        {
+            return (mask.value & (1 << c.gameObject.layer)) != 0;
+        }
+
     }
 }

@@ -18,12 +18,12 @@ namespace com.spacepuppy.Scenario
         #region Events
 
         public event System.EventHandler<TempEventArgs> TriggerActivated;
-        protected virtual void OnTriggerActivated(object arg)
+        protected virtual void OnTriggerActivated(object sender, object arg)
         {
             if (TriggerActivated != null)
             {
                 var e = TempEventArgs.Create(arg);
-                TriggerActivated(this, e);
+                TriggerActivated(sender, e);
                 TempEventArgs.Release(e);
             }
             
@@ -119,22 +119,7 @@ namespace com.spacepuppy.Scenario
             return targ;
         }
         
-        public void ActivateTrigger()
-        {
-            if (_targets.Count > 0)
-            {
-                var e = _targets.GetEnumerator();
-                while (e.MoveNext())
-                {
-                    if (e.Current != null) e.Current.Trigger();
-                }
-            }
-
-            this.OnTriggerActivated(null);
-
-        }
-
-        public void ActivateTrigger(object arg)
+        public void ActivateTrigger(object sender, object arg)
         {
             if (_targets.Count > 0)
             {
@@ -145,21 +130,11 @@ namespace com.spacepuppy.Scenario
                 }
             }
 
-            this.OnTriggerActivated(arg);
+            this.OnTriggerActivated(sender, arg);
+
         }
-
-        public void ActivateTriggerAt(int index)
-        {
-            if(index >= 0 && index < _targets.Count)
-            {
-                TriggerTarget trig = _targets[index];
-                if (trig != null) trig.Trigger();
-            }
-
-            this.OnTriggerActivated(null);
-        }
-
-        public void ActivateTriggerAt(int index, object arg)
+        
+        public void ActivateTriggerAt(int index, object sender, object arg)
         {
             if (index >= 0 && index < _targets.Count)
             {
@@ -167,66 +142,21 @@ namespace com.spacepuppy.Scenario
                 if(trig != null) trig.Trigger(arg);
             }
 
-            this.OnTriggerActivated(arg);
+            this.OnTriggerActivated(sender, arg);
         }
         
-        public void ActivateRandomTrigger(bool considerWeights)
+        public void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
         {
             if (_targets.Count > 0)
             {
                 TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
-                if (trig != null) trig.Trigger();
+                if (trig != null) trig.Trigger(arg);
             }
 
-            this.OnTriggerActivated(null);
-        }
-
-        public void ActivateRandomTrigger(object arg, bool considerWeights)
-        {
-            if (_targets.Count > 0)
-            {
-                TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
-                if (trig != null) trig.Trigger();
-            }
-
-            this.OnTriggerActivated(arg);
+            this.OnTriggerActivated(sender, arg);
         }
         
-        public IRadicalYieldInstruction ActivateTriggerYielding()
-        {
-            if (_yield && _targets.Count > 0)
-            {
-                var instruction = BlockingTriggerYieldInstruction.Create();
-
-                var e = _targets.GetEnumerator();
-                while (e.MoveNext())
-                {
-                    if (e.Current != null) e.Current.Trigger();
-                }
-
-                this.OnTriggerActivated(null);
-
-                return (instruction.Count > 0) ? instruction : null;
-            }
-            else
-            {
-
-                if (_targets.Count > 0)
-                {
-                    var e = _targets.GetEnumerator();
-                    while (e.MoveNext())
-                    {
-                        if (e.Current != null) e.Current.Trigger();
-                    }
-                }
-
-                this.OnTriggerActivated(null);
-
-                return null;
-            }
-        }
-
-        public IRadicalYieldInstruction ActivateTriggerYielding(object arg)
+        public IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
         {
             if (_yield && _targets.Count > 0)
             {
@@ -238,7 +168,7 @@ namespace com.spacepuppy.Scenario
                     if (e.Current != null) e.Current.Trigger(arg);
                 }
 
-                this.OnTriggerActivated(arg);
+                this.OnTriggerActivated(sender, arg);
 
                 return (instruction.Count > 0) ? instruction : null;
             }
@@ -253,14 +183,14 @@ namespace com.spacepuppy.Scenario
                     }
                 }
 
-                this.OnTriggerActivated(arg);
+                this.OnTriggerActivated(sender, arg);
 
                 return null;
             }
         }
 
 
-        public void DaisyChainTriggerYielding(object arg, BlockingTriggerYieldInstruction instruction)
+        public void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
         {
             if (_targets.Count > 0)
             {
@@ -270,7 +200,7 @@ namespace com.spacepuppy.Scenario
                     if (e.Current != null) e.Current.Trigger(arg);
                 }
 
-                this.OnTriggerActivated(arg);
+                this.OnTriggerActivated(sender, arg);
             }
         }
 

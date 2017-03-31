@@ -61,9 +61,9 @@ namespace com.spacepuppy.Scenario
         private void DoTriggerNext(object arg)
         {
             if (this._passAlongTriggerArg)
-                _trigger.ActivateTrigger(arg);
+                _trigger.ActivateTrigger(this, arg);
             else
-                _trigger.ActivateTrigger();
+                _trigger.ActivateTrigger(this, null);
         }
 
         #endregion

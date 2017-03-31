@@ -57,12 +57,12 @@ namespace com.spacepuppy.Scenario
                     {
                         this.Invoke(() =>
                         {
-                            c.Trigger.ActivateTrigger(arg);
+                            c.Trigger.ActivateTrigger(this,arg);
                         }, _delay);
                     }
                     else
                     {
-                        c.Trigger.ActivateTrigger(arg);
+                        c.Trigger.ActivateTrigger(this,arg);
                     }
                     return true;
                 }

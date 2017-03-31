@@ -280,6 +280,7 @@ namespace com.spacepuppyeditor
             var iterator = serializedObject.GetIterator();
             for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
             {
+
                 if (propsNotToDraw == null || !propsNotToDraw.Contains(iterator.name))
                 {
                     //EditorGUILayout.PropertyField(iterator, true);

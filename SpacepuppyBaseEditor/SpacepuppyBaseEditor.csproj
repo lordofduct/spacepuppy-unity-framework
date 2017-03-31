@@ -160,6 +160,7 @@
     <Compile Include="Scenario\i_SetValueOnEntityInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArgInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
+    <Compile Include="Scenario\i_TriggerSequenceInspector.cs" />
     <Compile Include="Scenario\i_TweenValueInspector.cs" />
     <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerableTargetObjectPropertyDrawer.cs" />

@@ -194,12 +194,12 @@ namespace com.spacepuppy.Scenario
 
             public void NotifyStateEntered()
             {
-                _onEnterState.ActivateTrigger();
+                _onEnterState.ActivateTrigger(this, null);
             }
 
             public void NotifyStateExited()
             {
-                _onExitState.ActivateTrigger();
+                _onExitState.ActivateTrigger(this, null);
             }
         }
 

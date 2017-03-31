@@ -128,7 +128,7 @@ namespace com.spacepuppyeditor.Scenario
 
                 EditorGUI.EndProperty();
 
-                if (Application.isPlaying)
+                if (Application.isPlaying && !property.serializedObject.isEditingMultipleObjects)
                 {
                     var w = position.width * 0.6f;
                     var pad = (position.width - w) / 2f;
@@ -136,7 +136,7 @@ namespace com.spacepuppyeditor.Scenario
                     if (GUI.Button(rect, "Activate Trigger"))
                     {
                         var targ = EditorHelper.GetTargetObjectOfProperty(property) as Trigger;
-                        if (targ != null) targ.ActivateTrigger();
+                        if (targ != null) targ.ActivateTrigger(property.serializedObject.targetObject, null);
                     }
                 }
             }
@@ -266,7 +266,7 @@ namespace com.spacepuppyeditor.Scenario
                 EditorGUI.LabelField(labelRect, labelContent);
             }
 
-            if (act == TriggerActivationType.TriggerAllOnTarget)
+            if (act == TriggerActivationType.TriggerAllOnTarget || act == TriggerActivationType.EnableTarget)
             {
                 //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
                 EditorGUI.BeginProperty(trigRect, GUIContent.none, trigProp);

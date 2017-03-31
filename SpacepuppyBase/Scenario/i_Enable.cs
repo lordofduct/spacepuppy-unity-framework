@@ -77,7 +77,7 @@ namespace com.spacepuppy.Scenario
                     break;
             }
         }
-
+        
         #endregion
 
         #region ITriggerableMechanism Interface

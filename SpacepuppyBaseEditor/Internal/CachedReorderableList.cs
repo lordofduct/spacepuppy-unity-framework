@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEditorInternal;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 
 using com.spacepuppy.Utils;
 
@@ -18,6 +18,27 @@ namespace com.spacepuppyeditor.Internal
             : base(serializedObj, property)
         {
         }
+
+        #region Methods
+
+        private static FieldInfo _m_SerializedObject;
+        private void ReInit(SerializedObject obj, SerializedProperty prop)
+        {
+            try
+            {
+                if (_m_SerializedObject == null)
+                    _m_SerializedObject = typeof(ReorderableList).GetField("m_SerializedObject", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                _m_SerializedObject.SetValue(this, obj);
+            }
+            catch
+            {
+                UnityEngine.Debug.LogWarning("This version of Spacepuppy Framework does not support the version of Unity it's being used with (CachedReorderableList).");
+            }
+
+            this.serializedProperty = prop;
+        }
+
+        #endregion
 
 
         #region Static Factory
@@ -36,7 +57,7 @@ namespace com.spacepuppyeditor.Internal
             CachedReorderableList lst;
             if (_lstCache.TryGetValue(hash, out lst))
             {
-                lst.serializedProperty = property;
+                lst.ReInit(property.serializedObject, property);
             }
             else
             {

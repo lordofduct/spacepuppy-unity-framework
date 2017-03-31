@@ -27,7 +27,7 @@ namespace com.spacepuppy.Scenario
             {
                 t_OnEventTrigger.Entry entry = _triggers[index];
                 if (entry.EventID == id)
-                    entry.ActivateTrigger(eventData);
+                    entry.ActivateTrigger(this, eventData);
             }
         }
 
