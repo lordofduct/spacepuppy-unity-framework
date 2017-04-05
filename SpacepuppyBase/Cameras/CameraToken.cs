@@ -9,7 +9,7 @@ namespace com.spacepuppy.Cameras
     /// This type is a class rather than a struct, you should create an object for the token and recycle as needed.
     /// </summary>
     [System.Serializable()]
-    public class CameraToken
+    public struct CameraToken
     {
 
         #region Fields
@@ -30,24 +30,10 @@ namespace com.spacepuppy.Cameras
         public bool hdr;
 
         #endregion
-
-        #region CONSTRUCTOR
-
-        public CameraToken()
-        {
-
-        }
-
-        public CameraToken(Camera camera)
-        {
-            this.CopyFrom(camera);
-        }
-
-        #endregion
         
         #region Methods
-
-        public void CopyTo(Camera camera)
+        
+        public void Apply(Camera camera)
         {
             camera.clearFlags = this.clearFlags;
             camera.backgroundColor = this.backgroundColor;
@@ -65,22 +51,24 @@ namespace com.spacepuppy.Cameras
             camera.hdr = this.hdr;
         }
 
-        public void CopyFrom(Camera camera)
+        public static CameraToken FromCamera(Camera camera)
         {
-            this.clearFlags = camera.clearFlags;
-            this.backgroundColor = camera.backgroundColor;
-            this.cullingMask = camera.cullingMask;
-            this.orthographic = camera.orthographic;
-            this.orthographicSize = camera.orthographicSize;
-            this.fieldOfView = camera.fieldOfView;
-            this.nearClipPlane = camera.nearClipPlane;
-            this.farClipPlane = camera.farClipPlane;
-            this.rect = camera.rect;
-            this.depth = camera.depth;
-            this.renderingPath = camera.renderingPath;
-            this.targetTexture = camera.targetTexture;
-            this.useOcclusionCulling = camera.useOcclusionCulling;
-            this.hdr = camera.hdr;
+            return new CameraToken() {
+                clearFlags = camera.clearFlags,
+                backgroundColor = camera.backgroundColor,
+                cullingMask = camera.cullingMask,
+                orthographic = camera.orthographic,
+                orthographicSize = camera.orthographicSize,
+                fieldOfView = camera.fieldOfView,
+                nearClipPlane = camera.nearClipPlane,
+                farClipPlane = camera.farClipPlane,
+                rect = camera.rect,
+                depth = camera.depth,
+                renderingPath = camera.renderingPath,
+                targetTexture = camera.targetTexture,
+                useOcclusionCulling = camera.useOcclusionCulling,
+                hdr = camera.hdr
+            };
         }
 
         #endregion

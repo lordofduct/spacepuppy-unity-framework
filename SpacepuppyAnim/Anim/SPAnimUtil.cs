@@ -42,5 +42,19 @@ namespace com.spacepuppy.Anim
             anim.Time = Mathf.Clamp(startTime, 0f, anim.Duration);
         }
 
+
+
+        public static System.Collections.IEnumerator ScheduleLegacy(this AnimationState state, System.Action callback)
+        {
+            if (callback == null) throw new System.ArgumentNullException("callback");
+            
+            while(state != null)
+            {
+                yield return null;
+            }
+
+            callback();
+        }
+
     }
 }

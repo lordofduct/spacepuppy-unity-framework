@@ -179,6 +179,7 @@ namespace com.spacepuppy.Anim
 
         public bool ContainsKey(string name)
         {
+            if (name == null) return false;
             return _dict.ContainsKey(name);
         }
 
@@ -348,6 +349,7 @@ namespace com.spacepuppy.Anim
             public bool HideDetailRegion;
             public int DefaultLayer;
             public string Prefix;
+            public string Hash;
         }
 
         public class StaticCollectionAttribute : System.Attribute

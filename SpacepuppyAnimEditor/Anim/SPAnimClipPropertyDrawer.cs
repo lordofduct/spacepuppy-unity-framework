@@ -143,7 +143,7 @@ namespace com.spacepuppyeditor.Anim
             }
             else
             {
-                property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
+                property.isExpanded = EditorGUI.Foldout(new Rect(position.xMin, position.yMin, EditorGUIUtility.labelWidth, EditorGUIUtility.singleLineHeight), property.isExpanded, GUIContent.none);
                 var clipPos = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
                 //this.DrawClip(EditorGUI.IndentedRect(clipPos), property, label, EditorGUIUtility.labelWidth, GUI.skin.label, _nameIsReadOnly);
                 this.DrawClip(clipPos, property, label, EditorGUIUtility.labelWidth, GUI.skin.label, _nameIsReadOnly);

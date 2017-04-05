@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Anim\AnimationUtil.cs" />
     <Compile Include="Anim\AnimPropertyAttributes.cs" />
+    <Compile Include="Anim\AnimSettings.cs" />
     <Compile Include="Anim\AnimUtil.cs" />
     <Compile Include="Anim\Blend\AnimationBlendGraph.cs" />
     <Compile Include="Anim\Blend\IndexedAnimationSelector.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Anim\AnimEventScheduler.cs" />
     <Compile Include="Anim\ISPAnimationSource.cs" />
     <Compile Include="Anim\ISPAnimatorState.cs" />
+    <Compile Include="Anim\i_PlayAnimation.cs" />
     <Compile Include="Anim\i_PlaySPAnimation.cs" />
     <Compile Include="Anim\AnimPrimitives.cs" />
     <Compile Include="Anim\Blend\LinearAnimationBlend.cs" />

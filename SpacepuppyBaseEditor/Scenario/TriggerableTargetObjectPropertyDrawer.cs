@@ -17,11 +17,11 @@ namespace com.spacepuppyeditor.Scenario
     public class TriggerableTargetObjectPropertyDrawer : PropertyDrawer
     {
 
-        private const string PROP_CONFIGURED = "_configured";
-        private const string PROP_TARGET = "_target";
-        private const string PROP_FIND = "_find";
-        private const string PROP_RESOLVEBY = "_resolveBy";
-        private const string PROP_QUERY = "_queryString";
+        public const string PROP_CONFIGURED = "_configured";
+        public const string PROP_TARGET = "_target";
+        public const string PROP_FIND = "_find";
+        public const string PROP_RESOLVEBY = "_resolveBy";
+        public const string PROP_QUERY = "_queryString";
 
         public enum TargetSource
         {
@@ -33,7 +33,10 @@ namespace com.spacepuppyeditor.Scenario
 
         #region Fields
 
-        private TriggerableTargetObject.ConfigAttribute _configAttrib;
+        public System.Type TargetType;
+        public bool SearchChildren;
+        public bool ManuallyConfigured;
+
         private SelectableComponentPropertyDrawer _objectDrawer = new SelectableComponentPropertyDrawer()
         {
             AllowNonComponents = true
@@ -42,11 +45,40 @@ namespace com.spacepuppyeditor.Scenario
 
         #endregion
 
+        #region CONSTRUCTOR
+
+        public TriggerableTargetObjectPropertyDrawer()
+        {
+
+        }
+
+        public TriggerableTargetObjectPropertyDrawer(System.Type targetType, bool searchChildren)
+        {
+            this.ManuallyConfigured = true;
+            this.TargetType = targetType;
+            this.SearchChildren = searchChildren;
+        }
+
+        #endregion
+
         #region Methods
 
         private void Init(SerializedProperty property)
         {
-            _configAttrib = this.fieldInfo.GetCustomAttributes(typeof(TriggerableTargetObject.ConfigAttribute), false).FirstOrDefault() as TriggerableTargetObject.ConfigAttribute;
+            if (this.ManuallyConfigured) return;
+            if (this.fieldInfo == null) return;
+
+            var attrib = this.fieldInfo.GetCustomAttributes(typeof(TriggerableTargetObject.ConfigAttribute), false).FirstOrDefault() as TriggerableTargetObject.ConfigAttribute;
+            if(attrib != null)
+            {
+                this.TargetType = attrib.TargetType;
+                this.SearchChildren = attrib.SearchChildren;
+            }
+            else
+            {
+                this.TargetType = null;
+                this.SearchChildren = false;
+            }
         }
 
 
@@ -91,12 +123,12 @@ namespace com.spacepuppyeditor.Scenario
             e = (TargetSource)EditorGUI.EnumPopup(r0, e);
             if(EditorGUI.EndChangeCheck())
             {
-                UpdateTargetFromSource(targetProp, e, (_configAttrib != null) ? _configAttrib.TargetType : null);
+                UpdateTargetFromSource(targetProp, e, this.TargetType);
                 configProp.boolValue = (e != TargetSource.Arg);
             }
             else if(e == TargetSource.Config && !_defaultSet && targetProp.objectReferenceValue == null)
             {
-                UpdateTargetFromSource(targetProp, e, (_configAttrib != null) ? _configAttrib.TargetType : null);
+                UpdateTargetFromSource(targetProp, e, this.TargetType);
                 _defaultSet = true;
             }
             else
@@ -112,8 +144,8 @@ namespace com.spacepuppyeditor.Scenario
             }
             else
             {
-                _objectDrawer.RestrictionType = (_configAttrib != null) ? _configAttrib.TargetType : null;
-                _objectDrawer.SearchChildren = (_configAttrib != null) ? _configAttrib.SearchChildren : false;
+                _objectDrawer.RestrictionType = this.TargetType;
+                _objectDrawer.SearchChildren = this.SearchChildren;
                 _objectDrawer.OnGUI(r1, targetProp, GUIContent.none);
             }
 

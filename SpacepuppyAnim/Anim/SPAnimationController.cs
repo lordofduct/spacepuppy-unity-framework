@@ -54,7 +54,7 @@ namespace com.spacepuppy.Anim
 
         [System.NonSerialized]
         private ScriptableAnimCollection _scriptableAnims;
-
+        
         #endregion
 
         #region CONSTRUCTOR
@@ -146,9 +146,98 @@ namespace com.spacepuppy.Anim
 
         public ISPAnim Play(IScriptableAnimationClip clip, PlayMode mode = PlayMode.StopSameLayer)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+
             var state = CreateScriptableAnimState(this, clip);
             state.Play(QueueMode.PlayNow, mode);
             return state;
+        }
+
+        /// <summary>
+        /// Play an AnimationClip on the AnimationController that doesn't already exist on it. If the same clip is called multiple times, it will not be readded.
+        /// </summary>
+        /// <param name="clip"></param>
+        /// <param name="queueMode"></param>
+        /// <param name="playMode"></param>
+        /// <returns></returns>
+        public ISPAnim PlayAuxiliary(SPAnimClip clip, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            if(clip.Clip is AnimationClip)
+            {
+                var anim = this.CreateAuxiliarySPAnim_Imp(clip.Clip as AnimationClip);
+                anim.Weight = clip.Weight;
+                anim.Speed = clip.Speed;
+                anim.Layer = clip.Layer;
+                anim.WrapMode = clip.WrapMode;
+                anim.BlendMode = clip.BlendMode;
+                anim.TimeSupplier = (clip.TimeSupplier != SPTime.Normal) ? anim.TimeSupplier : null;
+                anim.Play(queueMode, playMode);
+                return anim;
+            }
+            else if(clip.Clip is IScriptableAnimationClip)
+            {
+                return this.Play(clip.Clip as IScriptableAnimationClip, playMode);
+            }
+            else
+            {
+                return SPAnim.Null;
+            }
+        }
+
+        public ISPAnim CrossFadeAuxiliary(SPAnimClip clip, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            if (clip.Clip is AnimationClip)
+            {
+                var anim = this.CreateAuxiliarySPAnim_Imp(clip.Clip as AnimationClip);
+                anim.Weight = clip.Weight;
+                anim.Speed = clip.Speed;
+                anim.Layer = clip.Layer;
+                anim.WrapMode = clip.WrapMode;
+                anim.BlendMode = clip.BlendMode;
+                anim.TimeSupplier = (clip.TimeSupplier != SPTime.Normal) ? anim.TimeSupplier : null;
+                anim.CrossFade(fadeLength, queueMode, playMode);
+                return anim;
+            }
+            else if (clip.Clip is IScriptableAnimationClip)
+            {
+                return this.Play(clip.Clip as IScriptableAnimationClip, playMode);
+            }
+            else
+            {
+                return SPAnim.Null;
+            }
+        }
+
+        public SPAnim PlayAuxiliary(AnimationClip clip, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            var anim = this.CreateAuxiliarySPAnim_Imp(clip);
+            anim.Play(queueMode, playMode);
+            return anim;
+        }
+
+        public SPAnim CrossFadeAuxiliary(AnimationClip clip, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            var anim = this.CreateAuxiliarySPAnim_Imp(clip);
+            anim.CrossFade(fadeLength, queueMode, playMode);
+            return anim;
+        }
+
+        public SPAnim CreateAuxiliarySPAnim(AnimationClip clip)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            return this.CreateAuxiliarySPAnim_Imp(clip);
         }
 
 
@@ -240,6 +329,17 @@ namespace com.spacepuppy.Anim
             _scriptableAnims.Add(state);
         }
 
+        private SPAnim CreateAuxiliarySPAnim_Imp(AnimationClip clip)
+        {
+            string id = "aux*" + clip.GetInstanceID();
+            var a = _animation[id];
+            if (a == null || a.clip != clip)
+            {
+                _animation.AddClip(clip, id);
+            }
+
+            return SPAnim.Create(_animation, id);
+        }
 
         #endregion
 

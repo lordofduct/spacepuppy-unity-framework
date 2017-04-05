@@ -62,6 +62,8 @@ namespace com.spacepuppyeditor.Anim
                     _hideDetailRegion = configAttrib.HideDetailRegion;
                     _defaultLayer = configAttrib.DefaultLayer;
                     _entryPrefix = configAttrib.Prefix;
+                    if(!string.IsNullOrEmpty(configAttrib.Hash))
+                        _currentLabel.text= string.Format("{0} - ({1})", _currentLabel.text, configAttrib.Hash);
                 }
                 else
                 {

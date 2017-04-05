@@ -8,7 +8,6 @@ using com.spacepuppy;
 using com.spacepuppy.Anim;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppy.Anim
 {

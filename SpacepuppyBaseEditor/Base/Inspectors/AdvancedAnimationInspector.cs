@@ -54,7 +54,16 @@ namespace com.spacepuppyeditor.Base
 
             this.DrawPlayAnimPopup();
 
-            _animList.DoLayoutList();
+            //_animList.DoLayoutList();
+            var rect = EditorGUILayout.GetControlRect(false, _animList.GetHeight());
+            _animList.DoList(rect);
+
+            rect = new Rect(rect.xMin, rect.yMax - EditorGUIUtility.singleLineHeight + 1f, Mathf.Min(EditorGUIUtility.labelWidth, 60f), EditorGUIUtility.singleLineHeight - 1f);
+            if(GUI.Button(rect, "Clear All"))
+            {
+                _animList.serializedProperty.arraySize = 0;
+            }
+
 
             this.DrawPropertyField(PROP_ANIMATE_PHYSICS);
             this.DrawPropertyField(PROP_CULLINGTYPE);
@@ -122,6 +131,7 @@ namespace com.spacepuppyeditor.Base
                 label = EditorHelper.TempContent("Anim " + index.ToString("00"));
             }
 
+            area.height = EditorGUIUtility.singleLineHeight;
             EditorGUI.PropertyField(area, element, label);
 
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_animList, area, index, isActive, isFocused);
