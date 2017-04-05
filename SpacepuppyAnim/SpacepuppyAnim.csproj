@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{48C79480-359D-4215-9EDE-3D4E9D8190B3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppy</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFramework.Anim</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Anim\AnimationUtil.cs" />
+    <Compile Include="Anim\AnimPropertyAttributes.cs" />
+    <Compile Include="Anim\AnimUtil.cs" />
+    <Compile Include="Anim\Blend\AnimationBlendGraph.cs" />
+    <Compile Include="Anim\Blend\IndexedAnimationSelector.cs" />
+    <Compile Include="Anim\Exceptions.cs" />
+    <Compile Include="Anim\IKSolver.cs" />
+    <Compile Include="Anim\IScriptableAnimationClip.cs" />
+    <Compile Include="Anim\ISPAnimator.cs" />
+    <Compile Include="Anim\ISPAnim.cs" />
+    <Compile Include="Anim\AnimEventScheduler.cs" />
+    <Compile Include="Anim\ISPAnimationSource.cs" />
+    <Compile Include="Anim\ISPAnimatorState.cs" />
+    <Compile Include="Anim\i_PlaySPAnimation.cs" />
+    <Compile Include="Anim\AnimPrimitives.cs" />
+    <Compile Include="Anim\Blend\LinearAnimationBlend.cs" />
+    <Compile Include="Anim\Blend\LinearAnimationSelector.cs" />
+    <Compile Include="Anim\Legacy\SPLegacyAnimation.cs" />
+    <Compile Include="Anim\MaskCollection.cs" />
+    <Compile Include="Anim\PropertyAttributes.cs" />
+    <Compile Include="Anim\SPAnimUtil.cs" />
+    <Compile Include="Mecanim\MecanimSpeedScaler.cs" />
+    <Compile Include="Anim\SPAnimationController.cs" />
+    <Compile Include="Anim\SPAnimClip.cs" />
+    <Compile Include="Anim\SPAnimClipCollection.cs" />
+    <Compile Include="Anim\Blend\StaticFrameAnimation.cs" />
+    <Compile Include="Anim\SPAnim.cs" />
+    <Compile Include="Anim\SPAnimatorStateMachine.cs" />
+    <Compile Include="Anim\TransformMask.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
+      <Project>{4b8e57ac-f3b2-4dfd-ba0b-20f6be3b17c9}</Project>
+      <Name>SpacepuppyBase</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Anim.dll" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Anim.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Anim.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Anim.pdb"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

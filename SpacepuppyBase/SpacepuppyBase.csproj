@@ -124,6 +124,7 @@
     <Compile Include="Geom\BezierSpline.cs" />
     <Compile Include="Geom\Box.cs" />
     <Compile Include="Geom\CatmullRomSpline.cs" />
+    <Compile Include="Geom\Cylinder.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
     <Compile Include="Graphs\AStarPathResolver.cs" />
     <Compile Include="Graphs\DijkstraPathResolver.cs" />
@@ -300,6 +301,7 @@
     <Compile Include="SPTimeEnums.cs" />
     <Compile Include="StateMachine\ComponentStateSupplier.cs" />
     <Compile Include="StateMachine\GenericStateStack.cs" />
+    <Compile Include="StateMachine\IStackedStateMachine.cs" />
     <Compile Include="StateMachine\IStateMachine.cs" />
     <Compile Include="StateMachine\IStateStack.cs" />
     <Compile Include="StateMachine\IStateSupplier.cs" />

@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{801BD252-CE5C-45EA-B4DD-F7C3C13E0432}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppy</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFramework.Movement</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArmatureRig.cs" />
+    <Compile Include="MovementController.cs" />
+    <Compile Include="Movement\DumbMovementStyle.cs" />
+    <Compile Include="Movement\IMotorConstraint.cs" />
+    <Compile Include="Movement\IMovementStyle.cs" />
+    <Compile Include="Movement\InjectedMovementStyle.cs" />
+    <Compile Include="Movement\MotorEvents.cs" />
+    <Compile Include="Movement\MovementMotor.cs" />
+    <Compile Include="Movement\MovementMotor2D.cs" />
+    <Compile Include="Movement\WaitForBeforeUpdateMovement.cs" />
+    <Compile Include="Movement\XYPlaneConstraint.cs" />
+    <Compile Include="Pathfinding\PathingMovementStyle.cs" />
+    <Compile Include="Pathfinding\UnityPathAgentMovementStyle.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenario\i_ApplyForce.cs" />
+    <Compile Include="Tween\Accessors\MovementControllerMoveAccessor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
+      <Project>{4b8e57ac-f3b2-4dfd-ba0b-20f6be3b17c9}</Project>
+      <Name>SpacepuppyBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpacepuppySerialization\SpacepuppySerialization.csproj">
+      <Project>{5dcfc7a9-b2b5-4a08-beb8-b2ced2457391}</Project>
+      <Name>SpacepuppySerialization</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Movement.dll" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Movement.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Movement.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Movement.pdb"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

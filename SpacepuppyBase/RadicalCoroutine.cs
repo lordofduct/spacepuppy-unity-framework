@@ -177,6 +177,7 @@ namespace com.spacepuppy
 
         private RadicalCoroutine()
         {
+            _stack = new RadicalOperationStack(this);
             //was created for recycling
         }
 
@@ -812,14 +813,19 @@ namespace com.spacepuppy
         {
             if (this.Active) this.Stop(false);
 
-            _state = RadicalCoroutineOperatingState.Inactive;
+            _owner = null;
+            _token = null;
+            _manager = null;
             _disableMode = RadicalCoroutineDisableMode.Default;
-            if (_stack != null) _stack.Clear();
+            _stack.Clear();
             _currentIEnumeratorYieldValue = null;
+            _state = RadicalCoroutineOperatingState.Inactive;
             _forcedTick = false;
             this.OnComplete = null;
+            this.OnCancelling = null;
             this.OnCancelled = null;
             this.OnFinished = null;
+            _immediatelyResumingSignal = null;
 
             //TODO - #100 - allow releasing when we've fully implemented coroutine object caching 
             //_pool.Release(this);
@@ -956,35 +962,6 @@ namespace com.spacepuppy
 
         #endregion
 
-        #region Static Pool
-
-        private static com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine>(1000,
-                                                                                                                                                            () =>
-                                                                                                                                                            {
-                                                                                                                                                                return new RadicalCoroutine();
-                                                                                                                                                            },
-                                                                                                                                                            (r) =>
-                                                                                                                                                            {
-                                                                                                                                                                r._state = RadicalCoroutineOperatingState.Inactive;
-                                                                                                                                                                r._disableMode = RadicalCoroutineDisableMode.Default;
-                                                                                                                                                                r._currentIEnumeratorYieldValue = null;
-                                                                                                                                                                r._forcedTick = false;
-                                                                                                                                                                r.OnComplete = null;
-                                                                                                                                                                r.OnCancelled = null;
-                                                                                                                                                                r.OnFinished = null;
-                                                                                                                                                            },
-                                                                                                                                                            true);
-
-        internal RadicalCoroutine CreatePooledRoutine(IEnumerator e)
-        {
-            if (e == null) throw new System.ArgumentNullException("routine");
-            var routine = _pool.GetInstance();
-            routine.OperationStack.Push(EnumWrapper.Create(e));
-            return routine;
-        }
-
-        #endregion
-
         #region Static Operators/Conversion
 
         public static implicit operator bool(RadicalCoroutine routine)
@@ -997,6 +974,47 @@ namespace com.spacepuppy
 
         #endregion
 
+
+
+        #region Static Pool
+
+        /*
+        private static com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine>(1000,
+                                                                                                                                                            () =>
+                                                                                                                                                            {
+                                                                                                                                                                return new RadicalCoroutine();
+                                                                                                                                                            },
+                                                                                                                                                            (r) =>
+                                                                                                                                                            {
+                                                                                                                                                                r._owner = null;
+                                                                                                                                                                r._token = null;
+                                                                                                                                                                r._manager = null;
+                                                                                                                                                                r._disableMode = RadicalCoroutineDisableMode.Default;
+                                                                                                                                                                r._stack.Clear();
+                                                                                                                                                                r._currentIEnumeratorYieldValue = null;
+                                                                                                                                                                r._state = RadicalCoroutineOperatingState.Inactive;
+                                                                                                                                                                r._forcedTick = false;
+                                                                                                                                                                r.OnComplete = null;
+                                                                                                                                                                r.OnCancelling = null;
+                                                                                                                                                                r.OnCancelled = null;
+                                                                                                                                                                r.OnFinished = null;
+                                                                                                                                                                r._immediatelyResumingSignal = null;
+                                                                                                                                                            },
+                                                                                                                                                            true);
+
+        internal RadicalCoroutine CreatePooledRoutine(IEnumerator e)
+        {
+            if (e == null) throw new System.ArgumentNullException("routine");
+            var routine = _pool.GetInstance();
+            if (e is IRadicalYieldInstruction)
+                routine._stack.Push(e as IRadicalYieldInstruction);
+            else
+                routine._stack.Push(EnumWrapper.Create(e));
+            return routine;
+        }
+        */
+
+        #endregion
 
         #region Special Types
 

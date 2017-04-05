@@ -127,6 +127,210 @@ namespace com.spacepuppy
             }
         }
 
+        public bool GetBool(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.BoolValue;
+            else
+                return false;
+        }
+
+        public void SetBool(string key, bool value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.BoolValue = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    BoolValue = value
+                });
+            }
+        }
+
+        public int GetInt(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.IntValue;
+            else
+                return 0;
+        }
+
+        public void SetInt(string key, int value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.IntValue = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    IntValue = value
+                });
+            }
+        }
+
+        public float GetFloat(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.FloatValue;
+            else
+                return 0f;
+        }
+
+        public void SetFloat(string key, float value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.FloatValue = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    FloatValue = value
+                });
+            }
+        }
+
+        public double GetDouble(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.DoubleValue;
+            else
+                return 0f;
+        }
+
+        public void SetDouble(string key, double value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.DoubleValue = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    DoubleValue = value
+                });
+            }
+        }
+
+        public Vector2 GetVector2(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.Vector2Value;
+            else
+                return Vector2.zero;
+        }
+
+        public void SetVector2(string key, Vector2 value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.Vector2Value = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    Vector2Value = value
+                });
+            }
+        }
+
+        public Vector3 GetVector3(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.Vector3Value;
+            else
+                return Vector3.zero;
+        }
+
+        public void SetVector3(string key, Vector3 value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.Vector3Value = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    Vector3Value = value
+                });
+            }
+        }
+
+        public Quaternion GetQuaternion(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.QuaternionValue;
+            else
+                return Quaternion.identity;
+        }
+
+        public void SetQuaternion(string key, Quaternion value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.QuaternionValue = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    QuaternionValue = value
+                });
+            }
+        }
+
+        public Color GetColor(string key)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v.ColorValue;
+            else
+                return Color.black;
+        }
+
+        public void SetColor(string key, Color value)
+        {
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+            {
+                v.ColorValue = value;
+            }
+            else
+            {
+                _table.Add(key, new VariantReference()
+                {
+                    ColorValue = value
+                });
+            }
+        }
+
+
+
+
+
         public bool HasMember(string key)
         {
             return _table.ContainsKey(key);

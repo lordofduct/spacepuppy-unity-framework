@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{83C642E8-2A84-4815-8F58-487D341021B3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppy</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFramework.Input</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GameInputManager.cs" />
+    <Compile Include="Scenario\t_OnSimpleButtonPress.cs" />
+    <Compile Include="UserInput\CompositeAxlePrecedence.cs" />
+    <Compile Include="UserInput\CompositeInputSignature.cs" />
+    <Compile Include="UserInput\IPlayerInputDevice.cs" />
+    <Compile Include="UserInput\AnalogButtonSimulator.cs" />
+    <Compile Include="UserInput\ButtonState.cs" />
+    <Compile Include="UserInput\ComboInputSignature.cs" />
+    <Compile Include="UserInput\DeadZoneEnums.cs" />
+    <Compile Include="UserInput\IInputSignature.cs" />
+    <Compile Include="UserInput\InputSignatureCollection.cs" />
+    <Compile Include="UserInput\InputUtil.cs" />
+    <Compile Include="UserInput\GenericPlayerInputDevice.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserInput\ISequence.cs" />
+    <Compile Include="UserInput\Sequences\ButtonTap.cs" />
+    <Compile Include="UserInput\Sequences\CursorMove.cs" />
+    <Compile Include="UserInput\Sequences\FirstSuccessfulSequence.cs" />
+    <Compile Include="UserInput\UnityInput\EventfulUnityInputDevice.cs" />
+    <Compile Include="UserInput\UnityInput\UnityInputSignatures.cs" />
+    <Compile Include="UserInput\Xbox\IXboxGamePad.cs" />
+    <Compile Include="UserInput\Xbox\XboxControllerEnums.cs" />
+    <Compile Include="UserInput\Xbox\XboxGamePad.cs" />
+    <Compile Include="UserInput\Xbox\XboxGamePadState.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
+      <Project>{4b8e57ac-f3b2-4dfd-ba0b-20f6be3b17c9}</Project>
+      <Name>SpacepuppyBase</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Input.dll" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Input.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Input.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Input.pdb"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

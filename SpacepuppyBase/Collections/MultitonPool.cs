@@ -960,6 +960,8 @@ namespace com.spacepuppy.Collections
 
         public T GetFromSource(object obj)
         {
+            if (obj is T) return obj as T;
+
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return null;
 
@@ -971,6 +973,9 @@ namespace com.spacepuppy.Collections
         public T GetFromSource(System.Type tp, object obj)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
+
+            if (obj is T && TypeUtil.IsType(obj.GetType(), tp)) return obj as T;
+
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return null;
 
@@ -989,6 +994,8 @@ namespace com.spacepuppy.Collections
 
         public TSub GetFromSource<TSub>(object obj) where TSub : class, T
         {
+            if (obj is TSub) return obj as TSub;
+
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return null;
 
@@ -1005,6 +1012,12 @@ namespace com.spacepuppy.Collections
 
         public bool GetFromSource(object obj, out T comp)
         {
+            if(obj is T)
+            {
+                comp = obj as T;
+                return true;
+            }
+
             comp = null;
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return false;
@@ -1025,6 +1038,13 @@ namespace com.spacepuppy.Collections
         public bool GetFromSource(System.Type tp, object obj, out T comp)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
+
+            if (obj is T && TypeUtil.IsType(obj.GetType(), tp))
+            {
+                comp = obj as T;
+                return true;
+            }
+
             comp = null;
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return false;
@@ -1046,6 +1066,12 @@ namespace com.spacepuppy.Collections
 
         public bool GetFromSource<TSub>(object obj, out TSub comp) where TSub : class, T
         {
+            if(obj is TSub)
+            {
+                comp = obj as TSub;
+                return true;
+            }
+
             comp = null;
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
             if (go == null) return false;

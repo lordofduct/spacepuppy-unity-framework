@@ -8,6 +8,11 @@ namespace com.spacepuppy.Pathfinding
     public static class PathUtil
     {
 
+        public static bool IsDone(this IPath path)
+        {
+            return path.Status != PathCalculateStatus.Uncalculated;
+        }
+
         /// <summary>
         /// Gets the next target waypoint after currentIndex. Updating currentIndex if you've passed it.
         /// </summary>
@@ -35,7 +40,7 @@ namespace com.spacepuppy.Pathfinding
             var dir1 = targ - currentPosition;
             var dir2 = waypoints[currentIndex + 1] - targ;
 
-            if (Vector3.Dot(dir1, dir2) < 0f)
+            if (Vector3.Dot(dir1, dir2) <= 0f)
             {
                 currentIndex++;
                 targ = path.Waypoints[currentIndex];
@@ -107,7 +112,7 @@ namespace com.spacepuppy.Pathfinding
             var dir1 = targ - currentPosition;
             var dir2 = waypoints[currentIndex + 1] - targ;
 
-            if (Vector3.Dot(dir1, dir2) < 0f)
+            if (Vector3.Dot(dir1, dir2) <= 0f)
             {
                 currentIndex++;
                 targ = path.Waypoints[currentIndex];
