@@ -37,7 +37,12 @@ namespace com.spacepuppy.Tween.Accessors
 
         #region ImplicitCurve Interface
 
-        public System.Type Init(string propName, string args)
+        public System.Type GetMemberType()
+        {
+            return typeof(Vector3);
+        }
+
+        public System.Type Init(object target, string propName, string args)
         {
             _atypicalMove = ConvertUtil.ToBool(args);
             return typeof(Vector3);

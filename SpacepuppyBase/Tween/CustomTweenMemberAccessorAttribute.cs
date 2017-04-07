@@ -18,6 +18,6 @@
         public System.Type HandledTargetType { get { return _targetType; } }
 
         public string HandledPropName { get { return _propName; } }
-
+        
     }
 }

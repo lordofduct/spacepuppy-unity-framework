@@ -5,8 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Tween;
+using com.spacepuppy.Tween.Accessors;
 using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Base;
@@ -85,13 +88,13 @@ namespace com.spacepuppyeditor.Scenario
             //TODO - member
             position = CalcNextRect(ref area);
             var memberProp = el.FindPropertyRelative(PROP_DATA_MEMBER);
-            System.Reflection.MemberInfo selectedMember;
-            memberProp.stringValue = SPEditorGUI.ReflectedPropertyField(position,
-                                                                        EditorHelper.TempContent("Property", "The property on the target to set."),
-                                                                        _targetProp.objectReferenceValue,
-                                                                        memberProp.stringValue,
-                                                                        com.spacepuppy.Dynamic.DynamicMemberAccess.ReadWrite,
-                                                                        out selectedMember);
+            System.Type propType;
+            memberProp.stringValue = i_TweenValueInspector.ReflectedPropertyAndCustomTweenAccessorField(position,
+                                                                                                        EditorHelper.TempContent("Property", "The property on the target to set."),
+                                                                                                        _targetProp.objectReferenceValue,
+                                                                                                        memberProp.stringValue,
+                                                                                                        com.spacepuppy.Dynamic.DynamicMemberAccess.ReadWrite,
+                                                                                                        out propType);
 
             position = CalcNextRect(ref area);
             SPEditorGUI.PropertyField(position, el.FindPropertyRelative(PROP_DATA_EASE));
@@ -99,10 +102,8 @@ namespace com.spacepuppyeditor.Scenario
             position = CalcNextRect(ref area);
             SPEditorGUI.PropertyField(position, el.FindPropertyRelative(PROP_DATA_DUR));
 
-            if(selectedMember != null)
+            if(propType != null)
             {
-                var propType = com.spacepuppy.Dynamic.DynamicUtil.GetReturnType(selectedMember);
-
                 switch (el.FindPropertyRelative(PROP_DATA_MODE).GetEnumValue<TweenHash.AnimMode>())
                 {
                     case TweenHash.AnimMode.To:
@@ -176,6 +177,88 @@ namespace com.spacepuppyeditor.Scenario
         }
 
         #endregion
+
+
+        #region Custom Reflected PropertyField
+
+        public static string ReflectedPropertyAndCustomTweenAccessorField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Type propType)
+        {
+            if (targObj != null)
+            {
+                var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, access).ToArray();
+                var accessors = CustomTweenMemberAccessorFactory.GetCustomAccessorIds(targObj.GetType());
+                System.Array.Sort(accessors);
+
+                using (var entries = TempCollection.GetList<GUIContent>(members.Length))
+                {
+                    int index = -1;
+                    for (int i = 0; i < members.Length; i++)
+                    {
+                        var m = members[i];
+                        if ((DynamicUtil.GetMemberAccessLevel(m) & DynamicMemberAccess.Write) != 0)
+                            entries.Add(EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj))));
+                        else
+                            entries.Add(EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj))));
+
+                        if (index < 0 && m.Name == selectedMemberName)
+                        {
+                            //index = i;
+                            index = entries.Count - 1;
+                        }
+                    }
+
+                    for(int i = 0; i < accessors.Length; i++)
+                    {
+                        entries.Add(EditorHelper.TempContent(accessors[i]));
+                        if(index < 0 && accessors[i] == selectedMemberName)
+                        {
+                            index = entries.Count - 1;
+                        }
+                    }
+
+                    
+                    index = EditorGUI.Popup(position, label, index, entries.ToArray());
+                    //selectedMember = (index >= 0) ? members[index] : null;
+                    //return (selectedMember != null) ? selectedMember.Name : null;
+
+                    if(index < 0)
+                    {
+                        propType = null;
+                        return null;
+                    }
+                    else if (index < members.Length)
+                    {
+                        propType = DynamicUtil.GetReturnType(members[index]);
+                        return members[index].Name;
+                    }
+                    else
+                    {
+                        var nm = accessors[index - members.Length];
+                        ITweenMemberAccessor acc;
+                        if(CustomTweenMemberAccessorFactory.TryGetMemberAccessor(targObj, nm, out acc))
+                        {
+                            propType = acc.GetMemberType();
+                            if(VariantReference.AcceptableType(propType))
+                            {
+                                return nm;
+                            }
+                        }
+                    }
+
+                    propType = null;
+                    return null;
+                }
+            }
+            else
+            {
+                propType = null;
+                EditorGUI.Popup(position, label, -1, new GUIContent[0]);
+                return null;
+            }
+        }
+
+        #endregion
+
 
     }
 

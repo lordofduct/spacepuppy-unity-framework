@@ -34,7 +34,8 @@ namespace com.spacepuppyeditor.Collections
 
             if (expanded)
             {
-                EditorGUI.indentLevel++;
+                int lvl = EditorGUI.indentLevel;
+                EditorGUI.indentLevel = lvl + 1;
 
                 var keysProp = property.FindPropertyRelative("_keys");
                 var valuesProp = property.FindPropertyRelative("_values");
@@ -46,15 +47,19 @@ namespace com.spacepuppyeditor.Collections
                 {
                     r = GetNextRect(ref position);
                     //r = EditorGUI.IndentedRect(r);
-                    var w = r.width / 2f;
-                    var r0 = new Rect(r.xMin, r.yMin, w, r.height);
-                    var r1 = new Rect(r0.xMax, r.yMin, w, r.height);
+                    var w0 = EditorGUIUtility.labelWidth; // r.width / 2f;
+                    var w1 = r.width - w0;
+                    var r0 = new Rect(r.xMin, r.yMin, w0, r.height);
+                    var r1 = new Rect(r0.xMax, r.yMin, w1, r.height);
 
                     var keyProp = keysProp.GetArrayElementAtIndex(i);
                     var valueProp = valuesProp.GetArrayElementAtIndex(i);
-                    EditorGUI.PropertyField(r0, keyProp, GUIContent.none, false);
-                    EditorGUI.PropertyField(r1, valueProp, GUIContent.none, false);
+
+                    this.DrawKey(r0, keyProp);
+                    this.DrawValue(r1, valueProp);
                 }
+
+                EditorGUI.indentLevel = lvl;
 
                 r = GetNextRect(ref position);
                 var pRect = new Rect(r.xMax - 60f, r.yMin, 30f, EditorGUIUtility.singleLineHeight);
@@ -73,6 +78,26 @@ namespace com.spacepuppyeditor.Collections
                 }
             }
         }
+
+        protected virtual void DrawKey(Rect area, SerializedProperty keyProp)
+        {
+#if SP_LIB
+            SPEditorGUI.PropertyField(area, keyProp, GUIContent.none, false);
+#else
+            EditorGUI.PropertyField(area, keyProp, GUIContent.none, false);
+#endif
+        }
+
+        protected virtual void DrawValue(Rect area, SerializedProperty valueProp)
+        {
+#if SP_LIB
+            SPEditorGUI.PropertyField(area, valueProp, GUIContent.none, false);
+#else
+            EditorGUI.PropertyField(area, valueProp, GUIContent.none, false);
+#endif
+        }
+
+
 
 
         private Rect GetNextRect(ref Rect position)

@@ -18,6 +18,7 @@ namespace com.spacepuppyeditor.Internal
         #region Fields
 
         private System.Reflection.FieldInfo _fieldInfo;
+        private bool _propertyIsArray;
 
         private PropertyDrawer _drawer;
         private List<PropertyModifier> _modifiers;
@@ -26,11 +27,12 @@ namespace com.spacepuppyeditor.Internal
 
         #region CONSTRUCTOR
         
-        public MultiPropertyAttributePropertyHandler(System.Reflection.FieldInfo fieldInfo, PropertyAttribute[] attribs)
+        public MultiPropertyAttributePropertyHandler(System.Reflection.FieldInfo fieldInfo, bool propertyIsArray, PropertyAttribute[] attribs)
         {
             if (fieldInfo == null) throw new System.ArgumentNullException("fieldInfo");
             if (attribs == null) throw new System.ArgumentNullException("attribs");
             _fieldInfo = fieldInfo;
+            _propertyIsArray = propertyIsArray;
 
             this.Init(attribs);
         }
@@ -40,6 +42,11 @@ namespace com.spacepuppyeditor.Internal
         #region Properties
 
         public System.Reflection.FieldInfo Field { get { return _fieldInfo; } }
+
+        public bool PropertyIsArray
+        {
+            get { return _propertyIsArray; }
+        }
 
         #endregion
 
@@ -54,7 +61,7 @@ namespace com.spacepuppyeditor.Internal
             if (fieldTypePropertyDrawerType != null && TypeUtil.IsType(fieldTypePropertyDrawerType, typeof(PropertyDrawer)))
             {
                 _drawer = PropertyDrawerActivator.Create(fieldTypePropertyDrawerType, null, _fieldInfo);
-                if (_drawer != null && _fieldInfo.FieldType.IsListType()) _drawer = new ArrayPropertyDrawer(_drawer);
+                if (_drawer != null && _propertyIsArray) _drawer = new ArrayPropertyDrawer(_drawer);
                 this.InternalDrawer = _drawer;
             }
 
@@ -73,13 +80,13 @@ namespace com.spacepuppyeditor.Internal
                     var modifier = _modifiers.Last();
                     modifier.IsDrawer = true;
                     _drawer = modifier;
-                    if (_fieldInfo.FieldType.IsListType()) _drawer = new ArrayPropertyDrawer(_drawer);
+                    if (_propertyIsArray) _drawer = new ArrayPropertyDrawer(_drawer);
                     this.InternalDrawer = _drawer;
                 }
                 else
                 {
                     _drawer = DefaultPropertyDrawer.SharedInstance;
-                    if (_drawer != null && _fieldInfo.FieldType.IsListType()) _drawer = new ArrayPropertyDrawer(_drawer);
+                    if (_drawer != null && _propertyIsArray) _drawer = new ArrayPropertyDrawer(_drawer);
                     this.InternalDrawer = _drawer;
                 }
             }
@@ -115,7 +122,7 @@ namespace com.spacepuppyeditor.Internal
                     if (_modifiers == null) _modifiers = new List<PropertyModifier>();
                     _modifiers.Add(drawer as PropertyModifier);
                     
-                    if(this.Field.FieldType.IsListType())
+                    if(_propertyIsArray)
                     {
                         _drawer = new ArrayPropertyDrawer(null);
                     }
@@ -123,7 +130,7 @@ namespace com.spacepuppyeditor.Internal
                 else if(drawer != null)
                 {
                     //we got a new drawer, set it
-                    if (!(drawer is IArrayHandlingPropertyDrawer) && this.Field.FieldType.IsListType()) drawer = new ArrayPropertyDrawer(drawer);
+                    if (!(drawer is IArrayHandlingPropertyDrawer) && _propertyIsArray) drawer = new ArrayPropertyDrawer(drawer);
                     _drawer = drawer;
                 }
             }
@@ -163,7 +170,7 @@ namespace com.spacepuppyeditor.Internal
                 else
                 {
                     //we got a new drawer, set it
-                    if (this.Field.FieldType.IsListType())
+                    if (_propertyIsArray)
                     {
                         _drawer = new ArrayPropertyDrawer(drawer);
                     }

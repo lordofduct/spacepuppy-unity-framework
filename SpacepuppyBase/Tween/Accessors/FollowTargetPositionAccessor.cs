@@ -13,9 +13,14 @@ namespace com.spacepuppy.Tween.Accessors
 
 
 
-        public System.Type Init(string propName, string args)
+        public System.Type GetMemberType()
         {
-            return typeof(FollowTargetPositionAccessor);
+            return typeof(Vector3);
+        }
+
+        public System.Type Init(object target, string propName, string args)
+        {
+            return typeof(Vector3);
         }
 
         public object Get(object target)

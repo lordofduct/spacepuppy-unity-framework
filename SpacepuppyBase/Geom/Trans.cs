@@ -173,11 +173,21 @@ namespace com.spacepuppy.Geom
             this.Rotation = Quaternion.LookRotation(point - this.Position, up);
         }
 
+        /// <summary>
+        /// Transforms point from local space to global space.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
         public Vector3 TransformPoint(Vector3 v)
         {
             return this.Matrix.MultiplyPoint(v);
         }
 
+        /// <summary>
+        /// Trasnforms direction vector from local space to global space.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
         public Vector3 TransformDirection(Vector3 v)
         {
             return this.Matrix.MultiplyVector(v);

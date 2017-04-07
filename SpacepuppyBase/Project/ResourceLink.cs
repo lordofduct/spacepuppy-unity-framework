@@ -12,6 +12,8 @@ namespace com.spacepuppy.Project
 
         [SerializeField()]
         private string _path;
+        [System.NonSerialized]
+        private UnityEngine.Object _obj;
 
         #endregion
 
@@ -20,6 +22,7 @@ namespace com.spacepuppy.Project
         public ResourceLink(string path)
         {
             _path = path;
+            _obj = null;
         }
 
         #endregion
@@ -38,12 +41,16 @@ namespace com.spacepuppy.Project
 
         public UnityEngine.Object GetResource()
         {
-            return Resources.Load(_path);
+            if(_obj == null)
+                _obj = Resources.Load(_path);
+            return _obj;
         }
 
         public T GetResource<T>() where T : UnityEngine.Object
         {
-            return Resources.Load<T>(_path);
+            if(_obj == null)
+                _obj = Resources.Load<T>(_path);
+            return _obj as T;
         }
 
         #endregion

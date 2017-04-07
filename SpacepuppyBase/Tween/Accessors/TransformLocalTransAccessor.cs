@@ -16,7 +16,12 @@ namespace com.spacepuppy.Tween.Accessors
 
         #region ITweenMemberAccessor Interface
 
-        public System.Type Init(string propName, string args)
+        public System.Type GetMemberType()
+        {
+            return typeof(Trans);
+        }
+
+        public System.Type Init(object target, string propName, string args)
         {
             _includeScale = ConvertUtil.ToBool(args);
 

@@ -18,7 +18,12 @@ namespace com.spacepuppy.Tween.Accessors
 
         #region ITweenMemberAccessor Interface
 
-        public System.Type Init(string propName, string args)
+        public System.Type GetMemberType()
+        {
+            return typeof(float);
+        }
+
+        public System.Type Init(object target, string propName, string args)
         {
             _id = (string.IsNullOrEmpty(args)) ? DEFAULT_TIMESCALE_ID : args;
 

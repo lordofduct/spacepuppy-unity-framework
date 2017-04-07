@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Collections;
+using com.spacepuppy.Tween.Accessors;
 using com.spacepuppy.Tween.Curves;
 using com.spacepuppy.Utils;
 using com.spacepuppy.Dynamic.Accessors;
@@ -130,15 +131,38 @@ namespace com.spacepuppy.Tween
 
         #region Static Factory
 
-        private class CustomAccessorData
+        private static IMemberAccessor GetAccessor(object target, string propName, out System.Type memberType)
         {
-            public int priority;
-            public System.Type TargetType;
-            public System.Type AccessorType;
+            string args = null;
+            if (propName != null)
+            {
+                int fi = propName.IndexOf("(");
+                if (fi >= 0)
+                {
+                    int li = propName.LastIndexOf(")");
+                    if (li < fi) li = propName.Length;
+                    args = propName.Substring(fi + 1, li - fi - 1);
+                    propName = propName.Substring(0, fi);
+                }
+            }
+
+            ITweenMemberAccessor acc;
+            if (CustomTweenMemberAccessorFactory.TryGetMemberAccessor(target, propName, out acc))
+            {
+                memberType = acc.Init(target, propName, args);
+                return acc;
+            }
+
+            //return MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
+            return MemberAccessorPool.GetDynamicAccessor(target, propName, out memberType);
         }
 
+
+
+
+        #region Curve Accessors
+
         private static Dictionary<System.Type, System.Type> _memberTypeToCurveType;
-        private static ListDictionary<string, CustomAccessorData> _targetToCustomAccessor;
 
         private static void BuildCurveTypeDictionary()
         {
@@ -157,76 +181,6 @@ namespace com.spacepuppy.Tween
                     }
                 }
             }
-        }
-
-        private static void BuildAccessorDictionary()
-        {
-            _targetToCustomAccessor = new ListDictionary<string, CustomAccessorData>();
-            foreach (var tp in TypeUtil.GetTypesAssignableFrom(typeof(ITweenMemberAccessor)))
-            {
-                var attribs = tp.GetCustomAttributes(typeof(CustomTweenMemberAccessorAttribute), false).Cast<CustomTweenMemberAccessorAttribute>().ToArray();
-                foreach (var attrib in attribs)
-                {
-                    var data = new CustomAccessorData()
-                    {
-                        priority = attrib.priority,
-                        TargetType = attrib.HandledTargetType,
-                        AccessorType = tp
-                    };
-                    _targetToCustomAccessor.Add(attrib.HandledPropName, data);
-                }
-            }
-
-            foreach (var lst in _targetToCustomAccessor.Lists)
-            {
-                (lst as List<CustomAccessorData>).Sort((a, b) => b.priority.CompareTo(a.priority)); //sort descending
-            }
-        }
-
-        private static IMemberAccessor GetAccessor(object target, string propName, out System.Type memberType)
-        {
-            if (_targetToCustomAccessor == null) BuildAccessorDictionary();
-
-            string args = null;
-            if(propName != null)
-            {
-                int fi = propName.IndexOf("(");
-                if (fi >= 0)
-                {
-                    int li = propName.LastIndexOf(")");
-                    if (li < fi) li = propName.Length;
-                    args = propName.Substring(fi + 1, li - fi - 1);
-                    propName = propName.Substring(0, fi);
-                }
-            }
-
-            IList<CustomAccessorData> lst;
-            if (_targetToCustomAccessor.Lists.TryGetList(propName, out lst))
-            {
-                var tp = target.GetType();
-                CustomAccessorData data;
-                int cnt = lst.Count;
-                for (int i = 0; i < cnt; i++)
-                {
-                    data = lst[i];
-                    if (data.TargetType.IsAssignableFrom(tp))
-                    {
-                        try
-                        {
-                            var acc = System.Activator.CreateInstance(data.AccessorType) as ITweenMemberAccessor;
-                            memberType = acc.Init(propName, args);
-                            return acc;
-                        }
-                        catch
-                        {
-                            Debug.LogWarning("Failed to create Custom MemberAccessor of type '" + tp.FullName + "'.");
-                            break;
-                        }
-                    }
-                }
-            }
-            //return MemberAccessorPool.GetAccessor(target.GetType(), propName, out memberType);
-            return MemberAccessorPool.GetDynamicAccessor(target, propName, out memberType);
         }
 
         private static MemberCurve Create(System.Type memberType, IMemberAccessor accessor, Ease ease, float dur, object start, object end, object option)
@@ -255,6 +209,10 @@ namespace com.spacepuppy.Tween
                 throw new System.ArgumentException("MemberInfo is for a member type that is not supported.", "info");
             }
         }
+
+        #endregion
+
+
 
         public new static MemberCurve CreateTo(object target, string propName, Ease ease, object end, float dur, object option = null)
         {

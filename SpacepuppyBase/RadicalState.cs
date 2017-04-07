@@ -71,7 +71,7 @@ namespace com.spacepuppy
         private void OnCancelling(object sender, System.EventArgs e)
         {
             if (_disposed || _routine == null) return;
-            if (_onCancel != null && _routine.Cancelled) _onCancel();
+            if (_onCancel != null && GameLoopEntry.QuitState != QuitState.Quit && _routine.Cancelled) _onCancel();
             _routine = null;
         }
 

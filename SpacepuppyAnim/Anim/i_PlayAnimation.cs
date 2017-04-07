@@ -43,6 +43,8 @@ namespace com.spacepuppy.Anim
         private QueueMode _queueMode = QueueMode.PlayNow;
         [SerializeField]
         private PlayMode _playMode = PlayMode.StopSameLayer;
+        [SerializeField]
+        private float _crossFadeDur = 0f;
 
         [SerializeField()]
         private Trigger _onAnimComplete = new Trigger(TRG_ONANIMCOMPLETE);
@@ -66,10 +68,13 @@ namespace com.spacepuppy.Anim
             {
                 if (controller is SPAnimationController)
                 {
-                    var a = (controller as SPAnimationController).CreateAuxiliarySPAnim(clip as AnimationClip);
-                    _settings.Apply(a);
-                    a.Play(_queueMode, _playMode);
-                    return a;
+                    var anim = (controller as SPAnimationController).CreateAuxiliarySPAnim(clip as AnimationClip);
+                    _settings.Apply(anim);
+                    if (_crossFadeDur > 0f)
+                        anim.CrossFade(_crossFadeDur, _queueMode, _playMode);
+                    else
+                        anim.Play(_queueMode, _playMode);
+                    return anim;
                 }
                 else if (controller is Animation)
                 {
@@ -81,7 +86,11 @@ namespace com.spacepuppy.Anim
                         animController.AddClip(clip as AnimationClip, id);
                     }
 
-                    var anim = animController.PlayQueued(id, _queueMode, _playMode);
+                    AnimationState anim;
+                    if (_crossFadeDur > 0f)
+                        anim = animController.CrossFadeQueued(id, _crossFadeDur, _queueMode, _playMode);
+                    else
+                        anim = animController.PlayQueued(id, _queueMode, _playMode);
                     _settings.Apply(anim);
                     return anim;
                 }
@@ -107,12 +116,15 @@ namespace com.spacepuppy.Anim
                     {
                         if (controller is ISPAnimationSource)
                         {
-                            var a = (controller as ISPAnimationSource).GetAnim(_id);
-                            if (a != null)
+                            var anim = (controller as ISPAnimationSource).GetAnim(_id);
+                            if (anim != null)
                             {
-                                a.Play(_queueMode, _playMode);
+                                if (_crossFadeDur > 0f)
+                                    anim.CrossFade(_crossFadeDur, _queueMode, _playMode);
+                                else
+                                    anim.Play(_queueMode, _playMode);
                             }
-                            return a;
+                            return anim;
                         }
                         else if(controller is ISPAnimator)
                         {
@@ -124,9 +136,13 @@ namespace com.spacepuppy.Anim
                             var clip = (controller as Animation)[_id];
                             if(clip != null)
                             {
-                                var a = (controller as Animation).PlayQueued(_id, _queueMode, _playMode);
-                                _settings.Apply(a);
-                                return a;
+                                AnimationState anim;
+                                if (_crossFadeDur > 0f)
+                                    anim = (controller as Animation).CrossFadeQueued(_id, _crossFadeDur, _queueMode, _playMode);
+                                else
+                                    anim = (controller as Animation).PlayQueued(_id, _queueMode, _playMode);
+                                _settings.Apply(anim);
+                                return anim;
                             }
                         }
 

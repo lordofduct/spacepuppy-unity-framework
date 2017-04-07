@@ -13,14 +13,27 @@ namespace com.spacepuppyeditor.Project
     public class ResourceLinkPropertyDrawer : PropertyDrawer
     {
 
+        #region Fields
+
+        public bool ManualConfig;
+        public System.Type ResourceType;
+
+        #endregion
+        
+        #region Methods
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var pathProperty = property.FindPropertyRelative("_path");
             var path = pathProperty.stringValue;
 
-            var attrib = this.fieldInfo.GetCustomAttributes(typeof(ResourceLink.ConfigAttribute), false).FirstOrDefault() as ResourceLink.ConfigAttribute;
+            if(!this.ManualConfig)
+            {
+                var attrib = this.fieldInfo.GetCustomAttributes(typeof(ResourceLink.ConfigAttribute), false).FirstOrDefault() as ResourceLink.ConfigAttribute;
+                this.ResourceType = attrib != null ? attrib.resourceType : null;
+            }
 
-            var tp = (attrib != null && attrib.resourceType != null) ? attrib.resourceType : typeof(UnityEngine.Object);
+            var tp = (this.ResourceType != null) ? this.ResourceType : typeof(UnityEngine.Object);
             UnityEngine.Object asset = (!StringUtil.IsNullOrWhitespace(path)) ? Resources.Load(path, tp) : null;
 
             EditorGUI.BeginChangeCheck();
@@ -79,7 +92,9 @@ namespace com.spacepuppyeditor.Project
                 return path1 + "/" + path2;
             }
         }
-        
+
+        #endregion
+
 
     }
 }
