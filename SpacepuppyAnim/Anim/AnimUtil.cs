@@ -1,10 +1,23 @@
-﻿
+﻿using UnityEngine;
+using System.Linq;
+
 namespace com.spacepuppy.Anim
 {
     public static class AnimUtil
     {
 
-        
+        public static void ClearAnimations(Animation anim)
+        {
+            if (anim != null)
+            {
+                var clips = (from a in anim.Cast<AnimationState>() select a.clip).Distinct().ToArray();
+                foreach (var c in clips)
+                {
+                    anim.RemoveClip(c);
+                }
+            }
+        }
+
 
         public static void Schedule(this ISPAnim anim, System.Action<ISPAnim> callback, SPTimePeriod period)
         {

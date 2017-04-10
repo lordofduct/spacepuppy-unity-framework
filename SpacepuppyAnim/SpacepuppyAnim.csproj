@@ -46,7 +46,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Anim\AnimationUtil.cs" />
     <Compile Include="Anim\AnimPropertyAttributes.cs" />
     <Compile Include="Anim\AnimSettings.cs" />
     <Compile Include="Anim\AnimUtil.cs" />
