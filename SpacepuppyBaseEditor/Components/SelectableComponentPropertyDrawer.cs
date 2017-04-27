@@ -44,8 +44,9 @@ namespace com.spacepuppyeditor.Components
                 //else if (!value.IsInterface && !TypeUtil.IsType(value, typeof(Component))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
                 //_restrictionType = value;
 
-                //if (value == null) value = (this.AllowNonComponents) ? typeof(UnityEngine.Object) : typeof(Component);
-                if (value == null) value = typeof(Component);
+
+                //if (value == null) value = typeof(Component);
+                if (value == null) value = (this.AllowNonComponents) ? typeof(UnityEngine.Object) : typeof(Component); //needs to be this so that it works with VariantReference and allows all types
                 _restrictionType = value;
             }
         }

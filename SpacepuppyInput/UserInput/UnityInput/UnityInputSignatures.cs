@@ -107,18 +107,20 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         #region CONSTRUCTOR
 
-        public AxleButtonInputSignature(string id, string unityInputId)
+        public AxleButtonInputSignature(string id, string unityInputId, AxleValueConsideration consideration = AxleValueConsideration.Positive)
             : base(id)
         {
             this.AxisButtonDeadZone = 0.707f;
             this.UnityInputId = unityInputId;
+            this.Consideration = consideration;
         }
 
-        public AxleButtonInputSignature(string id, int hash, string unityInputId)
+        public AxleButtonInputSignature(string id, int hash, string unityInputId, AxleValueConsideration consideration = AxleValueConsideration.Positive)
             : base(id, hash)
         {
             this.AxisButtonDeadZone = 0.5f;
             this.UnityInputId = unityInputId;
+            this.Consideration = consideration;
         }
 
         #endregion

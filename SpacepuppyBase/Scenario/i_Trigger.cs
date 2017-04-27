@@ -103,12 +103,7 @@ namespace com.spacepuppy.Scenario
 
             return true;
         }
-
-        void ITriggerableMechanism.Trigger()
-        {
-            this.ActivateTrigger(null);
-        }
-
+        
         bool ITriggerableMechanism.Trigger(object arg)
         {
             return this.ActivateTrigger(arg);

@@ -74,6 +74,33 @@ namespace com.spacepuppy.AI
 
         public ITypedStateMachine<IAIState> States { get { return _stateMachine; } }
 
+        public IAIState DefaultState
+        {
+            get { return _defaultState as IAIState; }
+            set
+            {
+                if (object.ReferenceEquals(_defaultState, value)) return;
+
+                if(value != null && _stateMachine.Contains(value))
+                {
+                    _defaultState = value as Component;
+                }
+                else
+                {
+                    _defaultState = null;
+                }
+            }
+        }
+
+        public float Interval
+        {
+            get { return _interval; }
+            set
+            {
+                _interval = Mathf.Max(0f, value);
+            }
+        }
+
         public AIVariableCollection Variables { get { return _variables; } }
 
         public SourceMode StateSource
@@ -94,6 +121,11 @@ namespace com.spacepuppy.AI
         #endregion
 
         #region Methods
+
+        public void OffsetTicker(float t)
+        {
+            _t = Time.time - t;
+        }
 
         private void InitStateMachine()
         {

@@ -104,7 +104,7 @@ namespace com.spacepuppyeditor.Components
                     _selectComponentDrawer = new SelectableComponentPropertyDrawer();
                 }
 
-                _selectComponentDrawer.RestrictionType = inheritsFromType;
+                _selectComponentDrawer.RestrictionType = inheritsFromType ?? typeof(Component);
                 _selectComponentDrawer.ShowXButton = true;
 
                 _selectComponentDrawer.OnGUI(position, property, label);

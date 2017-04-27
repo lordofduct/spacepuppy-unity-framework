@@ -161,6 +161,7 @@
     <Compile Include="Scenario\i_SetValueInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnEntityInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArgInspector.cs" />
+    <Compile Include="Scenario\i_TriggerOnEvalInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
     <Compile Include="Scenario\i_TriggerSequenceInspector.cs" />
     <Compile Include="Scenario\i_TweenValueInspector.cs" />
@@ -190,19 +191,28 @@
       <Name>SpacepuppyBase</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Shaders\DefaultShader.shader" />
+    <None Include="Shaders\DefaultShader.shader.meta" />
+    <None Include="Shaders\LineShader.shader" />
+    <None Include="Shaders\LineShader.shader.meta" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\Editor\
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.dll" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.pdb" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.pdb"
-mkdir $(ProjectDir)..\Builds\OpenSource\Editor\
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.dll" "$(ProjectDir)..\Builds\OpenSource\Editor\SpacepuppyUnityFrameworkEditor.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.pdb" "$(ProjectDir)..\Builds\OpenSource\Editor\SpacepuppyUnityFrameworkEditor.pdb"</PostBuildEvent>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\Editor\
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.dll" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.pdb" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.pdb"
+mkdir $(ProjectDir)..\Builds\BaseLibrary\Editor\
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.dll" "$(ProjectDir)..\Builds\BaseLibrary\Editor\SpacepuppyUnityFrameworkEditor.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.pdb" "$(ProjectDir)..\Builds\BaseLibrary\Editor\SpacepuppyUnityFrameworkEditor.pdb"
+mkdir $(ProjectDir)..\Builds\FullLibrary\Editor\Shaders\
+xcopy /Y /S "$(ProjectDir)Shaders" "$(ProjectDir)\..\Builds\FullLibrary\Editor\Shaders\"
+mkdir $(ProjectDir)..\Builds\BaseLibrary\Editor\Shaders\
+xcopy /Y /S "$(ProjectDir)Shaders" "$(ProjectDir)\..\Builds\BaseLibrary\Editor\Shaders\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

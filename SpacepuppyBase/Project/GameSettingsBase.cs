@@ -14,11 +14,13 @@ namespace com.spacepuppy.Project
 
         #region CONSTRUCTOR
 
-        protected virtual void Awake()
+        protected void Awake()
         {
-            if (_instance != null)
+            if (_instance != null && _instance != this)
                 throw new System.InvalidOperationException("Attempted to create multiple GameSettings. Please get instances of the game settings via the static interface GameSettingsBase.GetGameSettings.");
         }
+
+        protected abstract void OnInitialized();
 
         protected virtual void OnDestroy()
         {
@@ -37,7 +39,9 @@ namespace com.spacepuppy.Project
             if(_instance == null)
             {
                 if (path == null) path = PATH_DEFAULTSETTINGS;
-                _instance = Object.Instantiate(Resources.Load(path)) as GameSettings;
+                //_instance = Object.Instantiate(Resources.Load(path)) as GameSettings;
+                _instance = Resources.Load(path) as GameSettings;
+                if (_instance != null) _instance.OnInitialized();
                 return _instance;
             }
             else
@@ -51,7 +55,9 @@ namespace com.spacepuppy.Project
             if (_instance == null)
             {
                 if (path == null) path = PATH_DEFAULTSETTINGS;
-                _instance = Object.Instantiate(Resources.Load(path)) as T;
+                //_instance = Object.Instantiate(Resources.Load(path)) as T;
+                _instance = Resources.Load(path) as T;
+                if (_instance != null) _instance.OnInitialized();
                 return _instance as T;
             }
             else

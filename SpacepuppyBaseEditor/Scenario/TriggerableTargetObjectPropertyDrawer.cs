@@ -144,7 +144,7 @@ namespace com.spacepuppyeditor.Scenario
             }
             else
             {
-                _objectDrawer.RestrictionType = this.TargetType;
+                _objectDrawer.RestrictionType = this.TargetType ?? typeof(Component);
                 _objectDrawer.SearchChildren = this.SearchChildren;
                 _objectDrawer.OnGUI(r1, targetProp, GUIContent.none);
             }

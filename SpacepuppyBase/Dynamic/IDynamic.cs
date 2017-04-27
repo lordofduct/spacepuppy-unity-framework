@@ -208,7 +208,12 @@ namespace com.spacepuppy.Dynamic
 
         public static bool SetValueDirect(object obj, string sprop, object value, params object[] index)
         {
+            if (string.IsNullOrEmpty(sprop)) return false;
+
+            //if (sprop.Contains('.'))
+            //    obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
             if (obj == null) return false;
+
             var vtp = (value != null) ? value.GetType() : null;
             var member = GetValueSetterMemberFromType(obj.GetType(), sprop, vtp, false);
             if (member == null) return false;
@@ -241,6 +246,10 @@ namespace com.spacepuppy.Dynamic
         public static object GetValueDirect(object obj, string sprop, params object[] args)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            if (string.IsNullOrEmpty(sprop)) return null;
+
+            //if (sprop.Contains('.'))
+            //    obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
             if (obj == null) return null;
 
             try
@@ -297,6 +306,10 @@ namespace com.spacepuppy.Dynamic
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             result = null;
+            if (string.IsNullOrEmpty(sprop)) return false;
+
+            //if (sprop.Contains('.'))
+            //    obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
             if (obj == null) return false;
 
             try
@@ -356,8 +369,11 @@ namespace com.spacepuppy.Dynamic
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
                                          BindingFlags.InvokeMethod | BindingFlags.OptionalParamBinding;
+            if (string.IsNullOrEmpty(name)) return null;
+            //if (name.Contains('.'))
+            //    obj = DynamicUtil.ReduceSubObject(obj, name, out name);
             if (obj == null) return false;
-
+            
             var tp = obj.GetType();
             try
             {
@@ -372,7 +388,8 @@ namespace com.spacepuppy.Dynamic
         public static bool HasMemberDirect(object obj, string name, bool includeNonPublic)
         {
             if (obj == null) return false;
-
+            if (string.IsNullOrEmpty(name)) return false;
+            
             return TypeHasMember(obj.GetType(), name, includeNonPublic);
         }
 
@@ -391,6 +408,9 @@ namespace com.spacepuppy.Dynamic
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
             const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+
+            //if (name.Contains('.'))
+            //    tp = DynamicUtil.ReduceSubType(tp, name, includeNonPublic, out name);
             if (tp == null) return false;
 
             if (tp.GetMember(name, BINDING) != null) return true;
@@ -443,6 +463,14 @@ namespace com.spacepuppy.Dynamic
         {
             const BindingFlags BINDING_PUBLIC = BindingFlags.Public | BindingFlags.Instance;
             const BindingFlags BINDING_NONPUBLIC = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            if (tp == null) throw new ArgumentNullException("tp");
+
+            //if (sMemberName.Contains('.'))
+            //{
+            //    tp = DynamicUtil.ReduceSubType(tp, sMemberName, includeNonPublic, out sMemberName);
+            //    if (tp == null) return null;
+            //}
+
             try
             {
                 while (tp != null)
@@ -487,6 +515,12 @@ namespace com.spacepuppy.Dynamic
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             if (tp == null) throw new ArgumentNullException("tp");
 
+            //if (sprop.Contains('.'))
+            //{
+            //    tp = DynamicUtil.ReduceSubType(tp, sprop, includeNonPublic, out sprop);
+            //    if (tp == null) return null;
+            //}
+            
             try
             {
                 while (tp != null)
@@ -565,6 +599,13 @@ namespace com.spacepuppy.Dynamic
         public static MemberInfo GetValueGetterMemberFromType(Type tp, string sprop, bool includeNonPublic)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
+            //if (sprop.Contains('.'))
+            //{
+            //    tp = DynamicUtil.ReduceSubType(tp, sprop, includeNonPublic, out sprop);
+            //    if (tp == null) return null;
+            //}
+
             try
             {
                 while (tp != null)
@@ -665,17 +706,36 @@ namespace com.spacepuppy.Dynamic
                     return (info as MethodInfo).ReturnType;
             }
             return null;
+        }
 
-            //if (info is IDynamicMemberInfo)
-            //    return (info as IDynamicMemberInfo).ReturnType;
-            //else if (info is PropertyInfo)
-            //    return (info as PropertyInfo).PropertyType;
-            //else if (info is FieldInfo)
-            //    return (info as FieldInfo).FieldType;
-            //else if (info is MethodInfo)
-            //    return (info as MethodInfo).ReturnType;
-            //else
-            //    return null;
+        /// <summary>
+        /// If the member is writeable, returns the the type it expects.
+        /// Field - type of the field
+        /// Property - type of the property
+        /// Method - type of the first parameter, if any, otherwise null.
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        public static Type GetInputType(MemberInfo info)
+        {
+            if (info == null) return null;
+
+            switch (info.MemberType)
+            {
+                case MemberTypes.Field:
+                    return (info as FieldInfo).FieldType;
+                case MemberTypes.Property:
+                    return (info as PropertyInfo).PropertyType;
+                case MemberTypes.Method:
+                    {
+                        var meth = info as MethodInfo;
+                        if (meth == null) return null;
+                        var arr = meth.GetParameters();
+                        if (arr.Length == 0) return null;
+                        return arr[0].ParameterType;
+                    }
+            }
+            return null;
         }
 
         public static DynamicMemberAccess GetMemberAccessLevel(MemberInfo info)
@@ -886,6 +946,47 @@ namespace com.spacepuppy.Dynamic
 
 
         #region Some Minor Helpers
+
+        private static object ReduceSubObject(object obj, string sprop, out string lastProp)
+        {
+            if (obj == null)
+            {
+                lastProp = null;
+                return null;
+            }
+
+            var arr = sprop.Split('.');
+            lastProp = arr[arr.Length - 1];
+            for (int i = 0; i < arr.Length - 1; i++)
+            {
+                obj = DynamicUtil.GetValue(obj, arr[i]);
+                if (obj == null) return null;
+            }
+            
+            return obj;
+        }
+
+        private static System.Type ReduceSubType(System.Type tp, string sprop, bool includeNonPublic, out string lastProp)
+        {
+            if (tp == null)
+            {
+                lastProp = null;
+                return null;
+            }
+
+            var arr = sprop.Split('.');
+            lastProp = arr[arr.Length - 1];
+            for (int i = 0; i < arr.Length - 1; i++)
+            {
+                var member = DynamicUtil.GetValueGetterMemberFromType(tp, arr[i], includeNonPublic);
+                if (member == null) return null;
+
+                tp = GetReturnType(member);
+                if (tp == null) return null;
+            }
+
+            return tp;
+        }
 
         private static bool ParameterSignatureMatches(object[] args, ParameterInfo[] paramInfos, bool convertToParamTypeIfCan)
         {

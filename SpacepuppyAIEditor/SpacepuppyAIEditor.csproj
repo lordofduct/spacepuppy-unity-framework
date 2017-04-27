@@ -95,10 +95,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\Editor\
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.AI.dll" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.AI.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.AI.pdb" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.AI.pdb"
-xcopy /Y /S "$(ProjectDir)Shaders" "$(ProjectDir)\..\Builds\Standard\Editor\Shaders\"</PostBuildEvent>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\Editor\
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.AI.dll" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.AI.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.AI.pdb" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.AI.pdb"
+mkdir $(ProjectDir)..\Builds\FullLibrary\Editor\Shaders\
+xcopy /Y /S "$(ProjectDir)Shaders" "$(ProjectDir)\..\Builds\FullLibrary\Editor\Shaders\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -47,6 +47,13 @@ namespace com.spacepuppy
 
         #region Methods
 
+        /// <summary>
+        /// Change to a new state, cancelling any existing running state, cancel callback for previous state will be called.
+        /// </summary>
+        /// <param name="routine">Routine to run.</param>
+        /// <param name="onCancel">Cancel callback when state changes.</param>
+        /// <param name="onComplete">Complete callback when state completes.</param>
+        /// <returns></returns>
         public RadicalCoroutine ChangeState(IEnumerator routine, System.Action onCancel = null, System.Action onComplete = null)
         {
             if (_disposed) throw new System.InvalidOperationException("Object is disposed.");
@@ -62,15 +69,64 @@ namespace com.spacepuppy
             return _routine;
         }
 
+        /// <summary>
+        /// Exit the current state, cancelling it, and firing the cancel callback.
+        /// </summary>
         public void ExitState()
         {
             if (_disposed) throw new System.InvalidOperationException("Object is disposed.");
-            if (_routine != null) _routine.Cancel();
+            if (_routine != null && _routine.Active)
+            {
+                _routine.Cancel();
+                _routine = null;
+            }
+        }
+
+        /// <summary>
+        /// Removes event listeners before cancelling the current state so that no callback signals occur.
+        /// </summary>
+        public void SilentlyExitState()
+        {
+            if (_disposed) throw new System.InvalidOperationException("Object is disposed.");
+            if (_routine != null && _routine.Active)
+            {
+                var rot = _routine;
+                _routine = null;
+                rot.OnCancelling -= this.OnCancelling;
+                rot.OnFinished -= this.OnFinished;
+                rot.Cancel();
+            }
+        }
+
+        /// <summary>
+        /// Removes event listeners before cancelling the routine so that no callback signals occur.
+        /// </summary>
+        /// <param name="routine">Supposed state to cancel, this may be a routine that was previously started on this but exited.</param>
+        /// <returns>Returns true if was the running routine.</returns>
+        public bool SilentlyExitState(RadicalCoroutine routine)
+        {
+            if (_disposed) throw new System.InvalidOperationException("Object is disposed.");
+            if (routine == null) return false;
+            
+            if (_routine == routine)
+            {
+                _routine = null;
+                routine.OnCancelling -= this.OnCancelling;
+                routine.OnFinished -= this.OnFinished;
+                routine.Cancel();
+                return true;
+            }
+            else
+            {
+                routine.Cancel();
+                return false;
+            }
         }
 
         private void OnCancelling(object sender, System.EventArgs e)
         {
             if (_disposed || _routine == null) return;
+            if (sender != _routine) return;
             if (_onCancel != null && GameLoopEntry.QuitState != QuitState.Quit && _routine.Cancelled) _onCancel();
             _routine = null;
         }
@@ -78,6 +134,7 @@ namespace com.spacepuppy
         private void OnFinished(object sender, System.EventArgs e)
         {
             if (_disposed || _routine == null) return;
+            if (sender != _routine) return;
             if (_onComplete != null && _routine.Complete) _onComplete();
             _routine = null;
         }

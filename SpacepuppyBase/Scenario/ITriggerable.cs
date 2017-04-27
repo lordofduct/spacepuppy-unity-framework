@@ -6,7 +6,6 @@
 
         int Order { get; }
         bool CanTrigger { get; }
-        void Trigger();
         bool Trigger(object arg);
 
     }

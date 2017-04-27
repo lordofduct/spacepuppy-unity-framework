@@ -23,6 +23,8 @@ namespace com.spacepuppy.Pathfinding
     public interface IPathFollower
     {
 
+        bool IsTraversing { get; }
+
         void SetPath(IPath path);
 
         /// <summary>

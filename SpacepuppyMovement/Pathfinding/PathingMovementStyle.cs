@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Movement;
-
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Pathfinding
 {
@@ -123,6 +123,14 @@ namespace com.spacepuppy.Pathfinding
         #endregion
 
         #region IPathFollower Interface
+
+        public bool IsTraversing
+        {
+            get
+            {
+                return _currentPath != null && !VectorUtil.NearZeroVector(this.Velocity);
+            }
+        }
 
         public virtual void SetPath(IPath path)
         {

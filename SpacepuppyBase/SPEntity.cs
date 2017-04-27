@@ -36,17 +36,7 @@ namespace com.spacepuppy
 
             _isAwake = true;
 
-            using (var lst = TempCollection.GetList<IEntityAwakeHandler>())
-            {
-                this.gameObject.GetComponentsInChildren<IEntityAwakeHandler>(true, lst);
-                if(lst.Count > 0)
-                {
-                    for(int i = 0; i < lst.Count; i++)
-                    {
-                        lst[i].OnEntityAwake(this);
-                    }
-                }
-            }
+            Messaging.Broadcast<IEntityAwakeHandler>(this.gameObject, (h) => h.OnEntityAwake(this));
         }
 
         //protected override void OnStartOrEnable()

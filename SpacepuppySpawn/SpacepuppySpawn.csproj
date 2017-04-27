@@ -78,9 +78,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.Spawn.dll" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Spawn.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.Spawn.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.Spawn.pdb"</PostBuildEvent>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Spawn.dll" "$(ProjectDir)..\Builds\FullLibrary\SpacepuppyUnityFramework.Spawn.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.Spawn.pdb" "$(ProjectDir)..\Builds\FullLibrary\SpacepuppyUnityFramework.Spawn.pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

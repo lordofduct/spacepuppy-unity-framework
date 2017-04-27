@@ -237,6 +237,7 @@
     <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
+    <Compile Include="Scenario\i_TriggerOnEval.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThen.cs" />
     <Compile Include="Scenario\i_TriggerSequence.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
@@ -385,6 +386,7 @@
     <Compile Include="Dynamic\Accessors\MemberAccessorException.cs" />
     <Compile Include="Dynamic\Accessors\MemberAccessorPool.cs" />
     <Compile Include="Dynamic\Accessors\PropertyAccessor.cs" />
+    <Compile Include="Utils\Messaging.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
     <Compile Include="Utils\Gizmo\GizmoGhost.cs" />
     <Compile Include="Utils\ArrayUtil.cs" />
@@ -422,12 +424,12 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.dll" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.pdb" "$(ProjectDir)..\Builds\Standard\SpacepuppyUnityFramework.pdb"
-mkdir $(ProjectDir)..\Builds\OpenSource\
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.dll" "$(ProjectDir)..\Builds\OpenSource\SpacepuppyUnityFramework.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFramework.pdb" "$(ProjectDir)..\Builds\OpenSource\SpacepuppyUnityFramework.pdb"</PostBuildEvent>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.dll" "$(ProjectDir)..\Builds\FullLibrary\SpacepuppyUnityFramework.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.pdb" "$(ProjectDir)..\Builds\FullLibrary\SpacepuppyUnityFramework.pdb"
+mkdir $(ProjectDir)..\Builds\BaseLibrary\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.dll" "$(ProjectDir)..\Builds\BaseLibrary\SpacepuppyUnityFramework.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.pdb" "$(ProjectDir)..\Builds\BaseLibrary\SpacepuppyUnityFramework.pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

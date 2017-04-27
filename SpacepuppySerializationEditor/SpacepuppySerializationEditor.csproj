@@ -63,9 +63,9 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\Standard\Editor\
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Serialization.dll" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.Serialization.dll"
-copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Serialization.pdb" "$(ProjectDir)..\Builds\Standard\Editor\SpacepuppyUnityFrameworkEditor.Serialization.pdb"</PostBuildEvent>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\Editor\
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Serialization.dll" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.Serialization.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.Serialization.pdb" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.Serialization.pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

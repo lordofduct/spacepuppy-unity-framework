@@ -181,6 +181,8 @@ namespace com.spacepuppy.Anim
 
         public AnimationClip AnimationClip { get { return _clip as AnimationClip; } }
 
+        public AnimationState State { get { return _state; } }
+
         public float Weight
         {
             get { return _weight; }
@@ -373,8 +375,10 @@ namespace com.spacepuppy.Anim
             }
             else if(_clip is IScriptableAnimationClip)
             {
-                var a = SPAnimationController.CreateScriptableAnimState(_controller, _clip as IScriptableAnimationClip);
+                var a = (_clip as IScriptableAnimationClip).CreateState(_controller) ?? SPAnim.Null;
+                a.Speed = _speed;
                 a.Layer = _layer;
+                if (_timeSupplier.IsCustom) a.TimeSupplier = _timeSupplier.TimeSupplier as ITimeSupplier;
                 return a;
             }
 
@@ -405,8 +409,10 @@ namespace com.spacepuppy.Anim
             }
             else if(_clip is IScriptableAnimationClip)
             {
-                var state = SPAnimationController.CreateScriptableAnimState(_controller, _clip as IScriptableAnimationClip);
+                var state = (_clip as IScriptableAnimationClip).CreateState(_controller) ?? SPAnim.Null;
+                state.Speed = _speed;
                 state.Layer = _layer;
+                if (_timeSupplier.IsCustom) state.TimeSupplier = _timeSupplier.TimeSupplier as ITimeSupplier;
                 state.Play(QueueMode.PlayNow, mode);
             }
         }
@@ -447,9 +453,11 @@ namespace com.spacepuppy.Anim
             }
             else
             {
-                var state = SPAnimationController.CreateScriptableAnimState(_controller, _clip as IScriptableAnimationClip);
+                var state = (_clip as IScriptableAnimationClip).CreateState(_controller) ?? SPAnim.Null;
+                state.Speed = _speed;
                 state.Layer = _layer;
-                state.Play(QueueMode.PlayNow, mode);
+                if (_timeSupplier.IsCustom) state.TimeSupplier = _timeSupplier.TimeSupplier as ITimeSupplier;
+                state.CrossFade(fadeLength, QueueMode.PlayNow, mode);
             }
         }
 

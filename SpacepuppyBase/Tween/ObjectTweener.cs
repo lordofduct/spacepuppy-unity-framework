@@ -1,4 +1,5 @@
 ﻿
+using System;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Tween
@@ -44,10 +45,15 @@ namespace com.spacepuppy.Tween
         }
 
         public object Target { get { return _target; } }
-        
+
         #endregion
 
         #region Tweener Interface
+
+        protected internal override bool GetTargetIsDestroyed()
+        {
+            return _target.IsNullOrDestroyed();
+        }
 
         protected internal override float GetPlayHeadLength()
         {

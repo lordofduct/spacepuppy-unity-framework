@@ -19,9 +19,9 @@ namespace com.spacepuppy.Pathfinding
         private UnityPath _path;
 
         #endregion
-        
-        #region IPathAgent Interface
 
+        #region IPathAgent Interface
+        
         public IPath CreatePath(Vector3 target)
         {
             return UnityPath.CreatePath(target);

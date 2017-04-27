@@ -22,7 +22,7 @@ namespace com.spacepuppyeditor.Scenario
 
             if(GUI.Button(rect, "Activate"))
             {
-                targ.Trigger();
+                targ.Trigger(null);
             }
         }
 

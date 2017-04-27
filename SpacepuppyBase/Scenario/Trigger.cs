@@ -126,7 +126,7 @@ namespace com.spacepuppy.Scenario
                 var e = _targets.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    if (e.Current != null) e.Current.Trigger(arg);
+                    if (e.Current != null) e.Current.Trigger(sender, arg);
                 }
             }
 
@@ -139,7 +139,7 @@ namespace com.spacepuppy.Scenario
             if (index >= 0 && index < _targets.Count)
             {
                 TriggerTarget trig = _targets[index];
-                if(trig != null) trig.Trigger(arg);
+                if(trig != null) trig.Trigger(sender, arg);
             }
 
             this.OnTriggerActivated(sender, arg);
@@ -150,7 +150,7 @@ namespace com.spacepuppy.Scenario
             if (_targets.Count > 0)
             {
                 TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
-                if (trig != null) trig.Trigger(arg);
+                if (trig != null) trig.Trigger(sender, arg);
             }
 
             this.OnTriggerActivated(sender, arg);
@@ -165,7 +165,7 @@ namespace com.spacepuppy.Scenario
                 var e = _targets.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    if (e.Current != null) e.Current.Trigger(arg);
+                    if (e.Current != null) e.Current.Trigger(sender, arg);
                 }
 
                 this.OnTriggerActivated(sender, arg);
@@ -179,7 +179,7 @@ namespace com.spacepuppy.Scenario
                     var e = _targets.GetEnumerator();
                     while (e.MoveNext())
                     {
-                        if (e.Current != null) e.Current.Trigger(arg);
+                        if (e.Current != null) e.Current.Trigger(sender, arg);
                     }
                 }
 
@@ -197,7 +197,7 @@ namespace com.spacepuppy.Scenario
                 var e = _targets.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    if (e.Current != null) e.Current.Trigger(arg);
+                    if (e.Current != null) e.Current.Trigger(sender, arg);
                 }
 
                 this.OnTriggerActivated(sender, arg);

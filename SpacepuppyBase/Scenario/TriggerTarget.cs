@@ -189,39 +189,44 @@ namespace com.spacepuppy.Scenario
 
         #region Trigger Methods
 
-        public void Trigger()
+        [System.Obsolete()]
+        public void Trigger(object sender)
         {
             if (this._triggerable == null) return;
 
             var arg = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : null;
-            this.Trigger_Imp(arg, null);
+            this.Trigger_Imp(sender, arg, null);
         }
 
-        public void Trigger(object arg)
-        {
-            if (this._triggerable == null) return;
-
-            var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : arg;
-            this.Trigger_Imp(arg0, null);
-        }
-
-        public void TriggerYielding(BlockingTriggerYieldInstruction instruction)
+        [System.Obsolete()]
+        public void TriggerYielding(object sender, BlockingTriggerYieldInstruction instruction)
         {
             if (this._triggerable == null) return;
 
             var arg = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : null;
-            this.Trigger_Imp(arg, instruction);
+            this.Trigger_Imp(sender, arg, instruction);
         }
 
-        public void TriggerYielding(object arg, BlockingTriggerYieldInstruction instruction)
+
+
+
+        public void Trigger(object sender, object arg)
         {
             if (this._triggerable == null) return;
 
             var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : arg;
-            this.Trigger_Imp(arg0, instruction);
+            this.Trigger_Imp(sender, arg0, null);
         }
 
-        private void Trigger_Imp(object arg, BlockingTriggerYieldInstruction instruction)
+        public void TriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
+        {
+            if (this._triggerable == null) return;
+
+            var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : arg;
+            this.Trigger_Imp(sender, arg0, instruction);
+        }
+
+        private void Trigger_Imp(object sender, object arg, BlockingTriggerYieldInstruction instruction)
         {
             switch (this._activationType)
             {

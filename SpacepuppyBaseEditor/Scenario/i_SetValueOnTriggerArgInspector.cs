@@ -44,7 +44,7 @@ namespace com.spacepuppyeditor.Scenario
             //MEMBER VALUE TO SET TO
             if (selectedMember != null)
             {
-                var propType = com.spacepuppy.Dynamic.DynamicUtil.GetReturnType(selectedMember);
+                var propType = com.spacepuppy.Dynamic.DynamicUtil.GetInputType(selectedMember);
                 var emode = modeProp.GetEnumValue<i_SetValue.SetMode>();
                 if (emode == i_SetValue.SetMode.Toggle)
                 {

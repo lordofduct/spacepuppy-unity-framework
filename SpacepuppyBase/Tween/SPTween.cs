@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,6 +30,24 @@ namespace com.spacepuppy.Tween
         private bool _locked;
 
         private static Dictionary<TokenPairing, Tweener> _autoKillDict = new Dictionary<TokenPairing, Tweener>(new TokenPairingComparer());
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        protected override void OnValidAwake()
+        {
+            base.OnValidAwake();
+
+            SceneManager.sceneUnloaded += this.OnSceneUnloaded;
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            SceneManager.sceneUnloaded -= this.OnSceneUnloaded;
+        }
 
         #endregion
 
@@ -260,7 +279,34 @@ namespace com.spacepuppy.Tween
             var e = _runningTweens.GetEnumerator();
             while(e.MoveNext())
             {
-                if (e.Current.UpdateType == updateType) e.Current.Update();
+                if (e.Current.UpdateType == updateType)
+                {
+                    try
+                    {
+                        e.Current.Update();
+                    }
+                    catch
+                    {
+                        _toRemove.Add(e.Current);
+                    }
+                }
+            }
+
+            this.UnlockTweenSet();
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void OnSceneUnloaded(Scene scene)
+        {
+            this.LockTweenSet();
+
+            var e = _runningTweens.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current.GetTargetIsDestroyed()) _toRemove.Add(e.Current);
             }
 
             this.UnlockTweenSet();

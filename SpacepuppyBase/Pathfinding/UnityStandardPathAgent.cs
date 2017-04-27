@@ -41,6 +41,14 @@ namespace com.spacepuppy.Pathfinding
 
         #region IPathAgent Interface
 
+        public bool IsTraversing
+        {
+            get
+            {
+                return _agent.hasPath && !VectorUtil.NearZeroVector(_agent.velocity);
+            }
+        }
+
         public IPath CreatePath(Vector3 target)
         {
             return UnityPath.CreatePath(target);

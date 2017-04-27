@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Anim.Blend
 {
 
@@ -83,19 +85,33 @@ namespace com.spacepuppy.Anim.Blend
                 return;
             }
 
-            StateData stateL;
-            StateData stateH;
+            StateData stateL = null;
+            StateData stateH = null;
             for (int i = 0; i < _states.Count; i++)
             {
                 if (_currentT <= _states[i].Position)
                 {
-                    stateL = _states[i];
-                    stateH = (i + 1 < _states.Count) ? _states[i + 1] : null;
+                    stateH = _states[i];
+                    stateL = (i - 1 >= 0) ? _states[i - 1] : null;
                     break;
                 }
             }
 
             //TODO - implement blend
+            if (stateL != null)
+            {
+                stateL.Anim.Play(QueueMode.PlayNow);
+                if (stateH != null)
+                {
+                    float w = MathUtil.PercentageMinMax(_currentT, stateH.Position, stateL.Position);
+                    Debug.Log(string.Format("{0}, {1}, {2}, {3}", _currentT, stateH.Position, stateL.Position, w));
+                    stateH.Anim.Controller.animation.Blend((stateH.Anim as SPAnim).ClipId, w);
+                }
+            }
+            else
+            {
+                stateH.Anim.Play(QueueMode.PlayNow);
+            }
         }
 
         #endregion

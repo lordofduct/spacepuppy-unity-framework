@@ -41,8 +41,18 @@ namespace com.spacepuppy.Tween
         public TweenSequenceCollection Tweens { get { return _sequence; } }
 
         #endregion
-        
+
         #region Tweener Interface
+
+        protected internal override bool GetTargetIsDestroyed()
+        {
+            for (int i = 0; i < _sequence.Count; i++)
+            {
+                if (_sequence[i].GetTargetIsDestroyed()) return true;
+            }
+
+            return false;
+        }
 
         protected internal override float GetPlayHeadLength()
         {

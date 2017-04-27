@@ -52,9 +52,6 @@ namespace com.spacepuppy.Anim
         [System.NonSerialized()]
         private Dictionary<string, AnimationCallbackData> _animEventTable;
 
-        [System.NonSerialized]
-        private ScriptableAnimCollection _scriptableAnims;
-        
         #endregion
 
         #region CONSTRUCTOR
@@ -147,11 +144,32 @@ namespace com.spacepuppy.Anim
         public ISPAnim Play(IScriptableAnimationClip clip, PlayMode mode = PlayMode.StopSameLayer)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
 
-            var state = CreateScriptableAnimState(this, clip);
+            var state = clip.CreateState(this) ?? SPAnim.Null;
             state.Play(QueueMode.PlayNow, mode);
             return state;
         }
+
+        public void Stop(string id)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+
+            _animation.Stop(id);
+        }
+
+        public void Stop(int layer)
+        {
+            this.StopInternal(layer, PlayMode.StopSameLayer);
+        }
+
+        public void StopAll()
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+
+            _animation.Stop();
+        }
+
 
         /// <summary>
         /// Play an AnimationClip on the AnimationController that doesn't already exist on it. If the same clip is called multiple times, it will not be readded.
@@ -160,13 +178,15 @@ namespace com.spacepuppy.Anim
         /// <param name="queueMode"></param>
         /// <param name="playMode"></param>
         /// <returns></returns>
-        public ISPAnim PlayAuxiliary(SPAnimClip clip, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        public ISPAnim PlayAuxiliary(SPAnimClip clip, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
 
             if(clip.Clip is AnimationClip)
             {
-                var anim = this.CreateAuxiliarySPAnim_Imp(clip.Clip as AnimationClip);
+                var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
+                var anim = SPAnim.Create(_animation, id);
                 anim.Weight = clip.Weight;
                 anim.Speed = clip.Speed;
                 anim.Layer = clip.Layer;
@@ -186,13 +206,15 @@ namespace com.spacepuppy.Anim
             }
         }
 
-        public ISPAnim CrossFadeAuxiliary(SPAnimClip clip, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        public ISPAnim CrossFadeAuxiliary(SPAnimClip clip, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
 
             if (clip.Clip is AnimationClip)
             {
-                var anim = this.CreateAuxiliarySPAnim_Imp(clip.Clip as AnimationClip);
+                var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
+                var anim = SPAnim.Create(_animation, id);
                 anim.Weight = clip.Weight;
                 anim.Speed = clip.Speed;
                 anim.Layer = clip.Layer;
@@ -212,32 +234,109 @@ namespace com.spacepuppy.Anim
             }
         }
 
-        public SPAnim PlayAuxiliary(AnimationClip clip, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        public SPAnim PlayAuxiliary(AnimationClip clip, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
 
-            var anim = this.CreateAuxiliarySPAnim_Imp(clip);
+            var id = this.AddAuxiliaryClip(clip, auxId);
+            var anim = SPAnim.Create(_animation, id);
             anim.Play(queueMode, playMode);
             return anim;
         }
 
-        public SPAnim CrossFadeAuxiliary(AnimationClip clip, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        public SPAnim CrossFadeAuxiliary(AnimationClip clip, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
 
-            var anim = this.CreateAuxiliarySPAnim_Imp(clip);
+            var id = this.AddAuxiliaryClip(clip, auxId);
+            var anim = SPAnim.Create(_animation, id);
             anim.CrossFade(fadeLength, queueMode, playMode);
             return anim;
         }
 
-        public SPAnim CreateAuxiliarySPAnim(AnimationClip clip)
+        public SPAnim CreateAuxiliarySPAnim(AnimationClip clip, string auxId = null)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
 
-            return this.CreateAuxiliarySPAnim_Imp(clip);
+            var id = this.AddAuxiliaryClip(clip, auxId);
+            return SPAnim.Create(_animation, id);
+        }
+
+
+
+        public string PlayAuxiliaryDirectly(SPAnimClip clip, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            if (clip.Clip is AnimationClip)
+            {
+                var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
+                var anim = _animation[id];
+                anim.weight = clip.Weight;
+                anim.speed = clip.Speed * this.Speed;
+                anim.layer = clip.Layer;
+                anim.wrapMode = clip.WrapMode;
+                anim.blendMode = clip.BlendMode;
+                this.PlayInternal(anim.name, playMode, clip.Layer);
+                return id;
+            }
+            else if (clip.Clip is IScriptableAnimationClip)
+            {
+                this.Play(clip.Clip as IScriptableAnimationClip, playMode);
+            }
+
+            return null;
+        }
+
+        public string CrossFadeAuxiliaryDirectly(SPAnimClip clip, float fadeLength, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            if (clip.Clip is AnimationClip)
+            {
+                var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
+                var anim = _animation[id];
+                anim.weight = clip.Weight;
+                anim.speed = clip.Speed * this.Speed;
+                anim.layer = clip.Layer;
+                anim.wrapMode = clip.WrapMode;
+                anim.blendMode = clip.BlendMode;
+                this.CrossFadeInternal(id, fadeLength, playMode, clip.Layer);
+                return id;
+            }
+            else if (clip.Clip is IScriptableAnimationClip)
+            {
+                this.Play(clip.Clip as IScriptableAnimationClip, playMode);
+            }
+
+            return null;
+        }
+
+        public string PlayAuxiliaryDirectly(AnimationClip clip, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            var id = this.AddAuxiliaryClip(clip, auxId);
+            var anim = _animation[id];
+            this.PlayInternal(id, playMode, anim.layer);
+            return id;
+        }
+
+        public string CrossFadeAuxiliaryDirectly(AnimationClip clip, float fadeLength, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (clip == null) throw new System.ArgumentNullException("clip");
+
+            var id = this.AddAuxiliaryClip(clip, auxId);
+            var anim = _animation[id];
+            this.CrossFadeInternal(id, fadeLength, playMode, anim.layer);
+            return id;
         }
 
 
@@ -251,11 +350,11 @@ namespace com.spacepuppy.Anim
             {
                 if (mode == PlayMode.StopAll)
                 {
-                    _scriptableAnims.Clear();
+                    _scriptableAnims.Clear(true);
                 }
                 else
                 {
-                    _scriptableAnims.Remove(layer);
+                    _scriptableAnims.Remove(layer, true);
                 }
             }
         }
@@ -268,11 +367,11 @@ namespace com.spacepuppy.Anim
             {
                 if (mode == PlayMode.StopAll)
                 {
-                    _scriptableAnims.Clear();
+                    _scriptableAnims.Clear(true);
                 }
                 else
                 {
-                    _scriptableAnims.Remove(layer);
+                    _scriptableAnims.Remove(layer, true);
                 }
             }
         }
@@ -285,11 +384,11 @@ namespace com.spacepuppy.Anim
             {
                 if (playMode == PlayMode.StopAll)
                 {
-                    _scriptableAnims.Clear();
+                    _scriptableAnims.Clear(true);
                 }
                 else
                 {
-                    _scriptableAnims.Remove(layer);
+                    _scriptableAnims.Remove(layer, true);
                 }
             }
 
@@ -304,41 +403,48 @@ namespace com.spacepuppy.Anim
             {
                 if (playMode == PlayMode.StopAll)
                 {
-                    _scriptableAnims.Clear();
+                    _scriptableAnims.Clear(true);
                 }
                 else
                 {
-                    _scriptableAnims.Remove(layer);
+                    _scriptableAnims.Remove(layer, true);
                 }
             }
 
             return anim;
         }
 
-
-        private void StartScriptableAnim(ScriptableAnimationStateWrapper state, PlayMode mode)
+        internal void StopInternal(int layer, PlayMode mode)
         {
-            if (_scriptableAnims == null)
-                _scriptableAnims = new ScriptableAnimCollection(this);
+            if (_animation == null) throw new AnimationInvalidAccessException();
 
             if (mode == PlayMode.StopAll)
-                _scriptableAnims.Clear();
+            {
+                _animation.Stop();
+            }
             else
-                _scriptableAnims.Remove(state.Layer);
-
-            _scriptableAnims.Add(state);
+            {
+                foreach (AnimationState a in _animation)
+                {
+                    if (a.layer == layer && _animation.IsPlaying(a.name))
+                    {
+                        _animation.Stop(a.name);
+                    }
+                }
+            }
         }
 
-        private SPAnim CreateAuxiliarySPAnim_Imp(AnimationClip clip)
+
+        private string AddAuxiliaryClip(AnimationClip clip, string auxId)
         {
-            string id = "aux*" + clip.GetInstanceID();
+            string id = string.IsNullOrEmpty(auxId) ? "aux*" + clip.GetInstanceID() : auxId;
             var a = _animation[id];
             if (a == null || a.clip != clip)
             {
                 _animation.AddClip(clip, id);
             }
 
-            return SPAnim.Create(_animation, id);
+            return id;
         }
 
         #endregion
@@ -412,15 +518,74 @@ namespace com.spacepuppy.Anim
                 this.Add = add;
             }
         }
+        
+        #endregion
 
 
 
-        private class ScriptableAnimCollection : IUpdateable, IEnumerable<ScriptableAnimationStateWrapper>
+        #region Scriptable Animation Interface
+
+        [System.NonSerialized]
+        private ScriptableAnimCollection _scriptableAnims;
+        
+        /// <summary>
+        /// Starts an IScriptableAnimationCallback stopping animations according to PlayMode, this acts like 'Animation.Play'.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="mode"></param>
+        public void StartScriptableAnim(IScriptableAnimationCallback state, PlayMode mode)
+        {
+            if (state == null) throw new System.ArgumentNullException("state");
+
+            if (_scriptableAnims == null)
+                _scriptableAnims = new ScriptableAnimCollection(this);
+
+            this.StopInternal(state.Layer, mode);
+            if (mode == PlayMode.StopAll)
+                _scriptableAnims.Clear(true);
+            else
+                _scriptableAnims.Remove(state.Layer, true);
+
+            _scriptableAnims.Add(state);
+        }
+
+        /// <summary>
+        /// Starts an IScriptableAnimationCallback, but doesn't stop any other animations. This is similar to enabling an AnimationState, or calling Animation.Blend.
+        /// </summary>
+        /// <param name="state"></param>
+        public void EnableScriptableAnim(IScriptableAnimationCallback state)
+        {
+            if (state == null) throw new System.ArgumentNullException("state");
+
+            if (_scriptableAnims == null)
+                _scriptableAnims = new ScriptableAnimCollection(this);
+
+            _scriptableAnims.Add(state);
+        }
+
+        /// <summary>
+        /// Stops the IScriptableAnimationCallback, usually we do not dispose as this should be called from within the IScriptableAnimationCallback when 'Stop' is called. 
+        /// But an overload is allowed if needed.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="dispose"></param>
+        public void StopScriptableAnim(IScriptableAnimationCallback state, bool dispose = false)
+        {
+            if (state == null) throw new System.ArgumentNullException("state");
+
+            if(_scriptableAnims != null)
+            {
+                _scriptableAnims.Remove(state, dispose);
+            }
+        }
+
+        private class ScriptableAnimCollection : IUpdateable, IEnumerable<IScriptableAnimationCallback>
         {
             private SPAnimationController _controller;
-            private HashSet<ScriptableAnimationStateWrapper> _set = new HashSet<ScriptableAnimationStateWrapper>();
-            private HashSet<ScriptableAnimationStateWrapper> _toAdd = new HashSet<ScriptableAnimationStateWrapper>();
-            private HashSet<ScriptableAnimationStateWrapper> _toRemove = new HashSet<ScriptableAnimationStateWrapper>();
+            private HashSet<IScriptableAnimationCallback> _set = new HashSet<IScriptableAnimationCallback>();
+            private HashSet<IScriptableAnimationCallback> _toAdd = new HashSet<IScriptableAnimationCallback>();
+            private HashSet<IScriptableAnimationCallback> _toRemove = new HashSet<IScriptableAnimationCallback>();
+            private HashSet<IScriptableAnimationCallback> _toRemoveAndDispose = new HashSet<IScriptableAnimationCallback>();
             private bool _inUpdate;
 
             public ScriptableAnimCollection(SPAnimationController controller)
@@ -433,9 +598,9 @@ namespace com.spacepuppy.Anim
                 get { return _set.Count; }
             }
 
-            public void Add(ScriptableAnimationStateWrapper wrapper)
+            public void Add(IScriptableAnimationCallback wrapper)
             {
-                if(_inUpdate)
+                if (_inUpdate)
                 {
                     _toAdd.Add(wrapper);
                 }
@@ -443,68 +608,87 @@ namespace com.spacepuppy.Anim
                 {
                     _set.Add(wrapper);
                 }
-                if(!GameLoopEntry.LateUpdatePump.Contains(this))
+                if (!GameLoopEntry.LateUpdatePump.Contains(this))
                     GameLoopEntry.LateUpdatePump.Add(this);
             }
             
-            public void Remove(ScriptableAnimationStateWrapper wrapper)
+            public void Remove(IScriptableAnimationCallback callback, bool dispose)
             {
-                if (!_set.Contains(wrapper)) return;
+                if (!_set.Contains(callback)) return;
 
-                if(_inUpdate)
+                if (_inUpdate)
                 {
-                    _toRemove.Add(wrapper);
+                    if (dispose)
+                        _toRemoveAndDispose.Add(callback);
+                    else
+                        _toRemove.Add(callback);
                 }
                 else
                 {
-                    if(_set.Remove(wrapper))
+                    if (_set.Remove(callback) && dispose)
                     {
-                        wrapper.Dispose();
+                        callback.Dispose();
                     }
                 }
             }
 
-            public void Remove(int layer)
+            public void Remove(int layer, bool dispose)
             {
                 var e = _set.GetEnumerator();
-                while(e.MoveNext())
+                var rmSet = dispose ? _toRemoveAndDispose : _toRemove;
+                while (e.MoveNext())
                 {
-                    if(e.Current.Layer == layer)
+                    if (e.Current.Layer == layer)
                     {
-                        _toRemove.Add(e.Current);
+                        rmSet.Add(e.Current);
                     }
                 }
 
-                if(!_inUpdate)
+                if (!_inUpdate)
                 {
-                    e = _toRemove.GetEnumerator();
-                    while(e.MoveNext())
+                    e = rmSet.GetEnumerator();
+                    while (e.MoveNext())
                     {
-                        e.Current.Dispose();
+                        if(dispose)
+                            e.Current.Dispose();
                         _set.Remove(e.Current);
                     }
-                    _toRemove.Clear();
+                    rmSet.Clear();
                 }
             }
 
-            public void Clear()
+            public void Clear(bool dispose)
             {
-                if(_inUpdate)
+                var rmSet = dispose ? _toRemoveAndDispose : _toRemove;
+                if (_inUpdate)
                 {
                     var e = _set.GetEnumerator();
-                    while(e.MoveNext())
+                    while (e.MoveNext())
                     {
-                        _toRemove.Add(e.Current);
+                        rmSet.Add(e.Current);
                     }
                 }
                 else
                 {
-                    var e = _set.GetEnumerator();
-                    while(e.MoveNext())
+                    if(dispose)
                     {
-                        e.Current.Dispose();
+                        using (var lst = TempCollection.GetList(_set))
+                        {
+                            _set.Clear();
+                            GameLoopEntry.LateUpdatePump.Remove(this);
+
+                            var e = lst.GetEnumerator();
+                            while(e.MoveNext())
+                            {
+                                e.Current.Dispose();
+                            }
+                        }
                     }
-                    _set.Clear();
+                    else
+                    {
+                        _set.Clear();
+                        GameLoopEntry.LateUpdatePump.Remove(this);
+                    }
                 }
             }
 
@@ -512,17 +696,17 @@ namespace com.spacepuppy.Anim
             {
                 _inUpdate = true;
                 var e = _set.GetEnumerator();
-                while(e.MoveNext())
+                while (e.MoveNext())
                 {
                     if (!e.Current.Tick(false))
                         _toRemove.Add(e.Current);
                 }
                 _inUpdate = false;
 
-                if(_toAdd.Count > 0)
+                if (_toAdd.Count > 0)
                 {
                     e = _toAdd.GetEnumerator();
-                    while(e.MoveNext())
+                    while (e.MoveNext())
                     {
                         _set.Add(e.Current);
                     }
@@ -539,19 +723,19 @@ namespace com.spacepuppy.Anim
                     _toRemove.Clear();
                 }
 
-                if(_set.Count == 0)
+                if (_set.Count == 0)
                 {
                     GameLoopEntry.LateUpdatePump.Remove(this);
                 }
             }
 
 
-            public HashSet<ScriptableAnimationStateWrapper>.Enumerator GetEnumerator()
+            public HashSet<IScriptableAnimationCallback>.Enumerator GetEnumerator()
             {
                 return _set.GetEnumerator();
             }
 
-            IEnumerator<ScriptableAnimationStateWrapper> IEnumerable<ScriptableAnimationStateWrapper>.GetEnumerator()
+            IEnumerator<IScriptableAnimationCallback> IEnumerable<IScriptableAnimationCallback>.GetEnumerator()
             {
                 return this.GetEnumerator();
             }
@@ -560,420 +744,6 @@ namespace com.spacepuppy.Anim
             {
                 return this.GetEnumerator();
             }
-        }
-
-        private class ScriptableAnimationStateWrapper : ISPAnim, System.IDisposable
-        {
-
-            private SPAnimationController _controller;
-            private IScriptableAnimationState _state;
-
-            private float _startTime;
-            private bool _complete;
-            private AnimEventScheduler _scheduler;
-
-            public ScriptableAnimationStateWrapper()
-            {
-
-            }
-
-            #region Methods
-
-            public void Init(SPAnimationController controller, IScriptableAnimationState state)
-            {
-                _controller = controller;
-                _state = state;
-                _startTime = UnityEngine.Time.time;
-            }
-
-            public bool Tick(bool layerIsObscured)
-            {
-                if (_complete || _state == null) return false;
-                _complete = !_state.Tick(layerIsObscured);
-                return !_complete;
-            }
-            
-            #endregion
-
-            #region ISPAnim Interface
-
-            public SPAnimationController Controller
-            {
-                get
-                {
-                    return _controller;
-                }
-            }
-
-            public float Duration
-            {
-                get
-                {
-                    if (_state == null) throw new System.ObjectDisposedException("ISPAnim");
-                    return _state.Length;
-                }
-            }
-
-            public bool IsPlaying
-            {
-                get
-                {
-                    if(_controller == null) throw new System.ObjectDisposedException("ISPAnim");
-                    if (_controller._scriptableAnims == null) return false;
-                    return _controller._scriptableAnims.Contains(this);
-                }
-            }
-
-            public int Layer
-            {
-                get
-                {
-                    if (_state == null) throw new System.ObjectDisposedException("ISPAnim");
-                    return _state.Layer;
-                }
-
-                set
-                {
-                    if (_state == null) throw new System.ObjectDisposedException("ISPAnim");
-                    _state.Layer = value;
-                }
-            }
-
-            public float Speed
-            {
-                get
-                {
-                    return 1f;
-                }
-
-                set
-                {
-                    //do nothing
-                }
-            }
-
-            public float Time
-            {
-                get
-                {
-                    return UnityEngine.Time.time - _startTime;
-                }
-
-                set
-                {
-                    //do nothing
-                }
-            }
-
-            public ITimeSupplier TimeSupplier
-            {
-                get
-                {
-                    return SPTime.Normal;
-                }
-
-                set
-                {
-                    //do nothing
-                }
-            }
-
-            public void CrossFade(float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
-            {
-                if (_state == null) throw new System.ObjectDisposedException("ISPAnim");
-                if (this.IsPlaying) return;
-
-                _state.OnStart();
-                _controller.StartScriptableAnim(this, playMode);
-            }
-
-            public void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
-            {
-                if (_state == null) throw new System.ObjectDisposedException("ISPAnim");
-                if (this.IsPlaying) return;
-
-                _state.OnStart();
-                _controller.StartScriptableAnim(this, playMode);
-            }
-
-            public void Schedule(Action<ISPAnim> callback)
-            {
-                if (_state == null) throw new System.ObjectDisposedException("ISPAnim");
-                if (_scheduler == null)
-                    _scheduler = new AnimEventScheduler(this);
-                _scheduler.Schedule(callback);
-            }
-
-            public void Schedule(Action<ISPAnim> callback, float timeout, ITimeSupplier time)
-            {
-                if (_state == null) throw new System.ObjectDisposedException("ISPAnim");
-                if (_scheduler == null)
-                    _scheduler = new AnimEventScheduler(this);
-                _scheduler.Schedule(callback, timeout, time);
-            }
-
-            public void Stop()
-            {
-                _complete = true;
-            }
-
-            #endregion
-
-            #region IRadicalWaitHandle Interface
-
-            public bool Cancelled
-            {
-                get
-                {
-                    return false;
-                }
-            }
-
-            public bool IsComplete
-            {
-                get
-                {
-                    return _complete;
-                }
-            }
-
-            public void OnComplete(Action<IRadicalWaitHandle> callback)
-            {
-                this.Schedule((a) => callback(a));
-            }
-
-
-            public bool Tick(out object yieldObject)
-            {
-                yieldObject = null;
-                return !_complete;
-            }
-
-            #endregion
-
-            #region IDisposable Interface
-
-            public void Dispose()
-            {
-                if (_scheduler != null)
-                {
-                    _scheduler.Dispose();
-                    _scheduler = null;
-                }
-                if(_state != null)
-                {
-                    _state.OnStop();
-                }
-                _controller = null;
-                _state = null;
-            }
-
-            #endregion
-
-        }
-
-
-
-        private class CoroutineWrapper : ISPAnim, System.IDisposable
-        {
-
-            private SPAnimationController _controller;
-            private RadicalCoroutine _routine;
-            private float _startTime;
-
-            public CoroutineWrapper()
-            {
-
-            }
-
-            public void Init(SPAnimationController controller, RadicalCoroutine routine)
-            {
-                _controller = controller;
-                _routine = routine;
-                _startTime = UnityEngine.Time.time;
-            }
-
-            #region ISPAnim Interface
-
-            public SPAnimationController Controller
-            {
-                get
-                {
-                    return _controller; 
-                }
-            }
-
-            public float Duration
-            {
-                get
-                {
-                    return float.PositiveInfinity;
-                }
-            }
-
-            public bool IsPlaying
-            {
-                get
-                {
-                    return !this.IsComplete;
-                }
-            }
-
-            public int Layer
-            {
-                get
-                {
-                    return 0;
-                }
-
-                set
-                {
-                    //do nothing
-                }
-            }
-
-            public float Speed
-            {
-                get
-                {
-                    return 1f;
-                }
-
-                set
-                {
-                    //do nothing
-                }
-            }
-
-            public float Time
-            {
-                get
-                {
-                    return UnityEngine.Time.time - _startTime;
-                }
-
-                set
-                {
-                    //do nothing
-                }
-            }
-
-            public ITimeSupplier TimeSupplier
-            {
-                get
-                {
-                    return SPTime.Normal;
-                }
-
-                set
-                {
-                    //do nothing
-                }
-            }
-
-            public void CrossFade(float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
-            {
-                if (_routine == null) throw new System.ObjectDisposedException("ISPAnim");
-                if (_routine.OperatingState == RadicalCoroutineOperatingState.Inactive)
-                    _routine.Start(_controller, RadicalCoroutineDisableMode.Pauses);
-            }
-
-            public void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
-            {
-                if (_routine == null) throw new System.ObjectDisposedException("ISPAnim");
-                if (_routine.OperatingState == RadicalCoroutineOperatingState.Inactive)
-                    _routine.Start(_controller, RadicalCoroutineDisableMode.Pauses);
-            }
-
-            public void Schedule(Action<ISPAnim> callback)
-            {
-                if (_routine == null) throw new System.ObjectDisposedException("ISPAnim");
-                _routine.OnComplete += (s, e) => { callback(this); };
-            }
-
-            private AnimEventScheduler _scheduler;
-            public void Schedule(Action<ISPAnim> callback, float timeout, ITimeSupplier time)
-            {
-                if (_routine == null) throw new System.ObjectDisposedException("ISPAnim");
-                if (_scheduler == null)
-                    _scheduler = new AnimEventScheduler(this);
-                _scheduler.Schedule(callback, timeout, time);
-            }
-
-            public void Stop()
-            {
-                _routine.Cancel();
-            }
-
-            #endregion
-
-            #region IRadicalWaitHandle Interface
-
-            public bool Cancelled
-            {
-                get
-                {
-                    return _routine.Cancelled;
-                }
-            }
-
-            public bool IsComplete
-            {
-                get
-                {
-                    if (_routine == null) return true;
-                    return _routine.Finished;
-                }
-            }
-
-            public void OnComplete(Action<IRadicalWaitHandle> callback)
-            {
-                if (_routine == null) throw new System.ObjectDisposedException("ISPAnim");
-                (_routine as IRadicalWaitHandle).OnComplete(callback);
-            }
-
-
-            public bool Tick(out object yieldObject)
-            {
-                yieldObject = null;
-                return !this.IsComplete;
-            }
-
-            #endregion
-
-            #region IDisposable Interface
-
-            public void Dispose()
-            {
-                if(_scheduler != null)
-                {
-                    _scheduler.Dispose();
-                    _scheduler = null;
-                }
-                _controller = null;
-                _routine = null;
-            }
-
-            #endregion
-
-        }
-
-        #endregion
-
-
-        #region Static Factory
-
-        internal static ISPAnim CreateScriptableAnimState(SPAnimationController controller, IScriptableAnimationClip clip)
-        {
-            if(controller == null) throw new System.ArgumentNullException("controller");
-            if (clip == null) throw new System.ArgumentNullException("clip");
-
-            var st = clip.GetState(controller);
-            if (st == null) return SPAnim.Null;
-
-            var state = new ScriptableAnimationStateWrapper();
-            state.Init(controller, st);
-            return state;
         }
 
         #endregion

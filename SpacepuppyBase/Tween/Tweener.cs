@@ -448,6 +448,11 @@ namespace com.spacepuppy.Tween
 
         #region Tweener Interface
 
+        /// <summary>
+        /// Return true if the target was destroyed, used to purge unneeded tweens on a scene unload.
+        /// </summary>
+        protected internal abstract bool GetTargetIsDestroyed();
+
         protected internal abstract float GetPlayHeadLength();
 
         protected internal abstract void DoUpdate(float dt, float t);

@@ -581,9 +581,9 @@ namespace com.spacepuppy.Utils
             value -= min;
             max -= min;
 
-            if (max == 0)
+            if (max == 0f)
             {
-                return 0;
+                return 0f;
             }
             else
             {

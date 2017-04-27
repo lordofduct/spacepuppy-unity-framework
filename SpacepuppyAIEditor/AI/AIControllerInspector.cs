@@ -75,9 +75,9 @@ namespace com.spacepuppyeditor.AI
 
             if (Application.isPlaying)
             {
-                if ((this.target as AIController).States.Current != null)
+                if (targ.States != null && targ.States.Current != null)
                 {
-                    EditorGUILayout.HelpBox("Currently active state is '" + (this.target as AIController).States.Current.GetType().Name + "'.", MessageType.Info);
+                    EditorGUILayout.HelpBox("Currently active state is '" + targ.States.Current.GetType().Name + "'.", MessageType.Info);
                 }
                 else
                 {

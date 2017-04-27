@@ -633,25 +633,32 @@ namespace com.spacepuppy
             {
                 _controller.enabled = true;
 
-                _hooks = _controller.AddOrGetComponent<ControllerColliderHitEventHooks>();
-                _hooks.ControllerColliderHit -= this.OnCharacterControllerHit;
-                _hooks.ControllerColliderHit += this.OnCharacterControllerHit;
+                this.OnHasHitListenersChanged();
             }
 
             public void OnDisable()
             {
                 _controller.enabled = false;
-                //_owner.OnCharacterControllerHit -= this.OnCharacterControllerHit;
-                if(_hooks != null)
+
+                if(!object.ReferenceEquals(_hooks, null))
                 {
-                    _hooks.ControllerColliderHit -= this.OnCharacterControllerHit;
+                    ObjUtil.SmartDestroy(_hooks);
                     _hooks = null;
                 }
             }
 
             public void OnHasHitListenersChanged()
             {
-                //do nothing
+                if (_owner._movementControllerHit != null && object.ReferenceEquals(_hooks, null))
+                {
+                    _hooks = _controller.AddComponent<ControllerColliderHitEventHooks>();
+                    _hooks.ControllerColliderHit += this.OnCharacterControllerHit;
+                }
+                else if(_owner._movementControllerHit == null && !object.ReferenceEquals(_hooks, null))
+                {
+                    ObjUtil.SmartDestroy(_hooks);
+                    _hooks = null;
+                }
             }
 
             public void OnBeforeUpdate()

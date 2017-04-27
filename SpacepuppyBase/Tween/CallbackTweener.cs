@@ -1,4 +1,5 @@
 ﻿using System;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Tween
 {
@@ -67,6 +68,11 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region Tweener Interface
+
+        protected internal override bool GetTargetIsDestroyed()
+        {
+            return (_callback.Target is UnityEngine.Object) && _callback.Target.IsNullOrDestroyed();
+        }
 
         protected internal override float GetPlayHeadLength()
         {

@@ -1088,11 +1088,7 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
-
-
-
-
-
+        
         #region X Button
 
         public const float X_BTN_WIDTH = 30f;
