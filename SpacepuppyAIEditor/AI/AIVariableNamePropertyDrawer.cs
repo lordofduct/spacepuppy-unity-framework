@@ -32,12 +32,7 @@ namespace com.spacepuppyeditor.AI
                 return;
             }
 
-            IAIController controller = tr.GetComponent<IAIController>();
-            while (controller == null && tr.parent != null)
-            {
-                tr = tr.parent;
-                controller = tr.GetComponent<IAIController>();
-            }
+            IAIController controller = tr.GetComponentInParent<IAIController>() ?? tr.FindComponent<IAIController>();
             if(controller == null)
             {
                 SPEditorGUI.DefaultPropertyField(position, property, label);

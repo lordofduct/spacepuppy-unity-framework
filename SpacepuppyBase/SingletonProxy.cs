@@ -9,7 +9,7 @@ using com.spacepuppy.Dynamic;
 namespace com.spacepuppy
 {
 
-    public class SingletonProxy : MonoBehaviour, IDynamic
+    public class SingletonProxy : MonoBehaviour, IDynamic, IProxy
     {
 
         #region Fields
@@ -21,28 +21,35 @@ namespace com.spacepuppy
         private bool _createIfNone;
 
         #endregion
+        
+        #region IProxy Interface
 
-        #region Properties
-
-        public ISingleton Instance
+        public ISingleton GetTarget()
         {
-            get
-            {
-                if (_singletonType == null || _singletonType.Type == null) return null;
+            if (_singletonType == null || _singletonType.Type == null) return null;
 
-                if(_createIfNone)
-                {
-                    return Singleton.GetInstance(_singletonType.Type);
-                }
-                else
-                {
-                    ISingleton instance;
-                    if (Singleton.HasInstance(_singletonType.Type, out instance))
-                        return instance;
-                    else
-                        return null;
-                }
+            if (_createIfNone)
+            {
+                return Singleton.GetInstance(_singletonType.Type);
             }
+            else
+            {
+                ISingleton instance;
+                if (Singleton.HasInstance(_singletonType.Type, out instance))
+                    return instance;
+                else
+                    return null;
+            }
+        }
+
+        UnityEngine.Object IProxy.GetTarget()
+        {
+            return this.GetTarget() as UnityEngine.Object;
+        }
+
+        UnityEngine.Object IProxy.GetTarget(object arg)
+        {
+            return this.GetTarget() as UnityEngine.Object;
         }
 
         #endregion
@@ -63,22 +70,22 @@ namespace com.spacepuppy
 
         bool IDynamic.SetValue(string sMemberName, object value, params object[] index)
         {
-            return this.Instance.SetValue(sMemberName, value, index);
+            return this.GetTarget().SetValue(sMemberName, value, index);
         }
 
         object IDynamic.GetValue(string sMemberName, params object[] args)
         {
-            return this.Instance.GetValue(sMemberName, args);
+            return this.GetTarget().GetValue(sMemberName, args);
         }
 
         bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
         {
-            return this.Instance.TryGetValue(sMemberName, out result, args);
+            return this.GetTarget().TryGetValue(sMemberName, out result, args);
         }
 
         object IDynamic.InvokeMethod(string sMemberName, params object[] args)
         {
-            return this.Instance.InvokeMethod(sMemberName, args);
+            return this.GetTarget().InvokeMethod(sMemberName, args);
         }
 
         bool IDynamic.HasMember(string sMemberName, bool includeNonPublic)

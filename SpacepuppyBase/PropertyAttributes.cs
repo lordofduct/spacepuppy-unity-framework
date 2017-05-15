@@ -340,6 +340,11 @@ namespace com.spacepuppy
 
     }
 
+    public class DisplayFlatAttribute : SPPropertyAttribute
+    {
+
+    }
+
     #endregion
 
     #region Default Or Configured Property Drawer Attribute

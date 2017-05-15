@@ -262,33 +262,33 @@ namespace com.spacepuppyeditor
         /// <summary>
         /// Reflects the available properties and shows them in a dropdown
         /// </summary>
-        public static string ReflectedPropertyField(GUIContent label, object targObj, string selectedMemberName, com.spacepuppy.Dynamic.DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(GUIContent label, object targObj, string selectedMemberName, com.spacepuppy.Dynamic.DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
         {
             var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
-            return SPEditorGUI.ReflectedPropertyField(position, label, targObj, selectedMemberName, access, out selectedMember);
+            return SPEditorGUI.ReflectedPropertyField(position, label, targObj, selectedMemberName, access, out selectedMember, allowSetterMethods);
         }
 
-        public static string ReflectedPropertyField(GUIContent label, object targObj, string selectedMemberName, com.spacepuppy.Dynamic.DynamicMemberAccess access)
+        public static string ReflectedPropertyField(GUIContent label, object targObj, string selectedMemberName, com.spacepuppy.Dynamic.DynamicMemberAccess access, bool allowSetterMethods = false)
         {
             var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
             System.Reflection.MemberInfo selectedMember;
-            return SPEditorGUI.ReflectedPropertyField(position, label, targObj, selectedMemberName, access, out selectedMember);
+            return SPEditorGUI.ReflectedPropertyField(position, label, targObj, selectedMemberName, access, out selectedMember, allowSetterMethods);
         }
 
         /// <summary>
         /// Reflects the available properties and shows them in a dropdown
         /// </summary>
-        public static string ReflectedPropertyField(GUIContent label, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(GUIContent label, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
         {
             var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
-            return SPEditorGUI.ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember);
+            return SPEditorGUI.ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember, allowSetterMethods);
         }
 
-        public static string ReflectedPropertyField(GUIContent label, System.Type targType, string selectedMemberName)
+        public static string ReflectedPropertyField(GUIContent label, System.Type targType, string selectedMemberName, bool allowSetterMethods = false)
         {
             var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
             System.Reflection.MemberInfo selectedMember;
-            return SPEditorGUI.ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember);
+            return SPEditorGUI.ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember, allowSetterMethods);
         }
 
         #endregion

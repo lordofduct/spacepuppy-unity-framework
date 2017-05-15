@@ -44,7 +44,7 @@ namespace com.spacepuppy.Scenario
 
         #region ITriggerableMechanism Interface
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (_conditions == null || _conditions.Length == 0) return false;
 

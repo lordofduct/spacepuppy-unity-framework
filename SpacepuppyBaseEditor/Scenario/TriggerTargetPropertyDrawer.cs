@@ -60,6 +60,9 @@ namespace com.spacepuppyeditor.Scenario
                 case TriggerActivationType.EnableTarget:
                     h += EditorGUIUtility.singleLineHeight * 2.0f;
                     break;
+                case TriggerActivationType.DestroyTarget:
+                    h += EditorGUIUtility.singleLineHeight;
+                    break;
             }
 
             return h;
@@ -95,6 +98,9 @@ namespace com.spacepuppyeditor.Scenario
                 case TriggerActivationType.EnableTarget:
                     this.DrawAdvanced_EnableTarget(area, property);
                     break;
+                case TriggerActivationType.DestroyTarget:
+                    this.DrawAdvanced_DestroyTarget(area, property);
+                    break;
             }
 
             EditorGUI.EndProperty();
@@ -125,7 +131,7 @@ namespace com.spacepuppyeditor.Scenario
             var argRect = new Rect(area.xMin, targRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
-            if(argArrayProp.arraySize == 0)
+            if (argArrayProp.arraySize == 0)
             {
                 EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
                 if (GUI.Button(btnRect, _argBtnLabel))
@@ -223,21 +229,8 @@ namespace com.spacepuppyeditor.Scenario
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
             var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
             var targLabel = new GUIContent("Triggerable Target");
-            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
-            var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
-            if (newTargGo != targGo)
-            {
-                targGo = newTargGo;
-                if (targGo != null)
-                {
-                    //targProp.objectReferenceValue = (targGo.HasLikeComponent<ITriggerableMechanism>()) ? targGo.GetFirstLikeComponent<ITriggerableMechanism>() as Component : targGo.transform;
-                    targProp.objectReferenceValue = targGo.transform;
-                }
-                else
-                {
-                    targProp.objectReferenceValue = null;
-                }
-            }
+            //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
+            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
 
             //Draw MessageName
             var msgRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
@@ -314,7 +307,7 @@ namespace com.spacepuppyeditor.Scenario
 
                 //var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targProp.objectReferenceValue, System.Reflection.MemberTypes.Method).ToArray();
                 var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembers(targProp.objectReferenceValue, System.Reflection.MemberTypes.All, spacepuppy.Dynamic.DynamicMemberAccess.Write).ToArray();
-                System.Array.Sort(members, (a,b) => string.Compare(a.Name,b.Name, true));
+                System.Array.Sort(members, (a, b) => string.Compare(a.Name, b.Name, true));
                 var memberNames = members.Select((m) => m.Name).ToArray();
 
                 int index = System.Array.IndexOf(memberNames, methProp.stringValue);
@@ -338,7 +331,7 @@ namespace com.spacepuppyeditor.Scenario
 
                 var argRect = new Rect(area.xMin, methNameRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
                 var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
-                if(argArrayProp.arraySize > 0)
+                if (argArrayProp.arraySize > 0)
                 {
                     argArrayProp.arraySize = 0;
                     argArrayProp.serializedObject.ApplyModifiedProperties();
@@ -385,7 +378,7 @@ namespace com.spacepuppyeditor.Scenario
                 }
                 EditorGUI.indentLevel--;
             }
-            
+
         }
 
         private void DrawAdvanced_EnableTarget(Rect area, SerializedProperty property)
@@ -394,18 +387,8 @@ namespace com.spacepuppyeditor.Scenario
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
             var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
             var targLabel = new GUIContent("Triggerable Target");
-            //targProp.objectReferenceValue = SPEditorGUI.ComponentField(targRect,
-            //                                                           targLabel,
-            //                                                            ValidateTriggerableTargAsMechanism(targProp.objectReferenceValue),
-            //                                                            typeof(Transform),
-            //                                                            true);
-            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
-            var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
-            if (newTargGo != targGo)
-            {
-                targGo = newTargGo;
-                targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
-            }
+            //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
+            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
 
 
             //Draw Triggerable Arg
@@ -417,9 +400,67 @@ namespace com.spacepuppyeditor.Scenario
             argProp.stringValue = e.ToString();
         }
 
+        private void DrawAdvanced_DestroyTarget(Rect area, SerializedProperty property)
+        {
+            //Draw Target
+            var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
+            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
+            var targLabel = new GUIContent("Triggerable Target");
+            //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
+            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
+        }
+
 
 
         #region Utils
+
+        private static Transform TransformField(Rect position, GUIContent label, UnityEngine.Object target)
+        {
+            var go = GameObjectUtil.GetGameObjectFromSource(target);
+            go = EditorGUI.ObjectField(position, label, go, typeof(GameObject), true) as GameObject;
+            return go != null ? go.transform : null;
+        }
+
+        private static Component TransformOrProxyField(Rect position, GUIContent label, Component target)
+        {
+            if(target == null)
+            {
+                var go = EditorGUI.ObjectField(position, label, target, typeof(GameObject), true) as GameObject;
+                return (go != null) ? go.transform : null;
+            }
+            else
+            {
+                if(target is IProxy || target.HasComponent<IProxy>())
+                {
+                    using (var lst = com.spacepuppy.Collections.TempCollection.GetList<IProxy>())
+                    {
+                        target.GetComponents<IProxy>(lst);
+                        GUIContent[] entries = new GUIContent[lst.Count + 1];
+                        int index = -1;
+                        entries[0] = EditorHelper.TempContent("GameObject");
+                        for(int i = 0; i < lst.Count; i++)
+                        {
+                            entries[i + 1] = EditorHelper.TempContent(string.Format("Proxy -> ({0})", lst[i].GetType().Name));
+                            if (index < 0 && target == lst[i])
+                                index = i + 1;
+                        }
+                        if (index < 0)
+                            index = 0;
+
+                        index = EditorGUI.Popup(position, label, index, entries);
+                        if (index < 0 || index >= entries.Length)
+                            return null;
+
+                        return (index == 0) ? target.transform : lst[index - 1] as Component;
+                    }
+                }
+                else
+                {
+                    var go = EditorGUI.ObjectField(position, label, target.gameObject, typeof(GameObject), true) as GameObject;
+                    return (go != null) ? go.transform : null;
+                }
+            }
+        }
 
         internal static Component ValidateTriggerableTargAsMechanism(object value)
         {

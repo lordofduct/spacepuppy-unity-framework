@@ -41,6 +41,9 @@ namespace com.spacepuppy.UserInput
         {
             if (deadzone < 0f) deadzone = 0f;
 
+            //no larger than 1
+            if (Mathf.Abs(value) > 1f) return Mathf.Sign(value);
+
             switch (cutoff)
             {
                 case DeadZoneCutoff.Scaled:
@@ -63,6 +66,9 @@ namespace com.spacepuppy.UserInput
                 value.x = CutoffAxis(value.x, axleDeadzone, axleCutoff);
                 value.y = CutoffAxis(value.y, axleDeadzone, axleCutoff);
             }
+
+            //no larger than 1
+            if (value.sqrMagnitude > 1f) return value.normalized;
 
             if (radialDeadzone > 0f)
             {

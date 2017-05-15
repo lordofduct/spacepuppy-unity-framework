@@ -154,7 +154,7 @@ namespace com.spacepuppy.Graphs
             v.Next = null;
             v.g = g;
             v.h = _heuristic.Distance(node, goal);
-            v.f = g + v.f;
+            v.f = g + v.h;
             _tracked.Add(v);
             return v;
         }
@@ -174,6 +174,9 @@ namespace com.spacepuppy.Graphs
 
         private VertexInfo _steppedCompletedParentNode;
 
+        /// <summary>
+        /// Start the stepping path resolver for reducing.
+        /// </summary>
         public void BeginSteppedReduce()
         {
             if (_calculating) throw new InvalidOperationException("PathResolver is already running.");
@@ -189,10 +192,14 @@ namespace com.spacepuppy.Graphs
             _open.Add(this.CreateInfo(_start, _heuristic.Weight(_start), _goal));
         }
 
+        /// <summary>
+        /// Take a step at reducing the path resolver.
+        /// </summary>
+        /// <returns>Returns true if reached goal.</returns>
         public bool Step()
         {
             if (!_calculating) throw new InvalidOperationException("You must begin a SteppingResolver before stepping through it.");
-            if (_steppedCompletedParentNode != null) return false;
+            if (_steppedCompletedParentNode != null) return true;
 
             if (_open.Count > 0)
             {
@@ -237,6 +244,10 @@ namespace com.spacepuppy.Graphs
             return false;
         }
 
+        /// <summary>
+        /// Get the result of reducing the path.
+        /// </summary>
+        /// <param name="path"></param>
         public int EndSteppedReduce(IList<T> path)
         {
             if (!_calculating) throw new InvalidOperationException("You must begin a SteppingResolver before ending it.");
@@ -259,6 +270,9 @@ namespace com.spacepuppy.Graphs
             return cnt;
         }
 
+        /// <summary>
+        /// Reset the resolver so a new Step sequence could be started.
+        /// </summary>
         public void Reset()
         {
             _steppedCompletedParentNode = null;

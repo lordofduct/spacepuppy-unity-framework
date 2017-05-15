@@ -18,6 +18,11 @@ namespace com.spacepuppy.Spawn
     {
 
         /// <summary>
+        /// The TrackingMechanism used for spawning entities.
+        /// </summary>
+        SelfTrackingSpawnerMechanism Mechanism { get; }
+
+        /// <summary>
         /// Total number of entities, dead or alive, that have spawned since this Spawner started.
         /// </summary>
         int TotalCount { get; }
@@ -32,6 +37,8 @@ namespace com.spacepuppy.Spawn
         /// </summary>
         /// <returns></returns>
         void Spawn();
+
+        
 
     }
 

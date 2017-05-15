@@ -36,6 +36,8 @@ namespace com.spacepuppyeditor.Scenario
         public System.Type TargetType;
         public bool SearchChildren;
         public bool ManuallyConfigured;
+        public bool DefaultFromSelf;
+        public bool AlwaysExpanded;
 
         private SelectableComponentPropertyDrawer _objectDrawer = new SelectableComponentPropertyDrawer()
         {
@@ -52,11 +54,13 @@ namespace com.spacepuppyeditor.Scenario
 
         }
 
-        public TriggerableTargetObjectPropertyDrawer(System.Type targetType, bool searchChildren)
+        public TriggerableTargetObjectPropertyDrawer(System.Type targetType, bool searchChildren, bool defaultFromSelf = false, bool alwaysExpanded = false)
         {
             this.ManuallyConfigured = true;
             this.TargetType = targetType;
             this.SearchChildren = searchChildren;
+            this.DefaultFromSelf = defaultFromSelf;
+            this.AlwaysExpanded = alwaysExpanded;
         }
 
         #endregion
@@ -73,11 +77,15 @@ namespace com.spacepuppyeditor.Scenario
             {
                 this.TargetType = attrib.TargetType;
                 this.SearchChildren = attrib.SearchChildren;
+                this.DefaultFromSelf = attrib.DefaultFromSelf;
+                this.AlwaysExpanded = attrib.AlwaysExpanded;
             }
             else
             {
                 this.TargetType = null;
                 this.SearchChildren = false;
+                this.DefaultFromSelf = false;
+                this.AlwaysExpanded = false;
             }
         }
 
@@ -89,7 +97,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             this.Init(property);
 
-            if(property.isExpanded)
+            if(this.AlwaysExpanded || property.isExpanded)
             {
                 return EditorGUIUtility.singleLineHeight * 2f;
             }
@@ -115,7 +123,10 @@ namespace com.spacepuppyeditor.Scenario
             //var r0 = new Rect(rect.xMin, rect.yMin, EditorGUIUtility.labelWidth, rect.height);
             //rect = new Rect(r0.xMax, rect.yMin, rect.width - r0.width, rect.height);
             //property.isExpanded = EditorGUI.Foldout(r0, property.isExpanded, label);
-            property.isExpanded = SPEditorGUI.PrefixFoldoutLabel(ref rect, property.isExpanded, label);
+            if (!this.AlwaysExpanded)
+                property.isExpanded = SPEditorGUI.PrefixFoldoutLabel(ref rect, property.isExpanded, label);
+            else
+                rect = EditorGUI.PrefixLabel(rect, label);
 
             var r0 = new Rect(rect.xMin, rect.yMin, Mathf.Min(rect.width * 0.25f, 50f), rect.height);
             var e = (configProp.boolValue) ? TargetSource.Config : TargetSource.Arg;
@@ -123,12 +134,12 @@ namespace com.spacepuppyeditor.Scenario
             e = (TargetSource)EditorGUI.EnumPopup(r0, e);
             if(EditorGUI.EndChangeCheck())
             {
-                UpdateTargetFromSource(targetProp, e, this.TargetType);
+                UpdateTargetFromSource(targetProp, e);
                 configProp.boolValue = (e != TargetSource.Arg);
             }
             else if(e == TargetSource.Config && !_defaultSet && targetProp.objectReferenceValue == null)
             {
-                UpdateTargetFromSource(targetProp, e, this.TargetType);
+                UpdateTargetFromSource(targetProp, e);
                 _defaultSet = true;
             }
             else
@@ -139,7 +150,25 @@ namespace com.spacepuppyeditor.Scenario
             var r1 = new Rect(rect.xMin + r0.width, rect.yMin, rect.width - r0.width, rect.height);
             if(!configProp.boolValue)
             {
-                EditorGUI.LabelField(r1, "Target determined by activating trigger.");
+                var findProp = property.FindPropertyRelative(PROP_FIND);
+                var e0 = findProp.GetEnumValue<TriggerableTargetObject.FindCommand>();
+                switch(e0)
+                {
+                    case TriggerableTargetObject.FindCommand.Direct:
+                        EditorGUI.LabelField(r1, "Target determined by activating trigger.");
+                        break;
+                    case TriggerableTargetObject.FindCommand.FindParent:
+                    case TriggerableTargetObject.FindCommand.FindInChildren:
+                    case TriggerableTargetObject.FindCommand.FindInEntity:
+                        EditorGUI.LabelField(r1, e0.ToString() + " of activating trigger arg.");
+                        break;
+                    case TriggerableTargetObject.FindCommand.FindInScene:
+                    case TriggerableTargetObject.FindCommand.FindEntityInScene:
+                    default:
+                        EditorGUI.LabelField(r1, e0.ToString());
+                        break;
+                }
+
                 targetProp.objectReferenceValue = null;
             }
             else
@@ -152,7 +181,7 @@ namespace com.spacepuppyeditor.Scenario
 
             //################################
             //SECOND LINE
-            if (property.isExpanded)
+            if (this.AlwaysExpanded || property.isExpanded)
             {
                 var indent = EditorGUIUtility.labelWidth * 0.5f;
                 rect = new Rect(position.xMin + indent, position.yMin + EditorGUIUtility.singleLineHeight, Mathf.Max(0f, position.width - indent), EditorGUIUtility.singleLineHeight);
@@ -220,7 +249,7 @@ namespace com.spacepuppyeditor.Scenario
 
         #region Utils
 
-        private static void UpdateTargetFromSource(SerializedProperty property, TargetSource esrc, System.Type targetType)
+        private void UpdateTargetFromSource(SerializedProperty property, TargetSource esrc)
         {
             switch(esrc)
             {
@@ -232,8 +261,8 @@ namespace com.spacepuppyeditor.Scenario
                 case TargetSource.Self:
                     {
                         UnityEngine.Object obj = property.serializedObject.targetObject;
-                        if (targetType != null)
-                            obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;
+                        if (this.TargetType != null)
+                            obj = ObjUtil.GetAsFromSource(this.TargetType, obj) as UnityEngine.Object;
                         property.objectReferenceValue = obj;
                     }
                     break;
@@ -244,19 +273,19 @@ namespace com.spacepuppyeditor.Scenario
                         if (go != null)
                             obj = go.FindRoot();
 
-                        if (targetType != null)
-                            obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;
+                        if (this.TargetType != null)
+                            obj = ObjUtil.GetAsFromSource(this.TargetType, obj) as UnityEngine.Object;
                         property.objectReferenceValue = obj;
                     }
                     break;
                 case TargetSource.Config:
                     {
-                        if(property.objectReferenceValue == null)
+                        if (this.DefaultFromSelf && property.objectReferenceValue == null)
                         {
                             UnityEngine.Object obj = property.serializedObject.targetObject;
-                            if (targetType != null)
+                            if (this.TargetType != null)
                             {
-                                obj = ObjUtil.GetAsFromSource(targetType, obj) as UnityEngine.Object;  
+                                obj = ObjUtil.GetAsFromSource(this.TargetType, obj) as UnityEngine.Object;
                             }
                             property.objectReferenceValue = obj;
                         }

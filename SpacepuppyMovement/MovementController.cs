@@ -349,13 +349,19 @@ namespace com.spacepuppy
             }
             else
             {
-                _updateCache += () =>
-                {
-                    _bMoveCalled = true;
-                    _mover.Move(mv);
-                };
+                //mono seems to create garbage even if the anonymous delegate is in an if/else, so moved to own function
+                this.SetMoveCache(mv);
             }
         }
+        private void SetMoveCache(Vector3 mv)
+        {
+            _updateCache += () =>
+            {
+                _bMoveCalled = true;
+                _mover.Move(mv);
+            };
+        }
+
 
         /// <summary>
         /// Moves the character by some delta, but does not effect the velocity. This is useful for things like moving platforms.

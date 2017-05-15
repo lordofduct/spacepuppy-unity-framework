@@ -69,9 +69,9 @@ namespace com.spacepuppy.Scenario
                     foreach (var t in (from t in child.GetComponentsAlt<ITriggerableMechanism>() where t.CanTrigger orderby t.Order ascending select t))
                     {
                         if (_passAlongTriggerArg)
-                            t.Trigger(arg);
+                            t.Trigger(this, arg);
                         else
-                            t.Trigger(null);
+                            t.Trigger(this, null);
                     }
                 }
             }
@@ -84,9 +84,9 @@ namespace com.spacepuppy.Scenario
                         foreach (var t in (from t in child.GetComponentsAlt<ITriggerableMechanism>() where t.CanTrigger orderby t.Order ascending select t))
                         {
                             if (_passAlongTriggerArg)
-                                t.Trigger(arg);
+                                t.Trigger(this, arg);
                             else
-                                t.Trigger(null);
+                                t.Trigger(this, null);
                         }
                     }
                 }
@@ -97,7 +97,7 @@ namespace com.spacepuppy.Scenario
 
         #region Triggerable Interface
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 

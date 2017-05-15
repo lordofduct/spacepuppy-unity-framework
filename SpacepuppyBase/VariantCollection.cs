@@ -424,35 +424,57 @@ namespace com.spacepuppy
 
         object IDynamic.this[string sMemberName]
         {
-            get { return this[sMemberName]; }
-            set { this[sMemberName] = value; }
+            get { return (this as IDynamic).GetValue(sMemberName); }
+            set { (this as IDynamic).SetValue(sMemberName, value); }
         }
 
         bool IDynamic.SetValue(string sMemberName, object value, params object[] index)
         {
-            this[sMemberName] = value;
-            return true;
+            if (_table.ContainsKey(sMemberName))
+            {
+                this[sMemberName] = value;
+                return true;
+            }
+            else if (DynamicUtil.HasMemberDirect(this, sMemberName, true))
+                return DynamicUtil.SetValueDirect(this, sMemberName, value, index);
+            else
+            {
+                this[sMemberName] = value;
+                return true;
+            }
         }
 
         object IDynamic.GetValue(string sMemberName, params object[] args)
         {
-            return this[sMemberName];
+            if (_table.ContainsKey(sMemberName))
+                return this[sMemberName];
+            else
+                return DynamicUtil.GetValueDirect(this, sMemberName, args);
         }
 
         bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
         {
-            return this.TryGetValue(sMemberName, out result);
+            if (_table.ContainsKey(sMemberName))
+            {
+                result = this[sMemberName];
+                return true;
+            }
+            else
+                return DynamicUtil.TryGetValueDirect(this, sMemberName, out result, args);
         }
 
         object IDynamic.InvokeMethod(string sMemberName, params object[] args)
         {
             //throw new System.NotSupportedException();
-            return null;
+            return DynamicUtil.InvokeMethodDirect(this, sMemberName, args);
         }
 
         bool IDynamic.HasMember(string sMemberName, bool includeNonPublic)
         {
-            return _table.ContainsKey(sMemberName);
+            if (_table.ContainsKey(sMemberName))
+                return true;
+            else
+                return DynamicUtil.TypeHasMember(this.GetType(), sMemberName, includeNonPublic);
         }
 
         IEnumerable<System.Reflection.MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
@@ -478,10 +500,9 @@ namespace com.spacepuppy
 
             foreach(var p in DynamicUtil.GetMembersFromType(tp, includeNonPublic))
             {
-                yield return p;
+                if(p.Name != "_table" && p.Name != "_values" && p.Name != "_keys")
+                    yield return p;
             }
-
-            yield break;
         }
 
         System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)

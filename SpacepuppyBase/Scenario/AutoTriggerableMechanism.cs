@@ -22,7 +22,7 @@ namespace com.spacepuppy.Scenario
 
             if (_activateOn.HasFlag(ActivateEvent.OnStart))
             {
-                this.Trigger(null);
+                this.Trigger(this, null);
             }
         }
 
@@ -34,7 +34,7 @@ namespace com.spacepuppy.Scenario
 
             if (_activateOn.HasFlag(ActivateEvent.OnEnable))
             {
-                this.Trigger(null);
+                this.Trigger(this, null);
             }
         }
 

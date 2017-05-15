@@ -405,7 +405,8 @@ namespace com.spacepuppy.Anim
                 _state.layer = _layer;
                 _state.wrapMode = _wrapMode;
                 _state.blendMode = _blendMode;
-                _controller.PlayInternal(_state.name, mode, _layer);
+                //_controller.PlayInternal(_state.name, mode, _layer);
+                _controller.PlayInternal(_id, mode, _layer);
             }
             else if(_clip is IScriptableAnimationClip)
             {
@@ -449,7 +450,8 @@ namespace com.spacepuppy.Anim
                 _state.layer = _layer;
                 _state.wrapMode = _wrapMode;
                 _state.blendMode = _blendMode;
-                _controller.CrossFadeInternal(_state.name, fadeLength, mode, _layer);
+                //_controller.CrossFadeInternal(_state.name, fadeLength, mode, _layer);
+                _controller.CrossFadeInternal(_id, fadeLength, mode, _layer);
             }
             else
             {
@@ -530,9 +532,10 @@ namespace com.spacepuppy.Anim
 
         public void Dispose()
         {
-            if (_controller != null && _state != null && _controller.animation[_state.name] == _state)
+            var nm = _id; // _state.name;
+            if (_controller != null && _state != null && _controller.animation[nm] == _state)
             {
-                _controller.animation.RemoveClip(_state.name);
+                _controller.animation.RemoveClip(nm);
             }
             _controller = null;
             _state = null;

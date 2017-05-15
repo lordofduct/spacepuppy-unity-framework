@@ -8,17 +8,11 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
+
+    [System.Obsolete("Use i_SetValueOnTarget Instead.")]
     public class i_SetValueOnEntity : AutoTriggerableMechanism
     {
-
-        public enum SetMode
-        {
-            Set = 0,
-            Increment = 1,
-            Decrement = 2,
-            Toggle = 3
-        }
-
+        
         #region Fields
 
         [SerializeField()]
@@ -36,13 +30,13 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private VariantReference _value;
         [SerializeField()]
-        private SetMode _mode;
+        private i_SetValue.SetMode _mode;
 
         #endregion
 
         #region Methods
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 
@@ -54,21 +48,21 @@ namespace com.spacepuppy.Scenario
 
             switch (_mode)
             {
-                case SetMode.Set:
+                case i_SetValue.SetMode.Set:
                     return DynamicUtil.SetValue(targ, _memberName, _value.Value);
-                case SetMode.Increment:
+                case i_SetValue.SetMode.Increment:
                     {
                         var v = DynamicUtil.GetValue(targ, _memberName);
                         v = Evaluator.TrySum(v, _value.Value);
                         return DynamicUtil.SetValue(targ, _memberName, v);
                     }
-                case SetMode.Decrement:
+                case i_SetValue.SetMode.Decrement:
                     {
                         var v = DynamicUtil.GetValue(targ, _memberName);
                         v = Evaluator.TryDifference(v, _value.Value);
                         return DynamicUtil.SetValue(targ, _memberName, v);
                     }
-                case SetMode.Toggle:
+                case i_SetValue.SetMode.Toggle:
                     {
                         var v = DynamicUtil.GetValue(targ, _memberName);
                         v = Evaluator.TryToggle(v);

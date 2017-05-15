@@ -49,7 +49,7 @@ namespace com.spacepuppy.AI.Scenario
             }
         }
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 

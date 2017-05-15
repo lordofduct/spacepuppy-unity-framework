@@ -61,10 +61,12 @@
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
     <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\DisplayFlatPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
-    <Compile Include="Base\Inspectors\ProxyTargetPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\ProxyPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\ShortGuidPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
@@ -160,6 +162,7 @@
     <Compile Include="Scenario\ITriggerableMechanismAddonDrawer.cs" />
     <Compile Include="Scenario\i_SetValueInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnEntityInspector.cs" />
+    <Compile Include="Scenario\i_SetValueOnTargetInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArgInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnEvalInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
@@ -183,6 +186,7 @@
     <Compile Include="SPGUI.cs" />
     <Compile Include="SPMenu.cs" />
     <Compile Include="Base\TypeSelectionDropDownWindow.cs" />
+    <Compile Include="Tween\SPTweenInspector.cs" />
     <Compile Include="Utils\Diminish\DiminishingWeightOverDurationPropertyDrawer.cs" />
   </ItemGroup>
   <ItemGroup>

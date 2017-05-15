@@ -204,7 +204,7 @@
     <Compile Include="Project\ResourceLinkTable.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
-    <Compile Include="ProxyTarget.cs" />
+    <Compile Include="Proxy.cs" />
     <Compile Include="PsuedoSingleton.cs" />
     <Compile Include="RadicalEnums.cs" />
     <Compile Include="RadicalState.cs" />
@@ -234,7 +234,9 @@
     <Compile Include="Scenario\i_PostNotification.cs" />
     <Compile Include="Scenario\i_QuitApplication.cs" />
     <Compile Include="Scenario\i_SetValueOnEntity.cs" />
+    <Compile Include="Scenario\i_SetValueOnTarget.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
+    <Compile Include="Scenario\i_SignalEvent.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
     <Compile Include="Scenario\i_TriggerOnEval.cs" />
@@ -242,6 +244,7 @@
     <Compile Include="Scenario\i_TriggerSequence.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
     <Compile Include="Scenario\t_OnClick.cs" />
+    <Compile Include="Scenario\t_OnDisable.cs" />
     <Compile Include="Scenario\t_OnEnable.cs" />
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />

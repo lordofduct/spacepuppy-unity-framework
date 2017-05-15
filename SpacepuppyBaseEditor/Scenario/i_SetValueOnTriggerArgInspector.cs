@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
@@ -56,7 +57,7 @@ namespace com.spacepuppyeditor.Scenario
                 }
                 else
                 {
-                    if (propType == typeof(object))
+                    if (DynamicUtil.TypeIsVariantSupported(propType))
                     {
                         //draw the default variant as the method accepts anything
                         _variantDrawer.RestrictVariantType = false;

@@ -24,8 +24,9 @@ namespace com.spacepuppy.Scenario
         [FormerlySerializedAs("EffectPrefab")]
         private ParticleSystem _effectPrefab;
 
+        [SerializeField()]
         [TimeUnitsSelector()]
-        [Tooltip("Leave value 0 to play for duration of particle effect.")]
+        [Tooltip("Delete particle effect after a duration. Leave 0 to use the 'duration' of the particle effect, or use negative value (-1) to never delete.")]
         [FormerlySerializedAs("Duration")]
         private float _duration;
 
@@ -86,6 +87,8 @@ namespace com.spacepuppy.Scenario
 
         #region ISpawner Interface
 
+        public SelfTrackingSpawnerMechanism Mechanism { get { return _spawnMechanism; } }
+
         public int TotalCount { get { return _spawnMechanism.TotalCount; } }
 
         public int ActiveCount { get { return _spawnMechanism.ActiveCount; } }
@@ -98,13 +101,10 @@ namespace com.spacepuppy.Scenario
             var go = _spawnMechanism.Spawn(_effectPrefab.gameObject, this.transform.position, this.transform.rotation, (_spawnAsChild) ? this.transform : null);
             if (go == null) return null;
 
-            var dur = (_duration <= 0f) ? _effectPrefab.main.duration : _duration;
+            var dur = (_duration == 0f) ? _effectPrefab.main.duration : _duration;
             if (dur > 0f && dur != float.PositiveInfinity)
             {
-                this.Invoke(() =>
-                {
-                    go.Kill();
-                }, dur);
+                GameLoopEntry.Hook.Invoke(go.Kill, dur);
             }
 
             if (_onSpawnedObject != null && _onSpawnedObject.Count > 0)
@@ -127,7 +127,7 @@ namespace com.spacepuppy.Scenario
             get { return base.CanTrigger && _effectPrefab != null; }
         }
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 

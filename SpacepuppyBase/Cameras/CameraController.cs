@@ -6,9 +6,9 @@ namespace com.spacepuppy.Cameras
 {
     public abstract class CameraController : SPNotifyingComponent, ICamera
     {
-
-        #region CONSTRUCTOR
         
+        #region CONSTRUCTOR
+
         protected override void Awake()
         {
             base.Awake();
@@ -33,7 +33,7 @@ namespace com.spacepuppy.Cameras
         {
             get { return this.camera; }
         }
-
+        
         public virtual bool IsAlive { get { return this != null && this.gameObject != null; } }
 
         bool ICamera.IsAlive { get { return this.IsAlive; } }

@@ -120,6 +120,8 @@ namespace com.spacepuppy.Spawn
 
         #region ISpawner Interface
 
+        public SelfTrackingSpawnerMechanism Mechanism { get { return _spawnMechanism; } }
+
         public int TotalCount { get { return _spawnMechanism.TotalCount; } }
 
         public int ActiveCount { get { return _spawnMechanism.ActiveCount; } }
@@ -148,7 +150,7 @@ namespace com.spacepuppy.Spawn
             get { return base.CanTrigger && _prefabs != null && _prefabs.Length > 0; }
         }
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 

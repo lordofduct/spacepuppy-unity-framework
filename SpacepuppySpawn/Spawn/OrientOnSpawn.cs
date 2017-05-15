@@ -36,6 +36,20 @@ namespace com.spacepuppy.Spawn
 
         #region CONSTRUCTOR
 
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            SpawnPointHelper.RegisterModifierWithSpawners(this.gameObject, this);
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            SpawnPointHelper.UnRegisterModifierWithSpawners(this.gameObject, this);
+        }
+
         #endregion
 
         #region ISpawnerModifier Interface

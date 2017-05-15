@@ -17,6 +17,8 @@ namespace com.spacepuppyeditor.Base
 
         #region Fields
 
+        const string PROP_UNITYOBJREF = "_unityObjectReference";
+        const string PROP_STRING = "_string";
         const float REF_SELECT_WIDTH = 70f;
 
         public bool RestrictVariantType = false;
@@ -206,9 +208,9 @@ namespace com.spacepuppyeditor.Base
                     case VariantType.Component:
                         {
                             _selectComponentDrawer.AllowNonComponents = false;
-                            _selectComponentDrawer.RestrictionType = _forcedObjectType;
+                            _selectComponentDrawer.RestrictionType = ComponentUtil.IsAcceptableComponentType(_forcedObjectType) ? _forcedObjectType : typeof(Component);
                             _selectComponentDrawer.ShowXButton = true;
-                            var targProp = property.FindPropertyRelative("_unityObjectReference");
+                            var targProp = property.FindPropertyRelative(PROP_UNITYOBJREF);
                             EditorGUI.BeginChangeCheck();
                             _selectComponentDrawer.OnGUI(r1, targProp);
                             if (EditorGUI.EndChangeCheck())
@@ -227,7 +229,7 @@ namespace com.spacepuppyeditor.Base
                                     _selectComponentDrawer.AllowNonComponents = false;
                                     _selectComponentDrawer.RestrictionType = _forcedObjectType;
                                     _selectComponentDrawer.ShowXButton = true;
-                                    var targProp = property.FindPropertyRelative("_unityObjectReference");
+                                    var targProp = property.FindPropertyRelative(PROP_UNITYOBJREF);
                                     EditorGUI.BeginChangeCheck();
                                     _selectComponentDrawer.OnGUI(r1, targProp);
                                     if (EditorGUI.EndChangeCheck())
@@ -286,8 +288,8 @@ namespace com.spacepuppyeditor.Base
             _selectComponentDrawer.AllowNonComponents = true;
             _selectComponentDrawer.RestrictionType = null;
             _selectComponentDrawer.ShowXButton = false;
-            var targProp = property.FindPropertyRelative("_unityObjectReference");
-            var memberProp = property.FindPropertyRelative("_string");
+            var targProp = property.FindPropertyRelative(PROP_UNITYOBJREF);
+            var memberProp = property.FindPropertyRelative(PROP_STRING);
 
             if (targProp.objectReferenceValue == null)
             {
@@ -307,8 +309,8 @@ namespace com.spacepuppyeditor.Base
             _selectComponentDrawer.AllowNonComponents = true;
             _selectComponentDrawer.RestrictionType = null;
             _selectComponentDrawer.ShowXButton = false;
-            var targProp = property.FindPropertyRelative("_unityObjectReference");
-            var evalProp = property.FindPropertyRelative("_string");
+            var targProp = property.FindPropertyRelative(PROP_UNITYOBJREF);
+            var evalProp = property.FindPropertyRelative(PROP_STRING);
 
             var r1 = new Rect(position.xMin, position.yMin, position.width * 0.4f, position.height);
             var r2 = new Rect(r1.xMax, position.yMin, position.width - r1.width, position.height);

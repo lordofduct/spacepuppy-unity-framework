@@ -413,13 +413,15 @@ namespace com.spacepuppy.Dynamic
             //    tp = DynamicUtil.ReduceSubType(tp, name, includeNonPublic, out name);
             if (tp == null) return false;
 
-            if (tp.GetMember(name, BINDING) != null) return true;
+            var member = tp.GetMember(name, BINDING);
+            if (member != null && member.Length > 0) return true;
 
             if(includeNonPublic)
             {
                 while (tp != null)
                 {
-                    if (tp.GetMember(name, PRIV_BINDING) != null) return true;
+                    member = tp.GetMember(name, PRIV_BINDING);
+                    if (member != null && member.Length > 0) return true;
                     tp = tp.BaseType;
                 }
             }

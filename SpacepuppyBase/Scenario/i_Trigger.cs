@@ -104,7 +104,7 @@ namespace com.spacepuppy.Scenario
             return true;
         }
         
-        bool ITriggerableMechanism.Trigger(object arg)
+        bool ITriggerableMechanism.Trigger(object sender, object arg)
         {
             return this.ActivateTrigger(arg);
         }

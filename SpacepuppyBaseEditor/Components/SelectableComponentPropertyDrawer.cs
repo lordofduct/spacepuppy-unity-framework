@@ -30,23 +30,23 @@ namespace com.spacepuppyeditor.Components
         /// </summary>
         public bool AllowNonComponents;
 
-        private System.Type _restrictionType = typeof(Component);
+        private System.Type _restrictionType;
 
         public System.Type RestrictionType
         {
             get
             {
-                return _restrictionType;
+                if (_restrictionType == null)
+                {
+                    //return typeof(Component);
+                    //needs to be this so that it works with VariantReference and allows all types
+                    return this.AllowNonComponents ? typeof(UnityEngine.Object) : typeof(Component);
+                }
+                else
+                    return _restrictionType;
             }
             set
             {
-                //if (value == null) value = typeof(Component);
-                //else if (!value.IsInterface && !TypeUtil.IsType(value, typeof(Component))) throw new TypeArgumentMismatchException(value, typeof(Component), "value");
-                //_restrictionType = value;
-
-
-                //if (value == null) value = typeof(Component);
-                if (value == null) value = (this.AllowNonComponents) ? typeof(UnityEngine.Object) : typeof(Component); //needs to be this so that it works with VariantReference and allows all types
                 _restrictionType = value;
             }
         }
@@ -55,7 +55,7 @@ namespace com.spacepuppyeditor.Components
         {
             get
             {
-                return (ComponentUtil.IsAcceptableComponentType(_restrictionType)) ? _restrictionType : typeof(Component);
+                return (ComponentUtil.IsAcceptableComponentType(this.RestrictionType)) ? this.RestrictionType : typeof(Component);
             }
         }
 
@@ -69,7 +69,8 @@ namespace com.spacepuppyeditor.Components
             {
                 var tp = this.fieldInfo.FieldType;
                 if (tp.IsListType()) tp = tp.GetElementTypeOfListType();
-                _restrictionType = tp;
+                if (_restrictionType == null)
+                    _restrictionType = tp;
             }
 
             if (this.attribute != null && this.attribute is SelectableComponentAttribute)
@@ -79,7 +80,7 @@ namespace com.spacepuppyeditor.Components
                 this.AllowSceneObject = attrib.AllowSceneObjects;
                 this.ForceOnlySelf = attrib.ForceOnlySelf;
                 this.SearchChildren = attrib.SearchChildren;
-                if (attrib.InheritsFromType != null) _restrictionType = attrib.InheritsFromType;
+                if (attrib.InheritsFromType != null) this.RestrictionType = attrib.InheritsFromType;
             }
 
             if (this.ChoiceSelector == null)
@@ -106,7 +107,7 @@ namespace com.spacepuppyeditor.Components
         public void OnGUI(Rect position, SerializedProperty property)
         {
             //if (property.propertyType != SerializedPropertyType.ObjectReference || !TypeUtil.IsType(_restrictionType, typeof(Component), typeof(IComponent)))
-            if (property.propertyType != SerializedPropertyType.ObjectReference || (!this.AllowNonComponents && !(TypeUtil.IsType(_restrictionType, typeof(Component)) || _restrictionType.IsInterface)))
+            if (property.propertyType != SerializedPropertyType.ObjectReference || (!this.AllowNonComponents && !ComponentUtil.IsAcceptableComponentType(this.RestrictionType)))
             {
                 this.DrawAsMismatchedAttribute(position, property);
                 return;
@@ -126,7 +127,7 @@ namespace com.spacepuppyeditor.Components
 
                 if (property.objectReferenceValue == null)
                 {
-                    property.objectReferenceValue = targGo.GetComponent(_restrictionType);
+                    property.objectReferenceValue = targGo.GetComponent(this.RestrictionType);
                 }
             }
 
@@ -234,9 +235,9 @@ namespace com.spacepuppyeditor.Components
 
         private void DrawObjectRefField(Rect position, SerializedProperty property)
         {
-            if (ComponentUtil.IsAcceptableComponentType(_restrictionType))
+            if (ComponentUtil.IsAcceptableComponentType(this.RestrictionType))
             {
-                var fieldObjType = (!this.SearchChildren && TypeUtil.IsType(_restrictionType, typeof(UnityEngine.Component))) ? _restrictionType : typeof(UnityEngine.GameObject);
+                var fieldObjType = (!this.SearchChildren && TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Component))) ? this.RestrictionType : typeof(UnityEngine.GameObject);
                 var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObject);
                 if(this.ForceOnlySelf)
                 {
@@ -248,7 +249,7 @@ namespace com.spacepuppyeditor.Components
                         //property.objectReferenceValue = obj;
                         var o = obj;
                         if (this.SearchChildren && o == null)
-                            o = ngo.GetComponentInChildren(_restrictionType);
+                            o = ngo.GetComponentInChildren(this.RestrictionType);
                         property.objectReferenceValue = o;
                     }
                 }
@@ -256,15 +257,15 @@ namespace com.spacepuppyeditor.Components
                 {
                     //property.objectReferenceValue = obj;
                     //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
-                    var o = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    var o = ObjUtil.GetAsFromSource(this.RestrictionType, obj) as UnityEngine.Object;
                     if (this.SearchChildren && o == null && GameObjectUtil.GetGameObjectFromSource(obj) != null)
-                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(_restrictionType);
+                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(this.RestrictionType);
                     property.objectReferenceValue = o;
                 }
             }
             else if (this.AllowNonComponents)
             {
-                var fieldObjType = (TypeUtil.IsType(_restrictionType, typeof(UnityEngine.Object))) ? _restrictionType : typeof(UnityEngine.Object);
+                var fieldObjType = (TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Object))) ? this.RestrictionType : typeof(UnityEngine.Object);
                 var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObject);
                 if(this.ForceOnlySelf)
                 {
@@ -275,9 +276,9 @@ namespace com.spacepuppyeditor.Components
                     {
                         //property.objectReferenceValue = obj;
                         //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
-                        var o = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                        var o = ObjUtil.GetAsFromSource(this.RestrictionType, obj) as UnityEngine.Object;
                         if (this.SearchChildren && o == null)
-                            o = ngo.GetComponentInChildren(_restrictionType);
+                            o = ngo.GetComponentInChildren(this.RestrictionType);
                         property.objectReferenceValue = o;
                     }
                 }
@@ -285,9 +286,9 @@ namespace com.spacepuppyeditor.Components
                 {
                     //property.objectReferenceValue = obj;
                     //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
-                    var o = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
+                    var o = ObjUtil.GetAsFromSource(this.RestrictionType, obj) as UnityEngine.Object;
                     if (this.SearchChildren && o == null && GameObjectUtil.GetGameObjectFromSource(obj) != null)
-                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(_restrictionType);
+                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(this.RestrictionType);
                     property.objectReferenceValue = o;
                 }
             }
@@ -305,9 +306,9 @@ namespace com.spacepuppyeditor.Components
                         {
                             //property.objectReferenceValue = ngo.GetComponent(_restrictionType);
                             //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
-                            var o = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                            var o = ObjUtil.GetAsFromSource(this.RestrictionType, ngo) as UnityEngine.Object;
                             if (this.SearchChildren && o == null)
-                                o = ngo.GetComponentInChildren(_restrictionType);
+                                o = ngo.GetComponentInChildren(this.RestrictionType);
                             property.objectReferenceValue = o;
                         }
                     }
@@ -315,9 +316,9 @@ namespace com.spacepuppyeditor.Components
                     {
                         //property.objectReferenceValue = (ngo == null) ? null : ngo.GetComponent(_restrictionType);
                         //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
-                        var o = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
+                        var o = ObjUtil.GetAsFromSource(this.RestrictionType, ngo) as UnityEngine.Object;
                         if (this.SearchChildren && o == null)
-                            o = ngo.GetComponentInChildren(_restrictionType);
+                            o = ngo.GetComponentInChildren(this.RestrictionType);
                         property.objectReferenceValue = o;
                     }
                 }

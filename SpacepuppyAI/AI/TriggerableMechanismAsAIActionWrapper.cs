@@ -98,7 +98,7 @@ namespace com.spacepuppy.AI
                     if(_mechanism is IBlockingTriggerableMechanism)
                     {
                         var obj = BlockingTriggerYieldInstruction.Create();
-                        (_mechanism as IBlockingTriggerableMechanism).Trigger(ai, obj);
+                        (_mechanism as IBlockingTriggerableMechanism).Trigger(ai, ai, obj);
                         if(obj.Count > 0)
                         {
                             _state = ActionResult.Waiting;
@@ -111,7 +111,7 @@ namespace com.spacepuppy.AI
                     }
                     else
                     {
-                        _mechanism.Trigger(ai);
+                        _mechanism.Trigger(ai, ai);
                     }
                 }
             }

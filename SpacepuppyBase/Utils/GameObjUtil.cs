@@ -48,9 +48,51 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+        public static GameObject GetGameObjectFromSource(object obj, bool respectProxy)
+        {
+            if (obj == null) return null;
+
+            if(respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return null;
+            }
+
+            if (obj is GameObject)
+                return obj as GameObject;
+            if (obj is Component)
+                return (obj as Component).gameObject;
+            if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).gameObject;
+
+            return null;
+        }
+
         public static Transform GetTransformFromSource(object obj)
         {
             if (obj == null) return null;
+            if (obj is Transform)
+                return obj as Transform;
+            if (obj is GameObject)
+                return (obj as GameObject).transform;
+            if (obj is Component)
+                return (obj as Component).transform;
+            if (obj is IGameObjectSource)
+                return (obj as IGameObjectSource).transform;
+
+            return null;
+        }
+
+        public static Transform GetTransformFromSource(object obj, bool respectProxy)
+        {
+            if (obj == null) return null;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return null;
+            }
+
             if (obj is Transform)
                 return obj as Transform;
             if (obj is GameObject)
@@ -175,27 +217,35 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return;
 
-            using (var lst = TempCollection.GetList<IKillableEntity>())
+            if(Application.isPlaying)
             {
-                //this returns in the order from top down, we will loop backwards to kill bottom up
-                obj.GetComponentsInChildren<IKillableEntity>(true, lst);
-                if(lst.Count > 0)
+                using (var lst = TempCollection.GetList<IKillableEntity>())
                 {
-                    for(int i = lst.Count - 1; i > -1; i--)
+                    //this returns in the order from top down, we will loop backwards to kill bottom up
+                    obj.GetComponentsInChildren<IKillableEntity>(true, lst);
+                    if (lst.Count > 0)
                     {
-                        lst[i].Kill();
-                    }
+                        for (int i = lst.Count - 1; i > -1; i--)
+                        {
+                            lst[i].Kill();
+                        }
 
-                    if(lst[0].gameObject != obj)
-                    {
-                        ObjUtil.SmartDestroy(obj);
+                        if (lst[0].gameObject != obj)
+                        {
+                            UnityEngine.Object.Destroy(obj);
+                        }
                     }
-                }
-                else
-                {
-                    ObjUtil.SmartDestroy(obj);
+                    else
+                    {
+                        UnityEngine.Object.Destroy(obj);
+                    }
                 }
             }
+            else
+            {
+                UnityEngine.Object.DestroyImmediate(obj);
+            }
+
         }
 
         /// <summary>
@@ -204,26 +254,7 @@ namespace com.spacepuppy.Utils
         /// <param name="obj"></param>
         public static void KillEntity(this GameObject obj)
         {
-            if (obj.IsNullOrDestroyed()) return;
-
-            obj = obj.FindRoot();
-
-            using (var lst = TempCollection.GetList<IKillableEntity>())
-            {
-                obj.GetComponentsInChildren<IKillableEntity>(true, lst);
-                if (lst.Count > 0)
-                {
-                    var e = lst.GetEnumerator();
-                    while (e.MoveNext())
-                    {
-                        e.Current.Kill();
-                    }
-                }
-                else
-                {
-                    ObjUtil.SmartDestroy(obj);
-                }
-            }
+            Kill(obj.FindRoot());
         }
         
 #endregion
@@ -631,17 +662,18 @@ namespace com.spacepuppy.Utils
                 {
                     foreach (var go in GameObject.FindGameObjectsWithTag(tag)) tmp.Add(go);
 
-                    foreach (var c in MultiTag.FindAll(tag)) tmp.Add(c.gameObject);
+                    MultiTag.FindAll(tag, tmp);
 
                     return tmp.ToArray();
                 }
             }
         }
 
-        public static void FindGameObjectsWithMultiTag(string tag, ICollection<UnityEngine.GameObject> coll)
+        public static int FindGameObjectsWithMultiTag(string tag, ICollection<UnityEngine.GameObject> coll)
         {
             if (coll == null) throw new System.ArgumentNullException("coll");
 
+            int cnt = coll.Count;
             if(tag == SPConstants.TAG_MULTITAG)
             {
                 coll.AddRange(GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG));
@@ -650,8 +682,9 @@ namespace com.spacepuppy.Utils
             {
                 foreach (var go in GameObject.FindGameObjectsWithTag(tag)) coll.Add(go);
 
-                foreach (var c in MultiTag.FindAll(tag)) coll.Add(c.gameObject);
+                MultiTag.FindAll(tag, coll);
             }
+            return coll.Count - cnt;
         }
 
         public static GameObject FindWithMultiTag(string tag)

@@ -1,5 +1,10 @@
 ﻿#pragma warning disable 0168 // variable declared but not used.
 
+using System.Collections.Generic;
+using System.Linq;
+
+using com.spacepuppy.Collections;
+
 namespace com.spacepuppy.Utils
 {
     public static class ObjUtil
@@ -8,6 +13,26 @@ namespace com.spacepuppy.Utils
         #region Fields
 
         private static System.Func<UnityEngine.Object, bool> _isObjectAlive;
+
+        private static Dictionary<System.Type, System.Type[]> _interfaceToComponentMap;
+
+        private static System.Type[] GetInterfaceComponentMap(System.Type tp)
+        {
+            if (!tp.IsInterface) throw new System.ArgumentException("Generic Type is not an interface.");
+
+            System.Type[] arr;
+            if(_interfaceToComponentMap != null && _interfaceToComponentMap.TryGetValue(tp, out arr))
+                return arr;
+
+            System.Type utp = typeof(UnityEngine.Object);
+            arr = (from t in TypeUtil.GetTypesAssignableFrom(tp)
+                   where utp.IsAssignableFrom(t)
+                   select t).ToArray();
+            if (_interfaceToComponentMap == null) _interfaceToComponentMap = new Dictionary<System.Type, System.Type[]>();
+            _interfaceToComponentMap[tp] = arr;
+
+            return arr;
+        }
 
         #endregion
 
@@ -46,7 +71,7 @@ namespace com.spacepuppy.Utils
                 case SearchBy.Name:
                     return UnityEngine.GameObject.Find(query);
                 case SearchBy.Type:
-                    return UnityEngine.Object.FindObjectOfType(TypeUtil.FindType(query));
+                    return ObjUtil.FindObjectOfType(TypeUtil.FindType(query));
                 default:
                     return null;
             }
@@ -63,7 +88,7 @@ namespace com.spacepuppy.Utils
                 case SearchBy.Name:
                     return ObjUtil.GetAsFromSource<T>(UnityEngine.GameObject.Find(query));
                 case SearchBy.Type:
-                    return ObjUtil.GetAsFromSource<T>(UnityEngine.Object.FindObjectOfType(TypeUtil.FindType(query)));
+                    return ObjUtil.GetAsFromSource<T>(ObjUtil.FindObjectOfType(TypeUtil.FindType(query)));
                 default:
                     return null;
             }
@@ -86,7 +111,60 @@ namespace com.spacepuppy.Utils
                         }
                     }
                 case SearchBy.Type:
-                    return UnityEngine.Object.FindObjectsOfType(TypeUtil.FindType(query));
+                    return ObjUtil.FindObjectsOfType(TypeUtil.FindType(query));
+                default:
+                    return null;
+            }
+        }
+
+        public static UnityEngine.Object[] FindAll(SearchBy search, string query, System.Type tp)
+        {
+            switch (search)
+            {
+                case SearchBy.Nothing:
+                    return ArrayUtil.Empty<UnityEngine.Object>();
+                case SearchBy.Tag:
+                    {
+                        using (var tmp = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.GameObject>())
+                        using (var results = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.Object>())
+                        {
+                            GameObjectUtil.FindGameObjectsWithMultiTag(query, tmp);
+                            var e = tmp.GetEnumerator();
+                            while (e.MoveNext())
+                            {
+                                var o = ObjUtil.GetAsFromSource(tp, e.Current) as UnityEngine.Object;
+                                if (o != null) results.Add(o);
+                            }
+                            return results.ToArray();
+                        }
+                    }
+                case SearchBy.Name:
+                    {
+                        using (var tmp = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.GameObject>())
+                        using (var results = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.Object>())
+                        {
+                            GameObjectUtil.FindAllByName(query, tmp);
+                            var e = tmp.GetEnumerator();
+                            while (e.MoveNext())
+                            {
+                                var o = ObjUtil.GetAsFromSource(tp, e.Current) as UnityEngine.Object;
+                                if (o != null) results.Add(o);
+                            }
+                            return results.ToArray();
+                        }
+                    }
+                case SearchBy.Type:
+                    {
+                        using (var results = com.spacepuppy.Collections.TempCollection.GetList<UnityEngine.Object>())
+                        {
+                            foreach (var o in ObjUtil.FindObjectsOfType(TypeUtil.FindType(query)))
+                            {
+                                var o2 = ObjUtil.GetAsFromSource(tp, o) as UnityEngine.Object;
+                                if (o2 != null) results.Add(o2);
+                            }
+                            return results.ToArray();
+                        }
+                    }
                 default:
                     return null;
             }
@@ -132,7 +210,7 @@ namespace com.spacepuppy.Utils
                     {
                         using (var results = com.spacepuppy.Collections.TempCollection.GetList<T>())
                         {
-                            foreach(var o in UnityEngine.Object.FindObjectsOfType(TypeUtil.FindType(query)))
+                            foreach(var o in ObjUtil.FindObjectsOfType(TypeUtil.FindType(query)))
                             {
                                 var o2 = ObjUtil.GetAsFromSource<T>(o);
                                 if (o2 != null) results.Add(o2);
@@ -144,6 +222,132 @@ namespace com.spacepuppy.Utils
                     return null;
             }
         }
+
+
+        public static T FindObjectOfInterface<T>() where T : class
+        {
+            var tp = typeof(T);
+            var map = GetInterfaceComponentMap(tp);
+            if (map.Length == 0) return null;
+
+            foreach(var ctp in map)
+            {
+                var obj = UnityEngine.Object.FindObjectOfType(map[0]);
+                if (obj != null) return obj as T;
+            }
+
+            return null;
+        }
+
+        public static UnityEngine.Object FindObjectOfType(System.Type tp)
+        {
+            if (tp == null) return null;
+
+            if(tp.IsInterface)
+            {
+                var map = GetInterfaceComponentMap(tp);
+                if (map.Length == 0) return null;
+
+                foreach (var ctp in map)
+                {
+                    var obj = UnityEngine.Object.FindObjectOfType(map[0]);
+                    if (obj != null) return obj;
+                }
+            }
+            else
+            {
+                return UnityEngine.Object.FindObjectOfType(tp);
+            }
+
+            return null;
+        }
+
+
+        public static T[] FindObjectsOfInterface<T>() where T : class
+        {
+            var tp = typeof(T);
+            var map = GetInterfaceComponentMap(tp);
+            using (var lst = TempCollection.GetList<T>())
+            {
+                foreach(var ctp in map)
+                {
+                    foreach(var obj in UnityEngine.Object.FindObjectsOfType(ctp))
+                    {
+                        lst.Add(obj as T);
+                    }
+                }
+                return lst.ToArray();
+            }
+        }
+
+        public static int FindObjectsOfInterface<T>(ICollection<T> lst) where T : class
+        {
+            var tp = typeof(T);
+            var map = GetInterfaceComponentMap(tp);
+            int cnt = 0;
+            foreach (var ctp in map)
+            {
+                var arr = UnityEngine.Object.FindObjectsOfType(ctp);
+                cnt += arr.Length;
+                foreach (var obj in arr)
+                {
+                    lst.Add(obj as T);
+                }
+            }
+            return cnt;
+        }
+
+        public static UnityEngine.Object[] FindObjectsOfType(System.Type tp)
+        {
+            if (tp == null) return ArrayUtil.Empty<UnityEngine.Object>();
+
+            if (tp.IsInterface)
+            {
+                var map = GetInterfaceComponentMap(tp);
+                using (var lst = TempCollection.GetList<UnityEngine.Object>())
+                {
+                    foreach (var ctp in map)
+                    {
+                        lst.AddRange(UnityEngine.Object.FindObjectsOfType(ctp));
+                    }
+                    return lst.ToArray();
+                }
+            }
+            else
+            {
+                return UnityEngine.Object.FindObjectsOfType(tp);
+            }
+        }
+
+        public static int FindObjectsOfType(System.Type tp, ICollection<UnityEngine.Object> lst)
+        {
+            if (tp == null) return 0;
+
+            if (tp.IsInterface)
+            {
+                var map = GetInterfaceComponentMap(tp);
+                int cnt = 0;
+                foreach (var ctp in map)
+                {
+                    var arr = UnityEngine.Object.FindObjectsOfType(ctp);
+                    cnt += arr.Length;
+                    lst.AddRange(arr);
+                }
+                return cnt;
+            }
+            else
+            {
+                var arr = UnityEngine.Object.FindObjectsOfType(tp);
+                foreach (var obj in arr)
+                {
+                    lst.Add(obj);
+                }
+                return arr.Length;
+            }
+        }
+
+
+
 
         public static T GetAsFromSource<T>(object obj) where T : class
         {
@@ -201,7 +405,13 @@ namespace com.spacepuppy.Utils
         {
             if (UnityEngine.Application.isPlaying)
             {
-                UnityEngine.Object.Destroy(obj);
+                //UnityEngine.Object.Destroy(obj);
+                if (obj is UnityEngine.GameObject)
+                    (obj as UnityEngine.GameObject).Kill();
+                else if (obj is UnityEngine.Transform)
+                    (obj as UnityEngine.Transform).gameObject.Kill();
+                else
+                    UnityEngine.Object.Destroy(obj);
             }
             else
             {

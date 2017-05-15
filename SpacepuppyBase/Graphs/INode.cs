@@ -7,6 +7,8 @@ namespace com.spacepuppy.Graphs
 {
 
     /// <summary>
+    /// Contract for a graph node that can determine its own neighbours.
+    /// 
     /// When implementing this contract T should be typed as itself.
     /// </summary>
     /// <typeparam name="T"></typeparam>

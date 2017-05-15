@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
@@ -44,31 +45,33 @@ namespace com.spacepuppyeditor.Scenario
             //MEMBER VALUE TO SET TO
             if (selectedMember != null)
             {
-                var propType = com.spacepuppy.Dynamic.DynamicUtil.GetInputType(selectedMember);
+                var propType = DynamicUtil.GetInputType(selectedMember);
                 var emode = modeProp.GetEnumValue<i_SetValue.SetMode>();
                 if (emode == i_SetValue.SetMode.Toggle)
                 {
                     //EditorGUILayout.LabelField(EditorHelper.TempContent(valueProp.displayName), EditorHelper.TempContent(propType.Name));
                     var evtp = VariantReference.GetVariantType(propType);
                     var cache = SPGUI.Disable();
-                    EditorGUILayout.EnumPopup(EditorHelper.TempContent(valueProp.displayName), evtp);
+                    EditorGUILayout.EnumPopup(EditorHelper.TempContent("Value"), evtp);
                     cache.Reset();
                 }
                 else
                 {
-                    if (propType == typeof(object))
+                    if (DynamicUtil.TypeIsVariantSupported(propType))
                     {
                         //draw the default variant as the method accepts anything
                         _variantDrawer.RestrictVariantType = false;
                         _variantDrawer.ForcedObjectType = null;
-                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
+                        var label = EditorHelper.TempContent("Value", "The value to set to.");
+                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(true, _variantDrawer.GetPropertyHeight(valueProp, label)), valueProp, label);
                     }
                     else
                     {
                         _variantDrawer.RestrictVariantType = true;
                         _variantDrawer.TypeRestrictedTo = propType;
-                        _variantDrawer.ForcedObjectType = (TypeUtil.IsType(propType, typeof(Component))) ? propType : null;
-                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
+                        _variantDrawer.ForcedObjectType = (TypeUtil.IsType(propType, typeof(UnityEngine.Object))) ? propType : null;
+                        var label = EditorHelper.TempContent("Value", "The value to set to.");
+                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(true, _variantDrawer.GetPropertyHeight(valueProp, label)), valueProp, label);
                     }
                 }
 

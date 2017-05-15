@@ -57,6 +57,13 @@ namespace com.spacepuppy.Scenario
             _configured = !defaultTriggerArg;
         }
 
+        public TriggerableTargetObject(bool defaultTriggerArg, FindCommand find, ResolveByCommand resolve)
+        {
+            _configured = !defaultTriggerArg;
+            _find = find;
+            _resolveBy = resolve;
+        }
+
         #endregion
 
         #region Properties
@@ -170,11 +177,14 @@ namespace com.spacepuppy.Scenario
 
         private object ReduceTarget(object triggerArg)
         {
+            var targ = _target;
+            if (targ is IProxy) targ = (targ as IProxy).GetTarget(triggerArg) as UnityEngine.Object;
+
             switch (_find)
             {
                 case FindCommand.Direct:
                     {
-                        object obj = (_configured) ? _target : triggerArg;
+                        object obj = (_configured) ? targ : triggerArg;
                         if (obj == null) return null;
                         switch (_resolveBy)
                         {
@@ -191,7 +201,7 @@ namespace com.spacepuppy.Scenario
                     break;
                 case FindCommand.FindParent:
                     {
-                        Transform trans = GameObjectUtil.GetTransformFromSource((_configured) ? _target : triggerArg);
+                        Transform trans = GameObjectUtil.GetTransformFromSource((_configured) ? targ : triggerArg);
                         if (trans == null) return null;
                         switch (_resolveBy)
                         {
@@ -206,7 +216,8 @@ namespace com.spacepuppy.Scenario
                                     var tp = TypeUtil.FindType(_queryString);
                                     foreach (var p in GameObjectUtil.GetParents(trans))
                                     {
-                                        if (ObjUtil.GetAsFromSource(tp, p) != null) return p;
+                                        var o = ObjUtil.GetAsFromSource(tp, p);
+                                        if (o != null) return o;
                                     }
                                     return null;
                                 }
@@ -215,7 +226,7 @@ namespace com.spacepuppy.Scenario
                     break;
                 case FindCommand.FindInChildren:
                     {
-                        Transform trans = GameObjectUtil.GetTransformFromSource((_configured) ? _target : triggerArg);
+                        Transform trans = GameObjectUtil.GetTransformFromSource((_configured) ? targ : triggerArg);
                         if (trans == null) return null;
                         switch (_resolveBy)
                         {
@@ -249,7 +260,8 @@ namespace com.spacepuppy.Scenario
                                         GameObjectUtil.GetAllChildren(trans, lst);
                                         for(int i = 0; i < lst.Count; i++)
                                         {
-                                            if (ObjUtil.GetAsFromSource(tp, lst[i]) != null) return lst[i];
+                                            var o = ObjUtil.GetAsFromSource(tp, lst[i]);
+                                            if (o != null) return o;
                                         }
                                     }
                                 }
@@ -259,7 +271,7 @@ namespace com.spacepuppy.Scenario
                     break;
                 case FindCommand.FindInEntity:
                     {
-                        GameObject entity = GameObjectUtil.GetRootFromSource((_configured) ? _target : triggerArg);
+                        GameObject entity = GameObjectUtil.GetRootFromSource((_configured) ? targ : triggerArg);
                         if (entity == null) return null;
 
                         switch (_resolveBy)
@@ -275,7 +287,8 @@ namespace com.spacepuppy.Scenario
                                     var tp = TypeUtil.FindType(_queryString);
                                     foreach (var t in GameObjectUtil.GetAllChildrenAndSelf(entity))
                                     {
-                                        if (ObjUtil.GetAsFromSource(tp, t) != null) return t;
+                                        var o = ObjUtil.GetAsFromSource(tp, t);
+                                        if (o != null) return o;
                                     }
                                     return null;
                                 }
@@ -287,7 +300,7 @@ namespace com.spacepuppy.Scenario
                         switch (_resolveBy)
                         {
                             case ResolveByCommand.Nothing:
-                                return GameObjectUtil.GetGameObjectFromSource((_configured) ? _target : triggerArg);
+                                return GameObjectUtil.GetGameObjectFromSource((_configured) ? targ : triggerArg);
                             case ResolveByCommand.WithTag:
                                 return GameObjectUtil.FindWithMultiTag(_queryString);
                             case ResolveByCommand.WithName:
@@ -302,7 +315,7 @@ namespace com.spacepuppy.Scenario
                         switch(_resolveBy)
                         {
                             case ResolveByCommand.Nothing:
-                                return GameObjectUtil.GetGameObjectFromSource((_configured) ? _target : triggerArg);
+                                return GameObjectUtil.GetGameObjectFromSource((_configured) ? targ : triggerArg);
                             case ResolveByCommand.WithTag:
                                 {
                                     var e = SPEntity.Pool.GetEnumerator();
@@ -327,7 +340,8 @@ namespace com.spacepuppy.Scenario
                                     var tp = TypeUtil.FindType(_queryString);
                                     while (e.MoveNext())
                                     {
-                                        if (e.Current.HasComponent(tp)) return e.Current;
+                                        var o = e.Current.GetComponentInChildren(tp);
+                                        if (o != null) return o;
                                     }
                                 }
                                 break;
@@ -366,8 +380,8 @@ namespace com.spacepuppy.Scenario
                                 break;
                             case ResolveByCommand.WithType:
                                 {
-                                    if (ObjUtil.GetAsFromSource(TypeUtil.FindType(_queryString), GameObjectUtil.GetGameObjectFromSource(obj)) != null)
-                                        yield return obj;
+                                    var o = ObjUtil.GetAsFromSource(TypeUtil.FindType(_queryString), GameObjectUtil.GetGameObjectFromSource(obj));
+                                    if (o != null) yield return o;
                                 }
                                 break;
                         }
@@ -406,7 +420,8 @@ namespace com.spacepuppy.Scenario
                                     var tp = TypeUtil.FindType(_queryString);
                                     foreach (var p in GameObjectUtil.GetParents(trans))
                                     {
-                                        if (ObjUtil.GetAsFromSource(tp, p) != null) yield return p;
+                                        var o = ObjUtil.GetAsFromSource(tp, p);
+                                        if (o != null) yield return o;
                                     }
                                 }
                                 break;
@@ -457,7 +472,8 @@ namespace com.spacepuppy.Scenario
                                         GameObjectUtil.GetAllChildren(trans, lst);
                                         for (int i = 0; i < lst.Count; i++)
                                         {
-                                            if (ObjUtil.GetAsFromSource(tp, lst[i]) != null) yield return lst[i];
+                                            var o = ObjUtil.GetAsFromSource(tp, lst[i]);
+                                            if (o != null) yield return o;
                                         }
                                     }
                                 }
@@ -499,7 +515,8 @@ namespace com.spacepuppy.Scenario
                                         GameObjectUtil.GetAllChildrenAndSelf(entity.transform, lst);
                                         for(int i = 0; i < lst.Count; i++)
                                         {
-                                            if (ObjUtil.GetAsFromSource(tp, tp) != null) yield return tp;
+                                            var o = ObjUtil.GetAsFromSource(tp, lst[i]);
+                                            if (o != null) yield return o;
                                         }
                                     }
                                 }
@@ -578,7 +595,8 @@ namespace com.spacepuppy.Scenario
                                     var tp = TypeUtil.FindType(_queryString);
                                     while (e.MoveNext())
                                     {
-                                        if (e.Current.HasComponent(tp)) yield return e.Current;
+                                        var o = e.Current.GetComponent(tp);
+                                        if (o != null) yield return o;
                                     }
                                 }
                                 break;
@@ -586,6 +604,23 @@ namespace com.spacepuppy.Scenario
                     }
                     break;
             }
+        }
+
+
+        /// <summary>
+        /// Attempts to figure out the target type, only works for direct configurations, or WithType configurations.
+        /// This is used primarily by the inspector.
+        /// </summary>
+        /// <returns></returns>
+        public System.Type GetTargetType()
+        {
+            if(_configured && _target != null && _find == FindCommand.Direct && _resolveBy != ResolveByCommand.WithType)
+                return _target.GetType();
+
+            if (_resolveBy == ResolveByCommand.WithType)
+                return TypeUtil.FindType(_queryString);
+
+            return null;
         }
 
         #endregion
@@ -597,6 +632,8 @@ namespace com.spacepuppy.Scenario
 
             public System.Type TargetType;
             public bool SearchChildren;
+            public bool DefaultFromSelf;
+            public bool AlwaysExpanded;
 
             public ConfigAttribute()
             {

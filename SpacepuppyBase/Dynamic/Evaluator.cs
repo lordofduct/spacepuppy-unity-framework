@@ -1510,6 +1510,7 @@ namespace com.spacepuppy.Dynamic
             if (tp == typeof(UnityEngine.Vector3)) return true;
             if (tp == typeof(UnityEngine.Vector4)) return true;
             if (tp == typeof(UnityEngine.Quaternion)) return true;
+            if (tp == typeof(Variant)) return true;
 
             return false;
         }

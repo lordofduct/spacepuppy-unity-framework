@@ -181,7 +181,7 @@ namespace com.spacepuppy.Anim
 
 
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 
@@ -216,9 +216,9 @@ namespace com.spacepuppy.Anim
             return false;
         }
         
-        public bool Trigger(object arg, BlockingTriggerYieldInstruction instruction)
+        public bool Trigger(object sender, object arg, BlockingTriggerYieldInstruction instruction)
         {
-            if (!_useAsBlockingYieldInstruction || instruction == null) return this.Trigger(arg);
+            if (!_useAsBlockingYieldInstruction || instruction == null) return this.Trigger(sender, arg);
             if (!this.CanTrigger) return false;
 
             var targ = this.ResolveTargetAnimator(arg);

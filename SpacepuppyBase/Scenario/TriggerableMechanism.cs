@@ -29,10 +29,10 @@ namespace com.spacepuppy.Scenario
 
         public void Trigger()
         {
-            this.Trigger(null);
+            this.Trigger(null, null);
         }
 
-        public abstract bool Trigger(object arg);
+        public abstract bool Trigger(object sender, object arg);
 
         #endregion
 

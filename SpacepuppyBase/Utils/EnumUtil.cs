@@ -3,6 +3,11 @@ using System.Linq;
 
 namespace com.spacepuppy.Utils
 {
+
+    /// <summary>
+    /// Readable shorthand methods for enum operations. The underlying bitwise operators are substantially faster. 
+    /// These methods are intended for making code more readable, rather than more optimized. Use sparingly.
+    /// </summary>
     public static class EnumUtil
     {
 
@@ -56,6 +61,29 @@ namespace com.spacepuppy.Utils
         public static bool EnumValueIsDefined<T>(object value)
         {
             return EnumValueIsDefined(value, typeof(T));
+        }
+
+        public static T AddFlag<T>(this T e, T value) where T : struct, System.IConvertible
+        {
+            return (T)System.Enum.ToObject(typeof(T), System.Convert.ToInt64(e) | System.Convert.ToInt64(value));
+        }
+
+        public static T RedactFlag<T>(this T e, T value) where T : struct, System.IConvertible
+        {
+            var x = System.Convert.ToInt64(e);
+            var y = System.Convert.ToInt64(value);
+            return (T)System.Enum.ToObject(typeof(T), x & ~(x & y));
+        }
+
+        public static T SetFlag<T>(this T e, T flag, bool status) where T : struct, System.IConvertible
+        {
+            var x = System.Convert.ToInt64(e);
+            var y = System.Convert.ToInt64(flag);
+            if (status)
+                x |= y;
+            else
+                x &= ~(x & y);
+            return (T)System.Enum.ToObject(typeof(T), x);
         }
 
         public static bool HasFlag(this System.Enum e, System.Enum value)
@@ -159,6 +187,6 @@ namespace com.spacepuppy.Utils
         }
 
 #endif
-
+        
     }
 }

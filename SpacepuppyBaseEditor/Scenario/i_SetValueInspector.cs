@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
@@ -55,19 +56,21 @@ namespace com.spacepuppyeditor.Scenario
                 }
                 else
                 {
-                    if (com.spacepuppy.Dynamic.DynamicUtil.TypeIsVariantSupported(propType))
+                    if (DynamicUtil.TypeIsVariantSupported(propType))
                     {
                         //draw the default variant as the method accepts anything
                         _variantDrawer.RestrictVariantType = false;
                         _variantDrawer.ForcedObjectType = null;
-                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
+                        var label = EditorHelper.TempContent("Value", "The value to set to.");
+                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(true, _variantDrawer.GetPropertyHeight(valueProp, label)), valueProp, label);
                     }
                     else
                     {
                         _variantDrawer.RestrictVariantType = true;
                         _variantDrawer.TypeRestrictedTo = propType;
-                        _variantDrawer.ForcedObjectType = propType;
-                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(), valueProp, EditorHelper.TempContent("Value", "The value to set to."));
+                        _variantDrawer.ForcedObjectType = (TypeUtil.IsType(propType, typeof(UnityEngine.Object))) ? propType : null;
+                        var label = EditorHelper.TempContent("Value", "The value to set to.");
+                        _variantDrawer.OnGUI(EditorGUILayout.GetControlRect(true, _variantDrawer.GetPropertyHeight(valueProp, label)), valueProp, label);
                     }
                 }
 

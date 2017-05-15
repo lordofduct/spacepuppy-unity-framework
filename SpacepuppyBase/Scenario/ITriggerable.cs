@@ -6,14 +6,14 @@
 
         int Order { get; }
         bool CanTrigger { get; }
-        bool Trigger(object arg);
+        bool Trigger(object sender, object arg);
 
     }
 
     public interface IBlockingTriggerableMechanism : ITriggerableMechanism
     {
         
-        bool Trigger(object arg, BlockingTriggerYieldInstruction instruction);
+        bool Trigger(object sender, object arg, BlockingTriggerYieldInstruction instruction);
 
     }
     

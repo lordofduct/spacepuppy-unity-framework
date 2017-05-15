@@ -51,6 +51,15 @@ namespace com.spacepuppy.Tween
 
         #endregion
 
+        #region Properties
+
+        public int RunningTweenCount
+        {
+            get { return _runningTweens.Count; }
+        }
+
+        #endregion
+
         #region Methods
 
         internal static bool IsRunning(Tweener tween)
@@ -256,10 +265,10 @@ namespace com.spacepuppy.Tween
         {
             this.DoUpdate(UpdateSequence.Update);
 
-            if(Application.isEditor)
-            {
-                if (this.name.StartsWith(SPECIAL_NAME)) this.name = SPECIAL_NAME + " [ActiveTweens: " + _runningTweens.Count.ToString() + "]";
-            }
+            //if(Application.isEditor)
+            //{
+            //    if (this.name.StartsWith(SPECIAL_NAME)) this.name = SPECIAL_NAME + " [ActiveTweens: " + _runningTweens.Count.ToString() + "]";
+            //}
         }
 
         private void FixedUpdate()

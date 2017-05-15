@@ -22,4 +22,28 @@ namespace com.spacepuppy.Spawn
         #endregion
 
     }
+
+
+    public class SpawnerModifierComparer : IComparer<ISpawnerModifier>
+    {
+
+        private static SpawnerModifierComparer _default;
+        public static SpawnerModifierComparer Default
+        {
+            get
+            {
+                if (_default == null)
+                    _default = new SpawnerModifierComparer();
+                return _default;
+            }
+        }
+
+        public int Compare(ISpawnerModifier x, ISpawnerModifier y)
+        {
+            if (x == null) return y == null ? 0 : -1;
+            if (y == null) return x == null ? 0 : 1;
+            return x.order.CompareTo(y.order);
+        }
+    }
+
 }

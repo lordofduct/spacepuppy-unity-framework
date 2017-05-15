@@ -395,7 +395,14 @@ namespace com.spacepuppy.Spawn
             }
 
             //if we reached here, it's not managed by this pool... destroy
-            GameObject.Destroy(obj.gameObject);
+            if (UnityEngine.Application.isPlaying)
+            {
+                UnityEngine.Object.Destroy(obj.gameObject);
+            }
+            else
+            {
+                UnityEngine.Object.DestroyImmediate(obj.gameObject);
+            }
             return false;
         }
 

@@ -34,6 +34,20 @@ namespace com.spacepuppy.Spawn
             _onReleaseBusyStatusPool.OnNotification += this.OnReleaseBusyStatusHandler;
         }
 
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            SpawnPointHelper.RegisterModifierWithSpawners(this.gameObject, this);
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            SpawnPointHelper.UnRegisterModifierWithSpawners(this.gameObject, this);
+        }
+
         #endregion
 
         #region Properties

@@ -37,7 +37,7 @@ namespace com.spacepuppy.Scenario
 
         #region ITriggerableMechanism Interface
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 
@@ -48,34 +48,12 @@ namespace com.spacepuppy.Scenario
             {
                 this.Invoke(() =>
                 {
-                    if (targ is GameObject)
-                    {
-                        (targ as GameObject).Kill();
-                    }
-                    else if (targ is Transform)
-                    {
-                        (targ as Transform).gameObject.Kill();
-                    }
-                    else
-                    {
-                        Object.Destroy(targ);
-                    }
+                    ObjUtil.SmartDestroy(targ);
                 }, _delay);
             }
             else
             {
-                if (targ is GameObject)
-                {
-                    (targ as GameObject).Kill();
-                }
-                else if (targ is Transform)
-                {
-                    (targ as Transform).gameObject.Kill();
-                }
-                else
-                {
-                    Object.Destroy(targ);
-                }
+                ObjUtil.SmartDestroy(targ);
             }
 
             return true;

@@ -20,7 +20,7 @@ namespace com.spacepuppy.Scenario
 
         #region Methods
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
             if (string.IsNullOrEmpty(_sceneName)) return false;

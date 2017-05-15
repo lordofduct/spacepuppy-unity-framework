@@ -10,16 +10,30 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private VariantReference _message = new VariantReference(string.Empty);
 
+        [SerializeField]
+        private bool _logStackTrace;
+
         #endregion
 
 
         #region TriggerableMechanism Interface
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 
-            Debug.Log(_message.StringValue, this);
+            if(_logStackTrace)
+            {
+                var str = _message.StringValue;
+                if(string.IsNullOrEmpty(str))
+                    Debug.Log(UnityEngine.StackTraceUtility.ExtractStackTrace(), this);
+                else
+                    Debug.Log(str + "\n" + UnityEngine.StackTraceUtility.ExtractStackTrace(), this);
+            }
+            else
+            {
+                Debug.Log(_message.StringValue, this);
+            }
             return true;
         }
 

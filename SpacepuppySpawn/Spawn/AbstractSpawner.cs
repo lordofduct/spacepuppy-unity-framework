@@ -79,10 +79,6 @@ namespace com.spacepuppy.Spawn
             set { _spawnAsChild = value; }
         }
 
-        public int ActiveCount { get { return _spawnMechanism.ActiveCount; } }
-
-        public int TotalCount { get { return _spawnMechanism.TotalCount; } }
-
         #endregion
 
         #region Methods
@@ -95,16 +91,6 @@ namespace com.spacepuppy.Spawn
             var prefab = this.SelectPrefab(prefabs);
             if (prefab == null) return null;
             return this.Spawn(prefab);
-        }
-
-        protected GameObject SelectPrefab(GameObject[] prefabs)
-        {
-            if (!this.enabled) return null;
-
-            int index = SpawnPointHelper.SelectFromMultiple(this, prefabs.Length);
-            if (index < 0 || index >= prefabs.Length) return null;
-
-            return prefabs[index];
         }
 
         protected GameObject Spawn(GameObject prefab, System.Action<GameObject> initializeProperties = null)
@@ -123,9 +109,14 @@ namespace com.spacepuppy.Spawn
             return spawnedObject;
         }
 
-        void ISpawner.Spawn()
+        protected GameObject SelectPrefab(GameObject[] prefabs)
         {
-            this.Spawn();
+            if (!this.enabled) return null;
+
+            int index = SpawnPointHelper.SelectFromMultiple(this, prefabs.Length);
+            if (index < 0 || index >= prefabs.Length) return null;
+
+            return prefabs[index];
         }
 
         public GameObject[] GetActiveGameObjects()
@@ -148,6 +139,21 @@ namespace com.spacepuppy.Spawn
 
         #endregion
 
+        #region ISpawner Interface
+
+        public SelfTrackingSpawnerMechanism Mechanism { get { return _spawnMechanism; } }
+
+        public int ActiveCount { get { return _spawnMechanism.ActiveCount; } }
+
+        public int TotalCount { get { return _spawnMechanism.TotalCount; } }
+
+        void ISpawner.Spawn()
+        {
+            this.Spawn();
+        }
+
+        #endregion
+
         #region ITriggerableMechanism Interface
 
         public int Order
@@ -162,10 +168,10 @@ namespace com.spacepuppy.Spawn
         
         public void Trigger()
         {
-            this.Trigger(null);
+            this.Trigger(null, null);
         }
 
-        public abstract bool Trigger(object arg);
+        public abstract bool Trigger(object sender, object arg);
 
         #endregion
 

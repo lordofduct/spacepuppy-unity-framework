@@ -147,12 +147,34 @@ namespace com.spacepuppy.Utils
         {
             if (!typeof(T).IsEnum) throw new System.ArgumentException("T must be an enumerated type");
 
-            object obj = val;
-            if(System.Enum.IsDefined(typeof(T), obj))
+            //object obj = val;
+            //if(System.Enum.IsDefined(typeof(T), obj))
+            //{
+            //    return (T)obj;
+            //}
+            //else
+            //{
+            //    return defaultValue;
+            //}
+            try
             {
-                return (T)obj;
+                return (T)System.Enum.ToObject(typeof(T), val);
             }
-            else
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        public static T ToEnum<T>(long val, T defaultValue) where T : struct, System.IConvertible
+        {
+            if (!typeof(T).IsEnum) throw new System.ArgumentException("T must be an enumerated type");
+
+            try
+            {
+                return (T)System.Enum.ToObject(typeof(T), val);
+            }
+            catch
             {
                 return defaultValue;
             }

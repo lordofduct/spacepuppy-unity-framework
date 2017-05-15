@@ -8,7 +8,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenario
 {
 
-    [System.Obsolete("Use i_SetValueOnEntity Instead.")]
+    [System.Obsolete("Use i_SetValueOnTarget Instead.")]
     public class i_SetValueOnTriggerArg : AutoTriggerableMechanism
     {
 
@@ -40,7 +40,7 @@ namespace com.spacepuppy.Scenario
 
         #region TriggerableMechanism Interface
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 

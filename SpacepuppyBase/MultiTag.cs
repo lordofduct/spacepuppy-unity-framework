@@ -5,13 +5,14 @@ using System.Linq;
 using com.spacepuppy.Collections;
 using com.spacepuppy.Project;
 using com.spacepuppy.Utils;
+using System.Collections;
 
 namespace com.spacepuppy
 {
 
     [AddComponentMenu("SpacePuppy/Multi Tag")]
     [DisallowMultipleComponent()]
-    public class MultiTag : SPComponent
+    public class MultiTag : SPComponent, IEnumerable<string>
     {
 
         #region Multiton Interface
@@ -29,11 +30,21 @@ namespace com.spacepuppy
             return (from c in MultiTag.Pool where c.HasTag(tag) select c).ToArray();
         }
 
+        internal static void FindAll(string tag, ICollection<GameObject> coll)
+        {
+            var e = _pool.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (e.Current.HasTag(tag)) coll.Add(e.Current.gameObject);
+            }
+        }
+
         internal static MultiTag Find(string tag)
         {
-            foreach(var c in MultiTag.Pool)
+            var e = _pool.GetEnumerator();
+            while(e.MoveNext())
             {
-                if (c.HasTag(tag)) return c;
+                if (e.Current.HasTag(tag)) return e.Current;
             }
             return null;
         }
@@ -77,6 +88,11 @@ namespace com.spacepuppy
         #region Properties
 
         public int Count { get { return (_tags != null) ? _tags.Length : 0; } }
+
+        public string this[int index]
+        {
+            get { return (_tags != null && index >= 0 && index < _tags.Length) ? _tags[index] : null; }
+        }
 
         #endregion
 
@@ -159,6 +175,24 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region IEnumerable Interface
+
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<string> IEnumerable<string>.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        #endregion
 
         #region Static Methods
 
@@ -184,6 +218,64 @@ namespace com.spacepuppy
         public static bool IsEmptyTag(string stag)
         {
             return string.IsNullOrEmpty(stag) || stag == SPConstants.TAG_UNTAGGED;
+        }
+
+        #endregion
+
+        #region Special Types
+
+        public struct Enumerator : IEnumerator<string>
+        {
+
+            private MultiTag _multi;
+            private int _index;
+            private string _current;
+
+            public Enumerator(MultiTag multi)
+            {
+                _multi = multi;
+                _index = 0;
+                _current = null;
+            }
+
+            public string Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
+
+            public bool MoveNext()
+            {
+                if (_multi == null || _multi._tags == null) return false;
+                if (_index >= _multi._tags.Length) return false;
+
+                _current = _multi._tags[_index];
+                _index++;
+                return true;
+            }
+
+            public void Dispose()
+            {
+                _multi = null;
+                _index = 0;
+                _current = null;
+            }
+
+            void System.Collections.IEnumerator.Reset()
+            {
+                _index = 0;
+            }
+
         }
 
         #endregion
@@ -304,13 +396,16 @@ namespace com.spacepuppy
             }
             else
             {
-                if (MultiTag.IsEmptyTag(go.tag))
+                //if (MultiTag.IsEmptyTag(go.tag))
+                if(go.CompareTag(SPConstants.TAG_UNTAGGED))
                 {
                     go.tag = stag;
                 }
-                else
+                else if(!go.CompareTag(stag))
                 {
+                    var oldtag = go.tag;
                     multitag = go.AddComponent<MultiTag>();
+                    multitag.AddTag(oldtag);
                     multitag.AddTag(stag);
                 }
             }
@@ -337,7 +432,7 @@ namespace com.spacepuppy
                 multitag.RemoveTag(stag);
                 if (bDestroyMultiTagComponentOnEmpty && multitag.Count == 0)
                 {
-                    Object.Destroy(multitag);
+                    ObjUtil.SmartDestroy(multitag);
                     go.tag = SPConstants.TAG_UNTAGGED;
                 }
             }
@@ -413,7 +508,7 @@ namespace com.spacepuppy
             {
                 if (bDestroyMultiTagComponent)
                 {
-                    Object.Destroy(multitag);
+                    ObjUtil.SmartDestroy(multitag);
                     go.tag = SPConstants.TAG_UNTAGGED;
                 }
                 else
@@ -432,6 +527,157 @@ namespace com.spacepuppy
             if (c == null) throw new System.ArgumentNullException("c");
 
             ClearTags(c.gameObject, bDestroyMultiTagComponent);
+        }
+
+        /**
+         * GetTags
+         */
+        
+        public static IEnumerable<string> GetTags(this GameObject go)
+        {
+            if (go == null) throw new System.ArgumentNullException("go");
+
+            MultiTag multitag;
+            if (MultiTag.TryGetMultiTag(go, out multitag))
+            {
+                return multitag.GetTags();
+            }
+            else
+            {
+                return new string[] { go.tag };
+            }
+        }
+
+        public static IEnumerable<string> GetTags(this Component c)
+        {
+            if (c == null) throw new System.ArgumentNullException("c");
+
+            return GetTags(c.gameObject);
+        }
+
+        /**
+         * AddTags
+         */
+
+        public static void AddTags(this GameObject go, IEnumerable<string> tags)
+        {
+            if (go == null) throw new System.ArgumentNullException("go");
+            if (tags == null) throw new System.ArgumentNullException("tags");
+            
+            MultiTag multitag;
+            if (MultiTag.TryGetMultiTag(go, out multitag))
+            {
+                foreach (var t in tags)
+                {
+                    multitag.AddTag(t);
+                }
+            }
+            else
+            {
+                var oldtag = go.tag;
+                multitag = go.AddComponent<MultiTag>();
+                multitag.AddTag(oldtag);
+                foreach (var t in tags)
+                {
+                    multitag.AddTag(t);
+                }
+            }
+        }
+
+        public static void AddTags(this GameObject go, params string[] tags)
+        {
+            if (go == null) throw new System.ArgumentNullException("go");
+            if (tags == null || tags.Length == 0) return;
+
+            MultiTag multitag;
+            if (MultiTag.TryGetMultiTag(go, out multitag))
+            {
+                foreach(var t in tags)
+                {
+                    multitag.AddTag(t);
+                }
+            }
+            else
+            {
+                if (tags.Length > 1 || !go.CompareTag(SPConstants.TAG_UNTAGGED))
+                {
+                    var oldtag = go.tag;
+                    multitag = go.AddComponent<MultiTag>();
+                    multitag.AddTag(oldtag);
+                    foreach (var t in tags)
+                    {
+                        multitag.AddTag(t);
+                    }
+                }
+                else
+                {
+                    go.tag = tags[0];
+                }
+            }
+        }
+
+        public static void AddTags(this GameObject go, GameObject source)
+        {
+            if (go == null) throw new System.ArgumentNullException("go");
+            if (source == null) throw new System.ArgumentNullException("source");
+
+            MultiTag multitag;
+            if (MultiTag.TryGetMultiTag(go, out multitag))
+            {
+                MultiTag otherMultiTag;
+                if (MultiTag.TryGetMultiTag(source, out otherMultiTag))
+                {
+                    var e = otherMultiTag.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        multitag.AddTag(e.Current);
+                    }
+                }
+                else
+                {
+                    multitag.AddTag(source.tag);
+                }
+            }
+            else
+            {
+                MultiTag otherMultiTag;
+                if (MultiTag.TryGetMultiTag(source, out otherMultiTag))
+                {
+                    if(otherMultiTag.Count > 1 || !go.CompareTag(SPConstants.TAG_UNTAGGED))
+                    {
+                        var oldtag = go.tag;
+                        multitag = go.AddComponent<MultiTag>();
+                        multitag.AddTag(oldtag);
+                        var e = otherMultiTag.GetEnumerator();
+                        while (e.MoveNext())
+                        {
+                            multitag.AddTag(e.Current);
+                        }
+                    }
+                    else
+                    {
+                        go.tag = otherMultiTag[0];
+                    }
+                }
+                else if(!source.CompareTag(SPConstants.TAG_UNTAGGED))
+                {
+                    if (go.CompareTag(SPConstants.TAG_UNTAGGED))
+                    {
+                        go.tag = source.tag;
+                    }
+                    else
+                    {
+                        go.AddTag(source.tag);
+                    }
+                }
+            }
+        }
+
+        public static void AddTags(this Component c, GameObject source)
+        {
+            if (c == null) throw new System.ArgumentNullException("c");
+
+            AddTags(c.gameObject, source);
         }
 
     }

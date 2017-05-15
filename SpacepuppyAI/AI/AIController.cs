@@ -59,13 +59,16 @@ namespace com.spacepuppy.AI
         {
             base.Start();
 
-            var state = _defaultState as IAIState;
-            if (state.IsNullOrDestroyed() || !_stateMachine.Contains(state))
+            if (_stateMachine.Current == null)
             {
-                state = _stateMachine.FirstOrDefault();
-                _defaultState = state as Component;
+                var state = _defaultState as IAIState;
+                if (state.IsNullOrDestroyed() || !_stateMachine.Contains(state))
+                {
+                    state = _stateMachine.FirstOrDefault();
+                    _defaultState = state as Component;
+                }
+                _stateMachine.ChangeState(state);
             }
-            _stateMachine.ChangeState(state);
         }
 
         #endregion

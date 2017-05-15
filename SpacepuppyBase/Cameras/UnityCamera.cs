@@ -17,7 +17,7 @@ namespace com.spacepuppy.Cameras
         [SerializeField]
         [DefaultFromSelf(UseEntity = true)]
         private Camera _camera;
-
+        
         #endregion
 
         #region CONSTRUCTOR

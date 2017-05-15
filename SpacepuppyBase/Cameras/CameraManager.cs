@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
-using System.Collections;
 
 namespace com.spacepuppy.Cameras
 {
@@ -30,6 +29,15 @@ namespace com.spacepuppy.Cameras
             get
             {
                 return Instance;
+            }
+        }
+
+        public static IEnumerable<ICamera> CameraGroup(string tag)
+        {
+            var e = Instance.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (e.Current.gameObject.HasTag(tag)) yield return e.Current;
             }
         }
 
@@ -155,6 +163,9 @@ namespace com.spacepuppy.Cameras
 
         #endregion
 
+
+
+
         #region Instance Interface
 
         #region Fields
@@ -262,7 +273,7 @@ namespace com.spacepuppy.Cameras
             return _cameras.GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return _cameras.GetEnumerator();
         }

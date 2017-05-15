@@ -33,12 +33,14 @@ namespace com.spacepuppy.Spawn
             return RandomUtil.Standard.Range(optionCount);
         }
 
+        /*
         public static void GetSpawnModifiers(ISpawner spawnPoint, List<ISpawnerModifier> modifiers)
         {
             if (spawnPoint == null) throw new System.ArgumentNullException("spawnPoint");
 
             spawnPoint.component.GetComponents<ISpawnerModifier>(modifiers);
-            modifiers.Sort(SpawnPointHelper.ModiferSortMethod);
+            if(modifiers.Count > 0)
+                modifiers.Sort(SpawnPointHelper.ModiferSortMethod);
         }
 
         public static bool SignalOnBeforeSpawnNotification(ISpawner spawnPoint, GameObject prefab, IList<ISpawnerModifier> modifiers)
@@ -71,14 +73,32 @@ namespace com.spacepuppy.Spawn
             Notification.PostNotification<SpawnPointTriggeredNotification>(spawnPoint, spawnNotif, false);
             Notification.Release(spawnNotif);
         }
+        */
 
+        public static void RegisterModifierWithSpawners(GameObject target, ISpawnerModifier modifier)
+        {
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<ISpawner>())
+            {
+                target.GetComponents<ISpawner>(lst);
+                var e = lst.GetEnumerator();
+                while (e.MoveNext())
+                    e.Current.Mechanism.RegisterModifier(modifier);
+            }
+        }
 
-
-
-
+        public static void UnRegisterModifierWithSpawners(GameObject target, ISpawnerModifier modifier)
+        {
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<ISpawner>())
+            {
+                target.GetComponents<ISpawner>(lst);
+                var e = lst.GetEnumerator();
+                while (e.MoveNext())
+                    e.Current.Mechanism.UnRegisterModifier(modifier);
+            }
+        }
 
         #region Internal
-        
+
         private static System.Comparison<ISpawnerModifier> _modifierSort;
         public static System.Comparison<ISpawnerModifier> ModiferSortMethod
         {

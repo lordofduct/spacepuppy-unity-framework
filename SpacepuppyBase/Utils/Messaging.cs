@@ -6,8 +6,8 @@ namespace com.spacepuppy.Utils
 {
     public static class Messaging
     {
-
-        public static void Execute<T>(GameObject go, System.Action<T> functor)
+        
+        public static void Execute<T>(GameObject go, System.Action<T> functor) where T : class
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
 
@@ -24,7 +24,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static void Execute<TInterface, TArg>(GameObject go, TArg arg, System.Action<TInterface, TArg> functor)
+        public static void Execute<TInterface, TArg>(GameObject go, TArg arg, System.Action<TInterface, TArg> functor) where TInterface : class
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
 
@@ -41,7 +41,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static void Broadcast<T>(GameObject go, System.Action<T> functor, bool includeInactive = false)
+        public static void Broadcast<T>(GameObject go, System.Action<T> functor, bool includeInactive = false) where T : class
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
 
@@ -58,7 +58,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static void Broadcast<TInterface, TArg>(GameObject go, TArg arg, System.Action<TInterface, TArg> functor, bool includeInactive = false)
+        public static void Broadcast<TInterface, TArg>(GameObject go, TArg arg, System.Action<TInterface, TArg> functor, bool includeInactive = false) where TInterface : class
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
 
@@ -75,7 +75,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static void ExecuteUpwards<T>(GameObject go, System.Action<T> functor)
+        public static void ExecuteUpwards<T>(GameObject go, System.Action<T> functor) where T : class
         {
             var p = go.transform;
             while(p != null)
@@ -85,7 +85,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static void ExecuteUpwards<TInterface, TArg>(GameObject go, TArg arg, System.Action<TInterface, TArg> functor)
+        public static void ExecuteUpwards<TInterface, TArg>(GameObject go, TArg arg, System.Action<TInterface, TArg> functor) where TInterface : class
         {
             var p = go.transform;
             while (p != null)

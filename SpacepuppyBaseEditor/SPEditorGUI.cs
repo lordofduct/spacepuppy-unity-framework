@@ -986,11 +986,61 @@ namespace com.spacepuppyeditor
         /// <summary>
         /// Reflects the available properties and shows them in a dropdown
         /// </summary>
-        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
         {
+            if(targObj is IDynamic)
+            {
+                var mask = allowSetterMethods ? System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Method : System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property;
+                var members = DynamicUtil.GetEasilySerializedMembers(targObj, mask, access).ToArray();
+                var entries = new GUIContent[members.Length + 1];
+
+                int index = -1;
+                for (int i = 0; i < members.Length; i++)
+                {
+                    var m = members[i];
+                    if ((DynamicUtil.GetMemberAccessLevel(m) & DynamicMemberAccess.Write) != 0)
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj)));
+                    else
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj)));
+
+                    if (index < 0 && m.Name == selectedMemberName)
+                    {
+                        index = i;
+                    }
+                }
+
+                entries[entries.Length - 1] = EditorHelper.TempContent("...Custom");
+                if (index < 0)
+                    index = entries.Length - 1;
+
+                if(index < members.Length)
+                {
+                    index = EditorGUI.Popup(position, label, index, entries);
+                    selectedMember = (index >= 0 && index < members.Length) ? members[index] : null;
+                    return (selectedMember != null) ? selectedMember.Name : null;
+                }
+                else
+                {
+                    position = EditorGUI.PrefixLabel(position, label);
+                    var r0 = new Rect(position.xMin, position.yMin, position.width / 2f, position.height);
+                    var r1 = new Rect(r0.xMax, r0.yMin, position.width - r0.width, r0.height);
+                    index = EditorGUI.Popup(r0, index, entries);
+                    if (index < members.Length)
+                    {
+                        selectedMember = (index >= 0) ? members[index] : null;
+                        return (selectedMember != null) ? selectedMember.Name : null;
+                    }
+                    else
+                    {
+                        selectedMemberName = EditorGUI.TextField(r1, selectedMemberName);
+                        selectedMember = new DynamicPropertyInfo(selectedMemberName, targObj.GetType(), typeof(Variant));
+                        return selectedMemberName;
+                    }
+                }
+            }
             if (targObj != null)
             {
-                var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, access).ToArray();
+                var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Method, access).ToArray();
                 var entries = new GUIContent[members.Length];
 
                 int index = -1;
@@ -1020,21 +1070,21 @@ namespace com.spacepuppyeditor
             }
         }
         
-        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access)
+        public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access, bool allowSetterMethods = false)
         {
             System.Reflection.MemberInfo selectedMember;
-            return ReflectedPropertyField(position, label, targObj, selectedMemberName, access, out selectedMember);
+            return ReflectedPropertyField(position, label, targObj, selectedMemberName, access, out selectedMember, allowSetterMethods);
         }
 
-        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
         {
-            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, access, out selectedMember);
+            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, access, out selectedMember, allowSetterMethods);
         }
 
-        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, DynamicMemberAccess access)
+        public static string ReflectedPropertyField(Rect position, object targObj, string selectedMemberName, DynamicMemberAccess access, bool allowSetterMethods = false)
         {
             System.Reflection.MemberInfo selectedMember;
-            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, access, out selectedMember);
+            return ReflectedPropertyField(position, GUIContent.none, targObj, selectedMemberName, access, out selectedMember, allowSetterMethods);
         }
 
 
@@ -1042,11 +1092,12 @@ namespace com.spacepuppyeditor
         /// <summary>
         /// Reflects the available properties and shows them in a dropdown
         /// </summary>
-        public static string ReflectedPropertyField(Rect position, GUIContent label, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(Rect position, GUIContent label, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
         {
             if (targType != null)
             {
-                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembersFromType(targType, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property).ToArray();
+                var mask = allowSetterMethods ? System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Method : System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property;
+                var members = com.spacepuppy.Dynamic.DynamicUtil.GetEasilySerializedMembersFromType(targType, mask).ToArray();
 
                 int index = -1;
                 for (int i = 0; i < members.Length; i++)
@@ -1070,21 +1121,21 @@ namespace com.spacepuppyeditor
             }
         }
 
-        public static string ReflectedPropertyField(Rect position, GUIContent label, System.Type targType, string selectedMemberName)
+        public static string ReflectedPropertyField(Rect position, GUIContent label, System.Type targType, string selectedMemberName, bool allowSetterMethods = false)
         {
             System.Reflection.MemberInfo selectedMember;
-            return ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember);
+            return ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember, allowSetterMethods);
         }
 
-        public static string ReflectedPropertyField(Rect position, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember)
+        public static string ReflectedPropertyField(Rect position, System.Type targType, string selectedMemberName, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
         {
-            return ReflectedPropertyField(position, GUIContent.none, targType, selectedMemberName, out selectedMember);
+            return ReflectedPropertyField(position, GUIContent.none, targType, selectedMemberName, out selectedMember, allowSetterMethods);
         }
 
-        public static string ReflectedPropertyField(Rect position, System.Type targType, string selectedMemberName)
+        public static string ReflectedPropertyField(Rect position, System.Type targType, string selectedMemberName, bool allowSetterMethods = false)
         {
             System.Reflection.MemberInfo selectedMember;
-            return ReflectedPropertyField(position, GUIContent.none, targType, selectedMemberName, out selectedMember);
+            return ReflectedPropertyField(position, GUIContent.none, targType, selectedMemberName, out selectedMember, allowSetterMethods);
         }
 
         #endregion

@@ -7,7 +7,8 @@
         TriggerSelectedTarget = 1,
         SendMessage = 2,
         CallMethodOnSelectedTarget = 3,
-        EnableTarget = 4
+        EnableTarget = 4,
+        DestroyTarget = 5
     }
 
 }

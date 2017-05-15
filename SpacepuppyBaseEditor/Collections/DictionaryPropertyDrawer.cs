@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Collections;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Collections
 {
@@ -67,8 +68,7 @@ namespace com.spacepuppyeditor.Collections
 
                 if(GUI.Button(pRect, "+"))
                 {
-                    keysProp.arraySize++;
-                    SetPropertyDefault(keysProp.GetArrayElementAtIndex(keysProp.arraySize - 1));
+                    AddKeyElement(keysProp);
                     valuesProp.arraySize = keysProp.arraySize;
                 }
                 if(GUI.Button(mRect, "-"))
@@ -106,6 +106,234 @@ namespace com.spacepuppyeditor.Collections
             var h = EditorGUIUtility.singleLineHeight + 1f;
             position = new Rect(position.xMin, position.yMin + h, position.width, position.height = h);
             return r;
+        }
+
+
+        private static void AddKeyElement(SerializedProperty keysProp)
+        {
+            keysProp.arraySize++;
+            var prop = keysProp.GetArrayElementAtIndex(keysProp.arraySize - 1);
+
+            switch (prop.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    {
+                        int value = 0;
+                        for(int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if(keysProp.GetArrayElementAtIndex(i).intValue == value)
+                            {
+                                value++;
+                                if (value == int.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.intValue = value;
+                    }
+                    break;
+                case SerializedPropertyType.Boolean:
+                    {
+                        bool value = false;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if(keysProp.GetArrayElementAtIndex(i).boolValue== value)
+                            {
+                                value = true;
+                                break;
+                            }
+                        }
+                        prop.boolValue = value;
+                    }
+                    break;
+                case SerializedPropertyType.Float:
+                    {
+                        float value = 0f;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).intValue == value)
+                            {
+                                value++;
+                                if (value == int.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.floatValue = value;
+                    }
+                    break;
+                case SerializedPropertyType.String:
+                    {
+                        prop.stringValue = string.Empty;
+                    }
+                    break;
+                case SerializedPropertyType.Color:
+                    {
+                        Color value = Color.black;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).colorValue == value)
+                            {
+                                value = ConvertUtil.ToColor(ConvertUtil.ToInt(value) + 1);
+                                if (value == Color.white)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.colorValue = value;
+                    }
+                    break;
+                case SerializedPropertyType.ObjectReference:
+                    {
+                        prop.objectReferenceValue = null;
+                    }
+                    break;
+                case SerializedPropertyType.LayerMask:
+                    {
+                        int value = -1;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).intValue == value)
+                            {
+                                value++;
+                                if (value == int.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.intValue = value;
+                    }
+                    break;
+                case SerializedPropertyType.Enum:
+                    {
+                        int value = 0;
+                        if (keysProp.arraySize > 1)
+                        {
+                            var first = keysProp.GetArrayElementAtIndex(0);
+                            int max = first.enumNames.Length - 1;
+
+                            for (int i = 0; i < keysProp.arraySize - 1; i++)
+                            {
+                                if (keysProp.GetArrayElementAtIndex(i).enumValueIndex == value)
+                                {
+                                    value++;
+                                    if (value >= max)
+                                        break;
+                                    else
+                                        i = -1;
+                                }
+                            }
+                        }
+                        prop.enumValueIndex = value;
+                    }
+                    break;
+                case SerializedPropertyType.Vector2:
+                    {
+                        Vector2 value = Vector2.zero;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).vector2Value == value)
+                            {
+                                value.x++;
+                                if (value.x == int.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.vector2Value = value;
+                    }
+                    break;
+                case SerializedPropertyType.Vector3:
+                    {
+                        Vector3 value = Vector3.zero;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).vector3Value == value)
+                            {
+                                value.x++;
+                                if (value.x == int.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.vector3Value = value;
+                    }
+                    break;
+                case SerializedPropertyType.Vector4:
+                    {
+                        Vector4 value = Vector4.zero;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).vector4Value == value)
+                            {
+                                value.x++;
+                                if (value.x == int.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.vector4Value = value;
+                    }
+                    break;
+                case SerializedPropertyType.Rect:
+                    {
+                        prop.rectValue = Rect.zero;
+                    }
+                    break;
+                case SerializedPropertyType.ArraySize:
+                    {
+                        int value = 0;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).arraySize == value)
+                            {
+                                value++;
+                                if (value == int.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.arraySize = value;
+                    }
+                    break;
+                case SerializedPropertyType.Character:
+                    {
+                        int value = 0;
+                        for (int i = 0; i < keysProp.arraySize - 1; i++)
+                        {
+                            if (keysProp.GetArrayElementAtIndex(i).intValue == value)
+                            {
+                                value++;
+                                if (value == char.MaxValue)
+                                    break;
+                                else
+                                    i = -1;
+                            }
+                        }
+                        prop.intValue = value;
+                    }
+                    break;
+                case SerializedPropertyType.AnimationCurve:
+                    {
+                        prop.animationCurveValue = null;
+                    }
+                    break;
+                case SerializedPropertyType.Bounds:
+                    {
+                        prop.boundsValue = default(Bounds);
+                    }
+                    break;
+                default:
+                    throw new System.InvalidOperationException("Can not handle Type as key.");
+            }
         }
 
         private static void SetPropertyDefault(SerializedProperty prop)

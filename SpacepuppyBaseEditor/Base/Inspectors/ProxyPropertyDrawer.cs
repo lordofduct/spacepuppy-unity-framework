@@ -12,8 +12,8 @@ using com.spacepuppyeditor.Components;
 namespace com.spacepuppyeditor
 {
 
-    [CustomPropertyDrawer(typeof(ProxyTarget))]
-    public class ProxyTargetPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(Proxy))]
+    public class ProxyPropertyDrawer : PropertyDrawer
     {
         
         private const string PROP_TARGET = "_target";
@@ -31,7 +31,7 @@ namespace com.spacepuppyeditor
 
         #region Fields
 
-        private ProxyTarget.ConfigAttribute _configAttrib;
+        private Proxy.ConfigAttribute _configAttrib;
 
         #endregion
 
@@ -39,7 +39,7 @@ namespace com.spacepuppyeditor
 
         private void Init(SerializedProperty property)
         {
-            _configAttrib = this.fieldInfo.GetCustomAttributes(typeof(ProxyTarget.ConfigAttribute), false).FirstOrDefault() as ProxyTarget.ConfigAttribute;
+            _configAttrib = this.fieldInfo.GetCustomAttributes(typeof(Proxy.ConfigAttribute), false).FirstOrDefault() as Proxy.ConfigAttribute;
         }
 
 
@@ -69,8 +69,8 @@ namespace com.spacepuppyeditor
 
             var w0 = Mathf.Min(rect.width * 0.3f, 80f);
             var w1 = rect.width - w0;
-            var r0 = new Rect(rect.xMin, rect.yMin, w0, rect.height);
-            var r1 = new Rect(r0.xMax, rect.yMin, w1, rect.height);
+            var r0 = new Rect(rect.xMin, rect.yMin, w0, EditorGUIUtility.singleLineHeight);
+            var r1 = new Rect(r0.xMax, rect.yMin, w1, EditorGUIUtility.singleLineHeight);
             
             var searchProp = property.FindPropertyRelative(PROP_SEARCHBY);
             var queryProp = property.FindPropertyRelative(PROP_QUERY);
@@ -86,7 +86,8 @@ namespace com.spacepuppyeditor
                 case SearchByAlt.Direct:
                     {
                         var tp = (_configAttrib != null) ? _configAttrib.TargetType : typeof(UnityEngine.Object);
-                        targetProp.objectReferenceValue = EditorGUI.ObjectField(r1, targetProp.objectReferenceValue, tp, true);
+                        //targetProp.objectReferenceValue = EditorGUI.ObjectField(r1, targetProp.objectReferenceValue, tp, true);
+                        SPEditorGUI.PropertyField(r1, targetProp, GUIContent.none);
                     }
                     break;
                 case SearchByAlt.Tag:

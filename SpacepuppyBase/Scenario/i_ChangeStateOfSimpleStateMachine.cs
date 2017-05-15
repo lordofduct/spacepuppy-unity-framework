@@ -13,7 +13,7 @@ namespace com.spacepuppy.Scenario
         [TriggerableTargetObject.Config(typeof(IStateMachine<string>))]
         private TriggerableTargetObject _stateMachine;
 
-        public override bool Trigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
             if (_stateMachine == null) return false;

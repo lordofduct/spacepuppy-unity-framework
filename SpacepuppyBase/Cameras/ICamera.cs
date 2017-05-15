@@ -12,7 +12,7 @@ namespace com.spacepuppy.Cameras
         /// If this ICamera currnetly handles multiple active cameras, this is the one considered most important.
         /// </summary>
         Camera camera { get; }
-
+        
         bool IsAlive { get; }
 
         /// <summary>

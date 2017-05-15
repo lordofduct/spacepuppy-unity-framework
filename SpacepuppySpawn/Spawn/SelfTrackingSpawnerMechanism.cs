@@ -29,6 +29,9 @@ namespace com.spacepuppy.Spawn
         [System.NonSerialized()]
         private int _totalCount;
 
+        [System.NonSerialized]
+        private BinaryHeap<ISpawnerModifier> _modifiers;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -50,7 +53,7 @@ namespace com.spacepuppy.Spawn
 
         public bool UsesDefaultSpawnPool
         {
-            get { return Object.ReferenceEquals(_spawnPool, null) || Object.ReferenceEquals(_spawnPool, SpawnPool.DefaultPool); }
+            get { return object.ReferenceEquals(_spawnPool, null) || object.ReferenceEquals(_spawnPool, SpawnPool.DefaultPool); }
         }
 
         public SpawnPool SpawnPool
@@ -101,6 +104,7 @@ namespace com.spacepuppy.Spawn
             if (!_active) return null;
             if (prefab == null) return null;
 
+            /*
             using (var modifiers = TempCollection.GetList<ISpawnerModifier>())
             {
                 SpawnPointHelper.GetSpawnModifiers(_spawnPoint, modifiers);
@@ -121,8 +125,47 @@ namespace com.spacepuppy.Spawn
 
                 return controller;
             }
+            */
+
+            //on before spawn
+            var beforeNotif = SpawnPointBeforeSpawnNotification.Create(_spawnPoint, prefab);
+            if (_modifiers != null && _modifiers.Count > 0)
+            {
+                var e = _modifiers.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    e.Current.OnBeforeSpawnNotification(beforeNotif);
+                }
+            }
+            Notification.PostNotification<SpawnPointBeforeSpawnNotification>(_spawnPoint, beforeNotif, false);
+            Notification.Release(beforeNotif);
+
+            if (beforeNotif.Cancelled)
+                return null;
+
+            //perform actual spawn
+            var controller = this.SpawnPool.SpawnAsController(prefab, pos, rot, par, initializeProperties, _spawnPoint);
+            if (controller == null) return null;
+            _spawnedObjects.Add(controller);
+            _totalCount++;
+            //end actual spawn
+
+            //on post spawn
+            var spawnNotif = SpawnPointTriggeredNotification.Create(this.SpawnPool, controller.gameObject, _spawnPoint);
+            if (_modifiers != null && _modifiers.Count > 0)
+            {
+                var e = _modifiers.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    e.Current.OnSpawnedNotification(spawnNotif);
+                }
+            }
+            Notification.PostNotification<SpawnPointTriggeredNotification>(_spawnPoint, spawnNotif, false);
+            Notification.Release(spawnNotif);
+
+            return controller;
         }
-        
+
         public GameObject[] GetActiveGameObjects()
         {
             return (from c in _spawnedObjects where c is SpawnedObjectController select (c as SpawnedObjectController).gameObject).ToArray();
@@ -131,6 +174,27 @@ namespace com.spacepuppy.Spawn
         public SpawnedObjectController[] GetActiveObjectControllers()
         {
             return (from c in _spawnedObjects where c is SpawnedObjectController select c as SpawnedObjectController).ToArray();
+        }
+
+
+        public void RegisterModifier(ISpawnerModifier modifier)
+        {
+            if (modifier == null) throw new System.ArgumentNullException("modifier");
+            if(_modifiers == null)
+            {
+                _modifiers = new BinaryHeap<ISpawnerModifier>(SpawnerModifierComparer.Default);
+            }
+
+            if(!_modifiers.Contains(modifier))
+                _modifiers.Add(modifier);
+        }
+
+        public bool UnRegisterModifier(ISpawnerModifier modifier)
+        {
+            if (_modifiers == null) return false;
+            if (modifier == null) return false;
+
+            return _modifiers.Remove(modifier);
         }
 
         #endregion

@@ -7,7 +7,8 @@ namespace com.spacepuppy
     /// Represents a globally unique identifier (GUID) with a
     /// shorter string value. Sguid
     /// </summary>
-    public struct ShortGuid
+    [System.Serializable]
+    public struct ShortGuid : UnityEngine.ISerializationCallbackReceiver
     {
         #region Static
 
@@ -21,8 +22,10 @@ namespace com.spacepuppy
 
         #region Fields
 
-        Guid _guid;
-        string _value;
+        private Guid _guid;
+        [UnityEngine.SerializeField]
+        [ReadOnly]
+        private string _value;
 
         #endregion
 
@@ -83,6 +86,20 @@ namespace com.spacepuppy
                     _guid = Decode(value);
                 }
             }
+        }
+
+        #endregion
+
+        #region ISerializationCallbackReceiver
+
+        void UnityEngine.ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            //do nothing
+        }
+
+        void UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            _guid = Decode(_value);
         }
 
         #endregion
@@ -264,6 +281,7 @@ namespace com.spacepuppy
         }
 
         #endregion
+
     }
 
 }
