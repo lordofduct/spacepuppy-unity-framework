@@ -140,14 +140,109 @@ namespace com.spacepuppy.Utils
 
         #region Methods
 
+        /// <summary>
+        /// Select between min and max, exclussive of max.
+        /// </summary>
+        /// <param name="rng"></param>
+        /// <param name="max"></param>
+        /// <param name="min"></param>
+        /// <returns></returns>
         public static float Range(this IRandom rng, float max, float min = 0.0f)
         {
             return (float)(rng.NextDouble() * (max - min)) + min;
         }
 
+        /// <summary>
+        /// Select between min and max, exclussive of max.
+        /// </summary>
+        /// <param name="rng"></param>
+        /// <param name="max"></param>
+        /// <param name="min"></param>
+        /// <returns></returns>
         public static int Range(this IRandom rng, int max, int min = 0)
         {
             return rng.Next(min, max);
+        }
+
+        /// <summary>
+        /// Select an weighted index from 0 to length of weights.
+        /// </summary>
+        /// <param name="rng"></param>
+        /// <param name="weights"></param>
+        /// <returns></returns>
+        public static int Range(this IRandom rng, params float[] weights)
+        {
+            int i;
+            float w;
+            float total = 0f;
+            for (i = 0; i < weights.Length; i++)
+            {
+                w = weights[i];
+                if (float.IsPositiveInfinity(w)) return i;
+                else if (w >= 0f && !float.IsNaN(w)) total += w;
+            }
+
+            if (rng == null) rng = RandomUtil.Standard;
+            float r = rng.Next();
+            float s = 0f;
+
+            for (i = 0; i < weights.Length; i++)
+            {
+                w = weights[i];
+                if (float.IsNaN(w) || w <= 0f) continue;
+
+                s += w / total;
+                if (s > r)
+                {
+                    return i;
+                }
+            }
+
+            //should only get here if last element had a zero weight, and the r was large
+            i = weights.Length - 1;
+            while (i > 0 || weights[i] <= 0f) i--;
+            return i;
+        }
+
+        /// <summary>
+        /// Select an weighted index from 0 to length of weights.
+        /// </summary>
+        /// <param name="rng"></param>
+        /// <param name="weights"></param>
+        /// <returns></returns>
+        public static int Range(this IRandom rng, float[] weights, int startIndex, int count = -1)
+        {
+            int i;
+            float w;
+            float total = 0f;
+            int last = count < 0 ? weights.Length : System.Math.Min(startIndex + count, weights.Length);
+            for (i = startIndex; i < last; i++)
+            {
+                w = weights[i];
+                if (float.IsPositiveInfinity(w)) return i;
+                else if (w >= 0f && !float.IsNaN(w)) total += w;
+            }
+
+            if (rng == null) rng = RandomUtil.Standard;
+            float r = rng.Next();
+            float s = 0f;
+
+            for (i = startIndex; i < last; i++)
+            {
+                w = weights[i];
+                if (float.IsNaN(w) || w <= 0f) continue;
+
+                s += w / total;
+                if (s > r)
+                {
+                    return i;
+                }
+            }
+
+            //should only get here if last element had a zero weight, and the r was large
+            i = last - 1;
+            while (i > 0 || weights[i] <= 0f) i--;
+            return i;
         }
 
         #endregion

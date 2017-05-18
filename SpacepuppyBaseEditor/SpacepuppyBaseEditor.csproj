@@ -154,6 +154,7 @@
     <Compile Include="Project\AssetBundlePackageInspector.cs" />
     <Compile Include="Project\CustomTimeLayersDataInspector.cs" />
     <Compile Include="Project\ResourcePackageInspector.cs" />
+    <Compile Include="Project\WeightedTextDocumentInspector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Render\MaterialPropertyReferencePropertyDrawer.cs" />
     <Compile Include="Render\MaterialSourceInspector.cs" />
@@ -187,6 +188,7 @@
     <Compile Include="SPMenu.cs" />
     <Compile Include="Base\TypeSelectionDropDownWindow.cs" />
     <Compile Include="Tween\SPTweenInspector.cs" />
+    <Compile Include="Project\TextRefPropertyDrawer.cs" />
     <Compile Include="Utils\Diminish\DiminishingWeightOverDurationPropertyDrawer.cs" />
   </ItemGroup>
   <ItemGroup>

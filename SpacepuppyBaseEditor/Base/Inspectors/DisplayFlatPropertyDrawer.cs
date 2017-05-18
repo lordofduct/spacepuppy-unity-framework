@@ -28,7 +28,6 @@ namespace com.spacepuppyeditor.Base
         {
             if(property.hasChildren)
             {
-                property.isExpanded = true;
                 return SPEditorGUI.GetDefaultPropertyHeight(property, label, true) + BOTTOM_PAD + TOP_PAD - EditorGUIUtility.singleLineHeight;
             }
             else

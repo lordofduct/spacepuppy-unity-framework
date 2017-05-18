@@ -1023,6 +1023,10 @@ namespace com.spacepuppy.Geom
 
         public static Vector3 RepairHitSurfaceNormal(RaycastHit hit, int layerMask)
         {
+            /*
+             * Naive attempt to save a Raycast calculation... but ends up with a GC overhead 
+             * retrieving the tris and verts. Stick with just a Raycast, no garbage.
+             *
             if(hit.collider is MeshCollider && !(hit.collider as MeshCollider).convex)
             {
                 var collider = hit.collider as MeshCollider;
@@ -1039,12 +1043,11 @@ namespace com.spacepuppy.Geom
 
                 return hit.transform.TransformDirection(n);
             }
-            else
-            {
-                var p = hit.point + hit.normal * 0.01f;
-                Physics.Raycast(p, -hit.normal, out hit, 0.011f, layerMask);
-                return hit.normal;
-            }
+             */
+
+            var p = hit.point + hit.normal * 0.01f;
+            Physics.Raycast(p, -hit.normal, out hit, 0.011f, layerMask);
+            return hit.normal;
         }
 
         #endregion

@@ -369,6 +369,9 @@
     <Compile Include="Tween\Tweener.cs" />
     <Compile Include="Tween\TweenSequence.cs" />
     <Compile Include="TypeReference.cs" />
+    <Compile Include="Project\ITextSource.cs" />
+    <Compile Include="Project\TextDocument.cs" />
+    <Compile Include="Project\TextRef.cs" />
     <Compile Include="UI\TextSettings.cs" />
     <Compile Include="Utils\Assertions.cs" />
     <Compile Include="Utils\ColorUtil.cs" />

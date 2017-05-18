@@ -57,6 +57,10 @@ namespace com.spacepuppyeditor.Base
                     {
                         lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
                     }
+                    else if(pchild.hasChildren)
+                    {
+                        lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + 2f;
+                    }
                     else
                     {
                         lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1f;
@@ -160,8 +164,6 @@ namespace com.spacepuppyeditor.Base
                     if(_drawElementAtBottom && _lst.index >= 0 && _lst.index < property.arraySize)
                     {
                         var pchild = property.GetArrayElementAtIndex(_lst.index);
-                        bool cache = pchild.isExpanded;
-                        pchild.isExpanded = true;
                         if (_internalDrawer != null)
                         {
                             h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD + TOP_PAD;
@@ -174,7 +176,6 @@ namespace com.spacepuppyeditor.Base
                         {
                             h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + BOTTOM_PAD + TOP_PAD;
                         }
-                        pchild.isExpanded = cache;
                     }
                 }
                 else
@@ -333,6 +334,13 @@ namespace com.spacepuppyeditor.Base
                 if (_internalDrawer != null)
                 {
                     _internalDrawer.OnGUI(area, element, label);
+                }
+                else if(element.hasChildren)
+                {
+                    var labelArea = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
+                    EditorGUI.LabelField(labelArea, label);
+                    var childArea = new Rect(area.xMin, area.yMin + EditorGUIUtility.singleLineHeight + 1f, area.width, area.height - EditorGUIUtility.singleLineHeight);
+                    SPEditorGUI.FlatChildPropertyField(childArea, element);
                 }
                 else
                 {
