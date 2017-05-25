@@ -24,7 +24,7 @@ namespace com.spacepuppyeditor.Cameras
 
             var ids = new List<string>();
             ids.Add("None");
-            ids.AddRange(from c in targ.GetComponentsAlt<ICameraMovementControllerState>() select c.GetType().Name);
+            ids.AddRange(from c in targ.GetComponents<ICameraMovementControllerState>() select c.GetType().Name);
 
             int i = (targ.StartingCameraStyle != null) ? ids.IndexOf(targ.StartingCameraStyle.GetType().Name) : -1;
             if (i < 0) i = 0;
@@ -42,7 +42,7 @@ namespace com.spacepuppyeditor.Cameras
                 else
                 {
                     var id = ids[i];
-                    targ.StartingCameraStyle = (from c in targ.GetComponentsAlt<ICameraMovementControllerState>() where c.GetType().Name == id select c).FirstOrDefault();
+                    targ.StartingCameraStyle = (from c in targ.GetComponents<ICameraMovementControllerState>() where c.GetType().Name == id select c).FirstOrDefault();
                 }
 
                 this.serializedObject.Update();

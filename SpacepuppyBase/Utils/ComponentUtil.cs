@@ -34,11 +34,13 @@ namespace com.spacepuppy.Utils
             {
                 var c = (obj as IComponent).component;
                 if (c is T) return c as T;
-                else return c.GetComponentAlt<T>();
+                else return c.GetComponent<T>();
             }
             var go = GameObjectUtil.GetGameObjectFromSource(obj);
             if (go != null)
-                return go.GetComponentAlt<T>();
+            {
+                return go.GetComponent<T>();
+            }
 
             return null;
         }
@@ -312,12 +314,26 @@ namespace com.spacepuppy.Utils
 
 #region GetComponent
 
+        /// <summary>
+        /// Generic access of GetComponent that supports interfaces.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        [System.Obsolete("No longer needed, unity added appropriate support for generic component access by interface.")]
         public static T GetComponentAlt<T>(this GameObject obj) where T : class
         {
             if (obj == null) return null;
             return obj.GetComponent(typeof(T)) as T;
         }
 
+        /// <summary>
+        /// Generic access of GetComponent that supports interfaces.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        [System.Obsolete("No longer needed, unity added appropriate support for generic component access by interface.")]
         public static T GetComponentAlt<T>(this Component obj) where T : class
         {
             if (obj == null) return null;
@@ -366,10 +382,17 @@ namespace com.spacepuppy.Utils
             return (comp != null);
         }
 
-#endregion
+        #endregion
 
-#region GetComponents
+        #region GetComponents
 
+        /// <summary>
+        /// Generic access of GetComponents that supports interfaces.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        [System.Obsolete("No longer needed, unity added appropriate support for generic component access by interface.")]
         public static T[] GetComponentsAlt<T>(this GameObject obj) where T : class
         {
             //if (obj == null) return Enumerable.Empty<T>();
@@ -389,12 +412,25 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        /// <summary>
+        /// Generic access of GetComponents that supports interfaces.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        [System.Obsolete("No longer needed, unity added appropriate support for generic component access by interface.")]
         public static T[] GetComponentsAlt<T>(this Component obj) where T : class
         {
             if (obj == null) return ArrayUtil.Empty<T>();
             return GetComponentsAlt<T>(obj.gameObject);
         }
 
+        /// <summary>
+        /// Generic access of GetComponents that supports collections other than just List<T>/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static void GetComponentsAlt<T>(this GameObject obj, ICollection<T> lst) where T : class
         {
             if (obj == null) return;
@@ -412,13 +448,19 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        /// <summary>
+        /// Generic access of GetComponents that supports collections other than just List<T>/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static void GetComponentsAlt<T>(this Component obj, ICollection<T> lst) where T : class
         {
             if (obj == null) return;
 
             GetComponentsAlt<T>(obj.gameObject, lst);
         }
-
+       
         public static void GetComponents<T>(this GameObject obj, ICollection<T> lst, System.Func<Component, T> filter) where T : class
         {
             if (obj == null) return;

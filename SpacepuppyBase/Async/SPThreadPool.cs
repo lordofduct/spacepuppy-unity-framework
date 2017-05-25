@@ -23,7 +23,7 @@ namespace com.spacepuppy.Async
     /// threads by calling the 'Resize' method.
     /// </summary>
 #if SP_LIB
-    [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
+    [Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
     public class SPThreadPool : Singleton
     {
 

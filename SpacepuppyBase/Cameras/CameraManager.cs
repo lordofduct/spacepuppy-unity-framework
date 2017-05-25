@@ -8,7 +8,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Cameras
 {
 
-    [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
+    [Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
     public class CameraManager : Singleton, IEnumerable<ICamera>
     {
 

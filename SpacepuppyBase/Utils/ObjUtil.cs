@@ -57,8 +57,10 @@ namespace com.spacepuppy.Utils
                 //throw new System.InvalidOperationException("This version of Spacepuppy Framework does not support the version of Unity it's being used with.");
             }
         }
-        
+
         #endregion
+
+        #region Search Methods
 
         public static UnityEngine.Object Find(SearchBy search, string query)
         {
@@ -346,8 +348,9 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        #endregion
 
-
+        #region Casting
 
         public static T GetAsFromSource<T>(object obj) where T : class
         {
@@ -372,6 +375,50 @@ namespace com.spacepuppy.Utils
             }
 
             return null;
+        }
+
+        public static bool GetAsFromSource<T>(object obj, out T result) where T : class
+        {
+            result = null;
+            if (obj == null) return false;
+            if (obj is T)
+            {
+                result = obj as T;
+                return true;
+            }
+            if (obj is IComponent)
+            {
+                var c = (obj as IComponent).component;
+                if (c is T)
+                {
+                    result = c as T;
+                    return true;
+                }
+            }
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go is T)
+            {
+                result = go as T;
+                return true;
+            }
+
+            //if (go != null && ComponentUtil.IsAcceptableComponentType(typeof(T))) return go.GetComponentAlt<T>();
+            if (go != null)
+            {
+                var tp = typeof(T);
+                if (typeof(SPEntity).IsAssignableFrom(tp))
+                {
+                    result = SPEntity.Pool.GetFromSource(tp, go) as T;
+                    return true;
+                }
+                else if (ComponentUtil.IsAcceptableComponentType(tp))
+                {
+                    result = go.GetComponent(tp) as T;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static object GetAsFromSource(System.Type tp, object obj)
@@ -400,6 +447,215 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+        public static bool GetAsFromSource(System.Type tp, object obj, out object result)
+        {
+            result = null;
+            if (obj == null) return false;
+
+            var otp = obj.GetType();
+            if (TypeUtil.IsType(otp, tp))
+            {
+                result = obj;
+                return true;
+            }
+            if (obj is IComponent)
+            {
+                var c = (obj as IComponent).component;
+                if (!object.ReferenceEquals(c, null) && TypeUtil.IsType(c.GetType(), tp))
+                {
+                    result = c;
+                    return true;
+                }
+            }
+
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (tp == typeof(UnityEngine.GameObject))
+            {
+                result = go;
+                return true;
+            }
+
+            if (go != null)
+            {
+                if (typeof(SPEntity).IsAssignableFrom(tp))
+                {
+                    result = SPEntity.Pool.GetFromSource(tp, go);
+                    return true;
+                }
+                else if (ComponentUtil.IsAcceptableComponentType(tp))
+                {
+                    result = go.GetComponent(tp);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        public static T GetAsFromSource<T>(object obj, bool respectProxy) where T : class
+        {
+            if (obj == null) return null;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return null;
+            }
+
+            if (obj is T) return obj as T;
+            if (obj is IComponent)
+            {
+                var c = (obj as IComponent).component;
+                if (c is T) return c as T;
+            }
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (go is T) return go as T;
+
+            //if (go != null && ComponentUtil.IsAcceptableComponentType(typeof(T))) return go.GetComponentAlt<T>();
+            if (go != null)
+            {
+                var tp = typeof(T);
+                if (typeof(SPEntity).IsAssignableFrom(tp))
+                    return SPEntity.Pool.GetFromSource(tp, go) as T;
+                else if (ComponentUtil.IsAcceptableComponentType(tp))
+                    return go.GetComponent(tp) as T;
+            }
+
+            return null;
+        }
+
+        public static object GetAsFromSource(System.Type tp, object obj, bool respectProxy)
+        {
+            if (obj == null) return null;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return null;
+            }
+
+            var otp = obj.GetType();
+            if (TypeUtil.IsType(otp, tp)) return obj;
+            if (obj is IComponent)
+            {
+                var c = (obj as IComponent).component;
+                if (!object.ReferenceEquals(c, null) && TypeUtil.IsType(c.GetType(), tp)) return c;
+            }
+
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (tp == typeof(UnityEngine.GameObject)) return go;
+
+            if (go != null)
+            {
+                if (typeof(SPEntity).IsAssignableFrom(tp))
+                    return SPEntity.Pool.GetFromSource(tp, go);
+                else if (ComponentUtil.IsAcceptableComponentType(tp))
+                    return go.GetComponent(tp);
+            }
+
+            return null;
+        }
+
+        
+        public static T[] GetAllFromSource<T>(object obj) where T : class
+        {
+            if (obj == null) return ArrayUtil.Empty<T>();
+
+            using (var set = TempCollection.GetSet<T>())
+            {
+                if (obj is T) set.Add(obj as T);
+                if (obj is IComponent)
+                {
+                    var c = (obj as IComponent).component;
+                    if (c is T) set.Add(c as T);
+                }
+
+                var go = GameObjectUtil.GetGameObjectFromSource(obj);
+                if (go is T) set.Add(go as T);
+
+                //if (go != null && ComponentUtil.IsAcceptableComponentType(typeof(T))) go.GetComponentsAlt<T>(set);
+                if (go != null)
+                {
+                    var tp = typeof(T);
+                    if (typeof(SPEntity).IsAssignableFrom(tp))
+                    {
+                        var entity = SPEntity.Pool.GetFromSource(tp, go) as T;
+                        if (entity != null) set.Add(entity);
+                    }
+                    if (ComponentUtil.IsAcceptableComponentType(tp))
+                        go.GetComponentsAlt<T>(set);
+                }
+
+                return set.Count > 0 ? set.ToArray() : ArrayUtil.Empty<T>();
+            }
+        }
+
+        public static object[] GetAllFromSource(System.Type tp, object obj)
+        {
+            if (obj == null) return ArrayUtil.Empty<object>();
+
+            using (var set = TempCollection.GetSet<object>())
+            {
+                var otp = obj.GetType();
+                if (TypeUtil.IsType(otp, tp)) set.Add(obj);
+                if (obj is IComponent)
+                {
+                    var c = (obj as IComponent).component;
+                    if (!object.ReferenceEquals(c, null) && TypeUtil.IsType(c.GetType(), tp)) set.Add(c);
+                }
+
+                var go = GameObjectUtil.GetGameObjectFromSource(obj);
+                if (go != null)
+                {
+                    if (typeof(SPEntity).IsAssignableFrom(tp))
+                    {
+                        var entity = SPEntity.Pool.GetFromSource(tp, go);
+                        if (entity != null) set.Add(entity);
+                    }
+                    else if(ComponentUtil.IsAcceptableComponentType(tp))
+                    {
+                        using (var lst = TempCollection.GetList<UnityEngine.Component>())
+                        {
+                            go.GetComponents(tp, lst);
+                            var e = lst.GetEnumerator();
+                            while(e.MoveNext())
+                            {
+                                set.Add(e.Current);
+                            }
+                        }
+                    }
+                }
+
+                return set.Count > 0 ? set.ToArray() : ArrayUtil.Empty<object>();
+            }
+        }
+
+
+
+        public static bool IsType(object obj, System.Type tp)
+        {
+            if (obj == null) return false;
+
+            return TypeUtil.IsType(obj.GetType(), tp);
+        }
+
+        public static bool IsType(object obj, System.Type tp, bool respectProxy)
+        {
+            if (obj == null) return false;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return false;
+            }
+
+            return TypeUtil.IsType(obj.GetType(), tp);
+        }
+
+        #endregion
+
+        #region Destruction Methods
 
         public static void SmartDestroy(UnityEngine.Object obj)
         {
@@ -508,7 +764,9 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
+        #endregion
 
+        #region Misc
 
         public static bool EqualsAny(System.Object obj, params System.Object[] others)
         {
@@ -534,6 +792,7 @@ namespace com.spacepuppy.Utils
             return System.Delegate.CreateDelegate(delegateType, obj, name, ignoreCase, throwOnBindFailure);
         }
 
+        #endregion
 
     }
 }

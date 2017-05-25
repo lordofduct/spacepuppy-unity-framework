@@ -6,7 +6,7 @@ namespace com.spacepuppy
     /// <summary>
     /// This class is really only for internal use by com.spacepuppy, avoid using it outside of it.
     /// </summary>
-    [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
+    [Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
     public class GameLoopEntry : Singleton
     {
 

@@ -16,7 +16,7 @@ namespace com.spacepuppyeditor.Scenario
     /// </summary>
     //[CustomEditor(typeof(TriggerComponent), true)]
     [System.Obsolete("TriggerComponent now lets its trigger properties drawn by the TriggerPropertyDrawer.")]
-    public class TriggerComponentInspector : SPEditor
+    internal class TriggerComponentInspector : SPEditor
     {
 
         private const string PROP_TARGETS = "_targets";
@@ -95,8 +95,8 @@ namespace com.spacepuppyeditor.Scenario
         {
             var element = _targetList.serializedProperty.GetArrayElementAtIndex(index);
 
-            var trigProp = element.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var actProp = element.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
+            var trigProp = element.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var actProp = element.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
 
@@ -109,7 +109,7 @@ namespace com.spacepuppyeditor.Scenario
                 EditorGUI.BeginProperty(trigRect, trigLabel, trigProp);
                 trigProp.objectReferenceValue = SPEditorGUI.ComponentField(trigRect,
                                                                            trigLabel,
-                                                                           TriggerTargetPropertyDrawer.ValidateTriggerableTargAsMechanism(trigProp.objectReferenceValue) as Component,
+                                                                           ValidateTriggerableTargAsMechanism(trigProp.objectReferenceValue) as Component,
                                                                            typeof(ITriggerableMechanism),
                                                                            true);
                 EditorGUI.EndProperty();
@@ -122,19 +122,19 @@ namespace com.spacepuppyeditor.Scenario
 
                 if (trigProp.objectReferenceValue != null)
                 {
-                    var go = GameObjectUtil.GetGameObjectFromSource(trigProp.objectReferenceValue);
+                    var obj = trigProp.objectReferenceValue;
                     var trigType = trigProp.objectReferenceValue.GetType();
                     GUIContent extraLabel;
                     switch (act)
                     {
                         case TriggerActivationType.SendMessage:
-                            extraLabel = new GUIContent("(SendMessage) " + go.name);
+                            extraLabel = new GUIContent("(SendMessage) " + obj.name);
                             break;
                         case TriggerActivationType.TriggerSelectedTarget:
-                            extraLabel = new GUIContent("(TriggerSelectedTarget) " + go.name + " -> " + trigType.Name);
+                            extraLabel = new GUIContent("(TriggerSelectedTarget) " + obj.name + " -> " + trigType.Name);
                             break;
                         case TriggerActivationType.CallMethodOnSelectedTarget:
-                            extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + go.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME).stringValue);
+                            extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + obj.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME).stringValue);
                             break;
                         default:
                             extraLabel = GUIContent.none;
@@ -167,6 +167,16 @@ namespace com.spacepuppyeditor.Scenario
         }
 
         #endregion
+
+
+        private static Component ValidateTriggerableTargAsMechanism(object value)
+        {
+            if (value == null) return null;
+            if (!(value is Component)) return null;
+
+            if (value is ITriggerableMechanism) return value as Component;
+            else return (value as Component).GetComponent<ITriggerableMechanism>() as Component;
+        }
 
     }
 }

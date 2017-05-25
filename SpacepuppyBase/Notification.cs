@@ -499,9 +499,14 @@ namespace com.spacepuppy
 
         public static void PurgeHandlers(UnityEngine.GameObject go)
         {
-            foreach (var c in go.GetComponentsAlt<INotificationDispatcher>())
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<INotificationDispatcher>())
             {
-                c.Observers.PurgeHandlers();
+                go.GetComponents<INotificationDispatcher>(lst);
+                var e = lst.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    e.Current.Observers.PurgeHandlers();
+                }
             }
         }
 

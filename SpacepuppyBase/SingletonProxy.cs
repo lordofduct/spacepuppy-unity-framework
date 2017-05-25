@@ -28,18 +28,7 @@ namespace com.spacepuppy
         {
             if (_singletonType == null || _singletonType.Type == null) return null;
 
-            if (_createIfNone)
-            {
-                return Singleton.GetInstance(_singletonType.Type);
-            }
-            else
-            {
-                ISingleton instance;
-                if (Singleton.HasInstance(_singletonType.Type, out instance))
-                    return instance;
-                else
-                    return null;
-            }
+            return Singleton.GetInstance(_singletonType.Type, !_createIfNone);
         }
 
         UnityEngine.Object IProxy.GetTarget()

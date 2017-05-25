@@ -57,8 +57,9 @@ namespace com.spacepuppyeditor.Base
                     {
                         lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
                     }
-                    else if(pchild.hasChildren)
+                    else if(pchild.hasChildren && pchild.objectReferenceValue is MonoBehaviour)
                     {
+                        //we don't draw this way if it's a built-in type from Unity
                         lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + 2f;
                     }
                     else
@@ -168,8 +169,9 @@ namespace com.spacepuppyeditor.Base
                         {
                             h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD + TOP_PAD;
                         }
-                        else if (pchild.hasChildren)
+                        else if (pchild.hasChildren && pchild.objectReferenceValue is MonoBehaviour)
                         {
+                            //we don't draw this way if it's a built-in type from Unity
                             h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + BOTTOM_PAD + TOP_PAD - EditorGUIUtility.singleLineHeight;
                         }
                         else
@@ -335,8 +337,9 @@ namespace com.spacepuppyeditor.Base
                 {
                     _internalDrawer.OnGUI(area, element, label);
                 }
-                else if(element.hasChildren)
+                else if(element.hasChildren && element.objectReferenceValue is MonoBehaviour)
                 {
+                    //we don't draw this way if it's a built-in type from Unity
                     var labelArea = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
                     EditorGUI.LabelField(labelArea, label);
                     var childArea = new Rect(area.xMin, area.yMin + EditorGUIUtility.singleLineHeight + 1f, area.width, area.height - EditorGUIUtility.singleLineHeight);

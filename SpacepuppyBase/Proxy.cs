@@ -5,6 +5,7 @@ using System.Linq;
 using com.spacepuppy.Dynamic;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy
 {
@@ -22,7 +23,6 @@ namespace com.spacepuppy
         #region Fields
 
         [SerializeField()]
-        [SelectableObject(AllowSceneObjects = true)]
         private UnityEngine.Object _target;
         [SerializeField()]
         private SearchBy _searchBy;
@@ -69,7 +69,9 @@ namespace com.spacepuppy
         public UnityEngine.Object GetTarget()
         {
             if (_searchBy == SearchBy.Nothing)
-                return _target;
+            {
+                return (_target is IProxy) ? (_target as IProxy).GetTarget() : _target;
+            }
             else
             {
                 return ObjUtil.Find(_searchBy, _queryString);
@@ -79,7 +81,9 @@ namespace com.spacepuppy
         public UnityEngine.Object[] GetTargets()
         {
             if (_searchBy == SearchBy.Nothing)
-                return new UnityEngine.Object[] { _target };
+            {
+                return new UnityEngine.Object[] { (_target is IProxy) ? (_target as IProxy).GetTarget() : _target };
+            }
             else
             {
                 return ObjUtil.FindAll(_searchBy, _queryString);
@@ -89,7 +93,9 @@ namespace com.spacepuppy
         public T GetTarget<T>() where T : class
         {
             if (_searchBy == SearchBy.Nothing)
-                return ObjUtil.GetAsFromSource<T>(_target);
+            {
+                return ObjUtil.GetAsFromSource<T>(_target, true);
+            }
             else
             {
                 return ObjUtil.Find<T>(_searchBy, _queryString);
@@ -100,8 +106,7 @@ namespace com.spacepuppy
         {
             if (_searchBy == SearchBy.Nothing)
             {
-                //return (_target is T) ? new T[] { _target as T } : ArrayUtil.Empty<T>();
-                var targ = ObjUtil.GetAsFromSource<T>(_target);
+                var targ = ObjUtil.GetAsFromSource<T>(_target, true);
                 return targ != null ? new T[] { targ } : ArrayUtil.Empty<T>();
             }
             else
@@ -132,6 +137,7 @@ namespace com.spacepuppy
         {
 
             public System.Type TargetType;
+            public bool AllowProxy = true;
 
             public ConfigAttribute()
             {
@@ -197,11 +203,12 @@ namespace com.spacepuppy
 
         public UnityEngine.Object GetTarget()
         {
-            return _target.GetTarget(_componentTypeOnTarget, null) as UnityEngine.Object;
+            return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), null) as UnityEngine.Object;
         }
 
         public UnityEngine.Object GetTarget(object arg)
         {
+            if (_componentTypeOnTarget == null) return null;
             return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;
         }
 
@@ -301,130 +308,110 @@ namespace com.spacepuppy
 
     }
 
-    
-    /*
-public class TargetProxy : MonoBehaviour, IDynamic
-{
 
-    #region Fields
 
-    [SerializeField]
-    private Proxy _target;
-    [SerializeField]
-    [TypeReference.Config(typeof(Component), allowAbstractClasses = true, allowInterfaces = true)]
-    private TypeReference _componentTypeOnTarget = new TypeReference();
-
-    [System.NonSerialized]
-    private object _cachedTarg;
-
-    #endregion
-
-    #region Properties
-
-    public Proxy Target
+    [CreateAssetMenu(fileName = "ProxyMediator", menuName = "Spacepuppy/ProxyMediator")]
+    public class ProxyMediator : ScriptableObject, ITriggerableMechanism
     {
-        get { return _target; }
-        set { _target = value; }
+
+        public System.EventHandler OnTriggered;
+
+        public void Trigger()
+        {
+            if (this.OnTriggered != null) this.OnTriggered(this, System.EventArgs.Empty);
+        }
+
+        #region ITriggerableMechanism Interface
+
+        bool ITriggerableMechanism.CanTrigger
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        int ITriggerableMechanism.Order
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        bool ITriggerableMechanism.Trigger(object sender, object arg)
+        {
+            this.Trigger();
+            return true;
+        }
+
+        #endregion
+
     }
 
-    #endregion
-
-
-    #region IDynamic Interface
-
-    object IDynamic.this[string sMemberName]
+    public class t_OnProxyMediatorTriggered : TriggerComponent
     {
-        get
+
+        [SerializeField]
+        private ProxyMediator _mediator;
+
+        #region CONSTRUCTOR
+
+        protected override void OnEnable()
         {
-            return (this as IDynamic).GetValue(sMemberName);
+            base.OnEnable();
+
+            if(_mediator != null)
+            {
+                _mediator.OnTriggered += this.OnMediatorTriggered;
+            }
         }
-        set
+
+        protected override void OnDisable()
         {
-            (this as IDynamic).SetValue(sMemberName, value);
+            base.OnDisable();
+
+            if(_mediator != null)
+            {
+                _mediator.OnTriggered -= this.OnMediatorTriggered;
+            }
         }
+
+        #endregion
+
+        #region Properties
+
+        public ProxyMediator Mediator
+        {
+            get { return _mediator; }
+            set
+            {
+                if (_mediator == value) return;
+
+                if(Application.isPlaying && this.enabled)
+                {
+                    if(_mediator != null) _mediator.OnTriggered -= this.OnMediatorTriggered;
+                    _mediator = value;
+                    if (_mediator != null) _mediator.OnTriggered += this.OnMediatorTriggered;
+                }
+                else
+                {
+                    _mediator = value;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        private void OnMediatorTriggered(object sender, System.EventArgs e)
+        {
+            this.ActivateTrigger(null);
+        }
+
+        #endregion
+
     }
-
-    bool IDynamic.SetValue(string sMemberName, object value, params object[] index)
-    {
-        if(_cachedTarg == null)
-        {
-            _cachedTarg = _target.GetTarget();
-            if (_componentTypeOnTarget.Type != null)
-                _cachedTarg = ObjUtil.GetAsFromSource(_componentTypeOnTarget.Type, _cachedTarg);
-        }
-        return _cachedTarg.SetValue(sMemberName, value, index);
-    }
-
-    object IDynamic.GetValue(string sMemberName, params object[] args)
-    {
-        if (_cachedTarg == null)
-        {
-            _cachedTarg = _target.GetTarget();
-            if (_componentTypeOnTarget.Type != null)
-                _cachedTarg = ObjUtil.GetAsFromSource(_componentTypeOnTarget.Type, _cachedTarg);
-        }
-        return _cachedTarg.GetValue(sMemberName, args);
-    }
-
-    bool IDynamic.TryGetValue(string sMemberName, out object result, params object[] args)
-    {
-        if (_cachedTarg == null)
-        {
-            _cachedTarg = _target.GetTarget();
-            if (_componentTypeOnTarget.Type != null)
-                _cachedTarg = ObjUtil.GetAsFromSource(_componentTypeOnTarget.Type, _cachedTarg);
-        }
-        return _cachedTarg.TryGetValue(sMemberName, out result, args);
-    }
-
-    object IDynamic.InvokeMethod(string sMemberName, params object[] args)
-    {
-        if (_cachedTarg == null)
-        {
-            _cachedTarg = _target.GetTarget();
-            if (_componentTypeOnTarget.Type != null)
-                _cachedTarg = ObjUtil.GetAsFromSource(_componentTypeOnTarget.Type, _cachedTarg);
-        }
-        return _cachedTarg.InvokeMethod(sMemberName, args);
-    }
-
-    bool IDynamic.HasMember(string sMemberName, bool includeNonPublic)
-    {
-        if (_cachedTarg == null)
-        {
-            _cachedTarg = _target.GetTarget();
-            if (_componentTypeOnTarget.Type != null)
-                _cachedTarg = ObjUtil.GetAsFromSource(_componentTypeOnTarget.Type, _cachedTarg);
-        }
-        return DynamicUtil.HasMember(_cachedTarg, sMemberName, includeNonPublic);
-    }
-
-    IEnumerable<System.Reflection.MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
-    {
-        if (_cachedTarg == null)
-        {
-            _cachedTarg = _target.GetTarget();
-            if (_componentTypeOnTarget.Type != null)
-                _cachedTarg = ObjUtil.GetAsFromSource(_componentTypeOnTarget.Type, _cachedTarg);
-        }
-        return DynamicUtil.GetMembers(_cachedTarg, includeNonPublic);
-    }
-
-    System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
-    {
-        if (_cachedTarg == null)
-        {
-            _cachedTarg = _target.GetTarget();
-            if (_componentTypeOnTarget.Type != null)
-                _cachedTarg = ObjUtil.GetAsFromSource(_componentTypeOnTarget.Type, _cachedTarg);
-        }
-        return DynamicUtil.GetMember(_cachedTarg, sMemberName, includeNonPublic);
-    }
-
-    #endregion
-
-
-}
-*/
 
 }

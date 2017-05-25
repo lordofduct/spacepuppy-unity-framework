@@ -20,7 +20,7 @@ namespace com.spacepuppyeditor.Scenario
 
         private SelectableComponentPropertyDrawer _componentDrawer = new SelectableComponentPropertyDrawer()
         {
-            AllowSceneObject = true,
+            AllowSceneObjects = true,
             RestrictionType = typeof(IObservableTrigger),
             ChoiceSelector = new CustomComponentChoiceSelector()
         };

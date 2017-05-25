@@ -26,7 +26,7 @@ namespace com.spacepuppy.Scenario
 
         [UnityEngine.Serialization.FormerlySerializedAs("Triggerable")]
         [SerializeField()]
-        private Component _triggerable;
+        private UnityEngine.Object _triggerable;
 
         [UnityEngine.Serialization.FormerlySerializedAs("TriggerableArgs")]
         [SerializeField()]
@@ -57,7 +57,8 @@ namespace com.spacepuppy.Scenario
             set { _weight = value; }
         }
 
-        public GameObject Target { get { return (this._triggerable != null) ? _triggerable.gameObject : null; } }
+        //public GameObject Target { get { return (this._triggerable != null) ? _triggerable.gameObject : null; } }
+        public UnityEngine.Object Target { get { return _triggerable; } }
 
         public TriggerActivationType ActivationType { get { return this._activationType; } }
 
@@ -122,8 +123,11 @@ namespace com.spacepuppy.Scenario
         public void ConfigureTriggerAll(ITriggerableMechanism mechanism, object arg = null)
         {
             if (mechanism == null) throw new System.ArgumentNullException("mechanism");
-            this._triggerable = mechanism.transform;
-            if (arg == null)
+            if (GameObjectUtil.IsGameObjectSource(mechanism))
+                _triggerable = GameObjectUtil.GetGameObjectFromSource(mechanism).transform;
+            else
+                _triggerable = mechanism as UnityEngine.Object;
+            if (arg == null || _triggerable == null)
             {
                 this._triggerableArgs = null;
             }
@@ -139,8 +143,9 @@ namespace com.spacepuppy.Scenario
         public void ConfigureTriggerTarget(ITriggerableMechanism mechanism, object arg = null)
         {
             if (mechanism == null) throw new System.ArgumentNullException("mechanism");
-            this._triggerable = mechanism.component;
-            if (arg == null)
+            
+            this._triggerable = mechanism as UnityEngine.Object;
+            if (arg == null || _triggerable == null)
             {
                 this._triggerableArgs = null;
             }
@@ -236,15 +241,23 @@ namespace com.spacepuppy.Scenario
                     {
                         if (_triggerAllCache == null)
                         {
-                            //_triggerAllCache = (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t).ToArray();
-                            _triggerAllCache = _triggerable.GetComponentsAlt<ITriggerableMechanism>();
-                            System.Array.Sort(_triggerableArgs, MechanismComparer.Default);
+                            //_triggerAllCache = _triggerable.GetComponentsAlt<ITriggerableMechanism>();
+                            var go = GameObjectUtil.GetGameObjectFromSource(_triggerable);
+                            if (go != null)
+                                _triggerAllCache = go.GetComponents<ITriggerableMechanism>();
+                            else if (_triggerable is ITriggerableMechanism)
+                                _triggerAllCache = new ITriggerableMechanism[] { _triggerable as ITriggerableMechanism };
+                            else
+                                _triggerAllCache = ArrayUtil.Empty<ITriggerableMechanism>();
+
+                            if(_triggerableArgs.Length > 1)
+                                System.Array.Sort(_triggerableArgs, TriggerableMechanismOrderComparer.Default);
                         }
                         if (instruction != null)
                         {
                             foreach (var t in _triggerAllCache)
                             {
-                                if (t.component != null && t.CanTrigger)
+                                if (t.CanTrigger)
                                 {
                                     if (t is IBlockingTriggerableMechanism)
                                         (t as IBlockingTriggerableMechanism).Trigger(sender, outgoingArg, instruction);
@@ -257,7 +270,7 @@ namespace com.spacepuppy.Scenario
                         {
                             foreach (var t in _triggerAllCache)
                             {
-                                if (t.component != null && t.CanTrigger)
+                                if (t.CanTrigger)
                                 {
                                     t.Trigger(sender, outgoingArg);
                                 }
@@ -266,7 +279,12 @@ namespace com.spacepuppy.Scenario
                     }
                     break;
                 case TriggerActivationType.TriggerSelectedTarget:
-                    TriggerSelectedTarget(_triggerable, sender, outgoingArg, instruction);
+                    {
+                        //UnityEngine.Object targ = _triggerable;
+                        //if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
+                        //TriggerSelectedTarget(targ, sender, outgoingArg, instruction);
+                        TriggerSelectedTarget(_triggerable, sender, outgoingArg, instruction);
+                    }
                     break;
                 case TriggerActivationType.SendMessage:
                     {
@@ -276,7 +294,9 @@ namespace com.spacepuppy.Scenario
                     }
                     break;
                 case TriggerActivationType.CallMethodOnSelectedTarget:
-                    CallMethodOnSelectedTarget(_triggerable, _methodName, _triggerableArgs);
+                    {
+                        CallMethodOnSelectedTarget(_triggerable, _methodName, _triggerableArgs);
+                    }
                     break;
                 case TriggerActivationType.EnableTarget:
                     {
@@ -425,55 +445,32 @@ namespace com.spacepuppy.Scenario
         #endregion
 
 
-
-        #region Special Types
-
-        private class MechanismComparer : System.Collections.IComparer, System.Collections.Generic.IComparer<ITriggerableMechanism>
-        {
-
-            private static MechanismComparer _default;
-            public static MechanismComparer Default
-            {
-                get
-                {
-                    if (_default == null) _default = new MechanismComparer();
-                    return _default;
-                }
-            }
-
-
-            int System.Collections.IComparer.Compare(object x, object y)
-            {
-                return (x as ITriggerableMechanism).Order.CompareTo((y as ITriggerableMechanism).Order);
-            }
-
-            public int Compare(ITriggerableMechanism x, ITriggerableMechanism y)
-            {
-                return x.Order.CompareTo(y.Order);
-            }
-        }
-
-        #endregion
-
+            
         #region Static Methods
 
         public static void TriggerAllOnTarget(object target, object sender, object arg, BlockingTriggerYieldInstruction instruction = null)
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(target);
-            if (go == null) return;
+            //var go = GameObjectUtil.GetGameObjectFromSource(target);
+            //if (go == null) return;
 
             using (var lst = com.spacepuppy.Collections.TempCollection.GetList<ITriggerableMechanism>())
             {
-                go.GetComponents<ITriggerableMechanism>(lst);
-                lst.Sort(MechanismComparer.Default);
-
+                var go = GameObjectUtil.GetGameObjectFromSource(target);
+                if (go != null)
+                {
+                    go.GetComponents<ITriggerableMechanism>(lst);
+                    lst.Sort(TriggerableMechanismOrderComparer.Default);
+                }
+                else if (target is ITriggerableMechanism)
+                    lst.Add(target as ITriggerableMechanism);
+                
                 if (instruction != null)
                 {
                     var e = lst.GetEnumerator();
                     while (e.MoveNext())
                     {
                         var t = e.Current;
-                        if (t.component != null && t.CanTrigger)
+                        if (t.CanTrigger)
                         {
                             if (t is IBlockingTriggerableMechanism)
                                 (t as IBlockingTriggerableMechanism).Trigger(sender, arg, instruction);
@@ -488,7 +485,7 @@ namespace com.spacepuppy.Scenario
                     while (e.MoveNext())
                     {
                         var t = e.Current;
-                        if (t.component != null && t.CanTrigger)
+                        if (t.CanTrigger)
                         {
                             t.Trigger(sender, arg);
                         }
@@ -577,6 +574,10 @@ namespace com.spacepuppy.Scenario
             if (go != null)
             {
                 ObjUtil.SmartDestroy(go);
+            }
+            else if(target is UnityEngine.Object)
+            {
+                ObjUtil.SmartDestroy(target as UnityEngine.Object);
             }
         }
         

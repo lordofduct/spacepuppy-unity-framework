@@ -73,7 +73,7 @@ namespace com.spacepuppyeditor.Spawn
                 {
                     EditorGUILayout.LabelField("Selectors:");
                     EditorGUI.indentLevel++;
-                    foreach (var s in targ.GetComponentsAlt<ISpawnPointSelector>())
+                    foreach (var s in targ.GetComponents<ISpawnPointSelector>())
                     {
                         EditorGUILayout.LabelField(s.GetType().Name);
                     }

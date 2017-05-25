@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenes
 {
 
-    [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, LifeCycleReadOnly = true)]
+    [Singleton.Config(SingletonLifeCycleRule.LivesForever, LifeCycleReadOnly = true)]
     public class SPSceneManager : Singleton
     {
 

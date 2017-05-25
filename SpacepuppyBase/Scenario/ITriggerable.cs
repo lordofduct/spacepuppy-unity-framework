@@ -1,7 +1,7 @@
 ﻿namespace com.spacepuppy.Scenario
 {
 
-    public interface ITriggerableMechanism : IComponent
+    public interface ITriggerableMechanism
     {
 
         int Order { get; }

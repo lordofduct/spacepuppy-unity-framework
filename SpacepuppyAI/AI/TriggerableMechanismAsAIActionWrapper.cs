@@ -55,7 +55,11 @@ namespace com.spacepuppy.AI
         {
             get
             {
-                return (_mechanism != null && _mechanism.component != null) ? _mechanism.component.name + "(a_i_Triggerable_Wrapper)" : "null (a_i_Triggerable_Wrapper)";
+                var go = com.spacepuppy.Utils.GameObjectUtil.GetGameObjectFromSource(_mechanism);
+                if (go != null)
+                    return go.name + "(a_i_Triggerable_Wrapper)";
+                else
+                    return "null (a_i_Triggerable_Wrapper)";
             }
         }
 

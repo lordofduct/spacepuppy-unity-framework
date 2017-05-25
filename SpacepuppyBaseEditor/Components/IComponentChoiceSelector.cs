@@ -11,7 +11,7 @@ namespace com.spacepuppyeditor.Components
     public interface IComponentChoiceSelector
     {
 
-        void BeforeGUI(SelectableComponentPropertyDrawer drawer, SerializedProperty property, System.Type restrictionType);
+        void BeforeGUI(SelectableComponentPropertyDrawer drawer, SerializedProperty property, System.Type restrictionType, bool allowProxy);
 
         Component[] GetComponents();
         GUIContent[] GetPopupEntries();
@@ -28,18 +28,20 @@ namespace com.spacepuppyeditor.Components
         private SelectableComponentPropertyDrawer _drawer;
         private SerializedProperty _property;
         private System.Type _restrictionType;
+        private bool _allowProxy;
         private Component[] _components;
 
         public SelectableComponentPropertyDrawer Drawer { get { return _drawer; } }
         public SerializedProperty Property { get { return _property; } }
         public System.Type RestrictionType { get { return _restrictionType; } }
+        public bool AllowProxy { get { return _allowProxy; } }
         public Component[] Components { get { return _components; } }
 
 
 
         protected virtual Component[] DoGetComponents()
         {
-            return GetComponentsFromSerializedProperty(_property, _restrictionType, _drawer.ForceOnlySelf, _drawer.SearchChildren);
+            return GetComponentsFromSerializedProperty(_property, _restrictionType, _drawer.ForceOnlySelf, _drawer.SearchChildren, _allowProxy);
         }
 
         protected virtual void OnBeforeGUI()
@@ -54,11 +56,12 @@ namespace com.spacepuppyeditor.Components
 
         #region IComponentChoiceSelector Interface
 
-        void IComponentChoiceSelector.BeforeGUI(SelectableComponentPropertyDrawer drawer, SerializedProperty property, System.Type restrictionType)
+        void IComponentChoiceSelector.BeforeGUI(SelectableComponentPropertyDrawer drawer, SerializedProperty property, System.Type restrictionType, bool allowProxy)
         {
             _drawer = drawer;
             _property = property;
             _restrictionType = restrictionType;
+            _allowProxy = allowProxy;
             _components = this.DoGetComponents();
             this.OnBeforeGUI();
         }
@@ -121,7 +124,7 @@ namespace com.spacepuppyeditor.Components
                 return GameObjectUtil.GetGameObjectFromSource(property.objectReferenceValue);
         }
 
-        public static Component[] GetComponentsFromSerializedProperty(SerializedProperty property, System.Type restrictionType, bool forceSelfOnly, bool searchChildren)
+        public static Component[] GetComponentsFromSerializedProperty(SerializedProperty property, System.Type restrictionType, bool forceSelfOnly, bool searchChildren, bool allowProxy)
         {
             if (!ComponentUtil.IsAcceptableComponentType(restrictionType))
                 return ArrayUtil.Empty<Component>();
@@ -129,12 +132,22 @@ namespace com.spacepuppyeditor.Components
             var go = GetGameObjectFromSource(property, forceSelfOnly);
             if (go == null) return ArrayUtil.Empty<Component>();
 
-            if (searchChildren)
-                return go.GetComponentsInChildren(restrictionType);
+            if(allowProxy)
+            {
+                if (searchChildren)
+                    return (from c in go.GetComponentsInChildren<Component>() where ObjUtil.IsType(c, restrictionType) || c is IProxy select c).ToArray();
+                else
+                    return (from c in go.GetComponents<Component>() where ObjUtil.IsType(c, restrictionType) || c is IProxy select c).ToArray();
+            }
             else
-                return go.GetComponents(restrictionType);
+            {
+                if (searchChildren)
+                    return go.GetComponentsInChildren(restrictionType);
+                else
+                    return go.GetComponents(restrictionType);
+            }
         }
-
+        
         private static Dictionary<System.Type, int> _uniqueCount = new Dictionary<System.Type, int>();
         public static IEnumerable<string> GetUniqueComponentNames(Component[] components)
         {

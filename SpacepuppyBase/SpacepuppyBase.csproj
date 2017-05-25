@@ -220,6 +220,7 @@
     <Compile Include="Scenario\ActivateEvent.cs" />
     <Compile Include="Scenario\AutoTriggerableMechanism.cs" />
     <Compile Include="Scenario\AutoTriggerComponent.cs" />
+    <Compile Include="Scenario\Comparers.cs" />
     <Compile Include="Scenario\IAutoSequenceSignal.cs" />
     <Compile Include="Scenario\i_AutoSequenceSignal.cs" />
     <Compile Include="Scenario\i_ChangeStateOfSimpleStateMachine.cs" />

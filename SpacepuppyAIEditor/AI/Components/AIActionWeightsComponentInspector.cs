@@ -76,7 +76,7 @@ namespace com.spacepuppyeditor.AI.Components
 
             var propActions = this.serializedObject.FindProperty(PROP_ACTIONS);
             var propWeights = this.serializedObject.FindProperty(PROP_WEIGHTS);
-            var currentActions = go.GetComponentsAlt<IAIAction>();
+            var currentActions = go.GetComponents<IAIAction>();
             IAIAction[] serializedActions = new IAIAction[propActions.arraySize];
             for(int i = 0; i < serializedActions.Length; i++)
             {

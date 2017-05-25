@@ -227,8 +227,8 @@ namespace com.spacepuppyeditor.Scenario
         {
             var element = _targetList.serializedProperty.GetArrayElementAtIndex(index);
 
-            var trigProp = element.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var actProp = element.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
+            var targProp = element.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var actProp = element.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
 
@@ -237,7 +237,7 @@ namespace com.spacepuppyeditor.Scenario
             const float PERC_FIELD_WIDTH = 45f;
             const float FULLWEIGHT_WIDTH = WEIGHT_FIELD_WIDTH + PERC_FIELD_WIDTH;
 
-            EditorGUI.BeginProperty(area, GUIContent.none, trigProp);
+            EditorGUI.BeginProperty(area, GUIContent.none, targProp);
 
             Rect trigRect;
             GUIContent labelContent = EditorHelper.TempContent(index.ToString("00: ") + act.ToString()); //(act == TriggerActivationType.TriggerAllOnTarget) ? EditorHelper.TempContent("Target") : EditorHelper.TempContent(string.Format("Target ({0})", act));
@@ -267,95 +267,23 @@ namespace com.spacepuppyeditor.Scenario
             }
 
             //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
-            var targGo = GameObjectUtil.GetGameObjectFromSource(trigProp.objectReferenceValue);
+            /*
+            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
             var newTargGo = EditorGUI.ObjectField(trigRect, GUIContent.none, targGo, typeof(GameObject), true) as GameObject;
             if (newTargGo != targGo)
             {
                 targGo = newTargGo;
-                trigProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
-            }
-            EditorGUI.EndProperty();
-
-            /*
-            const float MARGIN = 1.0f;
-            const float SMALL_LABEL_WIDTH = 120f;
-            const float WEIGHT_FIELD_WIDTH = 60f;
-            const float PERC_FIELD_WIDTH = 45f;
-            
-            Rect trigRect;
-            GUIContent labelContent = (act == TriggerActivationType.TriggerAllOnTarget) ? EditorHelper.TempContent("Target") : EditorHelper.TempContent("Advanced Target", "A target is not set, see advanced settings section to set a target.");
-            if (_drawWeight && area.width > SMALL_LABEL_WIDTH)
-            {
-                var totalwidth = area.width - SMALL_LABEL_WIDTH;
-                var top = area.yMin + MARGIN;
-                var labelRect = new Rect(area.xMin, top, SMALL_LABEL_WIDTH, EditorGUIUtility.singleLineHeight);
-                var weightRect = new Rect(labelRect.xMax, top, Mathf.Min(totalwidth, WEIGHT_FIELD_WIDTH), EditorGUIUtility.singleLineHeight);
-                var percRect = new Rect(weightRect.xMax, top, Mathf.Min(totalwidth - weightRect.width, PERC_FIELD_WIDTH), EditorGUIUtility.singleLineHeight);
-                trigRect = new Rect(percRect.xMax, top, Mathf.Max(0f, totalwidth - weightRect.width - percRect.width), EditorGUIUtility.singleLineHeight);
-
-                var weightProp = element.FindPropertyRelative(PROP_WEIGHT);
-                float weight = weightProp.floatValue;
-
-                EditorGUI.LabelField(labelRect, labelContent);
-                weightProp.floatValue = EditorGUI.FloatField(weightRect, weight);
-                float p = (_totalWeight > 0f) ? (100f * weight / _totalWeight) : ((index == 0) ? 100f : 0f);
-                EditorGUI.LabelField(percRect, string.Format("{0:0.#}%", p));
-            }
-            else
-            {
-                //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
-                var top = area.yMin + MARGIN;
-                var labelRect = new Rect(area.xMin, top, Mathf.Min(area.width, EditorGUIUtility.labelWidth), EditorGUIUtility.singleLineHeight);
-                trigRect = new Rect(labelRect.xMax, top, Mathf.Max(0f, area.width - labelRect.width), EditorGUIUtility.singleLineHeight);
-
-                EditorGUI.LabelField(labelRect, labelContent);
-            }
-
-            if (act == TriggerActivationType.TriggerAllOnTarget || act == TriggerActivationType.EnableTarget || act == TriggerActivationType.DestroyTarget)
-            {
-                //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
-                EditorGUI.BeginProperty(trigRect, GUIContent.none, trigProp);
-                var targGo = GameObjectUtil.GetGameObjectFromSource(trigProp.objectReferenceValue);
-                var newTargGo = EditorGUI.ObjectField(trigRect, GUIContent.none, targGo, typeof(GameObject), true) as GameObject;
-                if (newTargGo != targGo)
-                {
-                    targGo = newTargGo;
-                    trigProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
-                }
-                EditorGUI.EndProperty();
-            }
-            else
-            {
-                //Draw Triggerable - this forces the user to use the advanced settings, not for newbs
-                if (trigProp.objectReferenceValue != null)
-                {
-                    var go = GameObjectUtil.GetGameObjectFromSource(trigProp.objectReferenceValue);
-                    var trigType = trigProp.objectReferenceValue.GetType();
-                    GUIContent extraLabel;
-                    switch (act)
-                    {
-                        case TriggerActivationType.SendMessage:
-                            extraLabel = new GUIContent("(SendMessage) " + go.name);
-                            break;
-                        case TriggerActivationType.TriggerSelectedTarget:
-                            extraLabel = new GUIContent("(TriggerSelectedTarget) " + go.name + " -> " + trigType.Name);
-                            break;
-                        case TriggerActivationType.CallMethodOnSelectedTarget:
-                            extraLabel = new GUIContent("(CallMethodOnSelectedTarget) " + go.name + " -> " + trigType.Name + "." + element.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME).stringValue);
-                            break;
-                        default:
-                            extraLabel = GUIContent.none;
-                            break;
-                    }
-                    EditorGUI.LabelField(trigRect, extraLabel);
-                }
-                else
-                {
-                    EditorGUI.LabelField(trigRect, EditorHelper.TempContent("No Target"), new GUIStyle("Label") { alignment = TextAnchor.MiddleCenter });
-                }
+                targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
             }
             */
-
+            EditorGUI.BeginChangeCheck();
+            var targObj = TriggerTargetPropertyDrawer.TargetObjectField(trigRect, GUIContent.none, targProp.objectReferenceValue);
+            if(EditorGUI.EndChangeCheck())
+            {
+                targProp.objectReferenceValue = TriggerTargetPropertyDrawer.IsValidTriggerTarget(targObj, act) ? targObj : null;
+            }
+            EditorGUI.EndProperty();
+            
             ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_targetList, area, index, isActive, isFocused);
         }
 

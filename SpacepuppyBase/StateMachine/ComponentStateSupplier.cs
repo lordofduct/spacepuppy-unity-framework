@@ -83,7 +83,7 @@ namespace com.spacepuppy.StateMachine
         public TSub GetState<TSub>() where TSub : class, T
         {
             if (_container == null) return null;
-            return _container.GetComponentAlt<TSub>();
+            return _container.GetComponent<TSub>();
         }
 
         public T GetState(System.Type tp)
@@ -111,13 +111,13 @@ namespace com.spacepuppy.StateMachine
         public IEnumerator<T> GetEnumerator()
         {
             if (_container == null) return Enumerable.Empty<T>().GetEnumerator();
-            return (_container.GetComponentsAlt<T>() as IEnumerable<T>).GetEnumerator();
+            return (_container.GetComponents<T>() as IEnumerable<T>).GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             if (_container == null) return Enumerable.Empty<T>().GetEnumerator();
-            return _container.GetComponentsAlt<T>().GetEnumerator();
+            return _container.GetComponents<T>().GetEnumerator();
         }
 
         #endregion
@@ -126,12 +126,12 @@ namespace com.spacepuppy.StateMachine
 
         public static IEnumerable<T> GetComponentsOnTarg(GameObject container)
         {
-            return container.GetComponentsAlt<T>();
+            return container.GetComponents<T>();
         }
 
         public static IEnumerable<TSub> GetComponentsOnTarg<TSub>(GameObject container) where TSub : class, T
         {
-            return container.GetComponentsAlt<TSub>();
+            return container.GetComponents<TSub>();
         }
 
         public static IEnumerable<T> GetComponentsOnTarg(System.Type tp, GameObject container)

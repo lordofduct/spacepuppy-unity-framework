@@ -28,7 +28,7 @@ namespace com.spacepuppyeditor.Movement
 
             var ids = new List<string>();
             ids.Add("None");
-            ids.AddRange(from c in this.target.GetComponentsAlt<IMovementStyle>() select c.GetType().Name);
+            ids.AddRange(from c in this.target.GetComponents<IMovementStyle>() select c.GetType().Name);
 
             int i = (target.DefaultMovementStyle != null) ? ids.IndexOf(target.DefaultMovementStyle.GetType().Name) : -1;
             if (i < 0) i = 0;
@@ -46,7 +46,7 @@ namespace com.spacepuppyeditor.Movement
                 else
                 {
                     var id = ids[i];
-                    target.DefaultMovementStyle = (from c in this.target.GetComponentsAlt<IMovementStyle>() where c.GetType().Name == id select c).FirstOrDefault();
+                    target.DefaultMovementStyle = (from c in this.target.GetComponents<IMovementStyle>() where c.GetType().Name == id select c).FirstOrDefault();
                 }
 
                 this.serializedObject.Update();

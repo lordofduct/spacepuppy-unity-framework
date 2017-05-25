@@ -174,7 +174,6 @@
     <Compile Include="Scenario\TriggerComponentInspector.cs" />
     <Compile Include="Scenario\TriggerPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerTargetPropertyDrawer.cs" />
-    <Compile Include="Scenario\TriggerTargetProps.cs" />
     <Compile Include="Scenario\t_OnEventTriggerInspector.cs" />
     <Compile Include="Scenario\t_OnNotificationTriggerInspector.cs" />
     <Compile Include="Scenario\t_StateMachineInspector.cs" />

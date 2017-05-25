@@ -8,7 +8,7 @@ using com.spacepuppy.Collections;
 namespace com.spacepuppy.Tween
 {
 
-    [Singleton.Config(DefaultLifeCycle = SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
+    [Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
     public class SPTween : Singleton
     {
 

@@ -30,8 +30,30 @@ namespace com.spacepuppyeditor
 
 
         #region Fields
+        
+        private SelectableComponentPropertyDrawer _selectableDrawer;
+        
+        private System.Type _inheritsFromType;
+        private bool _allowProxy;
+        private bool _manuallyConfigured;
 
-        private Proxy.ConfigAttribute _configAttrib;
+        #endregion
+
+        #region CONSTRUCTOR
+
+        #endregion
+
+        #region Properties
+
+        public System.Type InheritsFromType
+        {
+            get { return _inheritsFromType; }
+            set
+            {
+                _inheritsFromType = value;
+                _manuallyConfigured = true;
+            }
+        }
 
         #endregion
 
@@ -39,7 +61,19 @@ namespace com.spacepuppyeditor
 
         private void Init(SerializedProperty property)
         {
-            _configAttrib = this.fieldInfo.GetCustomAttributes(typeof(Proxy.ConfigAttribute), false).FirstOrDefault() as Proxy.ConfigAttribute;
+            if (_manuallyConfigured) return;
+
+            var attrib = this.fieldInfo.GetCustomAttributes(typeof(Proxy.ConfigAttribute), false).FirstOrDefault() as Proxy.ConfigAttribute;
+            if(attrib != null)
+            {
+                _inheritsFromType = attrib.TargetType;
+                _allowProxy = attrib.AllowProxy;
+            }
+            else
+            {
+                _inheritsFromType = null;
+                _allowProxy = true;
+            }
         }
 
 
@@ -48,8 +82,6 @@ namespace com.spacepuppyeditor
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            this.Init(property);
-
             return EditorGUIUtility.singleLineHeight;
         }
 
@@ -85,9 +117,15 @@ namespace com.spacepuppyeditor
             {
                 case SearchByAlt.Direct:
                     {
-                        var tp = (_configAttrib != null) ? _configAttrib.TargetType : typeof(UnityEngine.Object);
-                        //targetProp.objectReferenceValue = EditorGUI.ObjectField(r1, targetProp.objectReferenceValue, tp, true);
-                        SPEditorGUI.PropertyField(r1, targetProp, GUIContent.none);
+                        //SPEditorGUI.PropertyField(r1, targetProp, GUIContent.none);
+                        if(_selectableDrawer == null)
+                        {
+                            _selectableDrawer = new SelectableComponentPropertyDrawer();
+                        }
+                        _selectableDrawer.AllowSceneObjects = true;
+                        _selectableDrawer.RestrictionType = _inheritsFromType;
+                        _selectableDrawer.AllowProxy = _allowProxy;
+                        _selectableDrawer.OnGUI(r1, targetProp, GUIContent.none);
                     }
                     break;
                 case SearchByAlt.Tag:

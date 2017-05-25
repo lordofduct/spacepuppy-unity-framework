@@ -186,6 +186,7 @@ namespace com.spacepuppy
     {
         public System.Type InheritsFromType;
         public bool HideTypeDropDown;
+        public bool AllowProxy;
 
         public TypeRestrictionAttribute(System.Type inheritsFromType)
         {
@@ -213,6 +214,7 @@ namespace com.spacepuppy
         public bool AllowSceneObjects = true;
         public bool ForceOnlySelf = false;
         public bool SearchChildren = false;
+        public bool AllowProxy;
 
         public SelectableComponentAttribute()
         {
@@ -228,7 +230,9 @@ namespace com.spacepuppy
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class SelectableObjectAttribute : SPPropertyAttribute
     {
+        public System.Type InheritsFromType;
         public bool AllowSceneObjects = true;
+        public bool AllowProxy;
 
         public SelectableObjectAttribute()
         {

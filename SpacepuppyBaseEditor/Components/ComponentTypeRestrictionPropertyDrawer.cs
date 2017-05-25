@@ -74,26 +74,27 @@ namespace com.spacepuppyeditor.Components
             if (attrib.HideTypeDropDown || !objIsComponentType)
             {
                 //draw object field
+                UnityEngine.Object targ;
                 if(fieldIsComponentType)
                 {
                     var fieldCompType = (TypeUtil.IsType(fieldType, typeof(Component))) ? fieldType : typeof(Component);
-                    var comp = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, inheritsFromType, true, fieldCompType);
-                    if (comp == null)
-                        property.objectReferenceValue = null;
-                    else
-                        property.objectReferenceValue = ObjUtil.GetAsFromSource(inheritsFromType, comp) as UnityEngine.Object;
-                    //else if (TypeUtil.IsType(comp.GetType(), inheritsFromType))
-                    //    property.objectReferenceValue = comp;
-                    //else
-                    //    property.objectReferenceValue = comp.GetComponent(inheritsFromType);
+                    targ = SPEditorGUI.ComponentField(position, label, property.objectReferenceValue as Component, inheritsFromType, true, fieldCompType);
                 }
                 else
                 {
-                    var obj = EditorGUI.ObjectField(position, label, property.objectReferenceValue, fieldType, true);
-                    if (obj == null)
-                        property.objectReferenceValue = null;
-                    else
-                        property.objectReferenceValue = ObjUtil.GetAsFromSource(inheritsFromType, obj) as UnityEngine.Object;
+                    targ = EditorGUI.ObjectField(position, label, property.objectReferenceValue, fieldType, true);
+                }
+
+                if (targ == null)
+                {
+                    property.objectReferenceValue = null;
+                }
+                else
+                {
+                    var o = ObjUtil.GetAsFromSource(inheritsFromType, targ) as UnityEngine.Object;
+                    if (attrib.AllowProxy && o == null)
+                        o = ObjUtil.GetAsFromSource<IProxy>(targ) as UnityEngine.Object;
+                    property.objectReferenceValue = o;
                 }
             }
             else
@@ -105,6 +106,7 @@ namespace com.spacepuppyeditor.Components
                 }
 
                 _selectComponentDrawer.RestrictionType = inheritsFromType ?? typeof(Component);
+                _selectComponentDrawer.AllowProxy = attrib.AllowProxy;
                 _selectComponentDrawer.ShowXButton = true;
 
                 _selectComponentDrawer.OnGUI(position, property, label);

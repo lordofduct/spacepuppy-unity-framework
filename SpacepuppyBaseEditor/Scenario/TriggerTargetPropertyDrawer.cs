@@ -17,7 +17,7 @@ namespace com.spacepuppyeditor.Scenario
     public class TriggerTargetPropertyDrawer : PropertyDrawer
     {
 
-        public const string PROP_TRIGGERABLE = "_triggerable";
+        public const string PROP_TRIGGERABLETARG = "_triggerable";
         public const string PROP_TRIGGERABLEARGS = "_triggerableArgs";
         public const string PROP_ACTIVATIONTYPE = "_activationType";
         public const string PROP_METHODNAME = "_methodName";
@@ -37,7 +37,7 @@ namespace com.spacepuppyeditor.Scenario
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            var actProp = property.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
+            var actProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
 
@@ -49,13 +49,15 @@ namespace com.spacepuppyeditor.Scenario
                     h += EditorGUIUtility.singleLineHeight * 2.0f;
                     break;
                 case TriggerActivationType.TriggerSelectedTarget:
-                    h += EditorGUIUtility.singleLineHeight * 3.0f;
+                    //h += EditorGUIUtility.singleLineHeight * 3.0f;
+                    h += EditorGUIUtility.singleLineHeight * 2.0f;
                     break;
                 case TriggerActivationType.SendMessage:
                     h += EditorGUIUtility.singleLineHeight * 3.0f;
                     break;
                 case TriggerActivationType.CallMethodOnSelectedTarget:
-                    h += EditorGUIUtility.singleLineHeight * (3.0f + _callMethodModeExtraLines);
+                    //h += EditorGUIUtility.singleLineHeight * (3.0f + _callMethodModeExtraLines);
+                    h += EditorGUIUtility.singleLineHeight * (2.0f + _callMethodModeExtraLines);
                     break;
                 case TriggerActivationType.EnableTarget:
                     h += EditorGUIUtility.singleLineHeight * 2.0f;
@@ -74,7 +76,7 @@ namespace com.spacepuppyeditor.Scenario
 
             //Draw ActivationType Popup
             var r0 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
-            var actProp = property.FindPropertyRelative(TriggerTargetProps.PROP_ACTIVATIONTYPE);
+            var actProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
             EditorGUI.PropertyField(r0, actProp);
             //var act = (TriggerActivationType)actProp.enumValueIndex;
             var act = actProp.GetEnumValue<TriggerActivationType>();
@@ -110,14 +112,10 @@ namespace com.spacepuppyeditor.Scenario
         private void DrawAdvanced_TriggerAll(Rect area, SerializedProperty property)
         {
             //Draw Target
+            /*
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var targLabel = new GUIContent("Triggerable Target");
-            //targProp.objectReferenceValue = SPEditorGUI.ComponentField(targRect,
-            //                                                           targLabel,
-            //                                                            ValidateTriggerableTargAsMechanism(targProp.objectReferenceValue),
-            //                                                            typeof(Transform),
-            //                                                            true);
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var targLabel = EditorHelper.TempContent("Triggerable Target");
             var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
             var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
             if (newTargGo != targGo)
@@ -125,12 +123,18 @@ namespace com.spacepuppyeditor.Scenario
                 targGo = newTargGo;
                 targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
             }
-
+            */
+            var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var targLabel = EditorHelper.TempContent("Triggerable Target");
+            targProp.objectReferenceValue = TargetObjectField(targRect, targLabel, targProp.objectReferenceValue);
+            if (!GameObjectUtil.IsGameObjectSource(targProp.objectReferenceValue) && !(targProp.objectReferenceValue is ITriggerableMechanism))
+                targProp.objectReferenceValue = null;
 
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, targRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
+            var argArrayProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLEARGS);
             if (argArrayProp.arraySize == 0)
             {
                 EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
@@ -159,24 +163,24 @@ namespace com.spacepuppyeditor.Scenario
 
         private void DrawAdvanced_TriggerSelected(Rect area, SerializedProperty property)
         {
-
+            /*
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var targLabel = new GUIContent("Triggerable Target");
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var targLabel = EditorHelper.TempContent("Triggerable Target");
             var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
             var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
             if (newTargGo != targGo)
             {
                 targGo = newTargGo;
-                targProp.objectReferenceValue = (targGo != null) ? targGo.GetComponentAlt<ITriggerableMechanism>() as Component : null;
+                targProp.objectReferenceValue = (targGo != null) ? targGo.GetComponent<ITriggerableMechanism>() as Component : null;
             }
 
             var targCompPopupRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
             if (targProp.objectReferenceValue != null)
             {
                 var selectedType = targProp.objectReferenceValue.GetType();
-                var availableMechanismTypes = (from c in targGo.GetComponentsAlt<ITriggerableMechanism>() select c.GetType()).ToArray();
+                var availableMechanismTypes = (from c in targGo.GetComponents<ITriggerableMechanism>() select c.GetType()).ToArray();
                 var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => tp.Name).ToArray();
 
                 var index = System.Array.IndexOf(availableMechanismTypes, selectedType);
@@ -192,11 +196,85 @@ namespace com.spacepuppyeditor.Scenario
                 EditorGUI.LabelField(targCompPopupRect, "Target Component", "(First Select a Target)");
             }
 
-
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
+            var argArrayProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLEARGS);
+            if (argArrayProp.arraySize == 0)
+            {
+                EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 1;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
+            else
+            {
+                if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
+                var argProp = argArrayProp.GetArrayElementAtIndex(0);
+                //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
+                _variantDrawer.RestrictVariantType = false;
+                _variantDrawer.ForcedObjectType = null;
+                _variantDrawer.OnGUI(argRect, argProp, _defaultArgLabel);
+
+                if (GUI.Button(btnRect, _argBtnLabel))
+                {
+                    argArrayProp.arraySize = 0;
+                    argArrayProp.serializedObject.ApplyModifiedProperties();
+                }
+            }
+            */
+
+
+            var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            targRect = EditorGUI.PrefixLabel(targRect, EditorHelper.TempContent("Triggerable Target"));
+            
+            //validate
+            if (!GameObjectUtil.IsGameObjectSource(targProp.objectReferenceValue) && !(targProp.objectReferenceValue is ITriggerableMechanism))
+                targProp.objectReferenceValue = null;
+
+            //draw obj field
+            if (targProp.objectReferenceValue != null)
+            {
+                if (SPEditorGUI.XButton(ref targRect, "Clear Selected Object", true))
+                {
+                    targProp.objectReferenceValue = null;
+                    goto DrawTriggerableArg;
+                }
+
+                var targObj = targProp.objectReferenceValue;
+
+                var availableMechanisms = ObjUtil.GetAllFromSource<ITriggerableMechanism>(targObj);
+                var availableMechanismTypeNames = availableMechanisms.Select((o) => EditorHelper.TempContent(o.GetType().Name)).ToArray();
+
+                var index = System.Array.IndexOf(availableMechanisms, targObj);
+                EditorGUI.BeginChangeCheck();
+                index = EditorGUI.Popup(targRect, GUIContent.none, index, availableMechanismTypeNames);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    targObj = (index >= 0) ? availableMechanisms[index] as UnityEngine.Object : null;
+                    targProp.objectReferenceValue = targObj;
+                }
+            }
+            else
+            {
+                EditorGUI.BeginChangeCheck();
+                var targObj = TargetObjectField(targRect, GUIContent.none, targProp.objectReferenceValue);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    targObj = ObjUtil.GetAsFromSource<ITriggerableMechanism>(targObj) as UnityEngine.Object;
+                    targProp.objectReferenceValue = targObj;
+                }
+            }
+
+            
+            //Draw Triggerable Arg
+DrawTriggerableArg:
+            var argRect = new Rect(area.xMin, targRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
+            var argArrayProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLEARGS);
             if (argArrayProp.arraySize == 0)
             {
                 EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
@@ -227,19 +305,20 @@ namespace com.spacepuppyeditor.Scenario
         {
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var targLabel = new GUIContent("Triggerable Target");
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var targLabel = EditorHelper.TempContent("Triggerable Target");
             //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
             targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
+            
 
             //Draw MessageName
             var msgRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            EditorGUI.PropertyField(msgRect, property.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME), new GUIContent("Message", "Name of the message that should be sent."), false);
+            EditorGUI.PropertyField(msgRect, property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME), new GUIContent("Message", "Name of the message that should be sent."), false);
 
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, msgRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
             var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
+            var argArrayProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLEARGS);
             if (argArrayProp.arraySize == 0)
             {
                 EditorGUI.LabelField(argRect, _messageArgLabel, _undefinedArgLabel);
@@ -269,9 +348,10 @@ namespace com.spacepuppyeditor.Scenario
         private void DrawAdvanced_CallMethodOnSelected(Rect area, SerializedProperty property)
         {
             //Draw Target
+            /*
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var targLabel = new GUIContent("Triggerable Target");
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var targLabel = EditorHelper.TempContent("Triggerable Target");
             var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
             var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
             if (newTargGo != targGo)
@@ -294,13 +374,43 @@ namespace com.spacepuppyeditor.Scenario
             {
                 EditorGUI.LabelField(targCompPopupRect, "Target Component", "(First Select a Target)");
             }
+            */
+
+
+            var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            targRect = EditorGUI.PrefixLabel(targRect, EditorHelper.TempContent("Triggerable Target"));
+            
+            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
+            if(targGo != null)
+            {
+                if (SPEditorGUI.XButton(ref targRect, "Clear Selected Object", true))
+                {
+                    targProp.objectReferenceValue = null;
+                    goto DrawMethodName;
+                }
+
+                EditorGUI.BeginChangeCheck();
+                var selectedComp = SPEditorGUI.SelectComponentFromSourceField(targRect, GUIContent.none, targGo, targProp.objectReferenceValue as Component);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    targProp.objectReferenceValue = selectedComp;
+                }
+            }
+            else
+            {
+                targProp.objectReferenceValue = TargetObjectField(targRect, GUIContent.none, targProp.objectReferenceValue);
+            }
+
 
             //Draw Method Name
-            var methNameRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
+DrawMethodName:
+            //var methNameRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
+            var methNameRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
             System.Reflection.MemberInfo selectedMember = null;
             if (targProp.objectReferenceValue != null)
             {
-                var methProp = property.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME);
+                var methProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
 
                 //var tp = targProp.objectReferenceValue.GetType();
                 //var members = GetAvailableMethods(tp).ToArray();
@@ -330,7 +440,7 @@ namespace com.spacepuppyeditor.Scenario
                 _callMethodModeExtraLines = 1;
 
                 var argRect = new Rect(area.xMin, methNameRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-                var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
+                var argArrayProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLEARGS);
                 if (argArrayProp.arraySize > 0)
                 {
                     argArrayProp.arraySize = 0;
@@ -346,7 +456,7 @@ namespace com.spacepuppyeditor.Scenario
                 //MULTIPLE PARAMETERS - special case, does not support trigger event arg
                 _callMethodModeExtraLines = parr.Length;
 
-                var argArrayProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLEARGS);
+                var argArrayProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLEARGS);
 
                 if (argArrayProp.arraySize != parr.Length)
                 {
@@ -385,15 +495,15 @@ namespace com.spacepuppyeditor.Scenario
         {
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var targLabel = new GUIContent("Triggerable Target");
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var targLabel = EditorHelper.TempContent("Triggerable Target");
             //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
             targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
 
 
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            var argProp = property.FindPropertyRelative(TriggerTargetProps.PROP_METHODNAME);
+            var argProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
 
             var e = ConvertUtil.ToEnum<EnableMode>(argProp.stringValue, EnableMode.Enable);
             e = (EnableMode)EditorGUI.EnumPopup(argRect, "Mode", e);
@@ -404,8 +514,8 @@ namespace com.spacepuppyeditor.Scenario
         {
             //Draw Target
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(TriggerTargetProps.PROP_TRIGGERABLETARG);
-            var targLabel = new GUIContent("Triggerable Target");
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            var targLabel = EditorHelper.TempContent("Triggerable Target");
             //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
             targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
         }
@@ -414,15 +524,97 @@ namespace com.spacepuppyeditor.Scenario
 
         #region Utils
 
+        /// <summary>
+        /// Validates target object is appropriate for the activation type. Null is considered valid.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns>Returns false if invalid</returns>
+        public static bool ValidateTriggerTargetProperty(SerializedProperty property)
+        {
+            if (property == null) return false;
+
+            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
+            if (targProp.objectReferenceValue == null) return true;
+
+            var actProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
+            var act = actProp.GetEnumValue<TriggerActivationType>();
+            
+            if(!IsValidTriggerTarget(targProp.objectReferenceValue, act))
+            {
+                targProp.objectReferenceValue = null;
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static bool IsValidTriggerTarget(UnityEngine.Object obj, TriggerActivationType act)
+        {
+            if (obj == null) return true;
+            
+            switch (act)
+            {
+                case TriggerActivationType.TriggerAllOnTarget:
+                case TriggerActivationType.TriggerSelectedTarget:
+                    return (GameObjectUtil.IsGameObjectSource(obj) || obj is ITriggerableMechanism);
+                case TriggerActivationType.SendMessage:
+                    return GameObjectUtil.IsGameObjectSource(obj);
+                case TriggerActivationType.CallMethodOnSelectedTarget:
+                    return true;
+                case TriggerActivationType.EnableTarget:
+                case TriggerActivationType.DestroyTarget:
+                    return GameObjectUtil.IsGameObjectSource(obj);
+            }
+
+            return false;
+        }
+
+        public static UnityEngine.Object TargetObjectField(Rect position, GUIContent label, UnityEngine.Object target)
+        {
+            EditorGUI.BeginChangeCheck();
+            if (GameObjectUtil.IsGameObjectSource(target))
+                target = GameObjectUtil.GetGameObjectFromSource(target);
+            var result = EditorGUI.ObjectField(position, label, target, typeof(UnityEngine.Object), true);
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (GameObjectUtil.IsGameObjectSource(result))
+                {
+                    return GameObjectUtil.GetGameObjectFromSource(result).transform;
+                }
+                else
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                return target;
+            }
+        }
+
         private static Transform TransformField(Rect position, GUIContent label, UnityEngine.Object target)
         {
+            if (!GameObjectUtil.IsGameObjectSource(target))
+            {
+                GUI.changed = true;
+                target = null;
+            }
+
             var go = GameObjectUtil.GetGameObjectFromSource(target);
             go = EditorGUI.ObjectField(position, label, go, typeof(GameObject), true) as GameObject;
             return go != null ? go.transform : null;
         }
 
-        private static Component TransformOrProxyField(Rect position, GUIContent label, Component target)
+        private static UnityEngine.Object TransformOrProxyField(Rect position, GUIContent label, UnityEngine.Object target)
         {
+            if(!GameObjectUtil.IsGameObjectSource(target))
+            {
+                GUI.changed = true;
+                target = null;
+            }
+
             if(target == null)
             {
                 var go = EditorGUI.ObjectField(position, label, target, typeof(GameObject), true) as GameObject;
@@ -430,18 +622,19 @@ namespace com.spacepuppyeditor.Scenario
             }
             else
             {
-                if(target is IProxy || target.HasComponent<IProxy>())
+                var targGo = GameObjectUtil.GetGameObjectFromSource(target);
+                if(target is IProxy || targGo.HasComponent<IProxy>())
                 {
                     using (var lst = com.spacepuppy.Collections.TempCollection.GetList<IProxy>())
                     {
-                        target.GetComponents<IProxy>(lst);
+                        targGo.GetComponents<IProxy>(lst);
                         GUIContent[] entries = new GUIContent[lst.Count + 1];
                         int index = -1;
                         entries[0] = EditorHelper.TempContent("GameObject");
                         for(int i = 0; i < lst.Count; i++)
                         {
                             entries[i + 1] = EditorHelper.TempContent(string.Format("Proxy -> ({0})", lst[i].GetType().Name));
-                            if (index < 0 && target == lst[i])
+                            if (index < 0 && object.ReferenceEquals(target, lst[i]))
                                 index = i + 1;
                         }
                         if (index < 0)
@@ -451,26 +644,17 @@ namespace com.spacepuppyeditor.Scenario
                         if (index < 0 || index >= entries.Length)
                             return null;
 
-                        return (index == 0) ? target.transform : lst[index - 1] as Component;
+                        return (index == 0) ? targGo.transform : lst[index - 1] as UnityEngine.Object;
                     }
                 }
                 else
                 {
-                    var go = EditorGUI.ObjectField(position, label, target.gameObject, typeof(GameObject), true) as GameObject;
+                    var go = EditorGUI.ObjectField(position, label, targGo, typeof(GameObject), true) as GameObject;
                     return (go != null) ? go.transform : null;
                 }
             }
         }
-
-        internal static Component ValidateTriggerableTargAsMechanism(object value)
-        {
-            if (value == null) return null;
-            if (!(value is Component)) return null;
-
-            if (value is ITriggerableMechanism) return value as Component;
-            else return (value as Component).GetComponentAlt<ITriggerableMechanism>() as Component;
-        }
-
+        
         #endregion
 
     }

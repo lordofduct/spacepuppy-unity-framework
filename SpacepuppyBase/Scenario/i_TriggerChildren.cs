@@ -66,12 +66,28 @@ namespace com.spacepuppy.Scenario
                 var child = trans.FindChild(_specificTargetName);
                 if (child != null && child.gameObject.activeInHierarchy)
                 {
-                    foreach (var t in (from t in child.GetComponentsAlt<ITriggerableMechanism>() where t.CanTrigger orderby t.Order ascending select t))
+                    //foreach (var t in (from t in child.GetComponents<ITriggerableMechanism>() where t.CanTrigger orderby t.Order ascending select t))
+                    //{
+                    //    if (_passAlongTriggerArg)
+                    //        t.Trigger(this, arg);
+                    //    else
+                    //        t.Trigger(this, null);
+                    //}
+                    using (var lst = com.spacepuppy.Collections.TempCollection.GetList<ITriggerableMechanism>())
                     {
-                        if (_passAlongTriggerArg)
-                            t.Trigger(this, arg);
-                        else
-                            t.Trigger(this, null);
+                        child.GetChildComponents<ITriggerableMechanism>(lst);
+                        lst.Sort(TriggerableMechanismOrderComparer.Default);
+                        var e = lst.GetEnumerator();
+                        if(e.MoveNext())
+                        {
+                            if(e.Current.CanTrigger)
+                            {
+                                if (_passAlongTriggerArg)
+                                    e.Current.Trigger(this, arg);
+                                else
+                                    e.Current.Trigger(this, null);
+                            }
+                        }
                     }
                 }
             }
@@ -81,12 +97,28 @@ namespace com.spacepuppy.Scenario
                 {
                     if (child != null && child.gameObject.activeInHierarchy)
                     {
-                        foreach (var t in (from t in child.GetComponentsAlt<ITriggerableMechanism>() where t.CanTrigger orderby t.Order ascending select t))
+                        //foreach (var t in (from t in child.GetComponents<ITriggerableMechanism>() where t.CanTrigger orderby t.Order ascending select t))
+                        //{
+                        //    if (_passAlongTriggerArg)
+                        //        t.Trigger(this, arg);
+                        //    else
+                        //        t.Trigger(this, null);
+                        //}
+                        using (var lst = com.spacepuppy.Collections.TempCollection.GetList<ITriggerableMechanism>())
                         {
-                            if (_passAlongTriggerArg)
-                                t.Trigger(this, arg);
-                            else
-                                t.Trigger(this, null);
+                            child.GetChildComponents<ITriggerableMechanism>(lst);
+                            lst.Sort(TriggerableMechanismOrderComparer.Default);
+                            var e = lst.GetEnumerator();
+                            if (e.MoveNext())
+                            {
+                                if (e.Current.CanTrigger)
+                                {
+                                    if (_passAlongTriggerArg)
+                                        e.Current.Trigger(this, arg);
+                                    else
+                                        e.Current.Trigger(this, null);
+                                }
+                            }
                         }
                     }
                 }
@@ -120,7 +152,7 @@ namespace com.spacepuppy.Scenario
         }
 
         #endregion
-
+        
     }
 
 }

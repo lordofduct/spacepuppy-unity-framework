@@ -17,9 +17,10 @@ namespace com.spacepuppyeditor.Components
 
         public const float DEFAULT_POPUP_WIDTH_SCALE = 0.4f;
 
-        public bool AllowSceneObject = true;
+        public bool AllowSceneObjects = true;
         public bool ForceOnlySelf;
         public bool SearchChildren;
+        public bool AllowProxy;
         public bool ShowXButton = true;
         public bool XButtonOnRightSide = true;
         public IComponentChoiceSelector ChoiceSelector;
@@ -29,7 +30,7 @@ namespace com.spacepuppyeditor.Components
         /// Otherwise it just remains a simple object field.
         /// </summary>
         public bool AllowNonComponents;
-
+        
         private System.Type _restrictionType;
 
         public System.Type RestrictionType
@@ -77,9 +78,10 @@ namespace com.spacepuppyeditor.Components
             {
                 //created as part as a PropertyHandler
                 var attrib = (this.attribute as SelectableComponentAttribute);
-                this.AllowSceneObject = attrib.AllowSceneObjects;
+                this.AllowSceneObjects = attrib.AllowSceneObjects;
                 this.ForceOnlySelf = attrib.ForceOnlySelf;
                 this.SearchChildren = attrib.SearchChildren;
+                this.AllowProxy = attrib.AllowProxy;
                 if (attrib.InheritsFromType != null) this.RestrictionType = attrib.InheritsFromType;
             }
 
@@ -127,7 +129,7 @@ namespace com.spacepuppyeditor.Components
 
                 if (property.objectReferenceValue == null)
                 {
-                    property.objectReferenceValue = targGo.GetComponent(this.RestrictionType);
+                    property.objectReferenceValue = this.GetTargetFromSource(targGo);
                 }
             }
 
@@ -150,7 +152,7 @@ namespace com.spacepuppyeditor.Components
                 }
                 else
                 {
-                    this.ChoiceSelector.BeforeGUI(this, property, this.ComponentRestrictionType);
+                    this.ChoiceSelector.BeforeGUI(this, property, this.ComponentRestrictionType, this.AllowProxy);
                     var components = this.ChoiceSelector.GetComponents();
 
                     var fullsize = position;
@@ -192,7 +194,7 @@ namespace com.spacepuppyeditor.Components
             }
             else
             {
-                this.ChoiceSelector.BeforeGUI(this, property, this.ComponentRestrictionType);
+                this.ChoiceSelector.BeforeGUI(this, property, this.ComponentRestrictionType, this.AllowProxy);
                 var components = this.ChoiceSelector.GetComponents();
 
                 var fullsize = position;
@@ -237,8 +239,8 @@ namespace com.spacepuppyeditor.Components
         {
             if (ComponentUtil.IsAcceptableComponentType(this.RestrictionType))
             {
-                var fieldObjType = (!this.SearchChildren && TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Component))) ? this.RestrictionType : typeof(UnityEngine.GameObject);
-                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObject);
+                var fieldObjType = (!this.SearchChildren && !this.AllowProxy && TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Component))) ? this.RestrictionType : typeof(UnityEngine.GameObject);
+                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObjects);
                 if(this.ForceOnlySelf)
                 {
                     var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
@@ -246,27 +248,18 @@ namespace com.spacepuppyeditor.Components
                     if(targGo == ngo ||
                        (this.SearchChildren && targGo.IsParentOf(ngo)))
                     {
-                        //property.objectReferenceValue = obj;
-                        var o = obj;
-                        if (this.SearchChildren && o == null)
-                            o = ngo.GetComponentInChildren(this.RestrictionType);
-                        property.objectReferenceValue = o;
+                        property.objectReferenceValue = this.GetTargetFromSource(obj);
                     }
                 }
                 else
                 {
-                    //property.objectReferenceValue = obj;
-                    //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
-                    var o = ObjUtil.GetAsFromSource(this.RestrictionType, obj) as UnityEngine.Object;
-                    if (this.SearchChildren && o == null && GameObjectUtil.GetGameObjectFromSource(obj) != null)
-                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(this.RestrictionType);
-                    property.objectReferenceValue = o;
+                    property.objectReferenceValue = this.GetTargetFromSource(obj);
                 }
             }
             else if (this.AllowNonComponents)
             {
-                var fieldObjType = (TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Object))) ? this.RestrictionType : typeof(UnityEngine.Object);
-                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObject);
+                var fieldObjType = (!this.AllowProxy && TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Object))) ? this.RestrictionType : typeof(UnityEngine.Object);
+                var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObjects);
                 if(this.ForceOnlySelf)
                 {
                     var targGo = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
@@ -274,28 +267,18 @@ namespace com.spacepuppyeditor.Components
                     if (targGo == ngo ||
                        (this.SearchChildren && targGo.IsParentOf(ngo)))
                     {
-                        //property.objectReferenceValue = obj;
-                        //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
-                        var o = ObjUtil.GetAsFromSource(this.RestrictionType, obj) as UnityEngine.Object;
-                        if (this.SearchChildren && o == null)
-                            o = ngo.GetComponentInChildren(this.RestrictionType);
-                        property.objectReferenceValue = o;
+                        property.objectReferenceValue = this.GetTargetFromSource(obj);
                     }
                 }
                 else
                 {
-                    //property.objectReferenceValue = obj;
-                    //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, obj) as UnityEngine.Object;
-                    var o = ObjUtil.GetAsFromSource(this.RestrictionType, obj) as UnityEngine.Object;
-                    if (this.SearchChildren && o == null && GameObjectUtil.GetGameObjectFromSource(obj) != null)
-                        o = GameObjectUtil.GetGameObjectFromSource(obj).GetComponentInChildren(this.RestrictionType);
-                    property.objectReferenceValue = o;
+                    property.objectReferenceValue = this.GetTargetFromSource(obj);
                 }
             }
             else
             {
                 var ogo = GameObjectUtil.GetGameObjectFromSource(property.objectReferenceValue);
-                var ngo = EditorGUI.ObjectField(position, ogo, typeof(GameObject), this.AllowSceneObject) as GameObject;
+                var ngo = EditorGUI.ObjectField(position, ogo, typeof(GameObject), this.AllowSceneObjects) as GameObject;
                 if (ogo != ngo)
                 {
                     if(this.ForceOnlySelf)
@@ -304,25 +287,38 @@ namespace com.spacepuppyeditor.Components
                         if (targGo == ngo ||
                             (this.SearchChildren && targGo.IsParentOf(ngo)))
                         {
-                            //property.objectReferenceValue = ngo.GetComponent(_restrictionType);
-                            //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
-                            var o = ObjUtil.GetAsFromSource(this.RestrictionType, ngo) as UnityEngine.Object;
-                            if (this.SearchChildren && o == null)
-                                o = ngo.GetComponentInChildren(this.RestrictionType);
-                            property.objectReferenceValue = o;
+                            property.objectReferenceValue = this.GetTargetFromSource(ngo);
                         }
                     }
                     else
                     {
-                        //property.objectReferenceValue = (ngo == null) ? null : ngo.GetComponent(_restrictionType);
-                        //property.objectReferenceValue = ObjUtil.GetAsFromSource(_restrictionType, ngo) as UnityEngine.Object;
-                        var o = ObjUtil.GetAsFromSource(this.RestrictionType, ngo) as UnityEngine.Object;
-                        if (this.SearchChildren && o == null)
-                            o = ngo.GetComponentInChildren(this.RestrictionType);
-                        property.objectReferenceValue = o;
+                        property.objectReferenceValue = this.GetTargetFromSource(ngo);
                     }
                 }
             }
+        }
+
+        private UnityEngine.Object GetTargetFromSource(UnityEngine.Object obj)
+        {
+            if (obj == null) return null;
+            if (ObjUtil.IsType(obj, this.RestrictionType)) return obj;
+            if (this.AllowProxy && obj is IProxy) return obj;
+
+            var go = GameObjectUtil.GetGameObjectFromSource(obj);
+            var o = ObjUtil.GetAsFromSource(this.RestrictionType, obj) as UnityEngine.Object;
+
+            if(this.SearchChildren && o == null && go != null)
+                o = go.GetComponentInChildren(this.RestrictionType);
+
+            if(this.AllowProxy && o == null && go != null)
+            {
+                if (this.SearchChildren)
+                    o = go.GetComponentInChildren<IProxy>() as Component;
+                else
+                    o = go.GetComponent<IProxy>() as Component;
+            }
+
+            return o;
         }
 
 
