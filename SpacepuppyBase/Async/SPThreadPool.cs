@@ -22,6 +22,297 @@ namespace com.spacepuppy.Async
     /// Better speed could be accomplished by matching the core count if so desired. You can resize the number of available 
     /// threads by calling the 'Resize' method.
     /// </summary>
+    public static class SPThreadPool
+    {
+
+        #region CONSTRUCTOR
+
+        static SPThreadPool()
+        {
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (sc, m) =>
+            {
+                PurgeCancellableTasks();
+            };
+            Resize(0);
+        }
+
+        #endregion
+
+        #region Public Interface
+        
+        public static void Resize(int maxThreads)
+        {
+            if (maxThreads <= 0)
+            {
+                //thread-count higher than core-count can be useful on low-core systems
+                //otherwise a scheduled task will have to wait for a previously scheduled task
+                //async isn't necessarily about using all the cores, but more about performing a task asynchronously
+                //of course, you can set the 'maxThreads' manually if you prefer
+                if (UnityEngine.Application.isMobilePlatform)
+                {
+                    maxThreads = Math.Max(UnityEngine.SystemInfo.processorCount, 5);
+                }
+                else if (UnityEngine.Application.isWebPlayer)
+                {
+                    //WARNING - this mode technically not supported!
+                    maxThreads = 1;
+                }
+                else
+                {
+                    maxThreads = Math.Max(UnityEngine.SystemInfo.processorCount, 10);
+                }
+            }
+
+            lock (_lock)
+            {
+                if (_activeThreads != null)
+                {
+                    _maxThreadCount = maxThreads;
+                    //remove any unneeded waiting threads
+                    while (_openThreads.Count > _maxThreadCount)
+                    {
+                        var thread = _openThreads.Pop();
+                        thread.Thread.Interrupt();
+                    }
+
+                    //terminate any threads that are over count
+                    int cnt = _maxThreadCount - _openThreads.Count;
+                    if (_activeThreads.Count > cnt)
+                    {
+                        var old = _activeThreads;
+                        _activeThreads = new HashSet<ThreadState>();
+                        var e = old.GetEnumerator();
+                        int i = 0;
+                        while (i < cnt && e.MoveNext())
+                        {
+                            _activeThreads.Add(e.Current);
+                            i++;
+                        }
+                        while (e.MoveNext())
+                        {
+                            e.Current.IsTerminating = true;
+                        }
+                    }
+                }
+                else
+                {
+                    _maxThreadCount = maxThreads;
+                    _openThreads = new Stack<ThreadState>(_maxThreadCount);
+                    _activeThreads = new HashSet<ThreadState>();
+                    _taskQueue = new Queue<TaskInfo>();
+                }
+            }
+        }
+
+        public static bool QueueUserWorkItem(WaitCallback callback)
+        {
+            return EnqueueTask(callback, null, false);
+        }
+
+        public static bool QueueUserWorkItem(WaitCallback callback, bool cancelOnLevelLoaded)
+        {
+            return EnqueueTask(callback, null, cancelOnLevelLoaded);
+        }
+
+        public static bool QueueUserWorkItem(WaitCallback callback, object state)
+        {
+            return EnqueueTask(callback, state, false);
+        }
+
+        public static bool QueueUserWorkItem(WaitCallback callback, object state, bool cancelOnLevelLoaded)
+        {
+            return EnqueueTask(callback, state, cancelOnLevelLoaded);
+        }
+
+        public static int GetMaxThreadCount()
+        {
+            return _maxThreadCount;
+        }
+
+        public static int GetAvailableThreadCount()
+        {
+            lock (_lock)
+            {
+                return _maxThreadCount - _activeThreads.Count;
+            }
+        }
+
+        public static int GetQueueLength()
+        {
+            return _taskQueue.Count;
+        }
+
+        #endregion
+
+        #region Private Interface
+
+        #region Fields
+
+        private static int _maxThreadCount;
+        private static Stack<ThreadState> _openThreads;
+        private static HashSet<ThreadState> _activeThreads;
+        private static Queue<TaskInfo> _taskQueue;
+
+        private static object _lock = new object();
+
+        #endregion
+
+        #region Methods
+        
+        private static bool EnqueueTask(WaitCallback callback, object state, bool cancellable)
+        {
+            lock (_lock)
+            {
+                _taskQueue.Enqueue(new TaskInfo(callback, state, cancellable));
+                if (_openThreads.Count > 0)
+                {
+                    var thread = _openThreads.Pop();
+                    thread.WaitHandle.Set();
+                }
+                else if (_activeThreads.Count < _maxThreadCount)
+                {
+                    var thread = new ThreadState();
+                    thread.Thread = new Thread(MultiThreadedTaskCallback);
+                    thread.WaitHandle = new AutoResetEvent(true);
+                    _activeThreads.Add(thread);
+                    thread.Thread.Start(thread);
+                }
+            }
+
+            return true;
+        }
+
+        private static void PurgeThreads()
+        {
+            lock (_lock)
+            {
+                if (_activeThreads != null && _activeThreads.Count > 0)
+                {
+                    var e = _activeThreads.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        e.Current.IsTerminating = true;
+                    }
+
+                    _activeThreads.Clear();
+                }
+                if (_openThreads != null && _openThreads.Count > 0)
+                {
+                    var e = _openThreads.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        e.Current.Thread.Interrupt();
+                    }
+
+                    _openThreads.Clear();
+                }
+
+                _maxThreadCount = 0;
+                _activeThreads = null;
+                _taskQueue = null;
+            }
+        }
+
+        private static void PurgeCancellableTasks()
+        {
+            lock (_lock)
+            {
+                if (_taskQueue.Count > 0)
+                {
+                    bool anyCancellable = false;
+                    var e = _taskQueue.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (e.Current.Cancellable)
+                        {
+                            anyCancellable = true;
+                            break;
+                        }
+                    }
+
+                    if (anyCancellable)
+                    {
+                        var old = _taskQueue;
+                        _taskQueue = new Queue<TaskInfo>();
+                        e = old.GetEnumerator();
+                        while (e.MoveNext())
+                        {
+                            if (!e.Current.Cancellable) _taskQueue.Enqueue(e.Current);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        private static void MultiThreadedTaskCallback(object data)
+        {
+            ThreadState state = data as ThreadState;
+            if (state == null) return;
+
+            WaitUntilNextTask:
+            state.WaitHandle.WaitOne();
+
+            GetNextTask:
+            if (state.IsTerminating) return;
+
+            TaskInfo task = default(TaskInfo);
+            lock (_lock)
+            {
+                if (_taskQueue.Count > 0)
+                {
+                    task = _taskQueue.Dequeue();
+                }
+                else
+                {
+                    _activeThreads.Remove(state);
+                    if (state.IsTerminating) return;
+                    _openThreads.Push(state);
+                    goto WaitUntilNextTask;
+                }
+            }
+            if (task.Callback != null) task.Callback(task.State);
+
+            goto GetNextTask;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Special Types
+
+        private struct TaskInfo
+        {
+            public WaitCallback Callback;
+            public object State;
+            public bool Cancellable;
+
+            public TaskInfo(WaitCallback callback, object state, bool cancellable)
+            {
+                this.Callback = callback;
+                this.State = state;
+                this.Cancellable = cancellable;
+            }
+        }
+
+        private class ThreadState
+        {
+
+            public Thread Thread;
+            public AutoResetEvent WaitHandle;
+            public volatile bool IsTerminating;
+
+        }
+
+        #endregion
+
+    }
+
+
+
+    /*
 #if SP_LIB
     [Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
     public class SPThreadPool : Singleton
@@ -409,4 +700,5 @@ GetNextTask:
 #endregion
 
     }
+    */
 }

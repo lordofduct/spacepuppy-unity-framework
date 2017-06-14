@@ -667,7 +667,8 @@ namespace com.spacepuppyeditor
                                                System.Type baseType, System.Type selectedType, 
                                                bool allowAbstractTypes = false, bool allowInterfaces = false, 
                                                System.Type defaultType = null, System.Type[] excludedTypes = null,
-                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
+                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace,
+                                               System.Predicate<System.Type> searchPredicate = null)
         {
             /*
 
@@ -736,7 +737,7 @@ namespace com.spacepuppyeditor
 
             */
 
-            return TypeSelectionDropDownWindow.Popup(position, label, baseType, selectedType, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType);
+            return TypeSelectionDropDownWindow.Popup(position, label, baseType, selectedType, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType, searchPredicate);
         }
 
         #endregion
@@ -1169,6 +1170,24 @@ namespace com.spacepuppyeditor
             }
 
             return GUI.Button(r, EditorHelper.TempContent("X", tooltip));
+        }
+
+        public static bool PlayButton(ref Rect position, string tooltip = null, bool rightSide = true)
+        {
+            var w = Mathf.Min(X_BTN_WIDTH, position.width);
+            Rect r;
+            if (rightSide)
+            {
+                r = new Rect(position.xMax - w, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                position = new Rect(position.xMin, position.yMin, position.width - w, position.height);
+            }
+            else
+            {
+                r = new Rect(position.xMin, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                position = new Rect(r.xMax, position.yMin, position.width - w, position.height);
+            }
+
+            return GUI.Button(r, EditorHelper.TempContent(">", tooltip));
         }
 
         #endregion

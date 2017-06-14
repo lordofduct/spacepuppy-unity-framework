@@ -6,8 +6,20 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenes
 {
 
-    [Singleton.Config(SingletonLifeCycleRule.LivesForever, LifeCycleReadOnly = true)]
-    public class SPSceneManager : Singleton
+    public interface ISceneManager : IService
+    {
+        event System.EventHandler<SceneLoadingEventArgs> BeforeSceneLoaded;
+        event System.EventHandler<SceneLoadingEventArgs> SceneLoaded;
+        event System.EventHandler<SceneLoadingEventArgs> SceneStarted;
+
+        ISceneBehaviour Current { get; }
+
+        IRadicalYieldInstruction Unload();
+        IProgressingYieldInstruction LoadScene(ISceneLoadOptions options);
+
+    }
+    
+    public class SPSceneManager : Service<ISceneManager>, ISceneManager
     {
 
         #region Events

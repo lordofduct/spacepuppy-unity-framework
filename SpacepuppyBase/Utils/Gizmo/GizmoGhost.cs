@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace com.spacepuppy.Utils.Gizmo
 {
-
+    
     [ExecuteInEditMode()]
     public class GizmoGhost : Singleton
     {
@@ -117,4 +117,5 @@ namespace com.spacepuppy.Utils.Gizmo
         #endregion
 
     }
+
 }

@@ -288,7 +288,7 @@ namespace com.spacepuppy.Scenario
                     break;
                 case TriggerActivationType.SendMessage:
                     {
-                        UnityEngine.Object targ = _triggerable;
+                        object targ = _triggerable;
                         if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
                         SendMessageToTarget(targ, _methodName, outgoingArg);
                     }
@@ -300,14 +300,14 @@ namespace com.spacepuppy.Scenario
                     break;
                 case TriggerActivationType.EnableTarget:
                     {
-                        UnityEngine.Object targ = _triggerable;
+                        object targ = _triggerable;
                         if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
                         EnableTarget(_triggerable, ConvertUtil.ToEnum<EnableMode>(_methodName));
                     }
                     break;
                 case TriggerActivationType.DestroyTarget:
                     {
-                        UnityEngine.Object targ = _triggerable;
+                        object targ = _triggerable;
                         if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
                         DestroyTarget(_triggerable);
                     }

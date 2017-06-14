@@ -14,7 +14,7 @@ namespace com.spacepuppy
 
         #region Fields
 
-        [TypeReference.Config(typeof(ISingleton), allowAbstractClasses = false, allowInterfaces = false, dropDownStyle = TypeDropDownListingStyle.Flat)]
+        [TypeReference.Config(typeof(IManagedSingleton), allowAbstractClasses = false, allowInterfaces = false, dropDownStyle = TypeDropDownListingStyle.Flat)]
         [SerializeField()]
         private TypeReference _singletonType;
         [SerializeField()]
@@ -28,17 +28,18 @@ namespace com.spacepuppy
         {
             if (_singletonType == null || _singletonType.Type == null) return null;
 
-            return Singleton.GetInstance(_singletonType.Type, !_createIfNone);
+            //return Singleton.GetInstance(_singletonType.Type, !_createIfNone);
+            return Singletons.Get(_singletonType.Type, _createIfNone);
         }
 
-        UnityEngine.Object IProxy.GetTarget()
+        object IProxy.GetTarget()
         {
-            return this.GetTarget() as UnityEngine.Object;
+            return this.GetTarget();
         }
 
-        UnityEngine.Object IProxy.GetTarget(object arg)
+        object IProxy.GetTarget(object arg)
         {
-            return this.GetTarget() as UnityEngine.Object;
+            return this.GetTarget();
         }
 
         #endregion

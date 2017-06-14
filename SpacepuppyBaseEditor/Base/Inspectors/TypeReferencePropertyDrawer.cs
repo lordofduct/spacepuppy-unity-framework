@@ -16,25 +16,125 @@ namespace com.spacepuppyeditor.Base
 
         public const string PROP_TYPEHASH = "_typeHash";
 
+        #region Manually Configured Properties
+
+        private System.Type _inheritsFromType;
+        private bool _allowAbstractTypes;
+        private bool _allowInterfaces;
+        private System.Type _defaultType;
+        private System.Type[] _excludedTypes;
+        private TypeDropDownListingStyle _dropDownStyle = TypeDropDownListingStyle.Namespace;
+        private System.Predicate<System.Type> _searchPredicate;
+        private bool _isManuallyConfigured;
+
+        public System.Type InheritsFromType
+        {
+            get { return _inheritsFromType; }
+            set
+            {
+                _inheritsFromType = value;
+                _isManuallyConfigured = true;
+            }
+        }
+
+        public bool AllowAbstractTypes
+        {
+            get { return _allowAbstractTypes; }
+            set
+            {
+                _allowAbstractTypes = value;
+                _isManuallyConfigured = true;
+            }
+        }
+
+        public bool AllowInterfaces
+        {
+            get { return _allowInterfaces; }
+            set
+            {
+                _allowInterfaces = value;
+                _isManuallyConfigured = true;
+            }
+        }
+
+        public System.Type DefaultType
+        {
+            get { return _defaultType; }
+            set
+            {
+                _defaultType = value;
+                _isManuallyConfigured = true;
+            }
+        }
+
+        public System.Type[] ExcludedTypes
+        {
+            get { return _excludedTypes; }
+            set
+            {
+                _excludedTypes = value;
+                _isManuallyConfigured = true;
+            }
+        }
+
+        public TypeDropDownListingStyle DropDownStyle
+        {
+            get { return _dropDownStyle; }
+            set
+            {
+                _dropDownStyle = value;
+                _isManuallyConfigured = true;
+            }
+        }
+
+        public System.Predicate<System.Type> SearchPredicate
+        {
+            get { return _searchPredicate; }
+            set
+            {
+                _searchPredicate = value;
+                _isManuallyConfigured = true;
+            }
+        }
+
+        #endregion
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
-
-            var attrib = this.fieldInfo.GetCustomAttributes(typeof(TypeReference.ConfigAttribute), true).FirstOrDefault() as TypeReference.ConfigAttribute;
-            var baseType = typeof(Object);
+            
+            
+            var baseType = typeof(object);
             bool allowAbstractTypes = false;
             bool allowInterfaces = false;
             System.Type defaultType = null;
             System.Type[] excludedTypes = null;
             TypeDropDownListingStyle style = TypeDropDownListingStyle.Namespace;
-            if (attrib != null)
+            System.Predicate<System.Type> searchPredicate = null;
+
+            if(_isManuallyConfigured)
             {
-                baseType = attrib.inheritsFromType;
-                allowAbstractTypes = attrib.allowAbstractClasses;
-                allowInterfaces = attrib.allowInterfaces;
-                defaultType = attrib.defaultType;
-                excludedTypes = attrib.excludedTypes;
-                style = attrib.dropDownStyle;
+                baseType = _inheritsFromType ?? typeof(object);
+                allowAbstractTypes = _allowAbstractTypes;
+                allowInterfaces = _allowInterfaces;
+                defaultType = _defaultType;
+                excludedTypes = _excludedTypes;
+                style = _dropDownStyle;
+                searchPredicate = _searchPredicate;
+            }
+            else if(this.fieldInfo != null)
+            {
+                var attrib = this.fieldInfo.GetCustomAttributes(typeof(TypeReference.ConfigAttribute), true).FirstOrDefault() as TypeReference.ConfigAttribute;
+                if (attrib != null)
+                {
+                    baseType = attrib.inheritsFromType;
+                    allowAbstractTypes = attrib.allowAbstractClasses;
+                    allowInterfaces = attrib.allowInterfaces;
+                    defaultType = attrib.defaultType;
+                    excludedTypes = attrib.excludedTypes;
+                    style = attrib.dropDownStyle;
+                    searchPredicate = null;
+                }
             }
             
 
@@ -56,7 +156,7 @@ namespace com.spacepuppyeditor.Base
 
             var tp = GetTypeFromTypeReference(property);
             EditorGUI.BeginChangeCheck();
-            tp = SPEditorGUI.TypeDropDown(position, label, baseType, tp, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, style);
+            tp = SPEditorGUI.TypeDropDown(position, label, baseType, tp, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, style, searchPredicate);
             if (EditorGUI.EndChangeCheck())
                 SetTypeToTypeReference(property, tp);
 

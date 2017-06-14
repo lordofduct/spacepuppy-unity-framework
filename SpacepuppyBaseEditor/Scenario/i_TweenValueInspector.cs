@@ -20,6 +20,8 @@ namespace com.spacepuppyeditor.Scenario
     [CustomEditor(typeof(i_TweenValue))]
     public class i_TweenValueInspector : SPEditor
     {
+        public const string PROP_ORDER = "_order";
+
         public const string PROP_TIMESUPPLIER = "_timeSupplier";
         public const string PROP_TARGET = "_target";
         public const string PROP_TWEENDATA = "_data";
@@ -56,6 +58,7 @@ namespace com.spacepuppyeditor.Scenario
             _targetProp = this.serializedObject.FindProperty(PROP_TARGET);
 
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
+            this.DrawPropertyField(PROP_ORDER);
             this.DrawPropertyField(PROP_TIMESUPPLIER);
             SPEditorGUILayout.PropertyField(_targetProp);
             this.DrawPropertyField(PROP_TWEENTOKEN);

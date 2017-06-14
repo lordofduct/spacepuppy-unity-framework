@@ -39,7 +39,7 @@ namespace com.spacepuppy.Cameras
 
             if(_camera != null)
             {
-                CameraManager.Register(this);
+                CameraPool.Register(this);
             }
         }
 
@@ -47,7 +47,7 @@ namespace com.spacepuppy.Cameras
         {
             base.OnDestroy();
 
-            CameraManager.UnRegister(this);
+            CameraPool.Unregister(this);
         }
 
         #endregion

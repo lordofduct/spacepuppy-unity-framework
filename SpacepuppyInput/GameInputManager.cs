@@ -7,7 +7,24 @@ using com.spacepuppy.UserInput;
 namespace com.spacepuppy
 {
 
-    public class GameInputManager : Singleton, IEnumerable<IPlayerInputDevice>
+    public interface IGameInputManager : IService, IEnumerable<IPlayerInputDevice>
+    {
+        int Count { get; }
+        IPlayerInputDevice this[string id] { get; set; }
+
+        void Add(string id, IPlayerInputDevice dev);
+        bool Remove(string id);
+        bool Contains(string id);
+        bool Contains(IPlayerInputDevice dev);
+        string GetId(IPlayerInputDevice dev);
+        IPlayerInputDevice GetDevice(string id);
+        T GetDevice<T>(string id) where T : IPlayerInputDevice;
+
+        void RegisterSequence(ISequence sequence, bool useFixedUpdate = false);
+
+    }
+
+    public class GameInputManager : Service<IGameInputManager>, IGameInputManager
     {
 
         #region Fields
@@ -116,7 +133,7 @@ namespace com.spacepuppy
 
         public void Add(string id, IPlayerInputDevice dev)
         {
-            if (this.ContainsDevice(dev) && !(_dict.ContainsKey(id) && _dict[id] == dev)) throw new System.ArgumentException("Manager already contains input device for other player.");
+            if (this.Contains(dev) && !(_dict.ContainsKey(id) && _dict[id] == dev)) throw new System.ArgumentException("Manager already contains input device for other player.");
 
             _dict[id] = dev;
         }
@@ -126,17 +143,17 @@ namespace com.spacepuppy
             return _dict.Remove(id);
         }
 
-        public bool ContainsId(string id)
+        public bool Contains(string id)
         {
             return _dict.ContainsKey(id);
         }
 
-        public bool ContainsDevice(IPlayerInputDevice dev)
+        public bool Contains(IPlayerInputDevice dev)
         {
             return (_dict.Values as ICollection<IPlayerInputDevice>).Contains(dev);
         }
 
-        public string GetIdForDevice(IPlayerInputDevice dev)
+        public string GetId(IPlayerInputDevice dev)
         {
             foreach (var pair in _dict)
             {

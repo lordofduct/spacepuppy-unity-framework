@@ -17,7 +17,7 @@ namespace com.spacepuppyeditor.Base
         static SingletonManagerInspector()
         {
             var lst = new List<System.Type>();
-            foreach(var tp in TypeUtil.GetTypesAssignableFrom(typeof(ISingleton)))
+            foreach(var tp in TypeUtil.GetTypesAssignableFrom(typeof(IManagedSingleton)))
             {
                 var attribs = tp.GetCustomAttributes(typeof(Singleton.ConfigAttribute), false) as Singleton.ConfigAttribute[];
                 if(attribs != null && attribs.Length > 0)
@@ -86,7 +86,7 @@ namespace com.spacepuppyeditor.Base
         {
             if (property.serializedObject.isEditingMultipleObjects) return 0f;
 
-            if (property.serializedObject.targetObject is ISingleton && SingletonManagerInspector.SingletonCount(property.serializedObject.targetObject.GetType()) > 1)
+            if (property.serializedObject.targetObject is IManagedSingleton && SingletonManagerInspector.SingletonCount(property.serializedObject.targetObject.GetType()) > 1)
             {
                 _message = "Multiple Singletons of this type exist, you should purge the scene of duplicates!";
                 _messageType = MessageType.Error;
@@ -107,7 +107,7 @@ namespace com.spacepuppyeditor.Base
                 _messageType = MessageType.Info;
                 return EditorGUIUtility.singleLineHeight * 3f;
             }
-            else if (go.GetComponents<ISingleton>().Count() > 1)
+            else if (go.GetComponents<IManagedSingleton>().Count() > 1)
             {
                 _message = "A GameObject with multiple Singletons on it should have a SingletonManager attached!";
                 _messageType = MessageType.Warning;

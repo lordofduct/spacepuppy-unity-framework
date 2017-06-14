@@ -12,8 +12,8 @@ namespace com.spacepuppy
 
     public interface IProxy
     {
-        UnityEngine.Object GetTarget();
-        UnityEngine.Object GetTarget(object arg);
+        object GetTarget();
+        object GetTarget(object arg);
     }
 
     [System.Serializable]
@@ -66,7 +66,7 @@ namespace com.spacepuppy
 
         #region Methods
 
-        public UnityEngine.Object GetTarget()
+        public object GetTarget()
         {
             if (_searchBy == SearchBy.Nothing)
             {
@@ -78,11 +78,11 @@ namespace com.spacepuppy
             }
         }
 
-        public UnityEngine.Object[] GetTargets()
+        public object[] GetTargets()
         {
             if (_searchBy == SearchBy.Nothing)
             {
-                return new UnityEngine.Object[] { (_target is IProxy) ? (_target as IProxy).GetTarget() : _target };
+                return new object[] { (_target is IProxy) ? (_target as IProxy).GetTarget() : _target };
             }
             else
             {
@@ -119,12 +119,12 @@ namespace com.spacepuppy
 
         #region IProxy Interface
 
-        UnityEngine.Object IProxy.GetTarget()
+        object IProxy.GetTarget()
         {
             return this.GetTarget();
         }
 
-        UnityEngine.Object IProxy.GetTarget(object arg)
+        object IProxy.GetTarget(object arg)
         {
             return this.GetTarget();
         }
@@ -201,12 +201,12 @@ namespace com.spacepuppy
 
         #region IProxy Interface
 
-        public UnityEngine.Object GetTarget()
+        public object GetTarget()
         {
             return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), null) as UnityEngine.Object;
         }
 
-        public UnityEngine.Object GetTarget(object arg)
+        public object GetTarget(object arg)
         {
             if (_componentTypeOnTarget == null) return null;
             return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;

@@ -132,7 +132,23 @@ namespace com.spacepuppyeditor.Base
             }
 
             area.height = EditorGUIUtility.singleLineHeight;
-            EditorGUI.PropertyField(area, element, label);
+            //EditorGUI.PropertyField(area, element, label);
+
+            area = EditorGUI.PrefixLabel(area, label);
+            if(Application.isPlaying && !this.serializedObject.isEditingMultipleObjects)
+            {
+                if(SPEditorGUI.PlayButton(ref area))
+                {
+                    var targ = this.target as Animation;
+                    var clip = element.objectReferenceValue as AnimationClip;
+                    if (targ != null && clip != null)
+                    {
+                        targ.Play(clip.name, PlayMode.StopSameLayer);
+                    }
+                }
+            }
+            EditorGUI.PropertyField(area, element, GUIContent.none);
+
 
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_animList, area, index, isActive, isFocused);
 

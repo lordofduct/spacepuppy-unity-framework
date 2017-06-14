@@ -308,7 +308,7 @@ DrawTriggerableArg:
             var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
             var targLabel = EditorHelper.TempContent("Triggerable Target");
             //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
-            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
+            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue);
             
 
             //Draw MessageName
@@ -498,7 +498,7 @@ DrawMethodName:
             var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
             var targLabel = EditorHelper.TempContent("Triggerable Target");
             //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
-            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
+            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue);
 
 
             //Draw Triggerable Arg
@@ -517,7 +517,7 @@ DrawMethodName:
             var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
             var targLabel = EditorHelper.TempContent("Triggerable Target");
             //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
-            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue as Component);
+            targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue);
         }
 
 
@@ -574,9 +574,11 @@ DrawMethodName:
         public static UnityEngine.Object TargetObjectField(Rect position, GUIContent label, UnityEngine.Object target)
         {
             EditorGUI.BeginChangeCheck();
-            if (GameObjectUtil.IsGameObjectSource(target))
-                target = GameObjectUtil.GetGameObjectFromSource(target);
-            var result = EditorGUI.ObjectField(position, label, target, typeof(UnityEngine.Object), true);
+
+            UnityEngine.Object result = target;
+            if (GameObjectUtil.IsGameObjectSource(result))
+                result = GameObjectUtil.GetGameObjectFromSource(result);
+            result = EditorGUI.ObjectField(position, label, target, typeof(UnityEngine.Object), true);
             if (EditorGUI.EndChangeCheck())
             {
                 if (GameObjectUtil.IsGameObjectSource(result))

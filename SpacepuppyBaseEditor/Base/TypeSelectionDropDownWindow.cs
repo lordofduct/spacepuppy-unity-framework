@@ -26,6 +26,7 @@ namespace com.spacepuppyeditor.Base
         private bool _allowInterfaces;
         private System.Type[] _excludedTypes;
         private TypeDropDownListingStyle _listStyle;
+        private System.Predicate<System.Type> _searchPredicate;
 
 
         private string _header;
@@ -37,7 +38,7 @@ namespace com.spacepuppyeditor.Base
         private Vector2 _scrollPosition;
         private int _selectedIndex = -1;
         private bool _scrollToSelected;
-
+        
         #endregion
 
         #region CONSTRUCTOR
@@ -135,6 +136,12 @@ namespace com.spacepuppyeditor.Base
                 _listStyle = value;
                 _searchIsDirty = true;
             }
+        }
+
+        public System.Predicate<System.Type> SearchPredicate
+        {
+            get { return _searchPredicate; }
+            set { _searchPredicate = value; }
         }
 
         #endregion
@@ -331,6 +338,7 @@ namespace com.spacepuppyeditor.Base
                         Content = GetTypeLabel(null)
                     });
                 _searchElements.AddRange(from tp in TypeUtil.GetTypes(this.TestIfValidType)
+                                         where _searchPredicate == null || _searchPredicate(tp)
                                          select new SearchElement()
                                          {
                                              Name = tp.Name,
@@ -352,7 +360,7 @@ namespace com.spacepuppyeditor.Base
                         Content = GetTypeLabel(null)
                     });
                 _searchElements.AddRange(from tp in TypeUtil.GetTypes(this.TestIfValidType)
-                                         where tp.Name.ToLower().Contains(match)
+                                         where tp.Name.ToLower().Contains(match) && (_searchPredicate == null || _searchPredicate(tp))
                                          select new SearchElement()
                                          {
                                              Name = tp.Name,
@@ -441,7 +449,8 @@ namespace com.spacepuppyeditor.Base
                                                System.Type baseType, System.Type selectedType,
                                                bool allowAbstractTypes = false, bool allowInterfaces = false,
                                                System.Type defaultType = null, System.Type[] excludedTypes = null,
-                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
+                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace,
+                                               System.Predicate<System.Type> searchPredicate = null)
         {
             int controlID = GUIUtility.GetControlID(TypeSelectionDropDownWindow.s_TypePopupHash, EditorGUIUtility.native, position);
             position = EditorGUI.PrefixLabel(position, controlID, label);
@@ -469,7 +478,7 @@ namespace com.spacepuppyeditor.Base
                         if(current.button == 0 && position.Contains(current.mousePosition))
                         {
                             CallbackInfo.instance = new CallbackInfo(controlID, selectedType);
-                            TypeSelectionDropDownWindow.DisplayCustomMenu(position, label, baseType, selectedType, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType);
+                            TypeSelectionDropDownWindow.DisplayCustomMenu(position, label, baseType, selectedType, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType, searchPredicate);
                             GUIUtility.keyboardControl = controlID;
                             current.Use();
                         }
@@ -483,19 +492,21 @@ namespace com.spacepuppyeditor.Base
         public static void ShowAndCallbackOnSelect(Rect positionUnder, System.Type baseType,
                                            System.Action<System.Type> callback,
                                            bool allowAbstractTypes = false, bool allowInterfaces = false,
-                                        System.Type defaultType = null, System.Type[] excludedTypes = null,
-                                        TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
+                                           System.Type defaultType = null, System.Type[] excludedTypes = null,
+                                           TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace,
+                                           System.Predicate<System.Type> searchPredicate = null)
         {
             int controlID = GUIUtility.GetControlID(TypeSelectionDropDownWindow.s_TypeCustomHash, EditorGUIUtility.native, positionUnder);
             CallbackInfo.instance = new CallbackInfo(controlID, null, callback);
-            TypeSelectionDropDownWindow.DisplayCustomMenu(positionUnder, GUIContent.none, baseType, null, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType);
+            TypeSelectionDropDownWindow.DisplayCustomMenu(positionUnder, GUIContent.none, baseType, null, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType, searchPredicate);
         }
 
         private static void DisplayCustomMenu(Rect position, GUIContent label,
                                                System.Type baseType, System.Type selectedType,
                                                bool allowAbstractTypes = false, bool allowInterfaces = false,
                                                System.Type defaultType = null, System.Type[] excludedTypes = null,
-                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
+                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace,
+                                               System.Predicate<System.Type> searchPredicate = null)
         {
             if (_window != null)
             {
@@ -513,6 +524,7 @@ namespace com.spacepuppyeditor.Base
             _window.DefaultType = defaultType;
             _window.ExcludedTypes = excludedTypes;
             _window.ListingStyle = listType;
+            _window.SearchPredicate = searchPredicate;
 
             _window.ShowAsDropDown(position, new Vector2(position.width, 320f));
             _window.Focus();

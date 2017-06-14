@@ -188,10 +188,15 @@ namespace com.spacepuppyeditor
 
         #region Type Dropdown
 
-        public static System.Type TypeDropDown(GUIContent label, System.Type baseType, System.Type selectedType, bool allowAbstractTypes = false, bool allowInterfaces = false, System.Type defaultType = null, System.Type[] excludedTypes = null, TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace)
+        public static System.Type TypeDropDown(GUIContent label, 
+                                               System.Type baseType, System.Type selectedType, 
+                                               bool allowAbstractTypes = false, bool allowInterfaces = false, 
+                                               System.Type defaultType = null, System.Type[] excludedTypes = null, 
+                                               TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace,
+                                               System.Predicate<System.Type> searchPredicate = null)
         {
             var position = EditorGUILayout.GetControlRect(true);
-            return SPEditorGUI.TypeDropDown(position, label, baseType, selectedType, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType);
+            return SPEditorGUI.TypeDropDown(position, label, baseType, selectedType, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType, searchPredicate);
         }
 
         #endregion

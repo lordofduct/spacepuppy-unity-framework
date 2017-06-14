@@ -8,6 +8,63 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
+    /// <summary>
+    /// A contract that binds IManagedSingleton and IService together so that they are easily accessible from the Singletons.Get method.
+    /// 
+    /// If implementing this directly, ensure that there is a static property getter named 'Instance'.
+    /// </summary>
+    public interface ISingleton
+    {
+
+    }
+
+    public static class Singletons
+    {
+
+        public static T Get<T>(bool createIfNone = false) where T : class, ISingleton
+        {
+            var tp = typeof(T);
+
+            if (typeof(IManagedSingleton).IsAssignableFrom(tp))
+                return Singleton.GetInstance(tp, !createIfNone) as T;
+            else if (typeof(IService).IsAssignableFrom(tp))
+                return Services.Get(tp) as T;
+            else
+            {
+                var prop = tp.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (prop != null)
+                    return prop.GetValue(null, null) as T;
+                var field = tp.GetField("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (field != null)
+                    return field.GetValue(null) as T;
+            }
+
+            return null;
+        }
+
+        public static ISingleton Get(System.Type tp, bool createIfNone = false)
+        {
+            if (typeof(IManagedSingleton).IsAssignableFrom(tp))
+                return Singleton.GetInstance(tp, !createIfNone);
+            else if (typeof(IService).IsAssignableFrom(tp))
+                return Services.Get(tp) as ISingleton;
+            else if(typeof(ISingleton).IsAssignableFrom(tp))
+            {
+                var prop = tp.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (prop != null)
+                    return prop.GetValue(null, null) as ISingleton;
+                var field = tp.GetField("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (field != null)
+                    return field.GetValue(null) as ISingleton;
+            }
+
+            return null;
+        }
+
+    }
+
+
+
     [System.Flags()]
     public enum SingletonLifeCycleRule
     {
@@ -18,8 +75,8 @@ namespace com.spacepuppy
         LiveForeverAndAlwaysReplace = 3
 
     }
-
-    public interface ISingleton : IComponent, ISPDisposable
+    
+    public interface IManagedSingleton : ISingleton, IComponent, ISPDisposable
     {
 
         event System.EventHandler ComponentDestroyed;
@@ -27,7 +84,7 @@ namespace com.spacepuppy
         SingletonLifeCycleRule LifeCycle { get; set; }
 
     }
-
+    
     /// <summary>
     /// A base class that any script that should act like a Singleton can inherit from.
     /// 
@@ -40,7 +97,7 @@ namespace com.spacepuppy
     /// AlwaysReplace - if a singleton of this type already exists when this singleton starts, it will replace the older one
     /// LiveForeverAndAlwaysReplace - acts like LivesForever and AlwaysReplace
     /// </summary>
-    public abstract class Singleton : SPNotifyingComponent, ISingleton
+    public abstract class Singleton : SPNotifyingComponent, IManagedSingleton
     {
 
         #region Static Interface
@@ -48,7 +105,7 @@ namespace com.spacepuppy
         public const string GAMEOBJECT_NAME = "Spacepuppy.SingletonSource";
 
         private static GameObject _gameObject;
-        private static Dictionary<System.Type, ISingleton> _singletonRefs = new Dictionary<System.Type, ISingleton>();
+        private static Dictionary<System.Type, IManagedSingleton> _singletonRefs = new Dictionary<System.Type, IManagedSingleton>();
 
         public static GameObject GameObjectSource
         {
@@ -75,9 +132,9 @@ namespace com.spacepuppy
             }
         }
 
-        public static T GetInstance<T>(bool bDoNotCreateIfNotExist = false) where T : Component, ISingleton
+        public static T GetInstance<T>(bool bDoNotCreateIfNotExist = false) where T : Component, IManagedSingleton
         {
-            ISingleton single;
+            IManagedSingleton single;
             if (_singletonRefs.TryGetValue(typeof(T), out single)) return single as T;
             if (GameLoopEntry.ApplicationClosing) return null;
 
@@ -94,32 +151,32 @@ namespace com.spacepuppy
             }
         }
 
-        public static ISingleton GetInstance(System.Type tp, bool bDoNotCreateIfNotExist = false)
+        public static IManagedSingleton GetInstance(System.Type tp, bool bDoNotCreateIfNotExist = false)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
-            if (!typeof(ISingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(ISingleton), "tp");
+            if (!typeof(IManagedSingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(IManagedSingleton), "tp");
 
-            ISingleton single;
+            IManagedSingleton single;
             if (_singletonRefs.TryGetValue(tp, out single)) return single;
             if (GameLoopEntry.ApplicationClosing) return null;
 
             if (bDoNotCreateIfNotExist)
-                return Singleton.GameObjectSource.GetComponent(tp) as ISingleton;
+                return Singleton.GameObjectSource.GetComponent(tp) as IManagedSingleton;
             else
             {
                 var attrib = tp.GetCustomAttributes(typeof(ConfigAttribute), false).FirstOrDefault() as ConfigAttribute;
                 if (attrib != null && attrib.ExcludeFromSingletonManager)
                     return CreateSpecialInstance(tp, tp.Name, attrib.DefaultLifeCycle);
                 else
-                    return Singleton.GameObjectSource.AddOrGetComponent(tp) as ISingleton;
+                    return Singleton.GameObjectSource.AddOrGetComponent(tp) as IManagedSingleton;
             }
         }
 
 
 
-        public static T CreateSpecialInstance<T>(string gameObjectName, SingletonLifeCycleRule lifeCycle) where T : Component, ISingleton
+        public static T CreateSpecialInstance<T>(string gameObjectName, SingletonLifeCycleRule lifeCycle) where T : Component, IManagedSingleton
         {
-            ISingleton single;
+            IManagedSingleton single;
             if (_singletonRefs.TryGetValue(typeof(T), out single)) return single as T;
             if (GameLoopEntry.ApplicationClosing) return null;
 
@@ -129,16 +186,16 @@ namespace com.spacepuppy
             return single as T;
         }
 
-        public static ISingleton CreateSpecialInstance(System.Type tp, string gameObjectName, SingletonLifeCycleRule lifeCycle)
+        public static IManagedSingleton CreateSpecialInstance(System.Type tp, string gameObjectName, SingletonLifeCycleRule lifeCycle)
         {
-            if (!typeof(ISingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(ISingleton), "tp");
+            if (!typeof(IManagedSingleton).IsAssignableFrom(tp)) throw new TypeArgumentMismatchException(tp, typeof(IManagedSingleton), "tp");
 
-            ISingleton single;
+            IManagedSingleton single;
             if (_singletonRefs.TryGetValue(tp, out single)) return single;
             if (GameLoopEntry.ApplicationClosing) return null;
 
             var go = new GameObject(gameObjectName);
-            single = go.AddComponent(tp) as ISingleton;
+            single = go.AddComponent(tp) as IManagedSingleton;
             single.LifeCycle = lifeCycle;
             return single;
         }
@@ -153,12 +210,12 @@ namespace com.spacepuppy
             return _singletonRefs.ContainsKey(tp);
         }
 
-        public static bool HasInstance(System.Type tp, out ISingleton instance)
+        public static bool HasInstance(System.Type tp, out IManagedSingleton instance)
         {
             return _singletonRefs.TryGetValue(tp, out instance);
         }
 
-        public static IEnumerable<ISingleton> AllSingletons
+        public static IEnumerable<IManagedSingleton> AllSingletons
         {
             get
             {
@@ -251,7 +308,7 @@ namespace com.spacepuppy
 
 
             [System.NonSerialized()]
-            private ISingleton _target;
+            private IManagedSingleton _target;
             [System.NonSerialized()]
             private bool _flaggedSelfMaintaining;
             [System.NonSerialized()]
@@ -275,7 +332,7 @@ namespace com.spacepuppy
 
             #region Properties
 
-            public ISingleton Target { get { return _target; } }
+            public IManagedSingleton Target { get { return _target; } }
 
             public SingletonLifeCycleRule LifeCycle
             {
@@ -298,13 +355,13 @@ namespace com.spacepuppy
             /// </summary>
             /// <param name="target"></param>
             /// <returns>Returns true if the validation was a success.</returns>
-            public bool OnAwake(ISingleton target)
+            public bool OnAwake(IManagedSingleton target)
             {
                 if (object.ReferenceEquals(target, null)) throw new System.ArgumentNullException("target");
                 _target = target;
 
                 //first test if we have the appropriate configuration
-                if (_target.component.GetComponents<ISingleton>().Count() > 1 && !_target.component.HasComponent<SingletonManager>())
+                if (_target.component.GetComponents<IManagedSingleton>().Count() > 1 && !_target.component.HasComponent<SingletonManager>())
                 {
                     Debug.LogWarning("Gameobject with multiple Singletons exists without a SingletonManager attached, adding a SingletonManager with default destroy settings.", target.component);
                     _target.component.AddComponent<SingletonManager>();
@@ -378,7 +435,7 @@ namespace com.spacepuppy
             private void EnforceThisAsSingleton()
             {
                 var targTp = _target.GetType();
-                ISingleton c;
+                IManagedSingleton c;
                 if (!_singletonRefs.TryGetValue(targTp, out c)) c = null;
 
                 if (object.ReferenceEquals(c, null) || c.component == null || c.component == _target.component || !c.isActiveAndEnabled)
@@ -421,7 +478,7 @@ namespace com.spacepuppy
                 if (_target == null) return;
 
                 var tp = _target.GetType();
-                ISingleton sing;
+                IManagedSingleton sing;
                 if(_singletonRefs.TryGetValue(tp, out sing))
                 {
                     if(sing.component == _target.component)
@@ -517,9 +574,9 @@ namespace com.spacepuppy
 
         #region Methods
 
-        public IEnumerable<ISingleton> GetSingletons()
+        public IEnumerable<IManagedSingleton> GetSingletons()
         {
-            return this.GetComponents<ISingleton>();
+            return this.GetComponents<IManagedSingleton>();
         }
 
         private void UpdateMaintainOnLoadStatus()

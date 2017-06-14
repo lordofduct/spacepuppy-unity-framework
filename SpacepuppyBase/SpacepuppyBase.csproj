@@ -250,6 +250,7 @@
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />
     <Compile Include="Scenes\ISceneLoadOptions.cs" />
+    <Compile Include="Service.cs" />
     <Compile Include="SPAssets.cs" />
     <Compile Include="SPEntity.cs" />
     <Compile Include="ITimeSupplier.cs" />

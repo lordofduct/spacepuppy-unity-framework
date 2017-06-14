@@ -13,14 +13,14 @@ namespace com.spacepuppy.Cameras
         {
             base.Awake();
 
-            CameraManager.Register(this);
+            CameraPool.Register(this);
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
 
-            CameraManager.UnRegister(this);
+            CameraPool.Unregister(this);
         }
 
         #endregion

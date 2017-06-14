@@ -6,6 +6,7 @@ using System;
 
 namespace com.spacepuppy.UserInput.UnityInput
 {
+
     public class EventfulUnityInputDevice : IPlayerInputDevice
     {
 
@@ -14,7 +15,34 @@ namespace com.spacepuppy.UserInput.UnityInput
         #region Singleton Interface
 
         private static EventfulUnityInputDevice _device;
-        private static GameInputManager _inputManager;
+        private static IGameInputManager _inputManager;
+        public static EventfulUnityInputDevice GetDevice()
+        {
+            if (_device != null) return _device;
+            
+            if (_inputManager == null)
+            {
+                _inputManager = Services.Get<IGameInputManager>();
+                if(_inputManager != null)
+                {
+                    _inputManager.ServiceUnregistered += (s, e) =>
+                    {
+                        _inputManager = null;
+                        _device = null;
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            _device = new EventfulUnityInputDevice();
+            _inputManager.Add(INPUT_ID, _device);
+            return _device;
+        }
+
+        /* OLD
         public static EventfulUnityInputDevice GetDevice()
         {
             if (_device == null)
@@ -23,15 +51,24 @@ namespace com.spacepuppy.UserInput.UnityInput
             }
             if (_inputManager == null)
             {
-                _inputManager = Singleton.GetInstance<GameInputManager>();
-                _inputManager.Add(INPUT_ID, _device);
+                _inputManager = Services.Get<IGameInputManager>();
+                if (_inputManager != null)
+                {
+                    _inputManager.Add(INPUT_ID, _device);
+                    _inputManager.ServiceUnregistered += (s, e) =>
+                    {
+                        _inputManager = null;
+                        _device = null;
+                    };
+                }
             }
             return _device;
         }
+        */
 
         #endregion
 
-        #region Fields
+            #region Fields
 
         private Dictionary<string, System.Action<string>> _buttonPressTable = new Dictionary<string, Action<string>>();
 
@@ -186,4 +223,5 @@ namespace com.spacepuppy.UserInput.UnityInput
         #endregion
 
     }
+
 }
