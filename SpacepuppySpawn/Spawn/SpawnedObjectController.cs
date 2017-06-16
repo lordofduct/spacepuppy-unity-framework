@@ -15,6 +15,8 @@ namespace com.spacepuppy.Spawn
 
         [System.NonSerialized()]
         private SpawnPool _pool;
+        [System.NonSerialized]
+        private GameObject _prefab;
         [System.NonSerialized()]
         private string _sCacheName;
 
@@ -25,9 +27,10 @@ namespace com.spacepuppy.Spawn
 
         #region CONSTRUCTOR
 
-        internal void Init(SpawnPool pool)
+        internal void Init(SpawnPool pool, GameObject prefab)
         {
             _pool = pool;
+            _prefab = prefab;
             _sCacheName = null;
         }
 
@@ -45,6 +48,7 @@ namespace com.spacepuppy.Spawn
         internal void DeInit()
         {
             _pool = null;
+            _prefab = null;
             _sCacheName = null;
         }
 
@@ -73,6 +77,11 @@ namespace com.spacepuppy.Spawn
         public SpawnPool Pool
         {
             get { return _pool; }
+        }
+
+        public GameObject Prefab
+        {
+            get { return _prefab; }
         }
 
         /// <summary>
@@ -113,9 +122,12 @@ namespace com.spacepuppy.Spawn
             this.gameObject.SetActive(false);
         }
 
-        public GameObject CloneObject()
+        public GameObject CloneObject(bool fromPrefab = false)
         {
-            return _pool.Spawn(this.gameObject, this.transform.position, this.transform.rotation);
+            if(fromPrefab && _prefab != null)
+                return _pool.Spawn(_prefab, this.transform.position, this.transform.rotation);
+            else
+                return _pool.Spawn(this.gameObject, this.transform.position, this.transform.rotation);
         }
 
         #endregion

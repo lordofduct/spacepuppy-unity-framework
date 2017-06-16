@@ -327,7 +327,7 @@ namespace com.spacepuppy.Spawn
                 if (obj != null)
                 {
                     var controller = obj.AddOrGetComponent<SpawnedObjectController>();
-                    controller.Init(this);
+                    controller.Init(this, prefab);
                     if (initializeProperties != null) initializeProperties(obj);
                     controller.SetSpawned();
                     this.SignalSpawned(controller, optionalSpawnPoint);
@@ -355,7 +355,7 @@ namespace com.spacepuppy.Spawn
                 if (obj != null)
                 {
                     var controller = obj.AddOrGetComponent<SpawnedObjectController>();
-                    controller.Init(this);
+                    controller.Init(this, prefab);
                     if (initializeProperties != null) initializeProperties(obj);
                     controller.SetSpawned();
                     this.SignalSpawned(controller, optionalSpawnPoint);

@@ -578,7 +578,7 @@ DrawMethodName:
             UnityEngine.Object result = target;
             if (GameObjectUtil.IsGameObjectSource(result))
                 result = GameObjectUtil.GetGameObjectFromSource(result);
-            result = EditorGUI.ObjectField(position, label, target, typeof(UnityEngine.Object), true);
+            result = EditorGUI.ObjectField(position, label, result, typeof(UnityEngine.Object), true);
             if (EditorGUI.EndChangeCheck())
             {
                 if (GameObjectUtil.IsGameObjectSource(result))
