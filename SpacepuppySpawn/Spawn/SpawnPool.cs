@@ -651,7 +651,7 @@ namespace com.spacepuppy.Spawn
                 var obj = PrefabUtil.Create(this.Prefab, Vector3.zero, Quaternion.identity);
                 obj.name = this.ItemName + (index + 1).ToString("000");
                 var cntrl = obj.AddComponent<SpawnedObjectController>();
-                cntrl.Init(_owner, this.ItemName);
+                cntrl.Init(_owner, this.Prefab, this.ItemName);
 
                 obj.transform.parent = _owner.transform;
                 obj.transform.localPosition = Vector3.zero;

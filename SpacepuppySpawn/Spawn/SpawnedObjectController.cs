@@ -38,10 +38,12 @@ namespace com.spacepuppy.Spawn
         /// Initialize with a reference to the pool that spawned this object. Include a cache name if this gameobject is cached, otherwise no cache name should be included.
         /// </summary>
         /// <param name="pool"></param>
+        /// <param name="prefab">prefab this was spawned from</param>
         /// <param name="sCacheName"></param>
-        internal void Init(SpawnPool pool, string sCacheName)
+        internal void Init(SpawnPool pool, GameObject prefab, string sCacheName)
         {
             _pool = pool;
+            _prefab = prefab;
             _sCacheName = sCacheName;
         }
 
