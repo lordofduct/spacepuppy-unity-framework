@@ -111,7 +111,7 @@ namespace com.spacepuppyeditor
 
         public static bool PropertyField(SerializedProperty property, bool includeChildren, params GUILayoutOption[] options)
         {
-            return SPEditorGUILayout.PropertyField(property, (GUIContent)null, includeChildren, options);
+            return com.spacepuppyeditor.Internal.ScriptAttributeUtility.GetHandler(property).OnGUILayout(property, null, includeChildren, options);
         }
 
         public static bool PropertyField(SerializedProperty property, GUIContent label, bool includeChildren, params GUILayoutOption[] options)

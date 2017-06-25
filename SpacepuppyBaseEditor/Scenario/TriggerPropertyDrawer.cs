@@ -228,9 +228,6 @@ namespace com.spacepuppyeditor.Scenario
             var element = _targetList.serializedProperty.GetArrayElementAtIndex(index);
 
             var targProp = element.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
-            var actProp = element.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
-            //var act = (TriggerActivationType)actProp.enumValueIndex;
-            var act = actProp.GetEnumValue<TriggerActivationType>();
 
             const float MARGIN = 1.0f;
             const float WEIGHT_FIELD_WIDTH = 60f;
@@ -240,7 +237,8 @@ namespace com.spacepuppyeditor.Scenario
             EditorGUI.BeginProperty(area, GUIContent.none, targProp);
 
             Rect trigRect;
-            GUIContent labelContent = EditorHelper.TempContent(index.ToString("00: ") + act.ToString()); //(act == TriggerActivationType.TriggerAllOnTarget) ? EditorHelper.TempContent("Target") : EditorHelper.TempContent(string.Format("Target ({0})", act));
+            var actInfo = TriggerTargetPropertyDrawer.GetTriggerActivationInfo(element);
+            GUIContent labelContent = EditorHelper.TempContent(index.ToString("00: ") + actInfo.ActivationTypeDisplayName);
             if (_drawWeight && area.width > FULLWEIGHT_WIDTH)
             {
                 var top = area.yMin + MARGIN;
@@ -267,20 +265,11 @@ namespace com.spacepuppyeditor.Scenario
             }
 
             //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
-            /*
-            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
-            var newTargGo = EditorGUI.ObjectField(trigRect, GUIContent.none, targGo, typeof(GameObject), true) as GameObject;
-            if (newTargGo != targGo)
-            {
-                targGo = newTargGo;
-                targProp.objectReferenceValue = (targGo != null) ? targGo.transform : null;
-            }
-            */
             EditorGUI.BeginChangeCheck();
             var targObj = TriggerTargetPropertyDrawer.TargetObjectField(trigRect, GUIContent.none, targProp.objectReferenceValue);
             if(EditorGUI.EndChangeCheck())
             {
-                targProp.objectReferenceValue = TriggerTargetPropertyDrawer.IsValidTriggerTarget(targObj, act) ? targObj : null;
+                targProp.objectReferenceValue = TriggerTargetPropertyDrawer.IsValidTriggerTarget(targObj, actInfo.ActivationType) ? targObj : null;
             }
             EditorGUI.EndProperty();
             

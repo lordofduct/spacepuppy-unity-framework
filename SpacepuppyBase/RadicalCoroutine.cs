@@ -187,12 +187,24 @@ namespace com.spacepuppy
 
         public RadicalCoroutineDisableMode DisableMode { get { return _disableMode; } }
 
+        /// <summary>
+        /// Coroutine is currently active/running.
+        /// </summary>
         public bool Active { get { return _state == RadicalCoroutineOperatingState.Active; } }
 
+        /// <summary>
+        /// Coroutine completed successfully.
+        /// </summary>
         public bool Complete { get { return _state >= RadicalCoroutineOperatingState.Completing; } }
 
+        /// <summary>
+        /// Coroutine was cancelled.
+        /// </summary>
         public bool Cancelled { get { return _state <= RadicalCoroutineOperatingState.Cancelling; } }
 
+        /// <summary>
+        /// Coroutine is completed, but necessarily successfully (Complete/Cancelled agnostic).
+        /// </summary>
         public bool Finished { get { return _state <= RadicalCoroutineOperatingState.Cancelling || _state >= RadicalCoroutineOperatingState.Completing; } }
 
         /// <summary>

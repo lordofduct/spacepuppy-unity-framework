@@ -789,6 +789,33 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
+        public static object GetValueWithMember(MemberInfo info, object targObj, bool ignoreMethod)
+        {
+            if (info == null) return null;
+
+            try
+            {
+                switch (info.MemberType)
+                {
+                    case MemberTypes.Field:
+                        return (info as FieldInfo).GetValue(targObj);
+                    case MemberTypes.Property:
+                        return (info as PropertyInfo).GetValue(targObj, null);
+                    case MemberTypes.Method:
+                        if (ignoreMethod)
+                            return null;
+                        else
+                            return (info as MethodInfo).Invoke(targObj, null);
+                }
+            }
+            catch
+            {
+
+            }
+
+            return null;
+        }
+
 
         /// <summary>
         /// Returns members that return/accept types that are considered easily serializable. 

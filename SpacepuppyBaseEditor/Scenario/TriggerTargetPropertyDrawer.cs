@@ -16,7 +16,7 @@ namespace com.spacepuppyeditor.Scenario
     [CustomPropertyDrawer(typeof(TriggerTarget))]
     public class TriggerTargetPropertyDrawer : PropertyDrawer
     {
-
+        
         public const string PROP_TRIGGERABLETARG = "_triggerable";
         public const string PROP_TRIGGERABLEARGS = "_triggerableArgs";
         public const string PROP_ACTIVATIONTYPE = "_activationType";
@@ -76,10 +76,7 @@ namespace com.spacepuppyeditor.Scenario
 
             //Draw ActivationType Popup
             var r0 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
-            var actProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
-            EditorGUI.PropertyField(r0, actProp);
-            //var act = (TriggerActivationType)actProp.enumValueIndex;
-            var act = actProp.GetEnumValue<TriggerActivationType>();
+            var act = this.DrawTriggerActivationTypeDropdown(r0, property);
 
             //Draw Advanced
             var area = new Rect(position.xMin, r0.yMax, position.width, position.height - r0.height);
@@ -106,6 +103,55 @@ namespace com.spacepuppyeditor.Scenario
             }
 
             EditorGUI.EndProperty();
+        }
+
+
+        private TriggerActivationType DrawTriggerActivationTypeDropdown(Rect area, SerializedProperty property)
+        {
+            var actProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
+            //EditorGUI.PropertyField(area, actProp);
+            
+            var actInfo = GetTriggerActivationInfo(property);
+            int index = System.Array.IndexOf(_triggerActivationTypeDisplayNames, actInfo.ActivationTypeDisplayName);
+            EditorGUI.BeginChangeCheck();
+            index = EditorGUI.Popup(area, actInfo.ActivationTypeProperty.displayName, index, _triggerActivationTypeDisplayNames);
+            if(EditorGUI.EndChangeCheck())
+            {
+                if (index <= 3)
+                {
+                    //the main ones
+                    actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>((TriggerActivationType)index);
+                }
+                else if(index == 4)
+                {
+                    //enable
+                    actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>(TriggerActivationType.EnableTarget);
+                    var argProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
+                    if(argProp.stringValue == EnableMode.Disable.ToString())
+                    {
+                        argProp.stringValue = EnableMode.Enable.ToString();
+                    }
+                }
+                else if(index == 5)
+                {
+                    //disable
+                    actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>(TriggerActivationType.EnableTarget);
+                    var argProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
+                    argProp.stringValue = EnableMode.Disable.ToString();
+                }
+                else if(index == 6)
+                {
+                    //destroy
+                    actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>(TriggerActivationType.DestroyTarget);
+                }
+                else
+                {
+                    //unknown
+                    actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>(TriggerActivationType.TriggerAllOnTarget);
+                }
+            }
+
+            return actInfo.ActivationTypeProperty.GetEnumValue<TriggerActivationType>();
         }
 
 
@@ -523,6 +569,48 @@ DrawMethodName:
 
 
         #region Utils
+
+        private static string[] _triggerActivationTypeDisplayNames = new string[]
+        {
+            "Trigger All On Target",
+            "Trigger Selected Target",
+            "Send Message",
+            "Call Method On Selected Target",
+            "Enable Target",
+            "Disable Target",
+            "Destroy Target"
+        };
+        public struct TriggerActivationInfo
+        {
+            public TriggerActivationType ActivationType;
+            public string ActivationTypeDisplayName;
+            public SerializedProperty ActivationTypeProperty;
+        }
+        public static TriggerActivationInfo GetTriggerActivationInfo(SerializedProperty triggerTargetProperty)
+        {
+            var result = new TriggerActivationInfo();
+            result.ActivationTypeProperty = triggerTargetProperty.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
+            result.ActivationType = result.ActivationTypeProperty.GetEnumValue<TriggerActivationType>();
+            switch(result.ActivationType)
+            {
+                case TriggerActivationType.TriggerAllOnTarget:
+                case TriggerActivationType.TriggerSelectedTarget:
+                case TriggerActivationType.SendMessage:
+                case TriggerActivationType.CallMethodOnSelectedTarget:
+                    result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[(int)result.ActivationType];
+                    break;
+                case TriggerActivationType.DestroyTarget:
+                    result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[6];
+                    break;
+                case TriggerActivationType.EnableTarget:
+                    {
+                        var argProp = triggerTargetProperty.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
+                        result.ActivationTypeDisplayName = (argProp.stringValue == EnableMode.Disable.ToString()) ? _triggerActivationTypeDisplayNames[5] : _triggerActivationTypeDisplayNames[4];
+                    }
+                    break;
+            }
+            return result;
+        }
 
         /// <summary>
         /// Validates target object is appropriate for the activation type. Null is considered valid.

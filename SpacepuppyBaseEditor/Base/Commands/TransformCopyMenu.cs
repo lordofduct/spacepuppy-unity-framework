@@ -129,6 +129,55 @@ namespace com.spacepuppyeditor.Base.Commands
 
         }
 
+
+
+
+
+        [MenuItem("GameObject/Transform/Move To Scene Camera")]
+        public static void MoveToSceneCamera()
+        {
+            var go = Selection.activeGameObject;
+            if (go == null) return;
+
+            var view = SceneView.lastActiveSceneView;
+            if (view == null || view.camera == null) return;
+
+            var t = view.camera.transform;
+            go.transform.position = t.position;
+            go.transform.rotation = t.rotation;
+        }
+        [MenuItem("GameObject/Transform/Move To Scene Camera", validate = true)]
+        public static bool MoveToSceneCamera_Validate(MenuCommand cmnd)
+        {
+            var go = Selection.activeGameObject;
+            if (go == null) return false;
+
+            return true;
+        }
+
+        [MenuItem("CONTEXT/Transform/Move To Scene Camera")]
+        public static void MoveToSceneCamera_Transform(MenuCommand cmnd)
+        {
+            var go = com.spacepuppy.Utils.GameObjectUtil.GetGameObjectFromSource(cmnd.context);
+            if (go == null) return;
+
+            var view = SceneView.lastActiveSceneView;
+            if (view == null || view.camera == null) return;
+
+            var t = view.camera.transform;
+            go.transform.position = t.position;
+            go.transform.rotation = t.rotation;
+        }
+        [MenuItem("CONTEXT/Transform/Move To Scene Camera", validate = true)]
+        public static bool MoveToSceneCamera_Transform_Validate(MenuCommand cmnd)
+        {
+            var go = com.spacepuppy.Utils.GameObjectUtil.GetGameObjectFromSource(cmnd.context);
+            if (go == null) return false;
+
+            return true;
+        }
+
+
         #endregion
 
     }

@@ -250,6 +250,7 @@ namespace com.spacepuppy
         public bool Draggable = true;
         public float ElementPadding = 0f;
         public bool DrawElementAtBottom = false;
+        public bool HideElementLabel = false;
 
         /// <summary>
         /// If DrawElementAtBottom is true, this child element can be displayed as the label in the reorderable list.

@@ -163,7 +163,9 @@ namespace com.spacepuppyeditor.Base
 
             EditorGUI.indentLevel++;
 
-            _scenesScrollBarPosition = EditorGUILayout.BeginScrollView(_scenesScrollBarPosition, GUI.skin.box, GUILayout.Height(200f));
+            var h = (this.position.height - GUILayoutUtility.GetLastRect().yMax) - (EditorGUIUtility.singleLineHeight * 11f);
+            if (h < 0f) h = 0f;
+            _scenesScrollBarPosition = EditorGUILayout.BeginScrollView(_scenesScrollBarPosition, GUI.skin.box, GUILayout.Height(h));
             
             EditorGUI.BeginChangeCheck();
             var scenes = EditorBuildSettings.scenes;

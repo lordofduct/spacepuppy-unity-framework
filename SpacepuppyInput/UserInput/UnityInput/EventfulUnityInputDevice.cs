@@ -68,9 +68,11 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         #endregion
 
-            #region Fields
+        #region Fields
 
         private Dictionary<string, System.Action<string>> _buttonPressTable = new Dictionary<string, Action<string>>();
+        private bool _inUpdate;
+        private System.Action _lateRegister;
 
         #endregion
 
@@ -95,8 +97,20 @@ namespace com.spacepuppy.UserInput.UnityInput
             {
                 callback = d + callback;
             }
-            _buttonPressTable[id] = callback;
-            this.Active = true;
+
+            if(_inUpdate)
+            {
+                _lateRegister += () =>
+                {
+                    _buttonPressTable[id] = callback;
+                    this.Active = true;
+                };
+            }
+            else
+            {
+                _buttonPressTable[id] = callback;
+                this.Active = true;
+            }
         }
 
         public void UnregisterButtonPress(string id, System.Action<string> callback)
@@ -104,19 +118,29 @@ namespace com.spacepuppy.UserInput.UnityInput
             if (id == null) throw new System.ArgumentNullException("id");
             if (callback == null) return;
 
-            System.Action<string> d;
-            if(_buttonPressTable.TryGetValue(id, out d))
+            if(_inUpdate)
             {
-                d -= callback;
-                if(d == null)
+                _lateRegister += () =>
                 {
-                    _buttonPressTable.Remove(id);
-                    if (_buttonPressTable.Count == 0)
-                        this.Active = false;
-                }
-                else
+                    this.UnregisterButtonPress(id, callback);
+                };
+            }
+            else
+            {
+                System.Action<string> d;
+                if (_buttonPressTable.TryGetValue(id, out d))
                 {
-                    _buttonPressTable[id] = callback;
+                    d -= callback;
+                    if (d == null)
+                    {
+                        _buttonPressTable.Remove(id);
+                        if (_buttonPressTable.Count == 0)
+                            this.Active = false;
+                    }
+                    else
+                    {
+                        _buttonPressTable[id] = callback;
+                    }
                 }
             }
         }
@@ -165,11 +189,19 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         void IInputSignature.Update()
         {
+            _inUpdate = true;
             var e = _buttonPressTable.GetEnumerator();
             while(e.MoveNext())
             {
-                if (Input.GetButtonDown(e.Current.Key)) e.Current.Value(e.Current.Key);
-                    
+                if (Input.GetButtonDown(e.Current.Key)) e.Current.Value(e.Current.Key);   
+            }
+            _inUpdate = false;
+
+            if(_lateRegister != null)
+            {
+                var a = _lateRegister;
+                _lateRegister = null;
+                a();
             }
         }
 

@@ -9,12 +9,6 @@ namespace com.spacepuppy.Scenario
     public class i_PlaySoundEffect : TriggerableMechanism
     {
 
-        public enum InterruptMode
-        {
-            StopIfPlaying = 0,
-            DoNotPlayIfPlaying = 1
-        }
-
         #region Fields
 
         [SerializeField()]
@@ -27,7 +21,7 @@ namespace com.spacepuppy.Scenario
         
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("Interrupt")]
-        private InterruptMode Interrupt = InterruptMode.StopIfPlaying;
+        private AudioInterruptMode _interrupt = AudioInterruptMode.StopIfPlaying;
         
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
@@ -52,6 +46,12 @@ namespace com.spacepuppy.Scenario
         public float Delay
         {
             get { return _delay; }
+        }
+
+        public AudioInterruptMode Interrupt
+        {
+            get { return _interrupt; }
+            set { _interrupt = value; }
         }
 
         #endregion
@@ -90,18 +90,21 @@ namespace com.spacepuppy.Scenario
             {
                 switch (this.Interrupt)
                 {
-                    case InterruptMode.StopIfPlaying:
+                    case AudioInterruptMode.StopIfPlaying:
                         if (_completeRoutine != null) _completeRoutine.Cancel();
                         _completeRoutine = null;
                         src.Stop();
                         break;
-                    case InterruptMode.DoNotPlayIfPlaying:
+                    case AudioInterruptMode.DoNotPlayIfPlaying:
                         return false;
+                    case AudioInterruptMode.PlayOverExisting:
+                        //play one shot over existing audio
+                        break;
                 }
             }
 
             var clip = _clips[Random.Range(0, _clips.Length)];
-            src.clip = clip;
+            //src.clip = clip;
 
             if (clip != null)
             {
@@ -112,14 +115,16 @@ namespace com.spacepuppy.Scenario
                         if (src != null)
                         {
                             _completeRoutine = this.InvokeRadical(this.OnAudioComplete, clip.length);
-                            src.Play();
+                            //src.Play();
+                            src.PlayOneShot(clip);
                         }
                     }, this._delay);
                 }
                 else
                 {
                     _completeRoutine = this.InvokeRadical(this.OnAudioComplete, clip.length);
-                    src.Play();
+                    //src.Play();
+                    src.PlayOneShot(clip);
                 }
 
                 return true;

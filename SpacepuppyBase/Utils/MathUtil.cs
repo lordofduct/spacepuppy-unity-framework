@@ -1529,7 +1529,7 @@ namespace com.spacepuppy.Utils
         {
             value = Math.Abs(value);
             List<int> arr = new List<int>();
-            int sqrrt = (int)Math.Floor(Math.Sqrt(value));
+            int sqrrt = (int)Math.Sqrt(value);
             int c = 0;
 
             for (int i = 1; i <= sqrrt; i++)
@@ -1547,15 +1547,51 @@ namespace com.spacepuppy.Utils
 
             return arr.ToArray();
         }
-
+        
         public static int[] CommonFactorsOf(int m, int n)
         {
+            int i = 0;
+            int j = 0;
+            if (m < 0) m = -m;
+            if (n < 0) n = -n;
+
+            if(m > n)
+            {
+                i = m;
+                m = n;
+                n = i;
+            }
+
+            var set = new HashSet<int>(); //ensures no duplicates
+
+            int r = (int)Math.Sqrt(m);
+            for(i = 1; i <= r; i++)
+            {
+                if((m % i) == 0 && (n % i) == 0)
+                {
+                    set.Add(i);
+                    j = m / i;
+                    if ((n % j) == 0) set.Add(j);
+                    j = n / i;
+                    if ((m % j) == 0) set.Add(j);
+                }
+            }
+
+            int[] arr = System.Linq.Enumerable.ToArray(set);
+            System.Array.Sort(arr);
+            return arr;
+
+
+
+            //more loops
+            /*
             List<int> arr = new List<int>();
 
             int i = 0;
-            m = Math.Abs(m);
-            n = Math.Abs(n);
+            if (m < 0) m = -m;
+            if (n < 0) n = -n;
 
+            //make sure m is < n
             if (m > n)
             {
                 i = m;
@@ -1563,6 +1599,7 @@ namespace com.spacepuppy.Utils
                 n = i;
             }
 
+            //could be sped up by looping to sqrt(m), but then would have to do extra work to make sure duplicates don't occur
             for (i = 1; i <= m; i++)
             {
                 if ((m % i) == 0 && (n % i) == 0)
@@ -1572,10 +1609,11 @@ namespace com.spacepuppy.Utils
             }
 
             return arr.ToArray();
+            */
         }
 
         /// <summary>
-        /// Greatest Common Denominator using Euclid's algorithm
+        /// Greatest Common Divisor using Euclid's algorithm
         /// </summary>
         /// <param name="m"></param>
         /// <param name="n"></param>
@@ -1586,8 +1624,8 @@ namespace com.spacepuppy.Utils
             int r = 0;
 
             // make sure positive, GCD is always positive
-            m = Math.Abs(m);
-            n = Math.Abs(n);
+            if (m < 0) m = -m;
+            if (n < 0) n = -n;
 
             // m must be >= n
             if (m < n)
@@ -1616,8 +1654,8 @@ namespace com.spacepuppy.Utils
             long r = 0;
 
             // make sure positive, GCD is always positive
-            m = Math.Abs(m);
-            n = Math.Abs(n);
+            if (m < 0) m = -m;
+            if (n < 0) n = -n;
 
             // m must be >= n
             if (m < n)

@@ -14,6 +14,8 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         private ConditionBlock[] _conditions;
+        [SerializeField]
+        private Trigger _elseCondition;
 
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("PassAlongTriggerArg")]
@@ -68,7 +70,19 @@ namespace com.spacepuppy.Scenario
                 }
             }
 
-            return false;
+            //if we reached here, it's else
+            if (_delay > 0f)
+            {
+                this.Invoke(() =>
+                {
+                    _elseCondition.ActivateTrigger(this, arg);
+                }, _delay);
+            }
+            else
+            {
+                _elseCondition.ActivateTrigger(this, arg);
+            }
+            return true;
         }
 
         #endregion

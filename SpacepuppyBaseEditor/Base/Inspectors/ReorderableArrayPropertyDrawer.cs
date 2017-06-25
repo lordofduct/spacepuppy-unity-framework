@@ -29,6 +29,7 @@ namespace com.spacepuppyeditor.Base
         private bool _removeBackgroundWhenCollapsed;
         private bool _draggable = true;
         private bool _drawElementAtBottom;
+        private bool _hideElementLabel = false;
         private string _childPropertyAsLabel;
         private string _childPropertyAsEntry;
         private ReorderableList.AddCallbackDelegate _addCallback;
@@ -57,10 +58,18 @@ namespace com.spacepuppyeditor.Base
                     {
                         lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
                     }
-                    else if(pchild.hasChildren && pchild.objectReferenceValue is MonoBehaviour)
+                    else if(ElementIsFlatChildField(pchild))
                     {
                         //we don't draw this way if it's a built-in type from Unity
-                        lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + 2f;
+                        pchild.isExpanded = true;
+                        if(_hideElementLabel)
+                        {
+                            lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + 2f - EditorGUIUtility.singleLineHeight;
+                        }
+                        else
+                        {
+                            lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + 2f; //height when showing label
+                        }
                     }
                     else
                     {
@@ -85,6 +94,7 @@ namespace com.spacepuppyeditor.Base
                 _removeBackgroundWhenCollapsed = attrib.RemoveBackgroundWhenCollapsed;
                 _draggable = attrib.Draggable;
                 _drawElementAtBottom = attrib.DrawElementAtBottom;
+                _hideElementLabel = attrib.HideElementLabel;
                 _childPropertyAsLabel = attrib.ChildPropertyToDrawAsElementLabel;
                 _childPropertyAsEntry = attrib.ChildPropertyToDrawAsElementEntry;
             }
@@ -169,14 +179,15 @@ namespace com.spacepuppyeditor.Base
                         {
                             h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD + TOP_PAD;
                         }
-                        else if (pchild.hasChildren && pchild.objectReferenceValue is MonoBehaviour)
+                        else if (ElementIsFlatChildField(pchild))
                         {
                             //we don't draw this way if it's a built-in type from Unity
+                            pchild.isExpanded = true;
                             h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + BOTTOM_PAD + TOP_PAD - EditorGUIUtility.singleLineHeight;
                         }
                         else
                         {
-                            h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, true) + BOTTOM_PAD + TOP_PAD;
+                            h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, false) + BOTTOM_PAD + TOP_PAD;
                         }
                     }
                 }
@@ -304,7 +315,7 @@ namespace com.spacepuppyeditor.Base
 
             //EditorGUI.PropertyField(area, element, GUIContent.none, false);
             var attrib = this.attribute as ReorderableArrayAttribute;
-            GUIContent label = GUIContent.none;
+            GUIContent label = null;
             if(attrib != null)
             {
                 if (attrib.ElementLabelFormatString != null)
@@ -316,19 +327,19 @@ namespace com.spacepuppyeditor.Base
                     area = new Rect(area.xMin + attrib.ElementPadding, area.yMin, Mathf.Max(0f, area.width - attrib.ElementPadding), area.height);
                 }
             }
+            if (label == null) label = (_hideElementLabel) ? GUIContent.none : TempElementLabel(element, index);
 
             if(_drawElementAtBottom)
             {
-                var lbl = TempElementLabel(element, index);
                 SerializedProperty prop = string.IsNullOrEmpty(_childPropertyAsEntry) ? null : element.FindPropertyRelative(_childPropertyAsEntry);
 
                 if(prop != null)
                 {
-                    SPEditorGUI.PropertyField(area, prop, lbl);
+                    SPEditorGUI.PropertyField(area, prop, label);
                 }
                 else
                 {
-                    EditorGUI.LabelField(area, lbl);
+                    EditorGUI.LabelField(area, label);
                 }
             }
             else
@@ -337,13 +348,23 @@ namespace com.spacepuppyeditor.Base
                 {
                     _internalDrawer.OnGUI(area, element, label);
                 }
-                else if(element.hasChildren && element.objectReferenceValue is MonoBehaviour)
+                else if (ElementIsFlatChildField(element))
                 {
                     //we don't draw this way if it's a built-in type from Unity
-                    var labelArea = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-                    EditorGUI.LabelField(labelArea, label);
-                    var childArea = new Rect(area.xMin, area.yMin + EditorGUIUtility.singleLineHeight + 1f, area.width, area.height - EditorGUIUtility.singleLineHeight);
-                    SPEditorGUI.FlatChildPropertyField(childArea, element);
+
+                    if (_hideElementLabel)
+                    {
+                        //no label
+                        SPEditorGUI.FlatChildPropertyField(area, element);
+                    }
+                    else
+                    {
+                        //showing label
+                        var labelArea = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
+                        EditorGUI.LabelField(labelArea, label);
+                        var childArea = new Rect(area.xMin, area.yMin + EditorGUIUtility.singleLineHeight + 1f, area.width, area.height - EditorGUIUtility.singleLineHeight);
+                        SPEditorGUI.FlatChildPropertyField(childArea, element);
+                    }
                 }
                 else
                 {
@@ -390,6 +411,16 @@ namespace com.spacepuppyeditor.Base
         }
 
         #endregion
-        
+
+        #region Static Utils
+
+        private static bool ElementIsFlatChildField(SerializedProperty property)
+        {
+            //return property.hasChildren && property.objectReferenceValue is MonoBehaviour;
+            return property.hasChildren && property.propertyType == SerializedPropertyType.Generic;
+        }
+
+        #endregion
+
     }
 }

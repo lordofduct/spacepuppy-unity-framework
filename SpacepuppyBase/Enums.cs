@@ -98,5 +98,12 @@
         Toggle = 2
     }
 
+    public enum AudioInterruptMode
+    {
+        StopIfPlaying = 0,
+        DoNotPlayIfPlaying = 1,
+        PlayOverExisting = 2
+    }
+
 
 }

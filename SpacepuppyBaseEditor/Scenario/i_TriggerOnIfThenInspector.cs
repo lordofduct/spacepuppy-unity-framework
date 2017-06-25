@@ -15,6 +15,11 @@ namespace com.spacepuppyeditor.Scenario
     [CustomEditor(typeof(i_TriggerOnIfThen), true)]
     public class i_TriggerOnIfThenInspector : SPEditor
     {
+        public const string PROP_ORDER = "_order";
+        public const string PROP_CONDITIONS = "_conditions";
+        public const string PROP_ELSECONDITION = "_elseCondition";
+        private const string PROP_CONDITIONBLOCK_CONDITION = "_condition";
+        private const string PROP_CONDITIONBLOCK_TRIGGER = "_trigger";
 
         private VariantReferencePropertyDrawer _variantDrawer = new VariantReferencePropertyDrawer();
 
@@ -23,25 +28,33 @@ namespace com.spacepuppyeditor.Scenario
             this.serializedObject.Update();
 
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
-            this.DrawPropertyField("_order");
+            this.DrawPropertyField(PROP_ORDER);
 
 
             EditorGUILayout.BeginVertical("Box");
-            var conditionsArrayProp = this.serializedObject.FindProperty("_conditions");
+
+            //draw conditions blocks
+            var conditionsArrayProp = this.serializedObject.FindProperty(PROP_CONDITIONS);
+            if (conditionsArrayProp.arraySize == 0) conditionsArrayProp.arraySize = 1;
 
             for (int i = 0; i < conditionsArrayProp.arraySize; i++)
             {
                 EditorGUILayout.LabelField((i == 0) ? "IF" : "ELSE IF");
                 var conditionBlockProp = conditionsArrayProp.GetArrayElementAtIndex(i);
-                var conditionProp = conditionBlockProp.FindPropertyRelative("_condition");
+                var conditionProp = conditionBlockProp.FindPropertyRelative(PROP_CONDITIONBLOCK_CONDITION);
 
                 var r = EditorGUILayout.GetControlRect(false, _variantDrawer.GetPropertyHeight(conditionProp, GUIContent.none));
                 _variantDrawer.OnGUI(r, conditionProp, GUIContent.none);
 
-                var triggerProp = conditionBlockProp.FindPropertyRelative("_trigger");
+                var triggerProp = conditionBlockProp.FindPropertyRelative(PROP_CONDITIONBLOCK_TRIGGER);
                 SPEditorGUILayout.PropertyField(triggerProp);
             }
 
+            //draw else
+            EditorGUILayout.LabelField("ELSE");
+            SPEditorGUILayout.PropertyField(this.serializedObject.FindProperty(PROP_ELSECONDITION));
+
+            //draw add buttons
             var fullRect = EditorGUILayout.GetControlRect();
             var leftRect = new Rect(fullRect.xMin, fullRect.yMin, fullRect.width / 2f, fullRect.height);
             var rightRect = new Rect(fullRect.xMin + leftRect.width, fullRect.yMin, fullRect.width / 2f, fullRect.height);
@@ -56,7 +69,7 @@ namespace com.spacepuppyeditor.Scenario
 
             EditorGUILayout.EndVertical();
 
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, "_order", "_conditions");
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_ORDER, PROP_CONDITIONS, PROP_ELSECONDITION);
 
 
             this.serializedObject.ApplyModifiedProperties();
