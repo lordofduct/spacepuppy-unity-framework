@@ -234,7 +234,7 @@ namespace com.spacepuppy.Utils
 
             foreach(var ctp in map)
             {
-                var obj = UnityEngine.Object.FindObjectOfType(map[0]);
+                var obj = UnityEngine.Object.FindObjectOfType(ctp);
                 if (obj != null) return obj as T;
             }
 
@@ -252,7 +252,7 @@ namespace com.spacepuppy.Utils
 
                 foreach (var ctp in map)
                 {
-                    var obj = UnityEngine.Object.FindObjectOfType(map[0]);
+                    var obj = UnityEngine.Object.FindObjectOfType(ctp);
                     if (obj != null) return obj;
                 }
             }

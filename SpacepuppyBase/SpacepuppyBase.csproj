@@ -109,6 +109,7 @@
     <Compile Include="Collections\WeakList.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <Compile Include="CollisionExclusion.cs" />
+    <Compile Include="CompoundTrigger.cs" />
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
     <Compile Include="Dynamic\DoubleEvaluator.cs" />
     <Compile Include="Dynamic\DynamicObjectAccessor.cs" />
@@ -204,6 +205,7 @@
     <Compile Include="Project\ResourceLinkTable.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
+    <Compile Include="Project\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
     <Compile Include="PsuedoSingleton.cs" />
     <Compile Include="RadicalEnums.cs" />
@@ -249,7 +251,9 @@
     <Compile Include="Scenario\t_OnEnable.cs" />
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />
-    <Compile Include="Scenes\ISceneLoadOptions.cs" />
+    <Compile Include="Scenes\SceneManagerEventArgs.cs" />
+    <Compile Include="Scenes\LoadSceneAsyncWaitHandle.cs" />
+    <Compile Include="Scenes\SceneManager.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="SPAssets.cs" />
     <Compile Include="SPEntity.cs" />
@@ -285,17 +289,6 @@
     <Compile Include="Scenario\t_Interval.cs" />
     <Compile Include="Scenario\t_OnCollisionEnter.cs" />
     <Compile Include="Scenario\t_OnNotificationTrigger.cs" />
-    <Compile Include="Scenes\CompositeScene.cs" />
-    <Compile Include="Scenes\ISceneBehaviour.cs" />
-    <Compile Include="Scenes\ISceneBehaviourLoadOptions.cs" />
-    <Compile Include="Scenes\ModifiedLoadedSceneContainerException.cs" />
-    <Compile Include="Scenes\Scene.cs" />
-    <Compile Include="Scenes\SceneContainer.cs" />
-    <Compile Include="Scenes\SceneLoadingEventArgs.cs" />
-    <Compile Include="Scenes\SPSceneManager.cs" />
-    <Compile Include="Scenes\SceneBehaviourSequence.cs" />
-    <Compile Include="Scenes\SceneSequence.cs" />
-    <Compile Include="Scenes\SimpleScene.cs" />
     <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="Singleton.cs" />

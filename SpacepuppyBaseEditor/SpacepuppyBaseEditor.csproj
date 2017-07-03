@@ -70,6 +70,7 @@
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
+    <Compile Include="BuildSettings.cs" />
     <Compile Include="Cameras\CameraControllerInspector.cs" />
     <Compile Include="Cameras\CameraMovementControllerInspector.cs" />
     <Compile Include="Cameras\MultiCameraControllerInspector.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Base\Inspectors\SingletonInspector.cs" />
     <Compile Include="Project\ResourceLinkPropertyDrawer.cs" />
     <Compile Include="Project\ResourceLinkTablePropertyDrawer.cs" />
+    <Compile Include="Project\SceneRefPropertyDrawer.cs" />
     <Compile Include="Project\TagDataInspector.cs" />
     <Compile Include="Base\Inspectors\TagMaskInspector.cs" />
     <Compile Include="Base\Inspectors\TagSelectorPropertyDrawer.cs" />

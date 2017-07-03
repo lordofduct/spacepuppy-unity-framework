@@ -43,10 +43,17 @@ namespace com.spacepuppy.Scenario
         {
             if (!this.CanTrigger) return false;
 
-            var targ = _target.GetTarget<object>(arg);
-            if (targ == null) return false;
+            //var targ = _target.GetTarget<object>(arg);
+            //if (targ == null) return false;
 
-            if (_restrictedType != null && _restrictedType.Type != null) targ = ObjUtil.GetAsFromSource(_restrictedType.Type, targ);
+            //if (_restrictedType != null && _restrictedType.Type != null) targ = ObjUtil.GetAsFromSource(_restrictedType.Type, targ);
+            //if (targ == null) return false;
+
+            object targ;
+            if(_restrictedType != null && _restrictedType.Type != null)
+                targ = _target.GetTarget(_restrictedType.Type, arg);
+            else
+                targ = _target.GetTarget<object>(arg);
             if (targ == null) return false;
 
             switch (_mode)

@@ -2,6 +2,8 @@
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
+using com.spacepuppy.Scenes;
+
 namespace com.spacepuppy.Scenario
 {
     public class i_LoadScene : TriggerableMechanism
@@ -25,10 +27,21 @@ namespace com.spacepuppy.Scenario
             if (!this.CanTrigger) return false;
             if (string.IsNullOrEmpty(_sceneName)) return false;
 
-            if (_async)
-                SceneManager.LoadSceneAsync(_sceneName, _mode);
+            var manager = Services.Get<ISceneManager>();
+            if(manager != null)
+            {
+                if (_async)
+                    manager.LoadSceneAsync(_sceneName, _mode);
+                else
+                    manager.LoadScene(_sceneName, _mode);
+            }
             else
-                SceneManager.LoadScene(_sceneName, _mode);
+            {
+                if (_async)
+                    SceneManager.LoadSceneAsync(_sceneName, _mode);
+                else
+                    SceneManager.LoadScene(_sceneName, _mode);
+            }
 
             return true;
         }

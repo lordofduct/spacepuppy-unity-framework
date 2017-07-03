@@ -257,7 +257,7 @@ namespace com.spacepuppy.Cameras
 
     }
 
-    public class CameraManager : Service<ICameraManager>, ICameraManager
+    public class CameraManager : ServiceComponent<ICameraManager>, ICameraManager
     {
         
         #region Fields

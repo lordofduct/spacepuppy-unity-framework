@@ -129,7 +129,7 @@ namespace com.spacepuppy.Scenario
             if (obj == null) return null;
 
             var result = ObjUtil.GetAsFromSource(tp, obj);
-            if(result == null && !_configured && ComponentUtil.IsAcceptableComponentType(tp))
+            if(result == null && !_configured && _find != FindCommand.Direct && ComponentUtil.IsAcceptableComponentType(tp))
             {
                 //if not configured, and the triggerArg didn't reduce properly, lets search the entity of the 'triggerArg'
                 var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));

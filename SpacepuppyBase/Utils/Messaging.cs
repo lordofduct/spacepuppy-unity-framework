@@ -41,6 +41,13 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        /// <summary>
+        /// Broadcast message to all children of a GameObject
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="go"></param>
+        /// <param name="functor"></param>
+        /// <param name="includeInactive"></param>
         public static void Broadcast<T>(GameObject go, System.Action<T> functor, bool includeInactive = false) where T : class
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
@@ -58,6 +65,15 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        /// <summary>
+        /// Broadcast message to all children of a GameObject
+        /// </summary>
+        /// <typeparam name="TInterface"></typeparam>
+        /// <typeparam name="TArg"></typeparam>
+        /// <param name="go"></param>
+        /// <param name="arg"></param>
+        /// <param name="functor"></param>
+        /// <param name="includeInactive"></param>
         public static void Broadcast<TInterface, TArg>(GameObject go, TArg arg, System.Action<TInterface, TArg> functor, bool includeInactive = false) where TInterface : class
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
@@ -71,6 +87,48 @@ namespace com.spacepuppy.Utils
                     {
                         functor(lst[i], arg);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Broadcast a message globally. This can be slow, use sparingly.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="functor"></param>
+        public static void Broadcast<T>(System.Action<T> functor) where T : class
+        {
+            if (functor == null) throw new System.ArgumentNullException("functor");
+
+            using (var lst = TempCollection.GetList<T>())
+            {
+                ObjUtil.FindObjectsOfInterface<T>(lst);
+                var e = lst.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    functor(e.Current);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Broadcast a message globally. This can be slow, use sparingly.
+        /// </summary>
+        /// <typeparam name="TInterface"></typeparam>
+        /// <typeparam name="TArg"></typeparam>
+        /// <param name="arg"></param>
+        /// <param name="functor"></param>
+        public static void Broadcast<TInterface, TArg>(TArg arg, System.Action<TInterface, TArg> functor) where TInterface : class
+        {
+            if (functor == null) throw new System.ArgumentNullException("functor");
+
+            using (var lst = TempCollection.GetList<TInterface>())
+            {
+                ObjUtil.FindObjectsOfInterface<TInterface>(lst);
+                var e = lst.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    functor(e.Current, arg);
                 }
             }
         }

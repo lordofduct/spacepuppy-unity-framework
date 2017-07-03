@@ -24,7 +24,7 @@ namespace com.spacepuppy
 
     }
 
-    public class GameInputManager : Service<IGameInputManager>, IGameInputManager
+    public class GameInputManager : ServiceComponent<IGameInputManager>, IGameInputManager
     {
 
         #region Fields
