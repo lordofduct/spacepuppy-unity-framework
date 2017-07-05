@@ -29,8 +29,22 @@ namespace com.spacepuppyeditor.Base
             var r1 = new Rect(position.xMin, position.yMin, Mathf.Max(position.width - w, 0f), position.height);
 
             var idProp = property.FindPropertyRelative("_id");
-            EditorGUI.SelectableLabel(r1, idProp.longValue.ToString("X16"), EditorStyles.textField);
-            if (GUI.Button(r2, "New Id"))
+
+            //read-write
+            EditorGUI.BeginChangeCheck();
+            var sval = EditorGUI.TextField(r1, idProp.longValue.ToString("X16"));
+            if(EditorGUI.EndChangeCheck())
+            {
+                long val;
+                if(long.TryParse(sval, out val))
+                {
+                    idProp.longValue = val;
+                }
+            }
+            //read-only
+            //EditorGUI.SelectableLabel(r1, idProp.longValue.ToString("X16"), EditorStyles.textField);
+
+            if (GUI.Button(r2, "New Id") || idProp.longValue == 0)
             {
                 idProp.longValue = ShortUid.NewId().Value;
             }
