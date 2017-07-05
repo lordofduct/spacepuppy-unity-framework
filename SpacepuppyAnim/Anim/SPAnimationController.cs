@@ -460,7 +460,7 @@ namespace com.spacepuppy.Anim
             var ev = new AnimationEvent();
             ev.time = time;
             ev.functionName = "SPAnimationEventHook33417";
-            ev.stringParameter = ShortGuid.NewGuid().Value;
+            ev.stringParameter = ShortUid.NewId().ToString();
 
             if (_animEventTable == null) _animEventTable = new Dictionary<string, AnimationCallbackData>();
             _animEventTable.Add(ev.stringParameter, new AnimationCallbackData(callback, token));

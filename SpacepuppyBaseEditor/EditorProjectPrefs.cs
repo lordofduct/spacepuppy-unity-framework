@@ -38,7 +38,7 @@ namespace com.spacepuppyeditor
 
             if(_xdoc == null)
             {
-                _projectId = "SPProj." + ShortGuid.NewGuid().ToString();
+                _projectId = "SPProj." + System.Guid.NewGuid().ToString();
                 _xdoc = new XDocument(new XElement("root"));
                 _xdoc.Root.Add(new XAttribute("projectId", _projectId));
 
@@ -51,13 +51,13 @@ namespace com.spacepuppyeditor
                 var xattrib = _xdoc.Root.Attribute("projectId");
                 if (xattrib == null)
                 {
-                    xattrib = new XAttribute("projectId", "SPProj." + ShortGuid.NewGuid().ToString());
+                    xattrib = new XAttribute("projectId", "SPProj." + System.Guid.NewGuid().ToString());
                     _xdoc.Root.Add(xattrib);
                     _xdoc.Save(_path);
                 }
                 else if (string.IsNullOrEmpty(xattrib.Value))
                 {
-                    xattrib.Value = "SPProj." + ShortGuid.NewGuid().ToString();
+                    xattrib.Value = "SPProj." + System.Guid.NewGuid().ToString();
                     _xdoc.Save(_path);
                 }
                 _projectId = xattrib.Value;

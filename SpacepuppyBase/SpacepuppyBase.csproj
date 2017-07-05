@@ -289,7 +289,6 @@
     <Compile Include="Scenario\t_Interval.cs" />
     <Compile Include="Scenario\t_OnCollisionEnter.cs" />
     <Compile Include="Scenario\t_OnNotificationTrigger.cs" />
-    <Compile Include="ShortGuid.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="SingletonProxy.cs" />
