@@ -260,6 +260,18 @@ namespace com.spacepuppy.UserInput.Xbox
             }
         }
 
+        bool IPlayerInputDevice.GetButtonPressed(string id, float duration)
+        {
+            //TODO - how to track this?
+            throw new System.NotSupportedException();
+        }
+
+        bool IPlayerInputDevice.GetButtonPressed(int hash, float duration)
+        {
+            //TODO - how to track this?
+            throw new System.NotSupportedException();
+        }
+
         float IPlayerInputDevice.GetCurrentAxleState(string id)
         {
             try
@@ -356,11 +368,6 @@ namespace com.spacepuppy.UserInput.Xbox
         }
 
         #endregion
-
-
-
-
-
-
+        
     }
 }

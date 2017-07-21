@@ -6,6 +6,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenario
 {
 
+    [System.Obsolete("This thing is bonkers weird, and is a relic of early versions of the t&i system. Ignore this thing at all costs.")]
     public class i_TriggerChildren : AutoTriggerableMechanism
     {
 
@@ -63,7 +64,7 @@ namespace com.spacepuppy.Scenario
 
             if (!string.IsNullOrEmpty(_specificTargetName))
             {
-                var child = trans.FindChild(_specificTargetName);
+                var child = trans.Find(_specificTargetName);
                 if (child != null && child.gameObject.activeInHierarchy)
                 {
                     //foreach (var t in (from t in child.GetComponents<ITriggerableMechanism>() where t.CanTrigger orderby t.Order ascending select t))

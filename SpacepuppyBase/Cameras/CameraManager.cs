@@ -179,7 +179,7 @@ namespace com.spacepuppy.Cameras
         }
 
 
-        public static IEnumerator<ICamera> GetEnumerator()
+        public static Enumerator GetEnumerator()
         {
             return new Enumerator(_cameras);
         }

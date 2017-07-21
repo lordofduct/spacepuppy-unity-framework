@@ -50,7 +50,7 @@ namespace com.spacepuppy.Scenario
             if(_callback != null && _inputId != null)
             {
                 var device = EventfulUnityInputDevice.GetDevice();
-                device.UnregisterButtonPress(_inputId, _callback);
+                if(device != null) device.UnregisterButtonPress(_inputId, _callback);
             }
         }
 

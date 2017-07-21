@@ -64,6 +64,7 @@ namespace com.spacepuppy
     {
 
         public bool MustBeAttachedToRoot;
+        public bool IgnoreInactive;
 
     }
 

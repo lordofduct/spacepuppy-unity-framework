@@ -22,7 +22,7 @@ namespace com.spacepuppyeditor.Anim
 
         public string Label;
 
-        private ReorderableList _maskList;
+        private CachedReorderableList _maskList;
         private GUIContent _currentLabel;
 
         #endregion

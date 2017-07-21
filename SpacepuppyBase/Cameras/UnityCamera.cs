@@ -15,6 +15,9 @@ namespace com.spacepuppy.Cameras
         #region Fields
 
         [SerializeField]
+        private CameraCategory _type;
+
+        [SerializeField]
         [DefaultFromSelf(UseEntity = true)]
         private Camera _camera;
         
@@ -53,6 +56,12 @@ namespace com.spacepuppy.Cameras
         #endregion
 
         #region Properties
+
+        public CameraCategory Category
+        {
+            get { return _type; }
+            set { _type = value; }
+        }
 
         public new Camera camera
         {

@@ -5,6 +5,7 @@ using System.Linq;
 using com.spacepuppy.Collections;
 using com.spacepuppy.Hooks;
 using com.spacepuppy.Geom;
+using com.spacepuppy.Movement;
 using com.spacepuppy.Utils;
 using com.spacepuppy.Serialization;
 
@@ -19,7 +20,7 @@ namespace com.spacepuppy
     /// is called.
     /// </summary>
     [AddComponentMenu("SpacePuppy/Motors/Movement Controller")]
-    public class MovementController : SPComponent, IIgnorableCollision, IForceReceiver, ISerializationCallbackReceiver
+    public class MovementController : SPComponent, IIgnorableCollision, IForceReceiver, IMover, ISerializationCallbackReceiver
     {
 
         #region Events
@@ -329,7 +330,8 @@ namespace com.spacepuppy
 
         public void SignalHit(MovementControllerHitEventArgs e)
         {
-            if (_movementControllerHit != null) _movementControllerHit(this, e);
+            var ev = _movementControllerHit;
+            if (ev != null) ev(this, e);
         }
 
 
@@ -526,6 +528,17 @@ namespace com.spacepuppy
         {
             if (_mover != null) _mover.IgnoreCollision(coll, ignore);
         }
+
+        #endregion
+
+        #region IMover Interface
+
+        public bool InMotion
+        {
+            get { return this.Velocity.sqrMagnitude > 0.00001f; }
+        }
+
+        //Velocity implicitly implemented
 
         #endregion
 
@@ -754,9 +767,9 @@ namespace com.spacepuppy
             {
                 if(_owner.HasHitListeners)
                 {
-                    //var ev = new MovementControllerHitEventArgs(_owner, hit.collider, hit.normal, hit.point);
-                    var ev = new MovementControllerHitEventArgs(_owner, hit.collider, new MovementControllerHitContact(hit.normal, hit.point));
+                    var ev = MovementControllerHitEventArgs.GetTemp(_owner, hit);
                     _owner.SignalHit(ev);
+                    MovementControllerHitEventArgs.ReleaseTemp(ev);
                 }
             }
 
@@ -1085,21 +1098,9 @@ namespace com.spacepuppy
             {
                 if(_owner.HasHitListeners)
                 {
-                    //TODO - need to think of a better way to deal with more than 1 contact, currently just going to treat as the FIRST contact
-                    if (c.contacts.Length >= 1)
-                    {
-                        var points = c.contacts;
-                        using (var lst = TempCollection.GetList<MovementControllerHitContact>())
-                        {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                lst.Add(new MovementControllerHitContact(points[i].normal, points[i].point));
-                            }
-                            var e = new MovementControllerHitEventArgs(_owner, c.collider, lst.ToArray());
-                            _owner.SignalHit(e);
-                        }
-
-                    }
+                    var ev = MovementControllerHitEventArgs.GetTemp(_owner, c);
+                    _owner.SignalHit(ev);
+                    MovementControllerHitEventArgs.ReleaseTemp(ev);
                 }
                 else
                 {
@@ -1377,21 +1378,9 @@ namespace com.spacepuppy
             {
                 if(_owner.HasHitListeners)
                 {
-                    //TODO - need to think of a better way to deal with more than 1 contact, currently just going to treat as the FIRST contact
-                    if (c.contacts.Length >= 1)
-                    {
-                        var points = c.contacts;
-                        using (var lst = TempCollection.GetList<MovementControllerHitContact>())
-                        {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                lst.Add(new MovementControllerHitContact(points[i].normal, points[i].point));
-                            }
-                            var e = new MovementControllerHitEventArgs(_owner, c.collider, lst.ToArray());
-                            _owner.SignalHit(e);
-                        }
-
-                    }
+                    var ev = MovementControllerHitEventArgs.GetTemp(_owner, c);
+                    _owner.SignalHit(ev);
+                    MovementControllerHitEventArgs.ReleaseTemp(ev);
                 }
                 else
                 {
@@ -2056,6 +2045,9 @@ namespace com.spacepuppy
 
         #region Event Arg Types
 
+        /// <summary>
+        /// These event args are intended to be temporary, do not persist these args once the event has completed.
+        /// </summary>
         public class MovementControllerHitEventArgs : System.EventArgs
         {
 
@@ -2063,21 +2055,29 @@ namespace com.spacepuppy
 
             private MovementController _controller;
             private Collider _collider;
-            //private Vector3 _normal;
-            //private Vector3 _point;
-            private MovementControllerHitContact[] _contacts;
+            private object _data;
 
             #endregion
 
             #region CONSTRUCTOR
 
-            public MovementControllerHitEventArgs(MovementController controller, Collider otherCollider, params MovementControllerHitContact[] contacts) // Vector3 norm, Vector3 pnt)
+            private MovementControllerHitEventArgs()
+            {
+
+            }
+
+            public MovementControllerHitEventArgs(MovementController controller, Collision collision)
             {
                 _controller = controller;
-                _collider = otherCollider;
-                //_normal = norm;
-                //_point = pnt;
-                _contacts = contacts;
+                _collider = collision.collider;
+                _data = collision;
+            }
+
+            public MovementControllerHitEventArgs(MovementController controller, ControllerColliderHit collision)
+            {
+                _controller = controller;
+                _collider = collision.collider;
+                _data = collision;
             }
 
             #endregion
@@ -2086,9 +2086,101 @@ namespace com.spacepuppy
 
             public MovementController Controller { get { return _controller; } }
             public Collider Collider { get { return _collider; } }
-            //public Vector3 Normal { get { return _normal; } }
-            //public Vector3 Point { get { return _point; } }
-            public MovementControllerHitContact[] Contacts { get { return _contacts; } }
+
+            /// <summary>
+            /// The collision data, a Collision in the case of Rigidbody, ControllerColliderHit in the case of CharacterController.
+            /// </summary>
+            public object Data { get { return _data; } }
+
+            #endregion
+
+            #region Methods
+
+            public MovementControllerHitContact GetFirstContact()
+            {
+                if(_data is ControllerColliderHit)
+                {
+                    var hit = _data as ControllerColliderHit;
+                    return new MovementControllerHitContact(hit.normal, hit.point);
+                }
+                else if(_data is Collision)
+                {
+                    var coll = _data as Collision;
+                    var arr = coll.contacts;
+                    if (arr.Length > 0)
+                    {
+                        return new MovementControllerHitContact(arr[0].normal, arr[0].point);
+                    }
+                }
+
+                return default(MovementControllerHitContact);
+            }
+
+            public MovementControllerHitContact[] GetContacts()
+            {
+                if (_data is ControllerColliderHit)
+                {
+                    var hit = _data as ControllerColliderHit;
+                    return new MovementControllerHitContact[] { new MovementControllerHitContact(hit.normal, hit.point) };
+                }
+                else if(_data is Collision)
+                {
+                    var coll = _data as Collision;
+                    var arr = coll.contacts;
+                    if (arr.Length > 0)
+                    {
+                        using (var lst = TempCollection.GetList<MovementControllerHitContact>(arr.Length))
+                        {
+                            foreach(var c in arr)
+                            {
+                                lst.Add(new MovementControllerHitContact(c.normal, c.point));
+                            }
+                            return lst.ToArray();
+                        }
+                    }
+                }
+
+                return ArrayUtil.Empty<MovementControllerHitContact>();
+            }
+
+            #endregion
+
+            #region Static Interface
+
+            private static MovementControllerHitEventArgs _ev;
+
+            public static MovementControllerHitEventArgs GetTemp(MovementController controller, Collision collision)
+            {
+                var ev = _ev;
+                if (ev == null) ev = new MovementControllerHitEventArgs();
+
+                ev._controller = controller;
+                ev._collider = collision.collider;
+                ev._data = collision;
+                return ev;
+            }
+
+            public static MovementControllerHitEventArgs GetTemp(MovementController controller, ControllerColliderHit collision)
+            {
+                var ev = _ev;
+                if (ev == null) ev = new MovementControllerHitEventArgs();
+
+                ev._controller = controller;
+                ev._collider = collision.collider;
+                ev._data = collision;
+                return ev;
+            }
+
+            public static void ReleaseTemp(MovementControllerHitEventArgs ev)
+            {
+                if(_ev == null)
+                {
+                    ev._controller = null;
+                    ev._collider = null;
+                    ev._data = null;
+                    _ev = ev;
+                }
+            }
 
             #endregion
 

@@ -39,7 +39,7 @@ namespace com.spacepuppy.AI.Sensors.Collision
 
         public bool IsActive
         {
-            get { return _collider != null && _collider.IsActiveAndEnabled(); }
+            get { return _collider.IsActiveAndEnabled(); }
         }
 
         public float Precedence

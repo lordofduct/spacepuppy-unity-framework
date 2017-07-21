@@ -12,14 +12,24 @@ namespace com.spacepuppy.Collections
     public interface IMultitonPool<T> : IEnumerable<T> where T : class
     {
 
+        int Count { get; }
+
         void AddReference(T obj);
         bool RemoveReference(T obj);
+        bool Contains(T obj);
 
         T Find(System.Func<T, bool> predicate);
 
         T[] FindAll(System.Func<T, bool> predicate);
         int FindAll(ICollection<T> coll, System.Func<T, bool> predicate);
         int FindAll<TSub>(ICollection<TSub> coll, System.Func<TSub, bool> predicate) where TSub : class, T;
+
+        /// <summary>
+        /// Use for linq if you want to enumerate a specific subtype.
+        /// </summary>
+        /// <typeparam name="TSub"></typeparam>
+        /// <returns></returns>
+        IEnumerable<TSub> Enumerate<TSub>() where TSub : class, T;
 
     }
 
@@ -49,6 +59,11 @@ namespace com.spacepuppy.Collections
         #endregion
         
         #region IMultitonPool Interface
+
+        public int Count
+        {
+            get { return _pool.Count; }
+        }
 
         public void AddReference(T obj)
         {
@@ -84,6 +99,11 @@ namespace com.spacepuppy.Collections
             {
                 return _pool.Remove(obj);
             }
+        }
+
+        public bool Contains(T obj)
+        {
+            return _pool.Contains(obj);
         }
 
         public T Find(System.Func<T, bool> predicate)
@@ -247,6 +267,15 @@ namespace com.spacepuppy.Collections
             }
         }
 
+        public IEnumerable<TSub> Enumerate<TSub>() where TSub : class, T
+        {
+            var e = _pool.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (e.Current is TSub) yield return e.Current as TSub;
+            }
+        }
+
         #endregion
 
         #region IEnumerable Interface
@@ -344,8 +373,13 @@ namespace com.spacepuppy.Collections
         }
 
         #endregion
-        
+
         #region MultitonPool Methods
+
+        public int Count
+        {
+            get { return _pool.Count; }
+        }
 
         public void AddReference(T obj)
         {
@@ -381,6 +415,11 @@ namespace com.spacepuppy.Collections
             {
                 return _pool.Remove(obj.gameObject);
             }
+        }
+
+        public bool Contains(T obj)
+        {
+            return _pool.Contains(obj);
         }
 
         public T Find(System.Func<T, bool> predicate)
@@ -543,6 +582,15 @@ namespace com.spacepuppy.Collections
             }
         }
 
+        public IEnumerable<TSub> Enumerate<TSub>() where TSub : class, T
+        {
+            var e = _pool.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current is TSub) yield return e.Current as TSub;
+            }
+        }
+
         #endregion
 
         #region GameObjectMultiton Interface
@@ -658,8 +706,13 @@ namespace com.spacepuppy.Collections
         }
 
         #endregion
-        
+
         #region Multiton Methods
+
+        public int Count
+        {
+            get { return _pool.Count; }
+        }
 
         public void AddReference(T obj)
         {
@@ -715,6 +768,11 @@ namespace com.spacepuppy.Collections
             }
 
             return false;
+        }
+
+        public bool Contains(T obj)
+        {
+            return _pool.Contains(obj);
         }
 
         public T Find(System.Func<T, bool> predicate)
@@ -930,6 +988,15 @@ namespace com.spacepuppy.Collections
                     _queryCompleteAction = null;
                 }
                 _querying = false;
+            }
+        }
+
+        public IEnumerable<TSub> Enumerate<TSub>() where TSub : class, T
+        {
+            var e = _pool.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current is TSub) yield return e.Current as TSub;
             }
         }
 

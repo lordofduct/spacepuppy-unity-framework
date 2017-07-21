@@ -15,6 +15,10 @@ namespace com.spacepuppy.Scenes
             this.AsyncHandle = async;
         }
         
+        /// <summary>
+        /// Name of the scene unless loaded by index, in which case it will start with # followed by the build index.
+        /// i.e. #1
+        /// </summary>
         public string SceneName
         {
             get;

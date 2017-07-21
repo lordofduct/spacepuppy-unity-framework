@@ -27,7 +27,7 @@ namespace com.spacepuppyeditor.Scenario
         #region Fields
 
         private GUIContent _currentLabel;
-        private ReorderableList _targetList;
+        private CachedReorderableList _targetList;
         private bool _foldoutTargetExtra;
         private TriggerTargetPropertyDrawer _triggerTargetDrawer = new TriggerTargetPropertyDrawer();
 

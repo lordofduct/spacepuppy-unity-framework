@@ -182,32 +182,33 @@ namespace com.spacepuppy.Tween
         public static float ElasticEaseInFull(float t, float b, float c, float d, float a, float p)
         {
             float s;
-            if (t == 0) return b; if ((t /= d) == 1) return b + c;
-            if (p != 0) p = d * 0.3f;
-            if (a != 0 || a < Math.Abs(c)) { a = c; s = p / 4; }
+            if (t == 0f) return b; if ((t /= d) == 1) return b + c;
+            if (p == 0f) p = d * 0.3f;
+            if (a == 0f || a < Math.Abs(c)) { a = c; s = p / 4; }
             else s = p / _2PI * (float)Math.Asin(c / a);
             return -(a * (float)Math.Pow(2, 10 * (t -= 1)) * (float)Math.Sin((t * d - s) * _2PI / p)) + b;
         }
         public static float ElasticEaseOutFull(float t, float b, float c, float d, float a = 0, float p = 0)
         {
             float s;
-            if (t == 0) return b;
+            if (t == 0f) return b;
             if ((t /= d) == 1) return b + c;
-            if (p != 0) p = d * 0.3f;
-            if (a != 0 || a < Math.Abs(c)) { a = c; s = p / 4; }
+            if (p == 0f) p = d * 0.3f;
+            if (a == 0f || a < Math.Abs(c)) { a = c; s = p / 4; }
             else s = p / _2PI * (float)Math.Asin(c / a);
             return (a * (float)Math.Pow(2, -10 * t) * (float)Math.Sin((t * d - s) * _2PI / p) + c + b);
         }
         public static float ElasticEaseInOutFull(float t, float b, float c, float d, float a = 0, float p = 0)
         {
             float s;
-            if (t == 0) return b; if ((t /= d / 2) == 2) return b + c;
-            if (p != 0) p = d * (0.3f * 1.5f);
-            if (a != 0 || a < Math.Abs(c)) { a = c; s = p / 4; }
+            if (t == 0f) return b; if ((t /= d / 2) == 2) return b + c;
+            if (p == 0f) p = d * (0.3f * 1.5f);
+            if (a == 0f || a < Math.Abs(c)) { a = c; s = p / 4; }
             else s = p / _2PI * (float)Math.Asin(c / a);
             if (t < 1) return -.5f * (a * (float)Math.Pow(2, 10 * (t -= 1)) * (float)Math.Sin((t * d - s) * _2PI / p)) + b;
             return a * (float)Math.Pow(2, -10 * (t -= 1)) * (float)Math.Sin((t * d - s) * _2PI / p) * .5f + c + b;
         }
+        
         #endregion
 
         #region Expo Ease

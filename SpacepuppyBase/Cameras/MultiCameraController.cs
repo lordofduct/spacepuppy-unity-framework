@@ -22,6 +22,9 @@ namespace com.spacepuppy.Cameras
 
         private ITypedStateMachine<Camera> _stateMachine;
 
+        [SerializeField]
+        private CameraCategory _type;
+
         [SerializeField()]
         private Camera _defaultCamera;
 
@@ -110,6 +113,12 @@ namespace com.spacepuppy.Cameras
         #endregion
 
         #region ICamera Interface
+
+        public override CameraCategory Category
+        {
+            get { return _type; }
+            set { _type = value; }
+        }
 
         public override Camera camera
         {

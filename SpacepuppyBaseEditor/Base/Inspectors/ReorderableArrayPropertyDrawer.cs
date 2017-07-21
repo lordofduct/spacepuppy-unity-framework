@@ -23,7 +23,7 @@ namespace com.spacepuppyeditor.Base
         #region Fields
 
         public string Label;
-        private ReorderableList _lst;
+        private CachedReorderableList _lst;
         private GUIContent _label;
         private bool _disallowFoldout;
         private bool _removeBackgroundWhenCollapsed;

@@ -52,15 +52,17 @@ namespace com.spacepuppy.Async
                 {
                     maxThreads = Math.Max(UnityEngine.SystemInfo.processorCount, 5);
                 }
-                else if (UnityEngine.Application.isWebPlayer)
-                {
-                    //WARNING - this mode technically not supported!
-                    maxThreads = 1;
-                }
                 else
                 {
                     maxThreads = Math.Max(UnityEngine.SystemInfo.processorCount, 10);
                 }
+
+
+                //else if (UnityEngine.Application.isWebPlayer)
+                //{
+                //    //WARNING - this mode technically not supported!
+                //    maxThreads = 1;
+                //}
             }
 
             lock (_lock)

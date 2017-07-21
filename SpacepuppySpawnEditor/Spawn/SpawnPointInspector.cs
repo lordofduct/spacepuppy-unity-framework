@@ -7,6 +7,8 @@ using System.Linq;
 using com.spacepuppy.Spawn;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Spawn
 {
 
@@ -17,7 +19,7 @@ namespace com.spacepuppyeditor.Spawn
 
         #region Fields
 
-        ReorderableList _lst;
+        SPReorderableList _lst;
 
         #endregion
 
@@ -25,7 +27,7 @@ namespace com.spacepuppyeditor.Spawn
         {
             base.OnEnable();
 
-            _lst = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty("_prefabs"), true, true, true, true);
+            _lst = new SPReorderableList(this.serializedObject, this.serializedObject.FindProperty("_prefabs"), true, true, true, true);
             _lst.drawHeaderCallback = this._prefabList_DrawHeader;
             _lst.drawElementCallback = this._prefabList_DrawElement;
             _lst.onAddCallback = this._prefabList_OnAdded;

@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
 using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppyeditor;
+using com.spacepuppyeditor.Internal;
 
 namespace com.spacepuppyeditor.Base
 {
@@ -43,7 +43,7 @@ namespace com.spacepuppyeditor.Base
         private static AdvancedInputManagerWindow _openWindow;
 
         private SerializedObject _inputManagerAsset;
-        private ReorderableList _axesList;
+        private SPReorderableList _axesList;
 
 
         private void OnEnable()
@@ -59,7 +59,7 @@ namespace com.spacepuppyeditor.Base
             if (asset != null)
             {
                 _inputManagerAsset = new SerializedObject(asset);
-                _axesList = new ReorderableList(_inputManagerAsset, _inputManagerAsset.FindProperty(PROP_AXES));
+                _axesList = new SPReorderableList(_inputManagerAsset, _inputManagerAsset.FindProperty(PROP_AXES));
                 _axesList.elementHeight = EditorGUIUtility.singleLineHeight;
                 _axesList.drawHeaderCallback = _axesList_DrawHeader;
                 _axesList.drawElementCallback = _axesList_DrawElement;

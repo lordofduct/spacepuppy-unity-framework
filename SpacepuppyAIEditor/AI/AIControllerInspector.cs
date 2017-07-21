@@ -5,7 +5,6 @@ using System.Linq;
 
 using com.spacepuppy;
 using com.spacepuppy.AI;
-using com.spacepuppy.Dynamic;
 using com.spacepuppy.StateMachine;
 using com.spacepuppy.Utils;
 
@@ -16,7 +15,6 @@ namespace com.spacepuppyeditor.AI
     /// 
     /// </summary>
     /// <notes>
-    /// TODO - need to swap out this DynamicUtil usage in here, that's what the SerializedObject is for!!!
     /// </notes>
     [CustomEditor(typeof(AIController), true)]
     public class AIControllerInspector : SPEditor
@@ -40,15 +38,15 @@ namespace com.spacepuppyeditor.AI
             var cache = SPGUI.DisableIfPlaying();
             var stateProp = this.serializedObject.FindProperty(PROP_DEFAULTSTATE);
             
-            switch(sourceProp.GetEnumValue<AIController.SourceMode>())
+            switch(sourceProp.GetEnumValue<AIStateMachineSourceMode>())
             {
-                case AIController.SourceMode.SelfSourced:
+                case AIStateMachineSourceMode.SelfSourced:
                     {
                         var states = ComponentStateSupplier<IAIState>.GetComponentsOnTarg(targ.gameObject).Cast<Component>().ToArray();
                         stateProp.objectReferenceValue = SPEditorGUILayout.SelectComponentField(stateProp.displayName, states, stateProp.objectReferenceValue as Component);
                     }
                     break;
-                case AIController.SourceMode.ChildSourced:
+                case AIStateMachineSourceMode.ChildSourced:
                     {
                         var states = ParentComponentStateSupplier<IAIState>.GetComponentsOnTarg(targ.gameObject, false);
                         var names = (from s in states select EditorHelper.TempContent(GameObjectUtil.GetGameObjectFromSource(s).name + " (" + s.GetType().Name + ")")).ToArray();

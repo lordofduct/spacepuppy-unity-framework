@@ -121,5 +121,17 @@ namespace com.spacepuppy.Pathfinding
             return targ;
         }
 
+        public static float GetPathLength(this IPath path)
+        {
+            if (path == null) return float.PositiveInfinity;
+
+            var lst = path.Waypoints;
+            if (lst == null) return float.PositiveInfinity;
+
+            float tot = 0;
+            for (int i = 0; i < lst.Count - 1; i++) tot += Vector3.Distance(lst[i], lst[i + 1]);
+            return tot;
+        }
+
     }
 }

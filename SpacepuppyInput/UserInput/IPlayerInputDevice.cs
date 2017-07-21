@@ -12,6 +12,9 @@ namespace com.spacepuppy.UserInput
         ButtonState GetCurrentButtonState(string id);
         ButtonState GetCurrentButtonState(int hash);
 
+        bool GetButtonPressed(string id, float duration);
+        bool GetButtonPressed(int hash, float duration);
+
         float GetCurrentAxleState(string id);
         float GetCurrentAxleState(int hash);
 

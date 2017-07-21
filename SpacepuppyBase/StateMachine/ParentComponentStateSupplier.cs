@@ -198,6 +198,8 @@ namespace com.spacepuppy.StateMachine
 
         public T GetState(System.Type tp)
         {
+            if (tp == null) return null;
+
             //if (_container == null) return null;
             //T comp = this.GetStates(tp).FirstOrDefault();
             //if (!comp.IsNullOrDestroyed())

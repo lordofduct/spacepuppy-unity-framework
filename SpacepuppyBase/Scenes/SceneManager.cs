@@ -15,7 +15,9 @@ namespace com.spacepuppy.Scenes
         event System.EventHandler<ActiveSceneChangedEventArgs> ActiveSceneChanged;
 
         Scene LoadScene(string sceneName, LoadSceneMode mode = LoadSceneMode.Single);
+        Scene LoadScene(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode.Single);
         LoadSceneAsyncWaitHandle LoadSceneAsync(string sceneName, LoadSceneMode mode = LoadSceneMode.Single);
+        LoadSceneAsyncWaitHandle LoadSceneAsync(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode.Single);
         AsyncOperation UnloadScene(Scene scene);
         Scene GetActiveScene();
     }
@@ -67,11 +69,31 @@ namespace com.spacepuppy.Scenes
             return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
         }
 
+        public Scene LoadScene(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode.Single)
+        {
+            if (sceneBuildIndex < 0 || sceneBuildIndex >= SceneManager.sceneCountInBuildSettings) throw new System.IndexOutOfRangeException("sceneBuildIndex");
+
+            this.OnBeforeSceneLoaded("#" + sceneBuildIndex.ToString(), mode, null);
+            SceneManager.LoadScene(sceneBuildIndex, mode);
+            return SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+        }
+
         public LoadSceneAsyncWaitHandle LoadSceneAsync(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)
         {
             var handle = new LoadSceneAsyncWaitHandle();
             this.OnBeforeSceneLoaded(sceneName, mode, handle);
             var op = SceneManager.LoadSceneAsync(sceneName, mode);
+            handle.Init(op, SceneManager.GetSceneAt(SceneManager.sceneCount - 1));
+            return handle;
+        }
+
+        public LoadSceneAsyncWaitHandle LoadSceneAsync(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode.Single)
+        {
+            if (sceneBuildIndex < 0 || sceneBuildIndex >= SceneManager.sceneCountInBuildSettings) throw new System.IndexOutOfRangeException("sceneBuildIndex");
+
+            var handle = new LoadSceneAsyncWaitHandle();
+            this.OnBeforeSceneLoaded("#" + sceneBuildIndex.ToString(), mode, handle);
+            var op = SceneManager.LoadSceneAsync(sceneBuildIndex, mode);
             handle.Init(op, SceneManager.GetSceneAt(SceneManager.sceneCount - 1));
             return handle;
         }

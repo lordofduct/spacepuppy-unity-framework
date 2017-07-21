@@ -5,7 +5,7 @@ using com.spacepuppy;
 using com.spacepuppy.AI;
 using com.spacepuppy.Utils;
 
-namespace com.spacepuppyeditor.AI.Components
+namespace com.spacepuppyeditor.AI
 {
 
     [CustomHierarchyDrawer(typeof(IAIState))]

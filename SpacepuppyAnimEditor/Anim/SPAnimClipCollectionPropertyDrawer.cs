@@ -26,7 +26,7 @@ namespace com.spacepuppyeditor.Anim
 
         #region Fields
 
-        private ReorderableList _animList;
+        private CachedReorderableList _animList;
 
         private SPAnimClipCollection _target;
         private GUIContent _currentLabel;

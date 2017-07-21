@@ -7,6 +7,8 @@ namespace com.spacepuppy.Cameras
     public interface ICamera : IGameObjectSource
     {
 
+        CameraCategory Category { get; set; }
+
         /// <summary>
         /// The camera this ICamera currently represents. Can vary if this ICamera handles multiple cameras. 
         /// If this ICamera currnetly handles multiple active cameras, this is the one considered most important.

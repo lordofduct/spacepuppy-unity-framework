@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,6 +12,7 @@ using com.spacepuppy.Tween.Accessors;
 using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Base;
+using com.spacepuppyeditor.Internal;
 
 namespace com.spacepuppyeditor.Scenario
 {
@@ -36,7 +36,7 @@ namespace com.spacepuppyeditor.Scenario
         private const string PROP_DATA_DUR = "Duration";
 
 
-        private ReorderableList _dataList;
+        private SPReorderableList _dataList;
         private SerializedProperty _targetProp;
         private VariantReferencePropertyDrawer _variantDrawer = new VariantReferencePropertyDrawer();
 
@@ -44,7 +44,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             base.OnEnable();
 
-            _dataList = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_TWEENDATA));
+            _dataList = new SPReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_TWEENDATA));
             _dataList.drawHeaderCallback = _dataList_DrawHeader;
             _dataList.drawElementCallback = _dataList_DrawElement;
             _dataList.elementHeight = EditorGUIUtility.singleLineHeight * 6f + 7f;
@@ -66,7 +66,7 @@ namespace com.spacepuppyeditor.Scenario
             this.DrawPropertyField(PROP_ONCOMPLETE);
 
 
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_TARGET, PROP_TIMESUPPLIER, PROP_ONCOMPLETE, PROP_TWEENTOKEN);
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_ORDER, PROP_TARGET, PROP_TIMESUPPLIER, PROP_TWEENDATA, PROP_ONCOMPLETE, PROP_TWEENTOKEN);
 
             this.serializedObject.ApplyModifiedProperties();
         }

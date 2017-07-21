@@ -106,6 +106,24 @@ namespace com.spacepuppy.UserInput
             return (sig as IButtonInputSignature).CurrentState;
         }
 
+        public bool GetButtonPressed(string id, float duration)
+        {
+            var sig = _signatures.GetSignature(id);
+            if (sig == null) return false;
+            if (!(sig is IButtonInputSignature)) return false;
+
+            return (sig as IButtonInputSignature).GetPressed(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
+        }
+
+        public bool GetButtonPressed(int hash, float duration)
+        {
+            var sig = _signatures.GetSignature(hash);
+            if (sig == null) return false;
+            if (!(sig is IButtonInputSignature)) return false;
+
+            return (sig as IButtonInputSignature).GetPressed(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
+        }
+
         public float GetCurrentAxleState(string id)
         {
             var sig = _signatures.GetSignature(id);

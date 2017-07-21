@@ -10,7 +10,7 @@ namespace com.spacepuppy.Pathfinding
         IList<Vector3> Waypoints { get; }
         
         PathCalculateStatus Status { get; }
-
+        
     }
 
 }

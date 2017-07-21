@@ -46,41 +46,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AI\AINodeUtil.cs" />
+    <Compile Include="AI\AISubController.cs" />
     <Compile Include="AI\AIVariableCollection.cs" />
     <Compile Include="AI\AIVariableNameAttribute.cs" />
     <Compile Include="AI\ComplexTarget.cs" />
-    <Compile Include="AI\Components\a_RandomSuccess.cs" />
-    <Compile Include="AI\Components\GameObjectConfigurableAIActionGroup.cs" />
-    <Compile Include="AI\Components\AIActionComponent.cs" />
-    <Compile Include="AI\Components\AIActionWeightsComponent.cs" />
-    <Compile Include="AI\Components\AITrapActionComponent.cs" />
-    <Compile Include="AI\Components\a_ActionGroup.cs" />
-    <Compile Include="AI\Components\a_ChangeAIState.cs" />
-    <Compile Include="AI\Components\a_IfCurrentStateIs.cs" />
-    <Compile Include="AI\Components\a_NullAction.cs" />
-    <Compile Include="AI\Components\a_Sense.cs" />
-    <Compile Include="AI\Components\a_SenseExit.cs" />
-    <Compile Include="AI\Components\a_SetVariable.cs" />
-    <Compile Include="AI\Components\a_Trigger.cs" />
-    <Compile Include="AI\Components\a_WaitTimer.cs" />
-    <Compile Include="AI\Components\PropertyDrawerAttributes.cs" />
-    <Compile Include="AI\Components\SimpleAIStateComponent.cs" />
-    <Compile Include="AI\ConfigurableAIActionGroup.cs" />
     <Compile Include="AI\Enums.cs" />
-    <Compile Include="AI\AITreeController.cs" />
-    <Compile Include="AI\Components\AIStateComponent.cs" />
-    <Compile Include="AI\Components\AIStateMachineComponent.cs" />
-    <Compile Include="AI\IAIActionGroup.cs" />
-    <Compile Include="AI\IAIActionWeightSupplier.cs" />
     <Compile Include="AI\IAIController.cs" />
-    <Compile Include="AI\IAIEditorSyncActionsCallbackReceiver.cs" />
     <Compile Include="AI\IAINode.cs" />
-    <Compile Include="AI\ParallelAction.cs" />
-    <Compile Include="AI\RandomAction.cs" />
     <Compile Include="AI\Scenario\i_ChangeAIState.cs" />
     <Compile Include="AI\Scenario\t_OnSense.cs" />
-    <Compile Include="AI\SelectorAction.cs" />
     <Compile Include="AI\Sensors\Collision\ColliderAspect.cs" />
     <Compile Include="AI\Sensors\Collision\ColliderSensor.cs" />
     <Compile Include="AI\Sensors\IAspect.cs" />
@@ -91,15 +65,13 @@
     <Compile Include="AI\Sensors\Visual\TunnelVisionVisualSensor.cs" />
     <Compile Include="AI\Sensors\Visual\VisualAspect.cs" />
     <Compile Include="AI\Sensors\Visual\VisualSensor.cs" />
-    <Compile Include="AI\SequenceAction.cs" />
     <Compile Include="AI\AIController.cs" />
-    <Compile Include="AI\IAIAction.cs" />
     <Compile Include="AI\IAIState.cs" />
     <Compile Include="AI\Sensors\CompositeSensor.cs" />
     <Compile Include="AI\Sensors\Sensor.cs" />
     <Compile Include="AI\Sensors\SensorCollection.cs" />
     <Compile Include="AI\IAIStateMachine.cs" />
-    <Compile Include="AI\TriggerableMechanismAsAIActionWrapper.cs" />
+    <Compile Include="AI\SimpleAIStateComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

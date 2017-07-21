@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.AI.Sensors
@@ -35,8 +36,20 @@ namespace com.spacepuppy.AI.Sensors
 
         public void SyncChildSensors()
         {
-            _sensors = (from c in this.GetAllChildrenAndSelf() from s in c.GetComponents<Sensor>() where !object.ReferenceEquals(s, this) select s).ToArray();
-            //_sensors = this.GetChildComponents<Sensor>(true)
+            //_sensors = (from c in this.GetAllChildrenAndSelf() from s in c.GetComponents<Sensor>() where !object.ReferenceEquals(s, this) select s).ToArray();
+            using (var lst = TempCollection.GetList<Sensor>())
+            {
+                this.GetComponentsInChildren<Sensor>(false, lst);
+                for(int i = 0; i < lst.Count; i++)
+                {
+                    if(lst[i] == this)
+                    {
+                        lst.RemoveAt(i);
+                        i--;
+                    }
+                }
+                _sensors = lst.ToArray();
+            }
         }
 
         public bool Contains(Sensor sensor)
@@ -207,12 +220,29 @@ namespace com.spacepuppy.AI.Sensors
             }
             else
             {
+                /*
+                //todo - make distinct
                 int cnt = 0;
                 for (int i = 0; i < _sensors.Length; i++)
                 {
                     cnt += _sensors[i].SenseAll(lst, p);
                 }
                 return cnt;
+                */
+                using (var set = TempCollection.GetSet<IAspect>())
+                {
+                    for (int i = 0; i < _sensors.Length; i++)
+                    {
+                        _sensors[i].SenseAll(set, p);
+                    }
+
+                    var e = set.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        lst.Add(e.Current);
+                    }
+                    return set.Count;
+                }
             }
         }
 
@@ -248,12 +278,29 @@ namespace com.spacepuppy.AI.Sensors
             }
             else
             {
+                /*
+                //todo - make distinct
                 int cnt = 0;
                 for (int i = 0; i < _sensors.Length; i++)
                 {
                     cnt += _sensors[i].SenseAll<T>(lst, p);
                 }
                 return cnt;
+                */
+                using (var set = TempCollection.GetSet<T>())
+                {
+                    for(int i = 0; i < _sensors.Length; i++)
+                    {
+                        _sensors[i].SenseAll<T>(set, p);
+                    }
+
+                    var e = set.GetEnumerator();
+                    while(e.MoveNext())
+                    {
+                        lst.Add(e.Current);
+                    }
+                    return set.Count;
+                }
             }
         }
 

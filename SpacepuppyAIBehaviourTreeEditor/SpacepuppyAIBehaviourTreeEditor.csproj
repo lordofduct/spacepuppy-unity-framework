@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{67A86BE8-190B-4D68-A080-683DF9D4CF09}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppyeditor</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFrameworkEditor.AI.BehaviourTree</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\Resources\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AI\BehaviourTree\AITreeControllerInspector.cs" />
+    <Compile Include="AI\BehaviourTree\AITreeDebugWindow.cs" />
+    <Compile Include="AI\BehaviourTree\Components\AIActionWeightsComponentInspector.cs" />
+    <Compile Include="AI\BehaviourTree\Components\AIStateMachineComponentInspector.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_ChangeAIStateInspector.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_IfCurrentStateIsInspector.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_SenseInspector.cs" />
+    <Compile Include="AI\BehaviourTree\Components\GameObjectConfigurableAIActionGroupPropertyDrawer.cs" />
+    <Compile Include="AI\BehaviourTree\Components\ListAIStatesPropertyDrawer.cs" />
+    <Compile Include="AI\BehaviourTree\ConfigurableAIActionGroupPropertyDrawer.cs" />
+    <Compile Include="AI\BehaviourTree\ParallelPassOptionsPropertyDrawer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpacepuppyAIBehaviourTree\SpacepuppyAIBehaviourTree.csproj">
+      <Project>{b9807eba-396e-4379-800f-65cba0c47bd9}</Project>
+      <Name>SpacepuppyAIBehaviourTree</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpacepuppyAI\SpacepuppyAI.csproj">
+      <Project>{65a3df9e-1099-40d7-acf3-4a3989026a3d}</Project>
+      <Name>SpacepuppyAI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpacepuppyBaseEditor\SpacepuppyBaseEditor.csproj">
+      <Project>{a0466ee3-9582-4c0d-965d-e2d2f9006971}</Project>
+      <Name>SpacepuppyBaseEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
+      <Project>{4b8e57ac-f3b2-4dfd-ba0b-20f6be3b17c9}</Project>
+      <Name>SpacepuppyBase</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\Editor\
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.AI.BehaviourTree.dll" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.AI.BehaviourTree.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFrameworkEditor.AI.BehaviourTree.pdb" "$(ProjectDir)..\Builds\FullLibrary\Editor\SpacepuppyUnityFrameworkEditor.AI.BehaviourTree.pdb"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

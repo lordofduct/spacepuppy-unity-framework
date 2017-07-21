@@ -269,7 +269,7 @@ namespace com.spacepuppy
             foreach (var j in _joints)
             {
                 jc = j.GetComponent<Collider>();
-                if (jc != null && jc.IsActiveAndEnabled()) Physics.IgnoreCollision(collider, jc, ignore);
+                if (jc.IsActiveAndEnabled()) Physics.IgnoreCollision(collider, jc, ignore);
             }
         }
 
@@ -282,7 +282,7 @@ namespace com.spacepuppy
             foreach (var j in _joints)
             {
                 jc = j.GetComponent<Collider>();
-                if (jc != null && jc.IsActiveAndEnabled()) coll.IgnoreCollision(jc, ignore);
+                if (jc.IsActiveAndEnabled()) coll.IgnoreCollision(jc, ignore);
             }
         }
 

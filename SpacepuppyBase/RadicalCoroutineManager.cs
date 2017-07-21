@@ -236,7 +236,8 @@ namespace com.spacepuppy
 
         private void DealWithEnable(MonoBehaviour component)
         {
-            using (var lst = TempCollection.GetList<RadicalCoroutine>())
+            using (var todestroy = TempCollection.GetList<RadicalCoroutine>())
+            using(var toresume = TempCollection.GetList<RadicalCoroutine>())
             {
                 var e = _routines.GetEnumerator();
                 while (e.MoveNext())
@@ -253,28 +254,36 @@ namespace com.spacepuppy
                             case RadicalCoroutineOperatingState.Paused:
                                 if (e.Current.DisableMode.HasFlag(RadicalCoroutineDisableMode.Resumes))
                                 {
-                                    e.Current.Resume(component);
+                                    toresume.Add(e.Current);
                                 }
                                 else
                                 {
-                                    lst.Add(e.Current);
+                                    todestroy.Add(e.Current);
                                     Debug.LogWarning("A leaked RadicalCoroutine was found and cleaned up.", component);
                                 }
                                 break;
                             default:
                                 //somehow a finished routine made its way into the collection... remove it
-                                lst.Add(e.Current);
+                                todestroy.Add(e.Current);
                                 Debug.LogWarning("A leaked RadicalCoroutine was found and cleaned up.", component);
                                 break;
                         }
                     }
                 }
 
-                if(lst.Count > 0)
+                if (todestroy.Count > 0)
                 {
-                    for(int i = 0; i < lst.Count; i++)
+                    for (int i = 0; i < todestroy.Count; i++)
                     {
-                        _routines.Remove(lst[i]);
+                        _routines.Remove(todestroy[i]);
+                    }
+                }
+
+                if (toresume.Count > 0)
+                {
+                    for(int i = 0; i < toresume.Count; i++)
+                    {
+                        toresume[i].Resume(component);
                     }
                 }
             }

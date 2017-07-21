@@ -13,19 +13,28 @@ namespace com.spacepuppy
 
         #region Fields
 
+        //has to be stored with uint's
+        //unity has a bug at the time of writing this where long doesn't serialize in prefabs correctly
+        //there is a fix in unity beta 2017.1, but we are unsure as to when the full release will be out
+        //so stuck with this hack fix
         [UnityEngine.SerializeField]
-        private long _id;
+        private uint _low;
+        [UnityEngine.SerializeField]
+        private uint _high;
 
         #endregion
 
-        #region CONSTRUCTOR / FACTORY
+        #region CONSTRUCTOR
 
-        private static Random _rand = new Random();
+        public ShortUid(long value)
+        {
+            _low = (uint)(value & uint.MaxValue);
+            _high = (uint)(value >> 32);
+        }
+
         public static ShortUid NewId()
         {
-            ShortUid result = new ShortUid();
-            result._id = DateTime.UtcNow.Ticks;//store ticks relative to near date
-            return result;
+            return new ShortUid(System.DateTime.UtcNow.Ticks);
         }
 
         #endregion
@@ -34,7 +43,10 @@ namespace com.spacepuppy
 
         public long Value
         {
-            get { return _id; }
+            get
+            {
+                return ((long)_high << 32) | (long)_low;
+            }
         }
 
         #endregion
@@ -47,7 +59,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public override string ToString()
         {
-            return _id.ToString("X16");
+            return this.Value.ToString("X16");
         }
 
         /// <summary>
@@ -59,7 +71,10 @@ namespace com.spacepuppy
         public override bool Equals(object obj)
         {
             if (obj is ShortUid)
-                return _id == ((ShortUid)obj)._id;
+            {
+                var uid = (ShortUid)obj;
+                return uid._high == _high && uid._low == _low;
+            }
             return false;
         }
 
@@ -69,7 +84,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return _id.GetHashCode();
+            return (int)(_high ^ _low);
         }
 
         #endregion
@@ -85,7 +100,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public static bool operator ==(ShortUid x, ShortUid y)
         {
-            return x._id == y._id;
+            return x._high == y._high && x._low == y._low;
         }
 
         /// <summary>
@@ -97,7 +112,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public static bool operator !=(ShortUid x, ShortUid y)
         {
-            return x._id != y._id;
+            return x._high != y._high || x._low != y._low;
         }
 
         /// <summary>
@@ -112,7 +127,17 @@ namespace com.spacepuppy
 
         public static implicit operator long(ShortUid uid)
         {
-            return uid._id;
+            return uid.Value;
+        }
+
+        #endregion
+
+        #region Special Types
+
+        public class ConfigAttribute : Attribute
+        {
+            public bool ReadOnly;
+            public bool AllowZero;
         }
 
         #endregion
@@ -260,5 +285,142 @@ namespace com.spacepuppy
         }
 
     }
+
+
+
+
+
+
+
+    /*
+    [System.Serializable]
+    public struct ShortUid
+    {
+
+        public ShortUid Zero { get { return new ShortUid(); } }
+
+        #region Fields
+
+        [UnityEngine.SerializeField]
+        private long _id;
+        //private int _low;
+        //private int _high;
+
+        #endregion
+
+        #region CONSTRUCTOR / FACTORY
+
+        private static Random _rand = new Random();
+        public static ShortUid NewId()
+        {
+            ShortUid result = new ShortUid();
+            result._id = DateTime.UtcNow.Ticks;//store ticks relative to near date
+            return result;
+        }
+
+        #endregion
+
+        #region Properties
+
+        public long Value
+        {
+            get { return _id; }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Returns the base64 encoded guid as a string
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return _id.ToString("X16");
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether this instance and a
+        /// specified Object represent the same type and value.
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is ShortUid)
+                return _id == ((ShortUid)obj)._id;
+            return false;
+        }
+
+        /// <summary>
+        /// Returns the HashCode for underlying Guid.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return _id.GetHashCode();
+        }
+
+        #endregion
+
+        #region Operators
+
+        /// <summary>
+        /// Determines if both ShortGuids have the same underlying
+        /// Guid value.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static bool operator ==(ShortUid x, ShortUid y)
+        {
+            return x._id == y._id;
+        }
+
+        /// <summary>
+        /// Determines if both ShortGuids do not have the
+        /// same underlying Guid value.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static bool operator !=(ShortUid x, ShortUid y)
+        {
+            return x._id != y._id;
+        }
+
+        /// <summary>
+        /// Implicitly converts the ShortGuid to it's string equivilent
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        public static implicit operator string(ShortUid uid)
+        {
+            return uid.ToString();
+        }
+
+        public static implicit operator long(ShortUid uid)
+        {
+            return uid._id;
+        }
+
+        #endregion
+
+        #region Special Types
+
+        public class ConfigAttribute : Attribute
+        {
+            public readonly bool AllowZero;
+            public ConfigAttribute(bool allowZero)
+            {
+                this.AllowZero = allowZero;
+            }
+        }
+
+        #endregion
+
+    }
+    */
 
 }

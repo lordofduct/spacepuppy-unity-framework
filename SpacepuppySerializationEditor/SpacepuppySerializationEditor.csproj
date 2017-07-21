@@ -44,7 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serialization\PersistantGameObjectInspector.cs" />
+    <Compile Include="Serialization\PersistentGameObjectInspector.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpacepuppyBaseEditor\SpacepuppyBaseEditor.csproj">

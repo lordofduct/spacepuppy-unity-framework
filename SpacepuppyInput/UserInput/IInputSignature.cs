@@ -28,6 +28,14 @@ namespace com.spacepuppy.UserInput
         ButtonState CurrentState { get; }
 
         ButtonState GetCurrentState(bool getFixedState);
+
+        /// <summary>
+        /// The button was pressed and released in a set amount of time.
+        /// </summary>
+        /// <param name="duration"></param>
+        /// <param name="getFixedState"></param>
+        /// <returns></returns>
+        bool GetPressed(float duration, bool getFixedState);
     }
 
     public interface IAxleInputSignature : IInputSignature

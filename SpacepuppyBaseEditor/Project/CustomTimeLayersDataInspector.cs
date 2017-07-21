@@ -8,6 +8,8 @@ using com.spacepuppy;
 using com.spacepuppy.Project;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Project
 {
 
@@ -16,7 +18,7 @@ namespace com.spacepuppyeditor.Project
     {
 
         private CustomTimeLayersData.EditorHelper _timeLayersHelper;
-        private ReorderableList _timeLayersListDrawer;
+        private SPReorderableList _timeLayersListDrawer;
 
         protected override void OnEnable()
         {
@@ -26,7 +28,7 @@ namespace com.spacepuppyeditor.Project
             if (timeLayersData != null)
             {
                 _timeLayersHelper = new CustomTimeLayersData.EditorHelper(timeLayersData);
-                _timeLayersListDrawer = new ReorderableList(_timeLayersHelper.Layers, typeof(string));
+                _timeLayersListDrawer = new SPReorderableList(_timeLayersHelper.Layers, typeof(string));
                 _timeLayersListDrawer.drawHeaderCallback = _timeLayersList_DrawHeader;
                 _timeLayersListDrawer.drawElementCallback = _timeLayers_DrawElement;
                 _timeLayersListDrawer.onAddCallback = _timeLayers_AddElement;

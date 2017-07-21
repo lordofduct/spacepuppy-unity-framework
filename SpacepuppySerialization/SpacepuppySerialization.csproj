@@ -53,7 +53,7 @@
     <Compile Include="Serialization\Old\UnityDataScriptableObject.cs" />
     <Compile Include="Serialization\Old\UnitySerializationInfo.cs" />
     <Compile Include="Serialization\Old\UnitySerializationSurrogate.cs" />
-    <Compile Include="Serialization\PersistantGameObject.cs" />
+    <Compile Include="Serialization\PersistentGameObject.cs" />
     <Compile Include="Serialization\PersistantAssetToken.cs" />
     <Compile Include="Serialization\PersistantUnityObjectSerializedProxy.cs" />
     <Compile Include="Serialization\SerializationHelper.cs" />

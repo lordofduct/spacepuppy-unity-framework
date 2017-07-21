@@ -7,6 +7,8 @@ using System.Linq;
 using com.spacepuppy;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Base
 {
 
@@ -21,7 +23,7 @@ namespace com.spacepuppyeditor.Base
 
         #region Fields
 
-        private ReorderableList _animList;
+        private SPReorderableList _animList;
 
         #endregion
 
@@ -31,7 +33,7 @@ namespace com.spacepuppyeditor.Base
         {
             base.OnEnable();
 
-            _animList = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_ANIMATIONS), true, true, true, true);
+            _animList = new SPReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_ANIMATIONS), true, true, true, true);
             _animList.drawHeaderCallback = this._animList_DrawHeader;
             _animList.drawElementCallback = this._animList_DrawElement;
             _animList.onAddCallback = this._animList_OnAdded;

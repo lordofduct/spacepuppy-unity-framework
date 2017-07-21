@@ -150,6 +150,8 @@ namespace com.spacepuppy.Utils
             var tp = comp.GetType();
             var attrib = tp.GetCustomAttributes(typeof(UniqueToEntityAttribute), false).FirstOrDefault() as UniqueToEntityAttribute;
 
+            if (attrib.IgnoreInactive && !comp.gameObject.activeInHierarchy) return false;
+
             if (attrib != null)
             {
                 if (attrib.MustBeAttachedToRoot)
@@ -160,17 +162,16 @@ namespace com.spacepuppy.Utils
                         return true;
                     }
                 }
-                else
-                {
-                    var root = comp.FindRoot();
+                
 
-                    foreach (var child in root.GetAllChildrenAndSelf())
+                var root = comp.FindRoot();
+                
+                foreach (var c in root.GetComponentsInChildren(tp, !attrib.IgnoreInactive))
+                {
+                    if(c.gameObject != comp.gameObject)
                     {
-                        if (child != comp.transform && child.HasComponent(tp))
-                        {
-                            if(!silent) Assert(System.String.Format("(Entity:{1}) Only one component of type {0} must be attached to a root or any of its children.", tp.Name, root.name), comp);
-                            return true;
-                        }
+                        if (!silent) Assert(System.String.Format("(Entity:{1}) Only one component of type {0} must be attached to a root or any of its children.", tp.Name, root.name), comp);
+                        return true;
                     }
                 }
             }

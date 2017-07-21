@@ -4,7 +4,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-using com.spacepuppy.AI.Components;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 

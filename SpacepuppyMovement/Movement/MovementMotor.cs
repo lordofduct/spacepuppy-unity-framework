@@ -9,9 +9,9 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Movement
 {
 
-    [UniqueToEntity()]
+    [UniqueToEntity(IgnoreInactive = true)]
     [RequireComponentInEntity(typeof(MovementController))]
-    public class MovementMotor : SPComponent
+    public class MovementMotor : SPComponent, IMover
     {
 
         #region Events
@@ -171,6 +171,22 @@ namespace com.spacepuppy.Movement
         }
 
         #endregion
+
+        #region IMover Interface
+
+        public bool InMotion
+        {
+            get { return _controller.InMotion; }
+        }
+        
+        Vector3 IMover.Velocity
+        {
+            get { return _controller.Velocity; }
+        }
+
+        #endregion
+
+
 
         #region EditorOnly
 
@@ -622,7 +638,7 @@ namespace com.spacepuppy.Movement
 
             public IMovementStyle ChangeState(System.Type tp, float precedence = 0)
             {
-                if (!TypeUtil.IsType(tp, typeof(IMovementStyle))) throw new TypeArgumentMismatchException(tp, typeof(IMovementStyle), "tp");
+                if (tp != null && !TypeUtil.IsType(tp, typeof(IMovementStyle))) throw new TypeArgumentMismatchException(tp, typeof(IMovementStyle), "tp");
 
                 var style = _stateSupplier.GetState(tp);
                 if (style == null) throw new System.ArgumentException("MovementStyle '" + tp.Name + "' is not a member of the state machine.", "style");

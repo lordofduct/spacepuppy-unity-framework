@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +8,7 @@ using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Base.Inspectors;
 using com.spacepuppyeditor.Components;
+using com.spacepuppyeditor.Internal;
 
 namespace com.spacepuppyeditor.Anim
 {
@@ -28,7 +28,7 @@ namespace com.spacepuppyeditor.Anim
                                                             SPAnimClip.PROP_TIMESUPPLIER,
                                                             SPAnimClip.PROP_MASKS};
 
-        private ReorderableList _maskList;
+        private SPReorderableList _maskList;
         private bool _nameIsReadOnly;
         private string[] _detailProps;
 
@@ -40,7 +40,7 @@ namespace com.spacepuppyeditor.Anim
         {
             if(_maskList == null)
             {
-                _maskList = new ReorderableList(property.serializedObject, property.FindPropertyRelative(PROP_ANIMSTATE_MASKS), true, true, true, true);
+                _maskList = new SPReorderableList(property.serializedObject, property.FindPropertyRelative(PROP_ANIMSTATE_MASKS), true, true, true, true);
                 _maskList.drawHeaderCallback = this._maskList_DrawHeader;
                 _maskList.drawElementCallback = this._maskList_DrawElement;
             }

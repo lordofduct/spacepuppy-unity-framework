@@ -12,6 +12,7 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         private ButtonState _current;
         private ButtonState _currentFixed;
+        private float _lastDown;
 
         #endregion
 
@@ -63,6 +64,18 @@ namespace com.spacepuppy.UserInput.UnityInput
             return (getFixedState) ? _currentFixed : _current;
         }
 
+        public bool GetPressed(float duration, bool getFixedState)
+        {
+            if(getFixedState)
+            {
+                return _currentFixed == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+            else
+            {
+                return _current == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+        }
+
         #endregion
 
         #region IInputSignature Interfacce
@@ -71,6 +84,8 @@ namespace com.spacepuppy.UserInput.UnityInput
         {
             //determine based on history
             _current = InputUtil.GetNextButtonState(_current, Input.GetButton(this.UnityInputId));
+            if (_current == ButtonState.Down)
+                _lastDown = Time.unscaledTime;
         }
 
         public override void FixedUpdate()
@@ -102,6 +117,7 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         private ButtonState _current;
         private ButtonState _currentFixed;
+        private float _lastDown;
 
         #endregion
 
@@ -175,6 +191,18 @@ namespace com.spacepuppy.UserInput.UnityInput
             return (getFixedState) ? _currentFixed : _current;
         }
 
+        public bool GetPressed(float duration, bool getFixedState)
+        {
+            if (getFixedState)
+            {
+                return _currentFixed == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+            else
+            {
+                return _current == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+        }
+
         #endregion
 
         #region IInputSignature Interfacce
@@ -197,6 +225,9 @@ namespace com.spacepuppy.UserInput.UnityInput
                     _current = InputUtil.GetNextButtonState(_current, Mathf.Abs(Input.GetAxis(this.UnityInputId)) >= this.AxisButtonDeadZone);
                     break;
             }
+
+            if (_current == ButtonState.Down)
+                _lastDown = Time.unscaledTime;
         }
 
         public override void FixedUpdate()
@@ -231,6 +262,7 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         private ButtonState _current;
         private ButtonState _currentFixed;
+        private float _lastDown;
 
         #endregion
 
@@ -282,6 +314,18 @@ namespace com.spacepuppy.UserInput.UnityInput
             return (getFixedState) ? _currentFixed : _current;
         }
 
+        public bool GetPressed(float duration, bool getFixedState)
+        {
+            if (getFixedState)
+            {
+                return _currentFixed == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+            else
+            {
+                return _current == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+        }
+
         #endregion
 
         #region IInputSignature Interfacce
@@ -301,6 +345,9 @@ namespace com.spacepuppy.UserInput.UnityInput
 
             //determine based on history
             _current = InputUtil.GetNextButtonState(_current, Input.GetKey(this.Key));
+
+            if (_current == ButtonState.Down)
+                _lastDown = Time.unscaledTime;
         }
 
         public override void FixedUpdate()
@@ -529,6 +576,7 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         private ButtonState _current;
         private ButtonState _currentFixed;
+        private float _lastDown;
 
         #endregion
 
@@ -580,6 +628,18 @@ namespace com.spacepuppy.UserInput.UnityInput
             return (getFixedState) ? _currentFixed : _current;
         }
 
+        public bool GetPressed(float duration, bool getFixedState)
+        {
+            if (getFixedState)
+            {
+                return _currentFixed == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+            else
+            {
+                return _current == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+        }
+
         #endregion
 
         #region IInputSignature Interfacce
@@ -588,6 +648,9 @@ namespace com.spacepuppy.UserInput.UnityInput
         {
             //determine based on history
             _current = InputUtil.GetNextButtonState(_current, Input.GetMouseButton(this.MouseButton));
+
+            if (_current == ButtonState.Down)
+                _lastDown = Time.unscaledTime;
         }
 
         public override void FixedUpdate()

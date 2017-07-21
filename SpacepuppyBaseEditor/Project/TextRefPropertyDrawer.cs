@@ -37,7 +37,7 @@ namespace com.spacepuppyeditor.Project
         private bool _disallowFoldout;
         private System.Action<Rect, SerializedProperty, GUIContent, int> _elementLabelCallback;
 
-        private ReorderableList _lst;
+        private CachedReorderableList _lst;
         private SerializedProperty _textProp;
         private SerializedProperty _objProp;
         private GUIContent _label;

@@ -232,6 +232,18 @@ namespace com.spacepuppy.UserInput.UnityInput
                 return ButtonState.None;
         }
 
+        public bool GetButtonPressed(string id, float duration)
+        {
+            //TODO - how to track this?
+            throw new System.NotSupportedException();
+        }
+
+        public bool GetButtonPressed(int hash, float duration)
+        {
+            //TODO - how to track this?
+            throw new System.NotSupportedException();
+        }
+
         public Vector2 GetCurrentCursorState(int hash)
         {
             return Vector2.zero;

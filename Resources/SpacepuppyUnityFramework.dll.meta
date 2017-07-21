@@ -10,7 +10,8 @@ PluginImporter:
     com.spacepuppy.GameLoopEntry: -32000
     com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks: -31990
     com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks: 32000
-    com.spacepuppy.SPEntity: 32000
+    com.spacepuppy.SPEntity: 31995
+    com.spacepuppy.Scenario.t_OnStart: 31900
     com.spacepuppy.Utils.SpecializedComponents.EarlyParentSetter: -31980
   isPreloaded: 0
   platformData:

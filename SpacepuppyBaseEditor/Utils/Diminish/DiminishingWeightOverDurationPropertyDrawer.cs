@@ -84,7 +84,7 @@ namespace com.spacepuppyeditor.Utils.Diminish
                 _line2[2] = periodProp.floatValue;
 
                 EditorGUI.BeginChangeCheck();
-                SPEditorGUI.MultiFloatField(r2, _line2Labels, _line2, 80f);
+                SPEditorGUI.DelayedMultiFloatField(r2, _line2Labels, _line2, 80f);
                 if(EditorGUI.EndChangeCheck())
                 {
                     maxCountProp.floatValue = DiscreteFloatPropertyDrawer.NormalizeValue(maxCountProp.floatValue, _line2[0]);

@@ -17,16 +17,15 @@ namespace com.spacepuppy.AI
     public class AIController : SPNotifyingComponent, IAIController, IAIStateMachine
     {
 
-        public enum SourceMode
+        public void Blargh()
         {
-            SelfSourced = 0,
-            ChildSourced = 1
+
         }
 
         #region Fields
 
         [SerializeField()]
-        private SourceMode _stateSource;
+        private AIStateMachineSourceMode _stateSource;
 
         [SerializeField()]
         private Component _defaultState;
@@ -95,6 +94,8 @@ namespace com.spacepuppy.AI
             }
         }
 
+        public AIVariableCollection Variables { get { return _variables; } }
+
         public float Interval
         {
             get { return _interval; }
@@ -104,9 +105,7 @@ namespace com.spacepuppy.AI
             }
         }
 
-        public AIVariableCollection Variables { get { return _variables; } }
-
-        public SourceMode StateSource
+        public AIStateMachineSourceMode StateSource
         {
             get { return _stateSource; }
             set
@@ -142,14 +141,18 @@ namespace com.spacepuppy.AI
 
             switch(_stateSource)
             {
-                case SourceMode.SelfSourced:
+                case AIStateMachineSourceMode.SelfSourced:
                     _stateMachine = TypedStateMachine<IAIState>.CreateFromComponentSource(this.gameObject);
                     break;
-                case SourceMode.ChildSourced:
+                case AIStateMachineSourceMode.ChildSourced:
                     _stateMachine = TypedStateMachine<IAIState>.CreateFromParentComponentSource(this.gameObject, false, true);
                     break;
             }
             _stateMachine.StateChanged += this.OnStateChanged;
+            foreach(var st in _stateMachine)
+            {
+                st.Init(this);
+            }
 
             if(this.started)
             {
@@ -159,7 +162,7 @@ namespace com.spacepuppy.AI
                 }
                 else
                 {
-                    _stateMachine.ChangeState(null);
+                    _stateMachine.ChangeState((IAIState)null);
                 }
             }
         }
@@ -189,7 +192,7 @@ namespace com.spacepuppy.AI
         }
 
         #endregion
-
+        
         #region Notifications
 
         /*
@@ -226,7 +229,7 @@ namespace com.spacepuppy.AI
             add { _stateMachine.StateChanged += value; }
             remove { _stateMachine.StateChanged -= value; }
         }
-
+        
         IAIState IStateMachine<IAIState>.Current
         {
             get { return _stateMachine.Current; }

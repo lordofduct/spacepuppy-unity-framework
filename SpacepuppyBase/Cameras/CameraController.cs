@@ -6,7 +6,11 @@ namespace com.spacepuppy.Cameras
 {
     public abstract class CameraController : SPNotifyingComponent, ICamera
     {
+
+        #region Fields
         
+        #endregion
+
         #region CONSTRUCTOR
 
         protected override void Awake()
@@ -26,6 +30,12 @@ namespace com.spacepuppy.Cameras
         #endregion
 
         #region ICamera Interface
+
+        public abstract CameraCategory Category
+        {
+            get;
+            set;
+        }
 
         public new abstract Camera camera { get; }
 

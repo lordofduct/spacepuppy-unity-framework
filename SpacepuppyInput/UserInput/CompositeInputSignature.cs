@@ -70,9 +70,10 @@ namespace com.spacepuppy.UserInput
 
         private ButtonState _current;
         private ButtonState _currentFixed;
-        
+        private float _lastDown;
+
         #region CONSTRUCTOR
-        
+
         public CompositeButtonInputSignature(string id)
             : base(id)
         {
@@ -105,6 +106,18 @@ namespace com.spacepuppy.UserInput
             return (getFixedState) ? _currentFixed : _current;
         }
 
+        public bool GetPressed(float duration, bool getFixedState)
+        {
+            if (getFixedState)
+            {
+                return _currentFixed == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+            else
+            {
+                return _current == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+            }
+        }
+
         public override void Update()
         {
             base.Update();
@@ -119,6 +132,9 @@ namespace com.spacepuppy.UserInput
                 }
             }
             _current = InputUtil.GetNextButtonState(_current, down);
+
+            if (_current == ButtonState.Down)
+                _lastDown = Time.unscaledTime;
         }
 
         public override void FixedUpdate()

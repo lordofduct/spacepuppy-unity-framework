@@ -53,7 +53,7 @@ namespace com.spacepuppyeditor.Geom
 
             EditorGUI.BeginProperty(position, label, property);
             EditorGUI.BeginChangeCheck();
-            SPEditorGUI.MultiFloatField(position, label, subLabels, _values, labelWidth);
+            SPEditorGUI.DelayedMultiFloatField(position, label, subLabels, _values, labelWidth);
             if (EditorGUI.EndChangeCheck())
             {
                 _values[0] = Mathf.Clamp(_values[0], minValue, maxValue);

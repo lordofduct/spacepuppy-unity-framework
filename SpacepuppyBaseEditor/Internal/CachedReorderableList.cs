@@ -9,7 +9,83 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Internal
 {
-    public sealed class CachedReorderableList : ReorderableList
+
+    public class SPReorderableList : ReorderableList
+    {
+        public SPReorderableList(SerializedObject serializedObj, SerializedProperty property)
+            : base(serializedObj, property)
+        {
+
+        }
+        public SPReorderableList(System.Collections.IList elements, System.Type elementType)
+            : base(elements, elementType)
+        {
+
+        }
+        public SPReorderableList(System.Collections.IList elements, System.Type elementType, bool draggable, bool displayHeader, bool displayAddButton, bool displayRemoveButton)
+            : base(elements, elementType, draggable, displayHeader, displayAddButton, displayRemoveButton)
+        {
+
+        }
+        public SPReorderableList(SerializedObject serializedObject, SerializedProperty elements, bool draggable, bool displayHeader, bool displayAddButton, bool displayRemoveButton)
+            : base(serializedObject, elements, draggable, displayHeader, displayAddButton, displayRemoveButton)
+        {
+
+        }
+
+        public new void DoLayoutList()
+        {
+            var beforeRect = GUILayoutUtility.GetLastRect();
+            base.DoLayoutList();
+            var afterRect = GUILayoutUtility.GetLastRect();
+
+            var area = new Rect(afterRect.xMin, beforeRect.yMax, afterRect.width, this.headerHeight);
+            this.DoHeaderContextMenu(area);
+        }
+
+        public new void DoList(Rect rect)
+        {
+            base.DoList(rect);
+
+            var area = new Rect(rect.xMin, rect.yMin, rect.width, this.headerHeight);
+            this.DoHeaderContextMenu(area);
+        }
+
+        private void DoHeaderContextMenu(Rect area)
+        {
+            if(ReorderableListHelper.IsClickingArea(area, MouseUtil.BTN_RIGHT))
+            {
+                Event.current.Use();
+
+                if(this.serializedProperty != null)
+                {
+                    var menu = new GenericMenu();
+                    var prop = this.serializedProperty;
+                    menu.AddItem(new GUIContent("Clear"), false, () =>
+                    {
+                        prop.serializedObject.Update();
+                        prop.arraySize = 0;
+                        prop.serializedObject.ApplyModifiedProperties();
+                    });
+                    menu.ShowAsContext();
+                }
+                else if(this.list != null)
+                {
+
+                    var menu = new GenericMenu();
+                    var lst = this.list;
+                    menu.AddItem(new GUIContent("Clear"), false, () =>
+                    {
+                        lst.Clear();
+                    });
+                    menu.ShowAsContext();
+                }
+            }
+        }
+
+    }
+
+    public sealed class CachedReorderableList : SPReorderableList
     {
 
         public GUIContent Label;

@@ -51,6 +51,7 @@
     <Compile Include="Movement\DumbMovementStyle.cs" />
     <Compile Include="Movement\IMotorConstraint.cs" />
     <Compile Include="Movement\IMovementStyle.cs" />
+    <Compile Include="Movement\IMover.cs" />
     <Compile Include="Movement\InjectedMovementStyle.cs" />
     <Compile Include="Movement\MotorEvents.cs" />
     <Compile Include="Movement\MovementMotor.cs" />

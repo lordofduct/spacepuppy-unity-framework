@@ -88,7 +88,7 @@ namespace com.spacepuppy.StateMachine
 
         public T GetState(System.Type tp)
         {
-            if (!TypeUtil.IsType(tp, typeof(T))) return default(T);
+            if (tp == null || !TypeUtil.IsType(tp, typeof(T))) return default(T);
             if (_container == null) return default(T);
             return _container.GetComponent(tp) as T;
         }

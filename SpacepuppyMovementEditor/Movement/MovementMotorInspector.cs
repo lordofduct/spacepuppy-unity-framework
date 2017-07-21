@@ -57,7 +57,7 @@ namespace com.spacepuppyeditor.Movement
 
 
 
-            if(Application.isPlaying)
+            if(Application.isPlaying && this.target.States != null)
             {
                 if(this.target.States.Current != null)
                 {

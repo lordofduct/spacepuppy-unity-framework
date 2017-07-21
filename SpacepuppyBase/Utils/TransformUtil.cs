@@ -87,6 +87,12 @@ namespace com.spacepuppy.Utils
         {
             switch (axis)
             {
+                case CartesianAxis.Xneg:
+                    return Vector3.left;
+                case CartesianAxis.Yneg:
+                    return Vector3.down;
+                case CartesianAxis.Zneg:
+                    return Vector3.back;
                 case CartesianAxis.X:
                     return Vector3.right;
                 case CartesianAxis.Y:
@@ -97,13 +103,19 @@ namespace com.spacepuppy.Utils
 
             return Vector3.zero;
         }
-
+        
         public static Vector3 GetAxis(this Transform trans, CartesianAxis axis)
         {
             if (trans == null) throw new System.ArgumentNullException("trans");
 
             switch (axis)
             {
+                case CartesianAxis.Xneg:
+                    return -trans.right;
+                case CartesianAxis.Yneg:
+                    return -trans.up;
+                case CartesianAxis.Zneg:
+                    return -trans.forward;
                 case CartesianAxis.X:
                     return trans.right;
                 case CartesianAxis.Y:
@@ -114,7 +126,7 @@ namespace com.spacepuppy.Utils
 
             return Vector3.zero;
         }
-
+        
         public static Vector3 GetAxis(this Transform trans, CartesianAxis axis, bool inLocalSpace)
         {
             if (trans == null) throw new System.ArgumentNullException("trans");
@@ -122,6 +134,15 @@ namespace com.spacepuppy.Utils
             Vector3 v = Vector3.zero;
             switch (axis)
             {
+                case CartesianAxis.Xneg:
+                    v= -trans.right;
+                    break;
+                case CartesianAxis.Yneg:
+                    v = -trans.up;
+                    break;
+                case CartesianAxis.Zneg:
+                    v = -trans.forward;
+                    break;
                 case CartesianAxis.X:
                     v = trans.right;
                     break;

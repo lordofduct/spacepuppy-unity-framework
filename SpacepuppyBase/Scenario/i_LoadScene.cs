@@ -12,6 +12,7 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField]
+        [Tooltip("Prefix with # to load by index.")]
         private string _sceneName;
         [SerializeField]
         private bool _async;
@@ -27,22 +28,51 @@ namespace com.spacepuppy.Scenario
             if (!this.CanTrigger) return false;
             if (string.IsNullOrEmpty(_sceneName)) return false;
 
-            var manager = Services.Get<ISceneManager>();
-            if(manager != null)
+            var nm = _sceneName;
+            if(nm.StartsWith("#"))
             {
-                if (_async)
-                    manager.LoadSceneAsync(_sceneName, _mode);
+                nm = nm.Substring(1);
+                int index;
+                if(!int.TryParse(nm, out index))
+                    return false;
+                if (index < 0 || index >= SceneManager.sceneCountInBuildSettings)
+                    return false;
+
+                var manager = Services.Get<ISceneManager>();
+                if (manager != null)
+                {
+                    if (_async)
+                        manager.LoadSceneAsync(index, _mode);
+                    else
+                        manager.LoadScene(index, _mode);
+                }
                 else
-                    manager.LoadScene(_sceneName, _mode);
+                {
+                    if (_async)
+                        SceneManager.LoadSceneAsync(index, _mode);
+                    else
+                        SceneManager.LoadScene(index, _mode);
+                }
             }
             else
             {
-                if (_async)
-                    SceneManager.LoadSceneAsync(_sceneName, _mode);
+                var manager = Services.Get<ISceneManager>();
+                if (manager != null)
+                {
+                    if (_async)
+                        manager.LoadSceneAsync(_sceneName, _mode);
+                    else
+                        manager.LoadScene(_sceneName, _mode);
+                }
                 else
-                    SceneManager.LoadScene(_sceneName, _mode);
+                {
+                    if (_async)
+                        SceneManager.LoadSceneAsync(_sceneName, _mode);
+                    else
+                        SceneManager.LoadScene(_sceneName, _mode);
+                }
             }
-
+            
             return true;
         }
 

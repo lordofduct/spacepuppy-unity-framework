@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B9807EBA-396E-4379-800F-65CBA0C47BD9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppy</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFramework.AI.BehaviourTree</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AI\BehaviourTree\AINodeUtil.cs" />
+    <Compile Include="AI\BehaviourTree\AITreeController.cs" />
+    <Compile Include="AI\BehaviourTree\Components\AIActionComponent.cs" />
+    <Compile Include="AI\BehaviourTree\Components\AIActionWeightsComponent.cs" />
+    <Compile Include="AI\BehaviourTree\Components\AIStateComponent.cs" />
+    <Compile Include="AI\BehaviourTree\Components\AIStateMachineComponent.cs" />
+    <Compile Include="AI\BehaviourTree\Components\AITrapActionComponent.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_ActionGroup.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_ChangeAIState.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_IfCurrentStateIs.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_NullAction.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_RandomSuccess.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_Sense.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_SenseExit.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_SetVariable.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_Trigger.cs" />
+    <Compile Include="AI\BehaviourTree\Components\a_WaitTimer.cs" />
+    <Compile Include="AI\BehaviourTree\Components\GameObjectConfigurableAIActionGroup.cs" />
+    <Compile Include="AI\BehaviourTree\Components\PropertyDrawerAttributes.cs" />
+    <Compile Include="AI\BehaviourTree\ConfigurableAIActionGroup.cs" />
+    <Compile Include="AI\BehaviourTree\Enums.cs" />
+    <Compile Include="AI\BehaviourTree\IAIAction.cs" />
+    <Compile Include="AI\BehaviourTree\IAIActionGroup.cs" />
+    <Compile Include="AI\BehaviourTree\IAIActionWeightSupplier.cs" />
+    <Compile Include="AI\BehaviourTree\IAIEditorSyncActionsCallbackReceiver.cs" />
+    <Compile Include="AI\BehaviourTree\IAITreeStateMachine.cs" />
+    <Compile Include="AI\BehaviourTree\ParallelAction.cs" />
+    <Compile Include="AI\BehaviourTree\RandomAction.cs" />
+    <Compile Include="AI\BehaviourTree\SelectorAction.cs" />
+    <Compile Include="AI\BehaviourTree\SequenceAction.cs" />
+    <Compile Include="AI\BehaviourTree\TriggerableMechanismAsAIActionWrapper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpacepuppyAI\SpacepuppyAI.csproj">
+      <Project>{65a3df9e-1099-40d7-acf3-4a3989026a3d}</Project>
+      <Name>SpacepuppyAI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
+      <Project>{4b8e57ac-f3b2-4dfd-ba0b-20f6be3b17c9}</Project>
+      <Name>SpacepuppyBase</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.AI.BehaviourTree.dll" "$(ProjectDir)..\Builds\FullLibrary\SpacepuppyUnityFramework.AI.BehaviourTree.dll"
+copy /Y "$(TargetDir)SpacepuppyUnityFramework.AI.BehaviourTree.pdb" "$(ProjectDir)..\Builds\FullLibrary\SpacepuppyUnityFramework.AI.BehaviourTree.pdb"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -158,6 +158,36 @@ namespace com.spacepuppy.Utils
 
 
 #region Kill Extension Methods
+
+        /// <summary>
+        /// Object is not null, dead/killed, and is active in hierarchy.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsAliveAndActive(this GameObject obj)
+        {
+            return obj != null && obj.activeInHierarchy && !obj.IsKilled();
+        }
+
+        /// <summary>
+        /// Object is not null, dead/killed, and is active in hierarchy as well as enabled.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsAliveAndActive(this Component obj)
+        {
+            return obj != null && obj.IsActiveAndEnabled() && !obj.IsKilled();
+        }
+
+        /// <summary>
+        /// Object is not null, dead/killed, and is active in hierarchy as well as enabled.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsAliveAndActive(this Behaviour obj)
+        {
+            return obj != null && obj.isActiveAndEnabled && !obj.IsKilled();
+        }
         
         /// <summary>
         /// Tests if the object is either destroyed or killed.
@@ -166,7 +196,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static bool IsKilled(this GameObject obj)
         {
-            if (obj.IsNullOrDestroyed()) return true;
+            if (obj == null) return true;
             
             using (var lst = TempCollection.GetList<IKillableEntity>())
             {
@@ -191,7 +221,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static bool IsKilled(this Component obj)
         {
-            if (obj.IsNullOrDestroyed()) return true;
+            if (obj == null) return true;
             
             using (var lst = TempCollection.GetList<IKillableEntity>())
             {

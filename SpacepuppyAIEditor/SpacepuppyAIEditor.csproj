@@ -51,19 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\AIControllerInspector.cs" />
-    <Compile Include="AI\AITreeControllerInspector.cs" />
-    <Compile Include="AI\AITreeDebugWindow.cs" />
+    <Compile Include="AI\AISubControllerInspector.cs" />
     <Compile Include="AI\AIVariableNamePropertyDrawer.cs" />
-    <Compile Include="AI\Components\AIActionWeightsComponentInspector.cs" />
-    <Compile Include="AI\Components\a_ChangeAIStateInspector.cs" />
-    <Compile Include="AI\Components\a_IfCurrentStateIsInspector.cs" />
-    <Compile Include="AI\Components\a_SenseInspector.cs" />
-    <Compile Include="AI\Components\GameObjectConfigurableAIActionGroupPropertyDrawer.cs" />
-    <Compile Include="AI\Components\ListAIStatesPropertyDrawer.cs" />
-    <Compile Include="AI\ConfigurableAIActionGroupPropertyDrawer.cs" />
-    <Compile Include="AI\ParallelPassOptionsPropertyDrawer.cs" />
     <Compile Include="AI\IAIStateHierarchyDrawer.cs" />
-    <Compile Include="AI\Components\AIStateMachineComponentInspector.cs" />
     <Compile Include="AI\Sensors\Visual\RightCylindricalVisualSensorInspector.cs" />
     <Compile Include="AI\Sensors\Visual\SphericalVisionVisualSensorInspector.cs" />
     <Compile Include="AI\Sensors\Visual\TunnelVisionVisualSensorInspector.cs" />

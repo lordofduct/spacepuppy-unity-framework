@@ -16,7 +16,7 @@ namespace com.spacepuppyeditor.Project
     public class WeightedTextDocumentInspector : SPEditor
     {
 
-        private ReorderableList _lst;
+        private SPReorderableList _lst;
         private SerializedProperty _weightsProp;
         private float _totalOdds;
 
@@ -24,7 +24,7 @@ namespace com.spacepuppyeditor.Project
         {
             base.OnEnable();
 
-            _lst = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty("_text"));
+            _lst = new SPReorderableList(this.serializedObject, this.serializedObject.FindProperty("_text"));
             _lst.drawHeaderCallback += _maskList_DrawHeader;
             _lst.drawElementCallback += _maskList_DrawElement;
             _lst.elementHeight = EditorGUIUtility.singleLineHeight * 4f;

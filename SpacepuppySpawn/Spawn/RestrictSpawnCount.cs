@@ -90,7 +90,7 @@ namespace com.spacepuppy.Spawn
 
         void ISpawnerModifier.OnBeforeSpawnNotification(SpawnPointBeforeSpawnNotification n)
         {
-            if (!this.IsActiveAndEnabled()) return;
+            if (!this.isActiveAndEnabled) return;
 
             if (n.SpawnPoint.TotalCount >= this._maxCount)
             {
@@ -108,7 +108,7 @@ namespace com.spacepuppy.Spawn
 
         void ISpawnerModifier.OnSpawnedNotification(SpawnPointTriggeredNotification n)
         {
-            if (!this.IsActiveAndEnabled()) return;
+            if (!this.isActiveAndEnabled) return;
 
             if (!_maxActiveReachedTriggered && n.SpawnPoint.ActiveCount == this._maxActiveCount)
             {

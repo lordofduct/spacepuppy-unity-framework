@@ -57,20 +57,50 @@ namespace com.spacepuppyeditor
 
     }
 
-    [CustomEditor(typeof(BuildSettings))]
+    [CustomEditor(typeof(BuildSettings), true)]
     public class BuildSettingsEditor : SPEditor
     {
 
+        public const string PROP_BOOTSCENE = "_bootScene";
+        public const string PROP_SCENES = "_scenes";
+        public const string PROP_BUILDTARGET = "_buildTarget";
+        public const string PROP_BUILDOPTIONS = "_buildOptions";
+
+
         protected override void OnSPInspectorGUI()
         {
-            //TODO - make editor more robust like the Build Settings screen
-            this.DrawDefaultInspector();
+            this.serializedObject.Update();
+
+            this.DrawScenes();
+
+            this.DrawBuildOptions();
+
+            this.serializedObject.ApplyModifiedProperties();
             
             //build button
             if (this.serializedObject.isEditingMultipleObjects) return;
             
             EditorGUILayout.Space();
-            if(GUILayout.Button("Build"))
+
+            this.DrawBuildButtons();
+        }
+
+        public virtual void DrawScenes()
+        {
+            this.DrawPropertyField(PROP_BOOTSCENE);
+            this.DrawPropertyField(PROP_SCENES);
+        }
+
+        public virtual void DrawBuildOptions()
+        {
+            //TODO - upgrade this to more specialized build options gui
+            this.DrawPropertyField(PROP_BUILDTARGET);
+            this.DrawPropertyField(PROP_BUILDOPTIONS);
+        }
+
+        public virtual void DrawBuildButtons()
+        {
+            if (GUILayout.Button("Build"))
             {
                 var path = this.Build();
                 EditorUtility.RevealInFinder(path);
@@ -78,13 +108,20 @@ namespace com.spacepuppyeditor
             if (GUILayout.Button("Build & Run"))
             {
                 var path = this.Build();
-                var proc = new System.Diagnostics.Process();
-                proc.StartInfo.FileName = path;
-                proc.Start();
+                if (!string.IsNullOrEmpty(path))
+                {
+                    var proc = new System.Diagnostics.Process();
+                    proc.StartInfo.FileName = path;
+                    proc.Start();
+                }
+            }
+            if (GUILayout.Button("Sync To Global Build"))
+            {
+                this.SyncToGlobalBuild();
             }
         }
 
-        public string[] GetScenePaths()
+        public virtual string[] GetScenePaths()
         {
             using (var lst = TempCollection.GetList<string>())
             {
@@ -100,14 +137,35 @@ namespace com.spacepuppyeditor
             }
         }
 
+        public virtual void SyncToGlobalBuild()
+        {
+            var lst = new List<EditorBuildSettingsScene>();
+            var settings = this.target as BuildSettings;
+            foreach (var sc in this.GetScenePaths())
+            {
+                lst.Add(new EditorBuildSettingsScene(sc, true));
+            }
+            EditorBuildSettings.scenes = lst.ToArray();
+        }
+
         public virtual string Build()
         {
             var settings = this.target as BuildSettings;
             var scenes = this.GetScenePaths();
-            var path = EditorUtility.SaveFilePanel("Build", "", Application.productName + ".exe", "exe");
 
-            BuildPipeline.BuildPlayer(scenes, path, settings.BuildTarget, settings.BuildOptions);
-            return path;
+            var dir = EditorProjectPrefs.Local.GetString("LastBuildDirectory", string.Empty);
+            var path = EditorUtility.SaveFilePanel("Build", dir, Application.productName + ".exe", "exe");
+            if(!string.IsNullOrEmpty(path))
+            {
+                EditorProjectPrefs.Local.SetString("LastBuildDirectory", System.IO.Path.GetDirectoryName(path));
+
+                BuildPipeline.BuildPlayer(scenes, path, settings.BuildTarget, settings.BuildOptions);
+                return path;
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
 
     }

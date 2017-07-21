@@ -8,6 +8,8 @@ using System.Linq;
 using com.spacepuppy.Waypoints;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Waypoints
 {
 
@@ -26,7 +28,7 @@ namespace com.spacepuppyeditor.Waypoints
         private WaypointPathComponent _targ;
 
         private SerializedProperty _nodesProp;
-        private ReorderableList _nodeList;
+        private SPReorderableList _nodeList;
         private GUIContent _argBtnLabel = new GUIContent("||", "Toggle allowing to manually configure which Transform is this waypoint.");
 
         private List<Transform> _lastNodeCache = new List<Transform>();
@@ -43,7 +45,7 @@ namespace com.spacepuppyeditor.Waypoints
             _targ = this.target as WaypointPathComponent;
 
             _nodesProp = this.serializedObject.FindProperty(PROP_WAYPOINTS);
-            _nodeList = new ReorderableList(this.serializedObject, _nodesProp);
+            _nodeList = new SPReorderableList(this.serializedObject, _nodesProp);
             _nodeList.elementHeight = EditorGUIUtility.singleLineHeight;
             _nodeList.drawHeaderCallback = _nodeList_DrawHeader;
             _nodeList.drawElementCallback = _nodeList_DrawElement;

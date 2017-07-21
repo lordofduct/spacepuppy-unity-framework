@@ -8,6 +8,8 @@ using com.spacepuppy;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
+using com.spacepuppyeditor.Internal;
+
 namespace com.spacepuppyeditor.Scenario
 {
     
@@ -21,14 +23,14 @@ namespace com.spacepuppyeditor.Scenario
 
         private const string PROP_TARGETS = "_targets";
 
-        private ReorderableList _targetList;
+        private SPReorderableList _targetList;
         private bool _foldoutTargetExtra;
 
         protected override void OnEnable()
         {
             base.OnEnable();
 
-            _targetList = new ReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_TARGETS), true, true, true, true);
+            _targetList = new SPReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_TARGETS), true, true, true, true);
             _targetList.drawHeaderCallback = _targetList_DrawHeader;
             _targetList.drawElementCallback = _targetList_DrawElement;
             _targetList.onAddCallback = _targetList_OnAdd;

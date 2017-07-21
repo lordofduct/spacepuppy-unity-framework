@@ -120,11 +120,16 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
+        /// <summary>
+        /// Implementation of 'Behaviour.isActiveAnEnabled' that also works for all Components (including Colliders).
+        /// </summary>
+        /// <param name="comp"></param>
+        /// <returns></returns>
         public static bool IsActiveAndEnabled(this Component comp)
         {
             if (comp == null) return false;
+            if (comp is Behaviour) return (comp as Behaviour).isActiveAndEnabled;
             if (!comp.gameObject.activeInHierarchy) return false;
-            if (comp is Behaviour) return (comp as Behaviour).enabled;
             if (comp is Collider) return (comp as Collider).enabled;
             return true;
         }
