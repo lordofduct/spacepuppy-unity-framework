@@ -5,7 +5,7 @@ using System.Linq;
 using com.spacepuppy.Tween;
 using com.spacepuppy.Utils;
 
-namespace com.spacepuppy.Cameras
+namespace com.spacepuppy.Cameras.Transition
 {
     public abstract class CameraFade : SPComponent
     {

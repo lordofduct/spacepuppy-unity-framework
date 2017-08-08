@@ -53,6 +53,7 @@
     <Compile Include="Anim\IAnimLayerInformationSupplier.cs" />
     <Compile Include="Anim\i_PlayAnimationInspector.cs" />
     <Compile Include="Anim\i_PlaySPAnimationInspector.cs" />
+    <Compile Include="Anim\i_StopAnimationInspector.cs" />
     <Compile Include="Anim\Legacy\SPLegacyAnimationInspector.cs" />
     <Compile Include="Anim\MaskCollectionPropertyDrawer.cs" />
     <Compile Include="Anim\SPAnimationControllerInspector.cs" />

@@ -36,6 +36,8 @@ namespace com.spacepuppyeditor.Scenario
 
         private bool _alwaysExpanded;
 
+        private bool _customInspector;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -46,24 +48,59 @@ namespace com.spacepuppyeditor.Scenario
 
             _targetList = CachedReorderableList.GetListDrawer(prop.FindPropertyRelative(PROP_TARGETS), _targetList_DrawHeader, _targetList_DrawElement, _targetList_OnAdd);
 
-            if(this.fieldInfo != null)
+            if(!_customInspector)
             {
-                var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
-                if (attribs != null && attribs.Length > 0)
+                if (this.fieldInfo != null)
                 {
-                    _drawWeight = attribs[0].Weighted;
-                    _alwaysExpanded = attribs[0].AlwaysExpanded;
+                    var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
+                    if (attribs != null && attribs.Length > 0)
+                    {
+                        _drawWeight = attribs[0].Weighted;
+                        _alwaysExpanded = attribs[0].AlwaysExpanded;
+                    }
                 }
-            }
-            else
-            {
-                _drawWeight = false;
-                _alwaysExpanded = false;
+                else
+                {
+                    _drawWeight = false;
+                    _alwaysExpanded = false;
+                }
             }
             _triggerTargetDrawer.DrawWeight = _drawWeight;
         }
 
         #endregion
+
+        #region Properties
+
+        public bool DrawWeight
+        {
+            get { return _drawWeight; }
+            set
+            {
+                _drawWeight = value;
+                _customInspector = true;
+            }
+        }
+
+        public bool AlwaysExpanded
+        {
+            get { return _alwaysExpanded; }
+            set
+            {
+                _alwaysExpanded = value;
+                _customInspector = true;
+            }
+        }
+
+        public System.Action<GUIContent, int> CustomizeEntryLabel
+        {
+            get;
+            set;
+        }
+
+        #endregion
+
+        #region Draw Methods
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -215,6 +252,7 @@ namespace com.spacepuppyeditor.Scenario
             return new Rect(position.xMin, r.yMax, position.width, position.yMax - r.yMax);
         }
 
+        #endregion
 
         #region ReorderableList Handlers
 
@@ -239,6 +277,7 @@ namespace com.spacepuppyeditor.Scenario
             Rect trigRect;
             var actInfo = TriggerTargetPropertyDrawer.GetTriggerActivationInfo(element);
             GUIContent labelContent = EditorHelper.TempContent(index.ToString("00: ") + actInfo.ActivationTypeDisplayName);
+            if (this.CustomizeEntryLabel != null) this.CustomizeEntryLabel(labelContent, index);
             if (_drawWeight && area.width > FULLWEIGHT_WIDTH)
             {
                 var top = area.yMin + MARGIN;
@@ -287,6 +326,7 @@ namespace com.spacepuppyeditor.Scenario
             if (obj != null)
             {
                 obj.Clear();
+                obj.Weight = 1f;
                 lst.serializedProperty.serializedObject.Update();
             }
         }

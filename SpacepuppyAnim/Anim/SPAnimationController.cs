@@ -424,13 +424,7 @@ namespace com.spacepuppy.Anim
             }
             else
             {
-                foreach (AnimationState a in _animation)
-                {
-                    if (a.layer == layer && _animation.IsPlaying(a.name))
-                    {
-                        _animation.Stop(a.name);
-                    }
-                }
+                _animation.Stop(layer);
             }
         }
 
@@ -483,6 +477,11 @@ namespace com.spacepuppy.Anim
         #endregion
 
         #region ISPAnimationSource Interface
+
+        public bool CanPlayAnim
+        {
+            get { return this != null && this.isActiveAndEnabled; }
+        }
 
         public virtual ISPAnim GetAnim(string name)
         {

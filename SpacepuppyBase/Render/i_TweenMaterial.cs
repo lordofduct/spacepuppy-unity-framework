@@ -7,7 +7,7 @@ using com.spacepuppy.Tween;
 
 namespace com.spacepuppy.Render
 {
-    public class i_TweenMaterial : TriggerableMechanism
+    public class i_TweenMaterial : AutoTriggerableMechanism
     {
 
         #region Fields

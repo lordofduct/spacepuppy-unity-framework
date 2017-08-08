@@ -7,6 +7,13 @@ namespace com.spacepuppy.Scenario
     public class i_LookAt : TriggerableMechanism
     {
 
+        public enum SlerpStyle
+        {
+            None = 0,
+            Speed = 1,
+            Time = 2
+        }
+
         #region Fields
 
         [SerializeField()]
@@ -31,12 +38,15 @@ namespace com.spacepuppy.Scenario
         [UnityEngine.Serialization.FormerlySerializedAs("FlattenOnAxis")]
         private bool _flattenOnAxis = true;
 
+        [SerializeField]
+        private SlerpStyle _slerp;
         [SerializeField()]
-        [UnityEngine.Serialization.FormerlySerializedAs("Slerp")]
-        private bool _slerp;
-        [SerializeField()]
-        [UnityEngine.Serialization.FormerlySerializedAs("SlerpAngularSpeed")]
-        private float _slerpAngularSpeed = 180f;
+        [Tooltip("If greater than 0, then it will slerp.")]
+        private float _slerpValue;
+
+        [SerializeField]
+        [Tooltip("Only fires if slerp'd")]
+        private Trigger _onSlerpComplete;
 
         #endregion
 
@@ -84,23 +94,17 @@ namespace com.spacepuppy.Scenario
             get { return _flattenOnAxis; }
             set { _flattenOnAxis = value; }
         }
-
-        /// <summary>
-        /// Should the lookat interpolation be spherical.
-        /// </summary>
-        public bool Slerp
+        
+        public SlerpStyle Slerp
         {
             get { return _slerp; }
             set { _slerp = value; }
         }
 
-        /// <summary>
-        /// If Slerp is true, the speed at which the rotation is slerped.
-        /// </summary>
-        public float SlerpAngularSpeed
+        public float SlerpValue
         {
-            get { return _slerpAngularSpeed; }
-            set { _slerpAngularSpeed = value; }
+            get { return _slerpValue; }
+            set { _slerpValue = value; }
         }
 
         #endregion
@@ -121,13 +125,32 @@ namespace com.spacepuppy.Scenario
             if (this._flattenOnAxis) dir = dir.SetLengthOnAxis(ax, 0f);
             var q = Quaternion.LookRotation(dir, ax);
 
-            if (this._slerp)
+            if (_slerp > SlerpStyle.None && _slerpValue > 0)
             {
-                observer.rotation = QuaternionUtil.SpeedSlerp(observer.rotation, q, this._slerpAngularSpeed, Time.deltaTime);
+                switch(_slerp)
+                {
+                    case SlerpStyle.Speed:
+                        {
+                            var a = Quaternion.Angle(observer.rotation, q);
+                            var dur = a / _slerpValue;
+                            var twn = com.spacepuppy.Tween.SPTween.Tween(observer).To("rotation", q, dur);
+                            if (_onSlerpComplete.Count > 0) twn.OnFinish((s, e) => _onSlerpComplete.ActivateTrigger(this, null));
+                            twn.Play(true);
+                        }
+                        break;
+                    case SlerpStyle.Time:
+                        {
+                            var twn = com.spacepuppy.Tween.SPTween.Tween(observer).To("rotation", q, _slerpValue);
+                            if (_onSlerpComplete.Count > 0) twn.OnFinish((s, e) => _onSlerpComplete.ActivateTrigger(this, null));
+                            twn.Play(true);
+                        }
+                        break;
+                }
             }
             else
             {
                 observer.rotation = q;
+                if (_onSlerpComplete.Count > 0) _onSlerpComplete.ActivateTrigger(this, null);
             }
             return true;
         }

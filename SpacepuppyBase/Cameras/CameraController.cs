@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Cameras
 {
-    public abstract class CameraController : SPNotifyingComponent, ICamera
+    public abstract class CameraController : SPComponent, ICamera
     {
 
         #region Fields

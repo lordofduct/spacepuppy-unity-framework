@@ -21,6 +21,7 @@ namespace com.spacepuppyeditor.Scenario
     public class i_TweenValueInspector : SPEditor
     {
         public const string PROP_ORDER = "_order";
+        public const string PROP_ACTIVATEON = "_activateOn";
 
         public const string PROP_TIMESUPPLIER = "_timeSupplier";
         public const string PROP_TARGET = "_target";
@@ -59,6 +60,7 @@ namespace com.spacepuppyeditor.Scenario
 
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
             this.DrawPropertyField(PROP_ORDER);
+            this.DrawPropertyField(PROP_ACTIVATEON);
             this.DrawPropertyField(PROP_TIMESUPPLIER);
             SPEditorGUILayout.PropertyField(_targetProp);
             this.DrawPropertyField(PROP_TWEENTOKEN);
@@ -66,7 +68,7 @@ namespace com.spacepuppyeditor.Scenario
             this.DrawPropertyField(PROP_ONCOMPLETE);
 
 
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_ORDER, PROP_TARGET, PROP_TIMESUPPLIER, PROP_TWEENDATA, PROP_ONCOMPLETE, PROP_TWEENTOKEN);
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_ORDER, PROP_ACTIVATEON, PROP_TARGET, PROP_TIMESUPPLIER, PROP_TWEENDATA, PROP_ONCOMPLETE, PROP_TWEENTOKEN);
 
             this.serializedObject.ApplyModifiedProperties();
         }

@@ -110,7 +110,6 @@
     <Compile Include="Base\Inspectors\ReorderableArrayPropertyDrawer.cs" />
     <Compile Include="Components\IComponentChoiceSelector.cs" />
     <Compile Include="Components\SelectableComponentPropertyDrawer.cs" />
-    <Compile Include="EditorGame.cs" />
     <Compile Include="EditorHierarchyDrawerEvents.cs" />
     <Compile Include="HierarchyDrawer.cs" />
     <Compile Include="IconHelper.cs" />
@@ -169,6 +168,7 @@
     <Compile Include="Scenario\i_SetValueOnTriggerArgInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnEvalInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
+    <Compile Include="Scenario\i_TriggerRandomEliminationInspector.cs" />
     <Compile Include="Scenario\i_TriggerSequenceInspector.cs" />
     <Compile Include="Scenario\i_TweenValueInspector.cs" />
     <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />

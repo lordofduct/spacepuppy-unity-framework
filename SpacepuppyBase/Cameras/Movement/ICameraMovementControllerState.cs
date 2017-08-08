@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace com.spacepuppy.Cameras
+namespace com.spacepuppy.Cameras.Movement
 {
 
     public interface ICameraMovementControllerState

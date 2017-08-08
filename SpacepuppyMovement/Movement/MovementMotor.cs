@@ -43,18 +43,32 @@ namespace com.spacepuppy.Movement
             base.Awake();
 
             _stateMachine = new MovementStyleStateMachine(this);
-        }
-
-        protected override void Start()
-        {
-            base.Start();
 
             if (_controller == null) _controller = this.FindComponent<MovementController>();
             if (_controller == null) throw new System.InvalidOperationException("MovementMotor requires an attach MovementController.");
+        }
+        
+        protected override void OnStartOrEnable()
+        {
+            base.OnStartOrEnable();
 
-            if (_defaultMovementStyle != null && _stateMachine.Contains(_defaultMovementStyle))
+            if (_defaultMovementStyle != null && _stateMachine.Current == null && _stateMachine.Contains(_defaultMovementStyle))
             {
                 _stateMachine.ChangeState(_defaultMovementStyle as IMovementStyle);
+            }
+            else if(_stateMachine.Current != null)
+            {
+                _stateMachine.Current.OnActivate(null, ActivationReason.MotorPaused);
+            }
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            if(_stateMachine.Current != null)
+            {
+                _stateMachine.Current.OnDeactivate(null, ActivationReason.MotorPaused);
             }
         }
 
@@ -433,8 +447,8 @@ namespace com.spacepuppy.Movement
                 var oldState = _current;
                 _current = style;
 
-                if (oldState != null) oldState.OnDeactivate(style, _stackingState);
-                if (style != null) style.OnActivate(oldState, _stackingState);
+                if (oldState != null) oldState.OnDeactivate(style, _stackingState ? ActivationReason.Stacking : ActivationReason.Standard);
+                if (style != null) style.OnActivate(oldState, _stackingState ? ActivationReason.Stacking : ActivationReason.Standard);
 
                 if (this.StateChanged != null) this.StateChanged(this, new StateChangedEventArgs<IMovementStyle>(oldState, style));
                 if (_owner.StyleChanged != null) _owner.StyleChanged(_owner, new StyleChangedEventArgs(oldState, style, _stackingState));

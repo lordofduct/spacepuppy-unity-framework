@@ -17,6 +17,8 @@ namespace com.spacepuppy.AI
         
         [SerializeField()]
         private Trigger _onEnterState;
+        [SerializeField]
+        private Trigger _onExitState;
 
         [System.NonSerialized()]
         private bool _isActive;
@@ -78,6 +80,7 @@ namespace com.spacepuppy.AI
         {
             this.OnStateExited(machine, nextState);
             _isActive = false;
+            _onExitState.ActivateTrigger(this, null);
         }
 
 

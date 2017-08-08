@@ -30,14 +30,14 @@ namespace com.spacepuppy.Movement
 
         #region IMovementStyle Interface
 
-        public void OnActivate(IMovementStyle lastStyle, bool stateIsStacking)
+        public void OnActivate(IMovementStyle lastStyle, ActivationReason reason)
         {
 
         }
 
-        public void OnDeactivate(IMovementStyle nextStyle, bool stateIsStacking)
+        public void OnDeactivate(IMovementStyle nextStyle, ActivationReason reason)
         {
-            if(!stateIsStacking)
+            if(reason == ActivationReason.Standard)
             {
                 Object.Destroy(this);
             }

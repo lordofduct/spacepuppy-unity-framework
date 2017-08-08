@@ -35,6 +35,17 @@ namespace com.spacepuppy.Utils
             return (obj is GameObject || obj is Component || obj is IGameObjectSource);
         }
 
+        public static bool IsGameObjectSource(object obj, bool respectProxy)
+        {
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return false;
+            }
+
+            return (obj is GameObject || obj is Component || obj is IGameObjectSource);
+        }
+
         public static GameObject GetGameObjectFromSource(object obj)
         {
             if (obj == null) return null;

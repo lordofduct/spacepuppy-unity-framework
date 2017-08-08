@@ -7,8 +7,17 @@ namespace com.spacepuppy.Cameras
 {
     public enum CameraCategory
     {
-        Other = -1,
+        Other = 31,
         Gameplay = 0,
         UI = 1
     }
+
+    [System.Flags]
+    public enum CameraCategoryMask
+    {
+        Gameplay = 1,
+        UI = 2,
+        Other = (1 << 31)
+    }
+    
 }

@@ -16,6 +16,7 @@ namespace com.spacepuppyeditor
     {
 
         public const string PROP_SCRIPT = "m_Script";
+        public const string PROP_ORDER = "_order";
 
 
         private static Texture2D s_WhiteTexture;
@@ -575,10 +576,7 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
-
-
-
-
+        
         #region Event Handlers
 
         private static void OnSceneGUI(SceneView scene)

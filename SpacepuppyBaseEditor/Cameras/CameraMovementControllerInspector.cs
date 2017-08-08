@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
-using com.spacepuppy.Cameras;
+using com.spacepuppy.Cameras.Movement;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Cameras

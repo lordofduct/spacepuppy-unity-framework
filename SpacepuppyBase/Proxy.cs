@@ -5,13 +5,14 @@ using System.Linq;
 using com.spacepuppy.Dynamic;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppy
 {
 
     public interface IProxy
     {
+        System.Type GetTargetType();
+
         object GetTarget();
         object GetTarget(object arg);
     }
@@ -129,6 +130,12 @@ namespace com.spacepuppy
             return this.GetTarget();
         }
 
+        public System.Type GetTargetType()
+        {
+            if (_target == null) return typeof(object);
+            return (_target is IProxy) ? (_target as IProxy).GetTargetType() : _target.GetType();
+        }
+
         #endregion
 
         #region Special Types
@@ -210,6 +217,11 @@ namespace com.spacepuppy
         {
             if (_componentTypeOnTarget == null) return null;
             return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;
+        }
+
+        public System.Type GetTargetType()
+        {
+            return _componentTypeOnTarget.Type ?? typeof(UnityEngine.Object);
         }
 
         #endregion

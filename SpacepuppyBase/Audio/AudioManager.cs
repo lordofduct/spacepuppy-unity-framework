@@ -1,10 +1,56 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Audio
 {
 
-    public static class AudioManager
+    public interface IAudioManager : IService
+    {
+
+        AudioSource BackgroundAmbientAudioSource { get; }
+
+    }
+
+    [RequireComponent(typeof(AudioSource))]
+    public class AudioManager : ServiceComponent<IAudioManager>, IAudioManager
+    {
+
+        #region Fields
+
+        [System.NonSerialized]
+        private AudioSource _backgroundAmbientAudioSource;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        protected override void OnValidAwake()
+        {
+            base.OnValidAwake();
+
+            _backgroundAmbientAudioSource = this.AddOrGetComponent<AudioSource>();
+        }
+
+        #endregion
+
+        #region IAudioManager Interface
+
+        public AudioSource BackgroundAmbientAudioSource
+        {
+            get { return _backgroundAmbientAudioSource; }
+        }
+
+        #endregion
+
+    }
+
+
+
+
+    [System.Obsolete]
+    internal static class AudioManager_Old
     {
 
         #region Singleton Interface
@@ -15,7 +61,6 @@ namespace com.spacepuppy.Audio
 
         private static GlobalAudioSourceGroup _globalAudioSources = new GlobalAudioSourceGroup();
         private static UnmanagedAudioSourceGroup _unmanagedAudioSources = new UnmanagedAudioSourceGroup();
-        private static ManagedAudioGroupCollection _groups = new ManagedAudioGroupCollection();
 
         #endregion
 
@@ -37,116 +82,11 @@ namespace com.spacepuppy.Audio
         /// Looping over the entries in this collection is expensive as it utilizes a Object.FindObjectsOfType call, do not do so unless necessary!
         /// </summary>
         public static IEnumerable<AudioSource> Unmanaged { get { return _unmanagedAudioSources; } }
-
-        public static ManagedAudioGroupCollection Groups { get { return _groups; } }
-
+        
         #endregion
-
-        #region Methods
-
-        public static bool IsManaged(AudioSource src)
-        {
-            if (src == null) return false;
-            int cnt = _groups.Count;
-            for (int i = 0; i < cnt; i++)
-            {
-                if (_groups[i].Contains(src)) return true;
-            }
-            return false;
-        }
-
-        #endregion
-
-
+        
         #region Special Types
-
-        public class ManagedAudioGroupCollection : IEnumerable<AudioGroup>
-        {
-
-            #region Fields
-
-            private List<AudioGroup> _lst = new List<AudioGroup>();
-
-            #endregion
-
-            #region CONSTRUCTOR
-
-            internal ManagedAudioGroupCollection()
-            {
-
-            }
-
-            #endregion
-
-            #region Properties
-
-            public int Count { get { return _groups.Count; } }
-
-            public AudioGroup this[int index] { get { return _groups[index]; } }
-
-            /// <summary>
-            /// Returns the first AudioGroup whose name matches.
-            /// </summary>
-            /// <param name="name"></param>
-            /// <returns></returns>
-            public AudioGroup this[string name]
-            {
-                get
-                {
-                    for(int i = 0; i < _groups.Count; i++)
-                    {
-                        if (_groups[i].name == name) return _groups[i];
-                    }
-                    return null;
-                }
-            }
-
-            #endregion
-
-            #region Methods
-
-            public AudioGroup Create(string name)
-            {
-                var go = new GameObject(name);
-                var grp = go.AddComponent<AudioGroup>();
-                _lst.Add(grp);
-                return grp;
-            }
-
-            public bool Contains(AudioGroup grp)
-            {
-                return _lst.Contains(grp);
-            }
-
-            internal void Register(AudioGroup grp)
-            {
-                if (_lst.Contains(grp)) return;
-                _lst.Add(grp);
-            }
-
-            internal void Unregister(AudioGroup grp)
-            {
-                _lst.Remove(grp);
-            }
-
-            #endregion
-
-            #region IEnumerable Interface
-
-            public IEnumerator<AudioGroup> GetEnumerator()
-            {
-                return _lst.GetEnumerator();
-            }
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-            {
-                return _lst.GetEnumerator();
-            }
-
-            #endregion
-
-        }
-
+        
         private class GlobalAudioSourceGroup : IAudioGroup
         {
 
@@ -226,14 +166,7 @@ namespace com.spacepuppy.Audio
 
             public IEnumerator<AudioSource> GetEnumerator()
             {
-                //var managedSources = (from g in AudioManager._groups from s in g select s).ToArray();
-                //var allSources = Object.FindObjectsOfType<AudioSource>();
-                //for (int i = 0; i < allSources.Length; i++)
-                //{
-                //    if (System.Array.IndexOf(managedSources, allSources[i]) < 0) yield return allSources[i];
-                //}
-
-                var e = AudioManager._groups.GetEnumerator();
+                var e = AudioGroup.Pool.GetEnumerator();
                 while(e.MoveNext())
                 {
                     var e2 = e.Current.GetEnumerator();

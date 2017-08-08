@@ -10,6 +10,17 @@ namespace com.spacepuppy.Audio
     public class AudioGroup : SPComponent, IAudioGroup, ICollection<AudioSource>
     {
 
+        #region Multiton Interface
+
+        private static AudioGroupPool _pool = new AudioGroupPool();
+        public static AudioGroupPool Pool
+        {
+            get { return _pool; }
+        }
+
+        #endregion
+
+
         #region Fields
 
         [ReorderableArray()]
@@ -41,7 +52,7 @@ namespace com.spacepuppy.Audio
         {
             base.Awake();
 
-            AudioManager.Groups.Register(this);
+            _pool.AddReference(this);
             _volume = Mathf.Clamp01(_volume);
         }
 
@@ -64,7 +75,7 @@ namespace com.spacepuppy.Audio
                 if (_managedAudioSources[i] != null) Object.Destroy(_managedAudioSources[i]);
             }
             _managedAudioSources.Clear();
-            AudioManager.Groups.Unregister(this);
+            _pool.RemoveReference(this);
         }
 
         #endregion
@@ -112,7 +123,7 @@ namespace com.spacepuppy.Audio
 
         public bool TryAdd(AudioSource item)
         {
-            if (AudioManager.IsManaged(item))
+            if (_pool.IsManaged(item))
             {
                 //Debug.LogWarning("AudioSource is already managed by another group. An AudioSource can only be a member of one group at a time.", item);
                 return false;
@@ -211,7 +222,7 @@ namespace com.spacepuppy.Audio
 
         public void Add(AudioSource item)
         {
-            if (AudioManager.IsManaged(item))
+            if (_pool.IsManaged(item))
             {
                 throw new System.ArgumentException("AudioSource is already managed by another group. An AudioSource can only be a member of one group at a time.", "item");
                 //Debug.LogWarning("AudioSource is already managed by another group. An AudioSource can only be a member of one group at a time.", item);
@@ -268,6 +279,25 @@ namespace com.spacepuppy.Audio
         public IEnumerator<AudioSource> GetEnumerator()
         {
             return _managedAudioSources.GetEnumerator();
+        }
+
+        #endregion
+
+        #region Special Types
+
+        public class AudioGroupPool : com.spacepuppy.Collections.MultitonPool<AudioGroup>
+        {
+            public bool IsManaged(AudioSource src)
+            {
+                if (src == null) return false;
+
+                var e = this.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    if (e.Current.Contains(src)) return true;
+                }
+                return false;
+            }
         }
 
         #endregion

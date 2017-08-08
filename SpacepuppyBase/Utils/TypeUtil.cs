@@ -192,5 +192,13 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+
+
+        private static System.Type _obsoleteAttribType = typeof(System.ObsoleteAttribute);
+        public static bool IsObsolete(this System.Reflection.MemberInfo member)
+        {
+            return Attribute.IsDefined(member, _obsoleteAttribType);
+        }
+
     }
 }

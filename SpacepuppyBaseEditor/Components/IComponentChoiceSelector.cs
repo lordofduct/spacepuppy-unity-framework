@@ -135,9 +135,9 @@ namespace com.spacepuppyeditor.Components
             if(allowProxy)
             {
                 if (searchChildren)
-                    return (from c in go.GetComponentsInChildren<Component>() where ObjUtil.IsType(c, restrictionType) || c is IProxy select c).ToArray();
+                    return (from c in go.GetComponentsInChildren<Component>() where ObjUtil.IsType(c, restrictionType, allowProxy) select c).ToArray();
                 else
-                    return (from c in go.GetComponents<Component>() where ObjUtil.IsType(c, restrictionType) || c is IProxy select c).ToArray();
+                    return (from c in go.GetComponents<Component>() where ObjUtil.IsType(c, restrictionType, allowProxy) select c).ToArray();
             }
             else
             {

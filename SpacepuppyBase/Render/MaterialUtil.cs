@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 using com.spacepuppy.Utils;
 
@@ -165,5 +166,21 @@ namespace com.spacepuppy.Render
                 return source.Material;
         }
 
+
+
+
+        public static IEnumerable<object> GetAllMaterialSources()
+        {
+            foreach(var o in UnityEngine.Object.FindObjectsOfType<UnityEngine.Renderer>())
+            {
+                yield return o;
+            }
+
+            foreach(var o in UnityEngine.Object.FindObjectsOfType<UnityEngine.UI.Graphic>())
+            {
+                yield return o;
+            }
+        }
+        
     }
 }

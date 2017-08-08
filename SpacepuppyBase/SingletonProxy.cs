@@ -42,6 +42,11 @@ namespace com.spacepuppy
             return this.GetTarget();
         }
 
+        System.Type IProxy.GetTargetType()
+        {
+            return _singletonType.Type ?? typeof(ISingleton);
+        }
+
         #endregion
 
         #region IDynamic Interface

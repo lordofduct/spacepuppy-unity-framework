@@ -6,7 +6,7 @@ using com.spacepuppy.Tween;
 
 namespace com.spacepuppy.Scenario
 {
-    public class i_TweenValue : TriggerableMechanism
+    public class i_TweenValue : AutoTriggerableMechanism
     {
 
         #region Fields

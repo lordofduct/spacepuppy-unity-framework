@@ -16,7 +16,7 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField()]
-        private float _weight;
+        private float _weight = 1f;
 
         /**
          * These values are named like public properties because this was originally an internal class and they were public. 

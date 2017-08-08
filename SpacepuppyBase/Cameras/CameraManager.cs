@@ -19,6 +19,13 @@ namespace com.spacepuppy.Cameras
 
         #endregion
 
+        #region Events
+
+        public static event System.EventHandler<CameraRegistrationEvent> CameraRegistered;
+        public static event System.EventHandler<CameraRegistrationEvent> CameraUnregistered;
+
+        #endregion
+
         #region Methods
 
         /// <summary>
@@ -55,6 +62,13 @@ namespace com.spacepuppy.Cameras
                 var manager = Services.Get<ICameraManager>();
                 if (manager != null)
                     manager.OnRegistered(cam);
+
+                var e = CameraRegistered;
+                if (e != null)
+                {
+                    var ev = CameraRegistrationEvent.GetTemp(cam);
+                    e(null, ev);
+                }
             }
         }
 
@@ -68,6 +82,13 @@ namespace com.spacepuppy.Cameras
                 var manager = Services.Get<ICameraManager>();
                 if (manager != null)
                     manager.OnUnregistered(cam);
+
+                var e = CameraUnregistered;
+                if(e != null)
+                {
+                    var ev = CameraRegistrationEvent.GetTemp(cam);
+                    e(null, ev);
+                }
             }
         }
 
@@ -264,6 +285,7 @@ namespace com.spacepuppy.Cameras
 
         private ICamera _main;
         private bool _overrideAsNull;
+
 
         #endregion
 

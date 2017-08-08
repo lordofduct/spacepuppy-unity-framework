@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenario
 {
 
-    public class i_PlaySoundEffect : TriggerableMechanism
+    public class i_PlaySoundEffect : AutoTriggerableMechanism
     {
 
         #region Fields

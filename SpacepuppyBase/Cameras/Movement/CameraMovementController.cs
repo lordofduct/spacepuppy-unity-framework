@@ -6,7 +6,7 @@ using System.Linq;
 
 using com.spacepuppy.StateMachine;
 
-namespace com.spacepuppy.Cameras
+namespace com.spacepuppy.Cameras.Movement
 {
 
     /// <summary>

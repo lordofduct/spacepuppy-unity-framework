@@ -30,7 +30,8 @@ namespace com.spacepuppy.Scenario
                 }
 
                 _coolingDown = true;
-                this.Invoke(() =>
+                //use global incase this gets disable
+                GameLoopEntry.Hook.Invoke(() =>
                 {
                     _coolingDown = false;
                 }, this.CooldownInterval);

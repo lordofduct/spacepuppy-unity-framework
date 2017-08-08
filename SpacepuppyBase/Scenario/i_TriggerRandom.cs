@@ -14,8 +14,7 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         [Trigger.Config(Weighted=true)]
         private Trigger _targets;
-
-
+        
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("PassAlongTriggerArg")]
         private bool _passAlongTriggerArg;

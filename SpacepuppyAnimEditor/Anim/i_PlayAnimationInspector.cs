@@ -31,10 +31,10 @@ namespace com.spacepuppyeditor.Anim
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
             this.DrawPropertyField(PROP_ORDER);
 
+            this.DrawTargetAnimatorProperty();
+
             var propMode = this.serializedObject.FindProperty(PROP_MODE);
             SPEditorGUILayout.PropertyField(propMode);
-
-            this.DrawTargetAnimatorProperty();
 
             switch (propMode.GetEnumValue<i_PlayAnimation.PlayByMode>())
             {

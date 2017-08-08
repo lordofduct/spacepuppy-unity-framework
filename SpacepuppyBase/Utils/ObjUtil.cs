@@ -377,10 +377,17 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
-        public static bool GetAsFromSource<T>(object obj, out T result) where T : class
+        public static bool GetAsFromSource<T>(object obj, out T result, bool respectProxy = false) where T : class
         {
             result = null;
             if (obj == null) return false;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return false;
+            }
+
             if (obj is T)
             {
                 result = obj as T;
@@ -408,13 +415,19 @@ namespace com.spacepuppy.Utils
                 var tp = typeof(T);
                 if (typeof(SPEntity).IsAssignableFrom(tp))
                 {
-                    result = SPEntity.Pool.GetFromSource(tp, go) as T;
-                    return true;
+                    var uobj = SPEntity.Pool.GetFromSource(tp, go);
+                    if (uobj == null) return false;
+
+                    result = uobj as T;
+                    return result != null;
                 }
                 else if (ComponentUtil.IsAcceptableComponentType(tp))
                 {
-                    result = go.GetComponent(tp) as T;
-                    return true;
+                    var uobj = go.GetComponent(tp);
+                    if (uobj == null) return false;
+
+                    result = uobj as T;
+                    return result != null;
                 }
             }
 
@@ -447,10 +460,16 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
-        public static bool GetAsFromSource(System.Type tp, object obj, out object result)
+        public static bool GetAsFromSource(System.Type tp, object obj, out object result, bool respectProxy = false)
         {
             result = null;
             if (obj == null) return false;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return false;
+            }
 
             var otp = obj.GetType();
             if (TypeUtil.IsType(otp, tp))
@@ -479,12 +498,18 @@ namespace com.spacepuppy.Utils
             {
                 if (typeof(SPEntity).IsAssignableFrom(tp))
                 {
-                    result = SPEntity.Pool.GetFromSource(tp, go);
+                    var uobj = SPEntity.Pool.GetFromSource(tp, go);
+                    if (uobj == null) return false;
+
+                    result = uobj;
                     return true;
                 }
                 else if (ComponentUtil.IsAcceptableComponentType(tp))
                 {
-                    result = go.GetComponent(tp);
+                    var uobj = go.GetComponent(tp);
+                    if (uobj == null) return false;
+
+                    result = uobj;
                     return true;
                 }
             }
@@ -556,8 +581,9 @@ namespace com.spacepuppy.Utils
 
             return null;
         }
-
         
+
+
         public static T[] GetAllFromSource<T>(object obj) where T : class
         {
             if (obj == null) return ArrayUtil.Empty<T>();
@@ -646,11 +672,12 @@ namespace com.spacepuppy.Utils
 
             if (respectProxy && obj is IProxy)
             {
-                obj = (obj as IProxy).GetTarget();
-                if (obj == null) return false;
+                return TypeUtil.IsType((obj as IProxy).GetTargetType(), tp);
             }
-
-            return TypeUtil.IsType(obj.GetType(), tp);
+            else
+            {
+                return TypeUtil.IsType(obj.GetType(), tp);
+            }
         }
 
         #endregion

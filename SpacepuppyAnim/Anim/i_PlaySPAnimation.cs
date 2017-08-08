@@ -121,7 +121,7 @@ namespace com.spacepuppy.Anim
             if (!this.CanTrigger) return false;
 
             var anim = _targetAnimator.GetTarget<ISPAnimationSource>(arg);
-            if (anim == null) return false;
+            if (anim == null || !anim.CanPlayAnim) return false;
 
             var id = _clipIDs.PickRandom();
             _currentAnimState = anim.GetAnim(id);

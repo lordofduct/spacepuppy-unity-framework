@@ -15,7 +15,7 @@ namespace com.spacepuppyeditor.Scenario
     [CustomEditor(typeof(i_TriggerOnIfThen), true)]
     public class i_TriggerOnIfThenInspector : SPEditor
     {
-        public const string PROP_ORDER = "_order";
+        public const string PROP_ORDER = EditorHelper.PROP_ORDER;
         public const string PROP_CONDITIONS = "_conditions";
         public const string PROP_ELSECONDITION = "_elseCondition";
         private const string PROP_CONDITIONBLOCK_CONDITION = "_condition";

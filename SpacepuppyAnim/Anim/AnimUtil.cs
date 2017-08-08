@@ -18,6 +18,24 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        public static void Stop(this Animation animation, int layer)
+        {
+            foreach (AnimationState a in animation)
+            {
+                if (a.layer == layer)
+                {
+                    var nm = a.name;
+                    if (animation.IsPlaying(nm))
+                    {
+                        //if it was a queued animation, we need to redact... otherwise the Animation can't stop it... cause it's stupid
+                        int i = nm.IndexOf(" - Queued Clone");
+                        if (i >= 0) nm = nm.Substring(0, i);
+                        animation.Stop(nm);
+                    }
+                }
+            }
+        }
+
 
         public static void Schedule(this ISPAnim anim, System.Action<ISPAnim> callback, SPTimePeriod period)
         {

@@ -232,7 +232,7 @@ namespace com.spacepuppy.Scenario
         {
             get
             {
-                return this.Count;
+                return _targets.Count;
             }
         }
 

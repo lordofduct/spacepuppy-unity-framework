@@ -11,6 +11,8 @@ namespace com.spacepuppy
     public struct ShortUid
     {
 
+        public static ShortUid Zero { get { return new ShortUid(); } }
+
         #region Fields
 
         //has to be stored with uint's

@@ -26,19 +26,35 @@ namespace com.spacepuppyeditor.Base
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if(property.hasChildren)
+            bool cache = property.isExpanded;
+            property.isExpanded = true;
+            try
             {
-                return SPEditorGUI.GetDefaultPropertyHeight(property, label, true) + BOTTOM_PAD + TOP_PAD - EditorGUIUtility.singleLineHeight;
+                if (property.hasChildren)
+                {
+                    return SPEditorGUI.GetDefaultPropertyHeight(property, label, true) + BOTTOM_PAD + TOP_PAD - EditorGUIUtility.singleLineHeight;
+                }
+                else
+                {
+                    return SPEditorGUI.GetDefaultPropertyHeight(property, label);
+                }
             }
-            else
+            catch(System.Exception ex)
             {
-                return SPEditorGUI.GetDefaultPropertyHeight(property, label);
+                throw ex;
+            }
+            finally
+            {
+                property.isExpanded = cache;
             }
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if(!property.hasChildren)
+            bool cache = property.isExpanded;
+            property.isExpanded = true;
+
+            if (!property.hasChildren)
             {
                 SPEditorGUI.DefaultPropertyField(position, property, label);
                 return;
@@ -54,6 +70,8 @@ namespace com.spacepuppyeditor.Base
             EditorGUI.indentLevel++;
             SPEditorGUI.FlatChildPropertyField(drawArea, property);
             EditorGUI.indentLevel--;
+            
+            property.isExpanded = cache;
         }
 
     }

@@ -64,6 +64,7 @@
     <Compile Include="Anim\AnimPrimitives.cs" />
     <Compile Include="Anim\Blend\LinearAnimationBlend.cs" />
     <Compile Include="Anim\Blend\LinearAnimationSelector.cs" />
+    <Compile Include="Anim\i_StopAnimation.cs" />
     <Compile Include="Anim\Legacy\SPLegacyAnimation.cs" />
     <Compile Include="Anim\MaskCollection.cs" />
     <Compile Include="Anim\PropertyAttributes.cs" />

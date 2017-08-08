@@ -77,6 +77,11 @@ namespace com.spacepuppy.Scenario
             }
         }
 
+        public bool SearchesScene
+        {
+            get { return _find >= FindCommand.FindInScene; }
+        }
+
         public UnityEngine.Object Target
         {
             get { return _target; }

@@ -165,6 +165,8 @@ namespace com.spacepuppyeditor.Scenario
                     case TriggerableTargetObject.FindCommand.FindInScene:
                     case TriggerableTargetObject.FindCommand.FindEntityInScene:
                     default:
+                        configProp.boolValue = true;
+                        targetProp.objectReferenceValue = null;
                         EditorGUI.LabelField(r1, e0.ToString());
                         break;
                 }
@@ -175,6 +177,7 @@ namespace com.spacepuppyeditor.Scenario
             {
                 _objectDrawer.RestrictionType = this.TargetType ?? typeof(Component);
                 _objectDrawer.SearchChildren = this.SearchChildren;
+                _objectDrawer.AllowProxy = true;
                 _objectDrawer.OnGUI(r1, targetProp, GUIContent.none);
             }
 

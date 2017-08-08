@@ -35,12 +35,18 @@ namespace com.spacepuppyeditor.Internal
 
         public new void DoLayoutList()
         {
-            var beforeRect = GUILayoutUtility.GetLastRect();
-            base.DoLayoutList();
-            var afterRect = GUILayoutUtility.GetLastRect();
+            //var beforeRect = GUILayoutUtility.GetLastRect();
+            //base.DoLayoutList();
+            //var afterRect = GUILayoutUtility.GetLastRect();
 
-            var area = new Rect(afterRect.xMin, beforeRect.yMax, afterRect.width, this.headerHeight);
-            this.DoHeaderContextMenu(area);
+            //var area = new Rect(afterRect.xMin, beforeRect.yMax, afterRect.width, this.headerHeight);
+            //this.DoHeaderContextMenu(area);
+
+            var area = EditorGUILayout.GetControlRect(false, this.GetHeight());
+            this.DoList(area);
+
+            var headerArea = new Rect(area.xMin, area.yMin, area.width, this.headerHeight);
+            this.DoHeaderContextMenu(headerArea);
         }
 
         public new void DoList(Rect rect)

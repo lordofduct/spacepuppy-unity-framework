@@ -273,7 +273,7 @@ namespace com.spacepuppy.Movement
                     _routine.Stop();
                 }
                 if (_paused) this.Pause(false);
-                this.OnDeactivate(null, false);
+                this.OnDeactivate(null, ActivationReason.Standard);
                 _activeStatus = false;
             }
             _mode = UpdateMode.Inactive;
@@ -380,7 +380,7 @@ namespace com.spacepuppy.Movement
         private System.Collections.IEnumerator SelfUpdateRoutine()
         {
             var fixedYieldInstruct = new WaitForFixedUpdate();
-            this.OnActivate(null, false);
+            this.OnActivate(null, ActivationReason.Standard);
 
         Loop:
             switch (_mode)
@@ -441,12 +441,12 @@ namespace com.spacepuppy.Movement
 
         }
 
-        protected virtual void OnActivate(IMovementStyle lastStyle, bool stateIsStacking)
+        protected virtual void OnActivate(IMovementStyle lastStyle, ActivationReason reason)
         {
 
         }
 
-        protected virtual void OnDeactivate(IMovementStyle nextStyle, bool stateIsStacking)
+        protected virtual void OnDeactivate(IMovementStyle nextStyle, ActivationReason reason)
         {
 
         }
@@ -460,17 +460,17 @@ namespace com.spacepuppy.Movement
         
         #region IMovementStyle Interface
 
-        void IMovementStyle.OnActivate(IMovementStyle lastStyle, bool stateIsStacking)
+        void IMovementStyle.OnActivate(IMovementStyle lastStyle, ActivationReason reason)
         {
             if (_mode == UpdateMode.Inactive) this.DetermineUpdateMode();
             _activeStatus = true;
-            this.OnActivate(lastStyle, stateIsStacking);
+            this.OnActivate(lastStyle, reason);
         }
 
-        void IMovementStyle.OnDeactivate(IMovementStyle nextStyle, bool stateIsStacking)
+        void IMovementStyle.OnDeactivate(IMovementStyle nextStyle, ActivationReason reason)
         {
             if (_paused) this.Pause(false);
-            this.OnDeactivate(nextStyle, stateIsStacking);
+            this.OnDeactivate(nextStyle, reason);
             _activeStatus = false;
         }
 
@@ -921,7 +921,7 @@ namespace com.spacepuppy.Movement
                     _routine.Stop();
                 }
                 if (_paused) this.Pause(false);
-                this.OnDeactivate(null, false);
+                this.OnDeactivate(null, ActivationReason.Standard);
                 _activeStatus = false;
             }
             _mode = UpdateMode.Inactive;
@@ -1034,7 +1034,7 @@ namespace com.spacepuppy.Movement
         private System.Collections.IEnumerator SelfUpdateRoutine()
         {
             var fixedYieldInstruct = new WaitForFixedUpdate();
-            this.OnActivate(null, false);
+            this.OnActivate(null, ActivationReason.Standard);
 
             Loop:
             switch (_mode)
@@ -1095,12 +1095,12 @@ namespace com.spacepuppy.Movement
 
         }
 
-        protected virtual void OnActivate(IMovementStyle lastStyle, bool stateIsStacking)
+        protected virtual void OnActivate(IMovementStyle lastStyle, ActivationReason reason)
         {
 
         }
 
-        protected virtual void OnDeactivate(IMovementStyle nextStyle, bool stateIsStacking)
+        protected virtual void OnDeactivate(IMovementStyle nextStyle, ActivationReason reason)
         {
 
         }
@@ -1150,17 +1150,17 @@ namespace com.spacepuppy.Movement
 
         #region IMovementStyle Interface
 
-        void IMovementStyle.OnActivate(IMovementStyle lastStyle, bool stateIsStacking)
+        void IMovementStyle.OnActivate(IMovementStyle lastStyle, ActivationReason reason)
         {
             if (_mode == UpdateMode.Inactive) this.DetermineUpdateMode();
             _activeStatus = true;
-            this.OnActivate(lastStyle, stateIsStacking);
+            this.OnActivate(lastStyle, reason);
         }
 
-        void IMovementStyle.OnDeactivate(IMovementStyle nextStyle, bool stateIsStacking)
+        void IMovementStyle.OnDeactivate(IMovementStyle nextStyle, ActivationReason reason)
         {
             if (_paused) this.Pause(false);
-            this.OnDeactivate(nextStyle, stateIsStacking);
+            this.OnDeactivate(nextStyle, reason);
             _activeStatus = false;
             if (_controller != null) _controller.MovementControllerHit -= this.OnControllerHitHandler;
         }

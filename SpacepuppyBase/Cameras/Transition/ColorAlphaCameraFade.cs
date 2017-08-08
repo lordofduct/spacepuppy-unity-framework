@@ -4,7 +4,7 @@ using System.Linq;
 
 using com.spacepuppy.Utils;
 
-namespace com.spacepuppy.Cameras
+namespace com.spacepuppy.Cameras.Transition
 {
     public class ColorAlphaCameraFade : CameraFade
     {

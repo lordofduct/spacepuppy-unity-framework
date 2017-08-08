@@ -49,6 +49,7 @@
     <Compile Include="ArmatureRig.cs" />
     <Compile Include="MovementController.cs" />
     <Compile Include="Movement\DumbMovementStyle.cs" />
+    <Compile Include="Movement\Enums.cs" />
     <Compile Include="Movement\IMotorConstraint.cs" />
     <Compile Include="Movement\IMovementStyle.cs" />
     <Compile Include="Movement\IMover.cs" />
