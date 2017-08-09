@@ -65,8 +65,10 @@
     <Compile Include="Audio\GlobalAmbientAudioSourceProxy.cs" />
     <Compile Include="Audio\IAudioGroup.cs" />
     <Compile Include="AutoNotificationManager.cs" />
-    <Compile Include="Cameras\CameraController.cs" />
     <Compile Include="Cameras\Events.cs" />
+    <Compile Include="Cameras\LegacyRender\GlobalPostProcessorHook.cs" />
+    <Compile Include="Cameras\LegacyRender\IPostProcessingEffect.cs" />
+    <Compile Include="Cameras\LegacyRender\PostProcessingManager.cs" />
     <Compile Include="Cameras\Transition\CameraFade.cs" />
     <Compile Include="Cameras\CameraManager.cs" />
     <Compile Include="Cameras\Movement\CameraMovementController.cs" />

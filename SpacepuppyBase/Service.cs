@@ -120,8 +120,8 @@ namespace com.spacepuppy
         }
 
 
-        public static TServiceType Create<TServiceType, TConcrete>(bool persistent = false, string name = null) where TServiceType : class, IService
-                                                                                                                where TConcrete : TServiceType
+        public static TConcrete Create<TServiceType, TConcrete>(bool persistent = false, string name = null) where TServiceType : class, IService
+                                                                                                                where TConcrete : class, TServiceType
         {
             var inst = Services.Get<TServiceType>();
             if (inst != null) throw new System.InvalidOperationException(string.Format("A service of type '{0}' already exists.", typeof(TServiceType).Name));
@@ -129,11 +129,11 @@ namespace com.spacepuppy
             var tp = typeof(TConcrete);
             if (typeof(Component).IsAssignableFrom(tp))
             {
-                return ServiceComponent<TServiceType>.Create(tp, persistent, name);
+                return ServiceComponent<TServiceType>.Create(tp, persistent, name) as TConcrete;
             }
             else if (typeof(ScriptableObject).IsAssignableFrom(tp))
             {
-                return ServiceScriptableObject<TServiceType>.Create(tp, persistent, name);
+                return ServiceScriptableObject<TServiceType>.Create(tp, persistent, name) as TConcrete;
             }
             else
             {

@@ -25,4 +25,9 @@ namespace com.spacepuppy.Cameras
         bool Contains(Camera cam);
 
     }
+
+    public interface IMultiCamera : ICamera, IEnumerable<Camera>
+    {
+
+    }
 }

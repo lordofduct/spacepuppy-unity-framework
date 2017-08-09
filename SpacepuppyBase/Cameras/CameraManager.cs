@@ -59,10 +59,6 @@ namespace com.spacepuppy.Cameras
             if (GameLoopEntry.ApplicationClosing) return;
             if(_cameras.Add(cam))
             {
-                var manager = Services.Get<ICameraManager>();
-                if (manager != null)
-                    manager.OnRegistered(cam);
-
                 var e = CameraRegistered;
                 if (e != null)
                 {
@@ -79,10 +75,6 @@ namespace com.spacepuppy.Cameras
             if (GameLoopEntry.ApplicationClosing) return;
             if(_cameras.Remove(cam))
             {
-                var manager = Services.Get<ICameraManager>();
-                if (manager != null)
-                    manager.OnUnregistered(cam);
-
                 var e = CameraUnregistered;
                 if(e != null)
                 {
@@ -272,10 +264,7 @@ namespace com.spacepuppy.Cameras
     {
 
         ICamera Main { get; set; }
-
-        void OnRegistered(ICamera cam);
-        void OnUnregistered(ICamera cam);
-
+        
     }
 
     public class CameraManager : ServiceComponent<ICameraManager>, ICameraManager
@@ -285,19 +274,22 @@ namespace com.spacepuppy.Cameras
 
         private ICamera _main;
         private bool _overrideAsNull;
-
-
+        
         #endregion
 
         #region CONSTRUCTOR
 
         protected override void OnValidAwake()
         {
+            base.OnValidAwake();
+
             if (this.MainNeedsSyncing())
             {
                 this.ForceSyncTaggedMainCamera();
             }
 
+            CameraPool.CameraRegistered += OnRegistered;
+            CameraPool.CameraUnregistered += OnUnregistered;
             SceneManager.sceneLoaded += this.OnSceneWasLoaded;
         }
 
@@ -305,6 +297,8 @@ namespace com.spacepuppy.Cameras
         {
             base.OnDestroy();
 
+            CameraPool.CameraRegistered -= OnRegistered;
+            CameraPool.CameraUnregistered -= OnUnregistered;
             SceneManager.sceneLoaded -= this.OnSceneWasLoaded;
         }
 
@@ -346,6 +340,31 @@ namespace com.spacepuppy.Cameras
 
         #endregion
 
+        #region Event Handlers
+
+        private void OnRegistered(object sender, CameraRegistrationEvent e)
+        {
+            if (this.started && this.MainNeedsSyncing())
+            {
+                this.ForceSyncTaggedMainCamera();
+            }
+        }
+
+        private void OnUnregistered(object sender, CameraRegistrationEvent e)
+        {
+            var cam = e.Camera;
+            if (_main == cam)
+            {
+                _main = null;
+                if (this.started && !GameLoopEntry.ApplicationClosing)
+                {
+                    this.ForceSyncTaggedMainCamera();
+                }
+            }
+        }
+
+        #endregion
+
         #region ICameraManager Interface
 
         public ICamera Main
@@ -359,26 +378,6 @@ namespace com.spacepuppy.Cameras
             {
                 _main = value;
                 _overrideAsNull = (value == null);
-            }
-        }
-
-        void ICameraManager.OnRegistered(ICamera cam)
-        {
-            if (this.started && this.MainNeedsSyncing())
-            {
-                this.ForceSyncTaggedMainCamera();
-            }
-        }
-
-        void ICameraManager.OnUnregistered(ICamera cam)
-        {
-            if (_main == cam)
-            {
-                _main = null;
-                if (this.started && !GameLoopEntry.ApplicationClosing)
-                {
-                    this.ForceSyncTaggedMainCamera();
-                }
             }
         }
 

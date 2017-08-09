@@ -15,12 +15,12 @@ namespace com.spacepuppy.Cameras
     /// It's easiest if you move just the GameObject this is attached to, rather than the child cameras individually. Zeroing out the local 
     /// position of the various cameras inside of this.
     /// </summary>
-    public class MultiCameraController : CameraController
+    public class MultiCameraController : SPComponent, IMultiCamera
     {
 
         #region Fields
 
-        private ITypedStateMachine<Camera> _stateMachine;
+        private TypedStateMachine<Camera> _stateMachine;
 
         [SerializeField]
         private CameraCategory _type;
@@ -39,6 +39,8 @@ namespace com.spacepuppy.Cameras
         {
             base.Awake();
 
+            CameraPool.Register(this);
+
             _stateMachine = TypedStateMachine<Camera>.CreateFromParentComponentSource(this.gameObject, false, false);
             _stateMachine.StateChanged += this.OnStateChanged;
         }
@@ -51,6 +53,13 @@ namespace com.spacepuppy.Cameras
             {
                 _stateMachine.ChangeState(this.DefaultCamera);
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            CameraPool.Unregister(this);
         }
 
         #endregion
@@ -114,23 +123,44 @@ namespace com.spacepuppy.Cameras
 
         #region ICamera Interface
 
-        public override CameraCategory Category
+        public CameraCategory Category
         {
             get { return _type; }
             set { _type = value; }
         }
-
-        public override Camera camera
+        
+        public new Camera camera
+        {
+            get { return _stateMachine.Current; }
+        }
+        Camera ICamera.camera
         {
             get { return _stateMachine.Current; }
         }
 
-        public override bool Contains(Camera cam)
+        public bool IsAlive { get { return _stateMachine.Current != null; } }
+
+        public bool Contains(Camera cam)
         {
             return _stateMachine.Contains(cam);
         }
 
         #endregion
+
+        #region IEnumerable Interface
+        
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _stateMachine.GetEnumerator();
+        }
+
+        public IEnumerator<Camera> GetEnumerator()
+        {
+            return _stateMachine.GetEnumerator();
+        }
+
+        #endregion
+        
 
     }
 }
