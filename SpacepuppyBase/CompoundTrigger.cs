@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Collections;
+using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy
@@ -28,9 +29,9 @@ namespace com.spacepuppy
 
         #region CONSTRUCTOR
 
-        protected override void Awake()
+        protected override void Start()
         {
-            base.Awake();
+            base.Start();
 
             this.SyncTriggers();
         }
@@ -43,7 +44,7 @@ namespace com.spacepuppy
         }
 
         #endregion
-
+        
         #region Methods
 
         public void SyncTriggers()

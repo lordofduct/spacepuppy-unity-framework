@@ -61,23 +61,57 @@ namespace com.spacepuppy.Anim
 
         #region Methods
 
+        /// <summary>
+        /// Associate the collection as a master collection for an SPAnimationController
+        /// </summary>
+        /// <param name="controller"></param>
+        internal void InitMasterCollection(SPAnimationController controller)
+        {
+            if (controller == null) throw new System.ArgumentNullException("container");
+            if (this.Initialized) throw new System.InvalidOperationException("SPAnimClipCollection already has been initilized.");
+            _controller = controller;
+            _uniqueHash = null;
+        }
+
+        /// <summary>
+        /// Call only once to add all animations from a master collection with the SPAnimationController.
+        /// </summary>
+        internal void SyncMasterAnims()
+        {
+            if (!this.Initialized) throw new System.InvalidOperationException("SPAnimationClipCollection must be initialized as a master collection first.");
+            if(_controller.States != this) throw new System.InvalidOperationException("Attempted to sync non-master SPAnimClipCollection as if it were a master collection.");
+
+            //var e = _dict.GetEnumerator();
+            //while (e.MoveNext())
+            //{
+            //    this.AddToMasterList(e.Current.Value.Name, e.Current.Value, true);
+            //}
+
+            //we loop the serialized states in-case anims were added in between InitMasterCollection and SyncMasterAnims
+            foreach (var st in _serializedStates)
+            {
+                this.AddToMasterList(st.Name, st, true);
+            }
+        }
+
+        /// <summary>
+        /// Initialize a SPAnimClipCollection with a SPAnimationController.
+        /// 
+        /// (internal: this is only used for non-master collections)
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <param name="uniqueHash"></param>
         public void Init(SPAnimationController controller, string uniqueHash = null)
         {
             if (controller == null) throw new System.ArgumentNullException("container");
             if (this.Initialized) throw new System.InvalidOperationException("SPAnimClipCollection already has been initilized.");
             _controller = controller;
             _uniqueHash = uniqueHash;
-
-            bool isMaster = (_controller.States == this);
-            if (isMaster) _uniqueHash = null; //master lists aren't allowed a unique hash, the point of the has is for non-master lists
-
+            
             var e = _dict.GetEnumerator();
             while (e.MoveNext())
             {
-                if (isMaster)
-                    this.AddToMasterList(e.Current.Value.Name, e.Current.Value, true);
-                else
-                    e.Current.Value.Init(_controller, _uniqueHash);
+                e.Current.Value.Init(_controller, _uniqueHash);
             }
         }
 
@@ -116,6 +150,10 @@ namespace com.spacepuppy.Anim
             {
                 _controller.animation.AddClip(ac, id);
                 st = _controller.animation[id];
+                if (st == null)
+                {
+                    Debug.LogWarning("An added animation failed to be generated.");
+                }
             }
             clip.SetAnimState(_controller, id, st);
 

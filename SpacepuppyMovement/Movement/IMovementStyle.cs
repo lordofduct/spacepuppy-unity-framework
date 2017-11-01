@@ -5,7 +5,7 @@ namespace com.spacepuppy.Movement
 {
     public interface IMovementStyle : IComponent
     {
-
+        
         /// <summary>
         /// Called when the style becomes the currently active state.
         /// </summary>

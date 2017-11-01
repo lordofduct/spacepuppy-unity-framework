@@ -83,20 +83,10 @@ namespace com.spacepuppy.Scenario
         public bool Intersects(GameObject go)
         {
             if (go == null) return false;
-            if (!go.IntersectsLayerMask(_layerMask)) return false;
-            if (_tags != null && _tags.Length > 0 && !go.HasTag(_tags)) return false;
 
-            if (this.TestRoot)
-            {
-                var root = go.FindRoot();
-                if (root != go)
-                {
-                    if (!root.IntersectsLayerMask(_layerMask)) return false;
-                    if (_tags != null && _tags.Length > 0 && !root.HasTag(_tags)) return false;
-                }
-            }
+            if(this.TestRoot) go = go.FindRoot();
 
-            return true;
+            return go.IntersectsLayerMask(_layerMask) && (_tags == null || _tags.Length == 0 || go.HasTag(_tags));
         }
 
         public bool Intersects(Component comp)

@@ -10,7 +10,7 @@ namespace com.spacepuppy.Hooks
     /// The project must flag this as later execution in Edit->Project Settings->Execution Order
     /// </remarks>
     [AddComponentMenu("SpacePuppy/Hooks/TardyExecutionUpdateEventHooks")]
-    public class TardyExecutionUpdateEventHooks : UpdateEventHooks
+    public sealed class TardyExecutionUpdateEventHooks : UpdateEventHooks
     {
 
 

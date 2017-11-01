@@ -26,6 +26,7 @@ namespace com.spacepuppy.Tween.Accessors
                     {
                         priority = attrib.priority,
                         TargetType = attrib.HandledTargetType,
+                        MemberType = attrib.MemberType,
                         AccessorType = tp
                     };
                     _targetToCustomAccessor.Add(attrib.HandledPropName, data);
@@ -76,6 +77,44 @@ namespace com.spacepuppy.Tween.Accessors
             return false;
         }
 
+        public static bool TryGetMemberAccessorInfo(object target, string name, out CustomAccessorData data)
+        {
+            if (target == null)
+            {
+                data = default(CustomAccessorData);
+                return false;
+            }
+            if (_targetToCustomAccessor == null) BuildAccessorDictionary();
+
+            IList<CustomAccessorData> lst;
+            if (_targetToCustomAccessor.Lists.TryGetList(name, out lst))
+            {
+                var tp = target.GetType();
+                CustomAccessorData d2;
+                int cnt = lst.Count;
+                for (int i = 0; i < cnt; i++)
+                {
+                    d2 = lst[i];
+                    if (d2.TargetType.IsAssignableFrom(tp))
+                    {
+                        try
+                        {
+                            data = d2;
+                            return true;
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("Failed to create Custom MemberAccessor of type '" + tp.FullName + "'.");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            data = default(CustomAccessorData);
+            return false;
+        }
+
         public static string[] GetCustomAccessorIds()
         {
             if (_targetToCustomAccessor == null) BuildAccessorDictionary();
@@ -83,7 +122,7 @@ namespace com.spacepuppy.Tween.Accessors
             return _targetToCustomAccessor.Keys.ToArray();
         }
 
-        public static string[] GetCustomAccessorIds(System.Type tp)
+        public static string[] GetCustomAccessorIds(System.Type tp, System.Predicate<CustomAccessorData> predicate = null)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
             if (_targetToCustomAccessor == null) BuildAccessorDictionary();
@@ -96,7 +135,8 @@ namespace com.spacepuppy.Tween.Accessors
                     var lst = e.Current.Value;
                     for(int i = 0; i < lst.Count; i++)
                     {
-                        if(lst[i].TargetType.IsAssignableFrom(tp))
+                        if(lst[i].TargetType.IsAssignableFrom(tp) && 
+                            (predicate == null || predicate(lst[i])))
                         {
                             set.Add(e.Current.Key);
                             break;
@@ -112,11 +152,12 @@ namespace com.spacepuppy.Tween.Accessors
 
         #region Special Types
 
-        private class CustomAccessorData
+        public struct CustomAccessorData
         {
             public int priority;
             public System.Type TargetType;
             public System.Type AccessorType;
+            public System.Type MemberType;
         }
         
         #endregion

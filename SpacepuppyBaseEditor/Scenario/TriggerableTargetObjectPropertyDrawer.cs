@@ -165,7 +165,7 @@ namespace com.spacepuppyeditor.Scenario
                     case TriggerableTargetObject.FindCommand.FindInScene:
                     case TriggerableTargetObject.FindCommand.FindEntityInScene:
                     default:
-                        configProp.boolValue = true;
+                        configProp.boolValue = false;
                         targetProp.objectReferenceValue = null;
                         EditorGUI.LabelField(r1, e0.ToString());
                         break;
@@ -204,7 +204,17 @@ namespace com.spacepuppyeditor.Scenario
                 EditorGUI.BeginChangeCheck();
                 e0 = (TriggerableTargetObject.FindCommand)EditorGUI.EnumPopup(r0, e0);
                 if (EditorGUI.EndChangeCheck())
+                {
                     findProp.SetEnumValue(e0);
+                }
+                switch (e0)
+                {
+                    case TriggerableTargetObject.FindCommand.FindInScene:
+                    case TriggerableTargetObject.FindCommand.FindEntityInScene:
+                        configProp.boolValue = false;
+                        targetProp.objectReferenceValue = null;
+                        break;
+                }
 
                 var e1 = resolveProp.GetEnumValue<TriggerableTargetObject.ResolveByCommand>();
                 EditorGUI.BeginChangeCheck();

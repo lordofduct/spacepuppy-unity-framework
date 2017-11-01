@@ -59,7 +59,14 @@ namespace com.spacepuppy.Tween.Curves
         protected override void ReflectiveInit(object start, object end, object option)
         {
             _start = (start is Trans) ? (Trans)start : Trans.Identity;
-            _end = (end is Trans) ? (Trans)end : Trans.Identity;
+            if (end is Trans)
+                _end = (Trans)end;
+            else if (end is UnityEngine.Transform)
+                _end = Trans.GetGlobal((UnityEngine.Transform)end);
+            else if (GameObjectUtil.IsGameObjectSource(end))
+                _end = Trans.GetGlobal(GameObjectUtil.GetGameObjectFromSource(end).transform);
+            else
+                _end = Trans.Identity;
             _useSlerp = ConvertUtil.ToBool(option);
         }
 

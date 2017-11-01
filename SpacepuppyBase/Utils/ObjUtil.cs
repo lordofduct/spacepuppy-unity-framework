@@ -269,7 +269,7 @@ namespace com.spacepuppy.Utils
         {
             var tp = typeof(T);
             var map = GetInterfaceComponentMap(tp);
-            using (var lst = TempCollection.GetList<T>())
+            using (var lst = TempCollection.GetSet<T>())
             {
                 foreach(var ctp in map)
                 {

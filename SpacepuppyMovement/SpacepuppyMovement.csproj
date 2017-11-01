@@ -60,9 +60,10 @@
     <Compile Include="Movement\WaitForBeforeUpdateMovement.cs" />
     <Compile Include="Movement\XYPlaneConstraint.cs" />
     <Compile Include="Pathfinding\PathingMovementStyle.cs" />
-    <Compile Include="Pathfinding\UnityPathAgentMovementStyle.cs" />
+    <Compile Include="Pathfinding\Unity\UnityPathAgentMovementStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenario\i_ApplyForce.cs" />
+    <Compile Include="Scenario\i_ChangeMovementStyle.cs" />
     <Compile Include="Tween\Accessors\MovementControllerMoveAccessor.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -80,7 +80,7 @@ namespace com.spacepuppy.Scenario
         #region Methods
 
         /// <summary>
-        /// If 'Target' is modified, this must be called to resync the cahced renderers.
+        /// If 'Target' is modified, this must be called to resync the cached renderers.
         /// </summary>
         public void FindRenderersInTarget()
         {

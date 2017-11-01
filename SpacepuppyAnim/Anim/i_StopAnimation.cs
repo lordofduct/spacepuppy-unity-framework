@@ -65,14 +65,41 @@ namespace com.spacepuppy.Anim
 
         #region Methods
 
-        private UnityEngine.Object ResolveTargetAnimator(object arg)
+        private object ResolveTargetAnimator(object arg)
         {
+            var obj = _targetAnimator.GetTarget<UnityEngine.Object>(arg);
+
+            ISPAnimationSource src = null;
+            ISPAnimator spanim = null;
+            Animation anim = null;
+
+            if (ObjUtil.GetAsFromSource<ISPAnimationSource>(obj, out src))
+                return src;
+            if (ObjUtil.GetAsFromSource<ISPAnimator>(obj, out spanim))
+                return spanim;
+            if (ObjUtil.GetAsFromSource<Animation>(obj, out anim))
+                return anim;
+
+            if (_targetAnimator.ImplicityReducesEntireEntity)
+            {
+                var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
+                if (go == null) return null;
+
+                SPAnimationController spcont;
+                if (go.FindComponent<SPAnimationController>(out spcont))
+                    return spcont;
+
+                if (go.FindComponent<Animation>(out anim))
+                    return anim;
+            }
+
+            /*
             var obj = _targetAnimator.GetTarget<UnityEngine.Object>(arg);
             if (obj == null || obj is SPAnimationController || obj is Animation)
             {
                 return obj;
             }
-            else if (_targetAnimator.TargetsTriggerArg)
+            else if (_targetAnimator.ImplicityReducesEntireEntity)
             {
                 var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
                 if (go == null) return null;
@@ -85,6 +112,7 @@ namespace com.spacepuppy.Anim
                 if (go.FindComponent<Animation>(out anim))
                     return anim;
             }
+            */
 
             return null;
         }

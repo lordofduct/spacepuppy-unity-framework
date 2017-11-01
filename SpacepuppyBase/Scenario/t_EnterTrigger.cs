@@ -4,7 +4,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class t_EnterTrigger : TriggerComponent
+    public class t_EnterTrigger : TriggerComponent, ICompoundTriggerResponder
     {
 
         public ScenarioActivatorMask Mask = new ScenarioActivatorMask(-1);
@@ -14,7 +14,8 @@ namespace com.spacepuppy.Scenario
         [System.NonSerialized()]
         private bool _coolingDown;
 
-        void OnTriggerEnter(Collider other)
+
+        private void DoTestTriggerEnter(Collider other)
         {
             if (_coolingDown) return;
 
@@ -36,6 +37,23 @@ namespace com.spacepuppy.Scenario
                     _coolingDown = false;
                 }, this.CooldownInterval);
             }
+        }
+
+        void OnTriggerEnter(Collider other)
+        {
+            if (this.HasComponent<CompoundTrigger>()) return;
+
+            this.DoTestTriggerEnter(other);
+        }
+
+        void ICompoundTriggerResponder.OnCompoundTriggerEnter(Collider other)
+        {
+            this.DoTestTriggerEnter(other);
+        }
+
+        void ICompoundTriggerResponder.OnCompoundTriggerExit(Collider other)
+        {
+            //do nothing
         }
 
     }

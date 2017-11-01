@@ -50,7 +50,6 @@ namespace com.spacepuppy
 
         protected virtual void OnEnable()
         {
-            //this.SendMessage(SPConstants.MSG_ONSPCOMPONENTENABLED, this, SendMessageOptions.DontRequireReceiver);
             if (this.OnEnabled != null) this.OnEnabled(this, System.EventArgs.Empty);
 
             if (_started)
@@ -62,14 +61,9 @@ namespace com.spacepuppy
 
         protected virtual void OnDisable()
         {
-            //this.SendMessage(SPConstants.MSG_ONSPCOMPONENTDISABLED, this, SendMessageOptions.DontRequireReceiver);
             if (this.OnDisabled != null) this.OnDisabled(this, System.EventArgs.Empty);
         }
-
-        protected virtual void OnDespawn()
-        {
-        }
-
+        
         protected virtual void OnDestroy()
         {
             //InvokeUtil.CancelInvoke(this);

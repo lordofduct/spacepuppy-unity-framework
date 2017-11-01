@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using com.spacepuppy.Collections;
-
 namespace com.spacepuppy.Graphs
 {
 

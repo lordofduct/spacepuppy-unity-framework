@@ -1,33 +1,25 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using System;
 
-namespace com.spacepuppy.Pathfinding
+namespace com.spacepuppy.Pathfinding.Unity
 {
-    public class UnityPath : IPath
+
+    public abstract class UnityPath : IPath
     {
 
         #region Fields
 
-        internal NavMeshPath _path = new NavMeshPath();
-
-        #endregion
-
-        #region CONSTRUCTOR
-
-        private UnityPath()
-        {
-
-        }
+        private NavMeshPath _path = new NavMeshPath();
 
         #endregion
 
         #region Properties
 
-        public Vector3 Target
+        public NavMeshPath NavMeshPath
         {
-            get;
-            set;
+            get { return _path; }
         }
 
         #endregion
@@ -41,7 +33,7 @@ namespace com.spacepuppy.Pathfinding
                 return _path.corners;
             }
         }
-        
+
         public PathCalculateStatus Status
         {
             get
@@ -62,25 +54,51 @@ namespace com.spacepuppy.Pathfinding
 
         #endregion
 
-        #region Static Interface
+        #region Methods
 
-        public static UnityPath CreatePath(Vector3 target)
-        {
-            return new UnityPath()
-            {
-                Target = target
-            };
-        }
-        
-        public static bool CalculatePath(Vector3 start, IPath path, int areaMask)
-        {
-            if (!(path is UnityPath)) throw new PathArgumentException();
+        public abstract bool CalculatePath(int areaMask);
 
-            var p = path as UnityPath;
-            return NavMesh.CalculatePath(start, p.Target, areaMask, (path as UnityPath)._path);
+        #endregion
+
+    }
+
+    public class UnityFromToPath : UnityPath
+    {
+
+        #region CONSTRUCTOR
+
+        public UnityFromToPath(Vector3 start, Vector3 target)
+        {
+            this.Start = start;
+            this.Target = target;
         }
 
         #endregion
 
+        #region Properties
+
+        public Vector3 Start
+        {
+            get;
+            set;
+        }
+
+        public Vector3 Target
+        {
+            get;
+            set;
+        }
+
+        #endregion
+
+        #region Methods
+
+        public override bool CalculatePath(int areaMask)
+        {
+            return NavMesh.CalculatePath(this.Start, this.Target, areaMask, this.NavMeshPath);
+        }
+
+        #endregion
+        
     }
 }

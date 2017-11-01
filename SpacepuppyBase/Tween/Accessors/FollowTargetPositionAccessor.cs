@@ -5,9 +5,9 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(GameObject), "*Follow")]
-    [CustomTweenMemberAccessor(typeof(Component), "*Follow")]
-    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*Follow")]
+    [CustomTweenMemberAccessor(typeof(GameObject), typeof(Vector3), "*Follow")]
+    [CustomTweenMemberAccessor(typeof(Component), typeof(Vector3), "*Follow")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), typeof(Vector3), "*Follow")]
     public class FollowTargetPositionAccessor : ITweenMemberAccessor
     {
 

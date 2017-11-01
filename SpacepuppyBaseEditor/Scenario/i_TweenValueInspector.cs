@@ -191,7 +191,7 @@ namespace com.spacepuppyeditor.Scenario
             if (targObj != null)
             {
                 var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, access).ToArray();
-                var accessors = CustomTweenMemberAccessorFactory.GetCustomAccessorIds(targObj.GetType());
+                var accessors = CustomTweenMemberAccessorFactory.GetCustomAccessorIds(targObj.GetType(), (d) => VariantReference.AcceptableType(d.MemberType));
                 System.Array.Sort(accessors);
 
                 using (var entries = TempCollection.GetList<GUIContent>(members.Length))
@@ -239,10 +239,21 @@ namespace com.spacepuppyeditor.Scenario
                     else
                     {
                         var nm = accessors[index - members.Length];
+                        /*
                         ITweenMemberAccessor acc;
-                        if(CustomTweenMemberAccessorFactory.TryGetMemberAccessor(targObj, nm, out acc))
+                        if (CustomTweenMemberAccessorFactory.TryGetMemberAccessor(targObj, nm, out acc))
                         {
                             propType = acc.GetMemberType();
+                            if (VariantReference.AcceptableType(propType))
+                            {
+                                return nm;
+                            }
+                        }
+                        */
+                        CustomTweenMemberAccessorFactory.CustomAccessorData info;
+                        if(CustomTweenMemberAccessorFactory.TryGetMemberAccessorInfo(targObj, nm, out info))
+                        {
+                            propType = info.MemberType;
                             if(VariantReference.AcceptableType(propType))
                             {
                                 return nm;

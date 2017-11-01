@@ -8,6 +8,13 @@ namespace com.spacepuppy.Pathfinding
     public static class PathUtil
     {
 
+        public static IPath CreatePath(this IPathSeeker seeker, Vector3 target)
+        {
+            if (seeker == null) throw new System.ArgumentNullException("seeker");
+
+            return seeker.PathFactory.Create(seeker, target);
+        }
+        
         public static bool IsDone(this IPath path)
         {
             return path.Status != PathCalculateStatus.Uncalculated;

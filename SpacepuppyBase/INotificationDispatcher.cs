@@ -221,12 +221,7 @@ namespace com.spacepuppy
                     {
                         if (dispatcher.Observers.PostNotificationToJustSelf(tp, _owner, n)) handled = true;
                     }
-                    //root.BroadcastMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, n, UnityEngine.SendMessageOptions.DontRequireReceiver);
                 }
-                //else
-                //{
-                //    _ownerGameObject.gameObject.SendMessage(SPConstants.MSG_AUTONOTIFICATIONMESSAGEHANDLER, n, UnityEngine.SendMessageOptions.DontRequireReceiver);
-                //}
             }
 
             //let anyone registered with the global hear about it

@@ -25,7 +25,7 @@ namespace com.spacepuppy.Scenario
         [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
         [TimeUnitsSelector()]
         private float _delay = 0f;
-
+        
         #endregion
 
         #region CONSTRUCTOR

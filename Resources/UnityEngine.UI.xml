@@ -334,6 +334,11 @@
         <para>The GameObject that was selected first.</para>
       </summary>
     </member>
+    <member name="P:UnityEngine.EventSystems.EventSystem.isFocused">
+      <summary>
+        <para>Flag to say weather the EventSystem thinks it should be paused or not based upon focused state.</para>
+      </summary>
+    </member>
     <member name="P:UnityEngine.EventSystems.EventSystem.pixelDragThreshold">
       <summary>
         <para>The soft area for dragging in pixels.</para>
@@ -1012,6 +1017,14 @@
         <para>Logical and of Camera mask and eventMask.</para>
       </summary>
     </member>
+    <member name="M:UnityEngine.EventSystems.PhysicsRaycaster.ComputeRayAndDistance(UnityEngine.EventSystems.PointerEventData,UnityEngine.Ray&amp;,System.Single&amp;)">
+      <summary>
+        <para>Returns a ray going from camera through the event position and the distance between the near and far clipping planes along that ray.</para>
+      </summary>
+      <param name="eventData">The pointer event for which we will cast a ray.</param>
+      <param name="ray">The ray.</param>
+      <param name="distanceToClipPlane">The distance between the near and far clipping planes along the ray.</param>
+    </member>
     <member name="M:UnityEngine.EventSystems.PhysicsRaycaster.Raycast(UnityEngine.EventSystems.PointerEventData,System.Collections.Generic.List`1&lt;UnityEngine.EventSystems.RaycastResult&gt;)">
       <summary>
         <para>See: BaseRaycaster.</para>
@@ -1468,11 +1481,11 @@
     </member>
     <member name="M:UnityEngine.EventSystems.StandaloneInputModule.ProcessTouchPress(UnityEngine.EventSystems.PointerEventData,System.Boolean,System.Boolean)">
       <summary>
-        <para>How should the touch press be processed.</para>
+        <para>This method is called by Unity whenever a touch event is processed. Override this method with a custom implementation to process touch events yourself.</para>
       </summary>
-      <param name="pointerEvent">The data to be passed to the final object.</param>
-      <param name="pressed">If the touch was pressed this frame.</param>
-      <param name="released">If the touch was released this frame.</param>
+      <param name="pointerEvent">Event data relating to the touch event, such as position and ID to be passed to the touch event destination object.</param>
+      <param name="pressed">This is true for the first frame of a touch event, and false thereafter. This can therefore be used to determine the instant a touch event occurred.</param>
+      <param name="released">This is true only for the last frame of a touch event.</param>
     </member>
     <member name="M:UnityEngine.EventSystems.StandaloneInputModule.SendMoveEventToSelectedObject">
       <summary>
@@ -3099,12 +3112,12 @@ If you have modified the list of options, you should call this method afterwards
     </member>
     <member name="P:UnityEngine.UI.HorizontalOrVerticalLayoutGroup.childControlHeight">
       <summary>
-        <para>Should the layout group control the heights of the children?</para>
+        <para>Returns true if the Layout Group controls the heights of its children. Returns false if children control their own heights.</para>
       </summary>
     </member>
     <member name="P:UnityEngine.UI.HorizontalOrVerticalLayoutGroup.childControlWidth">
       <summary>
-        <para>Should the layout group control the widths of the children?</para>
+        <para>Returns true if the Layout Group controls the widths of its children. Returns false if children control their own widths.</para>
       </summary>
     </member>
     <member name="P:UnityEngine.UI.HorizontalOrVerticalLayoutGroup.childForceExpandHeight">
@@ -3897,7 +3910,7 @@ Characters 0-9, . (dot), and - (dash / minus sign) are allowed. The dash is only
     </member>
     <member name="F:UnityEngine.UI.InputField.ContentType.Name">
       <summary>
-        <para>The InputField is used for typing in a name and enforces capitalization.</para>
+        <para>The InputField is used for typing in a name, and enforces capitalization of the first letter of each word. Note that the user can circumvent the first letter capitalization rules by deleting automatically-capitalized letters.</para>
       </summary>
     </member>
     <member name="F:UnityEngine.UI.InputField.ContentType.Password">
@@ -5036,7 +5049,7 @@ Characters 0-9, . (dot), and - (dash / minus sign) are allowed. The dash is only
     </member>
     <member name="P:UnityEngine.UI.ScrollRect.onValueChanged">
       <summary>
-        <para>Callback executed when the scroll position of the slider is changed.</para>
+        <para>Callback executed when the position of the child changes.</para>
       </summary>
     </member>
     <member name="P:UnityEngine.UI.ScrollRect.preferredHeight">
@@ -5226,6 +5239,13 @@ Characters 0-9, . (dot), and - (dash / minus sign) are allowed. The dash is only
         <para>Called by the layout system.</para>
       </summary>
     </member>
+    <member name="M:UnityEngine.UI.ScrollRect.SetNormalizedPosition(System.Single,System.Int32)">
+      <summary>
+        <para>Set the horizontal or vertical scroll position as a value between 0 and 1, with 0 being at the left or at the bottom.</para>
+      </summary>
+      <param name="value">The position to set, between 0 and 1.</param>
+      <param name="axis">The axis to set: 0 for horizontal, 1 for vertical.</param>
+    </member>
     <member name="M:UnityEngine.UI.ScrollRect.StopMovement">
       <summary>
         <para>Sets the velocity to zero on both axes so the content stops moving.</para>
@@ -5238,7 +5258,7 @@ Characters 0-9, . (dot), and - (dash / minus sign) are allowed. The dash is only
     </member>
     <member name="M:UnityEngine.UI.ScrollRect.UpdatePrevData">
       <summary>
-        <para>Helper function to update the previous data fields on a ScrollRect.</para>
+        <para>Helper function to update the previous data fields on a ScrollRect. Call this before you change data in the ScrollRect.</para>
       </summary>
     </member>
     <member name="T:UnityEngine.UI.Selectable">
@@ -5422,6 +5442,31 @@ Characters 0-9, . (dot), and - (dash / minus sign) are allowed. The dash is only
     <member name="M:UnityEngine.UI.Selectable.Select">
       <summary>
         <para>Selects this Selectable.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.UI.Selectable.SelectionState">
+      <summary>
+        <para>An enumeration of selected states of objects.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.UI.Selectable.SelectionState.Disabled">
+      <summary>
+        <para>The UI object cannot be selected.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.UI.Selectable.SelectionState.Highlighted">
+      <summary>
+        <para>The UI object is highlighted.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.UI.Selectable.SelectionState.Normal">
+      <summary>
+        <para>The UI object can be selected.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.UI.Selectable.SelectionState.Pressed">
+      <summary>
+        <para>The UI object is pressed.</para>
       </summary>
     </member>
     <member name="T:UnityEngine.UI.Selectable.Transition">
@@ -5984,7 +6029,7 @@ Characters 0-9, . (dot), and - (dash / minus sign) are allowed. The dash is only
     </member>
     <member name="M:UnityEngine.UI.VertexHelper.AddUIVertexStream(System.Collections.Generic.List`1&lt;UnityEngine.UIVertex&gt;,System.Collections.Generic.List`1&lt;System.Int32&gt;)">
       <summary>
-        <para>Add a stream of custom UIVertex and corrisponding indices.</para>
+        <para>Add a stream of custom UIVertex and corresponding indices.</para>
       </summary>
       <param name="verts">The custom stream of verts to add to the helpers internal data.</param>
       <param name="indices">The custom stream of indices to add to the helpers internal data.</param>

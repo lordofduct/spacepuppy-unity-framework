@@ -6,44 +6,6 @@ using System.Linq;
 namespace com.spacepuppy.Scenes
 {
     
-    public class BeforeSceneLoadedEventArgs : System.EventArgs
-    {
-        public BeforeSceneLoadedEventArgs(string sceneName, LoadSceneMode mode, IProgressingYieldInstruction async)
-        {
-            this.SceneName = sceneName;
-            this.Mode = mode;
-            this.AsyncHandle = async;
-        }
-        
-        /// <summary>
-        /// Name of the scene unless loaded by index, in which case it will start with # followed by the build index.
-        /// i.e. #1
-        /// </summary>
-        public string SceneName
-        {
-            get;
-            set;
-        }
-
-        public LoadSceneMode Mode
-        {
-            get;
-            set;
-        }
-
-        public IProgressingYieldInstruction AsyncHandle
-        {
-            get;
-            set;
-        }
-
-        public bool IsAsync
-        {
-            get { return AsyncHandle != null; }
-        }
-        
-    }
-
     public class SceneUnloadedEventArgs : System.EventArgs
     {
 

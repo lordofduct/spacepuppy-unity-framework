@@ -70,6 +70,10 @@ namespace com.spacepuppy.Dynamic
     /// $inf
     /// $-infinity
     /// $-inf
+    /// $time
+    /// $unscaledtime
+    /// $fixedtime
+    /// $deltatime
     /// 
     /// These are global values, they are not case sensitive
     /// 
@@ -706,6 +710,21 @@ namespace com.spacepuppy.Dynamic
                     case "-inf":
                         state = State.Scalar;
                         return Vector4.one * float.NegativeInfinity;
+                    case "time":
+                        state = State.Scalar;
+                        return new Vector4(UnityEngine.Time.time, 0f);
+                    case "unscaledtime":
+                        state = State.Scalar;
+                        return new Vector4(UnityEngine.Time.unscaledTime, 0f);
+                    case "fixedtime":
+                        state = State.Scalar;
+                        return new Vector4(UnityEngine.Time.fixedTime, 0f);
+                    case "deltatime":
+                        state = State.Scalar;
+                        return new Vector4(UnityEngine.Time.deltaTime, 0f);
+                    case "fixeddeltatime":
+                        state = State.Scalar;
+                        return new Vector4(UnityEngine.Time.fixedDeltaTime, 0f);
                     default:
                         state = State.None;
                         return Vector4.zero;

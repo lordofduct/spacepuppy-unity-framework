@@ -31,6 +31,11 @@ namespace com.spacepuppy
         
         #region Methods
 
+        public static bool Exists<T>() where T : class, IService
+        {
+            return Entry<T>.Instance != null;
+        }
+
         public static T Get<T>() where T : class, IService
         {
             return Entry<T>.Instance;

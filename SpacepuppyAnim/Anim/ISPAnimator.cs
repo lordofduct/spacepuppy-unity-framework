@@ -24,7 +24,7 @@ namespace com.spacepuppy.Anim
     /// 
     /// Example, you may have a PlayWalkAnimator, which calls Idle/Walk/Run in the correct order depending on the state of the player.
     /// </summary>
-    public abstract class SPAnimator : SPComponent, ISPAnimator, IEntityAwakeHandler
+    public abstract class SPAnimator : SPComponent, ISPAnimator //, IEntityAwakeHandler
     {
 
         #region Fields
@@ -40,9 +40,17 @@ namespace com.spacepuppy.Anim
 
         #region CONSTRUCTOR
 
-        protected override void Awake()
+        //void IEntityAwakeHandler.OnEntityAwake(SPEntity entity)
+        //{
+        //    if (_initialized) return;
+
+        //    _initialized = true;
+        //    this.Init(entity, _controller);
+        //}
+
+        protected override void Start()
         {
-            base.Awake();
+            base.Start();
 
             var entity = SPEntity.Pool.GetFromSource<SPEntity>(this);
             if (!_initialized && entity != null && entity.IsAwake)
@@ -50,14 +58,6 @@ namespace com.spacepuppy.Anim
                 _initialized = true;
                 this.Init(entity, _controller);
             }
-        }
-
-        void IEntityAwakeHandler.OnEntityAwake(SPEntity entity)
-        {
-            if (_initialized) return;
-
-            _initialized = true;
-            this.Init(entity, _controller);
         }
 
         protected abstract void Init(SPEntity entity, SPAnimationController controller);

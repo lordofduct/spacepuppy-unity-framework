@@ -85,7 +85,10 @@ namespace com.spacepuppy.Tween
             else
             {
                 if (_runningTweens.Contains(tween)) return;
+
                 _runningTweens.Add(tween);
+                tween.Scrub(0f); //scrub to initialize values, this way if update doesn't happen for an entire frame, we get that init value
+
                 if(tween.Id != null)
                 {
                     var token = new TokenPairing(tween.Id, tween.AutoKillToken);

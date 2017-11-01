@@ -169,7 +169,8 @@ namespace com.spacepuppy.Utils
             if (behaviour == null) throw new System.ArgumentNullException("behaviour");
             if (method == null) throw new System.ArgumentNullException("method");
 
-            return behaviour.StartCoroutine(InvokeRedirect(method, delay));
+            //return behaviour.StartCoroutine(InvokeRedirect(method, delay));
+            return behaviour.StartCoroutine(RadicalInvokeRedirect(method, delay));
         }
 
         public static RadicalCoroutine InvokeRadical(this MonoBehaviour behaviour, System.Action method, float delay, ITimeSupplier time = null, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.CancelOnDisable)
@@ -190,9 +191,10 @@ namespace com.spacepuppy.Utils
 
 
 
-        private static System.Collections.IEnumerator InvokeRedirect(System.Action method, float delay, float repeatRate = -1f, ITimeSupplier time = null)
+        private static System.Collections.IEnumerator InvokeRedirect(System.Action method, float delay, float repeatRate = -1f)
         {
             yield return new WaitForSeconds(delay);
+
             if (repeatRate < 0f)
             {
                 method();

@@ -77,11 +77,15 @@ namespace com.spacepuppy.Scenario
             }
         }
 
-        public bool SearchesScene
+        /// <summary>
+        /// Returns true if when you call GetTarget it will attempt to query the entire entity of the resolved object to find the target object. 
+        /// This occurs if Configured to reduce from the passed in 'arg' OR if we search the scene.
+        /// </summary>
+        public bool ImplicityReducesEntireEntity
         {
-            get { return _find >= FindCommand.FindInScene; }
+            get { return !_configured || _find >= FindCommand.FindInScene; }
         }
-
+        
         public UnityEngine.Object Target
         {
             get { return _target; }
@@ -116,7 +120,7 @@ namespace com.spacepuppy.Scenario
             if (obj == null) return null;
 
             var result = ObjUtil.GetAsFromSource<T>(obj);
-            if(result == null && !_configured && ComponentUtil.IsAcceptableComponentType(typeof(T)))
+            if(result == null && this.ImplicityReducesEntireEntity && ComponentUtil.IsAcceptableComponentType(typeof(T)))
             {
                 //if not configured, and the triggerArg didn't reduce properly, lets search the entity of the 'triggerArg'
                 var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
@@ -134,7 +138,7 @@ namespace com.spacepuppy.Scenario
             if (obj == null) return null;
 
             var result = ObjUtil.GetAsFromSource(tp, obj);
-            if(result == null && !_configured && _find != FindCommand.Direct && ComponentUtil.IsAcceptableComponentType(tp))
+            if(result == null && this.ImplicityReducesEntireEntity && ComponentUtil.IsAcceptableComponentType(tp))
             {
                 //if not configured, and the triggerArg didn't reduce properly, lets search the entity of the 'triggerArg'
                 var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));

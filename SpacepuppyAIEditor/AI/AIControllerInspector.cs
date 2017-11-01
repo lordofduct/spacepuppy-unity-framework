@@ -75,7 +75,9 @@ namespace com.spacepuppyeditor.AI
             {
                 if (targ.States != null && targ.States.Current != null)
                 {
-                    EditorGUILayout.HelpBox("Currently active state is '" + targ.States.Current.GetType().Name + "'.", MessageType.Info);
+                    var c = targ.States.Current;
+                    var msg = string.Format("Currently active state is {0} ({1}).", c.DisplayName, c.GetType().Name);
+                    EditorGUILayout.HelpBox(msg, MessageType.Info);
                 }
                 else
                 {

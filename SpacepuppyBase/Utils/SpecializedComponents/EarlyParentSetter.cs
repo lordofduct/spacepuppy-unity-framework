@@ -10,7 +10,7 @@ namespace com.spacepuppy.Utils.SpecializedComponents
     /// This requires that its execution order be set very low.
     /// </summary>
     [Infobox("A special script used at runtime for advanced 'Instantiate', if you've added this yourself, remove it.")]
-    public class EarlyParentSetter : MonoBehaviour
+    public sealed class EarlyParentSetter : MonoBehaviour
     {
 
         private static Transform _parent;

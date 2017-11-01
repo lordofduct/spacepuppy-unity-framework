@@ -48,6 +48,8 @@ namespace com.spacepuppy.Anim
         [System.NonSerialized()]
         private Animation _animation;
 
+        [System.NonSerialized]
+        private bool _initialized;
 
         [System.NonSerialized()]
         private Dictionary<string, AnimationCallbackData> _animEventTable;
@@ -63,23 +65,32 @@ namespace com.spacepuppy.Anim
             _animation = this.AddOrGetComponent<Animation>();
             _animation.playAutomatically = false;
 
-            _states.Init(this, null);
+            _states.InitMasterCollection(this);
+            //_states.Init(this, null);
         }
 
         protected override void Start()
         {
+            if (!_initialized) this.Init();
+            
             base.Start();
-
-            //_animation.playAutomatically = false;
-            _animation.animatePhysics = _animatePhysics;
-            _animation.cullingType = _animCullingType;
-            //this.enabled = false;
 
             if (this.States.ContainsKey(_animToPlayOnStart))
             {
                 var state = this.States[_animToPlayOnStart];
                 if (state != null) state.PlayDirectly(PlayMode.StopAll);
             }
+        }
+
+        private void Init()
+        {
+            _states.SyncMasterAnims();
+            _initialized = true;
+
+            //_animation.playAutomatically = false;
+            _animation.animatePhysics = _animatePhysics;
+            _animation.cullingType = _animCullingType;
+            //this.enabled = false;
         }
 
         #endregion
@@ -124,6 +135,8 @@ namespace com.spacepuppy.Anim
         public ISPAnim Play(string clipId, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
+
             var state = _states[clipId];
             //if (state == null) throw new UnknownStateException(clipId);
             if (state == null) return null;
@@ -134,6 +147,8 @@ namespace com.spacepuppy.Anim
         public ISPAnim CrossFade(string clipId, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
+
             var state = _states[clipId];
             //if (state == null) throw new UnknownStateException(clipId);
             if (state == null) return null;
@@ -145,7 +160,8 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
-
+            if (!_initialized) this.Init();
+            
             var state = clip.CreateState(this) ?? SPAnim.Null;
             state.Play(QueueMode.PlayNow, mode);
             return state;
@@ -154,7 +170,8 @@ namespace com.spacepuppy.Anim
         public void Stop(string id)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
-
+            if (!_initialized) this.Init();
+            
             _animation.Stop(id);
         }
 
@@ -166,6 +183,7 @@ namespace com.spacepuppy.Anim
         public void StopAll()
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
 
             _animation.Stop();
         }
@@ -182,8 +200,9 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
-            if(clip.Clip is AnimationClip)
+            if (clip.Clip is AnimationClip)
             {
                 var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
                 var anim = SPAnim.Create(_animation, id);
@@ -210,6 +229,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             if (clip.Clip is AnimationClip)
             {
@@ -238,6 +258,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = SPAnim.Create(_animation, id);
@@ -249,6 +270,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = SPAnim.Create(_animation, id);
@@ -260,6 +282,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             return SPAnim.Create(_animation, id);
@@ -271,6 +294,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             if (clip.Clip is AnimationClip)
             {
@@ -296,6 +320,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             if (clip.Clip is AnimationClip)
             {
@@ -321,6 +346,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = _animation[id];
@@ -332,6 +358,7 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
+            if (!_initialized) this.Init();
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = _animation[id];
@@ -344,6 +371,9 @@ namespace com.spacepuppy.Anim
 
         internal void PlayInternal(string clipId, PlayMode mode, int layer)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
+
             _animation.Play(clipId, mode);
 
             if(_scriptableAnims != null && _scriptableAnims.Count > 0)
@@ -361,6 +391,9 @@ namespace com.spacepuppy.Anim
 
         internal void CrossFadeInternal(string clipId, float fadeLength, PlayMode mode, int layer)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
+
             _animation.CrossFade(clipId, fadeLength, mode);
 
             if (_scriptableAnims != null && _scriptableAnims.Count > 0)
@@ -378,6 +411,9 @@ namespace com.spacepuppy.Anim
 
         internal AnimationState PlayQueuedInternal(string clipId, QueueMode queueMode, PlayMode playMode, int layer)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
+
             var anim = _animation.PlayQueued(clipId, queueMode, playMode);
 
             if (_scriptableAnims != null && _scriptableAnims.Count > 0)
@@ -397,6 +433,9 @@ namespace com.spacepuppy.Anim
 
         internal AnimationState CrossFadeQueuedInternal(string clipId, float fadeLength, QueueMode queueMode, PlayMode playMode, int layer)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
+
             var anim = _animation.CrossFadeQueued(clipId, fadeLength, queueMode, playMode);
 
             if (_scriptableAnims != null && _scriptableAnims.Count > 0)
@@ -417,6 +456,7 @@ namespace com.spacepuppy.Anim
         internal void StopInternal(int layer, PlayMode mode)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
 
             if (mode == PlayMode.StopAll)
             {
@@ -480,11 +520,14 @@ namespace com.spacepuppy.Anim
 
         public bool CanPlayAnim
         {
-            get { return this != null && this.isActiveAndEnabled; }
+            get { return this != null && _animation != null && this.isActiveAndEnabled; }
         }
 
         public virtual ISPAnim GetAnim(string name)
         {
+            if (_animation == null) throw new AnimationInvalidAccessException();
+            if (!_initialized) this.Init();
+
             var state = _states[name];
             if (state != null) return state.CreateAnimatableState();
             else return null;

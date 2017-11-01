@@ -30,4 +30,5 @@ namespace com.spacepuppy.Dynamic.Accessors
         /// <param name="value">Member value.</param>
         void Set(object target, object value);
     }
+    
 }

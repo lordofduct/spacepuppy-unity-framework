@@ -2,7 +2,7 @@
 using UnityEngine.AI;
 using System.Collections.Generic;
 
-namespace com.spacepuppy.Pathfinding
+namespace com.spacepuppy.Pathfinding.Unity
 {
     public class UnityPathSeeker : SPComponent, IPathSeeker
     {
@@ -19,10 +19,10 @@ namespace com.spacepuppy.Pathfinding
         #endregion
 
         #region IPathSeeker Interface
-
-        public IPath CreatePath(Vector3 target)
+        
+        public IPathFactory PathFactory
         {
-            return UnityPath.CreatePath(target);
+            get { return UnityPathFactory.Default; }
         }
 
         public bool ValidPath(IPath path)
@@ -33,8 +33,8 @@ namespace com.spacepuppy.Pathfinding
         public void CalculatePath(IPath path)
         {
             if (!(path is UnityPath)) throw new PathArgumentException();
-            
-            UnityPath.CalculatePath(this.entityRoot.transform.position, path, _areaMask);
+
+            (path as UnityPath).CalculatePath(_areaMask);
         }
         
         #endregion

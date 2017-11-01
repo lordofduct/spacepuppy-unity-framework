@@ -6,8 +6,9 @@ namespace com.spacepuppy.Pathfinding
 {
     public interface IPathSeeker
     {
-
-        IPath CreatePath(Vector3 target);
+        
+        IPathFactory PathFactory { get; }
+        
         /// <summary>
         /// Returns true if the path can be used when calculating a path with this IPathSeeker.
         /// </summary>
@@ -16,8 +17,7 @@ namespace com.spacepuppy.Pathfinding
         bool ValidPath(IPath path);
 
         void CalculatePath(IPath path);
-
-
+        
     }
 
     public interface IPathFollower

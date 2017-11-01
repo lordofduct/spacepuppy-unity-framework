@@ -13,7 +13,7 @@
 
         #region CONSTRUCTOR
 
-        protected override void OnDespawn()
+        protected virtual void OnDespawn()
         {
             if (_observers != null) _observers.PurgeHandlers();
         }

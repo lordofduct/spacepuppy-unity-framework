@@ -137,6 +137,7 @@
     <Compile Include="Graphs\Exceptions.cs" />
     <Compile Include="Graphs\GridGraph.cs" />
     <Compile Include="Graphs\GridNeighbour.cs" />
+    <Compile Include="Graphs\HexGraph.cs" />
     <Compile Include="Graphs\IGraph.cs" />
     <Compile Include="Graphs\IHeuristic.cs" />
     <Compile Include="Graphs\INode.cs" />
@@ -153,13 +154,15 @@
     <Compile Include="ISPDisposable.cs" />
     <Compile Include="IUpdateable.cs" />
     <Compile Include="Pathfinding\IPath.cs" />
+    <Compile Include="Pathfinding\IPathFactory.cs" />
     <Compile Include="Pathfinding\IPathSeeker.cs" />
     <Compile Include="Pathfinding\PathArgumentException.cs" />
     <Compile Include="Pathfinding\PathCalculateStatus.cs" />
     <Compile Include="Pathfinding\PathUtil.cs" />
-    <Compile Include="Pathfinding\UnityPath.cs" />
-    <Compile Include="Pathfinding\UnityPathSeeker.cs" />
-    <Compile Include="Pathfinding\UnityStandardPathAgent.cs" />
+    <Compile Include="Pathfinding\Unity\UnityPath.cs" />
+    <Compile Include="Pathfinding\Unity\UnityPathFactory.cs" />
+    <Compile Include="Pathfinding\Unity\UnityPathSeeker.cs" />
+    <Compile Include="Pathfinding\Unity\UnityStandardPathAgent.cs" />
     <Compile Include="Project\AssetBundlePackage.cs" />
     <Compile Include="Project\AssetBundles.cs" />
     <Compile Include="Project\CustomTimeLayersData.cs" />
@@ -243,6 +246,7 @@
     <Compile Include="Scenario\i_PostNotification.cs" />
     <Compile Include="Scenario\i_QuitApplication.cs" />
     <Compile Include="Scenario\i_SetActiveUIElement.cs" />
+    <Compile Include="Scenario\i_SetParent.cs" />
     <Compile Include="Scenario\i_SetValueOnEntity.cs" />
     <Compile Include="Scenario\i_SetValueOnTarget.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
@@ -250,6 +254,7 @@
     <Compile Include="Scenario\i_StopAudioSource.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
+    <Compile Include="Scenario\i_TriggerForEachArg.cs" />
     <Compile Include="Scenario\i_TriggerOnEval.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThen.cs" />
     <Compile Include="Scenario\i_TriggerRandomElimination.cs" />
@@ -261,9 +266,11 @@
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />
     <Compile Include="Scenario\t_RandomInterval.cs" />
+    <Compile Include="Scenes\Enums.cs" />
     <Compile Include="Scenes\SceneManagerEventArgs.cs" />
     <Compile Include="Scenes\LoadSceneAsyncWaitHandle.cs" />
     <Compile Include="Scenes\SceneManager.cs" />
+    <Compile Include="Scenes\SceneManagerUtils.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="SPAssets.cs" />
     <Compile Include="SPEntity.cs" />
@@ -426,11 +433,6 @@
     <Compile Include="WaitUntilTime.cs" />
     <Compile Include="IResettingYieldInstruction.cs" />
     <Compile Include="NullYieldInstruction.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Hooks\EarlyExecutionUpdateEventHooks.cs.meta" />
-    <None Include="Hooks\TardyExecutionUpdateEventHooks.cs.meta" />
-    <None Include="Hooks\UpdateEventHooks.cs.meta" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

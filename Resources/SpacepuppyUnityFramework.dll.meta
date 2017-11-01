@@ -6,13 +6,15 @@ PluginImporter:
   serializedVersion: 1
   iconMap: {}
   executionOrder:
-    com.spacepuppy.GameInputManager: -31995
+    com.spacepuppy.Anim.SPAnimationController: -31980
+    com.spacepuppy.GameInputManager: -31990
     com.spacepuppy.GameLoopEntry: -32000
-    com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks: -31990
+    com.spacepuppy.Hooks.EarlyExecutionUpdateEventHooks: -31900
     com.spacepuppy.Hooks.TardyExecutionUpdateEventHooks: 32000
-    com.spacepuppy.SPEntity: 31995
+    com.spacepuppy.SPEntity: 31990
+    com.spacepuppy.Scenario.t_OnEnable: 31901
     com.spacepuppy.Scenario.t_OnStart: 31900
-    com.spacepuppy.Utils.SpecializedComponents.EarlyParentSetter: -31980
+    com.spacepuppy.Utils.SpecializedComponents.EarlyParentSetter: -31995
   isPreloaded: 0
   platformData:
     Any:

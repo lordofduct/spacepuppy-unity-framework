@@ -162,7 +162,7 @@ namespace com.spacepuppy.Pathfinding
         
         protected override void UpdateMovement()
         {
-            if (_paused) return;
+            if (_paused || _currentPath == null) return;
         Start:
             switch(this.Status)
             {

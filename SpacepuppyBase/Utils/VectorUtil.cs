@@ -115,7 +115,12 @@ namespace com.spacepuppy.Utils
 
         public static float AngleBetween(Vector2 a, Vector2 b)
         {
-            return Mathf.Acos(Vector2.Dot(a, b) / (a.magnitude * b.magnitude)) * MathUtil.RAD_TO_DEG;
+            // // Due to float error the dot / mag can sometimes be ever so slightly over 1, which can cause NaN in acos.
+            //return Mathf.Acos(Vector2.Dot(a, b) / (a.magnitude * b.magnitude)) * MathUtil.RAD_TO_DEG;
+            double d = (double)Vector2.Dot(a, b) / ((double)a.magnitude * (double)b.magnitude);
+            if (d >= 1d) return 0f;
+            else if (d <= -1d) return 180f;
+            return (float)System.Math.Acos(d) * MathUtil.RAD_TO_DEG;
         }
 
         /// <summary>
@@ -255,7 +260,12 @@ namespace com.spacepuppy.Utils
 
         public static float AngleBetween(Vector3 a, Vector3 b)
         {
-            return Mathf.Acos(Vector3.Dot(a, b) / (a.magnitude * b.magnitude)) * MathUtil.RAD_TO_DEG;
+            // // Due to float error the dot / mag can sometimes be ever so slightly over 1, which can cause NaN in acos.
+            //return Mathf.Acos(Vector3.Dot(a, b) / (a.magnitude * b.magnitude)) * MathUtil.RAD_TO_DEG;
+            double d = (double)Vector3.Dot(a, b) / ((double)a.magnitude * (double)b.magnitude);
+            if (d >= 1d) return 0f;
+            else if (d <= -1d) return 180f;
+            return (float)System.Math.Acos(d) * MathUtil.RAD_TO_DEG;
         }
 
         /// <summary>

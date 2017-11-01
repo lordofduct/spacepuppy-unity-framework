@@ -116,6 +116,7 @@ namespace com.spacepuppy.Utils
         // single float average epsilon
         public const float EPSILON = 0.0001f;
         public const float EPSILON_SQR = 0.0000001f;
+        public const double DBL_EPSILON = 9.99999943962493E-11;
 
         public static readonly float MACHINE_SNG_EPSILON = MathUtil.ComputeMachineEpsilon();
 

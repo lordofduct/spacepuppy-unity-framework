@@ -5,9 +5,9 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(GameObject), "*Rotate")]
-    [CustomTweenMemberAccessor(typeof(Component), "*Rotate")]
-    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*Rotate")]
+    [CustomTweenMemberAccessor(typeof(GameObject), typeof(Quaternion), "*Rotate")]
+    [CustomTweenMemberAccessor(typeof(Component), typeof(Quaternion), "*Rotate")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), typeof(Quaternion), "*Rotate")]
     public class GeneralRotateAccessor : ITweenMemberAccessor
     {
 

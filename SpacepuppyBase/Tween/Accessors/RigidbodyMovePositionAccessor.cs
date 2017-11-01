@@ -5,7 +5,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(Rigidbody), "MovePosition")]
+    [CustomTweenMemberAccessor(typeof(Rigidbody), typeof(Vector3), "MovePosition")]
     public class RigidbodyMovePositionAccessor : ITweenMemberAccessor
     {
 

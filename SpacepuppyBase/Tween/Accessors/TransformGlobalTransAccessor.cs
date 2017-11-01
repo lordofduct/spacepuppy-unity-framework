@@ -6,9 +6,12 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(GameObject), "*GlobalTrans")]
-    [CustomTweenMemberAccessor(typeof(Component), "*GlobalTrans")]
-    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*GlobalTrans")]
+    [CustomTweenMemberAccessor(typeof(GameObject), typeof(Trans), "*GlobalTrans")]
+    [CustomTweenMemberAccessor(typeof(Component), typeof(Trans), "*GlobalTrans")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), typeof(Trans), "*GlobalTrans")]
+    [CustomTweenMemberAccessor(typeof(GameObject), typeof(Transform), "*GlobalTransform")]
+    [CustomTweenMemberAccessor(typeof(Component), typeof(Transform), "*GlobalTransform")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), typeof(Transform), "*GlobalTransform")]
     public class TransformGlobalTransAccessor : ITweenMemberAccessor
     {
 
@@ -51,4 +54,5 @@ namespace com.spacepuppy.Tween.Accessors
         #endregion
 
     }
+    
 }

@@ -171,7 +171,7 @@ namespace com.spacepuppy.Anim
             if (ObjUtil.GetAsFromSource<Animation>(obj, out anim))
                 return anim;
 
-            if(_targetAnimator.SearchesScene || _targetAnimator.TargetsTriggerArg)
+            if(_targetAnimator.ImplicityReducesEntireEntity)
             {
                 var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
                 if (go == null) return null;

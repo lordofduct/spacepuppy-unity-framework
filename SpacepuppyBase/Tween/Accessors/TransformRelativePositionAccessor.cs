@@ -6,9 +6,9 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(GameObject), "*relativePosition")]
-    [CustomTweenMemberAccessor(typeof(Transform), "*relativePosition")]
-    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*relativePosition")]
+    [CustomTweenMemberAccessor(typeof(GameObject), typeof(Vector3), "*relativePosition")]
+    [CustomTweenMemberAccessor(typeof(Transform), typeof(Vector3), "*relativePosition")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), typeof(Vector3), "*relativePosition")]
     public class TransformRelativePositionAccessor : ITweenMemberAccessor
     {
 

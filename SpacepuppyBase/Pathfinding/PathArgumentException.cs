@@ -14,5 +14,23 @@ namespace com.spacepuppy.Pathfinding
 
         }
 
+        public PathArgumentException(string message)
+            : base(message)
+        {
+
+        }
+
+        public PathArgumentException(string message, string paramName)
+            : base(message, paramName)
+        {
+
+        }
+
+        public PathArgumentException(string message, string paramName, System.Exception innerException)
+            : base(message, paramName, innerException)
+        {
+
+        }
+
     }
 }

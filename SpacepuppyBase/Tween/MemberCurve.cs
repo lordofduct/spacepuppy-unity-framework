@@ -23,7 +23,6 @@ namespace com.spacepuppy.Tween
 
         private Ease _ease;
         private float _dur;
-        private float _delay;
 
         private string _memberName;
         private IMemberAccessor _accessor;
@@ -44,7 +43,6 @@ namespace com.spacepuppy.Tween
             _memberName = propName;
             _ease = EaseMethods.LinearEaseNone;
             _dur = dur;
-            _delay = 0f;
         }
 
         public MemberCurve(string propName, Ease ease, float dur)
@@ -52,7 +50,6 @@ namespace com.spacepuppy.Tween
             _memberName = propName;
             _ease = ease;
             _dur = dur;
-            _delay = 0f;
         }
 
         /// <summary>
@@ -82,13 +79,7 @@ namespace com.spacepuppy.Tween
             get { return _dur; }
             protected set { _dur = value; }
         }
-
-        public float Delay
-        {
-            get { return _delay; }
-            set { _delay = value; }
-        }
-
+        
         #endregion
 
         #region Methods
@@ -99,26 +90,24 @@ namespace com.spacepuppy.Tween
         /// <param name="t">The percentage of completion across the curve that the member is at.</param>
         /// <returns></returns>
         protected abstract object GetValueAt(float dt, float t);
-
+        
         #endregion
 
         #region ICurve Interface
 
         public float TotalDuration
         {
-            get { return _delay + _dur; }
+            get { return _dur; }
         }
 
         public override float TotalTime
         {
-            get { return _delay + _dur; }
+            get { return  _dur; }
         }
 
         public sealed override void Update(object targ, float dt, float t)
         {
-            if (t < _delay) return;
-
-            var value = GetValueAt(dt, t - _delay);
+            var value = GetValueAt(dt, t);
             if (_accessor == null)
             {
                 System.Type memberType;

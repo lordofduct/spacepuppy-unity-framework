@@ -60,6 +60,11 @@ namespace com.spacepuppy.Dynamic
     /// $inf
     /// $-infinity
     /// $-inf
+    /// $time
+    /// $unscaledtime
+    /// $fixedtime
+    /// $deltatime
+    /// $fixeddeltatime
     /// 
     /// These are global values, they are not case sensitive
     /// 
@@ -455,6 +460,16 @@ namespace com.spacepuppy.Dynamic
                     case "-infinity":
                     case "-inf":
                         return double.NegativeInfinity;
+                    case "time":
+                        return UnityEngine.Time.time;
+                    case "unscaledtime":
+                        return UnityEngine.Time.unscaledTime;
+                    case "fixedtime":
+                        return UnityEngine.Time.fixedTime;
+                    case "deltatime":
+                        return UnityEngine.Time.deltaTime;
+                    case "fixeddeltatime":
+                        return UnityEngine.Time.fixedDeltaTime;
                     default:
                         return 0d;
                 }

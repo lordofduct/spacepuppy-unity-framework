@@ -6,9 +6,9 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Tween.Accessors
 {
 
-    [CustomTweenMemberAccessor(typeof(GameObject), "*LocalTrans")]
-    [CustomTweenMemberAccessor(typeof(Component), "*LocalTrans")]
-    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*LocalTrans")]
+    [CustomTweenMemberAccessor(typeof(GameObject), typeof(Trans), "*LocalTrans")]
+    [CustomTweenMemberAccessor(typeof(Component), typeof(Trans), "*LocalTrans")]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), typeof(Trans), "*LocalTrans")]
     public class TransformLocalTransAccessor : ITweenMemberAccessor
     {
 

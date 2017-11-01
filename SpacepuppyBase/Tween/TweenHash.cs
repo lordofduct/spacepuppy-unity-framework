@@ -392,7 +392,7 @@ namespace com.spacepuppy.Tween
             {
                 tween.AutoKillToken = autoKillToken;
                 tween.Play();
-                SPTween.AutoKill(tween);
+                if(tween.IsPlaying) SPTween.AutoKill(tween);
             }
             else
             {

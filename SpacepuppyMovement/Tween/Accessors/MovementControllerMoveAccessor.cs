@@ -10,12 +10,12 @@ namespace com.spacepuppy.Tween.Accessors
     /// <summary>
     /// Subverts MoveAccessor.
     /// </summary>
-    [CustomTweenMemberAccessor(typeof(MovementController), "Move")]
-    [CustomTweenMemberAccessor(typeof(MovementController), "*Move")]
-    [CustomTweenMemberAccessor(typeof(Rigidbody), "*Move", priority=1)]
-    [CustomTweenMemberAccessor(typeof(GameObject), "*Move", priority = 1)]
-    [CustomTweenMemberAccessor(typeof(Transform), "*Move", priority = 1)]
-    [CustomTweenMemberAccessor(typeof(IGameObjectSource), "*Move", priority = 1)]
+    [CustomTweenMemberAccessor(typeof(MovementController), typeof(Vector3), "Move")]
+    [CustomTweenMemberAccessor(typeof(MovementController), typeof(Vector3), "*Move")]
+    [CustomTweenMemberAccessor(typeof(Rigidbody), typeof(Vector3), "*Move", priority=1)]
+    [CustomTweenMemberAccessor(typeof(GameObject), typeof(Vector3), "*Move", priority = 1)]
+    [CustomTweenMemberAccessor(typeof(Transform), typeof(Vector3), "*Move", priority = 1)]
+    [CustomTweenMemberAccessor(typeof(IGameObjectSource), typeof(Vector3), "*Move", priority = 1)]
     public class MovementControllerMoveAccessor : ITweenMemberAccessor
     {
         

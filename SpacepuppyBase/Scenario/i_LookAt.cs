@@ -125,13 +125,15 @@ namespace com.spacepuppy.Scenario
             if (this._flattenOnAxis) dir = dir.SetLengthOnAxis(ax, 0f);
             var q = Quaternion.LookRotation(dir, ax);
 
+            var a = Quaternion.Angle(observer.rotation, q);
+            if (a <= MathUtil.EPSILON) return true; //don't bother tweening if we are already looking at it
+
             if (_slerp > SlerpStyle.None && _slerpValue > 0)
             {
                 switch(_slerp)
                 {
                     case SlerpStyle.Speed:
                         {
-                            var a = Quaternion.Angle(observer.rotation, q);
                             var dur = a / _slerpValue;
                             var twn = com.spacepuppy.Tween.SPTween.Tween(observer).To("rotation", q, dur);
                             if (_onSlerpComplete.Count > 0) twn.OnFinish((s, e) => _onSlerpComplete.ActivateTrigger(this, null));

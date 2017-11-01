@@ -5,7 +5,7 @@ using System.Linq;
 
 using com.spacepuppy.Movement;
 
-namespace com.spacepuppy.Pathfinding
+namespace com.spacepuppy.Pathfinding.Unity
 {
     public class UnityPathAgentMovementStyle : PathingMovementStyle, IPathAgent
     {
@@ -16,15 +16,15 @@ namespace com.spacepuppy.Pathfinding
         private int _areaMask = -1;
 
         [System.NonSerialized]
-        private UnityPath _path;
+        private UnityFromToPath _path;
 
         #endregion
 
         #region IPathAgent Interface
-        
-        public IPath CreatePath(Vector3 target)
+
+        public IPathFactory PathFactory
         {
-            return UnityPath.CreatePath(target);
+            get { return UnityPathFactory.Default; }
         }
 
         public bool ValidPath(IPath path)
@@ -36,14 +36,14 @@ namespace com.spacepuppy.Pathfinding
         {
             if (!(path is UnityPath)) throw new PathArgumentException();
 
-            var p = (path as UnityPath);
-            UnityPath.CalculatePath(this.entityRoot.transform.position, path, _areaMask);
+            (path as UnityPath).CalculatePath(_areaMask);
         }
         
         public virtual void PathTo(Vector3 target)
         {
-            if (_path == null) _path = UnityPath.CreatePath(target);
+            if (_path == null) _path = new UnityFromToPath(Vector3.zero, Vector3.zero);
 
+            _path.Start = this.entityRoot.transform.position;
             _path.Target = target;
             this.CalculatePath(_path);
             this.SetPath(_path);

@@ -1221,11 +1221,11 @@ namespace com.spacepuppy.Utils
         /// <param name="obj"></param>
         /// <param name="child"></param>
         /// <param name="suppressChangeHierarchyMessage"></param>
-        public static void AddChild(this GameObject obj, GameObject child, bool suppressChangeHierarchyMessage = false)
+        public static void AddChild(this GameObject obj, GameObject child)
         {
             var p = (obj != null) ? obj.transform : null;
             var t = (child != null) ? child.transform : null;
-            AddChild(p, t, suppressChangeHierarchyMessage);
+            AddChild(p, t);
         }
         
         /// <summary>
@@ -1237,10 +1237,10 @@ namespace com.spacepuppy.Utils
         /// <param name="obj"></param>
         /// <param name="child"></param>
         /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
-        public static void AddChild(this GameObject obj, Transform child, bool suppressChangeHierarchyMessage = false)
+        public static void AddChild(this GameObject obj, Transform child)
         {
             var p = (obj != null) ? obj.transform : null;
-            AddChild(p, child, suppressChangeHierarchyMessage);
+            AddChild(p, child);
         }
 
         /// <summary>
@@ -1252,10 +1252,10 @@ namespace com.spacepuppy.Utils
         /// <param name="obj"></param>
         /// <param name="child"></param>
         /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
-        public static void AddChild(this Transform obj, GameObject child, bool suppressChangeHierarchyMessage = false)
+        public static void AddChild(this Transform obj, GameObject child)
         {
             var t = (child != null) ? child.transform : null;
-            AddChild(obj, t, suppressChangeHierarchyMessage);
+            AddChild(obj, t);
         }
 
         /// <summary>
@@ -1267,13 +1267,12 @@ namespace com.spacepuppy.Utils
         /// <param name="obj"></param>
         /// <param name="child"></param>
         /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
-        public static void AddChild(this Transform obj, Transform child, bool suppressChangeHierarchyMessage = false)
+        public static void AddChild(this Transform obj, Transform child)
         {
             if (child == null) throw new System.ArgumentNullException("child");
 
             if (child.parent == obj) return;
             child.parent = obj;
-            if (!suppressChangeHierarchyMessage) child.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED, SendMessageOptions.DontRequireReceiver);
         }
 
         /// <summary>
@@ -1282,14 +1281,13 @@ namespace com.spacepuppy.Utils
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
-        public static void RemoveFromParent(this GameObject obj, bool suppressChangeHierarchyMessage = false)
+        public static void RemoveFromParent(this GameObject obj)
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
 
             var t = obj.transform;
             if (t.parent == null) return;
             t.parent = null;
-            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED, SendMessageOptions.DontRequireReceiver);
         }
 
         /// <summary>
@@ -1298,13 +1296,12 @@ namespace com.spacepuppy.Utils
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
-        public static void RemoveFromParent(this Transform obj, bool suppressChangeHierarchyMessage = false)
+        public static void RemoveFromParent(this Transform obj)
         {
             if (obj == null) throw new System.ArgumentNullException("t");
 
             if (obj.parent == null) return;
             obj.parent = null;
-            if (!suppressChangeHierarchyMessage) obj.BroadcastMessage(SPConstants.MSG_ONTRANSFORMHIERARCHYCHANGED, SendMessageOptions.DontRequireReceiver);
         }
 
 #endregion

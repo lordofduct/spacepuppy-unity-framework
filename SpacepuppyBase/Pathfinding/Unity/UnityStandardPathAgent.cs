@@ -5,7 +5,7 @@ using System.Linq;
 
 using com.spacepuppy.Utils;
 
-namespace com.spacepuppy.Pathfinding
+namespace com.spacepuppy.Pathfinding.Unity
 {
 
     [RequireComponentInEntity(typeof(NavMeshAgent))]
@@ -49,9 +49,9 @@ namespace com.spacepuppy.Pathfinding
             }
         }
 
-        public IPath CreatePath(Vector3 target)
+        public IPathFactory PathFactory
         {
-            return UnityPath.CreatePath(target);
+            get { return UnityPathFactory.Default; }
         }
 
         public bool ValidPath(IPath path)
@@ -64,8 +64,9 @@ namespace com.spacepuppy.Pathfinding
             if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
             if (!(path is UnityPath)) throw new PathArgumentException();
 
-            var p = (path as UnityPath);
-            _agent.CalculatePath(p.Target, p._path);
+            //var p = (path as UnityPath);
+            //_agent.CalculatePath(p.Target, p._path);
+            (path as UnityPath).CalculatePath(_agent.areaMask);
         }
         
         public void SetPath(IPath path)
@@ -73,7 +74,7 @@ namespace com.spacepuppy.Pathfinding
             if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
             if (!(path is UnityPath)) throw new PathArgumentException();
 
-            _agent.SetPath((path as UnityPath)._path);
+            _agent.SetPath((path as UnityPath).NavMeshPath);
         }
 
         public void PathTo(Vector3 target)
@@ -88,8 +89,10 @@ namespace com.spacepuppy.Pathfinding
             if (!(path is UnityPath)) throw new PathArgumentException();
 
             var p = (path as UnityPath);
-            _agent.CalculatePath(p.Target, p._path);
-            this.SetPath(path);
+            //_agent.CalculatePath(p.Target, p.NavMeshPath);
+            //_agent.SetPath(p.NavMeshPath);
+            p.CalculatePath(_agent.areaMask);
+            _agent.SetPath(p.NavMeshPath);
         }
 
         public void ResetPath()
@@ -101,13 +104,13 @@ namespace com.spacepuppy.Pathfinding
         public void StopPath()
         {
             if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
-            _agent.Stop();
+            _agent.isStopped = true;
         }
 
         public void ResumePath()
         {
             if (object.ReferenceEquals(_agent, null)) throw new System.InvalidOperationException("UnityPathAgent was not configured correctly.");
-            _agent.Resume();
+            _agent.isStopped = false;
         }
 
         #endregion

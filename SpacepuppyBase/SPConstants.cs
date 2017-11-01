@@ -19,17 +19,8 @@ namespace com.spacepuppy
 
         public const string TAG_MULTITAG = "MultiTag";
         public const string TAG_ROOT = "Root";
-
-        //sent by SPComponent when enabled and disabled
-        //public const string MSG_ONSPCOMPONENTENABLED = "OnSPComponentEnabled";
-        //public const string MSG_ONSPCOMPONENTDISABLED = "OnSPComponentDisabled";
         
-        //Broadcasted to all children when AddChild or RemoveFromParent is called for a GameObject, allows scripts in that hierarchy to react to the add/remove
-        //Calling addchild/RemoveFromParent during this message can result in a stack overflow if the hierarchies intersect
-        public const string MSG_ONTRANSFORMHIERARCHYCHANGED = "OnTransformHierarchyChanged";
-
-
-        public static Quaternion ROT_3DSMAX_TO_UNITY = Quaternion.LookRotation(Vector3.down, Vector3.forward);
+        public static readonly Quaternion ROT_3DSMAX_TO_UNITY = Quaternion.LookRotation(Vector3.down, Vector3.forward);
 
     }
 }

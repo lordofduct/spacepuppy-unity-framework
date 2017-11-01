@@ -409,7 +409,7 @@ namespace com.spacepuppy
     public class DefaultFromSelfAttribute : PropertyModifierAttribute
     {
         public bool UseEntity = false;
-        public bool HandleOnce = false;
+        public bool HandleOnce = true;
     }
 
     /// <summary>
