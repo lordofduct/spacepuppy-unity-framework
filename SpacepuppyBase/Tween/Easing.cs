@@ -868,7 +868,7 @@ namespace com.spacepuppy.Tween
             //return new Vector3(ease(t, start.x, end.x - start.x, dur), ease(t, start.y, end.y - start.y, dur), ease(t, start.z, end.z - start.z, dur));
         }
 
-        public static Vector4 EaseVector3(Ease ease, Vector4 start, Vector4 end, float t, float dur)
+        public static Vector4 EaseVector4(Ease ease, Vector4 start, Vector4 end, float t, float dur)
         {
             return (ease(t, 0, 1, dur) * (end - start)) + start;
 
