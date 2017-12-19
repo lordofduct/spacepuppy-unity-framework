@@ -82,6 +82,13 @@ namespace com.spacepuppy.StateMachine
             return new StateMachine<T>(new ComponentStateSupplier<T>(source));
         }
 
+        /// <summary>
+        /// Create a ParentComponentStateSupplier
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="includeStatesOnContainer"></param>
+        /// <param name="isStatic">Set true if the hierarchy doesn't change (a changing hierarchy requires extra processing and is slower)</param>
+        /// <returns></returns>
         public static StateMachine<T> CreateFromParentComponentSource(UnityEngine.GameObject source, bool includeStatesOnContainer, bool isStatic)
         {
             return new StateMachine<T>(new ParentComponentStateSupplier<T>(source, includeStatesOnContainer, isStatic));

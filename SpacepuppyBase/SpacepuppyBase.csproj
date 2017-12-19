@@ -251,7 +251,9 @@
     <Compile Include="Scenario\i_SetValueOnTarget.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArg.cs" />
     <Compile Include="Scenario\i_SignalEvent.cs" />
+    <Compile Include="Scenario\i_StartTetherJoint.cs" />
     <Compile Include="Scenario\i_StopAudioSource.cs" />
+    <Compile Include="Scenario\i_StopTetherJoint.cs" />
     <Compile Include="Scenario\i_SwapMaterialFlash.cs" />
     <Compile Include="Scenario\i_Teleport.cs" />
     <Compile Include="Scenario\i_TriggerForEachArg.cs" />
@@ -330,6 +332,7 @@
     <Compile Include="TagMask.cs" />
     <Compile Include="SPTimePeriod.cs" />
     <Compile Include="TempEventArgs.cs" />
+    <Compile Include="TetherJoint.cs" />
     <Compile Include="Timers\BulkTimer.cs" />
     <Compile Include="Timers\DelayTimer.cs" />
     <Compile Include="Timers\GameTimers.cs" />

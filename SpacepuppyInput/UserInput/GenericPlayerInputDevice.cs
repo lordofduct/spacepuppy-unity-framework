@@ -58,10 +58,10 @@ namespace com.spacepuppy.UserInput
 
         public virtual void Update()
         {
-            _signatures.Sort();
+            //_signatures.Sort();
 
             var e = _signatures.GetEnumerator();
-            while(e.MoveNext())
+            while (e.MoveNext())
             {
                 e.Current.Update();
             }
@@ -69,7 +69,7 @@ namespace com.spacepuppy.UserInput
 
         public virtual void FixedUpdate()
         {
-            _signatures.Sort();
+            //_signatures.Sort();
 
             var e = _signatures.GetEnumerator();
             while (e.MoveNext())
@@ -188,6 +188,6 @@ namespace com.spacepuppy.UserInput
         }
 
         #endregion
-
+        
     }
 }

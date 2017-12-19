@@ -13,7 +13,9 @@ namespace com.spacepuppy.Anim
     {
 
         SPAnimationController Controller { get; }
+        bool IsInitialized { get; }
 
+        void Configure(SPAnimationController controller);
         void Play(string id, QueueMode queuMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer);
 
     }
@@ -63,16 +65,7 @@ namespace com.spacepuppy.Anim
         protected abstract void Init(SPEntity entity, SPAnimationController controller);
 
         #endregion
-
-        #region Properties
-
-        public bool IsInitialized
-        {
-            get { return _initialized; }
-        }
-
-        #endregion
-
+        
         #region ISPAnimator Interface
 
         public SPAnimationController Controller
@@ -83,8 +76,19 @@ namespace com.spacepuppy.Anim
             }
         }
 
-        public abstract void Play(string id, QueueMode queuMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer);
+        public bool IsInitialized
+        {
+            get { return _initialized; }
+        }
 
+        public void Configure(SPAnimationController controller)
+        {
+            if (_initialized) throw new System.InvalidOperationException("Can not change the Controller of an SPAnimator once it's been initialized.");
+            _controller = controller;
+        }
+
+        public abstract void Play(string id, QueueMode queuMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer);
+        
         #endregion
 
     }

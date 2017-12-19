@@ -60,6 +60,7 @@
     <Compile Include="Base\Commands\SPCreateRagdollWizard.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
+    <Compile Include="Base\Inspectors\ConstraintPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DisplayFlatPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ProxyPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ShortUidPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\TetherJointInspector.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="Base\Inspectors\SPTimePeriodPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\TimeUnitsSelectorPropertyDrawer.cs" />
     <Compile Include="Collections\DictionaryPropertyDrawer.cs" />
+    <Compile Include="EditorCoroutine.cs" />
     <Compile Include="EditorHierarchyAlternateContextMenuEvents.cs" />
     <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
     <Compile Include="Geom\CubicBezierCurvePropertyDrawer.cs" />
@@ -113,6 +116,7 @@
     <Compile Include="EditorHierarchyDrawerEvents.cs" />
     <Compile Include="HierarchyDrawer.cs" />
     <Compile Include="IconHelper.cs" />
+    <Compile Include="InputSettings.cs" />
     <Compile Include="Internal\CachedReorderableList.cs" />
     <Compile Include="Internal\DefaultPropertyHandler.cs" />
     <Compile Include="Internal\GUIViewProxy.cs" />
@@ -162,10 +166,12 @@
     <Compile Include="Render\MaterialTransitionPropertyDrawer.cs" />
     <Compile Include="ReorderableListHelper.cs" />
     <Compile Include="Scenario\ITriggerableMechanismAddonDrawer.cs" />
+    <Compile Include="Scenario\i_EnableInspector.cs" />
     <Compile Include="Scenario\i_SetValueInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnEntityInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnTargetInspector.cs" />
     <Compile Include="Scenario\i_SetValueOnTriggerArgInspector.cs" />
+    <Compile Include="Scenario\i_StartTetherJointInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnEvalInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
     <Compile Include="Scenario\i_TriggerRandomEliminationInspector.cs" />

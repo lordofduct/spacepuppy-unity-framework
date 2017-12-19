@@ -33,7 +33,7 @@ namespace com.spacepuppy
 
         public static bool Exists<T>() where T : class, IService
         {
-            return Entry<T>.Instance != null;
+            return !Entry<T>.Instance.IsNullOrDestroyed();
         }
 
         public static T Get<T>() where T : class, IService
@@ -43,14 +43,15 @@ namespace com.spacepuppy
 
         public static void Register<T>(T service) where T : class, IService
         {
-            if (Entry<T>.Instance != null) throw new System.InvalidOperationException("You must first unregister a service before registering a new one.");
+            var other = Entry<T>.Instance;
+            if (!other.IsNullOrDestroyed() && !object.ReferenceEquals(other, service)) throw new System.InvalidOperationException("You must first unregister a service before registering a new one.");
             Entry<T>.Instance = service;
         }
         
         public static void Unregister<T>(bool donotSignalUnregister = false) where T : class, IService
         {
             var inst = Entry<T>.Instance;
-            if(!object.ReferenceEquals(inst, null))
+            if(!inst.IsNullOrDestroyed())
             {
                 Entry<T>.Instance = null;
                 if(!donotSignalUnregister)
@@ -96,7 +97,8 @@ namespace com.spacepuppy
 
             if (field == null) throw new System.InvalidOperationException("Failed to resolve type '" + tp.Name + "'.");
 
-            if (field.GetValue(null) != null) throw new System.InvalidOperationException("You must first unregister a service before registering a new one.");
+            var other = field.GetValue(null);
+            if (!other.IsNullOrDestroyed() && !object.ReferenceEquals(other, service)) throw new System.InvalidOperationException("You must first unregister a service before registering a new one.");
             field.SetValue(null, service);
         }
 
@@ -134,11 +136,15 @@ namespace com.spacepuppy
             var tp = typeof(TConcrete);
             if (typeof(Component).IsAssignableFrom(tp))
             {
-                return ServiceComponent<TServiceType>.Create(tp, persistent, name) as TConcrete;
+                var obj = ServiceComponent<TServiceType>.Create(tp, persistent, name) as TConcrete;
+                Services.Register<TServiceType>(obj);
+                return obj;
             }
             else if (typeof(ScriptableObject).IsAssignableFrom(tp))
             {
-                return ServiceScriptableObject<TServiceType>.Create(tp, persistent, name) as TConcrete;
+                var obj = ServiceScriptableObject<TServiceType>.Create(tp, persistent, name) as TConcrete;
+                Services.Register<TServiceType>(obj);
+                return obj;
             }
             else
             {
@@ -163,11 +169,15 @@ namespace com.spacepuppy
             var tp = typeof(T);
             if (typeof(Component).IsAssignableFrom(tp))
             {
-                return ServiceComponent<T>.Create(tp, persistent, name);
+                var obj = ServiceComponent<T>.Create(tp, persistent, name);
+                Services.Register<T>(obj);
+                return obj;
             }
             else if (typeof(ScriptableObject).IsAssignableFrom(tp))
             {
-                return ServiceScriptableObject<T>.Create(tp, persistent, name);
+                var obj = ServiceScriptableObject<T>.Create(tp, persistent, name);
+                Services.Register<T>(obj);
+                return obj;
             }
             else
             {
@@ -194,11 +204,15 @@ namespace com.spacepuppy
 
             if (typeof(Component).IsAssignableFrom(concreteType))
             {
-                return ServiceComponent<TServiceType>.Create(concreteType, persistent, name);
+                var obj = ServiceComponent<TServiceType>.Create(concreteType, persistent, name);
+                Services.Register<TServiceType>(obj);
+                return obj;
             }
             else if (typeof(ScriptableObject).IsAssignableFrom(concreteType))
             {
-                return ServiceScriptableObject<TServiceType>.Create(concreteType, persistent, name);
+                var obj = ServiceScriptableObject<TServiceType>.Create(concreteType, persistent, name);
+                Services.Register<TServiceType>(obj);
+                return obj;
             }
             else
             {
@@ -284,11 +298,15 @@ namespace com.spacepuppy
             
             if (typeof(Component).IsAssignableFrom(concreteType))
             {
-                return ServiceComponent<TServiceType>.Create(concreteType, persistent, name);
+                var obj = ServiceComponent<TServiceType>.Create(concreteType, persistent, name);
+                Services.Register<TServiceType>(obj);
+                return obj;
             }
             else if (typeof(ScriptableObject).IsAssignableFrom(concreteType))
             {
-                return ServiceScriptableObject<TServiceType>.Create(concreteType, persistent, name);
+                var obj = ServiceScriptableObject<TServiceType>.Create(concreteType, persistent, name);
+                Services.Register<TServiceType>(obj);
+                return obj;
             }
             else
             {
@@ -483,10 +501,9 @@ namespace com.spacepuppy
         }
 
         #endregion
-
-
+        
     }
-
+    
     /// <summary>
     /// Abstract component for implementing a Service Component. 
     /// 

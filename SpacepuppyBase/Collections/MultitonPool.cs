@@ -387,11 +387,13 @@ namespace com.spacepuppy.Collections
 
             if (_querying)
             {
-                if (!_pool.Contains(obj)) _queryCompleteAction += () => _pool.Add(obj.gameObject, obj);
+                //if (!_pool.Contains(obj)) _queryCompleteAction += () => _pool.Add(obj.gameObject, obj);
+                if (!_pool.Contains(obj)) _queryCompleteAction += () => _pool[obj.gameObject] = obj;
             }
             else
             {
-                _pool.Add(obj.gameObject, obj);
+                //_pool.Add(obj.gameObject, obj);
+                _pool[obj.gameObject] = obj;
             }
         }
 
@@ -721,11 +723,13 @@ namespace com.spacepuppy.Collections
             var go = GameObjectUtil.FindRoot(obj.gameObject);
             if(_querying)
             {
-                _queryCompleteAction += () => _pool.Add(go, obj);
+                //_queryCompleteAction += () => _pool.Add(go, obj);
+                _queryCompleteAction += () => _pool[go] = obj;
             }
             else
             {
-                _pool.Add(go, obj);
+                //_pool.Add(go, obj);
+                _pool[go] = obj;
             }
         }
 

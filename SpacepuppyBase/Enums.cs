@@ -23,7 +23,22 @@
         Y = 1,
         Z = 2
     }
-    
+
+    [System.Flags()]
+    public enum Constraint
+    {
+        None = UnityEngine.RigidbodyConstraints.None,
+        XPosition = UnityEngine.RigidbodyConstraints.FreezePositionX,
+        YPosition = UnityEngine.RigidbodyConstraints.FreezePositionY,
+        ZPosition = UnityEngine.RigidbodyConstraints.FreezePositionZ,
+        Position = UnityEngine.RigidbodyConstraints.FreezePosition,
+        XRotation = UnityEngine.RigidbodyConstraints.FreezeRotationX,
+        YRotation = UnityEngine.RigidbodyConstraints.FreezeRotationY,
+        ZRotation = UnityEngine.RigidbodyConstraints.FreezeRotationZ,
+        Rotation = UnityEngine.RigidbodyConstraints.FreezeRotation,
+        All = UnityEngine.RigidbodyConstraints.FreezeAll
+    }
+
     /// <summary>
     /// Enum used by InfoboxAttribute to define which message box type to display as.
     /// </summary>
@@ -107,6 +122,5 @@
         DoNotPlayIfPlaying = 1,
         PlayOverExisting = 2
     }
-
-
+    
 }

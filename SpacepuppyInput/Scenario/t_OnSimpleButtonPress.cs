@@ -8,22 +8,23 @@ using com.spacepuppy.UserInput.UnityInput;
 
 namespace com.spacepuppy.Scenario
 {
-    public class t_OnSimpleButtonPress : TriggerComponent
+    public sealed class t_OnSimpleButtonPress : TriggerComponent
     {
 
         #region Fields
-
+        
         [SerializeField]
         [DisableOnPlay]
         private string _inputId;
 
-        [System.NonSerialized()]
-        private System.Action<string> _callback;
+        //[System.NonSerialized()]
+        //private System.Action<string> _callback;
 
         #endregion
 
         #region CONSTRUCTOR
 
+        /*
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -53,6 +54,7 @@ namespace com.spacepuppy.Scenario
                 if(device != null) device.UnregisterButtonPress(_inputId, _callback);
             }
         }
+        */
 
         #endregion
 
@@ -66,19 +68,43 @@ namespace com.spacepuppy.Scenario
             }
             set
             {
-                if (_inputId == value) return;
+                //if (_inputId == value) return;
+                //if(this.enabled && _callback != null)
+                //{
+                //    var device = EventfulUnityInputDevice.GetDevice();
+                //    device.UnregisterButtonPress(_inputId, _callback);
+                //    if(value != null) device.RegisterButtonPress(value, _callback);
+                //}
 
-                if(this.enabled && _callback != null)
-                {
-                    var device = EventfulUnityInputDevice.GetDevice();
-                    device.UnregisterButtonPress(_inputId, _callback);
-                    if(value != null) device.RegisterButtonPress(value, _callback);
-                }
                 _inputId = value;
             }
         }
 
         #endregion
-        
+
+        #region Methods
+
+        private void Update()
+        {
+            var service = Services.Get<IGameInputManager>();
+            var input = service != null ? service.Main : null;
+            if(input != null)
+            {
+                if(input.GetCurrentButtonState(_inputId) == UserInput.ButtonState.Down)
+                {
+                    this.ActivateTrigger(null);
+                }
+            }
+            else
+            {
+                if(Input.GetButtonDown(_inputId))
+                {
+                    this.ActivateTrigger(null);
+                }
+            }
+        }
+
+        #endregion
+
     }
 }

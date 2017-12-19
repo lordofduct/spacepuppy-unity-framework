@@ -127,12 +127,12 @@ namespace com.spacepuppy.Cameras.LegacyRender
                 for (int i = 0; i < _globalEffects.Count; i++)
                 {
                     var effect = _globalEffects[i];
-                    if (effect != null)
+                    if (effect != null && effect.enabled)
                     {
                         var dest = RenderTexture.GetTemporary(src.width, src.height);
                         set.Add(dest);
 
-                        effect.RenderImage(src, dest);
+                        effect.RenderImage(camera, src, dest);
 
                         src = dest;
                     }

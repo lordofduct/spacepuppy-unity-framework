@@ -7,13 +7,24 @@ using System;
 namespace com.spacepuppy.UserInput.UnityInput
 {
 
-    public class EventfulUnityInputDevice : IPlayerInputDevice
+    public class EventfulUnityInputDevice : IPlayerInputDevice, IUpdateable
     {
 
         public const string INPUT_ID = "sp.internal.evu.device";
 
         #region Singleton Interface
 
+        private static EventfulUnityInputDevice _device;
+        public static EventfulUnityInputDevice GetDevice()
+        {
+            if (_device != null) return _device;
+            
+            _device = new EventfulUnityInputDevice();
+            GameLoopEntry.UpdatePump.Add(_device);
+            return _device;
+        }
+
+        /* OLD
         private static EventfulUnityInputDevice _device;
         private static IGameInputManager _inputManager;
         public static EventfulUnityInputDevice GetDevice()
@@ -39,29 +50,6 @@ namespace com.spacepuppy.UserInput.UnityInput
 
             _device = new EventfulUnityInputDevice();
             _inputManager.Add(INPUT_ID, _device);
-            return _device;
-        }
-
-        /* OLD
-        public static EventfulUnityInputDevice GetDevice()
-        {
-            if (_device == null)
-            {
-                _device = new EventfulUnityInputDevice();
-            }
-            if (_inputManager == null)
-            {
-                _inputManager = Services.Get<IGameInputManager>();
-                if (_inputManager != null)
-                {
-                    _inputManager.Add(INPUT_ID, _device);
-                    _inputManager.ServiceUnregistered += (s, e) =>
-                    {
-                        _inputManager = null;
-                        _device = null;
-                    };
-                }
-            }
             return _device;
         }
         */
@@ -145,6 +133,24 @@ namespace com.spacepuppy.UserInput.UnityInput
             }
         }
 
+        public void Update()
+        {
+            _inUpdate = true;
+            var e = _buttonPressTable.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (Input.GetButtonDown(e.Current.Key)) e.Current.Value(e.Current.Key);
+            }
+            _inUpdate = false;
+
+            if (_lateRegister != null)
+            {
+                var a = _lateRegister;
+                _lateRegister = null;
+                a();
+            }
+        }
+
         #endregion
 
         #region IPlayerInputDevice Interface
@@ -185,24 +191,6 @@ namespace com.spacepuppy.UserInput.UnityInput
 
         void IInputSignature.FixedUpdate()
         {
-        }
-
-        void IInputSignature.Update()
-        {
-            _inUpdate = true;
-            var e = _buttonPressTable.GetEnumerator();
-            while(e.MoveNext())
-            {
-                if (Input.GetButtonDown(e.Current.Key)) e.Current.Value(e.Current.Key);   
-            }
-            _inUpdate = false;
-
-            if(_lateRegister != null)
-            {
-                var a = _lateRegister;
-                _lateRegister = null;
-                a();
-            }
         }
 
         public float GetCurrentAxleState(int hash)

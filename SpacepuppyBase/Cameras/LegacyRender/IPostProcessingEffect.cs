@@ -7,7 +7,9 @@ namespace com.spacepuppy.Cameras.LegacyRender
     public interface IPostProcessingEffect
     {
 
-        void RenderImage(RenderTexture source, RenderTexture destination);
+        bool enabled { get; set; }
+
+        void RenderImage(ICamera camera, RenderTexture source, RenderTexture destination);
 
     }
 }

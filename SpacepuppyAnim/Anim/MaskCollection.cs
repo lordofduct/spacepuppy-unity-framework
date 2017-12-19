@@ -9,6 +9,8 @@ namespace com.spacepuppy.Anim
     public class MaskCollection : ICollection<TransformMask>
     {
 
+        public System.EventHandler Changed;
+
         #region Fields
 
         [System.NonSerialized()]
@@ -46,6 +48,7 @@ namespace com.spacepuppy.Anim
             if (i >= 0)
             {
                 _masks.RemoveAt(i);
+                if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
                 return true;
             }
             return false;
@@ -65,6 +68,7 @@ namespace com.spacepuppy.Anim
             var m = _masks[index];
             _masks.RemoveAt(index);
             if (_owner != null) _owner.RemoveMixingTransform(m.Transform);
+            if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
         }
 
         public void AddRange(IEnumerable<TransformMask> coll)
@@ -73,15 +77,36 @@ namespace com.spacepuppy.Anim
             {
                 this.Add(m);
             }
+            if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
+        }
+
+        public void AddRange(MaskCollection coll)
+        {
+            for (int i = 0; i < coll._masks.Count; i++)
+            {
+                this.Add(coll._masks[i]);
+            }
+            if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
         }
 
         public void Copy(IEnumerable<TransformMask> coll)
         {
-            this.Clear();
+            this.SilentClear();
             foreach (var m in coll)
             {
                 this.Add(m);
             }
+            if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
+        }
+
+        public void Copy(MaskCollection coll)
+        {
+            this.SilentClear();
+            for(int i = 0; i < coll._masks.Count; i++)
+            {
+                this.Add(coll._masks[i]);
+            }
+            if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
         }
 
         public void Apply(AnimationState state)
@@ -90,6 +115,20 @@ namespace com.spacepuppy.Anim
             {
                 state.AddMixingTransform(m.Transform, m.Recursive);
             }
+        }
+
+
+
+        private void SilentClear()
+        {
+            if (_owner != null)
+            {
+                foreach (var m in _masks)
+                {
+                    _owner.RemoveMixingTransform(m.Transform);
+                }
+            }
+            _masks.Clear();
         }
 
         #endregion
@@ -109,6 +148,7 @@ namespace com.spacepuppy.Anim
 
             _masks.Add(item);
             if (_owner != null) _owner.AddMixingTransform(item.Transform, item.Recursive);
+            if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
         }
 
         public void Clear()
@@ -121,6 +161,7 @@ namespace com.spacepuppy.Anim
                 }
             }
             _masks.Clear();
+            if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
         }
 
         public bool Contains(TransformMask item)
@@ -149,6 +190,7 @@ namespace com.spacepuppy.Anim
             {
                 _masks.Remove(item);
                 if (_owner != null) _owner.RemoveMixingTransform(item.Transform);
+                if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
                 return true;
             }
             else

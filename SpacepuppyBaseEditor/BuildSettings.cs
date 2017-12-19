@@ -9,7 +9,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor
 {
 
-    [CreateAssetMenu(fileName = "BuildSettings", menuName = "Build Settings", order = int.MaxValue)]
+    [CreateAssetMenu(fileName = "BuildSettings", menuName = "Spacepuppy/Build Settings", order = int.MaxValue)]
     public class BuildSettings : ScriptableObject
     {
 
@@ -28,6 +28,10 @@ namespace com.spacepuppyeditor
         [SerializeField]
         [EnumFlags]
         private BuildOptions _buildOptions;
+
+        [SerializeField]
+        [Tooltip("Leave blank if you want to use default settings found in the Input Settings screen.")]
+        private InputSettings _inputSettings;
         
         #endregion
 
@@ -36,6 +40,7 @@ namespace com.spacepuppyeditor
         public SceneAsset BootScene
         {
             get { return _bootScene; }
+            set { _bootScene = value; }
         }
 
         public IList<SceneAsset> Scenes
@@ -46,13 +51,21 @@ namespace com.spacepuppyeditor
         public BuildTarget BuildTarget
         {
             get { return _buildTarget; }
+            set { _buildTarget = value; }
         }
 
         public BuildOptions BuildOptions
         {
             get { return _buildOptions; }
+            set { _buildOptions = value; }
         }
         
+        public InputSettings InputSettings
+        {
+            get { return _inputSettings; }
+            set { _inputSettings = value; }
+        }
+
         #endregion
 
     }
@@ -61,10 +74,20 @@ namespace com.spacepuppyeditor
     public class BuildSettingsEditor : SPEditor
     {
 
+        [System.Flags]
+        public enum PostBuildOption
+        {
+            Nothing = 0,
+            OpenFolder = 1,
+            Run = 2,
+            OpenFolderAndRun = 3
+        }
+
         public const string PROP_BOOTSCENE = "_bootScene";
         public const string PROP_SCENES = "_scenes";
         public const string PROP_BUILDTARGET = "_buildTarget";
         public const string PROP_BUILDOPTIONS = "_buildOptions";
+        public const string PROP_INPUTSETTINGS = "_inputSettings";
 
 
         protected override void OnSPInspectorGUI()
@@ -74,6 +97,8 @@ namespace com.spacepuppyeditor
             this.DrawScenes();
 
             this.DrawBuildOptions();
+
+            this.DrawInputSettings();
 
             this.serializedObject.ApplyModifiedProperties();
             
@@ -98,28 +123,36 @@ namespace com.spacepuppyeditor
             this.DrawPropertyField(PROP_BUILDOPTIONS);
         }
 
+        public virtual void DrawInputSettings()
+        {
+            this.DrawPropertyField(PROP_INPUTSETTINGS);
+        }
+
         public virtual void DrawBuildButtons()
         {
             if (GUILayout.Button("Build"))
             {
-                var path = this.Build();
-                EditorUtility.RevealInFinder(path);
+                EditorCoroutine.StartEditorCoroutine(this.DoBuild(PostBuildOption.OpenFolder));
             }
             if (GUILayout.Button("Build & Run"))
             {
-                var path = this.Build();
-                if (!string.IsNullOrEmpty(path))
-                {
-                    var proc = new System.Diagnostics.Process();
-                    proc.StartInfo.FileName = path;
-                    proc.Start();
-                }
+                EditorCoroutine.StartEditorCoroutine(this.DoBuild(PostBuildOption.OpenFolderAndRun));
             }
             if (GUILayout.Button("Sync To Global Build"))
             {
                 this.SyncToGlobalBuild();
             }
         }
+
+        protected virtual System.Collections.IEnumerator DoBuild(PostBuildOption postBuildOption)
+        {
+            this.Build(postBuildOption);
+
+            yield break;
+        }
+
+
+
 
         public virtual string[] GetScenePaths()
         {
@@ -147,25 +180,78 @@ namespace com.spacepuppyeditor
             }
             EditorBuildSettings.scenes = lst.ToArray();
         }
-
-        public virtual string Build()
+        
+        public bool Build(PostBuildOption option)
         {
-            var settings = this.target as BuildSettings;
-            var scenes = this.GetScenePaths();
-
-            var dir = EditorProjectPrefs.Local.GetString("LastBuildDirectory", string.Empty);
-            var path = EditorUtility.SaveFilePanel("Build", dir, Application.productName + ".exe", "exe");
-            if(!string.IsNullOrEmpty(path))
+            try
             {
-                EditorProjectPrefs.Local.SetString("LastBuildDirectory", System.IO.Path.GetDirectoryName(path));
+                var settings = this.target as BuildSettings;
+                var scenes = this.GetScenePaths();
 
-                BuildPipeline.BuildPlayer(scenes, path, settings.BuildTarget, settings.BuildOptions);
-                return path;
+                var dir = EditorProjectPrefs.Local.GetString("LastBuildDirectory", string.Empty);
+                string path;
+                switch(settings.BuildTarget)
+                {
+                    case BuildTarget.StandaloneWindows:
+                    case BuildTarget.StandaloneWindows64:
+                        path = EditorUtility.SaveFilePanel("Build", dir, Application.productName + ".exe", "exe");
+                        break;
+                    case BuildTarget.StandaloneLinux:
+                    case BuildTarget.StandaloneLinuxUniversal:
+                        path = EditorUtility.SaveFilePanel("Build", dir, Application.productName + ".x86", "x86");
+                        break;
+                    case BuildTarget.StandaloneLinux64:
+                        path = EditorUtility.SaveFilePanel("Build", dir, Application.productName + ".x86_64", "x86_64");
+                        break;
+                    case BuildTarget.StandaloneOSXIntel:
+                    case BuildTarget.StandaloneOSXIntel64:
+                    case BuildTarget.StandaloneOSXUniversal:
+                        path = EditorUtility.SaveFilePanel("Build", dir, Application.productName + ".app", "app");
+                        break;
+                    default:
+                        path = EditorUtility.SaveFilePanel("Build", dir, Application.productName, "");
+                        break;
+                }
+
+                if(!string.IsNullOrEmpty(path))
+                {
+                    EditorProjectPrefs.Local.SetString("LastBuildDirectory", System.IO.Path.GetDirectoryName(path));
+                
+                    if(settings.InputSettings != null)
+                    {
+                        var copy = InputSettings.LoadGlobalInputSettings(false);
+                        settings.InputSettings.ApplyToGlobal();
+
+                        BuildPipeline.BuildPlayer(scenes, path, settings.BuildTarget, settings.BuildOptions);
+
+                        copy.ApplyToGlobal();
+                    }
+                    else
+                    {
+                        BuildPipeline.BuildPlayer(scenes, path, settings.BuildTarget, settings.BuildOptions);
+                    }
+                
+                    if((option & PostBuildOption.OpenFolder) != 0)
+                    {
+                        EditorUtility.RevealInFinder(path);
+                    }
+                    if ((option & PostBuildOption.Run) != 0)
+                    {
+                        var proc = new System.Diagnostics.Process();
+                        proc.StartInfo.FileName = path;
+                        proc.Start();
+                    }
+
+                    return true;
+                }
+
             }
-            else
+            catch(System.Exception ex)
             {
-                return string.Empty;
+                Debug.LogException(ex);
             }
+
+            return false;
         }
 
     }

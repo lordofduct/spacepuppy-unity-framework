@@ -84,6 +84,10 @@ namespace com.spacepuppy.Utils
         {
             if (string.IsNullOrEmpty(typeName)) return null;
 
+            bool isArray = typeName.EndsWith("[]");
+            if (isArray)
+                typeName = typeName.Substring(0, typeName.Length - 2);
+
             StringComparison e = (ignoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             if (useFullName)
             {
@@ -91,7 +95,13 @@ namespace com.spacepuppy.Utils
                 {
                     foreach (var t in assemb.GetTypes())
                     {
-                        if (string.Equals(t.FullName, typeName, e)) return t;
+                        if (string.Equals(t.FullName, typeName, e))
+                        {
+                            if (isArray)
+                                return t.MakeArrayType();
+                            else
+                                return t;
+                        }
                     }
                 }
             }
@@ -101,7 +111,13 @@ namespace com.spacepuppy.Utils
                 {
                     foreach (var t in assemb.GetTypes())
                     {
-                        if (string.Equals(t.Name, typeName, e) || string.Equals(t.FullName, typeName, e)) return t;
+                        if (string.Equals(t.Name, typeName, e) || string.Equals(t.FullName, typeName, e))
+                        {
+                            if (isArray)
+                                return t.MakeArrayType();
+                            else
+                                return t;
+                        }
                     }
                 }
             }
@@ -113,6 +129,10 @@ namespace com.spacepuppy.Utils
             if (string.IsNullOrEmpty(typeName)) return null;
             if (baseType == null) throw new System.ArgumentNullException("baseType");
 
+            bool isArray = typeName.EndsWith("[]");
+            if (isArray)
+                typeName = typeName.Substring(0, typeName.Length - 2);
+
             StringComparison e = (ignoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             if(useFullName)
             {
@@ -120,7 +140,13 @@ namespace com.spacepuppy.Utils
                 {
                     foreach (var t in assemb.GetTypes())
                     {
-                        if (baseType.IsAssignableFrom(t) && string.Equals(t.FullName, typeName, e)) return t;
+                        if (baseType.IsAssignableFrom(t) && string.Equals(t.FullName, typeName, e))
+                        {
+                            if (isArray)
+                                return t.MakeArrayType();
+                            else
+                                return t;
+                        }
                     }
                 }
             }
@@ -130,7 +156,13 @@ namespace com.spacepuppy.Utils
                 {
                     foreach (var t in assemb.GetTypes())
                     {
-                        if (baseType.IsAssignableFrom(t) && (string.Equals(t.Name, typeName, e) || string.Equals(t.FullName, typeName, e))) return t;
+                        if (baseType.IsAssignableFrom(t) && (string.Equals(t.Name, typeName, e) || string.Equals(t.FullName, typeName, e)))
+                        {
+                            if (isArray)
+                                return t.MakeArrayType();
+                            else
+                                return t;
+                        }
                     }
                 }
             }
@@ -145,7 +177,8 @@ namespace com.spacepuppy.Utils
             if (tp.IsArray) return tp.GetArrayRank() == 1;
 
             var interfaces = tp.GetInterfaces();
-            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            //if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            if (Array.IndexOf(interfaces, typeof(System.Collections.IList)) >= 0 || Array.IndexOf(interfaces, typeof(IList<>)) >= 0)
             {
                 return true;
             }
@@ -167,8 +200,90 @@ namespace com.spacepuppy.Utils
             else
             {
                 var interfaces = tp.GetInterfaces();
-                if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+                //if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+                if (Array.IndexOf(interfaces, typeof(System.Collections.IList)) >= 0 || Array.IndexOf(interfaces, typeof(IList<>)) >= 0)
                 {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool IsListType(this System.Type tp, out System.Type innerType)
+        {
+            innerType = null;
+            if (tp == null) return false;
+
+            if (tp.IsArray)
+            {
+                if (tp.GetArrayRank() == 1)
+                {
+                    innerType = tp.GetElementType();
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            var interfaces = tp.GetInterfaces();
+            if (Array.IndexOf(interfaces, typeof(System.Collections.IList)) >= 0 || Array.IndexOf(interfaces, typeof(IList<>)) >= 0)
+            {
+                if (tp.IsGenericType)
+                {
+                    innerType = tp.GetGenericArguments()[0];
+                }
+                else
+                {
+                    innerType = typeof(object);
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsListType(this System.Type tp, bool ignoreAsInterface, out System.Type innerType)
+        {
+            innerType = null;
+            if (tp == null) return false;
+
+            if (tp.IsArray)
+            {
+                if (tp.GetArrayRank() == 1)
+                {
+                    innerType = tp.GetElementType();
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            if (ignoreAsInterface)
+            {
+                if (tp.IsGenericType && tp.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    innerType = tp.GetGenericArguments()[0];
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                var interfaces = tp.GetInterfaces();
+                if (Array.IndexOf(interfaces, typeof(System.Collections.IList)) >= 0 || Array.IndexOf(interfaces, typeof(IList<>)) >= 0)
+                {
+                    if (tp.IsGenericType)
+                    {
+                        innerType = tp.GetGenericArguments()[0];
+                    }
+                    else
+                    {
+                        innerType = typeof(object);
+                    }
                     return true;
                 }
             }
@@ -183,7 +298,8 @@ namespace com.spacepuppy.Utils
             if (tp.IsArray) return tp.GetElementType();
 
             var interfaces = tp.GetInterfaces();
-            if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            //if (interfaces.Contains(typeof(System.Collections.IList)) || interfaces.Contains(typeof(IList<>)))
+            if (Array.IndexOf(interfaces, typeof(System.Collections.IList)) >= 0 || Array.IndexOf(interfaces, typeof(IList<>)) >= 0)
             {
                 if (tp.IsGenericType) return tp.GetGenericArguments()[0];
                 else return typeof(object);

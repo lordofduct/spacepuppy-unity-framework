@@ -288,8 +288,10 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis)
         {
-            Vector3 right = Vector3.Cross(axis, forward).normalized;
-            forward = Vector3.Cross(right, axis).normalized;
+            //Vector3 right = Vector3.Cross(axis, forward).normalized;
+            //forward = Vector3.Cross(right, axis).normalized;
+            Vector3 right = Vector3.Cross(forward, axis).normalized;
+            forward = Vector3.Cross(axis, right).normalized;
             return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * MathUtil.RAD_TO_DEG;
         }
 

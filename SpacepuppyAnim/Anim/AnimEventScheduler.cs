@@ -77,7 +77,7 @@ namespace com.spacepuppy.Anim
             if (_endOfLineCallback == null) _endOfLineCallback = new CallbackInfo() { timeout = float.PositiveInfinity };
             _endOfLineCallback.callback += callback;
 
-            if (_waitRoutine == null) _waitRoutine = new RadicalCoroutine(this.DoUpdate()); //RadicalCoroutine.UpdateTicker(this.Update);
+            if (_waitRoutine == null || _waitRoutine.Finished) this.InitWaitRoutine();
             if (!_waitRoutine.Active) _waitRoutine.Start(_state.Controller);
         }
 
@@ -108,7 +108,7 @@ namespace com.spacepuppy.Anim
                 }
             }
 
-            if (_waitRoutine == null) _waitRoutine = new RadicalCoroutine(this.DoUpdate()); //RadicalCoroutine.UpdateTicker(this.Update);
+            if (_waitRoutine == null || _waitRoutine.Finished) this.InitWaitRoutine();
             if (!_waitRoutine.Active) _waitRoutine.Start(_state.Controller);
         }
 
@@ -127,30 +127,7 @@ namespace com.spacepuppy.Anim
             if(!_state.IsPlaying)
             {
                 //close them all down
-                if (_endOfLineCallback != null && _endOfLineCallback.callback != null)
-                {
-                    var a = _endOfLineCallback.callback;
-                    _endOfLineCallback.callback = null;
-                    try
-                    {
-                        a(_state);
-                    }
-                    catch(System.Exception ex)
-                    {
-                        Debug.LogException(ex);
-                    }
-                }
-
-                if(_timeoutInfos != null && _timeoutInfos.Count > 0)
-                {
-                    var e = _timeoutInfos.GetEnumerator();
-                    while(e.MoveNext())
-                    {
-                        e.Current.callback(_state);
-                        _pool.Release(e.Current);
-                    }
-                    _timeoutInfos.Clear();
-                }
+                this.CloseOutAllEventCallbacks();
             }
             else
             {
@@ -214,6 +191,49 @@ namespace com.spacepuppy.Anim
         {
             if (_endOfLineCallback != null && _endOfLineCallback.callback != null) return true;
             return _timeoutInfos.Count != 0;
+        }
+
+
+
+        private void InitWaitRoutine()
+        {
+            _waitRoutine = new RadicalCoroutine(this.DoUpdate()); //RadicalCoroutine.UpdateTicker(this.Update);
+            _waitRoutine.OnFinished += (s, e) =>
+            {
+                if (object.ReferenceEquals(s, _waitRoutine)) _waitRoutine = null;
+
+                _inUpdate = true;
+                this.CloseOutAllEventCallbacks();
+                _inUpdate = false;
+            };
+        }
+
+        private void CloseOutAllEventCallbacks()
+        {
+            if (_endOfLineCallback != null && _endOfLineCallback.callback != null)
+            {
+                var a = _endOfLineCallback.callback;
+                _endOfLineCallback.callback = null;
+                try
+                {
+                    a(_state);
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
+
+            if (_timeoutInfos != null && _timeoutInfos.Count > 0)
+            {
+                var e = _timeoutInfos.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    e.Current.callback(_state);
+                    _pool.Release(e.Current);
+                }
+                _timeoutInfos.Clear();
+            }
         }
 
         #endregion

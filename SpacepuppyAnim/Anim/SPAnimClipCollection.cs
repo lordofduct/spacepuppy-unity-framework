@@ -103,7 +103,7 @@ namespace com.spacepuppy.Anim
         /// <param name="uniqueHash"></param>
         public void Init(SPAnimationController controller, string uniqueHash = null)
         {
-            if (controller == null) throw new System.ArgumentNullException("container");
+            if (controller == null) throw new System.ArgumentNullException("controller");
             if (this.Initialized) throw new System.InvalidOperationException("SPAnimClipCollection already has been initilized.");
             _controller = controller;
             _uniqueHash = uniqueHash;

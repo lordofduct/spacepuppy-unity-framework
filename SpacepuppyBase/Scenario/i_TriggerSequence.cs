@@ -136,7 +136,7 @@ namespace com.spacepuppy.Scenario
             }
         }
 
-        private void AttemptAutoStart()
+        public void AttemptAutoStart()
         {
             int i = this.CurrentIndexNormalized;
             if (i < 0 || i >= _trigger.Targets.Count) return;

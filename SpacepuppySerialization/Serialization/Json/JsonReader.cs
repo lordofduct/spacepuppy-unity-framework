@@ -6,7 +6,7 @@ using System.Text;
 namespace com.spacepuppy.Serialization.Json
 {
 
-    public class JsonReader : System.IDisposable
+    internal class JsonReader : System.IDisposable
     {
 
         private enum ObjectState : byte
@@ -18,7 +18,7 @@ namespace com.spacepuppy.Serialization.Json
 
         #region Fields
 
-        private StringReader _reader;
+        private TextReader _reader;
         private JsonNodeType _nodeType;
 
         private string _name;
@@ -32,9 +32,19 @@ namespace com.spacepuppy.Serialization.Json
 
         #region CONSTRUCTOR
 
+        public JsonReader()
+        {
+
+        }
+
         public JsonReader(string value)
         {
-            this.Reset(value);
+            this.Init(value);
+        }
+
+        public JsonReader(TextReader reader)
+        {
+            this.Init(reader);
         }
 
         #endregion
@@ -60,7 +70,7 @@ namespace com.spacepuppy.Serialization.Json
 
         #region Methods
 
-        public void Reset(string value)
+        public void Init(string value)
         {
             _reader = new StringReader(value);
             _nodeType = JsonNodeType.None;
@@ -70,6 +80,31 @@ namespace com.spacepuppy.Serialization.Json
             _lastWasComma = false;
             _builder.Length = 0;
         }
+
+        public void Init(TextReader reader)
+        {
+            _reader = reader;
+            _nodeType = JsonNodeType.None;
+            _name = string.Empty;
+            _value = null;
+            _stack.Clear();
+            _lastWasComma = false;
+            _builder.Length = 0;
+        }
+
+        public void Clear()
+        {
+            _reader = null;
+            _nodeType = JsonNodeType.None;
+            _name = string.Empty;
+            _value = null;
+            _stack.Clear();
+            _lastWasComma = false;
+            _builder.Length = 0;
+        }
+
+
+
 
         public bool Read()
         {
@@ -139,6 +174,7 @@ namespace com.spacepuppy.Serialization.Json
                     {
                         //string
                         _value = this.ReadString(c);
+                        _nodeType = JsonNodeType.String;
                         this.ValidateComma();
                         return true;
                     }
@@ -155,6 +191,7 @@ namespace com.spacepuppy.Serialization.Json
                 case '9':
                     {
                         _value = this.ReadNumber(c);
+                        _nodeType = JsonNodeType.Number;
                         this.ValidateComma();
                         return true;
                     }
@@ -165,6 +202,7 @@ namespace com.spacepuppy.Serialization.Json
                     {
                         //bool
                         _value = this.ReadBool(c);
+                        _nodeType = JsonNodeType.Boolean;
                         this.ValidateComma();
                         return true;
                     }
@@ -173,6 +211,7 @@ namespace com.spacepuppy.Serialization.Json
                     {
                         //null
                         _value = this.ReadNull(c);
+                        _nodeType = JsonNodeType.Null;
                         this.ValidateComma();
                         return true;
                     }
@@ -228,7 +267,49 @@ namespace com.spacepuppy.Serialization.Json
                             i = _reader.Read();
                             if (i < 0) throw new JsonException("Syntax error, failed to parse Json.");
 
-                            //TODO!
+                            c = (char)i;
+                            switch (c)
+                            {
+                                case '\\':
+                                case '"':
+                                case '/':
+                                    _builder.Append(c);
+                                    break;
+                                case 'b':
+                                    _builder.Append('\b');
+                                    break;
+                                case 't':
+                                    _builder.Append('\t');
+                                    break;
+                                case 'n':
+                                    _builder.Append('\n');
+                                    break;
+                                case 'f':
+                                    _builder.Append('\f');
+                                    break;
+                                case 'r':
+                                    _builder.Append('\r');
+                                    break;
+                                case 'u':
+                                    int hex = 0;
+                                    for (int j = 0; j < 4; j++)
+                                    {
+                                        i = _reader.Read();
+                                        if (i < 0) throw new JsonException("Syntax error, failed to parse Json.");
+
+                                        c = (char)i;
+                                        if (char.IsNumber(c))
+                                            hex |= (i - 30);
+                                        else if (char.IsLetter(c))
+                                            hex |= ((int)char.ToUpper(c) - 31);
+                                        else
+                                            throw new JsonException("Syntax error, failed to parse Json.");
+
+                                        hex = hex << 4;
+                                    }
+                                    _builder.Append((char)hex);
+                                    break;
+                            }
                         }
                         break;
                     default:
@@ -242,8 +323,68 @@ namespace com.spacepuppy.Serialization.Json
 
         private double ReadNumber(char c)
         {
-            //TODO!
-            return 0d;
+            bool dotFound = false;
+            bool eFound = false;
+
+            _builder.Length = 0;
+            _builder.Append(c);
+            while (true)
+            {
+                switch (_reader.Peek())
+                {
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        c = (char)_reader.Read();
+                        _builder.Append(c);
+                        break;
+                    case '.':
+                        if (dotFound) throw new JsonException("Malformed numeric value.");
+                        dotFound = true;
+                        c = (char)_reader.Read();
+                        _builder.Append(c);
+                        break;
+                    case 'e':
+                    case 'E':
+                        if (eFound) throw new JsonException("Malformed numeric value.");
+                        eFound = true;
+                        dotFound = true;
+                        c = (char)_reader.Read();
+                        _builder.Append(char.ToLower(c));
+                        switch ((char)_reader.Peek())
+                        {
+                            case '+':
+                            case '-':
+                                c = (char)_reader.Read();
+                                _builder.Append(c);
+                                break;
+                        }
+                        break;
+                    case ',':
+                    case '}':
+                    case ']':
+                    case ' ':
+                    case '\t':
+                    case '\n':
+                        goto done;
+                    default:
+                        throw new JsonException("Malformed numeric value.");
+                }
+            }
+
+            done:
+            double value;
+            if (double.TryParse(_builder.ToString(), out value))
+                return value;
+            else
+                return 0d;
         }
 
         private bool ReadBool(char c)

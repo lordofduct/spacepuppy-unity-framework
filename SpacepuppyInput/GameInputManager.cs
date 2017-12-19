@@ -11,27 +11,21 @@ namespace com.spacepuppy
     {
         int Count { get; }
         IPlayerInputDevice this[string id] { get; set; }
+        IPlayerInputDevice Main { get; }
 
-        void Add(string id, IPlayerInputDevice dev);
-        bool Remove(string id);
-        bool Contains(string id);
-        bool Contains(IPlayerInputDevice dev);
-        string GetId(IPlayerInputDevice dev);
         IPlayerInputDevice GetDevice(string id);
         T GetDevice<T>(string id) where T : IPlayerInputDevice;
-
-        void RegisterSequence(ISequence sequence, bool useFixedUpdate = false);
-
+        
     }
-
+    
     public class GameInputManager : ServiceComponent<IGameInputManager>, IGameInputManager
     {
 
         #region Fields
 
         private Dictionary<string, IPlayerInputDevice> _dict = new Dictionary<string, IPlayerInputDevice>();
-        private HashSet<ISequence> _sequences = new HashSet<ISequence>();
-        private HashSet<ISequence> _fixedSequences = new HashSet<ISequence>();
+        private IPlayerInputDevice _default_main;
+        private IPlayerInputDevice _override_main;
 
         #endregion
 
@@ -43,8 +37,33 @@ namespace com.spacepuppy
         }
 
         #endregion
+        
+        #region Messages
 
-        #region Properties
+        private void FixedUpdate()
+        {
+            var e = _dict.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (e.Current.Value.Active) e.Current.Value.FixedUpdate();
+            }
+        }
+
+        /// <summary>
+        /// Call once per frame
+        /// </summary>
+        private void Update()
+        {
+            var e = _dict.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current.Value.Active) e.Current.Value.Update();
+            }
+        }
+
+        #endregion
+
+        #region IGameInputManager Interface
 
         public int Count { get { return _dict.Count; } }
 
@@ -60,87 +79,77 @@ namespace com.spacepuppy
             }
         }
 
-        #endregion
-
-        #region Messages
-
-        private void FixedUpdate()
+        public IPlayerInputDevice Main
         {
-            var e = _dict.GetEnumerator();
-            while(e.MoveNext())
+            get
             {
-                if (e.Current.Value.Active) e.Current.Value.FixedUpdate();
-            }
-
-            if (_fixedSequences.Count > 0)
-            {
-                using (var set = TempCollection.GetSet<ISequence>())
+                if (_override_main != null) return _override_main;
+                if (_default_main == null)
                 {
-                    var e2 = _fixedSequences.GetEnumerator();
-                    while(e2.MoveNext())
+                    var e = _dict.GetEnumerator();
+                    while (e.MoveNext())
                     {
-                        if (e2.Current.Update()) set.Add(e2.Current);
-                    }
-
-                    if(set.Count > 0)
-                    {
-                        e2 = set.GetEnumerator();
-                        while(e2.MoveNext())
-                        {
-                            _fixedSequences.Remove(e2.Current);
-                        }
+                        _default_main = e.Current.Value;
                     }
                 }
+                return _default_main;
+            }
+            set
+            {
+                _override_main = value;
             }
         }
 
-        /// <summary>
-        /// Call once per frame
-        /// </summary>
-        private void Update()
+        public IPlayerInputDevice GetDevice(string id)
         {
-            var e = _dict.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current.Value.Active) e.Current.Value.Update();
-            }
+            if (!_dict.ContainsKey(id)) throw new System.Collections.Generic.KeyNotFoundException();
+            return _dict[id];
+        }
 
-            if (_sequences.Count > 0)
-            {
-                using (var set = TempCollection.GetSet<ISequence>())
-                {
-                    var e2 = _sequences.GetEnumerator();
-                    while (e2.MoveNext())
-                    {
-                        if (e2.Current.Update()) set.Add(e2.Current);
-                    }
-
-                    if (set.Count > 0)
-                    {
-                        e2 = set.GetEnumerator();
-                        while (e2.MoveNext())
-                        {
-                            _sequences.Remove(e2.Current);
-                        }
-                    }
-                }
-            }
+        public T GetDevice<T>(string id) where T : IPlayerInputDevice
+        {
+            if (!_dict.ContainsKey(id)) throw new System.Collections.Generic.KeyNotFoundException();
+            return (T)_dict[id];
         }
 
         #endregion
 
-        #region Methods
+        #region Collection Interface
 
         public void Add(string id, IPlayerInputDevice dev)
         {
             if (this.Contains(dev) && !(_dict.ContainsKey(id) && _dict[id] == dev)) throw new System.ArgumentException("Manager already contains input device for other player.");
 
+            if (_dict.Count == 0) _default_main = dev;
             _dict[id] = dev;
         }
 
         public bool Remove(string id)
         {
-            return _dict.Remove(id);
+            if(_default_main != null)
+            {
+                IPlayerInputDevice device;
+                if(_dict.TryGetValue(id, out device) && device == _default_main)
+                {
+                    if(_dict.Remove(id))
+                    {
+                        _default_main = null;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return _dict.Remove(id);
+                }
+            }
+            else
+            {
+                return _dict.Remove(id);
+            }
         }
 
         public bool Contains(string id)
@@ -162,29 +171,7 @@ namespace com.spacepuppy
 
             throw new System.ArgumentException("Unknown input device.");
         }
-
-        public IPlayerInputDevice GetDevice(string id)
-        {
-            if (!_dict.ContainsKey(id)) throw new System.Collections.Generic.KeyNotFoundException();
-            return _dict[id];
-        }
-
-        public T GetDevice<T>(string id) where T : IPlayerInputDevice
-        {
-            if (!_dict.ContainsKey(id)) throw new System.Collections.Generic.KeyNotFoundException();
-            return (T)_dict[id];
-        }
-
-
-
-
-
-        public void RegisterSequence(ISequence sequence, bool useFixedUpdate = false)
-        {
-            bool b = (useFixedUpdate) ? _fixedSequences.Add(sequence) : _sequences.Add(sequence);
-            if (b) sequence.OnStart();
-        }
-
+        
         #endregion
 
         #region IEnumerable Interface

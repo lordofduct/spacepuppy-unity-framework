@@ -23,6 +23,12 @@ namespace com.spacepuppy.StateMachine
 
         #region CONSTRUCTOR
 
+        /// <summary>
+        /// Create a ParentComponentStateSupplier
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="includeStatesOnContainer"></param>
+        /// <param name="isStatic">Set true if the hierarchy doesn't change.</param>
         public ParentComponentStateSupplier(GameObject container, bool includeStatesOnContainer, bool isStatic)
         {
             if (container == null) throw new System.ArgumentNullException("container");

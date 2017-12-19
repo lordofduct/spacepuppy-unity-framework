@@ -61,7 +61,7 @@ namespace com.spacepuppy
     /// </notes>
     public sealed class RadicalCoroutine : IRadicalEnumerator, IImmediatelyResumingYieldInstruction, IRadicalWaitHandle, IEnumerator, System.IDisposable
     {
-
+        
         #region Events
 
         /// <summary>
@@ -454,7 +454,7 @@ namespace com.spacepuppy
         /// Manually step the coroutine. This is usually done from within a Update event.
         /// </summary>
         /// <param name="handle">A MonoBehaviour to use as a handle if a YieldInstruction is to be operated on.</param>
-        /// <returns></returns>
+        /// <returns>Returns true if the coroutine is still active.</returns>
         public bool ManualTick(MonoBehaviour handle)
         {
             if (_owner != null || _state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated.");
@@ -483,6 +483,40 @@ namespace com.spacepuppy
                     _stack.Push(wait);
                     wait.Start();
                 }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Like ManualTick(MonoBehaviour), but instead the yield object is returned as an out parameter and the caller decides what to do with it.
+        /// </summary>
+        /// <param name="yieldObj"></param>
+        /// <returns></returns>
+        public bool ManualTick(out object yieldObj)
+        {
+            if (_owner != null || _state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Can not manually operate a RadicalCoroutine that is already being operated.");
+
+            _state = RadicalCoroutineOperatingState.Active;
+            bool result = false;
+            try
+            {
+                result = (this as IEnumerator).MoveNext();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+            if (_state == RadicalCoroutineOperatingState.Active) _state = RadicalCoroutineOperatingState.Inactive;
+
+            if (result)
+            {
+                yieldObj = _currentIEnumeratorYieldValue;
+                _currentIEnumeratorYieldValue = null;
+            }
+            else
+            {
+                yieldObj = null;
             }
 
             return result;
@@ -989,6 +1023,25 @@ namespace com.spacepuppy
 
 
         #region Static Pool
+
+        private static UnityEngine.WaitForFixedUpdate _waitForFixedUpdate;
+        private static UnityEngine.WaitForEndOfFrame _waitForEndOfFrame;
+        public static UnityEngine.WaitForFixedUpdate WaitForFixedUpdate
+        {
+            get
+            {
+                if (_waitForFixedUpdate == null) _waitForFixedUpdate = new WaitForFixedUpdate();
+                return _waitForFixedUpdate;
+            }
+        }
+        public static UnityEngine.WaitForEndOfFrame WaitForEndOfFrame
+        {
+            get
+            {
+                if (_waitForEndOfFrame == null) _waitForEndOfFrame = new WaitForEndOfFrame();
+                return _waitForEndOfFrame;
+            }
+        }
 
         /*
         private static com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine> _pool = new com.spacepuppy.Collections.ObjectCachePool<RadicalCoroutine>(1000,

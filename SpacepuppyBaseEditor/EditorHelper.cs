@@ -83,6 +83,34 @@ namespace com.spacepuppyeditor
 
         #region SerializedProperty Helpers
 
+        public static IEnumerable<SerializedProperty> GetChildren(this SerializedProperty property)
+        {
+            property = property.Copy();
+            var nextElement = property.Copy();
+            bool hasNextElement = nextElement.NextVisible(false);
+            if (!hasNextElement)
+            {
+                nextElement = null;
+            }
+
+            property.NextVisible(true);
+            while (true)
+            {
+                if ((SerializedProperty.EqualContents(property, nextElement)))
+                {
+                    yield break;
+                }
+
+                yield return property;
+
+                bool hasNext = property.NextVisible(false);
+                if (!hasNext)
+                {
+                    break;
+                }
+            }
+        }
+
         public static System.Type GetTargetType(this SerializedObject obj)
         {
             if (obj == null) return null;
@@ -249,17 +277,18 @@ namespace com.spacepuppyeditor
             if (prop == null) throw new System.ArgumentNullException("prop");
             if (prop.propertyType != SerializedPropertyType.Enum) throw new System.ArgumentException("SerializedProperty is not an enum type.", "prop");
 
-            var tp = typeof(T);
-            if(tp.IsEnum)
-            {
-                prop.enumValueIndex = prop.enumNames.IndexOf(System.Enum.GetName(tp, value));
-            }
-            else
-            {
-                int i = ConvertUtil.ToInt(value);
-                if (i < 0 || i >= prop.enumNames.Length) i = 0;
-                prop.enumValueIndex = i;
-            }
+            //var tp = typeof(T);
+            //if(tp.IsEnum)
+            //{
+            //    prop.enumValueIndex = prop.enumNames.IndexOf(System.Enum.GetName(tp, value));
+            //}
+            //else
+            //{
+            //    int i = ConvertUtil.ToInt(value);
+            //    if (i < 0 || i >= prop.enumNames.Length) i = 0;
+            //    prop.enumValueIndex = i;
+            //}
+            prop.intValue = ConvertUtil.ToInt(value);
         }
 
         public static void SetEnumValue(this SerializedProperty prop, System.Enum value)
@@ -273,9 +302,10 @@ namespace com.spacepuppyeditor
                 return;
             }
 
-            int i = prop.enumNames.IndexOf(System.Enum.GetName(value.GetType(), value));
-            if (i < 0) i = 0;
-            prop.enumValueIndex = i;
+            //int i = prop.enumNames.IndexOf(System.Enum.GetName(value.GetType(), value));
+            //if (i < 0) i = 0;
+            //prop.enumValueIndex = i;
+            prop.intValue = ConvertUtil.ToInt(value);
         }
 
         public static void SetEnumValue(this SerializedProperty prop, object value)
@@ -289,19 +319,20 @@ namespace com.spacepuppyeditor
                 return;
             }
 
-            var tp = value.GetType();
-            if (tp.IsEnum)
-            {
-                int i = prop.enumNames.IndexOf(System.Enum.GetName(tp, value));
-                if (i < 0) i = 0;
-                prop.enumValueIndex = i;
-            }
-            else
-            {
-                int i = ConvertUtil.ToInt(value);
-                if (i < 0 || i >= prop.enumNames.Length) i = 0;
-                prop.enumValueIndex = i;
-            }
+            //var tp = value.GetType();
+            //if (tp.IsEnum)
+            //{
+            //    int i = prop.enumNames.IndexOf(System.Enum.GetName(tp, value));
+            //    if (i < 0) i = 0;
+            //    prop.enumValueIndex = i;
+            //}
+            //else
+            //{
+            //    int i = ConvertUtil.ToInt(value);
+            //    if (i < 0 || i >= prop.enumNames.Length) i = 0;
+            //    prop.enumValueIndex = i;
+            //}
+            prop.intValue = ConvertUtil.ToInt(value);
         }
 
         public static T GetEnumValue<T>(this SerializedProperty prop) where T : struct, System.IConvertible
@@ -310,8 +341,9 @@ namespace com.spacepuppyeditor
 
             try
             {
-                var name = prop.enumNames[prop.enumValueIndex];
-                return ConvertUtil.ToEnum<T>(name);
+                //var name = prop.enumNames[prop.enumValueIndex];
+                //return ConvertUtil.ToEnum<T>(name);
+                return ConvertUtil.ToEnum<T>(prop.intValue);
             }
             catch
             {
@@ -327,8 +359,9 @@ namespace com.spacepuppyeditor
 
             try
             {
-                var name = prop.enumNames[prop.enumValueIndex];
-                return System.Enum.Parse(tp, name) as System.Enum;
+                //var name = prop.enumNames[prop.enumValueIndex];
+                //return System.Enum.Parse(tp, name) as System.Enum;
+                return ConvertUtil.ToEnumOfType(tp, prop.intValue);
             }
             catch
             {
