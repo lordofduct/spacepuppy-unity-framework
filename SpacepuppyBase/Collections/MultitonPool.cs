@@ -589,7 +589,7 @@ namespace com.spacepuppy.Collections
             var e = _pool.GetEnumerator();
             while (e.MoveNext())
             {
-                if (e.Current is TSub) yield return e.Current as TSub;
+                if (e.Current.Value is TSub) yield return e.Current.Value as TSub;
             }
         }
 
@@ -1000,7 +1000,7 @@ namespace com.spacepuppy.Collections
             var e = _pool.GetEnumerator();
             while (e.MoveNext())
             {
-                if (e.Current is TSub) yield return e.Current as TSub;
+                if (e.Current.Value is TSub) yield return e.Current.Value as TSub;
             }
         }
 
