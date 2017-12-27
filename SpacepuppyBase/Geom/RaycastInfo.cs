@@ -60,4 +60,5 @@ namespace com.spacepuppy.Geom
             set { _dist = value; }
         }
     }
+
 }
