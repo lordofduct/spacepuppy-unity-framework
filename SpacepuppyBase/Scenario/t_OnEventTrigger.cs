@@ -20,8 +20,9 @@ namespace com.spacepuppy.Scenario
 
         private void Execute(EventTriggerType id, BaseEventData eventData)
         {
-            if (_triggers == null)
+            if (_triggers == null || _triggers.Count == 0)
                 return;
+
             int index = 0;
             for (int count = _triggers.Count; index < count; ++index)
             {

@@ -361,7 +361,10 @@ namespace com.spacepuppy.Utils
         {
             if (c == null) return false;
 
-            return c.name == name;
+            if (c is SPEntity)
+                return (c as SPEntity).CompareName(name);
+            else
+                return c.name == name;
         }
 
         public static GameObject Find(this GameObject go, string spath)

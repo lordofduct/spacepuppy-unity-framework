@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -45,6 +46,25 @@ namespace com.spacepuppyeditor
                 throw new DirectoryNotFoundException();
             }
         }
+
+
+        public static string GetSelectedPath()
+        {
+            string path = "Assets";
+
+            foreach (var obj in Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets))
+            {
+                path = AssetDatabase.GetAssetPath(obj);
+                if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
+                {
+                    path = System.IO.Path.GetDirectoryName(path);
+                    break;
+                }
+            }
+
+            return path;
+        }
+
 
     }
 }

@@ -5,8 +5,6 @@ namespace com.spacepuppy.Cameras
 
     /// <summary>
     /// Stores the state of a Camera.
-    /// 
-    /// This type is a class rather than a struct, you should create an object for the token and recycle as needed.
     /// </summary>
     [System.Serializable()]
     public struct CameraToken
@@ -74,4 +72,5 @@ namespace com.spacepuppy.Cameras
         #endregion
         
     }
+
 }

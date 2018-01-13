@@ -43,9 +43,7 @@ namespace com.spacepuppy
 
         private static com.spacepuppy.Async.InvokePump _updateInvokeHandle;
         private static com.spacepuppy.Async.InvokePump _fixedUpdateInvokeHandle;
-
         
-
         #endregion
 
         #region CONSTRUCTOR

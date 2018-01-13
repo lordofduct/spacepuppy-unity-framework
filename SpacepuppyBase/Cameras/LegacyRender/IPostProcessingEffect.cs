@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Cameras.LegacyRender
 {
+
     public interface IPostProcessingEffect
     {
 
@@ -12,4 +13,5 @@ namespace com.spacepuppy.Cameras.LegacyRender
         void RenderImage(ICamera camera, RenderTexture source, RenderTexture destination);
 
     }
+
 }

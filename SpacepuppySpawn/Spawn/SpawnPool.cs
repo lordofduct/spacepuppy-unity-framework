@@ -66,7 +66,7 @@ namespace com.spacepuppy.Spawn
                 if (_defaultPool != null) return true;
 
                 _defaultPool = null;
-                var point = (from p in GameObject.FindObjectsOfType<SpawnPool>() orderby p.name == DEFAULT_SPAWNPOOL_NAME select p).FirstOrDefault();
+                var point = (from p in GameObject.FindObjectsOfType<SpawnPool>() where p.name == DEFAULT_SPAWNPOOL_NAME select p).FirstOrDefault();
                 if (!object.ReferenceEquals(point, null))
                 {
                     _defaultPool = point;
@@ -96,7 +96,7 @@ namespace com.spacepuppy.Spawn
         protected override void Awake()
         {
             base.Awake();
-            if (!Object.ReferenceEquals(this, _defaultPool))
+            if (!object.ReferenceEquals(this, _defaultPool))
             {
                 _pools.Add(this);
             }

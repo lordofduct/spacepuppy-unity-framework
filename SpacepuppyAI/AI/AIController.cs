@@ -16,12 +16,7 @@ namespace com.spacepuppy.AI
     /// </summary>
     public class AIController : SPNotifyingComponent, IAIController, IAIStateMachine
     {
-
-        public void Blargh()
-        {
-
-        }
-
+        
         #region Fields
 
         [SerializeField()]
@@ -256,55 +251,6 @@ namespace com.spacepuppy.AI
         }
 
         #endregion
-
-        /*
-        #region IAIAction Interface
-
-        bool IAIAction.Enabled { get { return this.isActiveAndEnabled; } }
-
-        RepeatMode IAIAction.Repeat
-        {
-            get
-            {
-                return RepeatMode.Never;
-            }
-            set
-            {
-            }
-        }
-
-        bool IAIAction.AlwaysSucceed
-        {
-            get
-            {
-                return false;
-            }
-            set
-            {
-            }
-        }
-
-        ActionResult IAIAction.ActionState
-        {
-            get { return ActionResult.None; }
-        }
-
-        string IAINode.DisplayName
-        {
-            get { return this.name; }
-        }
-
-        ActionResult IAINode.Tick(AITreeController ai)
-        {
-            return ActionResult.Failed;
-        }
-
-        void IAINode.Reset()
-        {
-        }
-
-        #endregion
-        */
-
+        
     }
 }

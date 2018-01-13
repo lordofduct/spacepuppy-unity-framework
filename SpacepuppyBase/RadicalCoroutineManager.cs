@@ -4,7 +4,6 @@ using System.Linq;
 
 using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppy
 {

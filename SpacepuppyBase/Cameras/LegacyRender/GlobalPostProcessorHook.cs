@@ -7,6 +7,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Cameras.LegacyRender
 {
 
+    /*
     [RequireComponent(typeof(Camera))]
     internal sealed class GlobalPostProcessorHook : SPComponent
     {
@@ -106,4 +107,6 @@ namespace com.spacepuppy.Cameras.LegacyRender
         #endregion
 
     }
+    */
+
 }

@@ -4,7 +4,6 @@ using UnityEngine;
 using System.Collections.Generic;
 
 using com.spacepuppy.Collections;
-using System;
 
 namespace com.spacepuppy.Render
 {
@@ -105,6 +104,16 @@ namespace com.spacepuppy.Render
             }
 
             base.Start();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if(_unique)
+            {
+                UnityEngine.Object.Destroy(this.Material);
+            }
         }
 
         #endregion
@@ -215,6 +224,16 @@ namespace com.spacepuppy.Render
             }
 
             base.Start();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (_unique)
+            {
+                UnityEngine.Object.Destroy(this.Material);
+            }
         }
 
         #endregion
