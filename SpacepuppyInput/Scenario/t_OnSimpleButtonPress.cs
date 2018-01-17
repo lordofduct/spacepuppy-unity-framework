@@ -15,6 +15,7 @@ namespace com.spacepuppy.Scenario
         
         [SerializeField]
         [DisableOnPlay]
+        [InputID]
         private string _inputId;
 
         //[System.NonSerialized()]

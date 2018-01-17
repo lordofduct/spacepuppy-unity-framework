@@ -16,9 +16,7 @@ namespace com.spacepuppyeditor.Base
 
         public const string MENU_NAME = SPMenu.MENU_NAME_SETTINGS + "/Advanced Input Manager";
         public const int MENU_PRIORITY = SPMenu.MENU_PRIORITY_SETTINGS;
-
-        public const string PROP_AXES = "m_Axes";
-
+        
         #endregion
 
         #region Menu Entries
@@ -59,7 +57,7 @@ namespace com.spacepuppyeditor.Base
             if (asset != null)
             {
                 _inputManagerAsset = new SerializedObject(asset);
-                _axesList = new SPReorderableList(_inputManagerAsset, _inputManagerAsset.FindProperty(PROP_AXES));
+                _axesList = new SPReorderableList(_inputManagerAsset, _inputManagerAsset.FindProperty(InputSettings.PROP_AXES));
                 _axesList.elementHeight = EditorGUIUtility.singleLineHeight;
                 _axesList.drawHeaderCallback = _axesList_DrawHeader;
                 _axesList.drawElementCallback = _axesList_DrawElement;
@@ -120,35 +118,7 @@ namespace com.spacepuppyeditor.Base
         }
 
         #endregion
-
-
-
-        #region Static Utils
-
-        public static string[] GetAllAvailableInputs()
-        {
-            var asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset").FirstOrDefault();
-            if (asset != null)
-            {
-                var obj = new SerializedObject(asset);
-                var axes = obj.FindProperty(PROP_AXES);
-                string[] arr = new string[axes.arraySize];
-                for(int i = 0; i < arr.Length; i++)
-                {
-                    arr[i] = axes.GetArrayElementAtIndex(i).FindPropertyRelative("m_Name").stringValue;
-                }
-                obj.Dispose();
-                return arr;
-            }
-            else
-            {
-                return com.spacepuppy.Utils.ArrayUtil.Empty<string>();
-            }
-        }
-
-        #endregion
-
-
+        
     }
 
 }

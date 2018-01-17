@@ -229,11 +229,22 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
+        /// <summary>
+        /// TODO - currently is not thread safe, need to add a check to make sure on the main thread OR make it thread safe.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         private static class GlobalMessagePool<T> where T : class
         {
 
+            private enum ExecutingState
+            {
+                None,
+                Executing,
+                CleaningUp
+            }
+
             private static HashSet<T> _receivers;
-            private static bool _executing;
+            private static ExecutingState _state;
             private static TempHashSet<T> _toAdd;
             private static TempHashSet<T> _toRemove;
 
@@ -241,14 +252,18 @@ namespace com.spacepuppy.Utils
             {
                 if (_receivers == null) _receivers = new HashSet<T>();
 
-                if(_executing)
+                switch(_state)
                 {
-                    if (_toAdd == null) _toAdd = TempCollection.GetSet<T>();
-                    _toAdd.Add(listener);
-                }
-                else
-                {
-                    _receivers.Add(listener);
+                    case ExecutingState.None:
+                        _receivers.Add(listener);
+                        break;
+                    case ExecutingState.Executing:
+                        if (_toAdd == null) _toAdd = TempCollection.GetSet<T>();
+                        _toAdd.Add(listener);
+                        break;
+                    case ExecutingState.CleaningUp:
+                        _receivers.Add(listener);
+                        break;
                 }
             }
 
@@ -256,23 +271,27 @@ namespace com.spacepuppy.Utils
             {
                 if (_receivers == null || _receivers.Count == 0) return;
 
-                if (_executing)
+                switch (_state)
                 {
-                    if (_toRemove == null) _toRemove = TempCollection.GetSet<T>();
-                    _toRemove.Add(listener);
-                }
-                else
-                {
-                    _receivers.Remove(listener);
+                    case ExecutingState.None:
+                        _receivers.Remove(listener);
+                        break;
+                    case ExecutingState.Executing:
+                        if (_toRemove == null) _toRemove = TempCollection.GetSet<T>();
+                        _toRemove.Add(listener);
+                        break;
+                    case ExecutingState.CleaningUp:
+                        _receivers.Remove(listener);
+                        break;
                 }
             }
 
             public static void Execute(System.Action<T> functor)
             {
-                if (_executing) throw new System.InvalidOperationException("Can not globally broadcast a message currently executing.");
+                if (_state != ExecutingState.None) throw new System.InvalidOperationException("Can not globally broadcast a message currently executing.");
                 if (_receivers == null || _receivers.Count == 0) return;
-
-                _executing = true;
+                
+                _state = ExecutingState.Executing;
                 try
                 {
                     var e = _receivers.GetEnumerator();
@@ -283,19 +302,22 @@ namespace com.spacepuppy.Utils
                             //skip & remove destroyed objects
                             Remove(e.Current);
                         }
-                        try
+                        else
                         {
-                            functor(e.Current);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            Debug.LogException(ex);
+                            try
+                            {
+                                functor(e.Current);
+                            }
+                            catch (System.Exception ex)
+                            {
+                                Debug.LogException(ex);
+                            }
                         }
                     }
                 }
                 finally
                 {
-                    _executing = false;
+                    _state = ExecutingState.CleaningUp;
 
                     if (_toRemove != null)
                     {
@@ -318,15 +340,17 @@ namespace com.spacepuppy.Utils
                         _toAdd.Dispose();
                         _toAdd = null;
                     }
+
+                    _state = ExecutingState.None;
                 }
             }
 
             public static void Execute<TArg>(TArg arg, System.Action<T, TArg> functor)
             {
-                if (_executing) throw new System.InvalidOperationException("Can not globally broadcast a message currently executing.");
+                if (_state != ExecutingState.None) throw new System.InvalidOperationException("Can not globally broadcast a message currently executing.");
                 if (_receivers == null || _receivers.Count == 0) return;
-
-                _executing = true;
+                
+                _state = ExecutingState.Executing;
                 try
                 {
                     var e = _receivers.GetEnumerator();
@@ -337,19 +361,22 @@ namespace com.spacepuppy.Utils
                             //skip & remove destroyed objects
                             Remove(e.Current);
                         }
-                        try
+                        else
                         {
-                            functor(e.Current, arg);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            Debug.LogException(ex);
+                            try
+                            {
+                                functor(e.Current, arg);
+                            }
+                            catch (System.Exception ex)
+                            {
+                                Debug.LogException(ex);
+                            }
                         }
                     }
                 }
                 finally
                 {
-                    _executing = false;
+                    _state = ExecutingState.CleaningUp;
 
                     if (_toRemove != null)
                     {
@@ -372,6 +399,8 @@ namespace com.spacepuppy.Utils
                         _toAdd.Dispose();
                         _toAdd = null;
                     }
+
+                    _state = ExecutingState.None;
                 }
             }
 

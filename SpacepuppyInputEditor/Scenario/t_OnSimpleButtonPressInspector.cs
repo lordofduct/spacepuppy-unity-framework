@@ -7,7 +7,8 @@ using com.spacepuppy.Scenario;
 namespace com.spacepuppyeditor.Scenario
 {
 
-    [CustomEditor(typeof(t_OnSimpleButtonPressInspector))]
+    [System.Obsolete("Obselete Inspector, now uses the InputIDAttribute instead.")]
+    //[CustomEditor(typeof(t_OnSimpleButtonPress))]
     public class t_OnSimpleButtonPressInspector : SPEditor
     {
 
@@ -19,7 +20,7 @@ namespace com.spacepuppyeditor.Scenario
         {
             base.OnEnable();
 
-            _inputIds = com.spacepuppyeditor.Base.AdvancedInputManagerWindow.GetAllAvailableInputs();
+            _inputIds = InputSettings.GetGlobalInputIds();
         }
 
         protected override void OnSPInspectorGUI()

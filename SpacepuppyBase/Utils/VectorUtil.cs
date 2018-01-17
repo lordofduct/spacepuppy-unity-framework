@@ -285,23 +285,43 @@ namespace com.spacepuppy.Utils
         /// <param name="v"></param>
         /// <param name="forward"></param>
         /// <param name="axis"></param>
-        /// <returns></returns>
-        public static float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis)
+        /// <returns>Angle in degrees</returns>
+        public static float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis, bool clockwise = false)
         {
-            //Vector3 right = Vector3.Cross(axis, forward).normalized;
-            //forward = Vector3.Cross(right, axis).normalized;
-            Vector3 right = Vector3.Cross(forward, axis).normalized;
-            forward = Vector3.Cross(axis, right).normalized;
+            Vector3 right;
+            if (clockwise)
+            {
+                right = Vector3.Cross(forward, axis);
+                forward = Vector3.Cross(axis, right);
+            }
+            else
+            {
+                right = Vector3.Cross(axis, forward);
+                forward = Vector3.Cross(right, axis);
+            }
             return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * MathUtil.RAD_TO_DEG;
         }
 
-        public static Vector3 RotateAroundAxis(Vector3 v, float a, Vector3 axis, bool bUseRadians = false)
+        /// <summary>
+        /// Rotate a vector around some axis.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <param name="a"></param>
+        /// <param name="axis"></param>
+        /// <param name="clockwise"></param>
+        /// <param name="bUseRadians"></param>
+        /// <returns></returns>
+        public static Vector3 RotateAroundAxis(Vector3 v, float a, Vector3 axis, bool clockwise = false, bool bUseRadians = false)
         {
             if (bUseRadians) a *= MathUtil.RAD_TO_DEG;
-            var q = Quaternion.AngleAxis(a, axis);
+            Quaternion q;
+            if (clockwise)
+                q = Quaternion.AngleAxis(a, axis);
+            else
+                q = Quaternion.AngleAxis(-a, axis);
             return q * v;
         }
-        
+
         #endregion
 
         #region Vector2 Mod

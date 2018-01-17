@@ -14,7 +14,7 @@ namespace com.spacepuppyeditor
     [CreateAssetMenu(fileName = "InputSettings", menuName = "Spacepuppy/Input Settings", order = int.MaxValue)]
     public class InputSettings : ScriptableObject
     {
-
+        
         #region Fields
 
         [SerializeField]
@@ -419,6 +419,45 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Static Utils
+
+        private static System.Func<string[]> _overrideGetGlobalInputIds;
+        public static System.Func<string[]> GetGlobalInputIds
+        {
+            get
+            {
+                if (_overrideGetGlobalInputIds == null) _overrideGetGlobalInputIds = GetGlobalInputIdsDefault;
+                return _overrideGetGlobalInputIds;
+            }
+            set
+            {
+                _overrideGetGlobalInputIds = value;
+            }
+        }
+
+        public static string[] GetGlobalInputIdsDefault()
+        {
+            var asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset").FirstOrDefault();
+            if (asset != null)
+            {
+                var obj = new SerializedObject(asset);
+                var axes = obj.FindProperty(PROP_AXES);
+                string[] arr = new string[axes.arraySize];
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    arr[i] = axes.GetArrayElementAtIndex(i).FindPropertyRelative("m_Name").stringValue;
+                }
+                obj.Dispose();
+                return arr;
+            }
+            else
+            {
+                return com.spacepuppy.Utils.ArrayUtil.Empty<string>();
+            }
+        }
+
+        #endregion
+
     }
 
     [CustomEditor(typeof(InputSettings), true)]
@@ -442,7 +481,13 @@ namespace com.spacepuppyeditor
         public const string PROP_AXIS = "Axis";
         public const string PROP_JOYNUM = "JoyNum";
 
+        #region Fields
+
         private SPReorderableList _entryList;
+
+        #endregion
+
+        #region CONSTRUCTOR
 
         protected override void OnEnable()
         {
@@ -452,6 +497,10 @@ namespace com.spacepuppyeditor
             _entryList.drawHeaderCallback = this._entryList_DrawHeader;
             _entryList.drawElementCallback = this._entryList_DrawElement;
         }
+
+        #endregion
+
+        #region GUI
 
         protected override void OnSPInspectorGUI()
         {
@@ -574,6 +623,9 @@ namespace com.spacepuppyeditor
 
             EditorGUI.LabelField(area, propName.stringValue, propDesc.stringValue);
         }
+
+        #endregion
+
     }
 
 }
