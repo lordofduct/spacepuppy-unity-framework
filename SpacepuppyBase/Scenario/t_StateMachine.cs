@@ -150,6 +150,22 @@ namespace com.spacepuppy.Scenario
 
             return null;
         }
+        
+        void IStateMachine<string>.GetStates(ICollection<string> coll)
+        {
+            for (int i = 0; i < _states.Length; i++)
+            {
+                coll.Add(_states[i].Name);
+            }
+        }
+
+        void com.spacepuppy.Collections.IForeachEnumerator<string>.Foreach(System.Action<string> callback)
+        {
+            for (int i = 0; i < _states.Length; i++)
+            {
+                callback(_states[i].Name);
+            }
+        }
 
         IEnumerator<string> IEnumerable<string>.GetEnumerator()
         {

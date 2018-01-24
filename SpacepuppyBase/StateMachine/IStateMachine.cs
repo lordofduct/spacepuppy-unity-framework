@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using com.spacepuppy.Collections;
 
 namespace com.spacepuppy.StateMachine
 {
 
-    public interface IStateMachine<T> : IEnumerable<T>
+    public interface IStateMachine<T> : IEnumerable<T>, IForeachEnumerator<T>
     {
 
         event StateChangedEventHandler<T> StateChanged;
@@ -13,6 +14,8 @@ namespace com.spacepuppy.StateMachine
 
         bool Contains(T state);
         T ChangeState(T state);
+
+        void GetStates(ICollection<T> coll);
 
     }
 

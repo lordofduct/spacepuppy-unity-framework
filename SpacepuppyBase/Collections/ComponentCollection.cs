@@ -273,6 +273,10 @@ namespace com.spacepuppy.Collections
         #region IEnumerable Interface
 
         //TODO - implement propert Enumerator, remember dict.Values allocates mem in mono... ugh
+        protected Dictionary<System.Type, TBase>.ValueCollection.Enumerator GetEnumeratorDirect()
+        {
+            return _coll.Values.GetEnumerator();
+        }
 
         public IEnumerator<TBase> GetEnumerator()
         {

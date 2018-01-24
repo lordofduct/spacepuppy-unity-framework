@@ -82,6 +82,7 @@
     <Compile Include="Cameras\UnityCamera.cs" />
     <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\BinaryHeap.cs" />
+    <Compile Include="Collections\IForeachEnumerator.cs" />
     <Compile Include="Collections\LightEnumerator.cs" />
     <Compile Include="Collections\MultitonPool.cs" />
     <Compile Include="Collections\SamplingCharEnumerator.cs" />
@@ -430,6 +431,7 @@
     <Compile Include="VariableStore.cs" />
     <Compile Include="VariantCollection.cs" />
     <Compile Include="VariantReference.cs" />
+    <Compile Include="VersionInfo.cs" />
     <Compile Include="WaitForComplete.cs" />
     <Compile Include="WaitForDuration.cs" />
     <Compile Include="WaitForLateUpdate.cs" />

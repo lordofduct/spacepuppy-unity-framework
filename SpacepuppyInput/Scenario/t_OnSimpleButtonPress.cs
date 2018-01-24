@@ -91,7 +91,7 @@ namespace com.spacepuppy.Scenario
             var input = service != null ? service.Main : null;
             if(input != null)
             {
-                if(input.GetCurrentButtonState(_inputId) == UserInput.ButtonState.Down)
+                if(input.GetButtonState(_inputId) == UserInput.ButtonState.Down)
                 {
                     this.ActivateTrigger(null);
                 }

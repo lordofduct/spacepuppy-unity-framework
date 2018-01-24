@@ -231,6 +231,26 @@ namespace com.spacepuppy.StateMachine
             return _states.GetValueAfterOrDefault(current, true);
         }
 
+        public void GetStates(ICollection<T> coll)
+        {
+            GetComponentsOnTarg(_container, coll, _includeStatesOnContainer);
+        }
+
+        public void Foreach(System.Action<T> callback)
+        {
+            if (callback == null) return;
+            if (_container == null) return;
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<T>())
+            {
+                _container.GetComponents<T>(lst);
+                var e = lst.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    callback(e.Current);
+                }
+            }
+        }
+
         #endregion
 
         #region IEnumerable Interface

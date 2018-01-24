@@ -2883,7 +2883,24 @@ namespace com.spacepuppy.Utils
             //first make sure it's not an enum
             if(tp != null && tp.IsEnum)
             {
-                return System.Enum.Parse(tp, System.Convert.ToString(value), true);
+                if (value is string)
+                    return System.Enum.Parse(tp, value as string, true);
+
+                var vtp = value.GetType();
+                switch (System.Type.GetTypeCode(vtp))
+                {
+                    case System.TypeCode.SByte:
+                    case System.TypeCode.Byte:
+                    case System.TypeCode.Int16:
+                    case System.TypeCode.UInt16:
+                    case System.TypeCode.Int32:
+                    case System.TypeCode.UInt32:
+                    case System.TypeCode.Int64:
+                    case System.TypeCode.UInt64:
+                        return System.Enum.ToObject(tp, value);
+                    default:
+                        return System.Enum.Parse(tp, System.Convert.ToString(value), true);
+                }
             }
 
             //now base off of the TypeCode

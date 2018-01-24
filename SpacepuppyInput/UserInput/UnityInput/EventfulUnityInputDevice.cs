@@ -7,7 +7,7 @@ using System;
 namespace com.spacepuppy.UserInput.UnityInput
 {
 
-    public class EventfulUnityInputDevice : IPlayerInputDevice, IUpdateable
+    public class EventfulUnityInputDevice : IInputDevice, IUpdateable
     {
 
         public const string INPUT_ID = "sp.internal.evu.device";
@@ -193,22 +193,22 @@ namespace com.spacepuppy.UserInput.UnityInput
         {
         }
 
-        public float GetCurrentAxleState(int hash)
+        public float GetAxleState(int hash)
         {
             return 0f;
         }
 
-        public float GetCurrentAxleState(string id)
+        public float GetAxleState(string id)
         {
             return Input.GetAxis(id);
         }
 
-        public ButtonState GetCurrentButtonState(int hash)
+        public ButtonState GetButtonState(int hash)
         {
             return ButtonState.None;
         }
 
-        public ButtonState GetCurrentButtonState(string id)
+        public ButtonState GetButtonState(string id)
         {
             if (Input.GetButtonDown(id))
                 return ButtonState.Down;
@@ -232,22 +232,22 @@ namespace com.spacepuppy.UserInput.UnityInput
             throw new System.NotSupportedException();
         }
 
-        public Vector2 GetCurrentCursorState(int hash)
+        public Vector2 GetCursorState(int hash)
         {
             return Vector2.zero;
         }
 
-        public Vector2 GetCurrentCursorState(string id)
+        public Vector2 GetCursorState(string id)
         {
             return Vector2.zero;
         }
 
-        public Vector2 GetCurrentDualAxleState(int hash)
+        public Vector2 GetDualAxleState(int hash)
         {
             return Vector2.zero;
         }
 
-        public Vector2 GetCurrentDualAxleState(string id)
+        public Vector2 GetDualAxleState(string id)
         {
             return Vector2.zero;
         }

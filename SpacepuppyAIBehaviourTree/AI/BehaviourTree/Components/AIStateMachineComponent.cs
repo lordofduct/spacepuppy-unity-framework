@@ -153,7 +153,17 @@ namespace com.spacepuppy.AI.BehaviourTree.Components
         {
             return _stateMachine.GetEnumerator();
         }
-        
+
+        public void GetStates(ICollection<IAIState> coll)
+        {
+            _stateMachine.GetStates(coll);
+        }
+
+        public void Foreach(System.Action<IAIState> callback)
+        {
+            _stateMachine.Foreach(callback);
+        }
+
         #endregion
 
     }

@@ -117,6 +117,16 @@ namespace com.spacepuppy.StateMachine
             return this.ChangeState_Imp(newState);
         }
 
+        public void GetStates(ICollection<T> coll)
+        {
+            _states.GetStates(coll);
+        }
+        
+        public void Foreach(System.Action<T> callback)
+        {
+            _states.Foreach(callback);
+        }
+
         #endregion
 
         #region IEnumerable Interface
@@ -145,6 +155,10 @@ namespace com.spacepuppy.StateMachine
         {
             return new TypedStateMachine<T>(new ParentComponentStateSupplier<T>(source, includeStatesOnContainer, isStatic));
         }
+
+        #endregion
+
+        #region Special Types
 
         #endregion
 

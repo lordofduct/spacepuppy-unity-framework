@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.StateMachine
 {
 
-    public interface IStateSupplier<T> : IEnumerable<T> where T : class
+    public interface IStateSupplier<T> : IEnumerable<T>, IForeachEnumerator<T> where T : class
     {
 
         int Count { get; }
@@ -14,6 +15,8 @@ namespace com.spacepuppy.StateMachine
         bool Contains(T state);
         T GetNext(T current);
 
+        void GetStates(ICollection<T> coll);
+        
     }
 
     public interface ITypedStateSupplier<T> : IStateSupplier<T> where T : class
@@ -134,6 +137,24 @@ namespace com.spacepuppy.StateMachine
             e.MoveNext();
             return e.Current;
         }
+        
+        public void GetStates(ICollection<T> coll)
+        {
+            var e = this.GetEnumerator();
+            while(e.MoveNext())
+            {
+                coll.Add(e.Current);
+            }
+        }
+
+        public void Foreach(System.Action<T> callback)
+        {
+            var e = this.GetEnumerator();
+            while (e.MoveNext())
+            {
+                callback(e.Current);
+            }
+        }
 
         #endregion
 
@@ -195,6 +216,24 @@ namespace com.spacepuppy.StateMachine
             if (this.Count == 0) return null;
 
             return this.GetValueAfterOrDefault(current, true);
+        }
+
+        public void GetStates(ICollection<T> coll)
+        {
+            var e = this.GetEnumeratorDirect();
+            while (e.MoveNext())
+            {
+                coll.Add(e.Current);
+            }
+        }
+
+        public void Foreach(System.Action<T> callback)
+        {
+            var e = this.GetEnumeratorDirect();
+            while (e.MoveNext())
+            {
+                callback(e.Current);
+            }
         }
 
         #endregion

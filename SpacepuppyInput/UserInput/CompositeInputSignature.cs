@@ -12,7 +12,7 @@ namespace com.spacepuppy.UserInput
     /// The order of precedence is in the order of the signatures in the list.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class CompositeInputSignature<T> : AbstractInputSignature where T : IInputSignature
+    public abstract class CompositeInputSignature<T> : BaseInputSignature where T : IInputSignature
     {
 
         #region Fields

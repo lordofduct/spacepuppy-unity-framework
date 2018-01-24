@@ -469,7 +469,7 @@ namespace com.spacepuppy.Utils
         public static void GetComponents<T>(this GameObject obj, ICollection<T> lst, System.Func<Component, T> filter) where T : class
         {
             if (obj == null) return;
-
+            
             using (var tmpLst = TempCollection.GetList<Component>())
             {
                 obj.GetComponents(typeof(Component), tmpLst);
@@ -478,7 +478,10 @@ namespace com.spacepuppy.Utils
                 while (e.MoveNext())
                 {
                     c = (filter != null) ? filter(e.Current) : e.Current as T;
-                    if (c != null) lst.Add(c);
+                    if (c != null)
+                    {
+                        lst.Add(c);
+                    }
                 }
             }
         }

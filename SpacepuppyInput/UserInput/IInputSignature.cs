@@ -54,7 +54,7 @@ namespace com.spacepuppy.UserInput
         Vector2 CurrentState { get; }
     }
 
-    public abstract class AbstractInputSignature : IInputSignature
+    public abstract class BaseInputSignature : IInputSignature
     {
 
         #region Static Interface
@@ -78,13 +78,13 @@ namespace com.spacepuppy.UserInput
         
         #region CONSTRUCTOR
 
-        public AbstractInputSignature(string id)
+        public BaseInputSignature(string id)
         {
             _id = id;
-            _hash = AbstractInputSignature.GetNextHash();
+            _hash = BaseInputSignature.GetNextHash();
         }
 
-        public AbstractInputSignature(string id, int hash)
+        public BaseInputSignature(string id, int hash)
         {
             _id = id;
             _hash = hash;

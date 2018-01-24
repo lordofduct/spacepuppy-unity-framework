@@ -71,6 +71,7 @@ namespace com.spacepuppy.StateMachine
         public bool Contains(System.Type tp)
         {
             if (_container == null) return false;
+            if (tp == null || !TypeUtil.IsType(tp, typeof(T))) return false;
             return _container.HasComponent(tp);
         }
 
@@ -101,6 +102,27 @@ namespace com.spacepuppy.StateMachine
             {
                 _container.GetComponents<T>(lst);
                 return lst.GetValueAfterOrDefault(current, true);
+            }
+        }
+
+        public void GetStates(ICollection<T> coll)
+        {
+            if (_container == null) return;
+            _container.GetComponents<T>(coll, null);
+        }
+        
+        public void Foreach(System.Action<T> callback)
+        {
+            if (callback == null) return;
+            if (_container == null) return;
+            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<T>())
+            {
+                _container.GetComponents<T>(lst);
+                var e = lst.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    callback(e.Current);
+                }
             }
         }
 

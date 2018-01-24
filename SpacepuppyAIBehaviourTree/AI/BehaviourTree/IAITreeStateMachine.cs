@@ -144,6 +144,16 @@ namespace com.spacepuppy.AI.BehaviourTree
             return this.GetEnumerator();
         }
 
+        public void GetStates(ICollection<IAIState> coll)
+        {
+            _stateMachine.GetStates(coll);
+        }
+
+        public void Foreach(System.Action<IAIState> callback)
+        {
+            _stateMachine.Foreach(callback);
+        }
+
         #endregion
 
     }

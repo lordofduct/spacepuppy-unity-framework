@@ -50,26 +50,34 @@
     <Compile Include="Scenario\t_OnSimpleButtonPress.cs" />
     <Compile Include="UserInput\CompositeAxlePrecedence.cs" />
     <Compile Include="UserInput\CompositeInputSignature.cs" />
-    <Compile Include="UserInput\IPlayerInputDevice.cs" />
+    <Compile Include="UserInput\IInputDevice.cs" />
     <Compile Include="UserInput\AnalogButtonSimulator.cs" />
     <Compile Include="UserInput\ButtonState.cs" />
     <Compile Include="UserInput\ComboInputSignature.cs" />
     <Compile Include="UserInput\DeadZoneEnums.cs" />
     <Compile Include="UserInput\IInputSignature.cs" />
+    <Compile Include="UserInput\IMappedInputDevice.cs" />
     <Compile Include="UserInput\InputSignatureCollection.cs" />
     <Compile Include="UserInput\InputUtil.cs" />
-    <Compile Include="UserInput\GenericPlayerInputDevice.cs" />
+    <Compile Include="UserInput\GenericInputDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserInput\ISequence.cs" />
+    <Compile Include="UserInput\MappedInputDevice.cs" />
+    <Compile Include="UserInput\MappedInputSignaturCollection.cs" />
     <Compile Include="UserInput\Sequences\ButtonTap.cs" />
     <Compile Include="UserInput\Sequences\CursorMove.cs" />
     <Compile Include="UserInput\Sequences\FirstSuccessfulSequence.cs" />
+    <Compile Include="UserInput\SPInput\Enums.cs" />
+    <Compile Include="UserInput\SPInput\SPInputDirect.cs" />
+    <Compile Include="UserInput\SPInput\SPInputFactory.cs" />
+    <Compile Include="UserInput\SPInput\Xbox\ProfileDescriptionAttribute.cs" />
+    <Compile Include="UserInput\SPInput\Xbox\Profiles\Xbox360LinuxProfile.cs" />
+    <Compile Include="UserInput\SPInput\Xbox\Profiles\Xbox360MacOSProfile.cs" />
+    <Compile Include="UserInput\SPInput\Xbox\Profiles\Xbox360WinProfile.cs" />
+    <Compile Include="UserInput\SPInput\Xbox\XboxInputProfile.cs" />
     <Compile Include="UserInput\UnityInput\EventfulUnityInputDevice.cs" />
-    <Compile Include="UserInput\UnityInput\UnityInputSignatures.cs" />
-    <Compile Include="UserInput\Xbox\IXboxGamePad.cs" />
-    <Compile Include="UserInput\Xbox\XboxControllerEnums.cs" />
-    <Compile Include="UserInput\Xbox\XboxGamePad.cs" />
-    <Compile Include="UserInput\Xbox\XboxGamePadState.cs" />
+    <Compile Include="UserInput\SPInput\UnityInputSignatures.cs" />
+    <Compile Include="UserInput\SPInput\Xbox\XboxControllerEnums.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
@@ -78,6 +86,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <None Include="UserInput\SPInput\Xbox\README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir $(ProjectDir)..\Builds\FullLibrary\

@@ -59,6 +59,16 @@ namespace com.spacepuppy.StateMachine
             return _current;
         }
 
+        public void GetStates(ICollection<T> coll)
+        {
+            _states.GetStates(coll);
+        }
+        
+        public void Foreach(System.Action<T> callback)
+        {
+            _states.Foreach(callback);
+        }
+
         #endregion
 
         #region IEnumerable Interface

@@ -608,6 +608,16 @@ namespace com.spacepuppy.Movement
                 return style;
             }
 
+            public void GetStates(ICollection<IMovementStyle> coll)
+            {
+                _stateSupplier.GetStates(coll);
+            }
+
+            public void Foreach(System.Action<IMovementStyle> callback)
+            {
+                _stateSupplier.Foreach(callback);
+            }
+
             #endregion
 
             #region ITypedStateMachine Interface

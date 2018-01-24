@@ -150,6 +150,16 @@ namespace com.spacepuppy.AI
             return _stateMachine.GetEnumerator();
         }
 
+        void IStateMachine<IAIState>.GetStates(ICollection<IAIState> coll)
+        {
+            _stateMachine.GetStates(coll);
+        }
+
+        void com.spacepuppy.Collections.IForeachEnumerator<IAIState>.Foreach(System.Action<IAIState> callback)
+        {
+            _stateMachine.Foreach(callback);
+        }
+
         #endregion
 
         #region IAIState Interface

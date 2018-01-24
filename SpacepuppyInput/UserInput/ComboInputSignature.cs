@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy.UserInput
 {
 
-    public class ComboInputSignature : AbstractInputSignature, IInputSignature
+    public class ComboInputSignature : BaseInputSignature, IInputSignature
     {
 
         #region Fields

@@ -7,14 +7,14 @@ using com.spacepuppy.UserInput;
 namespace com.spacepuppy
 {
 
-    public interface IGameInputManager : IService, IEnumerable<IPlayerInputDevice>
+    public interface IGameInputManager : IService, IEnumerable<IInputDevice>
     {
         int Count { get; }
-        IPlayerInputDevice this[string id] { get; set; }
-        IPlayerInputDevice Main { get; }
+        IInputDevice this[string id] { get; set; }
+        IInputDevice Main { get; }
 
-        IPlayerInputDevice GetDevice(string id);
-        T GetDevice<T>(string id) where T : IPlayerInputDevice;
+        IInputDevice GetDevice(string id);
+        T GetDevice<T>(string id) where T : IInputDevice;
         
     }
     
@@ -23,9 +23,9 @@ namespace com.spacepuppy
 
         #region Fields
 
-        private Dictionary<string, IPlayerInputDevice> _dict = new Dictionary<string, IPlayerInputDevice>();
-        private IPlayerInputDevice _default_main;
-        private IPlayerInputDevice _override_main;
+        private Dictionary<string, IInputDevice> _dict = new Dictionary<string, IInputDevice>();
+        private IInputDevice _default_main;
+        private IInputDevice _override_main;
 
         #endregion
 
@@ -67,7 +67,7 @@ namespace com.spacepuppy
 
         public int Count { get { return _dict.Count; } }
 
-        public IPlayerInputDevice this[string id]
+        public IInputDevice this[string id]
         {
             get
             {
@@ -79,7 +79,7 @@ namespace com.spacepuppy
             }
         }
 
-        public IPlayerInputDevice Main
+        public IInputDevice Main
         {
             get
             {
@@ -100,13 +100,13 @@ namespace com.spacepuppy
             }
         }
 
-        public IPlayerInputDevice GetDevice(string id)
+        public IInputDevice GetDevice(string id)
         {
             if (!_dict.ContainsKey(id)) throw new System.Collections.Generic.KeyNotFoundException();
             return _dict[id];
         }
 
-        public T GetDevice<T>(string id) where T : IPlayerInputDevice
+        public T GetDevice<T>(string id) where T : IInputDevice
         {
             if (!_dict.ContainsKey(id)) throw new System.Collections.Generic.KeyNotFoundException();
             return (T)_dict[id];
@@ -116,7 +116,7 @@ namespace com.spacepuppy
 
         #region Collection Interface
 
-        public void Add(string id, IPlayerInputDevice dev)
+        public void Add(string id, IInputDevice dev)
         {
             if (this.Contains(dev) && !(_dict.ContainsKey(id) && _dict[id] == dev)) throw new System.ArgumentException("Manager already contains input device for other player.");
 
@@ -128,7 +128,7 @@ namespace com.spacepuppy
         {
             if(_default_main != null)
             {
-                IPlayerInputDevice device;
+                IInputDevice device;
                 if(_dict.TryGetValue(id, out device) && device == _default_main)
                 {
                     if(_dict.Remove(id))
@@ -157,12 +157,12 @@ namespace com.spacepuppy
             return _dict.ContainsKey(id);
         }
 
-        public bool Contains(IPlayerInputDevice dev)
+        public bool Contains(IInputDevice dev)
         {
-            return (_dict.Values as ICollection<IPlayerInputDevice>).Contains(dev);
+            return (_dict.Values as ICollection<IInputDevice>).Contains(dev);
         }
 
-        public string GetId(IPlayerInputDevice dev)
+        public string GetId(IInputDevice dev)
         {
             foreach (var pair in _dict)
             {
@@ -178,7 +178,7 @@ namespace com.spacepuppy
 
         //TODO - implement propert Enumerator, remember dict.Values allocates mem in mono... ugh
 
-        public IEnumerator<IPlayerInputDevice> GetEnumerator()
+        public IEnumerator<IInputDevice> GetEnumerator()
         {
             return _dict.Values.GetEnumerator();
         }
