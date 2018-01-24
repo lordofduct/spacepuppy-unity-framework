@@ -27,12 +27,7 @@ namespace com.spacepuppy.UserInput
             : base(id)
         {
         }
-
-        public CompositeInputSignature(string id, int hash)
-            : base(id, hash)
-        {
-        }
-
+        
         #endregion
 
         #region Properties
@@ -78,12 +73,7 @@ namespace com.spacepuppy.UserInput
             : base(id)
         {
         }
-
-        public CompositeButtonInputSignature(string id, int hash)
-            : base(id, hash)
-        {
-        }
-
+        
         #endregion
 
         public ButtonState CurrentState
@@ -165,12 +155,7 @@ namespace com.spacepuppy.UserInput
             : base(id)
         {
         }
-
-        public CompositeAxleInputSignature(string id, int hash)
-            : base(id, hash)
-        {
-        }
-
+        
         #endregion
 
         public CompositeAxlePrecedence AxlePrecedence
@@ -236,12 +221,7 @@ namespace com.spacepuppy.UserInput
             : base(id)
         {
         }
-
-        public CompositeDualAxleInputSignature(string id, int hash)
-            : base(id, hash)
-        {
-        }
-
+        
         #endregion
 
         public CompositeAxlePrecedence AxlePrecedence

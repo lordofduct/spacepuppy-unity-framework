@@ -8,7 +8,6 @@ namespace com.spacepuppy.UserInput
     {
 
         string Id { get; }
-        int Hash { get; }
         float Precedence { get; set; }
 
         /// <summary>
@@ -56,23 +55,10 @@ namespace com.spacepuppy.UserInput
 
     public abstract class BaseInputSignature : IInputSignature
     {
-
-        #region Static Interface
-
-        private static TinyUidGenerator _uidGenerator = new TinyUidGenerator();
-
-        public static int GetNextHash()
-        {
-            return _uidGenerator.Next().GetHashCode();
-        }
-
-        #endregion
-
-
+        
         #region Fields
 
         private string _id;
-        private int _hash;
 
         #endregion
         
@@ -81,23 +67,14 @@ namespace com.spacepuppy.UserInput
         public BaseInputSignature(string id)
         {
             _id = id;
-            _hash = BaseInputSignature.GetNextHash();
         }
-
-        public BaseInputSignature(string id, int hash)
-        {
-            _id = id;
-            _hash = hash;
-        }
-
+        
         #endregion
 
         #region IInputSignature Interfacce
 
         public string Id { get { return _id; } }
-
-        public int Hash { get { return _hash; } }
-
+        
         public float Precedence { get; set; }
 
         public abstract void Update();
@@ -108,16 +85,7 @@ namespace com.spacepuppy.UserInput
         }
 
         #endregion
-
-        #region HashCodeOverride
-
-        public override int GetHashCode()
-        {
-            return _hash;
-        }
-
-        #endregion
-
+        
     }
 
 }

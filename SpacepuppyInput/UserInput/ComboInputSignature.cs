@@ -19,13 +19,7 @@ namespace com.spacepuppy.UserInput
         {
             this.Precedence = float.PositiveInfinity;
         }
-
-        public ComboInputSignature(string id, int hash)
-            :base(id, hash)
-        {
-            this.Precedence = float.PositiveInfinity;
-        }
-
+        
         #endregion
 
         #region Methods

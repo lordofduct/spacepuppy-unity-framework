@@ -23,13 +23,7 @@ namespace com.spacepuppy.UserInput.SPInput
         {
             this.UnityInputId = unityInputId;
         }
-
-        public ButtonInputSignature(string id, int hash, string unityInputId)
-            : base(id, hash)
-        {
-            this.UnityInputId = unityInputId;
-        }
-
+        
         #endregion
 
         #region Properties
@@ -130,15 +124,7 @@ namespace com.spacepuppy.UserInput.SPInput
             this.UnityInputId = unityInputId;
             this.Consideration = consideration;
         }
-
-        public AxleButtonInputSignature(string id, int hash, string unityInputId, AxleValueConsideration consideration = AxleValueConsideration.Positive)
-            : base(id, hash)
-        {
-            this.AxisButtonDeadZone = 0.5f;
-            this.UnityInputId = unityInputId;
-            this.Consideration = consideration;
-        }
-
+        
         #endregion
 
         #region Properties
@@ -271,13 +257,7 @@ namespace com.spacepuppy.UserInput.SPInput
         {
             this.UnityInputId = unityInputId;
         }
-
-        public AxleInputSignature(string id, int hash, string unityInputId)
-            : base(id, hash)
-        {
-            this.UnityInputId = unityInputId;
-        }
-
+        
         #endregion
 
         #region Properties
@@ -347,14 +327,7 @@ namespace com.spacepuppy.UserInput.SPInput
             _xAxisId = xAxisId;
             _yAxisId = yAxisId;
         }
-
-        public DualAxleInputSignature(string id, int hash, string xAxisId, string yAxisId)
-            : base(id, hash)
-        {
-            _xAxisId = xAxisId;
-            _yAxisId = yAxisId;
-        }
-
+        
         #endregion
 
         #region Properties
@@ -441,13 +414,7 @@ namespace com.spacepuppy.UserInput.SPInput
         {
 
         }
-
-        public MouseCursorInputSignature(string id, int hash)
-            : base(id, hash)
-        {
-
-        }
-
+        
 
 
 
@@ -483,13 +450,7 @@ namespace com.spacepuppy.UserInput.SPInput
         {
             this.MouseButton = mouseButton;
         }
-
-        public MouseClickInputSignature(string id, int hash, int mouseButton)
-            : base(id, hash)
-        {
-            this.MouseButton = mouseButton;
-        }
-
+        
         #endregion
 
         #region Properties
@@ -577,13 +538,7 @@ namespace com.spacepuppy.UserInput.SPInput
         {
             this.Key = key;
         }
-
-        public KeyboardButtonInputSignature(string id, int hash, KeyCode key)
-            : base(id, hash)
-        {
-            this.Key = key;
-        }
-
+        
         #endregion
 
         #region Properties
@@ -680,14 +635,7 @@ namespace com.spacepuppy.UserInput.SPInput
             this.PositiveKey = positiveKey;
             this.NegativeKey = negativeKey;
         }
-
-        public KeyboardAxleInputSignature(string id, int hash, KeyCode positiveKey, KeyCode negativeKey)
-            : base(id, hash)
-        {
-            this.PositiveKey = positiveKey;
-            this.NegativeKey = negativeKey;
-        }
-
+        
         #endregion
 
         #region Properties
@@ -760,16 +708,7 @@ namespace com.spacepuppy.UserInput.SPInput
             this.VerticalPositiveKey = verticalPositiveKey;
             this.VerticalNegativeKey = verticalNegativeKey;
         }
-
-        public KeyboardDualAxleInputSignature(string id, int hash, KeyCode horizontalPositiveKey, KeyCode horizontalNegativeKey, KeyCode verticalPositiveKey, KeyCode verticalNegativeKey)
-            : base(id, hash)
-        {
-            this.HorizontalPositiveKey = horizontalPositiveKey;
-            this.HorizontalNegativeKey = horizontalNegativeKey;
-            this.VerticalPositiveKey = verticalPositiveKey;
-            this.VerticalNegativeKey = verticalNegativeKey;
-        }
-
+        
         #endregion
 
         #region Properties

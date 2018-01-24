@@ -6,9 +6,6 @@ namespace com.spacepuppy.UserInput
 
     /// <summary>
     /// Store a group of IInputSignatures based on a mapping value instead of a hash. This mapping value should usually be an enum, you can also use an int/long/etc if you want.
-    /// 
-    /// When creating IInputSignatures to add to this, it's best if its hash is set to the enum value that it maps to. 
-    /// It's not required, but the ICollection&ltT&gt.Add(IInputSignature) method will fail. 
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class MappedInputSignaturCollection<T> : ICollection<IInputSignature> where T : struct, System.IConvertible
@@ -51,22 +48,7 @@ namespace com.spacepuppy.UserInput
             }
             return null;
         }
-
-        /// <summary>
-        /// MappedInputSignatureCollection favors the mapping over the hash. This method will run slower than GetSignature(T mapping).
-        /// </summary>
-        /// <param name="hash"></param>
-        /// <returns></returns>
-        public IInputSignature GetSignature(int hash)
-        {
-            var e = _table.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current.Value.Hash == hash) return e.Current.Value;
-            }
-            return null;
-        }
-
+        
         public bool Contains(T mapping)
         {
             return _table.ContainsKey(mapping);
@@ -123,18 +105,7 @@ namespace com.spacepuppy.UserInput
 
         void ICollection<IInputSignature>.Add(IInputSignature item)
         {
-            if (item == null) return;
-
-            T map;
-            try
-            {
-                map = com.spacepuppy.Utils.ConvertUtil.ToPrim<T>(item.Hash);
-            }
-            catch (System.Exception)
-            {
-                throw new System.InvalidOperationException("MappedInputSignature generic type " + typeof(T).Name + " can not be coerced to an int. Your generic type should be an Enum or other integer type.");
-            }
-            this.Add(map, item);
+            throw new System.NotSupportedException();
         }
 
         public void Clear()

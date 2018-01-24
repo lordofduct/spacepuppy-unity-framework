@@ -95,16 +95,7 @@ namespace com.spacepuppy.UserInput
 
             return (sig as IButtonInputSignature).CurrentState;
         }
-
-        public ButtonState GetButtonState(int hash)
-        {
-            var sig = _signatures.GetSignature(hash);
-            if (sig == null) return ButtonState.None;
-            if (!(sig is IButtonInputSignature)) return ButtonState.None;
-
-            return (sig as IButtonInputSignature).CurrentState;
-        }
-
+        
         public bool GetButtonPressed(string id, float duration)
         {
             var sig = _signatures.GetSignature(id);
@@ -113,16 +104,7 @@ namespace com.spacepuppy.UserInput
 
             return (sig as IButtonInputSignature).GetPressed(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
         }
-
-        public bool GetButtonPressed(int hash, float duration)
-        {
-            var sig = _signatures.GetSignature(hash);
-            if (sig == null) return false;
-            if (!(sig is IButtonInputSignature)) return false;
-
-            return (sig as IButtonInputSignature).GetPressed(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
-        }
-
+        
         public float GetAxleState(string id)
         {
             var sig = _signatures.GetSignature(id);
@@ -131,16 +113,7 @@ namespace com.spacepuppy.UserInput
 
             return (sig as IAxleInputSignature).CurrentState;
         }
-
-        public float GetAxleState(int hash)
-        {
-            var sig = _signatures.GetSignature(hash);
-            if (sig == null) return 0f;
-            if (!(sig is IAxleInputSignature)) return 0f;
-
-            return (sig as IAxleInputSignature).CurrentState;
-        }
-
+        
         public Vector2 GetDualAxleState(string id)
         {
             var sig = _signatures.GetSignature(id);
@@ -149,16 +122,7 @@ namespace com.spacepuppy.UserInput
 
             return (sig as IDualAxleInputSignature).CurrentState;
         }
-
-        public Vector2 GetDualAxleState(int hash)
-        {
-            var sig = _signatures.GetSignature(hash);
-            if (sig == null) return Vector2.zero;
-            if (!(sig is IDualAxleInputSignature)) return Vector2.zero;
-
-            return (sig as IDualAxleInputSignature).CurrentState;
-        }
-
+        
         public Vector2 GetCursorState(string id)
         {
             var sig = _signatures.GetSignature(id);
@@ -167,16 +131,7 @@ namespace com.spacepuppy.UserInput
 
             return (sig as ICursorInputSignature).CurrentState;
         }
-
-        public Vector2 GetCursorState(int hash)
-        {
-            var sig = _signatures.GetSignature(hash);
-            if (sig == null) return Vector2.zero;
-            if (!(sig is ICursorInputSignature)) return Vector2.zero;
-
-            return (sig as ICursorInputSignature).CurrentState;
-        }
-
+        
         #endregion
 
         #region HashCodeOverride

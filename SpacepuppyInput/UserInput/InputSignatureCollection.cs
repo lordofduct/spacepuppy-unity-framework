@@ -9,7 +9,7 @@ namespace com.spacepuppy.UserInput
 
         #region Fields
 
-        private Dictionary<int, IInputSignature> _table = new Dictionary<int, IInputSignature>();
+        private Dictionary<string, IInputSignature> _table = new Dictionary<string, IInputSignature>();
         private List<IInputSignature> _sortedList = new List<IInputSignature>();
 
         #endregion
@@ -18,59 +18,29 @@ namespace com.spacepuppy.UserInput
 
         public IInputSignature GetSignature(string id)
         {
-            var e = _table.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current.Value.Id == id) return e.Current.Value;
-            }
-            return null;
-        }
-
-        public IInputSignature GetSignature(int hash)
-        {
             IInputSignature result;
-            if (_table.TryGetValue(hash, out result) && result != null && result.Hash == hash)
+            if (_table.TryGetValue(id, out result) && result != null && result.Id == id)
             {
                 return result;
             }
             return null;
         }
-
+        
         public bool Contains(string id)
         {
-            var e = _table.GetEnumerator();
-            while (e.MoveNext())
+            IInputSignature result;
+            if(_table.TryGetValue(id, out result) && result != null && result.Id == id)
             {
-                if (e.Current.Value.Id == id) return true;
+                return true;
             }
             return false;
         }
-
-        public bool Contains(int hash)
-        {
-            return _table.ContainsKey(hash);
-        }
-
+        
         public bool Remove(string id)
         {
-            var e = _table.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (e.Current.Value.Id == id)
-                {
-                    _table.Remove(e.Current.Key);
-                    return true;
-                }
-            }
-
-            return false;
+            return _table.Remove(id);
         }
-
-        public bool Remove(int hash)
-        {
-            return _table.Remove(hash);
-        }
-
+        
         public Enumerator GetEnumerator()
         {
             return new Enumerator(this);
@@ -93,18 +63,18 @@ namespace com.spacepuppy.UserInput
         public void Add(IInputSignature item)
         {
             if (item == null) throw new System.ArgumentNullException("item");
-            if (_table.ContainsKey(item.Hash)) throw new System.ArgumentException("A signature already exists with this Id and/or Hash.", "item");
+            if (_table.ContainsKey(item.Id)) throw new System.ArgumentException("A signature already exists with this Id and/or Hash.", "item");
 
             var e = _table.GetEnumerator();
             while (e.MoveNext())
             {
-                if (e.Current.Value.Id == item.Id || e.Current.Value.Hash == item.Hash)
+                if (e.Current.Value.Id == item.Id)
                 {
                     throw new System.ArgumentException("A signature already exists with this Id and/or Hash.", "item");
                 }
             }
 
-            _table[item.Hash] = item;
+            _table[item.Id] = item;
             _sortedList.Add(item);
         }
 
