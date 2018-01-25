@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using com.spacepuppy;
 using com.spacepuppy.Scenario;
-using com.spacepuppy.UserInput.UnityInput;
+using com.spacepuppy.SPInput;
 
 
 namespace com.spacepuppy.Scenario
@@ -91,7 +91,7 @@ namespace com.spacepuppy.Scenario
             var input = service != null ? service.Main : null;
             if(input != null)
             {
-                if(input.GetButtonState(_inputId) == UserInput.ButtonState.Down)
+                if(input.GetButtonState(_inputId) == ButtonState.Down)
                 {
                     this.ActivateTrigger(null);
                 }

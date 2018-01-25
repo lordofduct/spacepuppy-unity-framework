@@ -541,7 +541,11 @@ namespace com.spacepuppyeditor
                     var obj = this.serializedObject.targetObject as InputSettings;
                     if (obj != null)
                     {
+                        Undo.RecordObject(obj, "Load Global InputSettings to InputSettings Asset");
                         obj.CopyFromGlobal(true);
+                        EditorUtility.SetDirty(obj);
+                        AssetDatabase.SaveAssets();
+                        Selection.activeObject = obj;
                         this.serializedObject.Update();
                     }
                 }
