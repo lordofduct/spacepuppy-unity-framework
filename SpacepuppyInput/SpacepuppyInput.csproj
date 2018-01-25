@@ -72,10 +72,12 @@
     <Compile Include="SPInput\Unity\Enums.cs" />
     <Compile Include="SPInput\Unity\IInputProfile.cs" />
     <Compile Include="SPInput\Unity\InputProfileLookupTable.cs" />
+    <Compile Include="SPInput\Unity\KeyboardProfile.cs" />
     <Compile Include="SPInput\Unity\SPInputDirect.cs" />
     <Compile Include="SPInput\Unity\SPInputFactory.cs" />
     <Compile Include="SPInput\Unity\Xbox\IXboxInputProfile.cs" />
     <Compile Include="SPInput\Unity\InputProfileDescriptionAttributes.cs" />
+    <Compile Include="SPInput\Unity\Xbox\XboxInputKeyboardProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4LinuxProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4MacOSBTProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4MacOSUSBProfile.cs" />

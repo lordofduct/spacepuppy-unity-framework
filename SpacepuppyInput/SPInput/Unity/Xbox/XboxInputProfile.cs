@@ -124,6 +124,26 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             return _buttonTable.TryGetValue(button, out map);
         }
 
+        public bool Contains(XboxAxis axis)
+        {
+            return _axisTable.ContainsKey(axis);
+        }
+
+        public bool Contains(XboxButton button)
+        {
+            return _buttonTable.ContainsKey(button);
+        }
+
+        public bool Remove(XboxAxis axis)
+        {
+            return _axisTable.Remove(axis);
+        }
+
+        public bool Remove(XboxButton button)
+        {
+            return _buttonTable.Remove(button);
+        }
+
         #endregion
 
         #region IInputSignatureFactory Interface
