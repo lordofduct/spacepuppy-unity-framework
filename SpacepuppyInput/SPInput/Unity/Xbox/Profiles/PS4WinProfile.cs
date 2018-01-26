@@ -22,15 +22,10 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.Register(XboxAxis.RightStickY, SPInputAxis.Axis6);
             this.Register(XboxAxis.DPadX, SPInputAxis.Axis7);
             this.Register(XboxAxis.DPadY, SPInputAxis.Axis8);
-            /*
-             * PS4 controllers on windows for some weird ass reason go from -1 to 1 (depressed to pressed)
-             * Need to work out a way to deal with that.
-             * In the mean time emulate the axis with the digital versions of these inputs
-             */
-            //this.Register(XboxAxis.LeftTrigger, SPInputAxis.Axis4);
-            //this.Register(XboxAxis.RightTrigger, SPInputAxis.Axis5);
-            this.Register(XboxAxis.LeftTrigger, SPInputButton.Button6, SPInputButton.Unknown);
-            this.Register(XboxAxis.RightTrigger, SPInputButton.Button7, SPInputButton.Unknown);
+            this.Register(XboxAxis.LeftTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputAxis.Axis4));
+            this.Register(XboxAxis.RightTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputAxis.Axis5));
+            //this.Register(XboxAxis.LeftTrigger, SPInputButton.Button6, SPInputButton.Unknown);
+            //this.Register(XboxAxis.RightTrigger, SPInputButton.Button7, SPInputButton.Unknown);
 
 
             this.Register(XboxButton.A, SPInputButton.Button1); //X
@@ -47,7 +42,6 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.Register(XboxButton.DPadDown, SPInputAxis.Axis8, AxleValueConsideration.Negative);
             this.Register(XboxButton.DPadRight, SPInputAxis.Axis7, AxleValueConsideration.Positive);
             this.Register(XboxButton.DPadLeft, SPInputAxis.Axis7, AxleValueConsideration.Negative);
-
         }
 
     }

@@ -62,11 +62,11 @@ namespace com.spacepuppy.SPInput.Unity
         {
             if(getFixedState)
             {
-                return _currentFixed == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+                return _currentFixed == ButtonState.Released && Time.realtimeSinceStartup - _lastDown <= duration;
             }
             else
             {
-                return _current == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+                return _current == ButtonState.Released && Time.realtimeSinceStartup - _lastDown <= duration;
             }
         }
 
@@ -79,7 +79,7 @@ namespace com.spacepuppy.SPInput.Unity
             //determine based on history
             _current = InputUtil.GetNextButtonState(_current, Input.GetButton(this.UnityInputId));
             if (_current == ButtonState.Down)
-                _lastDown = Time.unscaledTime;
+                _lastDown = Time.realtimeSinceStartup;
         }
 
         public override void FixedUpdate()
@@ -100,8 +100,6 @@ namespace com.spacepuppy.SPInput.Unity
     public class AxleButtonInputSignature : BaseInputSignature, IButtonInputSignature
     {
 
-        public const float DEFAULT_BTNDEADZONE = 0.707f;
-
         #region Fields
 
         private ButtonState _current;
@@ -112,7 +110,7 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region CONSTRUCTOR
 
-        public AxleButtonInputSignature(string id, string unityInputId, AxleValueConsideration consideration = AxleValueConsideration.Positive, float axisButtnDeadZone = DEFAULT_BTNDEADZONE)
+        public AxleButtonInputSignature(string id, string unityInputId, AxleValueConsideration consideration = AxleValueConsideration.Positive, float axisButtnDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
             : base(id)
         {
             this.AxisButtonDeadZone = axisButtnDeadZone;
@@ -176,11 +174,11 @@ namespace com.spacepuppy.SPInput.Unity
         {
             if (getFixedState)
             {
-                return _currentFixed == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+                return _currentFixed == ButtonState.Released && Time.realtimeSinceStartup - _lastDown <= duration;
             }
             else
             {
-                return _current == ButtonState.Released && Time.unscaledTime - _lastDown <= duration;
+                return _current == ButtonState.Released && Time.realtimeSinceStartup - _lastDown <= duration;
             }
         }
 
@@ -208,7 +206,7 @@ namespace com.spacepuppy.SPInput.Unity
             }
 
             if (_current == ButtonState.Down)
-                _lastDown = Time.unscaledTime;
+                _lastDown = Time.realtimeSinceStartup;
         }
 
         public override void FixedUpdate()

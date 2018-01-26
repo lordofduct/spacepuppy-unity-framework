@@ -6,22 +6,6 @@ using System.Linq;
 namespace com.spacepuppy.SPInput.Unity
 {
 
-    public enum SPJoystick : byte
-    {
-        All,
-        Joy1,
-        Joy2,
-        Joy3,
-        Joy4,
-        Joy5,
-        Joy6,
-        Joy7,
-        Joy8,
-        Joy9,
-        Joy10,
-        Joy11
-    }
-    
     public enum SPInputAxis : sbyte
     {
         Unknown = -1,

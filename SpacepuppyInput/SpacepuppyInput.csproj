@@ -48,15 +48,13 @@
   <ItemGroup>
     <Compile Include="GameInputManager.cs" />
     <Compile Include="Scenario\t_OnSimpleButtonPress.cs" />
-    <Compile Include="SPInput\AxleValueConsideration.cs" />
     <Compile Include="SPInput\CompositeInputSignature.cs" />
-    <Compile Include="SPInput\MergedAxlePrecedence.cs" />
+    <Compile Include="SPInput\DelegatedInputSignature.cs" />
+    <Compile Include="SPInput\Enums.cs" />
     <Compile Include="SPInput\MergedInputSignature.cs" />
     <Compile Include="SPInput\IInputDevice.cs" />
     <Compile Include="SPInput\AnalogButtonSimulator.cs" />
-    <Compile Include="SPInput\ButtonState.cs" />
     <Compile Include="SPInput\ComboInputSignature.cs" />
-    <Compile Include="SPInput\DeadZoneEnums.cs" />
     <Compile Include="SPInput\IInputSignature.cs" />
     <Compile Include="SPInput\IMappedInputDevice.cs" />
     <Compile Include="SPInput\InputSignatureCollection.cs" />
@@ -73,11 +71,11 @@
     <Compile Include="SPInput\Unity\IInputProfile.cs" />
     <Compile Include="SPInput\Unity\InputProfileLookupTable.cs" />
     <Compile Include="SPInput\Unity\KeyboardProfile.cs" />
+    <Compile Include="SPInput\Unity\PollAxisSignatureRoutine.cs" />
+    <Compile Include="SPInput\Unity\PollButtonSignatureRoutine.cs" />
     <Compile Include="SPInput\Unity\SPInputDirect.cs" />
     <Compile Include="SPInput\Unity\SPInputFactory.cs" />
-    <Compile Include="SPInput\Unity\Xbox\IXboxInputProfile.cs" />
     <Compile Include="SPInput\Unity\InputProfileDescriptionAttributes.cs" />
-    <Compile Include="SPInput\Unity\Xbox\XboxInputKeyboardProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4LinuxProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4MacOSBTProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4MacOSUSBProfile.cs" />
@@ -89,7 +87,7 @@
     <Compile Include="SPInput\Unity\EventfulUnityInputDevice.cs" />
     <Compile Include="SPInput\Unity\UnityInputSignatures.cs" />
     <Compile Include="SPInput\Unity\Xbox\XboxControllerEnums.cs" />
-    <Compile Include="SPInput\Unity\Xbox\XboxInputProfileLookupTable.cs" />
+    <Compile Include="SPInput\Unity\Xbox\XboxInputImps.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">

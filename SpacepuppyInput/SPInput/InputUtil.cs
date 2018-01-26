@@ -7,6 +7,8 @@ namespace com.spacepuppy.SPInput
     public static class InputUtil
     {
 
+        public const float DEFAULT_AXLEBTNDEADZONE = 0.707f;
+
         public static ButtonState GetNextButtonState(ButtonState current, bool isButtonActive)
         {
             if (isButtonActive)

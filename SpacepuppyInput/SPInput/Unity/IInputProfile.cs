@@ -9,13 +9,21 @@ namespace com.spacepuppy.SPInput.Unity
     public interface IInputProfile<TButton, TAxis> where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
     {
 
-        IButtonInputSignature CreateButtonSignature(string id, TButton button, SPJoystick joystick = SPJoystick.All);
+        bool TryPollButton(out TButton button, Joystick joystick = Joystick.All);
 
-        IButtonInputSignature CreateButtonSignature(string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, SPJoystick joystick = SPJoystick.All, float axleButtonDeadZone = AxleButtonInputSignature.DEFAULT_BTNDEADZONE);
+        bool TryPollAxis(out TAxis axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE);
 
-        IAxleInputSignature CreateAxisSignature(string id, TAxis axis, SPJoystick joystick = SPJoystick.All);
+        ButtonDelegate CreateButtonDelegate(TButton button, Joystick joystick = Joystick.All);
+        
+        AxisDelegate CreateAxisDelegate(TAxis axis, Joystick joystick = Joystick.All);
+        
+        IButtonInputSignature CreateButtonSignature(string id, TButton button, Joystick joystick = Joystick.All);
 
-        IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, SPJoystick joystick = SPJoystick.All);
+        IButtonInputSignature CreateButtonSignature(string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE);
+
+        IAxleInputSignature CreateAxisSignature(string id, TAxis axis, Joystick joystick = Joystick.All);
+
+        IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, Joystick joystick = Joystick.All);
 
     }
 

@@ -7,7 +7,8 @@ namespace com.spacepuppy.SPInput.Unity
 {
 
     public class InputProfileLookupTable<T, TButton, TAxis> 
-           : ICollection<InputProfileLookupTable<T, TButton, TAxis>.InputProfileLookupEntry>
+           : ICollection<InputProfileLookupTable<T, TButton, TAxis>.InputProfileLookupEntry>,
+           ISPDisposable
            where T : class, IInputProfile<TButton, TAxis> 
            where TButton : struct, System.IConvertible 
            where TAxis : struct, System.IConvertible
@@ -144,6 +145,30 @@ namespace com.spacepuppy.SPInput.Unity
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+
+        private bool _isDisposed;
+
+        public bool IsDisposed
+        {
+            get { return _isDisposed; }
+        }
+
+        /// <summary>
+        /// Unloads all profiles and forces GC to purge them out. This should be called after a lengthy input creation process. 
+        /// Otherwise the garbage created here in may be collected further down the line and impact framerate.
+        /// </summary>
+        public void Dispose()
+        {
+            _isDisposed = true;
+            _table.Clear();
+            _table = null;
+            //force collect all those loaded profiles
+            GC.Collect();
         }
 
         #endregion

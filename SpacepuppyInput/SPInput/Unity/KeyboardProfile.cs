@@ -116,7 +116,73 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region IInputProfile Interface
 
-        public IButtonInputSignature CreateButtonSignature(string id, TButton button, SPJoystick joystick = SPJoystick.All)
+        public bool TryPollButton(out TButton button, Joystick joystick = Joystick.All)
+        {
+            ButtonMapping map;
+
+            var e = _buttonTable.Keys.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if(TryGetMapping(e.Current, out map))
+                {
+                    if(Input.GetKey(map.Key))
+                    {
+                        button = e.Current;
+                        return true;
+                    }
+                }
+            }
+
+            button = default(TButton);
+            return false;
+        }
+
+        public bool TryPollAxis(out TAxis axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        {
+            AxisMapping map;
+
+            var e = _axisTable.Keys.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (TryGetMapping(e.Current, out map))
+                {
+                    if (Input.GetKey(map.Positive))
+                    {
+                        axis = e.Current;
+                        value = 1f;
+                        return true;
+                    }
+                    else if(Input.GetKey(map.Negative))
+                    {
+                        axis = e.Current;
+                        value = -1f;
+                        return true;
+                    }
+                }
+            }
+
+            axis = default(TAxis);
+            value = 0f;
+            return false;
+        }
+
+        public ButtonDelegate CreateButtonDelegate(TButton button, Joystick joystick = Joystick.All)
+        {
+            ButtonMapping map;
+            if (!TryGetMapping(button, out map) || map.Key == KeyCode.None) return null;
+
+            return SPInputFactory.CreateButtonDelegate(map.Key);
+        }
+
+        public AxisDelegate CreateAxisDelegate(TAxis axis, Joystick joystick = Joystick.All)
+        {
+            AxisMapping map;
+            if (!this.TryGetMapping(axis, out map)) return null;
+
+            return SPInputFactory.CreateAxisDelegate(map.Positive, map.Negative);
+        }
+
+        public IButtonInputSignature CreateButtonSignature(string id, TButton button, Joystick joystick = Joystick.All)
         {
             ButtonMapping map;
             if (!TryGetMapping(button, out map)) return null;
@@ -124,7 +190,7 @@ namespace com.spacepuppy.SPInput.Unity
             return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Key);
         }
 
-        public IButtonInputSignature CreateButtonSignature(string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, SPJoystick joystick = SPJoystick.All, float axleButtonDeadZone = 0.707F)
+        public IButtonInputSignature CreateButtonSignature(string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = 0.707F)
         {
             AxisMapping map;
             if (!TryGetMapping(axis, out map)) return null;
@@ -156,7 +222,7 @@ namespace com.spacepuppy.SPInput.Unity
             }
         }
 
-        public IAxleInputSignature CreateAxisSignature(string id, TAxis axis, SPJoystick joystick = SPJoystick.All)
+        public IAxleInputSignature CreateAxisSignature(string id, TAxis axis, Joystick joystick = Joystick.All)
         {
             AxisMapping map;
             if (!TryGetMapping(axis, out map)) return null;
@@ -164,7 +230,7 @@ namespace com.spacepuppy.SPInput.Unity
             return SPInputFactory.CreateKeyCodeAxisSignature(id, map.Positive, map.Negative);
         }
 
-        public IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, SPJoystick joystick = SPJoystick.All)
+        public IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, Joystick joystick = Joystick.All)
         {
             AxisMapping mapX;
             if (!TryGetMapping(axisX, out mapX)) mapX = AxisMapping.Unknown;

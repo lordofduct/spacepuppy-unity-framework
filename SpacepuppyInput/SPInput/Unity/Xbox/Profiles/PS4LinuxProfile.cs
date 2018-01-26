@@ -17,7 +17,6 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
 
         public PS4LinuxProfile()
         {
-
             this.Register(XboxAxis.LeftStickX, SPInputAxis.Axis1);
             this.Register(XboxAxis.LeftStickY, SPInputAxis.Axis2, true);
             this.Register(XboxAxis.RightStickX, SPInputAxis.Axis4);
@@ -41,7 +40,6 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.Register(XboxButton.DPadDown, SPInputAxis.Axis8, AxleValueConsideration.Positive);
             this.Register(XboxButton.DPadRight, SPInputAxis.Axis7, AxleValueConsideration.Positive);
             this.Register(XboxButton.DPadLeft, SPInputAxis.Axis7, AxleValueConsideration.Negative);
-
         }
 
     }
