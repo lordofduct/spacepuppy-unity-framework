@@ -56,12 +56,12 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             _axisTable[axis] = del;
         }
 
-        public void Register(XboxAxis axis, SPInputAxis spaxis, bool invert = false)
+        public void Register(XboxAxis axis, SPInputId spaxis, bool invert = false)
         {
             _axisTable[axis] = SPInputFactory.CreateAxisDelegateFactory(spaxis, invert);
         }
 
-        public void Register(XboxAxis axis, SPInputButton positive, SPInputButton negative)
+        public void Register(XboxAxis axis, SPInputId positive, SPInputId negative)
         {
             _axisTable[axis] = SPInputFactory.CreateAxisDelegateFactory(positive, negative);
         }
@@ -71,14 +71,14 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             _buttonTable[button] = del;
         }
 
-        public void Register(XboxButton button, SPInputButton spbtn)
+        public void Register(XboxButton button, SPInputId spbtn)
         {
             _buttonTable[button] = SPInputFactory.CreateButtonDelegateFactory(spbtn);
         }
 
-        public void Register(XboxButton button, SPInputAxis axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public void Register(XboxButton button, SPInputId axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            _buttonTable[button] = SPInputFactory.CreateButtonDelegateFactory(axis, consideration, axleButtonDeadZone);
+            _buttonTable[button] = SPInputFactory.CreateAxleButtonDelegateFactory(axis, consideration, axleButtonDeadZone);
         }
 
 
@@ -192,16 +192,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
         {
             return new DelegatedButtonInputSignature(id, this.CreateButtonDelegate(button, joystick));
         }
-
-        public IButtonInputSignature CreateButtonSignature(string id, XboxAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
-        {
-            return new DelegatedAxleButtonInputSignature(id, this.CreateAxisDelegate(axis, joystick))
-            {
-                Consideration = consideration,
-                AxisButtonDeadZone = axleButtonDeadZone
-            };
-        }
-
+        
         public IAxleInputSignature CreateAxisSignature(string id, XboxAxis axis, Joystick joystick = Joystick.All)
         {
             return new DelegatedAxleInputSignature(id, this.CreateAxisDelegate(axis, joystick));

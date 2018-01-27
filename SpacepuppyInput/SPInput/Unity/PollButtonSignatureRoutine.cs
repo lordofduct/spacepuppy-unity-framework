@@ -13,10 +13,10 @@ namespace com.spacepuppy.SPInput.Unity
     /// </summary>
     /// <typeparam name="TButton"></typeparam>
     /// <typeparam name="TAxis"></typeparam>
-    public class PollButtonSignatureRoutine : IRadicalWaitHandle
+    public class PollingButtonSignatureRoutine : IRadicalWaitHandle
     {
 
-        public delegate bool PollingCallback(PollButtonSignatureRoutine targ, out ButtonDelegate del);
+        public delegate bool PollingCallback(PollingButtonSignatureRoutine targ, out ButtonDelegate del);
 
         private enum State
         {
@@ -35,15 +35,16 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region CONSTRUCTOR
 
-        public PollButtonSignatureRoutine()
+        public PollingButtonSignatureRoutine()
         {
             this.PollButtons = true;
             this.PollKeyboard = true;
             this.PollFromStandardSPInputs = true;
+            this.PollJoyAxes = false;
+            this.PollMouseAxes = false;
             this.Joystick = Joystick.All;
             this.AxisConsideration = AxleValueConsideration.Positive;
             this.AxisPollingDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE;
-            this.AllowMouseAsAxis = false;
             this.CancelKey = UnityEngine.KeyCode.Escape;
         }
         
@@ -102,10 +103,20 @@ namespace com.spacepuppy.SPInput.Unity
         }
 
         /// <summary>
-        /// Should we poll for axis tilts. <param/>
+        /// Should we poll for joystick axis tilts. <para/>
         /// Default: False
         /// </summary>
-        public bool PollAxes
+        public bool PollJoyAxes
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Should we poll for mouse axis movement. <param/>
+        /// Default: False
+        /// </summary>
+        public bool PollMouseAxes
         {
             get;
             set;
@@ -130,17 +141,7 @@ namespace com.spacepuppy.SPInput.Unity
             get;
             set;
         }
-
-        /// <summary>
-        /// Allow the mouse to register as an axis when pulling Standard SPInputs (does not work for profiles). <param/>
-        /// Default: False
-        /// </summary>
-        public bool AllowMouseAsAxis
-        {
-            get;
-            set;
-        }
-
+        
         /// <summary>
         /// A key the user can press to cancel out of the polling. <param/>
         /// Default: <see cref="UnityEngine.KeyCode.Escape"/>
@@ -242,7 +243,7 @@ namespace com.spacepuppy.SPInput.Unity
                 {
                     if (this.PollButtons)
                     {
-                        SPInputButton btn;
+                        SPInputId btn;
                         if(SPInputDirect.TryPollButton(out btn, this.Joystick))
                         {
                             this.DelegateResult = SPInputFactory.CreateButtonDelegate(btn, this.Joystick);
@@ -250,15 +251,15 @@ namespace com.spacepuppy.SPInput.Unity
                         }
                     }
 
-                    if(this.PollAxes)
+                    if(this.PollJoyAxes || this.PollMouseAxes)
                     {
-                        SPInputAxis axis;
+                        SPInputId axis;
                         float value;
-                        if(SPInputDirect.TryPollAxis(out axis, out value, this.Joystick, this.AxisPollingDeadZone) && TestConsideration(value, this.AxisConsideration, this.AxisPollingDeadZone))
+                        if(SPInputDirect.TryPollAxis(out axis, out value, this.Joystick, this.PollMouseAxes, this.AxisPollingDeadZone) && TestConsideration(value, this.AxisConsideration, this.AxisPollingDeadZone))
                         {
-                            if(this.AllowMouseAsAxis || axis < SPInputAxis.MouseAxis1)
+                            if((this.PollJoyAxes && axis.IsJoyAxis()) || (this.PollMouseAxes && axis.IsMouseAxis()))
                             {
-                                this.DelegateResult = SPInputFactory.CreateButtonDelegate(axis, this.AxisConsideration, this.Joystick, this.AxisPollingDeadZone);
+                                this.DelegateResult = SPInputFactory.CreateAxleButtonDelegate(axis, this.AxisConsideration, this.Joystick, this.AxisPollingDeadZone);
                                 goto Complete;
                             }
                         }
@@ -348,9 +349,9 @@ namespace com.spacepuppy.SPInput.Unity
         {
             if (profiles == null || profiles.Length == 0) return null;
 
-            return (PollButtonSignatureRoutine targ, out ButtonDelegate del) =>
+            return (PollingButtonSignatureRoutine targ, out ButtonDelegate del) =>
             {
-                if (targ.PollButtons || targ.PollAxes)
+                if (targ.PollButtons || targ.PollJoyAxes)
                 {
                     foreach (var p in profiles)
                     {
@@ -364,13 +365,13 @@ namespace com.spacepuppy.SPInput.Unity
                             }
                         }
 
-                        if (targ.PollAxes)
+                        if (targ.PollJoyAxes)
                         {
                             TAxis axis;
                             float value;
                             if (p.TryPollAxis(out axis, out value, targ.Joystick, targ.AxisPollingDeadZone) && TestConsideration(value, targ.AxisConsideration, targ.AxisPollingDeadZone))
                             {
-                                del = SPInputFactory.CreateButtonDelegate(p.CreateAxisDelegate(axis, targ.Joystick), targ.AxisConsideration, targ.AxisPollingDeadZone);
+                                del = SPInputFactory.CreateAxleButtonDelegate(p.CreateAxisDelegate(axis, targ.Joystick), targ.AxisConsideration, targ.AxisPollingDeadZone);
                                 return true;
                             }
                         }

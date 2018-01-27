@@ -16,32 +16,32 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
 
         public PS4WinProfile()
         {
-            this.Register(XboxAxis.LeftStickX, SPInputAxis.Axis1);
-            this.Register(XboxAxis.LeftStickY, SPInputAxis.Axis2, true);
-            this.Register(XboxAxis.RightStickX, SPInputAxis.Axis3);
-            this.Register(XboxAxis.RightStickY, SPInputAxis.Axis6);
-            this.Register(XboxAxis.DPadX, SPInputAxis.Axis7);
-            this.Register(XboxAxis.DPadY, SPInputAxis.Axis8);
-            this.Register(XboxAxis.LeftTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputAxis.Axis4));
-            this.Register(XboxAxis.RightTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputAxis.Axis5));
-            //this.Register(XboxAxis.LeftTrigger, SPInputButton.Button6, SPInputButton.Unknown);
-            //this.Register(XboxAxis.RightTrigger, SPInputButton.Button7, SPInputButton.Unknown);
+            this.Register(XboxAxis.LeftStickX, SPInputId.Axis1);
+            this.Register(XboxAxis.LeftStickY, SPInputId.Axis2, true);
+            this.Register(XboxAxis.RightStickX, SPInputId.Axis3);
+            this.Register(XboxAxis.RightStickY, SPInputId.Axis6);
+            this.Register(XboxAxis.DPadX, SPInputId.Axis7);
+            this.Register(XboxAxis.DPadY, SPInputId.Axis8);
+            this.Register(XboxAxis.LeftTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputId.Axis4));
+            this.Register(XboxAxis.RightTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputId.Axis5));
+            //this.Register(XboxAxis.LeftTrigger, SPInputId.Button6, SPInputId.Unknown);
+            //this.Register(XboxAxis.RightTrigger, SPInputId.Button7, SPInputId.Unknown);
 
 
-            this.Register(XboxButton.A, SPInputButton.Button1); //X
-            this.Register(XboxButton.B, SPInputButton.Button2); //O
-            this.Register(XboxButton.X, SPInputButton.Button0); //Sqr
-            this.Register(XboxButton.Y, SPInputButton.Button3); //Tri
-            this.Register(XboxButton.LB, SPInputButton.Button4); //L1
-            this.Register(XboxButton.RB, SPInputButton.Button5); //R1
-            this.Register(XboxButton.Back, SPInputButton.Button8); //Share
-            this.Register(XboxButton.Start, SPInputButton.Button9); //Options
-            this.Register(XboxButton.LeftStick, SPInputButton.Button10);
-            this.Register(XboxButton.RightStick, SPInputButton.Button11);
-            this.Register(XboxButton.DPadUp, SPInputAxis.Axis8, AxleValueConsideration.Positive);
-            this.Register(XboxButton.DPadDown, SPInputAxis.Axis8, AxleValueConsideration.Negative);
-            this.Register(XboxButton.DPadRight, SPInputAxis.Axis7, AxleValueConsideration.Positive);
-            this.Register(XboxButton.DPadLeft, SPInputAxis.Axis7, AxleValueConsideration.Negative);
+            this.Register(XboxButton.A, SPInputId.Button1); //X
+            this.Register(XboxButton.B, SPInputId.Button2); //O
+            this.Register(XboxButton.X, SPInputId.Button0); //Sqr
+            this.Register(XboxButton.Y, SPInputId.Button3); //Tri
+            this.Register(XboxButton.LB, SPInputId.Button4); //L1
+            this.Register(XboxButton.RB, SPInputId.Button5); //R1
+            this.Register(XboxButton.Back, SPInputId.Button8); //Share
+            this.Register(XboxButton.Start, SPInputId.Button9); //Options
+            this.Register(XboxButton.LeftStick, SPInputId.Button10);
+            this.Register(XboxButton.RightStick, SPInputId.Button11);
+            this.Register(XboxButton.DPadUp, SPInputId.Axis8, AxleValueConsideration.Positive);
+            this.Register(XboxButton.DPadDown, SPInputId.Axis8, AxleValueConsideration.Negative);
+            this.Register(XboxButton.DPadRight, SPInputId.Axis7, AxleValueConsideration.Positive);
+            this.Register(XboxButton.DPadLeft, SPInputId.Axis7, AxleValueConsideration.Negative);
         }
 
     }

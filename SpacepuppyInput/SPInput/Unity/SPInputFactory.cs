@@ -12,15 +12,20 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region Delegate Factory
 
-        public static ButtonDelegate CreateButtonDelegate(SPInputButton button, Joystick joystick)
+        public static ButtonDelegate CreateButtonDelegate(SPInputId button, Joystick joystick)
         {
-            var inputId = SPInputDirect.GetButtonInputId(button, joystick);
+            var inputId = SPInputDirect.GetInputName(button, joystick);
             return () => UnityEngine.Input.GetButton(inputId);
         }
 
-        public static ButtonDelegate CreateButtonDelegate(SPInputAxis axis, AxleValueConsideration consideration, Joystick joystick, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static ButtonDelegate CreateButtonDelegate(UnityEngine.KeyCode key)
         {
-            var inputId = SPInputDirect.GetAxisInputId(axis, joystick);
+            return () => UnityEngine.Input.GetKey(key);
+        }
+
+        public static ButtonDelegate CreateAxleButtonDelegate(SPInputId axis, AxleValueConsideration consideration, Joystick joystick, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        {
+            var inputId = SPInputDirect.GetInputName(axis, joystick);
             switch (consideration)
             {
                 case AxleValueConsideration.Positive:
@@ -34,12 +39,7 @@ namespace com.spacepuppy.SPInput.Unity
             }
         }
 
-        public static ButtonDelegate CreateButtonDelegate(UnityEngine.KeyCode key)
-        {
-            return () => UnityEngine.Input.GetKey(key);
-        }
-
-        public static ButtonDelegate CreateButtonDelegate(AxisDelegate axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static ButtonDelegate CreateAxleButtonDelegate(AxisDelegate axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
             if (axis == null) return null;
 
@@ -56,19 +56,19 @@ namespace com.spacepuppy.SPInput.Unity
             }
         }
 
-        public static AxisDelegate CreateAxisDelegate(SPInputAxis axis, Joystick joystick, bool invert = false)
+        public static AxisDelegate CreateAxisDelegate(SPInputId axis, Joystick joystick, bool invert = false)
         {
-            var inputId = SPInputDirect.GetAxisInputId(axis, joystick);
+            var inputId = SPInputDirect.GetInputName(axis, joystick);
             if (invert)
                 return () => -UnityEngine.Input.GetAxisRaw(inputId);
             else
                 return () => UnityEngine.Input.GetAxisRaw(inputId);
         }
 
-        public static AxisDelegate CreateAxisDelegate(SPInputButton positive, SPInputButton negative, Joystick joystick)
+        public static AxisDelegate CreateAxisDelegate(SPInputId positive, SPInputId negative, Joystick joystick)
         {
-            var posId = SPInputDirect.GetButtonInputId(positive, joystick);
-            var negId = SPInputDirect.GetButtonInputId(negative, joystick);
+            var posId = SPInputDirect.GetInputName(positive, joystick);
+            var negId = SPInputDirect.GetInputName(negative, joystick);
             if (posId != null && negId != null)
             {
                 return () =>
@@ -146,7 +146,7 @@ namespace com.spacepuppy.SPInput.Unity
         }
 
 
-        public static ButtonDelegateFactory CreateButtonDelegateFactory(SPInputButton button)
+        public static ButtonDelegateFactory CreateButtonDelegateFactory(SPInputId button)
         {
             return (j) =>
             {
@@ -154,15 +154,15 @@ namespace com.spacepuppy.SPInput.Unity
             };
         }
 
-        public static ButtonDelegateFactory CreateButtonDelegateFactory(SPInputAxis axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static ButtonDelegateFactory CreateAxleButtonDelegateFactory(SPInputId axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
             return (j) =>
             {
-                return CreateButtonDelegate(axis, consideration, j, axleButtonDeadZone);
+                return CreateAxleButtonDelegate(axis, consideration, j, axleButtonDeadZone);
             };
         }
 
-        public static AxisDelegateFactory CreateAxisDelegateFactory(SPInputAxis axis, bool invert = false)
+        public static AxisDelegateFactory CreateAxisDelegateFactory(SPInputId axis, bool invert = false)
         {
             return (j) =>
             {
@@ -170,7 +170,7 @@ namespace com.spacepuppy.SPInput.Unity
             };
         }
 
-        public static AxisDelegateFactory CreateAxisDelegateFactory(SPInputButton positive, SPInputButton negative)
+        public static AxisDelegateFactory CreateAxisDelegateFactory(SPInputId positive, SPInputId negative)
         {
             return (j) =>
             {
@@ -192,11 +192,11 @@ namespace com.spacepuppy.SPInput.Unity
         /// <param name="axis"></param>
         /// <param name="invert"></param>
         /// <returns></returns>
-        public static AxisDelegateFactory CreateAxisDelegateFactory_PS4TriggerLike(SPInputAxis axis)
+        public static AxisDelegateFactory CreateAxisDelegateFactory_PS4TriggerLike(SPInputId axis)
         {
             return (j) =>
             {
-                var inputId = SPInputDirect.GetAxisInputId(axis, j);
+                var inputId = SPInputDirect.GetInputName(axis, j);
                 return () =>
                 {
                     float v = UnityEngine.Input.GetAxisRaw(inputId);
@@ -209,14 +209,14 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region Signature Factory
 
-        public static ButtonInputSignature CreateButtonSignature(string id, SPInputButton button, Joystick joystick = Joystick.All)
+        public static ButtonInputSignature CreateButtonSignature(string id, SPInputId button, Joystick joystick = Joystick.All)
         {
-            return new ButtonInputSignature(id, SPInputDirect.GetButtonInputId(button, joystick));
+            return new ButtonInputSignature(id, SPInputDirect.GetInputName(button, joystick));
         }
         
-        public static AxleButtonInputSignature CreateAxleButtonSignature(string id, SPInputAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static AxleButtonInputSignature CreateAxleButtonSignature(string id, SPInputId axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            return new AxleButtonInputSignature(id, SPInputDirect.GetAxisInputId(axis, joystick), consideration, axleButtonDeadZone);
+            return new AxleButtonInputSignature(id, SPInputDirect.GetInputName(axis, joystick), consideration, axleButtonDeadZone);
         }
         
         public static KeyboardButtonInputSignature CreateKeyCodeButtonSignature(string id, UnityEngine.KeyCode key)
@@ -224,9 +224,9 @@ namespace com.spacepuppy.SPInput.Unity
             return new KeyboardButtonInputSignature(id, key);
         }
         
-        public static AxleInputSignature CreateAxisSignature(string id, SPInputAxis axis, Joystick joystick = Joystick.All, bool invert = false)
+        public static AxleInputSignature CreateAxisSignature(string id, SPInputId axis, Joystick joystick = Joystick.All, bool invert = false)
         {
-            return new AxleInputSignature(id, SPInputDirect.GetAxisInputId(axis, joystick))
+            return new AxleInputSignature(id, SPInputDirect.GetInputName(axis, joystick))
             {
                 Invert = invert
             };
@@ -237,9 +237,9 @@ namespace com.spacepuppy.SPInput.Unity
             return new KeyboardAxleInputSignature(id, positiveKey, negativeKey);
         }
         
-        public static DualAxleInputSignature CreateDualAxisSignature(string id, SPInputAxis axisX, SPInputAxis axisY, Joystick joystick = Joystick.All, bool invertX = false, bool invertY = false)
+        public static DualAxleInputSignature CreateDualAxisSignature(string id, SPInputId axisX, SPInputId axisY, Joystick joystick = Joystick.All, bool invertX = false, bool invertY = false)
         {
-            return new DualAxleInputSignature(id, SPInputDirect.GetAxisInputId(axisX, joystick), SPInputDirect.GetAxisInputId(axisY, joystick))
+            return new DualAxleInputSignature(id, SPInputDirect.GetInputName(axisX, joystick), SPInputDirect.GetInputName(axisY, joystick))
             {
                 InvertX = invertX,
                 InvertY = invertY
@@ -251,14 +251,24 @@ namespace com.spacepuppy.SPInput.Unity
             return new KeyboardDualAxleInputSignature(id, horizontalPositiveKey, horizontalNegativeKey, verticalPositiveKey, verticalNegativeKey);
         }
         
-        public static EmulatedAxleInputSignature CreateEmulatedAxixSignature(string id, SPInputButton positive, SPInputButton negative, Joystick joystick = Joystick.All)
+        public static EmulatedAxleInputSignature CreateEmulatedAxixSignature(string id, SPInputId positive, SPInputId negative, Joystick joystick = Joystick.All)
         {
-            return new EmulatedAxleInputSignature(id, SPInputDirect.GetButtonInputId(positive, joystick), SPInputDirect.GetButtonInputId(negative, joystick));
+            return new EmulatedAxleInputSignature(id, SPInputDirect.GetInputName(positive, joystick), SPInputDirect.GetInputName(negative, joystick));
         }
 
-        public static EmulatedDualAxleInputSignature CreateEmulatedDualAxixSignature(string id, SPInputButton positiveX, SPInputButton negativeX, SPInputButton positiveY, SPInputButton negativeY, Joystick joystick = Joystick.All)
+        public static EmulatedDualAxleInputSignature CreateEmulatedDualAxixSignature(string id, SPInputId positiveX, SPInputId negativeX, SPInputId positiveY, SPInputId negativeY, Joystick joystick = Joystick.All)
         {
-            return new EmulatedDualAxleInputSignature(id, SPInputDirect.GetButtonInputId(positiveX, joystick), SPInputDirect.GetButtonInputId(negativeX, joystick), SPInputDirect.GetButtonInputId(positiveY, joystick), SPInputDirect.GetButtonInputId(negativeY, joystick));
+            return new EmulatedDualAxleInputSignature(id, SPInputDirect.GetInputName(positiveX, joystick), SPInputDirect.GetInputName(negativeX, joystick), SPInputDirect.GetInputName(positiveY, joystick), SPInputDirect.GetInputName(negativeY, joystick));
+        }
+
+
+        //extension
+
+        public static IButtonInputSignature CreateAxleButtonSignature<TButton, TAxis>(this IInputProfile<TButton, TAxis> profile, string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE) where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
+        {
+            if (profile == null) return null;
+
+            return new DelegatedAxleButtonInputSignature(id, profile.CreateAxisDelegate(axis, joystick), consideration, axleButtonDeadZone);
         }
 
         #endregion
@@ -273,7 +283,7 @@ namespace com.spacepuppy.SPInput.Unity
         {
             if (joystick != Joystick.None)
             {
-                SPInputButton btn;
+                SPInputId btn;
                 if (SPInputDirect.TryPollButton(out btn, joystick))
                 {
                     signature = SPInputFactory.CreateButtonDelegate(btn, joystick);
@@ -293,20 +303,20 @@ namespace com.spacepuppy.SPInput.Unity
 
             if (allowAxis || allowMouseMotionAxis)
             {
-                SPInputAxis axis;
-                if (SPInputDirect.TryPollAxis(out axis, joystick, axleInputDeadZone))
+                SPInputId axis;
+                if (SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
                 {
-                    if ((allowMouseMotionAxis && axis >= SPInputAxis.MouseAxis1) || (allowAxis && axis < SPInputAxis.MouseAxis1))
+                    if ((allowMouseMotionAxis && axis.IsMouseAxis()) || (allowAxis && axis.IsJoyAxis()))
                     {
                         float value = SPInputDirect.GetAxis(axis, joystick);
                         if (value > 1f)
                         {
-                            signature = SPInputFactory.CreateButtonDelegate(axis, AxleValueConsideration.Positive, joystick, axleInputDeadZone);
+                            signature = SPInputFactory.CreateAxleButtonDelegate(axis, AxleValueConsideration.Positive, joystick, axleInputDeadZone);
                             return true;
                         }
                         else if (value < 0f)
                         {
-                            signature = SPInputFactory.CreateButtonDelegate(axis, AxleValueConsideration.Negative, joystick, axleInputDeadZone);
+                            signature = SPInputFactory.CreateAxleButtonDelegate(axis, AxleValueConsideration.Negative, joystick, axleInputDeadZone);
                             return true;
                         }
                     }
@@ -325,10 +335,10 @@ namespace com.spacepuppy.SPInput.Unity
         {
             if (joystick != Joystick.None)
             {
-                SPInputAxis axis;
-                if (SPInputDirect.TryPollAxis(out axis, joystick, axleInputDeadZone))
+                SPInputId axis;
+                if (SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
                 {
-                    if (allowMouseMotionAxis || axis < SPInputAxis.MouseAxis1)
+                    if (allowMouseMotionAxis || axis.IsJoyAxis())
                     {
                         signature = SPInputFactory.CreateAxisDelegate(axis, joystick);
                         return true;
@@ -348,7 +358,7 @@ namespace com.spacepuppy.SPInput.Unity
         {
             if (joystick != Joystick.None)
             {
-                SPInputButton btn;
+                SPInputId btn;
                 if (SPInputDirect.TryPollButton(out btn, joystick))
                 {
                     signature = SPInputFactory.CreateButtonSignature(id, btn, joystick);
@@ -368,10 +378,10 @@ namespace com.spacepuppy.SPInput.Unity
 
             if(allowAxis || allowMouseMotionAxis)
             {
-                SPInputAxis axis;
-                if(SPInputDirect.TryPollAxis(out axis, joystick, axleInputDeadZone))
+                SPInputId axis;
+                if(SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
                 {
-                    if ((allowMouseMotionAxis && axis >= SPInputAxis.MouseAxis1) || (allowAxis && axis < SPInputAxis.MouseAxis1))
+                    if ((allowMouseMotionAxis && axis.IsMouseAxis()) || (allowAxis && axis.IsJoyAxis()))
                     {
                         float value = SPInputDirect.GetAxis(axis, joystick);
                         if (value > 1f)
@@ -400,10 +410,10 @@ namespace com.spacepuppy.SPInput.Unity
         {
             if (joystick != Joystick.None)
             {
-                SPInputAxis axis;
-                if (SPInputDirect.TryPollAxis(out axis, joystick, axleInputDeadZone))
+                SPInputId axis;
+                if (SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
                 {
-                    if (allowMouseMotionAxis || axis < SPInputAxis.MouseAxis1)
+                    if (allowMouseMotionAxis || axis.IsJoyAxis())
                     {
                         signature = SPInputFactory.CreateAxisSignature(id, axis, joystick);
                         return true;

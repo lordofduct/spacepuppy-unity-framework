@@ -46,11 +46,12 @@ namespace com.spacepuppy.SPInput.Unity
             this.PollButtons = false;
             this.PollKeyboard = false;
             this.PollFromStandardSPInputs = true;
+            this.PollJoyAxes = true;
+            this.PollMouseAxes = false;
             this.Joystick = Joystick.All;
             this.AxisConsideration = AxleValueConsideration.Absolute;
             this.AxisPollingDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE;
             this.ButtonPressMonitorDuration = 5.0f;
-            this.AllowMouseAsAxis = false;
             this.CancelKey = UnityEngine.KeyCode.Escape;
         }
 
@@ -109,10 +110,20 @@ namespace com.spacepuppy.SPInput.Unity
         }
 
         /// <summary>
-        /// Should we poll for axis tilts. <para/>
+        /// Should we poll for joystick axis tilts. <para/>
         /// Default: True
         /// </summary>
-        public bool PollAxes
+        public bool PollJoyAxes
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Should we poll for mouse axis movement. <param/>
+        /// Default: False
+        /// </summary>
+        public bool PollMouseAxes
         {
             get;
             set;
@@ -161,17 +172,7 @@ namespace com.spacepuppy.SPInput.Unity
             get;
             set;
         }
-
-        /// <summary>
-        /// Allow the mouse to register as an axis when pulling Standard SPInputs (does not work for profiles). <param/>
-        /// Default: False
-        /// </summary>
-        public bool AllowMouseAsAxis
-        {
-            get;
-            set;
-        }
-
+        
         /// <summary>
         /// A key the user can press to cancel out of the polling. <para/>
         /// Default: <see cref="UnityEngine.KeyCode.Escape"/>
@@ -271,7 +272,7 @@ namespace com.spacepuppy.SPInput.Unity
                     yield break;
                 }
 
-                if(this.PollAxes && this.CustomAxisPollingCallback != null)
+                if(this.CustomAxisPollingCallback != null)
                 {
                     AxisDelegate d;
                     if(this.CustomAxisPollingCallback(this, out d))
@@ -307,13 +308,13 @@ namespace com.spacepuppy.SPInput.Unity
 
                 if (this.PollFromStandardSPInputs)
                 {
-                    if (this.PollAxes)
+                    if (this.PollJoyAxes || this.PollMouseAxes)
                     {
-                        SPInputAxis axis;
+                        SPInputId axis;
                         float value;
-                        if (SPInputDirect.TryPollAxis(out axis, out value, this.Joystick, this.AxisPollingDeadZone) && TestConsideration(value, this.AxisConsideration, this.AxisPollingDeadZone))
+                        if (SPInputDirect.TryPollAxis(out axis, out value, this.Joystick, this.PollMouseAxes, this.AxisPollingDeadZone) && TestConsideration(value, this.AxisConsideration, this.AxisPollingDeadZone))
                         {
-                            if (this.AllowMouseAsAxis || axis < SPInputAxis.MouseAxis1)
+                            if ((this.PollJoyAxes && axis.IsJoyAxis()) || (this.PollMouseAxes && axis.IsMouseAxis()))
                             {
                                 this.DelegateResult = SPInputFactory.CreateAxisDelegate(axis, this.Joystick, value < 0f);
                                 goto Complete;
@@ -323,7 +324,7 @@ namespace com.spacepuppy.SPInput.Unity
 
                     if (this.PollButtons)
                     {
-                        SPInputButton btn;
+                        SPInputId btn;
                         if (SPInputDirect.TryPollButton(out btn, this.Joystick))
                         {
                             if (this.PollAsTrigger)
@@ -454,7 +455,7 @@ namespace com.spacepuppy.SPInput.Unity
 
             return (PollingAxisSignatureRoutine targ, out AxisDelegate del) =>
             {
-                if (targ.PollAxes)
+                if (targ.PollJoyAxes)
                 {
                     foreach (var p in profiles)
                     {

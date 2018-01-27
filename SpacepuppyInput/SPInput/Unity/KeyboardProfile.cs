@@ -190,38 +190,6 @@ namespace com.spacepuppy.SPInput.Unity
             return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Key);
         }
 
-        public IButtonInputSignature CreateButtonSignature(string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = 0.707F)
-        {
-            AxisMapping map;
-            if (!TryGetMapping(axis, out map)) return null;
-
-            switch(consideration)
-            {
-                case AxleValueConsideration.Positive:
-                    return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Positive);
-                case AxleValueConsideration.Negative:
-                    return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Negative);
-                case AxleValueConsideration.Absolute:
-                    {
-                        IButtonInputSignature pos = null;
-                        IButtonInputSignature neg = null;
-                        if(map.Positive != KeyCode.None) pos = SPInputFactory.CreateKeyCodeButtonSignature(id, map.Positive);
-                        if(map.Negative != KeyCode.None) neg = SPInputFactory.CreateKeyCodeButtonSignature(id, map.Negative);
-
-                        if (pos != null && neg != null)
-                            return new MergedButtonInputSignature(id, pos, neg);
-                        else if (pos != null)
-                            return pos;
-                        else if (neg != null)
-                            return neg;
-                        else
-                            return SPInputFactory.CreateKeyCodeButtonSignature(id, KeyCode.None);
-                    }
-                default:
-                    return null;
-            }
-        }
-
         public IAxleInputSignature CreateAxisSignature(string id, TAxis axis, Joystick joystick = Joystick.All)
         {
             AxisMapping map;
