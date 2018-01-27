@@ -5,40 +5,24 @@ using System.Linq;
 namespace com.spacepuppy.SPInput.Unity
 {
 
-    public class KeyboardProfile<TButton, TAxis> : IInputProfile<TButton, TAxis> where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
+    public class KeyboardProfile<TInputId> : IInputProfile<TInputId> where TInputId : struct, System.IConvertible
     {
 
         #region Fields
 
-        private Dictionary<TAxis, AxisMapping> _axisTable = new Dictionary<TAxis, AxisMapping>();
-        private Dictionary<TButton, ButtonMapping> _buttonTable = new Dictionary<TButton, ButtonMapping>();
+        private Dictionary<TInputId, AxisMapping> _axisTable = new Dictionary<TInputId, AxisMapping>();
+        private Dictionary<TInputId, ButtonMapping> _buttonTable = new Dictionary<TInputId, ButtonMapping>();
 
         #endregion
 
         #region Properties
-
-        public AxisMapping this[TAxis axis]
-        {
-            get
-            {
-                return this.GetMapping(axis);
-            }
-        }
-
-        public ButtonMapping this[TButton button]
-        {
-            get
-            {
-                return this.GetMapping(button);
-            }
-        }
-
-        public Dictionary<TAxis, AxisMapping>.KeyCollection Axes
+        
+        public Dictionary<TInputId, AxisMapping>.KeyCollection Axes
         {
             get { return _axisTable.Keys; }
         }
 
-        public Dictionary<TButton, ButtonMapping>.KeyCollection Buttons
+        public Dictionary<TInputId, ButtonMapping>.KeyCollection Buttons
         {
             get { return _buttonTable.Keys; }
         }
@@ -47,7 +31,7 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region Methods
         
-        public void Register(TAxis axis, KeyCode positive, KeyCode negative)
+        public void RegisterAxis(TInputId axis, KeyCode positive, KeyCode negative)
         {
             _axisTable[axis] = new AxisMapping()
             {
@@ -56,7 +40,7 @@ namespace com.spacepuppy.SPInput.Unity
             };
         }
 
-        public void Register(TButton button, KeyCode key)
+        public void RegisterButton(TInputId button, KeyCode key)
         {
             _buttonTable[button] = new ButtonMapping()
             {
@@ -64,7 +48,7 @@ namespace com.spacepuppy.SPInput.Unity
             };
         }
         
-        public AxisMapping GetMapping(TAxis axis)
+        public AxisMapping GetAxisMapping(TInputId axis)
         {
             AxisMapping result;
             if (_axisTable.TryGetValue(axis, out result))
@@ -73,7 +57,7 @@ namespace com.spacepuppy.SPInput.Unity
             throw new KeyNotFoundException("A mapping for axis " + axis.ToString() + " was not found.");
         }
 
-        public ButtonMapping GetMapping(TButton button)
+        public ButtonMapping GetButtonMapping(TInputId button)
         {
             ButtonMapping result;
             if (_buttonTable.TryGetValue(button, out result))
@@ -82,48 +66,38 @@ namespace com.spacepuppy.SPInput.Unity
             throw new KeyNotFoundException("A mapping for button " + button.ToString() + " was not found.");
         }
 
-        public bool TryGetMapping(TAxis axis, out AxisMapping map)
+        public bool TryGetAxisMapping(TInputId axis, out AxisMapping map)
         {
             return _axisTable.TryGetValue(axis, out map);
         }
 
-        public bool TryGetMapping(TButton button, out ButtonMapping map)
+        public bool TryGetButtonMapping(TInputId button, out ButtonMapping map)
         {
             return _buttonTable.TryGetValue(button, out map);
         }
 
-        public bool Contains(TAxis axis)
+        public bool Contains(TInputId id)
         {
-            return _axisTable.ContainsKey(axis);
+            return _axisTable.ContainsKey(id) || _buttonTable.ContainsKey(id);
         }
-
-        public bool Contains(TButton button)
+        
+        public bool Remove(TInputId id)
         {
-            return _buttonTable.ContainsKey(button);
+            return _axisTable.Remove(id) | _buttonTable.Remove(id);
         }
-
-        public bool Remove(TAxis axis)
-        {
-            return _axisTable.Remove(axis);
-        }
-
-        public bool Remove(TButton button)
-        {
-            return _buttonTable.Remove(button);
-        }
-
+        
         #endregion
 
         #region IInputProfile Interface
 
-        public bool TryPollButton(out TButton button, Joystick joystick = Joystick.All)
+        public bool TryPollButton(out TInputId button, Joystick joystick = Joystick.All)
         {
             ButtonMapping map;
 
             var e = _buttonTable.Keys.GetEnumerator();
             while(e.MoveNext())
             {
-                if(TryGetMapping(e.Current, out map))
+                if(TryGetButtonMapping(e.Current, out map))
                 {
                     if(Input.GetKey(map.Key))
                     {
@@ -133,18 +107,18 @@ namespace com.spacepuppy.SPInput.Unity
                 }
             }
 
-            button = default(TButton);
+            button = default(TInputId);
             return false;
         }
 
-        public bool TryPollAxis(out TAxis axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public bool TryPollAxis(out TInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
             AxisMapping map;
 
             var e = _axisTable.Keys.GetEnumerator();
             while (e.MoveNext())
             {
-                if (TryGetMapping(e.Current, out map))
+                if (TryGetAxisMapping(e.Current, out map))
                 {
                     if (Input.GetKey(map.Positive))
                     {
@@ -161,23 +135,23 @@ namespace com.spacepuppy.SPInput.Unity
                 }
             }
 
-            axis = default(TAxis);
+            axis = default(TInputId);
             value = 0f;
             return false;
         }
 
-        public ButtonDelegate CreateButtonDelegate(TButton button, Joystick joystick = Joystick.All)
+        public ButtonDelegate CreateButtonDelegate(TInputId button, Joystick joystick = Joystick.All)
         {
             ButtonMapping map;
-            if (!TryGetMapping(button, out map) || map.Key == KeyCode.None) return null;
+            if (!TryGetButtonMapping(button, out map) || map.Key == KeyCode.None) return null;
 
             return SPInputFactory.CreateButtonDelegate(map.Key);
         }
 
-        public AxisDelegate CreateAxisDelegate(TAxis axis, Joystick joystick = Joystick.All)
+        public AxisDelegate CreateAxisDelegate(TInputId axis, Joystick joystick = Joystick.All)
         {
             AxisMapping map;
-            if (!this.TryGetMapping(axis, out map)) return null;
+            if (!this.TryGetAxisMapping(axis, out map)) return null;
 
             return SPInputFactory.CreateAxisDelegate(map.Positive, map.Negative);
         }

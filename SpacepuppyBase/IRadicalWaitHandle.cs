@@ -5,8 +5,15 @@ namespace com.spacepuppy
     public interface IRadicalWaitHandle : IRadicalYieldInstruction
     {
 
+        /// <summary>
+        /// The completion of the wait handle was the result of it being cancelled.
+        /// </summary>
         bool Cancelled { get; }
 
+        /// <summary>
+        /// Called when the wait handle completed. This includes being cancelled. Check 'Cancelled' to know why it completed.
+        /// </summary>
+        /// <param name="callback"></param>
         void OnComplete(System.Action<IRadicalWaitHandle> callback);
 
     }

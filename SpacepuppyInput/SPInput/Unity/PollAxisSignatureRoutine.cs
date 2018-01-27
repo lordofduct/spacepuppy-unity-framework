@@ -21,6 +21,8 @@ namespace com.spacepuppy.SPInput.Unity
     public class PollingAxisSignatureRoutine : IRadicalWaitHandle
     {
 
+        public const float DEFAULT_ButtonPressMonitorDuration = 5f;
+
         public delegate bool AxisPollingCallback(PollingAxisSignatureRoutine targ, out AxisDelegate del);
         public delegate bool ButtonPollingCallback(PollingAxisSignatureRoutine targ, out ButtonDelegate del);
 
@@ -36,6 +38,8 @@ namespace com.spacepuppy.SPInput.Unity
 
         private State _state;
         private RadicalCoroutine _routine;
+
+        private System.Action<PollingAxisSignatureRoutine> _onComplete;
 
         #endregion
 
@@ -152,7 +156,7 @@ namespace com.spacepuppy.SPInput.Unity
         /// <summary>
         /// If monitoring for button/key presses to emulate an axis this is how long in seconds one should wait before giving up on waiting for the second button press.<para/>
         /// Note - If AxisConsideration is Positive/Negative, it'll register on the first button press.
-        /// Default: 5.0f
+        /// Default: <see cref="PollingAxisSignatureRoutine.DEFAULT_ButtonPressMonitorDuration"/>
         /// </summary>
         public float ButtonPressMonitorDuration
         {
@@ -247,11 +251,22 @@ namespace com.spacepuppy.SPInput.Unity
 
             _state = State.Cancelled;
             this.DelegateResult = null;
+            this.SignalOnComplete();
         }
 
         public IAxleInputSignature CreateInputSignature(string id)
         {
             return new DelegatedAxleInputSignature(id, this.DelegateResult);
+        }
+
+        private void SignalOnComplete()
+        {
+            if (_onComplete != null)
+            {
+                var d = _onComplete;
+                _onComplete = null;
+                d(this);
+            }
         }
 
         private System.Collections.IEnumerator WorkRoutine()
@@ -282,7 +297,7 @@ namespace com.spacepuppy.SPInput.Unity
                     }
                 }
 
-                if(this.PollButtons && this.CustomButtonPollingCallback != null)
+                if(this.CustomButtonPollingCallback != null)
                 {
                     ButtonDelegate d;
                     if(this.CustomButtonPollingCallback(this, out d))
@@ -385,6 +400,7 @@ namespace com.spacepuppy.SPInput.Unity
             Complete:
             _state = State.Complete;
             _routine = null;
+            this.SignalOnComplete();
         }
 
         #endregion
@@ -401,9 +417,15 @@ namespace com.spacepuppy.SPInput.Unity
             get { return _state >= State.Cancelled; }
         }
 
+        public void OnComplete(System.Action<PollingAxisSignatureRoutine> callback)
+        {
+            _onComplete += callback;
+        }
+
         void IRadicalWaitHandle.OnComplete(Action<IRadicalWaitHandle> callback)
         {
-
+            if (callback == null) return;
+            _onComplete += (o) => callback(o);
         }
 
         bool IRadicalYieldInstruction.Tick(out object yieldObject)
@@ -449,7 +471,7 @@ namespace com.spacepuppy.SPInput.Unity
         /// <typeparam name="TAxis"></typeparam>
         /// <param name="profiles"></param>
         /// <returns></returns>
-        public static AxisPollingCallback CreateProfileAxisPollingCallback<TButton, TAxis>(params IInputProfile<TButton, TAxis>[] profiles) where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
+        public static AxisPollingCallback CreateProfileAxisPollingCallback<TInputId>(params IInputProfile<TInputId>[] profiles) where TInputId : struct, System.IConvertible
         {
             if (profiles == null || profiles.Length == 0) return null;
 
@@ -459,7 +481,7 @@ namespace com.spacepuppy.SPInput.Unity
                 {
                     foreach (var p in profiles)
                     {
-                        TAxis axis;
+                        TInputId axis;
                         float value;
                         if (p.TryPollAxis(out axis, out value, targ.Joystick, targ.AxisPollingDeadZone) && TestConsideration(value, targ.AxisConsideration, targ.AxisPollingDeadZone))
                         {
@@ -491,7 +513,7 @@ namespace com.spacepuppy.SPInput.Unity
         /// <typeparam name="TAxis"></typeparam>
         /// <param name="profiles"></param>
         /// <returns></returns>
-        public static ButtonPollingCallback CreateProfileButtonPollingCallback<TButton, TAxis>(params IInputProfile<TButton, TAxis>[] profiles) where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
+        public static ButtonPollingCallback CreateProfileButtonPollingCallback<TInputId>(params IInputProfile<TInputId>[] profiles) where TInputId : struct, System.IConvertible
         {
             if (profiles == null || profiles.Length == 0) return null;
 
@@ -501,7 +523,7 @@ namespace com.spacepuppy.SPInput.Unity
                 {
                     foreach (var p in profiles)
                     {
-                        TButton btn;
+                        TInputId btn;
                         if (p.TryPollButton(out btn, targ.Joystick))
                         {
                             del = p.CreateButtonDelegate(btn, targ.Joystick);

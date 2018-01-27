@@ -16,6 +16,19 @@ namespace com.spacepuppy.SPInput
 
         #region Methods
 
+        public void Replace(string id, IInputSignature item)
+        {
+            if (item == null) throw new System.ArgumentNullException("item");
+            IInputSignature old;
+            if (_table.TryGetValue(id, out old))
+            {
+                _sortedList.Remove(old);
+            }
+
+            _table[id] = item;
+            _sortedList.Add(item);
+        }
+
         public IInputSignature GetSignature(string id)
         {
             IInputSignature result;

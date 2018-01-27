@@ -6,12 +6,11 @@ using System.Linq;
 namespace com.spacepuppy.SPInput.Unity
 {
 
-    public class InputProfileLookupTable<T, TButton, TAxis> 
-           : ICollection<InputProfileLookupTable<T, TButton, TAxis>.InputProfileLookupEntry>,
+    public class InputProfileLookupTable<T, TInputId> 
+           : ICollection<InputProfileLookupTable<T, TInputId>.InputProfileLookupEntry>,
            ISPDisposable
-           where T : class, IInputProfile<TButton, TAxis> 
-           where TButton : struct, System.IConvertible 
-           where TAxis : struct, System.IConvertible
+           where T : class, IInputProfile<TInputId> 
+           where TInputId : struct, System.IConvertible 
     {
 
         #region Fields
@@ -207,7 +206,7 @@ namespace com.spacepuppy.SPInput.Unity
 
             private List<InputProfileLookupEntry>.Enumerator _e;
 
-            public Enumerator(InputProfileLookupTable<T, TButton, TAxis> table)
+            public Enumerator(InputProfileLookupTable<T, TInputId> table)
             {
                 if (table == null) throw new System.ArgumentNullException("table");
 

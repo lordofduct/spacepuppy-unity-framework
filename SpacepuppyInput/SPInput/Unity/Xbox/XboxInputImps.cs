@@ -6,17 +6,17 @@ using System.Text;
 namespace com.spacepuppy.SPInput.Unity.Xbox
 {
 
-    public interface IXboxInputProfile : IInputProfile<XboxButton, XboxAxis>
+    public interface IXboxInputProfile : IInputProfile<XboxInputId>
     {
         
     }
 
-    public class XboxInputKeyboardProfile : KeyboardProfile<XboxButton, XboxAxis>, IXboxInputProfile
+    public class XboxInputKeyboardProfile : KeyboardProfile<XboxInputId>, IXboxInputProfile
     {
 
     }
 
-    public class XboxInputProfileLookupTable : InputProfileLookupTable<IXboxInputProfile, XboxButton, XboxAxis>
+    public class XboxInputProfileLookupTable : InputProfileLookupTable<IXboxInputProfile, XboxInputId>
     {
     }
     

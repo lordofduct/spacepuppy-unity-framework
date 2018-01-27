@@ -29,6 +29,20 @@ namespace com.spacepuppy.SPInput
             _sortedList.Add(item);
         }
 
+        public void Replace(T mapping, IInputSignature item)
+        {
+            if (item == null) throw new System.ArgumentNullException("item");
+            IInputSignature old;
+            if(_table.TryGetValue(mapping, out old))
+            {
+                _table.Remove(mapping);
+                _sortedList.Remove(old);
+            }
+
+            _table[mapping] = item;
+            _sortedList.Add(item);
+        }
+
         public IInputSignature GetSignature(T mapping)
         {
             IInputSignature result;
@@ -66,7 +80,15 @@ namespace com.spacepuppy.SPInput
         
         public bool Remove(T mapping)
         {
-            return _table.Remove(mapping);
+            IInputSignature sig;
+            if(_table.TryGetValue(mapping, out sig))
+            {
+                _table.Remove(mapping);
+                _sortedList.Remove(sig);
+                return true;
+            }
+
+            return false;
         }
 
         public bool Remove(string id)
@@ -77,6 +99,7 @@ namespace com.spacepuppy.SPInput
                 if (e.Current.Value.Id == id)
                 {
                     _table.Remove(e.Current.Key);
+                    _sortedList.Remove(e.Current.Value);
                     return true;
                 }
             }
