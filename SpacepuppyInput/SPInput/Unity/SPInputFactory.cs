@@ -264,11 +264,34 @@ namespace com.spacepuppy.SPInput.Unity
 
         //extension
 
-        public static IButtonInputSignature CreateAxleButtonSignature<TButton, TAxis>(this IInputProfile<TButton, TAxis> profile, string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE) where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
+        public static IButtonInputSignature CreateButtonSignature<TButton, TAxis>(this IInputProfile<TButton, TAxis> profile, string id, TButton button, Joystick joystick = Joystick.All)
+            where TButton : struct, System.IConvertible
+            where TAxis : struct, System.IConvertible
+        {
+            return new DelegatedButtonInputSignature(id, profile.CreateButtonDelegate(button, joystick));
+        }
+
+        public static IButtonInputSignature CreateAxleButtonSignature<TButton, TAxis>(this IInputProfile<TButton, TAxis> profile, string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE) 
+            where TButton : struct, System.IConvertible 
+            where TAxis : struct, System.IConvertible
         {
             if (profile == null) return null;
 
             return new DelegatedAxleButtonInputSignature(id, profile.CreateAxisDelegate(axis, joystick), consideration, axleButtonDeadZone);
+        }
+
+        public static IAxleInputSignature CreateAxisSignature<TButton, TAxis>(this IInputProfile<TButton, TAxis> profile, string id, TAxis axis, Joystick joystick = Joystick.All)
+            where TButton : struct, System.IConvertible
+            where TAxis : struct, System.IConvertible
+        {
+            return new DelegatedAxleInputSignature(id, profile.CreateAxisDelegate(axis, joystick));
+        }
+
+        public static IDualAxleInputSignature CreateDualAxisSignature<TButton, TAxis>(this IInputProfile<TButton, TAxis> profile, string id, TAxis axisX, TAxis axisY, Joystick joystick = Joystick.All)
+            where TButton : struct, System.IConvertible
+            where TAxis : struct, System.IConvertible
+        {
+            return new DelegatedDualAxleInputSignature(id, profile.CreateAxisDelegate(axisX, joystick), profile.CreateAxisDelegate(axisY, joystick));
         }
 
         #endregion

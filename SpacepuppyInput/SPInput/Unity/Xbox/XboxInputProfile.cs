@@ -188,21 +188,6 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             return map != null ? map(joystick) : null;
         }
         
-        public IButtonInputSignature CreateButtonSignature(string id, XboxButton button, Joystick joystick = Joystick.All)
-        {
-            return new DelegatedButtonInputSignature(id, this.CreateButtonDelegate(button, joystick));
-        }
-        
-        public IAxleInputSignature CreateAxisSignature(string id, XboxAxis axis, Joystick joystick = Joystick.All)
-        {
-            return new DelegatedAxleInputSignature(id, this.CreateAxisDelegate(axis, joystick));
-        }
-        
-        public IDualAxleInputSignature CreateDualAxisSignature(string id, XboxAxis axisX, XboxAxis axisY, Joystick joystick = Joystick.All)
-        {
-            return new DelegatedDualAxleInputSignature(id, this.CreateAxisDelegate(axisX, joystick), this.CreateAxisDelegate(axisY, joystick));
-        }
-
         #endregion
         
     }

@@ -17,12 +17,6 @@ namespace com.spacepuppy.SPInput.Unity
         
         AxisDelegate CreateAxisDelegate(TAxis axis, Joystick joystick = Joystick.All);
         
-        IButtonInputSignature CreateButtonSignature(string id, TButton button, Joystick joystick = Joystick.All);
-        
-        IAxleInputSignature CreateAxisSignature(string id, TAxis axis, Joystick joystick = Joystick.All);
-
-        IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, Joystick joystick = Joystick.All);
-
     }
 
 }

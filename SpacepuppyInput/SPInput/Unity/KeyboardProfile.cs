@@ -181,33 +181,7 @@ namespace com.spacepuppy.SPInput.Unity
 
             return SPInputFactory.CreateAxisDelegate(map.Positive, map.Negative);
         }
-
-        public IButtonInputSignature CreateButtonSignature(string id, TButton button, Joystick joystick = Joystick.All)
-        {
-            ButtonMapping map;
-            if (!TryGetMapping(button, out map)) return null;
-
-            return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Key);
-        }
-
-        public IAxleInputSignature CreateAxisSignature(string id, TAxis axis, Joystick joystick = Joystick.All)
-        {
-            AxisMapping map;
-            if (!TryGetMapping(axis, out map)) return null;
-
-            return SPInputFactory.CreateKeyCodeAxisSignature(id, map.Positive, map.Negative);
-        }
-
-        public IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, Joystick joystick = Joystick.All)
-        {
-            AxisMapping mapX;
-            if (!TryGetMapping(axisX, out mapX)) mapX = AxisMapping.Unknown;
-            AxisMapping mapY;
-            if (!TryGetMapping(axisY, out mapY)) mapY = AxisMapping.Unknown;
-
-            return SPInputFactory.CreateKeyCodeDualAxisSignature(id, mapX.Positive, mapX.Negative, mapY.Positive, mapY.Negative);
-        }
-
+        
         #endregion
 
         #region Special Types
