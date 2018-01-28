@@ -12,11 +12,9 @@ namespace com.spacepuppy.SPInput.Unity
         bool TryPollButton(out TInputId button, Joystick joystick = Joystick.All);
 
         bool TryPollAxis(out TInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE);
+        
+        InputToken GetMapping(TInputId id);
 
-        ButtonDelegate CreateButtonDelegate(TInputId button, Joystick joystick = Joystick.All);
-        
-        AxisDelegate CreateAxisDelegate(TInputId axis, Joystick joystick = Joystick.All);
-        
     }
 
 }

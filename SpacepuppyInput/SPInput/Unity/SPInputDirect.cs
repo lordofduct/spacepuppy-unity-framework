@@ -245,7 +245,7 @@ namespace com.spacepuppy.SPInput.Unity
                     sname = string.Format("JoyAll-Axis{0:00}", (int)id);
                 else if(id.IsMouseAxis())
                     sname = string.Format("MouseAxis{0:0}", (int)id - (int)SPInputId.MouseAxis1 + 1);
-                else if (id.IsButton())
+                else if (id.IsJoyButton())
                     sname = string.Format("JoyAll-Button{0:00}", (int)id - (int)SPInputId.Button0);
                 else if(id.IsMouseButton())
                     sname = string.Format("MouseButton{0:0}", (int)id - (int)SPInputId.MouseButton0);
@@ -256,7 +256,7 @@ namespace com.spacepuppy.SPInput.Unity
                     sname = string.Format("Joy{0:0}-Axis{1:00}", (int)joystick, (int)id);
                 else if (id.IsMouseAxis())
                     sname = string.Format("MouseAxis{0:0}", (int)id - (int)SPInputId.MouseAxis1 + 1);
-                else if (id.IsButton())
+                else if (id.IsJoyButton())
                     sname = string.Format("Joy{0:0}-Button{1:00}", (int)joystick, (int)id - (int)SPInputId.Button0);
                 else if (id.IsMouseButton())
                     sname = string.Format("MouseButton{0:0}", (int)id - (int)SPInputId.MouseButton0);

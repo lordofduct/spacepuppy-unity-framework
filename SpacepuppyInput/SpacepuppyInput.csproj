@@ -70,6 +70,7 @@
     <Compile Include="SPInput\Unity\Enums.cs" />
     <Compile Include="SPInput\Unity\IInputProfile.cs" />
     <Compile Include="SPInput\Unity\InputProfileLookupTable.cs" />
+    <Compile Include="SPInput\Unity\InputToken.cs" />
     <Compile Include="SPInput\Unity\KeyboardProfile.cs" />
     <Compile Include="SPInput\Unity\PollAxisSignatureRoutine.cs" />
     <Compile Include="SPInput\Unity\PollButtonSignatureRoutine.cs" />

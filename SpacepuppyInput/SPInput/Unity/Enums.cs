@@ -68,7 +68,24 @@ namespace com.spacepuppy.SPInput.Unity
         MouseButton5 = 57,
         MouseButton6 = 58
     }
-    
+
+    public enum InputType
+    {
+        Unknown,
+        Joystick,
+        Keyboard,
+        Custom
+    }
+
+    public enum InputMode
+    {
+        Axis,
+        Trigger,
+        LongTrigger,
+        Button,
+        AxleButton
+    }
+
     [System.Flags()]
     public enum TargetPlatform : int
     {

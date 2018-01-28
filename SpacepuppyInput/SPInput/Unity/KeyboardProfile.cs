@@ -10,19 +10,19 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region Fields
 
-        private Dictionary<TInputId, AxisMapping> _axisTable = new Dictionary<TInputId, AxisMapping>();
-        private Dictionary<TInputId, ButtonMapping> _buttonTable = new Dictionary<TInputId, ButtonMapping>();
+        private Dictionary<TInputId, InputToken> _axisTable = new Dictionary<TInputId, InputToken>();
+        private Dictionary<TInputId, InputToken> _buttonTable = new Dictionary<TInputId, InputToken>();
 
         #endregion
 
         #region Properties
         
-        public Dictionary<TInputId, AxisMapping>.KeyCollection Axes
+        public Dictionary<TInputId, InputToken>.KeyCollection Axes
         {
             get { return _axisTable.Keys; }
         }
 
-        public Dictionary<TInputId, ButtonMapping>.KeyCollection Buttons
+        public Dictionary<TInputId, InputToken>.KeyCollection Buttons
         {
             get { return _buttonTable.Keys; }
         }
@@ -33,45 +33,40 @@ namespace com.spacepuppy.SPInput.Unity
         
         public void RegisterAxis(TInputId axis, KeyCode positive, KeyCode negative)
         {
-            _axisTable[axis] = new AxisMapping()
-            {
-                Positive = positive,
-                Negative = negative
-            };
+            _axisTable[axis] = InputToken.CreateEmulatedAxis(positive, negative);
+            _buttonTable.Remove(axis);
         }
 
         public void RegisterButton(TInputId button, KeyCode key)
         {
-            _buttonTable[button] = new ButtonMapping()
-            {
-                Key = key
-            };
+            _buttonTable[button] = InputToken.CreateButton(key);
+            _buttonTable.Remove(button);
         }
         
-        public AxisMapping GetAxisMapping(TInputId axis)
+        public InputToken GetAxisMapping(TInputId axis)
         {
-            AxisMapping result;
+            InputToken result;
             if (_axisTable.TryGetValue(axis, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for axis " + axis.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public ButtonMapping GetButtonMapping(TInputId button)
+        public InputToken GetButtonMapping(TInputId button)
         {
-            ButtonMapping result;
+            InputToken result;
             if (_buttonTable.TryGetValue(button, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for button " + button.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public bool TryGetAxisMapping(TInputId axis, out AxisMapping map)
+        public bool TryGetAxisMapping(TInputId axis, out InputToken map)
         {
             return _axisTable.TryGetValue(axis, out map);
         }
 
-        public bool TryGetButtonMapping(TInputId button, out ButtonMapping map)
+        public bool TryGetButtonMapping(TInputId button, out InputToken map)
         {
             return _buttonTable.TryGetValue(button, out map);
         }
@@ -92,14 +87,14 @@ namespace com.spacepuppy.SPInput.Unity
 
         public bool TryPollButton(out TInputId button, Joystick joystick = Joystick.All)
         {
-            ButtonMapping map;
+            InputToken map;
 
             var e = _buttonTable.Keys.GetEnumerator();
             while(e.MoveNext())
             {
                 if(TryGetButtonMapping(e.Current, out map))
                 {
-                    if(Input.GetKey(map.Key))
+                    if(Input.GetKey((KeyCode)map.Value))
                     {
                         button = e.Current;
                         return true;
@@ -113,20 +108,20 @@ namespace com.spacepuppy.SPInput.Unity
 
         public bool TryPollAxis(out TInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            AxisMapping map;
+            InputToken map;
 
             var e = _axisTable.Keys.GetEnumerator();
             while (e.MoveNext())
             {
                 if (TryGetAxisMapping(e.Current, out map))
                 {
-                    if (Input.GetKey(map.Positive))
+                    if (Input.GetKey((KeyCode)map.Value))
                     {
                         axis = e.Current;
                         value = 1f;
                         return true;
                     }
-                    else if(Input.GetKey(map.Negative))
+                    else if(Input.GetKey((KeyCode)map.AltValue))
                     {
                         axis = e.Current;
                         value = -1f;
@@ -139,67 +134,18 @@ namespace com.spacepuppy.SPInput.Unity
             value = 0f;
             return false;
         }
-
-        public ButtonDelegate CreateButtonDelegate(TInputId button, Joystick joystick = Joystick.All)
-        {
-            ButtonMapping map;
-            if (!TryGetButtonMapping(button, out map) || map.Key == KeyCode.None) return null;
-
-            return SPInputFactory.CreateButtonDelegate(map.Key);
-        }
-
-        public AxisDelegate CreateAxisDelegate(TInputId axis, Joystick joystick = Joystick.All)
-        {
-            AxisMapping map;
-            if (!this.TryGetAxisMapping(axis, out map)) return null;
-
-            return SPInputFactory.CreateAxisDelegate(map.Positive, map.Negative);
-        }
         
-        #endregion
-
-        #region Special Types
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 0)]
-        public struct AxisMapping
+        public InputToken GetMapping(TInputId id)
         {
-            public KeyCode Positive;
-            public KeyCode Negative;
+            InputToken result;
+            if (_axisTable.TryGetValue(id, out result)) return result;
+            if (_buttonTable.TryGetValue(id, out result)) return result;
 
-
-            public static AxisMapping Unknown
-            {
-                get
-                {
-                    return new AxisMapping()
-                    {
-                        Positive = KeyCode.None,
-                        Negative = KeyCode.None
-                    };
-                }
-            }
-
-        }
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 0)]
-        public struct ButtonMapping
-        {
-            public KeyCode Key;
-
-            public static ButtonMapping Unknown
-            {
-                get
-                {
-                    return new ButtonMapping()
-                    {
-
-                    };
-                }
-            }
+            return InputToken.Unknown;
         }
 
         #endregion
-
+        
     }
 
 }

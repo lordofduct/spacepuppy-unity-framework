@@ -22,8 +22,8 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis6);
             this.RegisterAxis(XboxInputId.DPadX, SPInputId.Axis7);
             this.RegisterAxis(XboxInputId.DPadY, SPInputId.Axis8);
-            this.RegisterAxis(XboxInputId.LTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputId.Axis4));
-            this.RegisterAxis(XboxInputId.RTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputId.Axis5));
+            this.RegisterAxis(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis4));
+            this.RegisterAxis(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
             //this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Button6, SPInputId.Unknown);
             //this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Button7, SPInputId.Unknown);
 

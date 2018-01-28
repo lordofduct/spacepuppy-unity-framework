@@ -14,19 +14,19 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         #region Fields
 
-        private Dictionary<XboxInputId, AxisDelegateFactory> _axisTable = new Dictionary<XboxInputId, AxisDelegateFactory>();
-        private Dictionary<XboxInputId, ButtonDelegateFactory> _buttonTable = new Dictionary<XboxInputId, ButtonDelegateFactory>();
+        private Dictionary<XboxInputId, InputToken> _axisTable = new Dictionary<XboxInputId, InputToken>();
+        private Dictionary<XboxInputId, InputToken> _buttonTable = new Dictionary<XboxInputId, InputToken>();
         
         #endregion
 
         #region Properties
         
-        public Dictionary<XboxInputId, AxisDelegateFactory>.KeyCollection Axes
+        public Dictionary<XboxInputId, InputToken>.KeyCollection Axes
         {
             get { return _axisTable.Keys; }
         }
 
-        public Dictionary<XboxInputId, ButtonDelegateFactory>.KeyCollection Buttons
+        public Dictionary<XboxInputId, InputToken>.KeyCollection Buttons
         {
             get { return _buttonTable.Keys; }
         }
@@ -35,62 +35,80 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         #region Methods
 
+        public void RegisterAxis(XboxInputId axis, InputToken token)
+        {
+            _axisTable[axis] = token;
+            _buttonTable.Remove(axis);
+        }
+
         public void RegisterAxis(XboxInputId axis, AxisDelegateFactory del)
         {
-            _axisTable[axis] = del;
+            _axisTable[axis] = InputToken.CreateCustom(del);
+            _buttonTable.Remove(axis);
         }
 
         public void RegisterAxis(XboxInputId axis, SPInputId spaxis, bool invert = false)
         {
-            _axisTable[axis] = SPInputFactory.CreateAxisDelegateFactory(spaxis, invert);
+            _axisTable[axis] = InputToken.CreateAxis(spaxis, invert);
+            _buttonTable.Remove(axis);
         }
 
         public void RegisterAxis(XboxInputId axis, SPInputId positive, SPInputId negative)
         {
-            _axisTable[axis] = SPInputFactory.CreateAxisDelegateFactory(positive, negative);
+            _axisTable[axis] = InputToken.CreateEmulatedAxis(positive, negative);
+            _buttonTable.Remove(axis);
+        }
+
+        public void RegisterButton(XboxInputId button, InputToken token)
+        {
+            _buttonTable[button] = token;
+            _axisTable.Remove(button);
         }
 
         public void RegisterButton(XboxInputId button, ButtonDelegateFactory del)
         {
-            _buttonTable[button] = del;
+            _buttonTable[button] = InputToken.CreateCustom(del);
+            _axisTable.Remove(button);
         }
 
         public void RegisterButton(XboxInputId button, SPInputId spbtn)
         {
-            _buttonTable[button] = SPInputFactory.CreateButtonDelegateFactory(spbtn);
+            _buttonTable[button] = InputToken.CreateButton(spbtn);
+            _axisTable.Remove(button);
         }
 
         public void RegisterAxleButton(XboxInputId button, SPInputId axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            _buttonTable[button] = SPInputFactory.CreateAxleButtonDelegateFactory(axis, consideration, axleButtonDeadZone);
+            _buttonTable[button] = InputToken.CreateAxleButton(axis, consideration, axleButtonDeadZone);
+            _axisTable.Remove(button);
         }
 
 
 
-        public AxisDelegateFactory GetAxisMapping(XboxInputId axis)
+        public InputToken GetAxisMapping(XboxInputId axis)
         {
-            AxisDelegateFactory result;
+            InputToken result;
             if (_axisTable.TryGetValue(axis, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for axis " + axis.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public ButtonDelegateFactory GetButtonMapping(XboxInputId button)
+        public InputToken GetButtonMapping(XboxInputId button)
         {
-            ButtonDelegateFactory result;
+            InputToken result;
             if (_buttonTable.TryGetValue(button, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for button " + button.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public bool TryGetAxisMapping(XboxInputId axis, out AxisDelegateFactory map)
+        public bool TryGetAxisMapping(XboxInputId axis, out InputToken map)
         {
             return _axisTable.TryGetValue(axis, out map);
         }
 
-        public bool TryGetButtonMapping(XboxInputId button, out ButtonDelegateFactory map)
+        public bool TryGetButtonMapping(XboxInputId button, out InputToken map)
         {
             return _buttonTable.TryGetValue(button, out map);
         }
@@ -111,13 +129,13 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         public bool TryPollButton(out XboxInputId button, Joystick joystick = Joystick.All)
         {
-            var e = _buttonTable.Keys.GetEnumerator();
+            var e = _buttonTable.GetEnumerator();
             while (e.MoveNext())
             {
-                var d = this.CreateButtonDelegate(e.Current, joystick);
+                var d = e.Current.Value.CreateButtonDelegate(joystick);
                 if(d != null && d())
                 {
-                    button = e.Current;
+                    button = e.Current.Key;
                     return true;
                 }
             }
@@ -128,14 +146,14 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         public bool TryPollAxis(out XboxInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            var e = _axisTable.Keys.GetEnumerator();
+            var e = _axisTable.GetEnumerator();
             while (e.MoveNext())
             {
-                var d = this.CreateAxisDelegate(e.Current, joystick);
+                var d = e.Current.Value.CreateAxisDelegate(joystick);
                 var v = d != null ? d() : 0f;
                 if(d != null && Mathf.Abs(v) > deadZone)
                 {
-                    axis = e.Current;
+                    axis = e.Current.Key;
                     value = v;
                     return true;
                 }
@@ -146,24 +164,17 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             return false;
         }
 
-        public ButtonDelegate CreateButtonDelegate(XboxInputId button, Joystick joystick = Joystick.All)
+        public InputToken GetMapping(XboxInputId id)
         {
-            ButtonDelegateFactory map;
-            if (!this.TryGetButtonMapping(button, out map)) return null;
+            InputToken result;
+            if (_axisTable.TryGetValue(id, out result)) return result;
+            if (_buttonTable.TryGetValue(id, out result)) return result;
 
-            return map != null ? map(joystick) : null;
+            return InputToken.Unknown;
         }
-        
-        public AxisDelegate CreateAxisDelegate(XboxInputId axis, Joystick joystick = Joystick.All)
-        {
-            AxisDelegateFactory map;
-            if (!this.TryGetAxisMapping(axis, out map)) return null;
 
-            return map != null ? map(joystick) : null;
-        }
-        
         #endregion
-        
+
     }
 
 }
