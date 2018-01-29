@@ -86,31 +86,52 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region Polling
 
-        public static SPInputId PollButton(Joystick joystick = Joystick.All)
+        public static SPInputId PollButton(Joystick joystick = Joystick.All, bool testDownOrHeld = false)
         {
             if (joystick != Joystick.None)
             {
                 for (int i = ID_BUTTONLOW; i <= ID_BUTTONHIGH; i++)
                 {
-                    if (UnityEngine.Input.GetButton(GetInputName((SPInputId)i, joystick)))
+                    if(testDownOrHeld)
                     {
-                        return (SPInputId)i;
+                        if (UnityEngine.Input.GetButtonDown(GetInputName((SPInputId)i, joystick)))
+                        {
+                            return (SPInputId)i;
+                        }
+                    }
+                    else
+                    {
+                        if (UnityEngine.Input.GetButton(GetInputName((SPInputId)i, joystick)))
+                        {
+                            return (SPInputId)i;
+                        }
                     }
                 }
             }
             return SPInputId.Unknown;
         }
 
-        public static bool TryPollButton(out SPInputId button, Joystick joystick = Joystick.All)
+        public static bool TryPollButton(out SPInputId button, Joystick joystick = Joystick.All, bool testDownOrHeld = false)
         {
             if (joystick != Joystick.None)
             {
                 for (int i = ID_BUTTONLOW; i <= ID_BUTTONHIGH; i++)
                 {
-                    if (UnityEngine.Input.GetButton(GetInputName((SPInputId)i, joystick)))
+                    if (testDownOrHeld)
                     {
-                        button = (SPInputId)i;
-                        return true;
+                        if (UnityEngine.Input.GetButton(GetInputName((SPInputId)i, joystick)))
+                        {
+                            button = (SPInputId)i;
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        if (UnityEngine.Input.GetButtonDown(GetInputName((SPInputId)i, joystick)))
+                        {
+                            button = (SPInputId)i;
+                            return true;
+                        }
                     }
                 }
             }
@@ -197,28 +218,46 @@ namespace com.spacepuppy.SPInput.Unity
             return com.spacepuppy.Utils.ArrayUtil.Empty<SPInputId>();
         }
 
-        public static UnityEngine.KeyCode PollKey()
+        public static UnityEngine.KeyCode PollKey(bool testDownOrHeld = false)
         {
             if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
 
             for (int i = 0; i < _allKeyCodes.Length; i++)
             {
-                if (UnityEngine.Input.GetKey(_allKeyCodes[i])) return _allKeyCodes[i];
+                if(testDownOrHeld)
+                {
+                    if (UnityEngine.Input.GetKey(_allKeyCodes[i])) return _allKeyCodes[i];
+                }
+                else
+                {
+                    if (UnityEngine.Input.GetKeyDown(_allKeyCodes[i])) return _allKeyCodes[i];
+                }
             }
             return UnityEngine.KeyCode.None;
         }
 
-        public static bool TryPollKey(out UnityEngine.KeyCode key)
+        public static bool TryPollKey(out UnityEngine.KeyCode key, bool testDownOrHeld = false)
         {
             if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
 
             key = KeyCode.None;
             for (int i = 0; i < _allKeyCodes.Length; i++)
             {
-                if (UnityEngine.Input.GetKey(_allKeyCodes[i]))
+                if(testDownOrHeld)
                 {
-                    key = _allKeyCodes[i];
-                    return true;
+                    if (UnityEngine.Input.GetKey(_allKeyCodes[i]))
+                    {
+                        key = _allKeyCodes[i];
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (UnityEngine.Input.GetKeyDown(_allKeyCodes[i]))
+                    {
+                        key = _allKeyCodes[i];
+                        return true;
+                    }
                 }
             }
             return false;

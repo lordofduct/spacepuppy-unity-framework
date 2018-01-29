@@ -16,11 +16,11 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         private Dictionary<XboxInputId, InputToken> _axisTable = new Dictionary<XboxInputId, InputToken>();
         private Dictionary<XboxInputId, InputToken> _buttonTable = new Dictionary<XboxInputId, InputToken>();
-        
+
         #endregion
 
         #region Properties
-        
+
         public Dictionary<XboxInputId, InputToken>.KeyCollection Axes
         {
             get { return _axisTable.Keys; }
@@ -117,12 +117,18 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
         {
             return _axisTable.ContainsKey(id) || _buttonTable.ContainsKey(id);
         }
-        
+
         public bool Remove(XboxInputId id)
         {
             return _axisTable.Remove(id) | _buttonTable.Remove(id);
         }
-        
+
+        public void Clear()
+        {
+            _axisTable.Clear();
+            _buttonTable.Clear();
+        }
+
         #endregion
 
         #region IInputSignatureFactory Interface
@@ -133,7 +139,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             while (e.MoveNext())
             {
                 var d = e.Current.Value.CreateButtonDelegate(joystick);
-                if(d != null && d())
+                if (d != null && d())
                 {
                     button = e.Current.Key;
                     return true;
@@ -151,7 +157,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             {
                 var d = e.Current.Value.CreateAxisDelegate(joystick);
                 var v = d != null ? d() : 0f;
-                if(d != null && Mathf.Abs(v) > deadZone)
+                if (d != null && Mathf.Abs(v) > deadZone)
                 {
                     axis = e.Current.Key;
                     value = v;
@@ -171,6 +177,21 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
             if (_buttonTable.TryGetValue(id, out result)) return result;
 
             return InputToken.Unknown;
+        }
+
+        void IConfigurableInputProfile<XboxInputId>.SetAxisMapping(XboxInputId id, InputToken token)
+        {
+            this.RegisterAxis(id, token);
+        }
+
+        void IConfigurableInputProfile<XboxInputId>.SetButtonMapping(XboxInputId id, InputToken token)
+        {
+            this.RegisterButton(id, token);
+        }
+
+        void IConfigurableInputProfile<XboxInputId>.Reset()
+        {
+            this.Clear();
         }
 
         #endregion

@@ -7,7 +7,7 @@ using com.spacepuppy.SPInput;
 namespace com.spacepuppy
 {
 
-    public interface IGameInputManager : IService, IEnumerable<IInputDevice>
+    public interface IInputManager : IService, IEnumerable<IInputDevice>
     {
         int Count { get; }
         IInputDevice this[string id] { get; set; }
@@ -18,7 +18,7 @@ namespace com.spacepuppy
         
     }
     
-    public class GameInputManager : ServiceComponent<IGameInputManager>, IGameInputManager
+    public class GameInputManager : ServiceComponent<IInputManager>, IInputManager
     {
 
         #region Fields

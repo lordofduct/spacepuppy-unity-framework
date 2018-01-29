@@ -178,7 +178,7 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region Methods
 
-        public void Start(float delay = 1f)
+        public void Start(float delay = 0f)
         {
             if (_routine != null)
             {

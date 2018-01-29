@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace com.spacepuppy.SPInput
 {
 
-    public class InputSignatureCollection : ICollection<IInputSignature>
+    public class InputSignatureCollection : IInputSignatureCollection
     {
 
         #region Fields

@@ -48,7 +48,7 @@ namespace com.spacepuppy
             Entry<T>.Instance = service;
         }
         
-        public static void Unregister<T>(bool donotSignalUnregister = false) where T : class, IService
+        public static void Unregister<T>(bool destroyIfCan = false, bool donotSignalUnregister = false) where T : class, IService
         {
             var inst = Entry<T>.Instance;
             if(!inst.IsNullOrDestroyed())
@@ -56,6 +56,9 @@ namespace com.spacepuppy
                 Entry<T>.Instance = null;
                 if(!donotSignalUnregister)
                     inst.SignalServiceUnregistered();
+
+                if (destroyIfCan && inst is UnityEngine.Object)
+                    ObjUtil.SmartDestroy(inst as UnityEngine.Object);
             }
         }
 
@@ -102,7 +105,7 @@ namespace com.spacepuppy
             field.SetValue(null, service);
         }
 
-        public static void Unregister(System.Type tp, bool donotSignalUnregister = false)
+        public static void Unregister(System.Type tp, bool destroyIfCan = false, bool donotSignalUnregister = false)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
             if(!tp.IsClass || tp.IsAbstract || !typeof(IService).IsAssignableFrom(tp)) throw new System.ArgumentException("Type must be a concrete class that implements IService.", "tp");
@@ -124,6 +127,9 @@ namespace com.spacepuppy
 
             if (!donotSignalUnregister && inst != null)
                 inst.SignalServiceUnregistered();
+
+            if (destroyIfCan && inst is UnityEngine.Object)
+                ObjUtil.SmartDestroy(inst as UnityEngine.Object);
         }
 
 

@@ -8,7 +8,7 @@ namespace com.spacepuppy.SPInput
     /// Store a group of IInputSignatures based on a mapping value instead of a hash. This mapping value should usually be an enum, you can also use an int/long/etc if you want.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class MappedInputSignatureCollection<T> : ICollection<IInputSignature> where T : struct, System.IConvertible
+    public class MappedInputSignatureCollection<T> : IInputSignatureCollection where T : struct, System.IConvertible
     {
 
         #region Fields

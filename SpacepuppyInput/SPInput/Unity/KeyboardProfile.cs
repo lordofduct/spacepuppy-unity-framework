@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.spacepuppy.SPInput.Unity
 {
 
-    public class KeyboardProfile<TInputId> : IInputProfile<TInputId> where TInputId : struct, System.IConvertible
+    public class KeyboardProfile<TInputId> : IConfigurableInputProfile<TInputId> where TInputId : struct, System.IConvertible
     {
 
         #region Fields
@@ -16,7 +16,7 @@ namespace com.spacepuppy.SPInput.Unity
         #endregion
 
         #region Properties
-        
+
         public Dictionary<TInputId, InputToken>.KeyCollection Axes
         {
             get { return _axisTable.Keys; }
@@ -30,10 +30,16 @@ namespace com.spacepuppy.SPInput.Unity
         #endregion
 
         #region Methods
-        
+
         public void RegisterAxis(TInputId axis, KeyCode positive, KeyCode negative)
         {
             _axisTable[axis] = InputToken.CreateEmulatedAxis(positive, negative);
+            _buttonTable.Remove(axis);
+        }
+
+        public void RegisterAxis(TInputId axis, InputToken token)
+        {
+            _axisTable[axis] = token;
             _buttonTable.Remove(axis);
         }
 
@@ -42,7 +48,13 @@ namespace com.spacepuppy.SPInput.Unity
             _buttonTable[button] = InputToken.CreateButton(key);
             _buttonTable.Remove(button);
         }
-        
+
+        public void RegisterButton(TInputId button, InputToken token)
+        {
+            _buttonTable[button] = token;
+            _buttonTable.Remove(button);
+        }
+
         public InputToken GetAxisMapping(TInputId axis)
         {
             InputToken result;
@@ -75,12 +87,18 @@ namespace com.spacepuppy.SPInput.Unity
         {
             return _axisTable.ContainsKey(id) || _buttonTable.ContainsKey(id);
         }
-        
+
         public bool Remove(TInputId id)
         {
             return _axisTable.Remove(id) | _buttonTable.Remove(id);
         }
-        
+
+        public void Clear()
+        {
+            _axisTable.Clear();
+            _buttonTable.Clear();
+        }
+
         #endregion
 
         #region IInputProfile Interface
@@ -90,14 +108,26 @@ namespace com.spacepuppy.SPInput.Unity
             InputToken map;
 
             var e = _buttonTable.Keys.GetEnumerator();
-            while(e.MoveNext())
+            while (e.MoveNext())
             {
-                if(TryGetButtonMapping(e.Current, out map))
+                if (TryGetButtonMapping(e.Current, out map))
                 {
-                    if(Input.GetKey((KeyCode)map.Value))
+                    if (map.Type == InputType.Keyboard)
                     {
-                        button = e.Current;
-                        return true;
+                        if (Input.GetKey((KeyCode)map.Value))
+                        {
+                            button = e.Current;
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        var d = map.CreateButtonDelegate(joystick);
+                        if (d != null && d())
+                        {
+                            button = e.Current;
+                            return true;
+                        }
                     }
                 }
             }
@@ -115,17 +145,31 @@ namespace com.spacepuppy.SPInput.Unity
             {
                 if (TryGetAxisMapping(e.Current, out map))
                 {
-                    if (Input.GetKey((KeyCode)map.Value))
+                    if (map.Type == InputType.Keyboard)
                     {
-                        axis = e.Current;
-                        value = 1f;
-                        return true;
+                        if (Input.GetKey((KeyCode)map.Value))
+                        {
+                            axis = e.Current;
+                            value = 1f;
+                            return true;
+                        }
+                        else if (Input.GetKey((KeyCode)map.AltValue))
+                        {
+                            axis = e.Current;
+                            value = -1f;
+                            return true;
+                        }
                     }
-                    else if(Input.GetKey((KeyCode)map.AltValue))
+                    else
                     {
-                        axis = e.Current;
-                        value = -1f;
-                        return true;
+                        var d = map.CreateAxisDelegate(joystick);
+                        var v = d != null ? d() : 0f;
+                        if (d != null && Mathf.Abs(v) > deadZone)
+                        {
+                            axis = e.Current;
+                            value = v;
+                            return true;
+                        }
                     }
                 }
             }
@@ -134,7 +178,7 @@ namespace com.spacepuppy.SPInput.Unity
             value = 0f;
             return false;
         }
-        
+
         public InputToken GetMapping(TInputId id)
         {
             InputToken result;
@@ -144,8 +188,23 @@ namespace com.spacepuppy.SPInput.Unity
             return InputToken.Unknown;
         }
 
+        void IConfigurableInputProfile<TInputId>.SetAxisMapping(TInputId id, InputToken token)
+        {
+            this.RegisterAxis(id, token);
+        }
+
+        void IConfigurableInputProfile<TInputId>.SetButtonMapping(TInputId id, InputToken token)
+        {
+            this.RegisterButton(id, token);
+        }
+
+        void IConfigurableInputProfile<TInputId>.Reset()
+        {
+            this.Clear();
+        }
+
         #endregion
-        
+
     }
 
 }

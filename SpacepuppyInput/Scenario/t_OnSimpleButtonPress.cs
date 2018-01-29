@@ -87,7 +87,7 @@ namespace com.spacepuppy.Scenario
 
         private void Update()
         {
-            var service = Services.Get<IGameInputManager>();
+            var service = Services.Get<IInputManager>();
             var input = service != null ? service.Main : null;
             if(input != null)
             {

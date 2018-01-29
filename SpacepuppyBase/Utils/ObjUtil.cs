@@ -686,6 +686,8 @@ namespace com.spacepuppy.Utils
 
         public static void SmartDestroy(UnityEngine.Object obj)
         {
+            if (obj.IsNullOrDestroyed()) return;
+
             if (UnityEngine.Application.isPlaying)
             {
                 //UnityEngine.Object.Destroy(obj);

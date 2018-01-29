@@ -60,7 +60,7 @@ namespace com.spacepuppy.SPInput
                 throw new System.NotImplementedException();
             }
         }
-
+        
         void IInputSignature.Update()
         {
             var e = _signatures.GetEnumerator();
@@ -87,6 +87,11 @@ namespace com.spacepuppy.SPInput
         {
             get { return _active; }
             set { _active = value; }
+        }
+
+        public bool Contains(string id)
+        {
+            return _signatures.Contains(id);
         }
 
         public ButtonState GetButtonState(string id)
