@@ -53,6 +53,11 @@ namespace com.spacepuppy.SPInput.Unity
             return id >= SPInputId.Button0 && id <= SPInputId.MouseButton6;
         }
 
+        public static SPInputId ToSPInputId(this SPMouseId id)
+        {
+            return (SPInputId)id;
+        }
+
         #endregion
 
         #region Standard Input Testing

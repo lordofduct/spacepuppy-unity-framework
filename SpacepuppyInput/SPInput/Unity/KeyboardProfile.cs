@@ -37,6 +37,12 @@ namespace com.spacepuppy.SPInput.Unity
             _buttonTable.Remove(axis);
         }
 
+        public void RegisterMouseAxis(TInputId axis, SPMouseId spaxis)
+        {
+            _axisTable[axis] = InputToken.CreateAxis(spaxis.ToSPInputId());
+            _buttonTable.Remove(axis);
+        }
+
         public void RegisterAxis(TInputId axis, InputToken token)
         {
             _axisTable[axis] = token;
@@ -46,13 +52,19 @@ namespace com.spacepuppy.SPInput.Unity
         public void RegisterButton(TInputId button, KeyCode key)
         {
             _buttonTable[button] = InputToken.CreateButton(key);
-            _buttonTable.Remove(button);
+            _axisTable.Remove(button);
+        }
+
+        public void RegisterMouseButton(TInputId button, SPMouseId spbtn)
+        {
+            _buttonTable[button] = InputToken.CreateButton(spbtn.ToSPInputId());
+            _axisTable.Remove(button);
         }
 
         public void RegisterButton(TInputId button, InputToken token)
         {
             _buttonTable[button] = token;
-            _buttonTable.Remove(button);
+            _axisTable.Remove(button);
         }
 
         public InputToken GetAxisMapping(TInputId axis)

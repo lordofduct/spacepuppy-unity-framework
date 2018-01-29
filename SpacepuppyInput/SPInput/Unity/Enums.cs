@@ -69,6 +69,20 @@ namespace com.spacepuppy.SPInput.Unity
         MouseButton6 = 58
     }
 
+    public enum SPMouseId
+    {
+        MouseX = SPInputId.MouseAxis1,
+        MouseY = SPInputId.MouseAxis2,
+        MouseScroll = SPInputId.MouseAxis3,
+        MouseButton0 = SPInputId.MouseButton0,
+        MouseButton1 = SPInputId.MouseButton1,
+        MouseButton2 = SPInputId.MouseButton2,
+        MouseButton3 = SPInputId.MouseButton3,
+        MouseButton4 = SPInputId.MouseButton4,
+        MouseButton5 = SPInputId.MouseButton5,
+        MouseButton6 = SPInputId.MouseButton6
+    }
+
     public enum InputType
     {
         Unknown,
