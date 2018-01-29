@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 
-namespace com.spacepuppy.SPInput.Unity
+namespace com.spacepuppy.SPInput.Legacy
 {
 
     public class ButtonInputSignature : BaseInputSignature, IButtonInputSignature
