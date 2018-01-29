@@ -8,236 +8,308 @@ namespace com.spacepuppy.SPInput.Unity
     public static class SPInputDirect
     {
 
-        public static bool GetButton(SPInputButton button, Joystick joystick = Joystick.All)
+        #region Fields
+
+        private const int ID_AXISLOW = (int)SPInputId.Axis1;
+        private const int ID_AXISMID = (int)SPInputId.Axis28;
+        private const int ID_AXISHIGH = (int)SPInputId.MouseAxis3;
+        private const int ID_BUTTONLOW = (int)SPInputId.Button0;
+        private const int ID_BUTTONHIGH = (int)SPInputId.MouseButton6;
+
+        private static Dictionary<int, string> _inputIdToName;
+        private static UnityEngine.KeyCode[] _allKeyCodes;
+
+        #endregion
+
+        #region SPInputId Extension Methods
+
+        public static bool IsJoyAxis(this SPInputId id)
         {
-            return UnityEngine.Input.GetButton(GetButtonInputId(button, joystick));
+            return id >= SPInputId.Axis1 && id <= SPInputId.Axis28;
         }
 
-        public static bool GetButtonDown(SPInputButton button, Joystick joystick = Joystick.All)
+        public static bool IsMouseAxis(this SPInputId id)
         {
-            return UnityEngine.Input.GetButtonDown(GetButtonInputId(button, joystick));
+            return id >= SPInputId.MouseAxis1 && id <= SPInputId.MouseAxis3;
         }
 
-        public static bool GetButtonUp(SPInputButton button, Joystick joystick = Joystick.All)
+        public static bool IsAxis(this SPInputId id)
         {
-            return UnityEngine.Input.GetButtonUp(GetButtonInputId(button, joystick));
+            return id >= SPInputId.Axis1 && id <= SPInputId.MouseAxis3;
         }
 
-        public static float GetAxis(SPInputAxis axis, Joystick joystick = Joystick.All)
+        public static bool IsJoyButton(this SPInputId id)
         {
-            return UnityEngine.Input.GetAxis(GetAxisInputId(axis, joystick));
+            return id >= SPInputId.Button0 && id <= SPInputId.Button19;
         }
 
-        public static float GetAxisRaw(SPInputAxis axis, Joystick joystick = Joystick.All)
+        public static bool IsMouseButton(this SPInputId id)
         {
-            return UnityEngine.Input.GetAxisRaw(GetAxisInputId(axis, joystick));
+            return id >= SPInputId.MouseButton0 && id <= SPInputId.MouseButton6;
         }
 
+        public static bool IsButton(this SPInputId id)
+        {
+            return id >= SPInputId.Button0 && id <= SPInputId.MouseButton6;
+        }
 
+        public static SPInputId ToSPInputId(this SPMouseId id)
+        {
+            return (SPInputId)id;
+        }
 
+        #endregion
 
+        #region Standard Input Testing
 
-        public static SPInputButton PollButton(Joystick joystick = Joystick.All)
+        public static bool GetButton(SPInputId button, Joystick joystick = Joystick.All)
+        {
+            return UnityEngine.Input.GetButton(GetInputName(button, joystick));
+        }
+
+        public static bool GetButtonDown(SPInputId button, Joystick joystick = Joystick.All)
+        {
+            return UnityEngine.Input.GetButtonDown(GetInputName(button, joystick));
+        }
+
+        public static bool GetButtonUp(SPInputId button, Joystick joystick = Joystick.All)
+        {
+            return UnityEngine.Input.GetButtonUp(GetInputName(button, joystick));
+        }
+
+        public static float GetAxis(SPInputId axis, Joystick joystick = Joystick.All)
+        {
+            return UnityEngine.Input.GetAxis(GetInputName(axis, joystick));
+        }
+
+        public static float GetAxisRaw(SPInputId axis, Joystick joystick = Joystick.All)
+        {
+            return UnityEngine.Input.GetAxisRaw(GetInputName(axis, joystick));
+        }
+
+        #endregion
+
+        #region Polling
+
+        public static SPInputId PollButton(Joystick joystick = Joystick.All, bool testDownOrHeld = false)
         {
             if (joystick != Joystick.None)
             {
-                for (int i = 0; i < (int)SPInputButton.MouseButton6; i++)
+                for (int i = ID_BUTTONLOW; i <= ID_BUTTONHIGH; i++)
                 {
-                    if (UnityEngine.Input.GetButton(GetButtonInputId((SPInputButton)i, joystick)))
+                    if(testDownOrHeld)
                     {
-                        return (SPInputButton)i;
+                        if (UnityEngine.Input.GetButtonDown(GetInputName((SPInputId)i, joystick)))
+                        {
+                            return (SPInputId)i;
+                        }
+                    }
+                    else
+                    {
+                        if (UnityEngine.Input.GetButton(GetInputName((SPInputId)i, joystick)))
+                        {
+                            return (SPInputId)i;
+                        }
                     }
                 }
             }
-            return SPInputButton.Unknown;
+            return SPInputId.Unknown;
         }
 
-        public static bool TryPollButton(out SPInputButton button, Joystick joystick = Joystick.All)
+        public static bool TryPollButton(out SPInputId button, Joystick joystick = Joystick.All, bool testDownOrHeld = false)
         {
             if (joystick != Joystick.None)
             {
-                for (int i = 0; i < (int)SPInputButton.MouseButton6; i++)
+                for (int i = ID_BUTTONLOW; i <= ID_BUTTONHIGH; i++)
                 {
-                    if (UnityEngine.Input.GetButton(GetButtonInputId((SPInputButton)i, joystick)))
+                    if (testDownOrHeld)
                     {
-                        button = (SPInputButton)i;
+                        if (UnityEngine.Input.GetButton(GetInputName((SPInputId)i, joystick)))
+                        {
+                            button = (SPInputId)i;
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        if (UnityEngine.Input.GetButtonDown(GetInputName((SPInputId)i, joystick)))
+                        {
+                            button = (SPInputId)i;
+                            return true;
+                        }
+                    }
+                }
+            }
+            button = SPInputId.Unknown;
+            return false;
+        }
+
+        public static SPInputId PollAxis(Joystick joystick = Joystick.All, bool pollMouse = false, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        {
+            if (joystick != Joystick.None)
+            {
+                int high = pollMouse ? ID_AXISHIGH : ID_AXISMID;
+                for (int i = ID_AXISLOW; i <= high; i++)
+                {
+                    float v = Input.GetAxis(GetInputName((SPInputId)i, joystick));
+                    if (Mathf.Abs(v) > deadZone)
+                    {
+                        return (SPInputId)i;
+                    }
+                }
+            }
+            return SPInputId.Unknown;
+        }
+
+        public static bool TryPollAxis(out SPInputId axis, Joystick joystick = Joystick.All, bool pollMouse = false, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        {
+            if (joystick != Joystick.None)
+            {
+                int high = pollMouse ? ID_AXISHIGH : ID_AXISMID;
+                for (int i = ID_AXISLOW; i <= high; i++)
+                {
+                    float v = Input.GetAxis(GetInputName((SPInputId)i, joystick));
+                    if (Mathf.Abs(v) > deadZone)
+                    {
+                        axis = (SPInputId)i;
                         return true;
                     }
                 }
             }
-            button = SPInputButton.Unknown;
+            axis = SPInputId.Unknown;
             return false;
         }
 
-        public static SPInputAxis PollAxis(Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static bool TryPollAxis(out SPInputId axis, out float value, Joystick joystick = Joystick.All, bool pollMouse = false, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
             if (joystick != Joystick.None)
             {
-                for (int i = 0; i < (int)SPInputAxis.MouseAxis3; i++)
+                int high = pollMouse ? ID_AXISHIGH : ID_AXISMID;
+                for (int i = ID_AXISLOW; i <= high; i++)
                 {
-                    float v = Input.GetAxis(GetAxisInputId((SPInputAxis)i, joystick));
+                    float v = Input.GetAxis(GetInputName((SPInputId)i, joystick));
                     if (Mathf.Abs(v) > deadZone)
                     {
-                        return (SPInputAxis)i;
-                    }
-                }
-            }
-            return SPInputAxis.Unknown;
-        }
-
-        public static bool TryPollAxis(out SPInputAxis axis, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
-        {
-            if (joystick != Joystick.None)
-            {
-                for (int i = 0; i < (int)SPInputAxis.MouseAxis3; i++)
-                {
-                    float v = Input.GetAxis(GetAxisInputId((SPInputAxis)i, joystick));
-                    if (Mathf.Abs(v) > deadZone)
-                    {
-                        axis = (SPInputAxis)i;
-                        return true;
-                    }
-                }
-            }
-            axis = SPInputAxis.Unknown;
-            return false;
-        }
-
-        public static bool TryPollAxis(out SPInputAxis axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
-        {
-            if (joystick != Joystick.None)
-            {
-                for (int i = 0; i < (int)SPInputAxis.MouseAxis3; i++)
-                {
-                    float v = Input.GetAxis(GetAxisInputId((SPInputAxis)i, joystick));
-                    if (Mathf.Abs(v) > deadZone)
-                    {
-                        axis = (SPInputAxis)i;
+                        axis = (SPInputId)i;
                         value = v;
                         return true;
                     }
                 }
             }
-            axis = SPInputAxis.Unknown;
+            axis = SPInputId.Unknown;
             value = 0f;
             return false;
         }
 
-        public static SPInputAxis[] PollAllAxes(Joystick joystick = Joystick.All)
+        public static SPInputId[] PollAllAxes(Joystick joystick = Joystick.All, bool pollMouse = false)
         {
             if (joystick != Joystick.None)
             {
-                using (var lst = com.spacepuppy.Collections.TempCollection.GetList<SPInputAxis>())
+                using (var lst = com.spacepuppy.Collections.TempCollection.GetList<SPInputId>())
                 {
-                    for (int i = 0; i < (int)SPInputAxis.MouseAxis3; i++)
+                    int high = pollMouse ? ID_AXISHIGH : ID_AXISMID;
+                    for (int i = ID_AXISLOW; i < high; i++)
                     {
-                        if (Mathf.Abs(UnityEngine.Input.GetAxis(GetAxisInputId((SPInputAxis)i, joystick))) > 0.5f)
+                        if (Mathf.Abs(UnityEngine.Input.GetAxis(GetInputName((SPInputId)i, joystick))) > 0.5f)
                         {
-                            lst.Add((SPInputAxis)i);
+                            lst.Add((SPInputId)i);
                         }
                     }
 
-                    return lst.Count > 0 ? lst.ToArray() : com.spacepuppy.Utils.ArrayUtil.Empty<SPInputAxis>();
+                    return lst.Count > 0 ? lst.ToArray() : com.spacepuppy.Utils.ArrayUtil.Empty<SPInputId>();
                 }
             }
 
-            return com.spacepuppy.Utils.ArrayUtil.Empty<SPInputAxis>();
+            return com.spacepuppy.Utils.ArrayUtil.Empty<SPInputId>();
         }
 
-        public static UnityEngine.KeyCode PollKey()
+        public static UnityEngine.KeyCode PollKey(bool testDownOrHeld = false)
         {
             if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
 
             for (int i = 0; i < _allKeyCodes.Length; i++)
             {
-                if (UnityEngine.Input.GetKey(_allKeyCodes[i])) return _allKeyCodes[i];
+                if(testDownOrHeld)
+                {
+                    if (UnityEngine.Input.GetKey(_allKeyCodes[i])) return _allKeyCodes[i];
+                }
+                else
+                {
+                    if (UnityEngine.Input.GetKeyDown(_allKeyCodes[i])) return _allKeyCodes[i];
+                }
             }
             return UnityEngine.KeyCode.None;
         }
 
-        public static bool TryPollKey(out UnityEngine.KeyCode key)
+        public static bool TryPollKey(out UnityEngine.KeyCode key, bool testDownOrHeld = false)
         {
             if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
 
             key = KeyCode.None;
             for (int i = 0; i < _allKeyCodes.Length; i++)
             {
-                if (UnityEngine.Input.GetKey(_allKeyCodes[i]))
+                if(testDownOrHeld)
                 {
-                    key = _allKeyCodes[i];
-                    return true;
+                    if (UnityEngine.Input.GetKey(_allKeyCodes[i]))
+                    {
+                        key = _allKeyCodes[i];
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (UnityEngine.Input.GetKeyDown(_allKeyCodes[i]))
+                    {
+                        key = _allKeyCodes[i];
+                        return true;
+                    }
                 }
             }
             return false;
         }
 
-
+        #endregion
 
 
         #region ID Lookup
 
-        private static Dictionary<int, string> _buttonToId;
-        private static Dictionary<int, string> _axisToId;
-        private static UnityEngine.KeyCode[] _allKeyCodes;
-
-        public static string GetButtonInputId(SPInputButton button, Joystick joystick = Joystick.All)
+        public static string GetInputName(SPInputId id, Joystick joystick = Joystick.All)
         {
-            if (button == SPInputButton.Unknown) return null;
+            if (id == SPInputId.Unknown) return null;
 
-            if (_buttonToId == null) _buttonToId = new Dictionary<int, string>();
-            int hash = (int)joystick | ((int)button << 4);
-            string id;
-            if (_buttonToId.TryGetValue(hash, out id))
-                return id;
+            if (_inputIdToName == null) _inputIdToName = new Dictionary<int, string>();
+            int hash = (int)joystick | ((int)id << 4);
+            string sname;
+            if (_inputIdToName.TryGetValue(hash, out sname))
+                return sname;
             
             if (joystick == Joystick.All)
             {
-                if (button <= SPInputButton.Button19)
-                    id = string.Format("JoyAll-Button{0:00}", (int)button);
-                else
-                    id = string.Format("MouseButton{0:0}", (int)button - (int)SPInputButton.MouseButton0);
+                if(id.IsJoyAxis())
+                    sname = string.Format("JoyAll-Axis{0:00}", (int)id);
+                else if(id.IsMouseAxis())
+                    sname = string.Format("MouseAxis{0:0}", (int)id - (int)SPInputId.MouseAxis1 + 1);
+                else if (id.IsJoyButton())
+                    sname = string.Format("JoyAll-Button{0:00}", (int)id - (int)SPInputId.Button0);
+                else if(id.IsMouseButton())
+                    sname = string.Format("MouseButton{0:0}", (int)id - (int)SPInputId.MouseButton0);
             }
             else
             {
-                if (button <= SPInputButton.Button19)
-                    id = string.Format("Joy{0:0}-Button{0:00}", (int)joystick, (int)button);
-                else
-                    id = string.Format("MouseButton{0:0}", (int)button - (int)SPInputButton.MouseButton0);
+                if (id.IsJoyAxis())
+                    sname = string.Format("Joy{0:0}-Axis{1:00}", (int)joystick, (int)id);
+                else if (id.IsMouseAxis())
+                    sname = string.Format("MouseAxis{0:0}", (int)id - (int)SPInputId.MouseAxis1 + 1);
+                else if (id.IsJoyButton())
+                    sname = string.Format("Joy{0:0}-Button{1:00}", (int)joystick, (int)id - (int)SPInputId.Button0);
+                else if (id.IsMouseButton())
+                    sname = string.Format("MouseButton{0:0}", (int)id - (int)SPInputId.MouseButton0);
             }
 
-            _buttonToId[hash] = id;
-            return id;
+            _inputIdToName[hash] = sname;
+            return sname;
         }
-
-        public static string GetAxisInputId(SPInputAxis axis, Joystick joystick = Joystick.All)
-        {
-            if (axis == SPInputAxis.Unknown) return null;
-
-            if (_axisToId == null) _axisToId = new Dictionary<int, string>();
-            int hash = (int)joystick | ((int)axis << 4);
-            string id;
-            if (_axisToId.TryGetValue(hash, out id))
-                return id;
-            
-            if (joystick == Joystick.All)
-            {
-                if (axis <= SPInputAxis.Axis28)
-                    id = string.Format("JoyAll-Axis{0:00}", (int)axis + 1);
-                else
-                    id = string.Format("MouseAxis{0:0}", (int)axis - (int)SPInputAxis.MouseAxis1 + 1);
-            }
-            else
-            {
-                if (axis <= SPInputAxis.Axis28)
-                    id = string.Format("Joy{0:0}-Axis{0:00}", (int)joystick, (int)axis + 1);
-                else
-                    id = string.Format("MouseAxis{0:0}", (int)axis - (int)SPInputAxis.MouseAxis1 + 1);
-            }
-
-            _axisToId[hash] = id;
-            return id;
-        }
-
+        
         #endregion
 
     }

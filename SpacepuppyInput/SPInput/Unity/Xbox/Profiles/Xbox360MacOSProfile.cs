@@ -18,29 +18,29 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
 
         public Xbox360MacOSProfile()
         {
-            this.Register(XboxAxis.LeftStickX, SPInputAxis.Axis1);
-            this.Register(XboxAxis.LeftStickY, SPInputAxis.Axis2, true);
-            this.Register(XboxAxis.RightStickX, SPInputAxis.Axis3);
-            this.Register(XboxAxis.RightStickY, SPInputAxis.Axis4);
-            this.Register(XboxAxis.DPadX, SPInputButton.Button5, SPInputButton.Button6);
-            this.Register(XboxAxis.DPadY, SPInputButton.Button7, SPInputButton.Button8);
-            this.Register(XboxAxis.LeftTrigger, SPInputAxis.Axis5);
-            this.Register(XboxAxis.RightTrigger, SPInputAxis.Axis6);
+            this.RegisterAxis(XboxInputId.LStickX, SPInputId.Axis1);
+            this.RegisterAxis(XboxInputId.LStickY, SPInputId.Axis2, true);
+            this.RegisterAxis(XboxInputId.RStickX, SPInputId.Axis3);
+            this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis4);
+            this.RegisterAxis(XboxInputId.DPadX, SPInputId.Button5, SPInputId.Button6);
+            this.RegisterAxis(XboxInputId.DPadY, SPInputId.Button7, SPInputId.Button8);
+            this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Axis5);
+            this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Axis6);
 
-            this.Register(XboxButton.A, SPInputButton.Button16);
-            this.Register(XboxButton.B, SPInputButton.Button17);
-            this.Register(XboxButton.X, SPInputButton.Button18);
-            this.Register(XboxButton.Y, SPInputButton.Button19);
-            this.Register(XboxButton.LB, SPInputButton.Button13);
-            this.Register(XboxButton.RB, SPInputButton.Button14);
-            this.Register(XboxButton.Back, SPInputButton.Button10);
-            this.Register(XboxButton.Start, SPInputButton.Button9);
-            this.Register(XboxButton.LeftStick, SPInputButton.Button11);
-            this.Register(XboxButton.RightStick, SPInputButton.Button12);
-            this.Register(XboxButton.DPadUp, SPInputButton.Button5);
-            this.Register(XboxButton.DPadDown, SPInputButton.Button6);
-            this.Register(XboxButton.DPadRight, SPInputButton.Button7);
-            this.Register(XboxButton.DPadLeft, SPInputButton.Button8);
+            this.RegisterButton(XboxInputId.A, SPInputId.Button16);
+            this.RegisterButton(XboxInputId.B, SPInputId.Button17);
+            this.RegisterButton(XboxInputId.X, SPInputId.Button18);
+            this.RegisterButton(XboxInputId.Y, SPInputId.Button19);
+            this.RegisterButton(XboxInputId.LB, SPInputId.Button13);
+            this.RegisterButton(XboxInputId.RB, SPInputId.Button14);
+            this.RegisterButton(XboxInputId.Back, SPInputId.Button10);
+            this.RegisterButton(XboxInputId.Start, SPInputId.Button9);
+            this.RegisterButton(XboxInputId.LStickPress, SPInputId.Button11);
+            this.RegisterButton(XboxInputId.RStickPress, SPInputId.Button12);
+            this.RegisterButton(XboxInputId.DPadUp, SPInputId.Button5);
+            this.RegisterButton(XboxInputId.DPadDown, SPInputId.Button6);
+            this.RegisterButton(XboxInputId.DPadRight, SPInputId.Button7);
+            this.RegisterButton(XboxInputId.DPadLeft, SPInputId.Button8);
         }
 
     }

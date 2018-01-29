@@ -54,7 +54,7 @@ namespace com.spacepuppy.SPInput
                 throw new System.NotImplementedException();
             }
         }
-
+        
         public virtual void Update()
         {
             //_signatures.Sort();
@@ -85,6 +85,11 @@ namespace com.spacepuppy.SPInput
         {
             get { return _active; }
             set { _active = value; }
+        }
+
+        public bool Contains(string id)
+        {
+            return _signatures.Contains(id);
         }
 
         public ButtonState GetButtonState(string id)

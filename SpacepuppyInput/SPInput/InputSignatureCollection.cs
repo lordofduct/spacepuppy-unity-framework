@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace com.spacepuppy.SPInput
 {
 
-    public class InputSignatureCollection : ICollection<IInputSignature>
+    public class InputSignatureCollection : IInputSignatureCollection
     {
 
         #region Fields
@@ -15,6 +15,19 @@ namespace com.spacepuppy.SPInput
         #endregion
 
         #region Methods
+
+        public void Replace(string id, IInputSignature item)
+        {
+            if (item == null) throw new System.ArgumentNullException("item");
+            IInputSignature old;
+            if (_table.TryGetValue(id, out old))
+            {
+                _sortedList.Remove(old);
+            }
+
+            _table[id] = item;
+            _sortedList.Add(item);
+        }
 
         public IInputSignature GetSignature(string id)
         {

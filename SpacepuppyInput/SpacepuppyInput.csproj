@@ -44,6 +44,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Resources\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\Resources\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameInputManager.cs" />
@@ -67,15 +70,19 @@
     <Compile Include="SPInput\Sequences\ButtonTap.cs" />
     <Compile Include="SPInput\Sequences\CursorMove.cs" />
     <Compile Include="SPInput\Sequences\FirstSuccessfulSequence.cs" />
+    <Compile Include="SPInput\Unity\InputLayoutToken.cs" />
+    <Compile Include="SPInput\Unity\ConfigurableInputProfile.cs" />
     <Compile Include="SPInput\Unity\Enums.cs" />
     <Compile Include="SPInput\Unity\IInputProfile.cs" />
     <Compile Include="SPInput\Unity\InputProfileLookupTable.cs" />
+    <Compile Include="SPInput\Unity\InputToken.cs" />
     <Compile Include="SPInput\Unity\KeyboardProfile.cs" />
     <Compile Include="SPInput\Unity\PollAxisSignatureRoutine.cs" />
     <Compile Include="SPInput\Unity\PollButtonSignatureRoutine.cs" />
     <Compile Include="SPInput\Unity\SPInputDirect.cs" />
     <Compile Include="SPInput\Unity\SPInputFactory.cs" />
     <Compile Include="SPInput\Unity\InputProfileDescriptionAttributes.cs" />
+    <Compile Include="SPInput\EventSystems\SPInputModule.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4LinuxProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4MacOSBTProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\PS4MacOSUSBProfile.cs" />

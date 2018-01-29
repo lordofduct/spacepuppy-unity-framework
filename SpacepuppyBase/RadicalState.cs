@@ -135,7 +135,7 @@ namespace com.spacepuppy
         {
             if (_disposed || _routine == null) return;
             if (sender != _routine) return;
-            if (_onComplete != null && _routine.Complete) _onComplete();
+            if (_onComplete != null && _routine.CompletedSuccessfully) _onComplete();
             _routine = null;
         }
 

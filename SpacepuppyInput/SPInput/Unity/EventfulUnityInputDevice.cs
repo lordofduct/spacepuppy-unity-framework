@@ -193,21 +193,16 @@ namespace com.spacepuppy.SPInput.Unity
         {
         }
 
-        public float GetAxleState(int hash)
+        public bool Contains(string id)
         {
-            return 0f;
+            return false;
         }
-
+        
         public float GetAxleState(string id)
         {
             return Input.GetAxis(id);
         }
-
-        public ButtonState GetButtonState(int hash)
-        {
-            return ButtonState.None;
-        }
-
+        
         public ButtonState GetButtonState(string id)
         {
             if (Input.GetButtonDown(id))
@@ -225,28 +220,12 @@ namespace com.spacepuppy.SPInput.Unity
             //TODO - how to track this?
             throw new System.NotSupportedException();
         }
-
-        public bool GetButtonPressed(int hash, float duration)
-        {
-            //TODO - how to track this?
-            throw new System.NotSupportedException();
-        }
-
-        public Vector2 GetCursorState(int hash)
-        {
-            return Vector2.zero;
-        }
-
+        
         public Vector2 GetCursorState(string id)
         {
             return Vector2.zero;
         }
-
-        public Vector2 GetDualAxleState(int hash)
-        {
-            return Vector2.zero;
-        }
-
+        
         public Vector2 GetDualAxleState(string id)
         {
             return Vector2.zero;

@@ -14,35 +14,19 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         #region Fields
 
-        private Dictionary<XboxAxis, AxisDelegateFactory> _axisTable = new Dictionary<XboxAxis, AxisDelegateFactory>();
-        private Dictionary<XboxButton, ButtonDelegateFactory> _buttonTable = new Dictionary<XboxButton, ButtonDelegateFactory>();
-        
+        private Dictionary<XboxInputId, InputToken> _axisTable = new Dictionary<XboxInputId, InputToken>();
+        private Dictionary<XboxInputId, InputToken> _buttonTable = new Dictionary<XboxInputId, InputToken>();
+
         #endregion
 
         #region Properties
 
-        public AxisDelegateFactory this[XboxAxis axis]
-        {
-            get
-            {
-                return this.GetMapping(axis);
-            }
-        }
-
-        public ButtonDelegateFactory this[XboxButton button]
-        {
-            get
-            {
-                return this.GetMapping(button);
-            }
-        }
-
-        public Dictionary<XboxAxis, AxisDelegateFactory>.KeyCollection Axes
+        public Dictionary<XboxInputId, InputToken>.KeyCollection Axes
         {
             get { return _axisTable.Keys; }
         }
 
-        public Dictionary<XboxButton, ButtonDelegateFactory>.KeyCollection Buttons
+        public Dictionary<XboxInputId, InputToken>.KeyCollection Buttons
         {
             get { return _buttonTable.Keys; }
         }
@@ -51,169 +35,167 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         #region Methods
 
-        public void Register(XboxAxis axis, AxisDelegateFactory del)
+        public void RegisterAxis(XboxInputId axis, InputToken token)
         {
-            _axisTable[axis] = del;
+            _axisTable[axis] = token;
+            _buttonTable.Remove(axis);
         }
 
-        public void Register(XboxAxis axis, SPInputAxis spaxis, bool invert = false)
+        public void RegisterAxis(XboxInputId axis, AxisDelegateFactory del)
         {
-            _axisTable[axis] = SPInputFactory.CreateAxisDelegateFactory(spaxis, invert);
+            _axisTable[axis] = InputToken.CreateCustom(del);
+            _buttonTable.Remove(axis);
         }
 
-        public void Register(XboxAxis axis, SPInputButton positive, SPInputButton negative)
+        public void RegisterAxis(XboxInputId axis, SPInputId spaxis, bool invert = false)
         {
-            _axisTable[axis] = SPInputFactory.CreateAxisDelegateFactory(positive, negative);
+            _axisTable[axis] = InputToken.CreateAxis(spaxis, invert);
+            _buttonTable.Remove(axis);
         }
 
-        public void Register(XboxButton button, ButtonDelegateFactory del)
+        public void RegisterAxis(XboxInputId axis, SPInputId positive, SPInputId negative)
         {
-            _buttonTable[button] = del;
+            _axisTable[axis] = InputToken.CreateEmulatedAxis(positive, negative);
+            _buttonTable.Remove(axis);
         }
 
-        public void Register(XboxButton button, SPInputButton spbtn)
+        public void RegisterButton(XboxInputId button, InputToken token)
         {
-            _buttonTable[button] = SPInputFactory.CreateButtonDelegateFactory(spbtn);
+            _buttonTable[button] = token;
+            _axisTable.Remove(button);
         }
 
-        public void Register(XboxButton button, SPInputAxis axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public void RegisterButton(XboxInputId button, ButtonDelegateFactory del)
         {
-            _buttonTable[button] = SPInputFactory.CreateButtonDelegateFactory(axis, consideration, axleButtonDeadZone);
+            _buttonTable[button] = InputToken.CreateCustom(del);
+            _axisTable.Remove(button);
+        }
+
+        public void RegisterButton(XboxInputId button, SPInputId spbtn)
+        {
+            _buttonTable[button] = InputToken.CreateButton(spbtn);
+            _axisTable.Remove(button);
+        }
+
+        public void RegisterAxleButton(XboxInputId button, SPInputId axis, AxleValueConsideration consideration, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        {
+            _buttonTable[button] = InputToken.CreateAxleButton(axis, consideration, axleButtonDeadZone);
+            _axisTable.Remove(button);
         }
 
 
 
-        public AxisDelegateFactory GetMapping(XboxAxis axis)
+        public InputToken GetAxisMapping(XboxInputId axis)
         {
-            AxisDelegateFactory result;
+            InputToken result;
             if (_axisTable.TryGetValue(axis, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for axis " + axis.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public ButtonDelegateFactory GetMapping(XboxButton button)
+        public InputToken GetButtonMapping(XboxInputId button)
         {
-            ButtonDelegateFactory result;
+            InputToken result;
             if (_buttonTable.TryGetValue(button, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for button " + button.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public bool TryGetMapping(XboxAxis axis, out AxisDelegateFactory map)
+        public bool TryGetAxisMapping(XboxInputId axis, out InputToken map)
         {
             return _axisTable.TryGetValue(axis, out map);
         }
 
-        public bool TryGetMapping(XboxButton button, out ButtonDelegateFactory map)
+        public bool TryGetButtonMapping(XboxInputId button, out InputToken map)
         {
             return _buttonTable.TryGetValue(button, out map);
         }
 
-        public bool Contains(XboxAxis axis)
+        public bool Contains(XboxInputId id)
         {
-            return _axisTable.ContainsKey(axis);
+            return _axisTable.ContainsKey(id) || _buttonTable.ContainsKey(id);
         }
 
-        public bool Contains(XboxButton button)
+        public bool Remove(XboxInputId id)
         {
-            return _buttonTable.ContainsKey(button);
+            return _axisTable.Remove(id) | _buttonTable.Remove(id);
         }
 
-        public bool Remove(XboxAxis axis)
+        public void Clear()
         {
-            return _axisTable.Remove(axis);
-        }
-
-        public bool Remove(XboxButton button)
-        {
-            return _buttonTable.Remove(button);
+            _axisTable.Clear();
+            _buttonTable.Clear();
         }
 
         #endregion
 
         #region IInputSignatureFactory Interface
 
-        public bool TryPollButton(out XboxButton button, Joystick joystick = Joystick.All)
+        public bool TryPollButton(out XboxInputId button, Joystick joystick = Joystick.All)
         {
-            var e = _buttonTable.Keys.GetEnumerator();
+            var e = _buttonTable.GetEnumerator();
             while (e.MoveNext())
             {
-                var d = this.CreateButtonDelegate(e.Current, joystick);
-                if(d != null && d())
+                var d = e.Current.Value.CreateButtonDelegate(joystick);
+                if (d != null && d())
                 {
-                    button = e.Current;
+                    button = e.Current.Key;
                     return true;
                 }
             }
 
-            button = default(XboxButton);
+            button = default(XboxInputId);
             return false;
         }
 
-        public bool TryPollAxis(out XboxAxis axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public bool TryPollAxis(out XboxInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            var e = _axisTable.Keys.GetEnumerator();
+            var e = _axisTable.GetEnumerator();
             while (e.MoveNext())
             {
-                var d = this.CreateAxisDelegate(e.Current, joystick);
+                var d = e.Current.Value.CreateAxisDelegate(joystick);
                 var v = d != null ? d() : 0f;
-                if(d != null && Mathf.Abs(v) > deadZone)
+                if (d != null && Mathf.Abs(v) > deadZone)
                 {
-                    axis = e.Current;
+                    axis = e.Current.Key;
                     value = v;
                     return true;
                 }
             }
 
-            axis = default(XboxAxis);
+            axis = default(XboxInputId);
             value = 0f;
             return false;
         }
 
-        public ButtonDelegate CreateButtonDelegate(XboxButton button, Joystick joystick = Joystick.All)
+        public InputToken GetMapping(XboxInputId id)
         {
-            ButtonDelegateFactory map;
-            if (!this.TryGetMapping(button, out map)) return null;
+            InputToken result;
+            if (_axisTable.TryGetValue(id, out result)) return result;
+            if (_buttonTable.TryGetValue(id, out result)) return result;
 
-            return map != null ? map(joystick) : null;
-        }
-        
-        public AxisDelegate CreateAxisDelegate(XboxAxis axis, Joystick joystick = Joystick.All)
-        {
-            AxisDelegateFactory map;
-            if (!this.TryGetMapping(axis, out map)) return null;
-
-            return map != null ? map(joystick) : null;
-        }
-        
-        public IButtonInputSignature CreateButtonSignature(string id, XboxButton button, Joystick joystick = Joystick.All)
-        {
-            return new DelegatedButtonInputSignature(id, this.CreateButtonDelegate(button, joystick));
+            return InputToken.Unknown;
         }
 
-        public IButtonInputSignature CreateButtonSignature(string id, XboxAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        void IConfigurableInputProfile<XboxInputId>.SetAxisMapping(XboxInputId id, InputToken token)
         {
-            return new DelegatedAxleButtonInputSignature(id, this.CreateAxisDelegate(axis, joystick))
-            {
-                Consideration = consideration,
-                AxisButtonDeadZone = axleButtonDeadZone
-            };
+            this.RegisterAxis(id, token);
         }
 
-        public IAxleInputSignature CreateAxisSignature(string id, XboxAxis axis, Joystick joystick = Joystick.All)
+        void IConfigurableInputProfile<XboxInputId>.SetButtonMapping(XboxInputId id, InputToken token)
         {
-            return new DelegatedAxleInputSignature(id, this.CreateAxisDelegate(axis, joystick));
+            this.RegisterButton(id, token);
         }
-        
-        public IDualAxleInputSignature CreateDualAxisSignature(string id, XboxAxis axisX, XboxAxis axisY, Joystick joystick = Joystick.All)
+
+        void IConfigurableInputProfile<XboxInputId>.Reset()
         {
-            return new DelegatedDualAxleInputSignature(id, this.CreateAxisDelegate(axisX, joystick), this.CreateAxisDelegate(axisY, joystick));
+            this.Clear();
         }
 
         #endregion
-        
+
     }
 
 }

@@ -52,7 +52,7 @@ namespace com.spacepuppy
                 }
                 else if (current is RadicalCoroutine)
                 {
-                    if ((current as RadicalCoroutine).Complete)
+                    if ((current as RadicalCoroutine).CompletedSuccessfully)
                     {
                         _instructions.RemoveAt(i);
                         i--;
@@ -206,7 +206,7 @@ namespace com.spacepuppy
                 }
                 else if (current is RadicalCoroutine)
                 {
-                    if ((current as RadicalCoroutine).Complete)
+                    if ((current as RadicalCoroutine).CompletedSuccessfully)
                     {
                         _signaledInstruction = current;
                         this.SetSignal();

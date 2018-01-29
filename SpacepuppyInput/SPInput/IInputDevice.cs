@@ -5,9 +5,13 @@ using com.spacepuppy.Collections;
 
 namespace com.spacepuppy.SPInput
 {
+
     public interface IInputDevice : IInputSignature
     {
+
         bool Active { get; set; }
+
+        bool Contains(string id);
 
         ButtonState GetButtonState(string id);
 
@@ -20,4 +24,10 @@ namespace com.spacepuppy.SPInput
         Vector2 GetCursorState(string id);
 
     }
+
+    public interface IInputSignatureCollection : ICollection<IInputSignature>
+    {
+        bool Contains(string id);
+    }
+
 }

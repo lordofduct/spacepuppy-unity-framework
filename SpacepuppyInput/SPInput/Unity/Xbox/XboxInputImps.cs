@@ -6,18 +6,33 @@ using System.Text;
 namespace com.spacepuppy.SPInput.Unity.Xbox
 {
 
-    public interface IXboxInputProfile : IInputProfile<XboxButton, XboxAxis>
-    {
-        
-    }
-
-    public class XboxInputKeyboardProfile : KeyboardProfile<XboxButton, XboxAxis>, IXboxInputProfile
+    public interface IXboxInputProfile : IConfigurableInputProfile<XboxInputId>
     {
 
     }
 
-    public class XboxInputProfileLookupTable : InputProfileLookupTable<IXboxInputProfile, XboxButton, XboxAxis>
+    public class XboxInputKeyboardProfile : KeyboardProfile<XboxInputId>, IXboxInputProfile
+    {
+
+    }
+
+    public class XboxInputProfileLookupTable : InputProfileLookupTable<IXboxInputProfile, XboxInputId>
     {
     }
-    
+
+    public class ConfigurableXboxInputProfile : ConfigurableInputProfile<XboxInputId>, IXboxInputProfile
+    {
+
+        public ConfigurableXboxInputProfile()
+        {
+
+        }
+
+        public ConfigurableXboxInputProfile(IInputProfile<XboxInputId> innerProfile) : base(innerProfile)
+        {
+
+        }
+
+    }
+
 }

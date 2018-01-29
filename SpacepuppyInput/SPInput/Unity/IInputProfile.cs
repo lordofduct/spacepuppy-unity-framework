@@ -6,25 +6,23 @@ using System.Text;
 namespace com.spacepuppy.SPInput.Unity
 {
 
-    public interface IInputProfile<TButton, TAxis> where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
+    public interface IInputProfile<TInputId> where TInputId : struct, System.IConvertible
     {
 
-        bool TryPollButton(out TButton button, Joystick joystick = Joystick.All);
+        bool TryPollButton(out TInputId button, Joystick joystick = Joystick.All);
 
-        bool TryPollAxis(out TAxis axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE);
+        bool TryPollAxis(out TInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE);
 
-        ButtonDelegate CreateButtonDelegate(TButton button, Joystick joystick = Joystick.All);
-        
-        AxisDelegate CreateAxisDelegate(TAxis axis, Joystick joystick = Joystick.All);
-        
-        IButtonInputSignature CreateButtonSignature(string id, TButton button, Joystick joystick = Joystick.All);
+        bool Contains(TInputId id);
+        InputToken GetMapping(TInputId id);
 
-        IButtonInputSignature CreateButtonSignature(string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE);
+    }
 
-        IAxleInputSignature CreateAxisSignature(string id, TAxis axis, Joystick joystick = Joystick.All);
-
-        IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, Joystick joystick = Joystick.All);
-
+    public interface IConfigurableInputProfile<TInputId> : IInputProfile<TInputId> where TInputId : struct, System.IConvertible
+    {
+        void SetButtonMapping(TInputId id, InputToken token);
+        void SetAxisMapping(TInputId id, InputToken token);
+        void Reset();
     }
 
 }

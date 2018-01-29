@@ -16,31 +16,31 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
 
         public PS4MacOSBTProfile()
         {
-            this.Register(XboxAxis.LeftStickX, SPInputAxis.Axis1);
-            this.Register(XboxAxis.LeftStickY, SPInputAxis.Axis2, true);
-            this.Register(XboxAxis.RightStickX, SPInputAxis.Axis3);
-            this.Register(XboxAxis.RightStickY, SPInputAxis.Axis4, true);
-            this.Register(XboxAxis.DPadX, SPInputAxis.Axis7);
-            this.Register(XboxAxis.DPadY, SPInputAxis.Axis8, true);
-            this.Register(XboxAxis.LeftTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputAxis.Axis5));
-            this.Register(XboxAxis.RightTrigger, SPInputFactory.CreateAxisDelegateFactory_PS4TriggerLike(SPInputAxis.Axis6));
-            //this.Register(XboxAxis.LeftTrigger, SPInputButton.Button6, SPInputButton.Unknown);
-            //this.Register(XboxAxis.RightTrigger, SPInputButton.Button7, SPInputButton.Unknown);
+            this.RegisterAxis(XboxInputId.LStickX, SPInputId.Axis1);
+            this.RegisterAxis(XboxInputId.LStickY, SPInputId.Axis2, true);
+            this.RegisterAxis(XboxInputId.RStickX, SPInputId.Axis3);
+            this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis4, true);
+            this.RegisterAxis(XboxInputId.DPadX, SPInputId.Axis7);
+            this.RegisterAxis(XboxInputId.DPadY, SPInputId.Axis8, true);
+            this.RegisterAxis(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
+            this.RegisterAxis(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis6));
+            //this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Button6, SPInputId.Unknown);
+            //this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Button7, SPInputId.Unknown);
 
-            this.Register(XboxButton.A, SPInputButton.Button1); //X
-            this.Register(XboxButton.B, SPInputButton.Button2); //O
-            this.Register(XboxButton.X, SPInputButton.Button0); //Sqr
-            this.Register(XboxButton.Y, SPInputButton.Button3); //Tri
-            this.Register(XboxButton.LB, SPInputButton.Button4); //L1
-            this.Register(XboxButton.RB, SPInputButton.Button5); //R1
-            this.Register(XboxButton.Back, SPInputButton.Button8); //Share
-            this.Register(XboxButton.Start, SPInputButton.Button9); //Options
-            this.Register(XboxButton.LeftStick, SPInputButton.Button10);
-            this.Register(XboxButton.RightStick, SPInputButton.Button11);
-            this.Register(XboxButton.DPadUp, SPInputAxis.Axis8, AxleValueConsideration.Negative);
-            this.Register(XboxButton.DPadDown, SPInputAxis.Axis8, AxleValueConsideration.Positive);
-            this.Register(XboxButton.DPadRight, SPInputAxis.Axis7, AxleValueConsideration.Positive);
-            this.Register(XboxButton.DPadLeft, SPInputAxis.Axis7, AxleValueConsideration.Negative);
+            this.RegisterButton(XboxInputId.A, SPInputId.Button1); //X
+            this.RegisterButton(XboxInputId.B, SPInputId.Button2); //O
+            this.RegisterButton(XboxInputId.X, SPInputId.Button0); //Sqr
+            this.RegisterButton(XboxInputId.Y, SPInputId.Button3); //Tri
+            this.RegisterButton(XboxInputId.LB, SPInputId.Button4); //L1
+            this.RegisterButton(XboxInputId.RB, SPInputId.Button5); //R1
+            this.RegisterButton(XboxInputId.Back, SPInputId.Button8); //Share
+            this.RegisterButton(XboxInputId.Start, SPInputId.Button9); //Options
+            this.RegisterButton(XboxInputId.LStickPress, SPInputId.Button10);
+            this.RegisterButton(XboxInputId.RStickPress, SPInputId.Button11);
+            this.RegisterAxleButton(XboxInputId.DPadUp, SPInputId.Axis8, AxleValueConsideration.Negative);
+            this.RegisterAxleButton(XboxInputId.DPadDown, SPInputId.Axis8, AxleValueConsideration.Positive);
+            this.RegisterAxleButton(XboxInputId.DPadRight, SPInputId.Axis7, AxleValueConsideration.Positive);
+            this.RegisterAxleButton(XboxInputId.DPadLeft, SPInputId.Axis7, AxleValueConsideration.Negative);
         }
 
     }

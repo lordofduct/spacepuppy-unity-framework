@@ -8,7 +8,7 @@ namespace com.spacepuppy.SPInput
     /// Store a group of IInputSignatures based on a mapping value instead of a hash. This mapping value should usually be an enum, you can also use an int/long/etc if you want.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class MappedInputSignatureCollection<T> : ICollection<IInputSignature> where T : struct, System.IConvertible
+    public class MappedInputSignatureCollection<T> : IInputSignatureCollection where T : struct, System.IConvertible
     {
 
         #region Fields
@@ -25,6 +25,20 @@ namespace com.spacepuppy.SPInput
             if (item == null) throw new System.ArgumentNullException("item");
             if (_table.ContainsKey(mapping)) throw new System.ArgumentException("A signature already exists with this mapping.", "item");
             
+            _table[mapping] = item;
+            _sortedList.Add(item);
+        }
+
+        public void Replace(T mapping, IInputSignature item)
+        {
+            if (item == null) throw new System.ArgumentNullException("item");
+            IInputSignature old;
+            if(_table.TryGetValue(mapping, out old))
+            {
+                _table.Remove(mapping);
+                _sortedList.Remove(old);
+            }
+
             _table[mapping] = item;
             _sortedList.Add(item);
         }
@@ -66,7 +80,15 @@ namespace com.spacepuppy.SPInput
         
         public bool Remove(T mapping)
         {
-            return _table.Remove(mapping);
+            IInputSignature sig;
+            if(_table.TryGetValue(mapping, out sig))
+            {
+                _table.Remove(mapping);
+                _sortedList.Remove(sig);
+                return true;
+            }
+
+            return false;
         }
 
         public bool Remove(string id)
@@ -77,6 +99,7 @@ namespace com.spacepuppy.SPInput
                 if (e.Current.Value.Id == id)
                 {
                     _table.Remove(e.Current.Key);
+                    _sortedList.Remove(e.Current.Value);
                     return true;
                 }
             }

@@ -235,6 +235,7 @@
     <Compile Include="Scenario\Comparers.cs" />
     <Compile Include="Scenario\IAutoSequenceSignal.cs" />
     <Compile Include="Scenario\i_AutoSequenceSignal.cs" />
+    <Compile Include="Scenario\i_ChangeCursorProperties.cs" />
     <Compile Include="Scenario\i_ChangeStateOfSimpleStateMachine.cs" />
     <Compile Include="Scenario\i_DebugLog.cs" />
     <Compile Include="Scenario\i_Destroy.cs" />

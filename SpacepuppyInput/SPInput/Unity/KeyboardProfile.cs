@@ -5,40 +5,24 @@ using System.Linq;
 namespace com.spacepuppy.SPInput.Unity
 {
 
-    public class KeyboardProfile<TButton, TAxis> : IInputProfile<TButton, TAxis> where TButton : struct, System.IConvertible where TAxis : struct, System.IConvertible
+    public class KeyboardProfile<TInputId> : IConfigurableInputProfile<TInputId> where TInputId : struct, System.IConvertible
     {
 
         #region Fields
 
-        private Dictionary<TAxis, AxisMapping> _axisTable = new Dictionary<TAxis, AxisMapping>();
-        private Dictionary<TButton, ButtonMapping> _buttonTable = new Dictionary<TButton, ButtonMapping>();
+        private Dictionary<TInputId, InputToken> _axisTable = new Dictionary<TInputId, InputToken>();
+        private Dictionary<TInputId, InputToken> _buttonTable = new Dictionary<TInputId, InputToken>();
 
         #endregion
 
         #region Properties
 
-        public AxisMapping this[TAxis axis]
-        {
-            get
-            {
-                return this.GetMapping(axis);
-            }
-        }
-
-        public ButtonMapping this[TButton button]
-        {
-            get
-            {
-                return this.GetMapping(button);
-            }
-        }
-
-        public Dictionary<TAxis, AxisMapping>.KeyCollection Axes
+        public Dictionary<TInputId, InputToken>.KeyCollection Axes
         {
             get { return _axisTable.Keys; }
         }
 
-        public Dictionary<TButton, ButtonMapping>.KeyCollection Buttons
+        public Dictionary<TInputId, InputToken>.KeyCollection Buttons
         {
             get { return _buttonTable.Keys; }
         }
@@ -46,240 +30,189 @@ namespace com.spacepuppy.SPInput.Unity
         #endregion
 
         #region Methods
-        
-        public void Register(TAxis axis, KeyCode positive, KeyCode negative)
+
+        public void RegisterAxis(TInputId axis, KeyCode positive, KeyCode negative)
         {
-            _axisTable[axis] = new AxisMapping()
-            {
-                Positive = positive,
-                Negative = negative
-            };
+            _axisTable[axis] = InputToken.CreateEmulatedAxis(positive, negative);
+            _buttonTable.Remove(axis);
         }
 
-        public void Register(TButton button, KeyCode key)
+        public void RegisterMouseAxis(TInputId axis, SPMouseId spaxis)
         {
-            _buttonTable[button] = new ButtonMapping()
-            {
-                Key = key
-            };
+            _axisTable[axis] = InputToken.CreateAxis(spaxis.ToSPInputId());
+            _buttonTable.Remove(axis);
         }
-        
-        public AxisMapping GetMapping(TAxis axis)
+
+        public void RegisterAxis(TInputId axis, InputToken token)
         {
-            AxisMapping result;
+            _axisTable[axis] = token;
+            _buttonTable.Remove(axis);
+        }
+
+        public void RegisterButton(TInputId button, KeyCode key)
+        {
+            _buttonTable[button] = InputToken.CreateButton(key);
+            _axisTable.Remove(button);
+        }
+
+        public void RegisterMouseButton(TInputId button, SPMouseId spbtn)
+        {
+            _buttonTable[button] = InputToken.CreateButton(spbtn.ToSPInputId());
+            _axisTable.Remove(button);
+        }
+
+        public void RegisterButton(TInputId button, InputToken token)
+        {
+            _buttonTable[button] = token;
+            _axisTable.Remove(button);
+        }
+
+        public InputToken GetAxisMapping(TInputId axis)
+        {
+            InputToken result;
             if (_axisTable.TryGetValue(axis, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for axis " + axis.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public ButtonMapping GetMapping(TButton button)
+        public InputToken GetButtonMapping(TInputId button)
         {
-            ButtonMapping result;
+            InputToken result;
             if (_buttonTable.TryGetValue(button, out result))
                 return result;
 
-            throw new KeyNotFoundException("A mapping for button " + button.ToString() + " was not found.");
+            return InputToken.Unknown;
         }
 
-        public bool TryGetMapping(TAxis axis, out AxisMapping map)
+        public bool TryGetAxisMapping(TInputId axis, out InputToken map)
         {
             return _axisTable.TryGetValue(axis, out map);
         }
 
-        public bool TryGetMapping(TButton button, out ButtonMapping map)
+        public bool TryGetButtonMapping(TInputId button, out InputToken map)
         {
             return _buttonTable.TryGetValue(button, out map);
         }
 
-        public bool Contains(TAxis axis)
+        public bool Contains(TInputId id)
         {
-            return _axisTable.ContainsKey(axis);
+            return _axisTable.ContainsKey(id) || _buttonTable.ContainsKey(id);
         }
 
-        public bool Contains(TButton button)
+        public bool Remove(TInputId id)
         {
-            return _buttonTable.ContainsKey(button);
+            return _axisTable.Remove(id) | _buttonTable.Remove(id);
         }
 
-        public bool Remove(TAxis axis)
+        public void Clear()
         {
-            return _axisTable.Remove(axis);
-        }
-
-        public bool Remove(TButton button)
-        {
-            return _buttonTable.Remove(button);
+            _axisTable.Clear();
+            _buttonTable.Clear();
         }
 
         #endregion
 
         #region IInputProfile Interface
 
-        public bool TryPollButton(out TButton button, Joystick joystick = Joystick.All)
+        public bool TryPollButton(out TInputId button, Joystick joystick = Joystick.All)
         {
-            ButtonMapping map;
+            InputToken map;
 
             var e = _buttonTable.Keys.GetEnumerator();
-            while(e.MoveNext())
+            while (e.MoveNext())
             {
-                if(TryGetMapping(e.Current, out map))
+                if (TryGetButtonMapping(e.Current, out map))
                 {
-                    if(Input.GetKey(map.Key))
+                    if (map.Type == InputType.Keyboard)
                     {
-                        button = e.Current;
-                        return true;
+                        if (Input.GetKey((KeyCode)map.Value))
+                        {
+                            button = e.Current;
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        var d = map.CreateButtonDelegate(joystick);
+                        if (d != null && d())
+                        {
+                            button = e.Current;
+                            return true;
+                        }
                     }
                 }
             }
 
-            button = default(TButton);
+            button = default(TInputId);
             return false;
         }
 
-        public bool TryPollAxis(out TAxis axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public bool TryPollAxis(out TInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            AxisMapping map;
+            InputToken map;
 
             var e = _axisTable.Keys.GetEnumerator();
             while (e.MoveNext())
             {
-                if (TryGetMapping(e.Current, out map))
+                if (TryGetAxisMapping(e.Current, out map))
                 {
-                    if (Input.GetKey(map.Positive))
+                    if (map.Type == InputType.Keyboard)
                     {
-                        axis = e.Current;
-                        value = 1f;
-                        return true;
+                        if (Input.GetKey((KeyCode)map.Value))
+                        {
+                            axis = e.Current;
+                            value = 1f;
+                            return true;
+                        }
+                        else if (Input.GetKey((KeyCode)map.AltValue))
+                        {
+                            axis = e.Current;
+                            value = -1f;
+                            return true;
+                        }
                     }
-                    else if(Input.GetKey(map.Negative))
+                    else
                     {
-                        axis = e.Current;
-                        value = -1f;
-                        return true;
+                        var d = map.CreateAxisDelegate(joystick);
+                        var v = d != null ? d() : 0f;
+                        if (d != null && Mathf.Abs(v) > deadZone)
+                        {
+                            axis = e.Current;
+                            value = v;
+                            return true;
+                        }
                     }
                 }
             }
 
-            axis = default(TAxis);
+            axis = default(TInputId);
             value = 0f;
             return false;
         }
 
-        public ButtonDelegate CreateButtonDelegate(TButton button, Joystick joystick = Joystick.All)
+        public InputToken GetMapping(TInputId id)
         {
-            ButtonMapping map;
-            if (!TryGetMapping(button, out map) || map.Key == KeyCode.None) return null;
+            InputToken result;
+            if (_axisTable.TryGetValue(id, out result)) return result;
+            if (_buttonTable.TryGetValue(id, out result)) return result;
 
-            return SPInputFactory.CreateButtonDelegate(map.Key);
+            return InputToken.Unknown;
         }
 
-        public AxisDelegate CreateAxisDelegate(TAxis axis, Joystick joystick = Joystick.All)
+        void IConfigurableInputProfile<TInputId>.SetAxisMapping(TInputId id, InputToken token)
         {
-            AxisMapping map;
-            if (!this.TryGetMapping(axis, out map)) return null;
-
-            return SPInputFactory.CreateAxisDelegate(map.Positive, map.Negative);
+            this.RegisterAxis(id, token);
         }
 
-        public IButtonInputSignature CreateButtonSignature(string id, TButton button, Joystick joystick = Joystick.All)
+        void IConfigurableInputProfile<TInputId>.SetButtonMapping(TInputId id, InputToken token)
         {
-            ButtonMapping map;
-            if (!TryGetMapping(button, out map)) return null;
-
-            return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Key);
+            this.RegisterButton(id, token);
         }
 
-        public IButtonInputSignature CreateButtonSignature(string id, TAxis axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = 0.707F)
+        void IConfigurableInputProfile<TInputId>.Reset()
         {
-            AxisMapping map;
-            if (!TryGetMapping(axis, out map)) return null;
-
-            switch(consideration)
-            {
-                case AxleValueConsideration.Positive:
-                    return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Positive);
-                case AxleValueConsideration.Negative:
-                    return SPInputFactory.CreateKeyCodeButtonSignature(id, map.Negative);
-                case AxleValueConsideration.Absolute:
-                    {
-                        IButtonInputSignature pos = null;
-                        IButtonInputSignature neg = null;
-                        if(map.Positive != KeyCode.None) pos = SPInputFactory.CreateKeyCodeButtonSignature(id, map.Positive);
-                        if(map.Negative != KeyCode.None) neg = SPInputFactory.CreateKeyCodeButtonSignature(id, map.Negative);
-
-                        if (pos != null && neg != null)
-                            return new MergedButtonInputSignature(id, pos, neg);
-                        else if (pos != null)
-                            return pos;
-                        else if (neg != null)
-                            return neg;
-                        else
-                            return SPInputFactory.CreateKeyCodeButtonSignature(id, KeyCode.None);
-                    }
-                default:
-                    return null;
-            }
-        }
-
-        public IAxleInputSignature CreateAxisSignature(string id, TAxis axis, Joystick joystick = Joystick.All)
-        {
-            AxisMapping map;
-            if (!TryGetMapping(axis, out map)) return null;
-
-            return SPInputFactory.CreateKeyCodeAxisSignature(id, map.Positive, map.Negative);
-        }
-
-        public IDualAxleInputSignature CreateDualAxisSignature(string id, TAxis axisX, TAxis axisY, Joystick joystick = Joystick.All)
-        {
-            AxisMapping mapX;
-            if (!TryGetMapping(axisX, out mapX)) mapX = AxisMapping.Unknown;
-            AxisMapping mapY;
-            if (!TryGetMapping(axisY, out mapY)) mapY = AxisMapping.Unknown;
-
-            return SPInputFactory.CreateKeyCodeDualAxisSignature(id, mapX.Positive, mapX.Negative, mapY.Positive, mapY.Negative);
-        }
-
-        #endregion
-
-        #region Special Types
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 0)]
-        public struct AxisMapping
-        {
-            public KeyCode Positive;
-            public KeyCode Negative;
-
-
-            public static AxisMapping Unknown
-            {
-                get
-                {
-                    return new AxisMapping()
-                    {
-                        Positive = KeyCode.None,
-                        Negative = KeyCode.None
-                    };
-                }
-            }
-
-        }
-
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 0)]
-        public struct ButtonMapping
-        {
-            public KeyCode Key;
-
-            public static ButtonMapping Unknown
-            {
-                get
-                {
-                    return new ButtonMapping()
-                    {
-
-                    };
-                }
-            }
+            this.Clear();
         }
 
         #endregion
