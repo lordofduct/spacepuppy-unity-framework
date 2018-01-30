@@ -313,70 +313,7 @@ namespace com.spacepuppy.SPInput.Unity
         }
 
         #endregion
-
-
-
-
-        #region Signature Factory
-
-        /*
-
-        public static ButtonInputSignature CreateButtonSignature(string id, SPInputId button, Joystick joystick = Joystick.All)
-        {
-            return new ButtonInputSignature(id, SPInputDirect.GetInputName(button, joystick));
-        }
         
-        public static AxleButtonInputSignature CreateAxleButtonSignature(string id, SPInputId axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
-        {
-            return new AxleButtonInputSignature(id, SPInputDirect.GetInputName(axis, joystick), consideration, axleButtonDeadZone);
-        }
-        
-        public static KeyboardButtonInputSignature CreateKeyCodeButtonSignature(string id, UnityEngine.KeyCode key)
-        {
-            return new KeyboardButtonInputSignature(id, key);
-        }
-        
-        public static AxleInputSignature CreateAxisSignature(string id, SPInputId axis, Joystick joystick = Joystick.All, bool invert = false)
-        {
-            return new AxleInputSignature(id, SPInputDirect.GetInputName(axis, joystick))
-            {
-                Invert = invert
-            };
-        }
-        
-        public static KeyboardAxleInputSignature CreateKeyCodeAxisSignature(string id, UnityEngine.KeyCode positiveKey, UnityEngine.KeyCode negativeKey)
-        {
-            return new KeyboardAxleInputSignature(id, positiveKey, negativeKey);
-        }
-        
-        public static DualAxleInputSignature CreateDualAxisSignature(string id, SPInputId axisX, SPInputId axisY, Joystick joystick = Joystick.All, bool invertX = false, bool invertY = false)
-        {
-            return new DualAxleInputSignature(id, SPInputDirect.GetInputName(axisX, joystick), SPInputDirect.GetInputName(axisY, joystick))
-            {
-                InvertX = invertX,
-                InvertY = invertY
-            };
-        }
-        
-        public static KeyboardDualAxleInputSignature CreateKeyCodeDualAxisSignature(string id, UnityEngine.KeyCode horizontalPositiveKey, UnityEngine.KeyCode horizontalNegativeKey, UnityEngine.KeyCode verticalPositiveKey, UnityEngine.KeyCode verticalNegativeKey)
-        {
-            return new KeyboardDualAxleInputSignature(id, horizontalPositiveKey, horizontalNegativeKey, verticalPositiveKey, verticalNegativeKey);
-        }
-        
-        public static EmulatedAxleInputSignature CreateEmulatedAxixSignature(string id, SPInputId positive, SPInputId negative, Joystick joystick = Joystick.All)
-        {
-            return new EmulatedAxleInputSignature(id, SPInputDirect.GetInputName(positive, joystick), SPInputDirect.GetInputName(negative, joystick));
-        }
-
-        public static EmulatedDualAxleInputSignature CreateEmulatedDualAxixSignature(string id, SPInputId positiveX, SPInputId negativeX, SPInputId positiveY, SPInputId negativeY, Joystick joystick = Joystick.All)
-        {
-            return new EmulatedDualAxleInputSignature(id, SPInputDirect.GetInputName(positiveX, joystick), SPInputDirect.GetInputName(negativeX, joystick), SPInputDirect.GetInputName(positiveY, joystick), SPInputDirect.GetInputName(negativeY, joystick));
-        }
-
-        */
-
-        #endregion
-
         #region Polling Factory
 
         /*

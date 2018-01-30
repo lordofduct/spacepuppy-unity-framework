@@ -96,6 +96,8 @@ namespace com.spacepuppy.SPInput
 
         public ButtonState GetButtonState(string id)
         {
+            if (!_active) return ButtonState.None;
+
             var sig = _signatures.GetSignature(id);
             if (sig == null) return ButtonState.None;
             if (!(sig is IButtonInputSignature)) return ButtonState.None;
@@ -105,6 +107,8 @@ namespace com.spacepuppy.SPInput
         
         public bool GetButtonPressed(string id, float duration)
         {
+            if (!_active) return false;
+
             var sig = _signatures.GetSignature(id);
             if (sig == null) return false;
             if (!(sig is IButtonInputSignature)) return false;
@@ -114,6 +118,8 @@ namespace com.spacepuppy.SPInput
         
         public float GetAxleState(string id)
         {
+            if (!_active) return 0f;
+
             var sig = _signatures.GetSignature(id);
             if (sig == null) return 0f;
             if (!(sig is IAxleInputSignature)) return 0f;
@@ -123,6 +129,8 @@ namespace com.spacepuppy.SPInput
 
         public Vector2 GetDualAxleState(string id)
         {
+            if (!_active) return Vector2.zero;
+
             var sig = _signatures.GetSignature(id);
             if (sig == null) return Vector2.zero;
             if (!(sig is IDualAxleInputSignature)) return Vector2.zero;
@@ -132,6 +140,8 @@ namespace com.spacepuppy.SPInput
         
         public Vector2 GetCursorState(string id)
         {
+            if (!_active) return Vector2.zero;
+
             var sig = _signatures.GetSignature(id);
             if (sig == null) return Vector2.zero;
             if (!(sig is ICursorInputSignature)) return Vector2.zero;
@@ -145,6 +155,8 @@ namespace com.spacepuppy.SPInput
 
         public ButtonState GetButtonState(T mapping)
         {
+            if (!_active) return ButtonState.None;
+
             var sig = _signatures.GetSignature(mapping);
             if (sig == null) return ButtonState.None;
             if (!(sig is IButtonInputSignature)) return ButtonState.None;
@@ -154,6 +166,8 @@ namespace com.spacepuppy.SPInput
 
         public bool GetButtonPressed(T mapping, float duration)
         {
+            if (!_active) return false;
+
             var sig = _signatures.GetSignature(mapping);
             if (sig == null) return false;
             if (!(sig is IButtonInputSignature)) return false;
@@ -163,6 +177,8 @@ namespace com.spacepuppy.SPInput
 
         public float GetAxleState(T mapping)
         {
+            if (!_active) return 0f;
+
             var sig = _signatures.GetSignature(mapping);
             if (sig == null) return 0f;
             if (!(sig is IAxleInputSignature)) return 0f;
@@ -172,6 +188,8 @@ namespace com.spacepuppy.SPInput
 
         public Vector2 GetDualAxleState(T mapping)
         {
+            if (!_active) return Vector2.zero;
+
             var sig = _signatures.GetSignature(mapping);
             if (sig == null) return Vector2.zero;
             if (!(sig is IDualAxleInputSignature)) return Vector2.zero;
@@ -181,6 +199,8 @@ namespace com.spacepuppy.SPInput
 
         public Vector2 GetCursorState(T mapping)
         {
+            if (!_active) return Vector2.zero;
+
             var sig = _signatures.GetSignature(mapping);
             if (sig == null) return Vector2.zero;
             if (!(sig is ICursorInputSignature)) return Vector2.zero;

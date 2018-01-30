@@ -54,6 +54,7 @@ namespace com.spacepuppy.SPInput.Unity
             this.Joystick = Joystick.All;
             this.AxisConsideration = AxleValueConsideration.Absolute;
             this.AxisPollingDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE;
+            this.ButtonPollingState = ButtonState.Down;
             this.ButtonPressMonitorDuration = 5.0f;
             this.CancelKey = UnityEngine.KeyCode.Escape;
         }
@@ -147,6 +148,16 @@ namespace com.spacepuppy.SPInput.Unity
         /// Default: <see cref="InputUtil.DEFAULT_AXLEBTNDEADZONE"/>
         /// </summary>
         public float AxisPollingDeadZone
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// When polling a button, what state should we check for.
+        /// Default: <see cref="ButtonState.Down"/>
+        /// </summary>
+        public ButtonState ButtonPollingState
         {
             get;
             set;
@@ -316,7 +327,7 @@ namespace com.spacepuppy.SPInput.Unity
                     if (this.PollButtons)
                     {
                         SPInputId btn;
-                        if (SPInputDirect.TryPollButton(out btn, this.Joystick))
+                        if (SPInputDirect.TryPollButton(out btn, this.Joystick, this.ButtonPollingState))
                         {
                             if (this.PollAsTrigger)
                             {
@@ -342,7 +353,7 @@ namespace com.spacepuppy.SPInput.Unity
                 if (this.PollKeyboard)
                 {
                     UnityEngine.KeyCode key;
-                    if (SPInputDirect.TryPollKey(out key))
+                    if (SPInputDirect.TryPollKey(out key, this.ButtonPollingState))
                     {
                         if (this.PollAsTrigger)
                         {

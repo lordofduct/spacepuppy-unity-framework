@@ -34,10 +34,24 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region Properties
 
+        /// <summary>
+        /// An ID field that can be used for identification purposes.
+        /// </summary>
+        public string Id
+        {
+            get;
+            set;
+        }
+
         public IInputProfile<TInputId> InnerProfile
         {
             get { return _innerProfile; }
             set { _innerProfile = value; }
+        }
+
+        public bool ContainsCustomLayout
+        {
+            get { return _customTable.Count > 0; }
         }
 
         #endregion
