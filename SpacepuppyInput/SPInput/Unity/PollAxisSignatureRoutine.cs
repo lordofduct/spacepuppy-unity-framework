@@ -327,7 +327,7 @@ namespace com.spacepuppy.SPInput.Unity
                     if (this.PollButtons)
                     {
                         SPInputId btn;
-                        if (SPInputDirect.TryPollButton(out btn, this.Joystick, this.ButtonPollingState))
+                        if (SPInputDirect.TryPollButton(out btn, this.ButtonPollingState, this.Joystick))
                         {
                             if (this.PollAsTrigger)
                             {
@@ -488,7 +488,7 @@ namespace com.spacepuppy.SPInput.Unity
                     foreach (var p in profiles)
                     {
                         TInputId btn;
-                        if (p.TryPollButton(out btn, targ.Joystick))
+                        if (p.TryPollButton(out btn, ButtonState.Released, targ.Joystick))
                         {
                             token = p.GetMapping(btn);
                             return true;

@@ -133,16 +133,20 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         #region IInputSignatureFactory Interface
 
-        public bool TryPollButton(out XboxInputId button, Joystick joystick = Joystick.All)
+        public bool TryPollButton(out XboxInputId button, ButtonState state = ButtonState.Down, Joystick joystick = Joystick.All)
         {
-            var e = _buttonTable.GetEnumerator();
+            InputToken map;
+
+            var e = _buttonTable.Keys.GetEnumerator();
             while (e.MoveNext())
             {
-                var d = e.Current.Value.CreateButtonDelegate(joystick);
-                if (d != null && d())
+                if (TryGetButtonMapping(e.Current, out map))
                 {
-                    button = e.Current.Key;
-                    return true;
+                    if (map.PollButton(state, joystick))
+                    {
+                        button = e.Current;
+                        return true;
+                    }
                 }
             }
 
@@ -152,16 +156,20 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         public bool TryPollAxis(out XboxInputId axis, out float value, Joystick joystick = Joystick.All, float deadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
-            var e = _axisTable.GetEnumerator();
+            InputToken map;
+
+            var e = _axisTable.Keys.GetEnumerator();
             while (e.MoveNext())
             {
-                var d = e.Current.Value.CreateAxisDelegate(joystick);
-                var v = d != null ? d() : 0f;
-                if (d != null && Mathf.Abs(v) > deadZone)
+                if (TryGetAxisMapping(e.Current, out map))
                 {
-                    axis = e.Current.Key;
-                    value = v;
-                    return true;
+                    float v = map.PollAxis(joystick);
+                    if (Mathf.Abs(v) > deadZone)
+                    {
+                        axis = e.Current;
+                        value = v;
+                        return true;
+                    }
                 }
             }
 

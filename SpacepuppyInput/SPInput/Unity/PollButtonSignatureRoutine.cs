@@ -270,7 +270,7 @@ namespace com.spacepuppy.SPInput.Unity
                     if (this.PollButtons)
                     {
                         SPInputId btn;
-                        if (SPInputDirect.TryPollButton(out btn, this.Joystick, this.ButtonPollingState))
+                        if (SPInputDirect.TryPollButton(out btn, this.ButtonPollingState, this.Joystick))
                         {
                             this.InputResult = InputToken.CreateButton(btn);
                             goto Complete;
@@ -391,7 +391,7 @@ namespace com.spacepuppy.SPInput.Unity
                         if (targ.PollButtons)
                         {
                             TInputId btn;
-                            if (p.TryPollButton(out btn, targ.Joystick))
+                            if (p.TryPollButton(out btn, ButtonState.Released, targ.Joystick))
                             {
                                 token = p.GetMapping(btn);
                                 return true;

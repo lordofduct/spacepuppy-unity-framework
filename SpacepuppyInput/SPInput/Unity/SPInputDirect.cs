@@ -67,6 +67,23 @@ namespace com.spacepuppy.SPInput.Unity
             return UnityEngine.Input.GetButton(GetInputName(button, joystick));
         }
 
+        public static bool GetButton(SPInputId button, ButtonState state, Joystick joystick = Joystick.All)
+        {
+            switch(state)
+            {
+                case ButtonState.None:
+                    return !UnityEngine.Input.GetButton(GetInputName(button, joystick));
+                case ButtonState.Down:
+                    return UnityEngine.Input.GetButtonDown(GetInputName(button, joystick));
+                case ButtonState.Held:
+                    return UnityEngine.Input.GetButton(GetInputName(button, joystick));
+                case ButtonState.Released:
+                    return UnityEngine.Input.GetButtonUp(GetInputName(button, joystick));
+                default:
+                    return false;
+            }
+        }
+
         public static bool GetButtonDown(SPInputId button, Joystick joystick = Joystick.All)
         {
             return UnityEngine.Input.GetButtonDown(GetInputName(button, joystick));
@@ -87,11 +104,28 @@ namespace com.spacepuppy.SPInput.Unity
             return UnityEngine.Input.GetAxisRaw(GetInputName(axis, joystick));
         }
 
+        public static bool GetKey(KeyCode key, ButtonState state)
+        {
+            switch (state)
+            {
+                case ButtonState.None:
+                    return !UnityEngine.Input.GetKey(key);
+                case ButtonState.Down:
+                    return UnityEngine.Input.GetKeyDown(key);
+                case ButtonState.Held:
+                    return UnityEngine.Input.GetKey(key);
+                case ButtonState.Released:
+                    return UnityEngine.Input.GetKeyUp(key);
+                default:
+                    return false;
+            }
+        }
+
         #endregion
 
         #region Polling
 
-        public static SPInputId PollButton(Joystick joystick = Joystick.All, ButtonState state = ButtonState.Down)
+        public static SPInputId PollButton(ButtonState state = ButtonState.Down, Joystick joystick = Joystick.All)
         {
             if (joystick != Joystick.None)
             {
@@ -129,7 +163,7 @@ namespace com.spacepuppy.SPInput.Unity
             return SPInputId.Unknown;
         }
 
-        public static bool TryPollButton(out SPInputId button, Joystick joystick = Joystick.All, ButtonState state = ButtonState.Down)
+        public static bool TryPollButton(out SPInputId button, ButtonState state = ButtonState.Down, Joystick joystick = Joystick.All)
         {
             if (joystick != Joystick.None)
             {
@@ -172,7 +206,7 @@ namespace com.spacepuppy.SPInput.Unity
             return false;
         }
 
-        public static SPInputId[] PollAllButtons(Joystick joystick = Joystick.All, ButtonState state = ButtonState.Down)
+        public static SPInputId[] PollAllButtons(ButtonState state = ButtonState.Down, Joystick joystick = Joystick.All)
         {
             if (joystick != Joystick.None)
             {

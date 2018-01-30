@@ -132,12 +132,12 @@ namespace com.spacepuppy.SPInput.Unity
             }
         }
 
-        bool IInputProfile<TInputId>.TryPollButton(out TInputId button, Joystick joystick = Joystick.All)
+        bool IInputProfile<TInputId>.TryPollButton(out TInputId button, ButtonState state = ButtonState.Down, Joystick joystick = Joystick.All)
         {
             //TODO - should we poll the custom inputs? No?
             if (_innerProfile != null)
             {
-                return _innerProfile.TryPollButton(out button, joystick);
+                return _innerProfile.TryPollButton(out button, state, joystick);
             }
             else
             {

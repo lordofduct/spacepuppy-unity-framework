@@ -115,7 +115,7 @@ namespace com.spacepuppy.SPInput.Unity
 
         #region IInputProfile Interface
 
-        public bool TryPollButton(out TInputId button, Joystick joystick = Joystick.All)
+        public bool TryPollButton(out TInputId button, ButtonState state = ButtonState.Down, Joystick joystick = Joystick.All)
         {
             InputToken map;
 
@@ -124,22 +124,10 @@ namespace com.spacepuppy.SPInput.Unity
             {
                 if (TryGetButtonMapping(e.Current, out map))
                 {
-                    if (map.Type == InputType.Keyboard)
+                    if(map.PollButton(state, joystick))
                     {
-                        if (Input.GetKey((KeyCode)map.Value))
-                        {
-                            button = e.Current;
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        var d = map.CreateButtonDelegate(joystick);
-                        if (d != null && d())
-                        {
-                            button = e.Current;
-                            return true;
-                        }
+                        button = e.Current;
+                        return true;
                     }
                 }
             }
@@ -157,31 +145,12 @@ namespace com.spacepuppy.SPInput.Unity
             {
                 if (TryGetAxisMapping(e.Current, out map))
                 {
-                    if (map.Type == InputType.Keyboard)
+                    float v = map.PollAxis(joystick);
+                    if(Mathf.Abs(v) > deadZone)
                     {
-                        if (Input.GetKey((KeyCode)map.Value))
-                        {
-                            axis = e.Current;
-                            value = 1f;
-                            return true;
-                        }
-                        else if (Input.GetKey((KeyCode)map.AltValue))
-                        {
-                            axis = e.Current;
-                            value = -1f;
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        var d = map.CreateAxisDelegate(joystick);
-                        var v = d != null ? d() : 0f;
-                        if (d != null && Mathf.Abs(v) > deadZone)
-                        {
-                            axis = e.Current;
-                            value = v;
-                            return true;
-                        }
+                        axis = e.Current;
+                        value = v;
+                        return true;
                     }
                 }
             }
