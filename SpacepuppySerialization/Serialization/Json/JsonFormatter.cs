@@ -9,6 +9,13 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Serialization.Json
 {
 
+    /// <summary>
+    /// Serialize/Deserialize objects to json.
+    /// 
+    /// This currently does not support ObjectManager and therefore does not do object matching for equal object references. Rather it works more like Unity's serialization library where all ref types are treated uniquelly.
+    /// 
+    /// TODO: implement ObjectManager to allow object identity to be maintained.
+    /// </summary>
     public class JsonFormatter : IFormatter
     {
 
@@ -281,21 +288,35 @@ namespace com.spacepuppy.Serialization.Json
             if (tp == null) tp = TypeUtil.FindType(_reader.Value as string, true);
             if (tp == null) throw new SerializationException("Failed to deserialize due to malformed json: objects must contain a @type property.");
 
+            object result;
             ISerializationSurrogate surrogate;
             ISurrogateSelector selector;
             if (this.SurrogateSelector != null && (surrogate = this.SurrogateSelector.GetSurrogate(tp, this.Context, out selector)) != null)
             {
                 var si = this.ReadAsSerializationInfo(tp);
-                var result = FormatterServices.GetUninitializedObject(tp);
-                surrogate.SetObjectData(result, si, this.Context, selector);
-                return result;
+                try
+                {
+                    result = FormatterServices.GetUninitializedObject(tp);
+                    surrogate.SetObjectData(result, si, this.Context, selector);
+                }
+                catch(System.Exception ex)
+                {
+                    throw new SerializationException("Failed to deserialize.", ex);
+                }
             }
             else if(typeof(ISerializable).IsAssignableFrom(tp))
             {
                 var si = this.ReadAsSerializationInfo(tp);
                 var constructor = GetSerializationConstructor(tp);
                 if (constructor == null) throw new SerializationException("Failed to deserialize due to ISerializable type '" + tp.FullName + "' not implementing the appropriate constructor.");
-                return constructor.Invoke(new object[] { si, this.Context });
+                try
+                {
+                    result = constructor.Invoke(new object[] { si, this.Context });
+                }
+                catch(System.Exception ex)
+                {
+                    throw new SerializationException("Failed to deserialize.", ex);
+                }
             }
             else
             {
@@ -379,9 +400,12 @@ namespace com.spacepuppy.Serialization.Json
                 }
 
                 Result:
-                var result = FormatterServices.GetUninitializedObject(tp);
-                return FormatterServices.PopulateObjectMembers(result, members, data);
+                result = FormatterServices.GetUninitializedObject(tp);
+                FormatterServices.PopulateObjectMembers(result, members, data);
             }
+
+            if (result is IDeserializationCallback) (result as IDeserializationCallback).OnDeserialization(this);
+            return result;
         }
 
         private SerializationInfo ReadAsSerializationInfo(System.Type tp)
