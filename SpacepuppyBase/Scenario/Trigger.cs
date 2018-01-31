@@ -10,29 +10,41 @@ namespace com.spacepuppy.Scenario
 {
 
     [System.Serializable()]
-    public class Trigger : ICollection<TriggerTarget>
+    public abstract class BaseSPEvent : ICollection<TriggerTarget>
     {
 
         public const string ID_DEFAULT = "Trigger";
 
         #region Events
 
-        public event System.EventHandler<TempEventArgs> TriggerActivated;
+        protected System.EventHandler<TempEventArgs> _triggerActivated;
+        public event System.EventHandler<TempEventArgs> TriggerActivated
+        {
+            add
+            {
+                _triggerActivated += value;
+            }
+            remove
+            {
+                _triggerActivated -= value;
+            }
+        }
         protected virtual void OnTriggerActivated(object sender, object arg)
         {
-            if (TriggerActivated != null)
+            if (_triggerActivated != null)
             {
                 var e = TempEventArgs.Create(arg);
-                TriggerActivated(sender, e);
+                var d = _triggerActivated;
+                d(sender, e);
                 TempEventArgs.Release(e);
             }
-            
+
             //if(_owner != null)
             //{
             //    _owner.PostNotification<TriggerActivatedNotification>(new TriggerActivatedNotification(_owner, _id), false);
             //}
         }
-
+        
         #endregion
 
         #region Fields
@@ -41,7 +53,7 @@ namespace com.spacepuppy.Scenario
         private bool _yield;
 
         [SerializeField()]
-        private List<TriggerTarget> _targets = new List<TriggerTarget>();
+        protected readonly List<TriggerTarget> _targets = new List<TriggerTarget>();
         
         [System.NonSerialized()]
         private string _id;
@@ -50,23 +62,23 @@ namespace com.spacepuppy.Scenario
 
         #region CONSTRUCTOR
 
-        public Trigger()
+        public BaseSPEvent()
         {
             _id = ID_DEFAULT;
         }
 
-        public Trigger(string id)
+        public BaseSPEvent(string id)
         {
             _id = id;
         }
         
-        public Trigger(bool yielding)
+        public BaseSPEvent(bool yielding)
         {
             _id = ID_DEFAULT;
             _yield = yielding;
         }
 
-        public Trigger(string id, bool yielding)
+        public BaseSPEvent(string id, bool yielding)
         {
             _id = id;
             _yield = yielding;
@@ -97,11 +109,11 @@ namespace com.spacepuppy.Scenario
         /// Count is total count of targets including the TriggerActivated event. 
         /// Check the count of 'Targets' for the direct targets only.
         /// </summary>
-        public int Count
+        public virtual int Count
         {
             get
             {
-                if (this.TriggerActivated != null)
+                if (_triggerActivated != null)
                     return _targets.Count + 1;
                 else
                     return _targets.Count;
@@ -119,7 +131,7 @@ namespace com.spacepuppy.Scenario
             return targ;
         }
         
-        public void ActivateTrigger(object sender, object arg)
+        protected void ActivateTrigger(object sender, object arg)
         {
             if (_targets.Count > 0)
             {
@@ -131,10 +143,9 @@ namespace com.spacepuppy.Scenario
             }
 
             this.OnTriggerActivated(sender, arg);
-
         }
-        
-        public void ActivateTriggerAt(int index, object sender, object arg)
+
+        protected void ActivateTriggerAt(int index, object sender, object arg)
         {
             if (index >= 0 && index < _targets.Count)
             {
@@ -144,8 +155,8 @@ namespace com.spacepuppy.Scenario
 
             this.OnTriggerActivated(sender, arg);
         }
-        
-        public void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
+
+        protected void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
         {
             if (_targets.Count > 0)
             {
@@ -155,8 +166,8 @@ namespace com.spacepuppy.Scenario
 
             this.OnTriggerActivated(sender, arg);
         }
-        
-        public IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
+
+        protected IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
         {
             if (_yield && _targets.Count > 0)
             {
@@ -190,7 +201,7 @@ namespace com.spacepuppy.Scenario
         }
 
 
-        public void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
+        protected void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
         {
             if (_targets.Count > 0)
             {
@@ -267,24 +278,12 @@ namespace com.spacepuppy.Scenario
 
         #region Special Types
 
-        public class ConfigAttribute : System.Attribute
-        {
-            public bool Weighted;
-            public bool AlwaysExpanded;
-
-            public ConfigAttribute()
-            {
-
-            }
-
-        }
-
         public struct Enumerator : IEnumerator<TriggerTarget>
         {
 
             private List<TriggerTarget>.Enumerator _e;
 
-            public Enumerator(Trigger t)
+            public Enumerator(BaseSPEvent t)
             {
                 _e = t._targets.GetEnumerator();
             }
@@ -319,6 +318,358 @@ namespace com.spacepuppy.Scenario
         #endregion
 
     }
+
+
+    [System.Serializable()]
+    public class SPEvent : BaseSPEvent
+    {
+
+        #region CONSTRUCTOR
+
+        public SPEvent()
+        {
+        }
+
+        public SPEvent(string id) : base(id)
+        {
+        }
+
+        public SPEvent(bool yielding) : base(yielding)
+        {
+        }
+
+        public SPEvent(string id, bool yielding) : base(id, yielding)
+        {
+        }
+
+        #endregion
+
+        #region Methods
+
+        public new void ActivateTrigger(object sender, object arg)
+        {
+            base.ActivateTrigger(sender, arg);
+        }
+
+        public new void ActivateTriggerAt(int index, object sender, object arg)
+        {
+            base.ActivateTriggerAt(index, sender, arg);
+        }
+
+        public new void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
+        {
+            base.ActivateRandomTrigger(sender, arg, considerWeights);
+        }
+
+        public new IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
+        {
+            return base.ActivateTriggerYielding(sender, arg);
+        }
+
+        public new void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
+        {
+            base.DaisyChainTriggerYielding(sender, arg, instruction);
+        }
+
+        #endregion
+
+        #region Special Types
+
+        /*
+         * This may be defined here, it is still usable on all types inheriting from BaseSPEvent. It's only here for namespace purposes to be consistent across the framework.
+         */
+        public class ConfigAttribute : System.Attribute
+        {
+            public bool Weighted;
+            public bool AlwaysExpanded;
+
+            public ConfigAttribute()
+            {
+
+            }
+
+        }
+
+        #endregion
+
+    }
+
+
+    [System.Serializable()]
+    public class SPEvent<T> : BaseSPEvent where T : System.EventArgs
+    {
+
+        #region Events
+
+        public new event System.EventHandler<T> TriggerActivated;
+        protected virtual void OnTriggerActivated(object sender, T e)
+        {
+            if (TriggerActivated != null)
+            {
+                var d = this.TriggerActivated;
+                d(sender, e);
+            }
+        }
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public SPEvent()
+        {
+        }
+
+        public SPEvent(string id) : base(id)
+        {
+        }
+
+        public SPEvent(bool yielding) : base(yielding)
+        {
+        }
+
+        public SPEvent(string id, bool yielding) : base(id, yielding)
+        {
+        }
+
+        #endregion
+
+        #region Methods
+
+        public override int Count
+        {
+            get
+            {
+                if (this.TriggerActivated != null || _triggerActivated != null)
+                    return _targets.Count + 1;
+                else
+                    return _targets.Count;
+            }
+        }
+
+        public void ActivateTrigger(object sender, T arg)
+        {
+            base.ActivateTrigger(sender, arg);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public void ActivateTriggerAt(int index, object sender, T arg)
+        {
+            base.ActivateTriggerAt(index, sender, arg);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public void ActivateRandomTrigger(object sender, T arg, bool considerWeights)
+        {
+            base.ActivateRandomTrigger(sender, arg, considerWeights);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public IRadicalYieldInstruction ActivateTriggerYielding(object sender, T arg)
+        {
+            return base.ActivateTriggerYielding(sender, arg);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public void DaisyChainTriggerYielding(object sender, T arg, BlockingTriggerYieldInstruction instruction)
+        {
+            base.DaisyChainTriggerYielding(sender, arg, instruction);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        #endregion
+
+    }
+
+    [System.Serializable()]
+    public class SPActionEvent<T> : BaseSPEvent
+    {
+
+        #region Events
+
+        private System.Action<T> _callback;
+        private System.Action<object, T> _evCallback;
+        protected virtual void OnTriggerActivated(object sender, T arg)
+        {
+            if (_callback != null)
+            {
+                var c = _callback;
+                c(arg);
+            }
+
+            if (_evCallback != null)
+            {
+                var c = _evCallback;
+                c(sender, arg);
+            }
+        }
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public SPActionEvent()
+        {
+        }
+
+        public SPActionEvent(string id) : base(id)
+        {
+        }
+
+        public SPActionEvent(bool yielding) : base(yielding)
+        {
+        }
+
+        public SPActionEvent(string id, bool yielding) : base(id, yielding)
+        {
+        }
+
+        #endregion
+
+        #region Methods
+
+        public override int Count
+        {
+            get
+            {
+                if (_callback != null || _evCallback != null || _triggerActivated != null)
+                    return _targets.Count + 1;
+                else
+                    return _targets.Count;
+            }
+        }
+
+        public void AddListener(System.Action<T> callback)
+        {
+            _callback += callback;
+        }
+
+        public void AddListener(System.Action<object, T> callback)
+        {
+            _evCallback += callback;
+        }
+
+        public void RemoveListener(System.Action<T> callback)
+        {
+            _callback -= callback;
+        }
+
+        public void RemoveListener(System.Action<object, T> callback)
+        {
+            _evCallback -= callback;
+        }
+
+        public void ActivateTrigger(object sender, T arg)
+        {
+            base.ActivateTrigger(sender, arg);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public void ActivateTriggerAt(int index, object sender, T arg)
+        {
+            base.ActivateTriggerAt(index, sender, arg);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public void ActivateRandomTrigger(object sender, T arg, bool considerWeights)
+        {
+            base.ActivateRandomTrigger(sender, arg, considerWeights);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public IRadicalYieldInstruction ActivateTriggerYielding(object sender, T arg)
+        {
+            return base.ActivateTriggerYielding(sender, arg);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        public void DaisyChainTriggerYielding(object sender, T arg, BlockingTriggerYieldInstruction instruction)
+        {
+            base.DaisyChainTriggerYielding(sender, arg, instruction);
+            this.OnTriggerActivated(sender, arg);
+        }
+
+        #endregion
+
+    }
+
+
+    /// <summary>
+    /// Exists to maintain compatibility with the 'Trigger' name. New events should use SPEvent directly.
+    /// </summary>
+    [System.Serializable()]
+    public class Trigger : SPEvent
+    {
+
+        #region CONSTRUCTOR
+
+        public Trigger()
+        {
+        }
+
+        public Trigger(string id) : base(id)
+        {
+        }
+
+        public Trigger(bool yielding) : base(yielding)
+        {
+        }
+
+        public Trigger(string id, bool yielding) : base(id, yielding)
+        {
+        }
+
+        #endregion
+
+        #region Methods
+
+        public new void ActivateTrigger(object sender, object arg)
+        {
+            base.ActivateTrigger(sender, arg);
+        }
+
+        public new void ActivateTriggerAt(int index, object sender, object arg)
+        {
+            base.ActivateTriggerAt(index, sender, arg);
+        }
+
+        public new void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
+        {
+            base.ActivateRandomTrigger(sender, arg, considerWeights);
+        }
+
+        public new IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
+        {
+            return base.ActivateTriggerYielding(sender, arg);
+        }
+
+        public new void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
+        {
+            base.DaisyChainTriggerYielding(sender, arg, instruction);
+        }
+
+        #endregion
+
+        #region Special Types
+
+        /*
+         * This may be defined here, it is still usable on all types inheriting from BaseSPEvent. It's only here for namespace purposes to be consistent across the framework.
+         */
+        public class ConfigAttribute : System.Attribute
+        {
+            public bool Weighted;
+            public bool AlwaysExpanded;
+
+            public ConfigAttribute()
+            {
+
+            }
+
+        }
+
+        #endregion
+
+    }
+
     
     public class BlockingTriggerYieldInstruction : RadicalYieldInstruction, IPooledYieldInstruction
     {

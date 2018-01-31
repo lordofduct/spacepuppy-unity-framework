@@ -13,7 +13,7 @@ using com.spacepuppyeditor.Internal;
 namespace com.spacepuppyeditor.Scenario
 {
 
-    [CustomPropertyDrawer(typeof(Trigger), true)]
+    [CustomPropertyDrawer(typeof(BaseSPEvent), true)]
     public class TriggerPropertyDrawer : PropertyDrawer
     {
 
