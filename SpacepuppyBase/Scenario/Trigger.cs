@@ -53,7 +53,7 @@ namespace com.spacepuppy.Scenario
         private bool _yield;
 
         [SerializeField()]
-        protected readonly List<TriggerTarget> _targets = new List<TriggerTarget>();
+        private List<TriggerTarget> _targets = new List<TriggerTarget>();
         
         [System.NonSerialized()]
         private string _id;
@@ -440,9 +440,9 @@ namespace com.spacepuppy.Scenario
             get
             {
                 if (this.TriggerActivated != null || _triggerActivated != null)
-                    return _targets.Count + 1;
+                    return this.Targets.Count + 1;
                 else
-                    return _targets.Count;
+                    return this.Targets.Count;
             }
         }
 
@@ -532,9 +532,9 @@ namespace com.spacepuppy.Scenario
             get
             {
                 if (_callback != null || _evCallback != null || _triggerActivated != null)
-                    return _targets.Count + 1;
+                    return this.Targets.Count + 1;
                 else
-                    return _targets.Count;
+                    return this.Targets.Count;
             }
         }
 
