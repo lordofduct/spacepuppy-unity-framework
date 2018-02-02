@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using com.spacepuppy.Collections;
 
 namespace com.spacepuppy.SPInput.Unity
 {
@@ -280,6 +282,107 @@ namespace com.spacepuppy.SPInput.Unity
             return (j) => CreateLongTriggerDelegate(axis, j);
         }
 
+
+
+        /*
+         * Profile Group Factory
+         */
+
+        public static AxisDelegate CreateAxisDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, TInputId axis, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
+            where TInputId : struct, System.IConvertible
+        {
+            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(from p in profiles where p != null select p))
+            {
+                if (comparison != null) lst.Sort(comparison);
+
+                if (lst.Count == 0)
+                    return null;
+                if (lst.Count == 1)
+                    return lst[0].GetMapping(axis).CreateAxisDelegate(joystick);
+                if (lst.Count == 2)
+                {
+                    return lst[0].GetMapping(axis).CreateAxisDelegate(joystick).Merge(
+                           lst[1].GetMapping(axis).CreateAxisDelegate(joystick));
+                }
+
+                var arr = (from p in lst select p.GetMapping(axis).CreateAxisDelegate(joystick)).ToArray();
+                return Merge(arr);
+            }
+        }
+
+        public static ButtonDelegate CreateButtonDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
+            where TInputId : struct, System.IConvertible
+        {
+            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(profiles))
+            {
+                if (comparison != null) lst.Sort(comparison);
+
+                if (lst.Count == 0)
+                    return null;
+                if (lst.Count == 1)
+                    return lst[0].GetMapping(button).CreateButtonDelegate(joystick);
+                if (lst.Count == 2)
+                {
+                    return lst[0].GetMapping(button).CreateButtonDelegate(joystick).Merge(
+                           lst[1].GetMapping(button).CreateButtonDelegate(joystick));
+                }
+
+                var arr = (from p in lst select p.GetMapping(button).CreateButtonDelegate(joystick)).ToArray();
+                return Merge(arr);
+            }
+        }
+        
+        /*
+         * Merge
+         */
+
+        public static AxisDelegate Merge(this AxisDelegate d1, AxisDelegate d2)
+        {
+            if (d1 == null) return d2;
+            if (d2 == null) return d1;
+            return () => UnityEngine.Mathf.Clamp(d1() + d2(), -1f, 1f);
+        }
+
+        public static AxisDelegate Merge(params AxisDelegate[] arr)
+        {
+            if (arr == null || arr.Length == 0) return null;
+            if (arr.Length == 1) return arr[0];
+            if (arr.Length == 2) return arr[0].Merge(arr[1]);
+
+            return () =>
+            {
+                float v = 0;
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (arr[i] != null) v += arr[i]();
+                }
+                return UnityEngine.Mathf.Clamp(v, -1f, 1f);
+            };
+        }
+
+        public static ButtonDelegate Merge(this ButtonDelegate d1, ButtonDelegate d2)
+        {
+            if (d1 == null) return d2;
+            if (d2 == null) return d1;
+            return () => d1() || d2();
+        }
+
+        public static ButtonDelegate Merge(params ButtonDelegate[] arr)
+        {
+            if (arr == null || arr.Length == 0) return null;
+            if (arr.Length == 1) return arr[0];
+            if (arr.Length == 2) return arr[0].Merge(arr[1]);
+
+            return () =>
+            {
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (arr[i] != null && arr[i]()) return true;
+                }
+                return false;
+            };
+        }
+
         #endregion
 
         #region Signature Factory Extension Methods
@@ -312,163 +415,32 @@ namespace com.spacepuppy.SPInput.Unity
             return new DelegatedDualAxleInputSignature(id, profile.GetMapping(axisX).CreateAxisDelegate(joystick), profile.GetMapping(axisY).CreateAxisDelegate(joystick));
         }
 
-        #endregion
+
+        //group
         
-        #region Polling Factory
-
-        /*
-        
-        /// <summary>
-        /// Polls the input system for a button press. If one is pressed it creates a ButtonDelegate for it.
-        /// </summary>
-        /// <returns></returns>
-        public static bool TryPollCreateButtonDelegate(out ButtonDelegate signature, Joystick joystick = Joystick.All, bool allowKeyboard = false, bool allowAxis = false, bool allowMouseMotionAxis = false, float axleInputDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static IButtonInputSignature CreateButtonSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
+            where TInputId : struct, System.IConvertible
         {
-            if (joystick != Joystick.None)
-            {
-                SPInputId btn;
-                if (SPInputDirect.TryPollButton(out btn, joystick))
-                {
-                    signature = SPInputFactory.CreateButtonDelegate(btn, joystick);
-                    return true;
-                }
-            }
-
-            if (allowKeyboard)
-            {
-                UnityEngine.KeyCode key;
-                if (SPInputDirect.TryPollKey(out key))
-                {
-                    signature = SPInputFactory.CreateButtonDelegate(key);
-                    return true;
-                }
-            }
-
-            if (allowAxis || allowMouseMotionAxis)
-            {
-                SPInputId axis;
-                if (SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
-                {
-                    if ((allowMouseMotionAxis && axis.IsMouseAxis()) || (allowAxis && axis.IsJoyAxis()))
-                    {
-                        float value = SPInputDirect.GetAxis(axis, joystick);
-                        if (value > 1f)
-                        {
-                            signature = SPInputFactory.CreateAxleButtonDelegate(axis, AxleValueConsideration.Positive, joystick, axleInputDeadZone);
-                            return true;
-                        }
-                        else if (value < 0f)
-                        {
-                            signature = SPInputFactory.CreateAxleButtonDelegate(axis, AxleValueConsideration.Negative, joystick, axleInputDeadZone);
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            signature = null;
-            return false;
+            return new DelegatedButtonInputSignature(id, CreateButtonDelegate(profiles, button, joystick, comparison));
         }
 
-        /// <summary>
-        /// Polls the input system for a button press. If one is pressed it creates an AxisDelegate for it.
-        /// </summary>
-        /// <returns></returns>
-        public static bool TryPollCreateAxisDelegate(out AxisDelegate signature, Joystick joystick = Joystick.All, bool allowMouseMotionAxis = false, float axleInputDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static IButtonInputSignature CreateAxleButtonSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+            where TInputId : struct, System.IConvertible
         {
-            if (joystick != Joystick.None)
-            {
-                SPInputId axis;
-                if (SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
-                {
-                    if (allowMouseMotionAxis || axis.IsJoyAxis())
-                    {
-                        signature = SPInputFactory.CreateAxisDelegate(axis, joystick);
-                        return true;
-                    }
-                }
-            }
-
-            signature = null;
-            return false;
+            return new DelegatedAxleButtonInputSignature(id, CreateAxisDelegate(profiles, axis, joystick, comparison), consideration, axleButtonDeadZone);
         }
 
-        /// <summary>
-        /// Polls the input system for a button press. If one is pressed it creates an IButtonInputSignature for it.
-        /// </summary>
-        /// <returns></returns>
-        public static bool TryPollCreateButtonSignature(string id, out IButtonInputSignature signature, Joystick joystick = Joystick.All, bool allowKeyboard = false, bool allowAxis = false, bool allowMouseMotionAxis = false, float axleInputDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static IAxleInputSignature CreateAxisSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId axis, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
+            where TInputId : struct, System.IConvertible
         {
-            if (joystick != Joystick.None)
-            {
-                SPInputId btn;
-                if (SPInputDirect.TryPollButton(out btn, joystick))
-                {
-                    signature = SPInputFactory.CreateButtonSignature(id, btn, joystick);
-                    return true;
-                }
-            }
-
-            if(allowKeyboard)
-            {
-                UnityEngine.KeyCode key;
-                if(SPInputDirect.TryPollKey(out key))
-                {
-                    signature = SPInputFactory.CreateKeyCodeButtonSignature(id, key);
-                    return true;
-                }
-            }
-
-            if(allowAxis || allowMouseMotionAxis)
-            {
-                SPInputId axis;
-                if(SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
-                {
-                    if ((allowMouseMotionAxis && axis.IsMouseAxis()) || (allowAxis && axis.IsJoyAxis()))
-                    {
-                        float value = SPInputDirect.GetAxis(axis, joystick);
-                        if (value > 1f)
-                        {
-                            signature = SPInputFactory.CreateAxleButtonSignature(id, axis, AxleValueConsideration.Positive, joystick, axleInputDeadZone);
-                            return true;
-                        }
-                        else if(value < 0f)
-                        {
-                            signature = SPInputFactory.CreateAxleButtonSignature(id, axis, AxleValueConsideration.Negative, joystick, axleInputDeadZone);
-                            return true;
-                        }
-                    }
-                }
-            }
-            
-            signature = null;
-            return false;
+            return new DelegatedAxleInputSignature(id, CreateAxisDelegate(profiles, axis, joystick, comparison));
         }
 
-        /// <summary>
-        /// Polls the input system for a button press. If one is pressed it creates an IAxisInputSignature for it.
-        /// </summary>
-        /// <returns></returns>
-        public static bool TryPollCreateAxisSignature(string id, out IAxleInputSignature signature, Joystick joystick = Joystick.All, bool allowMouseMotionAxis = false, float axleInputDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static IDualAxleInputSignature CreateDualAxisSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId axisX, TInputId axisY, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
+            where TInputId : struct, System.IConvertible
         {
-            if (joystick != Joystick.None)
-            {
-                SPInputId axis;
-                if (SPInputDirect.TryPollAxis(out axis, joystick, allowMouseMotionAxis, axleInputDeadZone))
-                {
-                    if (allowMouseMotionAxis || axis.IsJoyAxis())
-                    {
-                        signature = SPInputFactory.CreateAxisSignature(id, axis, joystick);
-                        return true;
-                    }
-                }
-            }
-           
-            signature = null;
-            return false;
+            return new DelegatedDualAxleInputSignature(id, CreateAxisDelegate(profiles, axisX, joystick, comparison), CreateAxisDelegate(profiles, axisY, joystick, comparison));
         }
-        
-        */
 
         #endregion
 

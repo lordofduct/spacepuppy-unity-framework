@@ -14,7 +14,10 @@ namespace com.spacepuppy.SPInput.Unity
         public int Value;
         public int AltValue;
         public float DeadZone;
-        private System.Delegate _customDelegate;
+        [System.NonSerialized]
+        private System.Delegate _axisDelegate;
+        [System.NonSerialized]
+        private System.Delegate _buttonDelegate;
 
         public AxisDelegate CreateAxisDelegate(Joystick joystick = Joystick.All)
         {
@@ -61,21 +64,21 @@ namespace com.spacepuppy.SPInput.Unity
                     break;
                 case InputType.Custom:
                     {
-                        if(_customDelegate is AxisDelegateFactory)
+                        if(_axisDelegate is AxisDelegateFactory)
                         {
-                            return (_customDelegate as AxisDelegateFactory)(joystick);
+                            return (_axisDelegate as AxisDelegateFactory)(joystick);
                         }
-                        else if(_customDelegate is ButtonDelegateFactory)
+                        else if (_axisDelegate is AxisDelegate)
                         {
-                            return SPInputFactory.CreateTriggerDelegate((_customDelegate as ButtonDelegateFactory)(joystick));
+                            return _axisDelegate as AxisDelegate;
                         }
-                        else if (_customDelegate is AxisDelegate)
+                        else if(_buttonDelegate is ButtonDelegateFactory)
                         {
-                            return _customDelegate as AxisDelegate;
+                            return SPInputFactory.CreateTriggerDelegate((_buttonDelegate as ButtonDelegateFactory)(joystick));
                         }
-                        else if (_customDelegate is ButtonDelegate)
+                        else if (_buttonDelegate is ButtonDelegate)
                         {
-                            return SPInputFactory.CreateTriggerDelegate(_customDelegate as ButtonDelegate);
+                            return SPInputFactory.CreateTriggerDelegate(_buttonDelegate as ButtonDelegate);
                         }
                         else
                         {
@@ -129,21 +132,21 @@ namespace com.spacepuppy.SPInput.Unity
                     break;
                 case InputType.Custom:
                     {
-                        if (_customDelegate is AxisDelegateFactory)
+                        if (_buttonDelegate is ButtonDelegateFactory)
                         {
-                            return SPInputFactory.CreateAxleButtonDelegate((_customDelegate as AxisDelegateFactory)(joystick), AxleValueConsideration.Absolute);
+                            return (_buttonDelegate as ButtonDelegateFactory)(joystick);
                         }
-                        else if (_customDelegate is ButtonDelegateFactory)
+                        else if (_buttonDelegate is ButtonDelegate)
                         {
-                            return (_customDelegate as ButtonDelegateFactory)(joystick);
+                            return _buttonDelegate as ButtonDelegate;
                         }
-                        else if(_customDelegate is AxisDelegate)
+                        else if (_axisDelegate is AxisDelegateFactory)
                         {
-                            return SPInputFactory.CreateAxleButtonDelegate(_customDelegate as AxisDelegate, AxleValueConsideration.Absolute);
+                            return SPInputFactory.CreateAxleButtonDelegate((_axisDelegate as AxisDelegateFactory)(joystick), AxleValueConsideration.Absolute);
                         }
-                        else if(_customDelegate is ButtonDelegate)
+                        else if(_axisDelegate is AxisDelegate)
                         {
-                            return _customDelegate as ButtonDelegate;
+                            return SPInputFactory.CreateAxleButtonDelegate(_axisDelegate as AxisDelegate, AxleValueConsideration.Absolute);
                         }
                         else
                         {
@@ -226,24 +229,24 @@ namespace com.spacepuppy.SPInput.Unity
                     break;
                 case InputType.Custom:
                     {
-                        if (_customDelegate is AxisDelegateFactory)
+                        if (_axisDelegate is AxisDelegateFactory)
                         {
-                            var d = (_customDelegate as AxisDelegateFactory)(joystick);
+                            var d = (_axisDelegate as AxisDelegateFactory)(joystick);
                             return d != null ? d() : 0f;
                         }
-                        else if (_customDelegate is ButtonDelegateFactory)
+                        else if (_axisDelegate is AxisDelegate)
                         {
-                            var d = SPInputFactory.CreateTriggerDelegate((_customDelegate as ButtonDelegateFactory)(joystick));
+                            var d = _axisDelegate as AxisDelegate;
                             return d != null ? d() : 0f;
                         }
-                        else if (_customDelegate is AxisDelegate)
+                        else if (_buttonDelegate is ButtonDelegateFactory)
                         {
-                            var d = _customDelegate as AxisDelegate;
+                            var d = SPInputFactory.CreateTriggerDelegate((_buttonDelegate as ButtonDelegateFactory)(joystick));
                             return d != null ? d() : 0f;
                         }
-                        else if (_customDelegate is ButtonDelegate)
+                        else if (_buttonDelegate is ButtonDelegate)
                         {
-                            var d = SPInputFactory.CreateTriggerDelegate(_customDelegate as ButtonDelegate);
+                            var d = SPInputFactory.CreateTriggerDelegate(_buttonDelegate as ButtonDelegate);
                             return d != null ? d() : 0f;
                         }
                         else
@@ -311,24 +314,24 @@ namespace com.spacepuppy.SPInput.Unity
                     break;
                 case InputType.Custom:
                     {
-                        if (_customDelegate is AxisDelegateFactory)
+                        if (_buttonDelegate is ButtonDelegateFactory)
                         {
-                            var d = SPInputFactory.CreateAxleButtonDelegate((_customDelegate as AxisDelegateFactory)(joystick), AxleValueConsideration.Absolute);
+                            var d = (_buttonDelegate as ButtonDelegateFactory)(joystick);
                             return d != null ? d() : false;
                         }
-                        else if (_customDelegate is ButtonDelegateFactory)
+                        else if (_buttonDelegate is ButtonDelegate)
                         {
-                            var d = (_customDelegate as ButtonDelegateFactory)(joystick);
+                            var d = _buttonDelegate as ButtonDelegate;
                             return d != null ? d() : false;
                         }
-                        else if (_customDelegate is AxisDelegate)
+                        else if (_axisDelegate is AxisDelegateFactory)
                         {
-                            var d = SPInputFactory.CreateAxleButtonDelegate(_customDelegate as AxisDelegate, AxleValueConsideration.Absolute);
+                            var d = SPInputFactory.CreateAxleButtonDelegate((_axisDelegate as AxisDelegateFactory)(joystick), AxleValueConsideration.Absolute);
                             return d != null ? d() : false;
                         }
-                        else if (_customDelegate is ButtonDelegate)
+                        else if (_axisDelegate is AxisDelegate)
                         {
-                            var d = _customDelegate as ButtonDelegate;
+                            var d = SPInputFactory.CreateAxleButtonDelegate(_axisDelegate as AxisDelegate, AxleValueConsideration.Absolute);
                             return d != null ? d() : false;
                         }
                         else
@@ -444,7 +447,7 @@ namespace com.spacepuppy.SPInput.Unity
             return new InputToken()
             {
                 Type = InputType.Custom,
-                _customDelegate = del
+                _axisDelegate = del
             };
         }
 
@@ -453,7 +456,7 @@ namespace com.spacepuppy.SPInput.Unity
             return new InputToken()
             {
                 Type = InputType.Custom,
-                _customDelegate = del
+                _buttonDelegate = del
             };
         }
 
@@ -462,7 +465,7 @@ namespace com.spacepuppy.SPInput.Unity
             return new InputToken()
             {
                 Type = InputType.Custom,
-                _customDelegate = del
+                _axisDelegate = del
             };
         }
 
@@ -471,10 +474,30 @@ namespace com.spacepuppy.SPInput.Unity
             return new InputToken()
             {
                 Type = InputType.Custom,
-                _customDelegate = del
+                _buttonDelegate = del
             };
         }
 
+        public static InputToken CreateCustom(AxisDelegateFactory axisDel, ButtonDelegateFactory buttonDel)
+        {
+            return new InputToken()
+            {
+                Type = InputType.Custom,
+                _axisDelegate = axisDel,
+                _buttonDelegate = buttonDel
+            };
+        }
+        
+        public static InputToken CreateCustom(AxisDelegate axisDel, ButtonDelegate buttonDel)
+        {
+            return new InputToken()
+            {
+                Type = InputType.Custom,
+                _axisDelegate = axisDel,
+                _buttonDelegate = buttonDel
+            };
+        }
+        
         public static InputToken Unknown
         {
             get
