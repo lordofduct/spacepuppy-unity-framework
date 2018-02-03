@@ -71,22 +71,7 @@ namespace com.spacepuppy.AI.Sensors
         public abstract int SenseAll(ICollection<IAspect> lst, System.Func<IAspect, bool> p = null);
 
         public abstract int SenseAll<T>(ICollection<T> lst, System.Func<T, bool> p = null) where T : class, IAspect;
-
-        public bool AnyVisible(IEnumerable<IAspect> aspects)
-        {
-            if (aspects == null) return false;
-
-            foreach (var aspect in aspects)
-            {
-                if (aspect != null && aspect.IsActive)
-                {
-                    if (this.Visible(aspect)) return true;
-                }
-            }
-
-            return false;
-        }
-
+        
         #endregion
 
     }

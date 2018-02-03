@@ -59,6 +59,7 @@
     <Compile Include="AI\Sensors\Collision\ColliderSensor.cs" />
     <Compile Include="AI\Sensors\IAspect.cs" />
     <Compile Include="AI\Sensors\Collision\RaycastSensor.cs" />
+    <Compile Include="AI\Sensors\SensorUtil.cs" />
     <Compile Include="AI\Sensors\Visual\OmnispectiveSensor.cs" />
     <Compile Include="AI\Sensors\Visual\RightCylindricalVisualSensor.cs" />
     <Compile Include="AI\Sensors\Visual\SphericalVisualSensor.cs" />
