@@ -4,15 +4,20 @@ using UnityEngine;
 
 namespace com.spacepuppy
 {
-    
+
+    [System.Serializable]
     public struct VersionInfo : IComparable<VersionInfo>
     {
 
         #region Fields
 
+        [SerializeField]
         public int Major;
+        [SerializeField]
         public int Minor;
+        [SerializeField]
         public int Patch;
+        [SerializeField]
         public int Build;
 
         #endregion
@@ -21,10 +26,10 @@ namespace com.spacepuppy
 
         public VersionInfo(int major, int minor = 0, int patch = 0, int build = 0)
         {
-            Major = major;
-            Minor = minor;
-            Patch = patch;
-            Build = build;
+            this.Major = major;
+            this.Minor = minor;
+            this.Patch = patch;
+            this.Build = build;
         }
 
         #endregion
@@ -57,9 +62,9 @@ namespace com.spacepuppy
             if (other is VersionInfo)
                 return this == (VersionInfo)other;
             else
-             return false;
+                return false;
         }
-        
+
         public override int GetHashCode()
         {
             return Major.GetHashCode() ^ Minor.GetHashCode() ^ Patch.GetHashCode() ^ Build.GetHashCode();
@@ -113,16 +118,15 @@ namespace com.spacepuppy
         {
             get
             {
-                if(_unityVersion == null || !_unityVersion.HasValue)
+                if (_unityVersion == null || !_unityVersion.HasValue)
                 {
                     var m = Regex.Match(Application.unityVersion, @"^(\d+)\.(\d+)\.(\d+)");
-                    var build = 0;
                     _unityVersion = new VersionInfo()
                     {
                         Major = Convert.ToInt32(m.Groups[1].Value),
                         Minor = Convert.ToInt32(m.Groups[2].Value),
                         Patch = Convert.ToInt32(m.Groups[3].Value),
-                        Build = build
+                        Build = 0
                     };
                 }
                 return _unityVersion.Value;
