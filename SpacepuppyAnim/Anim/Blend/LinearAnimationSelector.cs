@@ -273,6 +273,17 @@ namespace com.spacepuppy.Anim.Blend
             }
         }
 
+        public float ScaledDuration
+        {
+            get
+            {
+                var spd = this.Speed;
+                if (spd == 0f) return float.PositiveInfinity;
+
+                return Mathf.Abs(this.Duration / spd);
+            }
+        }
+
         public void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             this.PlayAnimationAtCurrentPosition(queueMode, playMode);

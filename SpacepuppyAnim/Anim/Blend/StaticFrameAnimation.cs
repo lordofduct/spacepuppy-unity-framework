@@ -153,6 +153,14 @@ namespace com.spacepuppy.Anim.Blend
             get { return 0f; }
         }
 
+        public float ScaledDuration
+        {
+            get
+            {
+                return 0f;
+            }
+        }
+
         #endregion
 
         #region IRadicalWaitHandle Interface

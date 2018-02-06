@@ -142,8 +142,17 @@ namespace com.spacepuppy.Anim
 
                 var st = _controller.States[_clipId];
                 return (st != null) ? st.Duration : 0f;
+            }
+        }
 
-                //return (_state == null) ? 0f : _state.length;
+        public float ScaledDuration
+        {
+            get
+            {
+                var spd = this.Speed;
+                if (spd == 0f) return float.PositiveInfinity;
+
+                return Mathf.Abs(this.Duration / spd);
             }
         }
 
@@ -471,6 +480,11 @@ namespace com.spacepuppy.Anim
             }
 
             public float Duration
+            {
+                get { return 0f; }
+            }
+
+            public float ScaledDuration
             {
                 get { return 0f; }
             }

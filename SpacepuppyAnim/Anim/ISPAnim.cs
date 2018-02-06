@@ -19,6 +19,7 @@ namespace com.spacepuppy.Anim
         bool IsPlaying { get; }
         float Time { get; set; }
         float Duration { get; }
+        float ScaledDuration { get; }
 
 
         void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer);

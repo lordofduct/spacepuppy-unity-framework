@@ -238,27 +238,6 @@ namespace com.spacepuppy.Anim
             get { return _timeSupplier.TimeSupplier; }
         }
 
-        /// <summary>
-        /// The duration of the clip at the current speed. When set modifies the speed property.
-        /// </summary>
-        public float ScaledDuration
-        {
-            get
-            {
-                if (this.Speed == 0f)
-                    return float.PositiveInfinity;
-                else
-                    return Mathf.Abs(this.Duration / this.Speed);
-            }
-            set
-            {
-                if (value <= 0f)
-                    this.Speed = 0f;
-                else
-                    this.Speed = this.Duration / value;
-            }
-        }
-
         public MaskCollection Masks
         {
             get { return _masks; }
@@ -295,7 +274,7 @@ namespace com.spacepuppy.Anim
             {
                 if (_state != null)
                     return _state.length;
-                if(_clip != null)
+                if (_clip != null)
                 {
                     if (_clip is AnimationClip)
                         return (_clip as AnimationClip).length;
@@ -308,6 +287,27 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        /// <summary>
+        /// The duration of the clip at the current speed. When set modifies the speed property.
+        /// </summary>
+        public float ScaledDuration
+        {
+            get
+            {
+                if (this.Speed == 0f)
+                    return float.PositiveInfinity;
+                else
+                    return Mathf.Abs(this.Duration / this.Speed);
+            }
+            set
+            {
+                if (value <= 0f)
+                    this.Speed = 0f;
+                else
+                    this.Speed = this.Duration / value;
+            }
+        }
+        
         public bool Enabled
         {
             get { return (_state != null) ? _state.enabled : false; }

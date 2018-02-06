@@ -64,6 +64,19 @@ namespace com.spacepuppy.Anim
         public abstract void Stop();
 
 
+        public float ScaledDuration
+        {
+            get
+            {
+                var spd = this.Speed;
+                if (spd == 0f) return float.PositiveInfinity;
+
+                return Mathf.Abs(this.Duration / spd);
+            }
+        }
+
+
+
         public void Schedule(System.Action<ISPAnim> callback)
         {
             if (_scheduler == null) _scheduler = new AnimEventScheduler(this);

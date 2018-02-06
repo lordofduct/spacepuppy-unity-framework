@@ -180,6 +180,14 @@ namespace com.spacepuppy.Anim.Blend
             }
         }
 
+        public float ScaledDuration
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
         public void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             this.PlayAnimationAtCurrentPosition(queueMode, playMode);

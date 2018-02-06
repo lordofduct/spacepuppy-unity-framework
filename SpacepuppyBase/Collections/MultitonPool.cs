@@ -270,12 +270,12 @@ namespace com.spacepuppy.Collections
         public IEnumerable<TSub> Enumerate<TSub>() where TSub : class, T
         {
             var e = _pool.GetEnumerator();
-            while(e.MoveNext())
+            while (e.MoveNext())
             {
                 if (e.Current is TSub) yield return e.Current as TSub;
             }
         }
-
+        
         #endregion
 
         #region IEnumerable Interface
