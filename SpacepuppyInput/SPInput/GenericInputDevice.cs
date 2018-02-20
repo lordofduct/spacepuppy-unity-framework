@@ -12,7 +12,7 @@ namespace com.spacepuppy.SPInput
 
         private string _id;
         private bool _active = true;
-        private InputSignatureCollection _signatures = new InputSignatureCollection();
+        private IInputSignatureCollection _signatures;
 
         #endregion
 
@@ -21,13 +21,20 @@ namespace com.spacepuppy.SPInput
         public GenericInputDevice(string id)
         {
             _id = id;
+            _signatures = new InputSignatureCollection();
+        }
+
+        public GenericInputDevice(string id, IInputSignatureCollection coll)
+        {
+            _id = id;
+            _signatures = coll ?? new InputSignatureCollection();
         }
 
         #endregion
 
         #region Properties
 
-        public InputSignatureCollection InputSignatures { get { return _signatures; } }
+        public IInputSignatureCollection InputSignatures { get { return _signatures; } }
 
         #endregion
 

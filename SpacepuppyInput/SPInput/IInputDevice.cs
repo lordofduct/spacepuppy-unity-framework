@@ -28,6 +28,9 @@ namespace com.spacepuppy.SPInput
     public interface IInputSignatureCollection : ICollection<IInputSignature>
     {
         bool Contains(string id);
+        IInputSignature GetSignature(string id);
+        bool Remove(string id);
+        void Sort();
     }
 
 }

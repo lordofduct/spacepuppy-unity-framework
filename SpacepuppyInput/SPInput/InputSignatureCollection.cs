@@ -15,21 +15,17 @@ namespace com.spacepuppy.SPInput
         #endregion
 
         #region Methods
-
-        public void Replace(string id, IInputSignature item)
+        
+        public Enumerator GetEnumerator()
         {
-            if (item == null) throw new System.ArgumentNullException("item");
-            IInputSignature old;
-            if (_table.TryGetValue(id, out old))
-            {
-                _sortedList.Remove(old);
-            }
-
-            _table[id] = item;
-            _sortedList.Add(item);
+            return new Enumerator(this);
         }
 
-        public IInputSignature GetSignature(string id)
+        #endregion
+
+        #region IInputSignatureCollection Interface
+
+        public virtual IInputSignature GetSignature(string id)
         {
             IInputSignature result;
             if (_table.TryGetValue(id, out result) && result != null && result.Id == id)
@@ -38,25 +34,27 @@ namespace com.spacepuppy.SPInput
             }
             return null;
         }
-        
-        public bool Contains(string id)
+
+        public virtual bool Contains(string id)
         {
             IInputSignature result;
-            if(_table.TryGetValue(id, out result) && result != null && result.Id == id)
+            if (_table.TryGetValue(id, out result) && result != null && result.Id == id)
             {
                 return true;
             }
             return false;
         }
-        
-        public bool Remove(string id)
+
+        public virtual bool Remove(string id)
         {
-            return _table.Remove(id);
-        }
-        
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(this);
+            IInputSignature sig;
+            if(_table.TryGetValue(id, out sig) && _table.Remove(id))
+            {
+                _sortedList.Remove(sig);
+                return true;
+            }
+
+            return false;
         }
 
         public void Sort()

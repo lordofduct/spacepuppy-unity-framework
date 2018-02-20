@@ -305,8 +305,17 @@ namespace com.spacepuppy.Serialization.Json
                     _stack.Pop();
                     break;
             }
-
-            _writer.Write(value.ToString());
+            
+            if(float.IsNaN(value) || float.IsInfinity(value))
+            {
+                _writer.Write('"');
+                _writer.Write(JsonEscape(value.ToString()));
+                _writer.Write('"');
+            }
+            else
+            {
+                _writer.Write(value.ToString());
+            }
 
             this.ValidateLineEnd();
         }
@@ -331,7 +340,16 @@ namespace com.spacepuppy.Serialization.Json
                     break;
             }
 
-            _writer.Write(value.ToString());
+            if (double.IsNaN(value) || double.IsInfinity(value))
+            {
+                _writer.Write('"');
+                _writer.Write(JsonEscape(value.ToString()));
+                _writer.Write('"');
+            }
+            else
+            {
+                _writer.Write(value.ToString());
+            }
 
             this.ValidateLineEnd();
         }

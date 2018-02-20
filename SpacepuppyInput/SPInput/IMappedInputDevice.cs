@@ -14,5 +14,5 @@ namespace com.spacepuppy.SPInput
         Vector2 GetCursorState(T mapping);
 
     }
-
+    
 }

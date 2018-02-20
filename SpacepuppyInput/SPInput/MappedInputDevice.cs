@@ -18,7 +18,7 @@ namespace com.spacepuppy.SPInput
 
         private string _id;
         private bool _active = true;
-        private MappedInputSignatureCollection<T> _signatures = new MappedInputSignatureCollection<T>();
+        private MappedInputSignatureCollection<T> _signatures;
 
         #endregion
 
@@ -27,6 +27,13 @@ namespace com.spacepuppy.SPInput
         public MappedInputDevice(string id)
         {
             _id = id;
+            _signatures = new MappedInputSignatureCollection<T>();
+        }
+
+        public MappedInputDevice(string id, MappedInputSignatureCollection<T> sig)
+        {
+            _id = id;
+            _signatures = sig ?? new MappedInputSignatureCollection<T>();
         }
 
         #endregion

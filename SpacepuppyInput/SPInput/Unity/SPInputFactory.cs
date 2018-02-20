@@ -313,7 +313,7 @@ namespace com.spacepuppy.SPInput.Unity
         public static ButtonDelegate CreateButtonDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
             where TInputId : struct, System.IConvertible
         {
-            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(profiles))
+            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(from p in profiles where p != null select p))
             {
                 if (comparison != null) lst.Sort(comparison);
 
