@@ -10,6 +10,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
 
         public const string GENERIC_XBOX360 = "Xbox 360 Controller";
         public const string GENERIC_XBOXONE = "Xbox One Controller";
+        public const string GENERIC_PS3 = "PS3 Controller";
         public const string GENERIC_PS4 = "PS4 Controller";
 
         #region Fields
@@ -81,6 +82,18 @@ namespace com.spacepuppy.SPInput.Unity.Xbox
         {
             _buttonTable[button] = InputToken.CreateAxleButton(axis, consideration, axleButtonDeadZone);
             _axisTable.Remove(button);
+        }
+
+        public void RegisterTrigger(XboxInputId trigger, SPInputId axis, AxleValueConsideration consideration = AxleValueConsideration.Positive)
+        {
+            _axisTable[trigger] = InputToken.CreateTrigger(axis, consideration);
+            _buttonTable.Remove(trigger);
+        }
+
+        public void RegisterTrigger(XboxInputId trigger, InputToken token)
+        {
+            _axisTable[trigger] = token;
+            _buttonTable.Remove(trigger);
         }
 
 

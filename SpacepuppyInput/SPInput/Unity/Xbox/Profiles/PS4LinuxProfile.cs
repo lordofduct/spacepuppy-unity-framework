@@ -12,6 +12,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
     /// </summary>
     [InputProfileDescription("PS4 Controller", TargetPlatform.Linux, Description = "PS4 Controller (Linux)")]
     [InputProfileJoystickName(XboxInputProfile.GENERIC_PS4)]
+    [InputProfileJoystickName("Sony Computer Entertainment Wireless Controller")]
     public class PS4LinuxProfile : XboxInputProfile
     {
 
@@ -23,8 +24,8 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis5, true);
             this.RegisterAxis(XboxInputId.DPadX, SPInputId.Axis7);
             this.RegisterAxis(XboxInputId.DPadY, SPInputId.Axis8, true);
-            this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Axis3);
-            this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Axis6);
+            this.RegisterTrigger(XboxInputId.LTrigger, SPInputId.Axis3);
+            this.RegisterTrigger(XboxInputId.RTrigger, SPInputId.Axis6);
 
             this.RegisterButton(XboxInputId.A, SPInputId.Button0); //X
             this.RegisterButton(XboxInputId.B, SPInputId.Button1); //O

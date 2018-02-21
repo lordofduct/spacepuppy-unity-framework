@@ -11,6 +11,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
     /// </summary>
     [InputProfileDescription("PS4 Controller", TargetPlatform.Windows, Description = "PS4 Controller (Windows)")]
     [InputProfileJoystickName(XboxInputProfile.GENERIC_PS4)]
+    [InputProfileJoystickName("Wireless Controller")]
     public class PS4WinProfile : XboxInputProfile
     {
 
@@ -19,11 +20,11 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterAxis(XboxInputId.LStickX, SPInputId.Axis1);
             this.RegisterAxis(XboxInputId.LStickY, SPInputId.Axis2, true);
             this.RegisterAxis(XboxInputId.RStickX, SPInputId.Axis3);
-            this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis6);
+            this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis6, true);
             this.RegisterAxis(XboxInputId.DPadX, SPInputId.Axis7);
             this.RegisterAxis(XboxInputId.DPadY, SPInputId.Axis8);
-            this.RegisterAxis(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis4));
-            this.RegisterAxis(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
+            this.RegisterTrigger(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis4));
+            this.RegisterTrigger(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
             //this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Button6, SPInputId.Unknown);
             //this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Button7, SPInputId.Unknown);
 

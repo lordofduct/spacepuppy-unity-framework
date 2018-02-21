@@ -11,6 +11,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
     /// </summary>
     [InputProfileDescription("PS4 Controller", TargetPlatform.MacOSX, Description = "PS4 Controller Bluetooth (MacOSX)")]
     [InputProfileJoystickName(XboxInputProfile.GENERIC_PS4)]
+    [InputProfileJoystickName("Unknown Wireless Controller")]
     public class PS4MacOSBTProfile : XboxInputProfile
     {
 
@@ -22,8 +23,8 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis4, true);
             this.RegisterAxis(XboxInputId.DPadX, SPInputId.Axis7);
             this.RegisterAxis(XboxInputId.DPadY, SPInputId.Axis8, true);
-            this.RegisterAxis(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
-            this.RegisterAxis(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis6));
+            this.RegisterTrigger(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
+            this.RegisterTrigger(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis6));
             //this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Button6, SPInputId.Unknown);
             //this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Button7, SPInputId.Unknown);
 

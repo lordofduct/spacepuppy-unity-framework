@@ -37,11 +37,11 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterAxis(XboxInputId.LStickX, SPInputId.Axis1);
             this.RegisterAxis(XboxInputId.LStickY, SPInputId.Axis2, true);
             this.RegisterAxis(XboxInputId.RStickX, SPInputId.Axis4);
-            this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis5);
+            this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis5, true);
             this.RegisterAxis(XboxInputId.DPadX, SPInputId.Axis6);
             this.RegisterAxis(XboxInputId.DPadY, SPInputId.Axis7);
-            this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Axis9);
-            this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Axis10);
+            this.RegisterTrigger(XboxInputId.LTrigger, SPInputId.Axis9);
+            this.RegisterTrigger(XboxInputId.RTrigger, SPInputId.Axis10);
 
             this.RegisterButton(XboxInputId.A, SPInputId.Button0);
             this.RegisterButton(XboxInputId.B, SPInputId.Button1);
@@ -53,8 +53,8 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterButton(XboxInputId.Start, SPInputId.Button7);
             this.RegisterButton(XboxInputId.LStickPress, SPInputId.Button8);
             this.RegisterButton(XboxInputId.RStickPress, SPInputId.Button9);
-            this.RegisterAxleButton(XboxInputId.DPadUp, SPInputId.Axis7, AxleValueConsideration.Negative);
-            this.RegisterAxleButton(XboxInputId.DPadDown, SPInputId.Axis7, AxleValueConsideration.Positive);
+            this.RegisterAxleButton(XboxInputId.DPadUp, SPInputId.Axis7, AxleValueConsideration.Positive);
+            this.RegisterAxleButton(XboxInputId.DPadDown, SPInputId.Axis7, AxleValueConsideration.Negative);
             this.RegisterAxleButton(XboxInputId.DPadRight, SPInputId.Axis6, AxleValueConsideration.Positive);
             this.RegisterAxleButton(XboxInputId.DPadLeft, SPInputId.Axis6, AxleValueConsideration.Negative);
         }
