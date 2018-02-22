@@ -36,10 +36,10 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterButton(XboxInputId.Start, SPInputId.Button7);
             this.RegisterButton(XboxInputId.LStickPress, SPInputId.Button9);
             this.RegisterButton(XboxInputId.RStickPress, SPInputId.Button10);
-            this.RegisterButton(XboxInputId.DPadUp, SPInputId.Button13);
-            this.RegisterButton(XboxInputId.DPadDown, SPInputId.Button14);
             this.RegisterButton(XboxInputId.DPadRight, SPInputId.Button15);
             this.RegisterButton(XboxInputId.DPadLeft, SPInputId.Button16);
+            this.RegisterButton(XboxInputId.DPadUp, SPInputId.Button13);
+            this.RegisterButton(XboxInputId.DPadDown, SPInputId.Button14);
         }
 
     }

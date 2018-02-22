@@ -33,10 +33,10 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterButton(XboxInputId.Start, SPInputId.MouseButton0); //touchpad tap
             this.RegisterButton(XboxInputId.LStickPress, SPInputId.Button6);
             this.RegisterButton(XboxInputId.RStickPress, SPInputId.Button7);
-            this.RegisterButton(XboxInputId.DPadUp, SPInputId.Button8);
-            this.RegisterButton(XboxInputId.DPadDown, SPInputId.Button9);
             this.RegisterButton(XboxInputId.DPadRight, SPInputId.Button11);
             this.RegisterButton(XboxInputId.DPadLeft, SPInputId.Button10);
+            this.RegisterButton(XboxInputId.DPadUp, SPInputId.Button8);
+            this.RegisterButton(XboxInputId.DPadDown, SPInputId.Button9);
         }
 
     }
