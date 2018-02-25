@@ -18,7 +18,7 @@ namespace com.spacepuppy.SPInput.Unity
          * Buttons
          */
 
-        public static ButtonDelegate CreateButtonDelegate(SPInputId button, Joystick joystick)
+        public static ButtonDelegate CreateButtonDelegate(SPInputId button, Joystick joystick = Joystick.All)
         {
             var inputId = SPInputDirect.GetInputName(button, joystick);
             if (button.IsButton())
@@ -32,7 +32,12 @@ namespace com.spacepuppy.SPInput.Unity
             return () => UnityEngine.Input.GetKey(key);
         }
 
-        public static ButtonDelegate CreateAxleButtonDelegate(SPInputId axis, AxleValueConsideration consideration, Joystick joystick, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static ButtonDelegate CreateButtonDelegate(SPMouseId id)
+        {
+            return CreateButtonDelegate(id.ToSPInputId());
+        }
+
+        public static ButtonDelegate CreateAxleButtonDelegate(SPInputId axis, AxleValueConsideration consideration, Joystick joystick = Joystick.All, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
         {
             var inputId = SPInputDirect.GetInputName(axis, joystick);
             if(axis.IsAxis())
@@ -74,7 +79,7 @@ namespace com.spacepuppy.SPInput.Unity
          * Axes
          */
 
-        public static AxisDelegate CreateAxisDelegate(SPInputId axis, Joystick joystick, bool invert = false)
+        public static AxisDelegate CreateAxisDelegate(SPInputId axis, Joystick joystick = Joystick.All, bool invert = false)
         {
             var inputId = SPInputDirect.GetInputName(axis, joystick);
             if(axis.IsAxis())
@@ -93,7 +98,7 @@ namespace com.spacepuppy.SPInput.Unity
             }
         }
 
-        public static AxisDelegate CreateAxisDelegate(SPInputId positive, SPInputId negative, Joystick joystick)
+        public static AxisDelegate CreateAxisDelegate(SPInputId positive, SPInputId negative, Joystick joystick = Joystick.All)
         {
             return CreateAxisDelegate(CreateButtonDelegate(positive, joystick), CreateButtonDelegate(negative, joystick));
         }
@@ -122,6 +127,11 @@ namespace com.spacepuppy.SPInput.Unity
             }
             else
                 return null;
+        }
+
+        public static AxisDelegate CreateAxisDelegate(SPMouseId id, bool invert = false)
+        {
+            return CreateAxisDelegate(id.ToSPInputId(), Joystick.All, invert);
         }
 
         public static AxisDelegate CreateAxisDelegate(ButtonDelegate positive, ButtonDelegate negative)
@@ -154,7 +164,7 @@ namespace com.spacepuppy.SPInput.Unity
          * Triggers
          */
         
-        public static AxisDelegate CreateTriggerDelegate(SPInputId axis, Joystick joystick, AxleValueConsideration axisConsideration = AxleValueConsideration.Positive)
+        public static AxisDelegate CreateTriggerDelegate(SPInputId axis, Joystick joystick = Joystick.All, AxleValueConsideration axisConsideration = AxleValueConsideration.Positive)
         {
             var inputId = SPInputDirect.GetInputName(axis, joystick);
             if(axis.IsAxis())
@@ -214,7 +224,7 @@ namespace com.spacepuppy.SPInput.Unity
         /// <param name="axis"></param>
         /// <param name="joystick"></param>
         /// <returns></returns>
-        public static AxisDelegate CreateLongTriggerDelegate(SPInputId axis, Joystick joystick)
+        public static AxisDelegate CreateLongTriggerDelegate(SPInputId axis, Joystick joystick = Joystick.All)
         {
             var inputId = SPInputDirect.GetInputName(axis, joystick);
             if (axis.IsAxis())
@@ -236,6 +246,23 @@ namespace com.spacepuppy.SPInput.Unity
             return (j) =>
             {
                 return CreateButtonDelegate(button, j);
+            };
+        }
+
+        public static ButtonDelegateFactory CreateButtonDelegateFactory(UnityEngine.KeyCode key)
+        {
+            return (j) =>
+            {
+                return CreateButtonDelegate(key);
+            };
+        }
+
+        public static ButtonDelegateFactory CreateButtonDelegateFactory(SPMouseId id)
+        {
+            var spid = id.ToSPInputId();
+            return (j) =>
+            {
+                return CreateButtonDelegate(spid, j);
             };
         }
 
@@ -271,6 +298,11 @@ namespace com.spacepuppy.SPInput.Unity
             };
         }
 
+        public static AxisDelegateFactory CreateAxisDelegateFactory(SPMouseId id, bool invert = false)
+        {
+            return CreateAxisDelegateFactory(id.ToSPInputId(), invert);
+        }
+
         /// <summary>
         /// The PS4 Controller L2/R2 triggers on some platforms registers -1 when depressed, and 1 when pressed. This creates a factory that normalizes those values to 0->1
         /// </summary>
@@ -283,54 +315,6 @@ namespace com.spacepuppy.SPInput.Unity
         }
 
 
-
-        /*
-         * Profile Group Factory
-         */
-
-        public static AxisDelegate CreateAxisDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, TInputId axis, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
-            where TInputId : struct, System.IConvertible
-        {
-            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(from p in profiles where p != null select p))
-            {
-                if (comparison != null) lst.Sort(comparison);
-
-                if (lst.Count == 0)
-                    return null;
-                if (lst.Count == 1)
-                    return lst[0].GetMapping(axis).CreateAxisDelegate(joystick);
-                if (lst.Count == 2)
-                {
-                    return lst[0].GetMapping(axis).CreateAxisDelegate(joystick).Merge(
-                           lst[1].GetMapping(axis).CreateAxisDelegate(joystick));
-                }
-
-                var arr = (from p in lst select p.GetMapping(axis).CreateAxisDelegate(joystick)).ToArray();
-                return Merge(arr);
-            }
-        }
-
-        public static ButtonDelegate CreateButtonDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
-            where TInputId : struct, System.IConvertible
-        {
-            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(from p in profiles where p != null select p))
-            {
-                if (comparison != null) lst.Sort(comparison);
-
-                if (lst.Count == 0)
-                    return null;
-                if (lst.Count == 1)
-                    return lst[0].GetMapping(button).CreateButtonDelegate(joystick);
-                if (lst.Count == 2)
-                {
-                    return lst[0].GetMapping(button).CreateButtonDelegate(joystick).Merge(
-                           lst[1].GetMapping(button).CreateButtonDelegate(joystick));
-                }
-
-                var arr = (from p in lst select p.GetMapping(button).CreateButtonDelegate(joystick)).ToArray();
-                return Merge(arr);
-            }
-        }
         
         /*
          * Merge
@@ -389,6 +373,18 @@ namespace com.spacepuppy.SPInput.Unity
 
         //extension
 
+        public static ButtonDelegate CreateButtonDelegate<TInputId>(this IInputProfile<TInputId> profile, TInputId button, Joystick joystick = Joystick.All)
+            where TInputId : struct, System.IConvertible
+        {
+            return profile.GetMapping(button).CreateButtonDelegate(joystick);
+        }
+
+        public static AxisDelegate CreateAxisDelegate<TInputId>(this IInputProfile<TInputId> profile, TInputId axis, Joystick joystick = Joystick.All)
+            where TInputId : struct, System.IConvertible
+        {
+            return profile.GetMapping(axis).CreateAxisDelegate(joystick);
+        }
+
         public static IButtonInputSignature CreateButtonSignature<TInputId>(this IInputProfile<TInputId> profile, string id, TInputId button, Joystick joystick = Joystick.All)
             where TInputId : struct, System.IConvertible
         {
@@ -417,7 +413,51 @@ namespace com.spacepuppy.SPInput.Unity
 
 
         //group
-        
+
+        public static AxisDelegate CreateAxisDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, TInputId axis, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
+            where TInputId : struct, System.IConvertible
+        {
+            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(from p in profiles where p != null select p))
+            {
+                if (comparison != null) lst.Sort(comparison);
+
+                if (lst.Count == 0)
+                    return null;
+                if (lst.Count == 1)
+                    return lst[0].GetMapping(axis).CreateAxisDelegate(joystick);
+                if (lst.Count == 2)
+                {
+                    return lst[0].GetMapping(axis).CreateAxisDelegate(joystick).Merge(
+                           lst[1].GetMapping(axis).CreateAxisDelegate(joystick));
+                }
+
+                var arr = (from p in lst select p.GetMapping(axis).CreateAxisDelegate(joystick)).ToArray();
+                return Merge(arr);
+            }
+        }
+
+        public static ButtonDelegate CreateButtonDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
+            where TInputId : struct, System.IConvertible
+        {
+            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(from p in profiles where p != null select p))
+            {
+                if (comparison != null) lst.Sort(comparison);
+
+                if (lst.Count == 0)
+                    return null;
+                if (lst.Count == 1)
+                    return lst[0].GetMapping(button).CreateButtonDelegate(joystick);
+                if (lst.Count == 2)
+                {
+                    return lst[0].GetMapping(button).CreateButtonDelegate(joystick).Merge(
+                           lst[1].GetMapping(button).CreateButtonDelegate(joystick));
+                }
+
+                var arr = (from p in lst select p.GetMapping(button).CreateButtonDelegate(joystick)).ToArray();
+                return Merge(arr);
+            }
+        }
+
         public static IButtonInputSignature CreateButtonSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
             where TInputId : struct, System.IConvertible
         {
