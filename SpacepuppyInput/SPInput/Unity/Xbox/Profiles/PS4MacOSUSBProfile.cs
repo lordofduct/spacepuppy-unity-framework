@@ -11,6 +11,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
     /// </summary>
     [InputProfileDescription("PS4 Controller", TargetPlatform.MacOSX, Description = "PS4 Controller USB (MacOSX)")]
     [InputProfileJoystickName(XboxInputProfile.GENERIC_PS4)]
+    [InputProfileJoystickName("Sony Computer Entertainment Wireless Controller")]
     public class PS4MacOSUSBProfile : XboxInputProfile
     {
 
@@ -22,8 +23,8 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterAxis(XboxInputId.RStickY, SPInputId.Axis4, true);
             this.RegisterAxis(XboxInputId.DPadX, SPInputId.Axis7);
             this.RegisterAxis(XboxInputId.DPadY, SPInputId.Axis8, true);
-            this.RegisterAxis(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
-            this.RegisterAxis(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis6));
+            this.RegisterTrigger(XboxInputId.LTrigger, InputToken.CreateLongTrigger(SPInputId.Axis5));
+            this.RegisterTrigger(XboxInputId.RTrigger, InputToken.CreateLongTrigger(SPInputId.Axis6));
             //this.RegisterAxis(XboxInputId.LTrigger, SPInputId.Button6, SPInputId.Unknown);
             //this.RegisterAxis(XboxInputId.RTrigger, SPInputId.Button7, SPInputId.Unknown);
 
@@ -37,10 +38,10 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
             this.RegisterButton(XboxInputId.Start, SPInputId.Button9); //Options
             this.RegisterButton(XboxInputId.LStickPress, SPInputId.Button10);
             this.RegisterButton(XboxInputId.RStickPress, SPInputId.Button11);
-            this.RegisterAxleButton(XboxInputId.DPadUp, SPInputId.Axis8, AxleValueConsideration.Negative);
-            this.RegisterAxleButton(XboxInputId.DPadDown, SPInputId.Axis8, AxleValueConsideration.Positive);
             this.RegisterAxleButton(XboxInputId.DPadRight, SPInputId.Axis7, AxleValueConsideration.Positive);
             this.RegisterAxleButton(XboxInputId.DPadLeft, SPInputId.Axis7, AxleValueConsideration.Negative);
+            this.RegisterAxleButton(XboxInputId.DPadUp, SPInputId.Axis8, AxleValueConsideration.Negative);
+            this.RegisterAxleButton(XboxInputId.DPadDown, SPInputId.Axis8, AxleValueConsideration.Positive);
         }
 
     }

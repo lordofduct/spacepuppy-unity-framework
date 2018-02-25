@@ -122,7 +122,18 @@ namespace com.spacepuppy.SPInput
 
             return (sig as IButtonInputSignature).GetPressed(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
         }
-        
+
+        public bool GetButtonHeld(string id, float duration)
+        {
+            if (!_active) return false;
+
+            var sig = _signatures.GetSignature(id);
+            if (sig == null) return false;
+            if (!(sig is IButtonInputSignature)) return false;
+
+            return (sig as IButtonInputSignature).GetHeld(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
+        }
+
         public float GetAxleState(string id)
         {
             if (!_active) return 0f;
@@ -180,6 +191,17 @@ namespace com.spacepuppy.SPInput
             if (!(sig is IButtonInputSignature)) return false;
 
             return (sig as IButtonInputSignature).GetPressed(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
+        }
+
+        public bool GetButtonHeld(T mapping, float duration)
+        {
+            if (!_active) return false;
+
+            var sig = _signatures.GetSignature(mapping);
+            if (sig == null) return false;
+            if (!(sig is IButtonInputSignature)) return false;
+
+            return (sig as IButtonInputSignature).GetHeld(duration, GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate);
         }
 
         public float GetAxleState(T mapping)

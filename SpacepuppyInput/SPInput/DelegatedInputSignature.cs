@@ -74,6 +74,18 @@ namespace com.spacepuppy.SPInput
             }
         }
 
+        public bool GetHeld(float duration, bool getFixedState)
+        {
+            if (getFixedState)
+            {
+                return _currentFixed == ButtonState.Released && Time.realtimeSinceStartup - _lastDown >= duration;
+            }
+            else
+            {
+                return _current == ButtonState.Released && Time.realtimeSinceStartup - _lastDown >= duration;
+            }
+        }
+
         #endregion
 
         #region IInputSignature Interfacce
@@ -179,6 +191,18 @@ namespace com.spacepuppy.SPInput
             else
             {
                 return _current == ButtonState.Released && Time.realtimeSinceStartup - _lastDown <= duration;
+            }
+        }
+
+        public bool GetHeld(float duration, bool getFixedState)
+        {
+            if (getFixedState)
+            {
+                return _currentFixed == ButtonState.Released && Time.realtimeSinceStartup - _lastDown >= duration;
+            }
+            else
+            {
+                return _current == ButtonState.Released && Time.realtimeSinceStartup - _lastDown >= duration;
             }
         }
 
