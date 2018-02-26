@@ -13,6 +13,11 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
     /// </summary>
     [InputProfileDescription("Xbox 360 Controller", TargetPlatform.MacOSX, Description = "Xbox 360 Controller (MacOSX)")]
     [InputProfileJoystickName(XboxInputProfile.GENERIC_XBOX360)]
+    [InputProfileJoystickName("")]
+    [InputProfileJoystickName("Microsoft Wireless 360 Controller")]
+    [InputProfileJoystickName("Mad Catz, Inc. Mad Catz FPS Pro GamePad")]
+    [InputProfileJoystickName("\u00A9Microsoft Corporation Controller")]
+    [InputProfileJoystickName("\u00A9Microsoft Corporation Xbox Original Wired Controller")]
     public class Xbox360MacOSProfile : XboxInputProfile
     {
 

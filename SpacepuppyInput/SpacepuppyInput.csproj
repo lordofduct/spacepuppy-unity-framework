@@ -124,6 +124,7 @@
     <Compile Include="SPInput\Unity\Xbox\Profiles\ValveStreamingWinProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\Xbox360AndroidProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\Xbox360LinuxProfile.cs" />
+    <Compile Include="SPInput\Unity\Xbox\Profiles\Xbox360LinuxProfile_X.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\Xbox360MacOSProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\Xbox360WinProfile.cs" />
     <Compile Include="SPInput\Unity\Xbox\Profiles\XboxOneConsoleProfile.cs" />
