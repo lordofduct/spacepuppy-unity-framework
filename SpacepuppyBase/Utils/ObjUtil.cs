@@ -352,6 +352,20 @@ namespace com.spacepuppy.Utils
 
         #region Casting
 
+        public static object ReduceIfProxy(this object obj)
+        {
+            if (obj is IProxy) return (obj as IProxy).GetTarget();
+
+            return obj;
+        }
+
+        public static object ReduceIfProxy(this object obj, object arg)
+        {
+            if (obj is IProxy) return (obj as IProxy).GetTarget(arg);
+
+            return obj;
+        }
+
         public static T GetAsFromSource<T>(object obj) where T : class
         {
             if (obj == null) return null;

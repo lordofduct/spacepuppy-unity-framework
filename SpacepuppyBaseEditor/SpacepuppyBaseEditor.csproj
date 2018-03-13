@@ -88,6 +88,7 @@
     <Compile Include="EditorHierarchyAlternateContextMenuEvents.cs" />
     <Compile Include="Geom\CubicBezierCurveEditorWindow.cs" />
     <Compile Include="Geom\CubicBezierCurvePropertyDrawer.cs" />
+    <Compile Include="Geom\PlanarSurfaceComponentEditor.cs" />
     <Compile Include="Geom\TransformAltContextMenu.cs" />
     <Compile Include="Hooks\CollisionSignalSourcePropertyDrawer.cs" />
     <Compile Include="IArrayHandlingPropertyDrawer.cs" />

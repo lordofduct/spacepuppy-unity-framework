@@ -133,6 +133,7 @@
     <Compile Include="Geom\CatmullRomSpline.cs" />
     <Compile Include="Geom\Cylinder.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
+    <Compile Include="Geom\PlanarSurfaceComponent.cs" />
     <Compile Include="Graphs\AStarPathResolver.cs" />
     <Compile Include="Graphs\DijkstraPathResolver.cs" />
     <Compile Include="Graphs\Exceptions.cs" />
@@ -265,12 +266,14 @@
     <Compile Include="Scenario\i_TriggerRandomElimination.cs" />
     <Compile Include="Scenario\i_TriggerSequence.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
+    <Compile Include="Scenario\t_Flicker.cs" />
     <Compile Include="Scenario\t_OnClick.cs" />
     <Compile Include="Scenario\t_OnDisable.cs" />
     <Compile Include="Scenario\t_OnEnable.cs" />
     <Compile Include="Scenario\t_OnEventTrigger.cs" />
     <Compile Include="Scenario\t_OnStart.cs" />
     <Compile Include="Scenario\t_RandomInterval.cs" />
+    <Compile Include="Scenario\t_OnTriggerOccupied.cs" />
     <Compile Include="Scenes\Enums.cs" />
     <Compile Include="Scenes\SceneManagerEventArgs.cs" />
     <Compile Include="Scenes\LoadSceneAsyncWaitHandle.cs" />

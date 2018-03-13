@@ -13,6 +13,9 @@ namespace com.spacepuppyeditor.Geom
     [CustomPropertyDrawer(typeof(Interval))]
     public class IntervalInspector : PropertyDrawer
     {
+        private const string PROP_MIN = "_min";
+        private const string PROP_MAX = "_max";
+
         private GUIContent[] _defaultLabels = new GUIContent[] { new GUIContent("Min"), new GUIContent("Max") };
         private GUIContent[] _reverseLabels = new GUIContent[] { new GUIContent("Max"), new GUIContent("Min") };
         private float[] _values = new float[2];
@@ -24,7 +27,8 @@ namespace com.spacepuppyeditor.Geom
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var targ = (Interval)EditorHelper.GetTargetObjectOfProperty(property);
+            var prop_min = property.FindPropertyRelative(PROP_MIN);
+            var prop_max = property.FindPropertyRelative(PROP_MAX);
 
             var attrib = this.fieldInfo.GetCustomAttributes(typeof(Interval.ConfigAttribute), false).Cast<Interval.ConfigAttribute>().FirstOrDefault();
             bool reverse = (attrib != null) ? attrib.Reverse : false;
@@ -40,15 +44,15 @@ namespace com.spacepuppyeditor.Geom
             {
                 subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MaxLabel), EditorHelper.TempContent(attrib.MinLabel) } : _defaultLabels;
                 labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
-                _values[1] = targ.Min;
-                _values[0] = targ.Max;
+                _values[1] = prop_min.floatValue;
+                _values[0] = prop_max.floatValue;
             }
             else
             {
                 subLabels = (attrib != null) ? new GUIContent[] { EditorHelper.TempContent(attrib.MinLabel), EditorHelper.TempContent(attrib.MaxLabel) } : _defaultLabels;
                 labelWidth = (attrib != null) ? attrib.LabelWidth : 30f;
-                _values[0] = targ.Min;
-                _values[1] = targ.Max;
+                _values[0] = prop_min.floatValue;
+                _values[1] = prop_max.floatValue;
             }
 
             EditorGUI.BeginProperty(position, label, property);
@@ -61,11 +65,22 @@ namespace com.spacepuppyeditor.Geom
                 if (discreteValuesOnly) _values[0] = Mathf.Round(_values[0]);
                 if (discreteValuesOnly) _values[1] = Mathf.Round(_values[1]);
 
-                if (reverse)
-                    targ.SetExtents(_values[1], _values[0]);
+                float min = reverse ? _values[1] : _values[0];
+                float max = reverse ? _values[0] : _values[1];
+
+                if(!MathUtil.FuzzyEqual(min, prop_min.floatValue))
+                {
+                    //changed min
+                    if (max < min) max = min;
+                }
                 else
-                    targ.SetExtents(_values[0], _values[1]);
-                EditorHelper.SetTargetObjectOfProperty(property, targ);
+                {
+                    //changed max
+                    if (min > max) min = max;
+                }
+
+                prop_min.floatValue = min;
+                prop_max.floatValue = max;
             }
             EditorGUI.EndProperty();
         }

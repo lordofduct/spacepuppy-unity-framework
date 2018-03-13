@@ -168,18 +168,7 @@ namespace com.spacepuppy.Geom
         #endregion
 
         #region Plane Extension Methods
-
-        /// <summary>
-        /// returns distance point is from a plane, sign reflects if it is above or below the facing side (direction of normal)
-        /// </summary>
-        /// <param name="pl"></param>
-        /// <param name="p"></param>
-        /// <returns></returns>
-        public static float DistanceOfPointFromPlane(this Plane pl, Vector3 p)
-        {
-            return Vector3.Dot(pl.normal, (p - pl.normal * pl.distance));
-        }
-
+        
         public static Vector3 ProjectVectorOnPlane(this Plane pl, Vector3 v)
         {
             return v - (Vector3.Dot(v, pl.normal) * pl.normal);
@@ -187,9 +176,9 @@ namespace com.spacepuppy.Geom
 
         public static Vector3 ProjectPointOnPlane(this Plane pl, Vector3 p)
         {
-            float dist = DistanceOfPointFromPlane(pl, p) *-1;
-            var v = pl.normal * dist;
-            return p + v;
+            //var d = Vector3.Dot(pl.normal, p) - pl.distance;
+            var d = Vector3.Dot(pl.normal, p) + pl.distance; //due to a bug in Plane, we have to do it this way
+            return p - pl.normal * d;
         }
 
         public static float AngleBetweenVectorAndPlane(this Plane pl, Vector3 v)
@@ -199,10 +188,24 @@ namespace com.spacepuppy.Geom
             return 1.5707963f - a;
         }
 
+        /// <summary>
+        /// Create a reflection of a point, as if the plane was a mirror you were looking into.
+        /// </summary>
+        /// <param name="pl"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static Vector3 ReflectPointThroughPlane(this Plane pl, Vector3 point)
+        {
+            //var d = Vector3.Dot(pl.normal, point) - pl.distance;
+            var d = Vector3.Dot(pl.normal, point) + pl.distance; //due to a bug in Plane, we have to do it this way
+            return point - pl.normal * d * 2f;
+
+        }
+
         #endregion
 
         #region GetBounds
-        
+
         public static Sphere GetGlobalBoundingSphere(this Renderer rend)
         {
             return GetGlobalBoundingSphere(rend, GeomUtil.DefaultBoundingSphereAlgorithm);

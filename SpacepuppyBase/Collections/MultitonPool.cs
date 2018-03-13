@@ -697,7 +697,7 @@ namespace com.spacepuppy.Collections
         private Dictionary<GameObject, T> _pool;
         private bool _querying;
         private System.Action _queryCompleteAction;
-
+        
         #endregion
 
         #region CONSTRUCTOR
@@ -1044,7 +1044,7 @@ namespace com.spacepuppy.Collections
         public T GetFromSource(System.Type tp, object obj)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
-
+            
             if (obj is T && TypeUtil.IsType(obj.GetType(), tp)) return obj as T;
 
             var go = GameObjectUtil.GetTrueRootFromSource(obj);
@@ -1083,7 +1083,7 @@ namespace com.spacepuppy.Collections
 
         public bool GetFromSource(object obj, out T comp)
         {
-            if(obj is T)
+            if (obj is T)
             {
                 comp = obj as T;
                 return true;
@@ -1109,7 +1109,7 @@ namespace com.spacepuppy.Collections
         public bool GetFromSource(System.Type tp, object obj, out T comp)
         {
             if (tp == null) throw new System.ArgumentNullException("tp");
-
+            
             if (obj is T && TypeUtil.IsType(obj.GetType(), tp))
             {
                 comp = obj as T;
@@ -1137,7 +1137,7 @@ namespace com.spacepuppy.Collections
 
         public bool GetFromSource<TSub>(object obj, out TSub comp) where TSub : class, T
         {
-            if(obj is TSub)
+            if (obj is TSub)
             {
                 comp = obj as TSub;
                 return true;

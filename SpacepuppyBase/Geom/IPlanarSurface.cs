@@ -44,5 +44,8 @@ namespace com.spacepuppy.Geom
         /// <returns></returns>
         Vector3 ClampToSurface(Vector3 v);
 
+
+        //Vector3 Mirror(Vector3 pos);
+
     }
 }

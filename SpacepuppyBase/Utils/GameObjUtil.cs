@@ -46,6 +46,7 @@ namespace com.spacepuppy.Utils
             return (obj is GameObject || obj is Component || obj is IGameObjectSource);
         }
 
+        /*
         public static GameObject GetGameObjectFromSource(object obj)
         {
             if (obj == null) return null;
@@ -58,8 +59,9 @@ namespace com.spacepuppy.Utils
 
             return null;
         }
+        */
 
-        public static GameObject GetGameObjectFromSource(object obj, bool respectProxy)
+        public static GameObject GetGameObjectFromSource(object obj, bool respectProxy = false)
         {
             if (obj == null) return null;
 
@@ -79,6 +81,7 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
+        /*
         public static Transform GetTransformFromSource(object obj)
         {
             if (obj == null) return null;
@@ -93,8 +96,9 @@ namespace com.spacepuppy.Utils
 
             return null;
         }
+        */
 
-        public static Transform GetTransformFromSource(object obj, bool respectProxy)
+        public static Transform GetTransformFromSource(object obj, bool respectProxy = false)
         {
             if (obj == null) return null;
 
@@ -116,9 +120,15 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
-        public static GameObject GetRootFromSource(object obj)
+        public static GameObject GetRootFromSource(object obj, bool respectProxy = false)
         {
             if (obj.IsNullOrDestroyed()) return null;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return null;
+            }
 
             if (obj is IComponent) obj = (obj as IComponent).component;
 
@@ -138,9 +148,15 @@ namespace com.spacepuppy.Utils
             return null;
         }
 
-        public static GameObject GetTrueRootFromSource(object obj)
+        public static GameObject GetTrueRootFromSource(object obj, bool respectProxy = false)
         {
             if (obj.IsNullOrDestroyed()) return null;
+
+            if (respectProxy && obj is IProxy)
+            {
+                obj = (obj as IProxy).GetTarget();
+                if (obj == null) return null;
+            }
 
             if (obj is IComponent) obj = (obj as IComponent).component;
 

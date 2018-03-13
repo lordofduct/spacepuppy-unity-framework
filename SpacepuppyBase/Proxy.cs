@@ -178,10 +178,21 @@ namespace com.spacepuppy
         [SerializeField]
         [TypeReference.Config(typeof(Component), allowAbstractClasses = true, allowInterfaces = true)]
         private TypeReference _componentTypeOnTarget = new TypeReference();
+
+        [Space()]
+        [SerializeField]
+        [Tooltip("Cache the target when it's first retrieved. This is useful for speeding up any 'Find' commands if called repeatedly, but is hindered if the target is changing.")]
+        private bool _cache;
+        [System.NonSerialized]
+        private UnityEngine.Object _object;
+
+        [Space()]
+        [SerializeField]
+        private bool _treatAsTriggerable = true;
         [SerializeField]
         [EnumPopupExcluding((int)TriggerActivationType.SendMessage, (int)TriggerActivationType.CallMethodOnSelectedTarget, (int)TriggerActivationType.EnableTarget)]
         private TriggerActivationType _triggerAction;
-
+        
         #endregion
 
         #region Properties
@@ -210,23 +221,50 @@ namespace com.spacepuppy
 
         public object GetTarget()
         {
-            return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), null) as UnityEngine.Object;
+            if(_cache)
+            {
+                if (_object != null) return _object;
+
+                _object = _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), null) as UnityEngine.Object;
+                return _object;
+            }
+            else
+            {
+                return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), null) as UnityEngine.Object;
+            }
         }
 
         public object GetTarget(object arg)
         {
-            if (_componentTypeOnTarget == null) return null;
-            return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;
+            if (_cache)
+            {
+                if (_object != null) return _object;
+
+                if (_componentTypeOnTarget == null) return null;
+                _object = _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;
+                return _object;
+            }
+            else
+            {
+                if (_componentTypeOnTarget == null) return null;
+                return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;
+            }
         }
 
         public System.Type GetTargetType()
         {
-            return _componentTypeOnTarget.Type ?? typeof(UnityEngine.Object);
+            if(_componentTypeOnTarget.Type != null) return _componentTypeOnTarget.Type;
+            return (_cache && _object != null) ? _object.GetType() : typeof(UnityEngine.Object);
         }
 
         #endregion
 
         #region TriggerableMechanism Interface
+
+        public override bool CanTrigger
+        {
+            get { return _treatAsTriggerable && base.CanTrigger; }
+        }
 
         public override bool Trigger(object sender, object arg)
         {
