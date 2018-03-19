@@ -146,6 +146,7 @@
     <Compile Include="Graphs\IPathResolver.cs" />
     <Compile Include="Graphs\LinkedNodeGraph.cs" />
     <Compile Include="Graphs\NodeGraph.cs" />
+    <Compile Include="IMixin.cs" />
     <Compile Include="IEntityAwakeHandler.cs" />
     <Compile Include="IImmediatelyResumingYieldInstruction.cs" />
     <Compile Include="IPausibleYieldInstruction.cs" />

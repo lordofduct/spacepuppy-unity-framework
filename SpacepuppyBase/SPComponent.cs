@@ -5,29 +5,30 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
 
-    public abstract class SPComponent : MonoBehaviour, IComponent, ISPDisposable
+    public abstract class SPComponent : MonoBehaviour, IEventfulComponent, ISPDisposable
     {
 
         #region Events
 
         public event System.EventHandler OnEnabled;
-        public event System.EventHandler OnStartOrEnabled;
+        public event System.EventHandler OnStarted;
         public event System.EventHandler OnDisabled;
         public event System.EventHandler ComponentDestroyed;
 
         #endregion
 
-#region Fields
-        
+        #region Fields
+
         [System.NonSerialized()]
         private bool _started = false;
 
-#endregion
+        #endregion
 
-#region CONSTRUCTOR
+        #region CONSTRUCTOR
 
         protected virtual void Awake()
         {
+            if (this is IMixin) MixinUtil.Initialize(this as IMixin);
             //this.SyncEntityRoot();
         }
 
@@ -36,7 +37,7 @@ namespace com.spacepuppy
             _started = true;
             //this.SyncEntityRoot();
             this.OnStartOrEnable();
-            if (this.OnStartOrEnabled != null) this.OnStartOrEnabled(this, System.EventArgs.Empty);
+            if (this.OnStarted != null) this.OnStarted(this, System.EventArgs.Empty);
         }
 
         /// <summary>
@@ -55,7 +56,6 @@ namespace com.spacepuppy
             if (_started)
             {
                 this.OnStartOrEnable();
-                if (this.OnStartOrEnabled != null) this.OnStartOrEnabled(this, System.EventArgs.Empty);
             }
         }
 
@@ -63,7 +63,7 @@ namespace com.spacepuppy
         {
             if (this.OnDisabled != null) this.OnDisabled(this, System.EventArgs.Empty);
         }
-        
+
         protected virtual void OnDestroy()
         {
             //InvokeUtil.CancelInvoke(this);
@@ -73,9 +73,9 @@ namespace com.spacepuppy
             }
         }
 
-#endregion
+        #endregion
 
-#region Properties
+        #region Properties
 
         /// <summary>
         /// Start has been called on this component.
@@ -90,7 +90,7 @@ namespace com.spacepuppy
         #region Root Methods
 
 #if SP_LIB
-            
+
         [System.NonSerialized()]
         private GameObject _entityRoot;
 
@@ -111,7 +111,7 @@ namespace com.spacepuppy
         {
             _entityRoot = this.FindRoot();
         }
-            
+
         /// <summary>
         /// Occurs if this gameobject or one of its parents is moved in the hierarchy using 'GameObjUtil.AddChild' or 'GameObjUtil.RemoveFromParent'
         /// </summary>
@@ -214,16 +214,16 @@ namespace com.spacepuppy
         public new void StopAllCoroutines()
         {
             RadicalCoroutineManager manager = this.GetComponent<RadicalCoroutineManager>();
-            if(manager != null)
+            if (manager != null)
             {
                 manager.PurgeCoroutines(this);
             }
             base.StopAllCoroutines();
         }
 
-#endregion
+        #endregion
 
-#region IComponent Interface
+        #region IComponent Interface
 
         bool IComponent.enabled
         {
@@ -242,10 +242,10 @@ namespace com.spacepuppy
         Transform IComponent.transform { get { return this.transform; } }
         */
 
-#endregion
+        #endregion
 
-#region ISPDisposable Interface
-    
+        #region ISPDisposable Interface
+
         bool ISPDisposable.IsDisposed
         {
             get
@@ -267,8 +267,8 @@ namespace com.spacepuppy
 #endif
         }
 
-#endregion
-
+        #endregion
+        
     }
 
 }

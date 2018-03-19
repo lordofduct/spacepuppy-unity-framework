@@ -41,25 +41,17 @@ namespace com.spacepuppy.Anim
         #endregion
 
         #region CONSTRUCTOR
-
-        //void IEntityAwakeHandler.OnEntityAwake(SPEntity entity)
-        //{
-        //    if (_initialized) return;
-
-        //    _initialized = true;
-        //    this.Init(entity, _controller);
-        //}
-
+        
         protected override void Start()
         {
-            base.Start();
-
             var entity = SPEntity.Pool.GetFromSource<SPEntity>(this);
             if (!_initialized && entity != null && entity.IsAwake)
             {
                 _initialized = true;
                 this.Init(entity, _controller);
             }
+
+            base.Start();
         }
 
         protected abstract void Init(SPEntity entity, SPAnimationController controller);

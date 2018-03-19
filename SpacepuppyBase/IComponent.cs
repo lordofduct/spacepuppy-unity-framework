@@ -15,4 +15,14 @@ namespace com.spacepuppy
 
     }
 
+    public interface IEventfulComponent : IComponent
+    {
+        event System.EventHandler OnEnabled;
+        event System.EventHandler OnStarted;
+        event System.EventHandler OnDisabled;
+        event System.EventHandler ComponentDestroyed;
+
+        bool started { get; }
+    }
+    
 }

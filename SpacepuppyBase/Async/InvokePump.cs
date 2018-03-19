@@ -95,29 +95,7 @@ namespace com.spacepuppy.Async
         {
             if (_threadId == 0) return; //we're destroyed
             if (this.InvokeRequired) throw new System.InvalidOperationException("InvokePump.Update can only be updated on the thread that was designated its owner.");
-
-            /*
-            if (_invoking != null)
-            {
-                Action act;
-                EventWaitHandle handle;
-                lock (_invokeLock)
-                {
-                    act = _invoking;
-                    handle = _waitHandle;
-                    _invoking = null;
-                    _waitHandle = _waitHandleAlt;
-                    _waitHandleAlt = handle;
-                }
-
-                //call delegate
-                act();
-
-                //release waits
-                handle.Set();
-            }
-            */
-
+            
             //record the current length so we only activate those actions added at this point
             //any newly added actions should wait until NEXT update
             int cnt = _invoking.Count;
