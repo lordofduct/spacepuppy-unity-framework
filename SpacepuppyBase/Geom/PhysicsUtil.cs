@@ -53,20 +53,26 @@ namespace com.spacepuppy.Geom
                 return x.distance.CompareTo(y.distance);
             }
         }
-        
-        #endregion
 
+
+        private static Dictionary<int, int> _calculatedMasks;
         public static int CalculateLayerMaskAgainst(int layer)
         {
-            int mask = 0;
+            if (layer < 0 || layer > 31) return Physics.AllLayers;
 
+            int mask = 0;
+            if (_calculatedMasks == null) _calculatedMasks = new Dictionary<int, int>();
+            else if (_calculatedMasks.TryGetValue(layer, out mask)) return mask;
+            
             for (int i = 0; i < 32; i++)
             {
                 if (!Physics.GetIgnoreLayerCollision(layer, i)) mask = mask | (1 << i);
             }
-
+            _calculatedMasks[layer] = mask;
             return mask;
         }
+
+        #endregion
 
 
         #region Physics Forwards
@@ -505,7 +511,7 @@ namespace com.spacepuppy.Geom
 
             return geom.Cast(dir, out hitInfo, dist, layerMask, query);
         }
-
+        
         #endregion
 
         #region CastAll
@@ -568,6 +574,60 @@ namespace com.spacepuppy.Geom
             if (geom == null) throw new System.ArgumentNullException("geom");
 
             return geom.CastAll(dir, results, dist, layerMask, query);
+        }
+
+        #endregion
+
+        #region Collider Cast/All
+
+        public static bool Cast(Collider coll, Vector3 dir, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            RaycastHit hit;
+            return Cast(coll, dir, out hit, dist, query);
+        }
+
+        public static bool Cast(Collider coll, Vector3 dir, out RaycastHit hitInfo, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            var rb = coll.attachedRigidbody;
+            if (!object.ReferenceEquals(rb, null))
+            {
+                return rb.SweepTest(dir, out hitInfo, dist, query);
+            }
+
+            var geom = GeomUtil.GetGeom(coll);
+            return geom.Cast(dir, out hitInfo, dist, CalculateLayerMaskAgainst(coll.gameObject.layer), query);
+        }
+        
+        public static RaycastHit[] CastAll(Collider coll, Vector3 dir, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            var rb = coll.attachedRigidbody;
+            if (!object.ReferenceEquals(rb, null))
+            {
+                return rb.SweepTestAll(dir, dist, query);
+            }
+
+            using (var lst = TempCollection.GetList<RaycastHit>())
+            {
+                var geom = GeomUtil.GetGeom(coll);
+                geom.CastAll(dir, lst, dist, CalculateLayerMaskAgainst(coll.gameObject.layer), query);
+                return lst.ToArray();
+            }
+        }
+
+        public static int CastAll(Collider coll, ICollection<RaycastHit> results, Vector3 dir, float dist, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)
+        {
+            var rb = coll.attachedRigidbody;
+            if (!object.ReferenceEquals(rb, null))
+            {
+                if (results == null) throw new System.ArgumentNullException("results");
+                var arr = rb.SweepTestAll(dir, dist, query);
+                if (arr == null || arr.Length == 0) return 0;
+                results.AddRange(arr);
+                return arr.Length;
+            }
+
+            var geom = GeomUtil.GetGeom(coll);
+            return geom.CastAll(dir, results, dist, CalculateLayerMaskAgainst(coll.gameObject.layer), query);
         }
 
         #endregion

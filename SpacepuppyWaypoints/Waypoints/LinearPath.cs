@@ -128,10 +128,15 @@ namespace com.spacepuppy.Waypoints
             return this.GetWaypointAfter(i, dt);
         }
 
-        public Vector3[] GetDetailedPositions(float segmentLength)
+        public int GetDetailedPositions(ICollection<Vector3> coll, float segmentLength)
         {
+            if (coll == null) throw new System.ArgumentNullException("coll");
             if (_points == null) this.Clean_Imp();
-            return _points.Clone() as Vector3[];
+            for(int i = 0; i < _points.Length; i++)
+            {
+                coll.Add(_points[i]);
+            }
+            return _points.Length;
         }
 
         #endregion

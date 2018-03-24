@@ -71,6 +71,7 @@
     <Compile Include="Base\Inspectors\ShortUidPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\TetherJointInspector.cs" />
     <Compile Include="Base\Inspectors\VersionInfoPropertyDrawer.cs" />
+    <Compile Include="Base\Modifiers\DisableIfModifier.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />

@@ -11,27 +11,20 @@ namespace com.spacepuppyeditor.Modifiers
     [CustomPropertyDrawer(typeof(DisableOnPlayAttribute))]
     public class DisableOnPlayModifier : PropertyModifier
     {
-
-        private bool? _cached = null;
-
+        
         protected internal override void OnBeforeGUI(SerializedProperty property)
         {
-            if(Application.isPlaying)
+            if (Application.isPlaying)
             {
-                _cached = GUI.enabled;
-                GUI.enabled = false;
-            }
-            else
-            {
-                _cached = null;
+                EditorGUI.BeginDisabledGroup(true);
             }
         }
 
         protected internal override void OnPostGUI(SerializedProperty property)
         {
-            if (_cached != null)
+            if (Application.isPlaying)
             {
-                GUI.enabled = (bool)_cached.Value;
+                EditorGUI.EndDisabledGroup();
             }
         }
 

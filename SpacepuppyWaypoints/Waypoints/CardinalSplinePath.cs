@@ -159,15 +159,15 @@ namespace com.spacepuppy.Waypoints
             return _speedTable.TotalArcLength;
         }
 
-        public Vector3[] GetDetailedPositions(float segmentLength)
+        public int GetDetailedPositions(ICollection<Vector3> coll, float segmentLength)
         {
+            if (coll == null) throw new System.ArgumentNullException("coll");
             int detail = Mathf.FloorToInt(this.GetArcLength() / segmentLength) + 1;
-            Vector3[] arr = new Vector3[detail + 1];
             for (int i = 0; i <= detail; i++)
             {
-                arr[i] = this.GetPositionAt((float)i / (float)detail);
+                coll.Add(this.GetPositionAt((float)i / (float)detail));
             }
-            return arr;
+            return detail + 1;
         }
 
         #endregion

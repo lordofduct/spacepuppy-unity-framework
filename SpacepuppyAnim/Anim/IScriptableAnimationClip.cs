@@ -28,7 +28,7 @@ namespace com.spacepuppy.Anim
     }
 
     
-    public abstract class ScriptableAnimState : ISPAnim
+    public abstract class ScriptableAnimState : ISPAnim, ISPDisposable
     {
 
         #region Fields
@@ -54,6 +54,8 @@ namespace com.spacepuppy.Anim
         public virtual int Layer { get; set; }
         public virtual float Speed { get; set; }
         public virtual ITimeSupplier TimeSupplier { get; set; }
+        public virtual WrapMode WrapMode { get; set; }
+
 
         public abstract float Duration { get; }
         public abstract bool IsPlaying { get; }
@@ -117,7 +119,32 @@ namespace com.spacepuppy.Anim
             get { return false; }
         }
 
-        #endregion 
+        #endregion
+
+        #region IDisposable Interface
+
+        public bool IsDisposed
+        {
+            get
+            {
+                if (object.ReferenceEquals(_controller, null)) return true;
+                if (_controller == null)
+                {
+                    //dead but still active
+                    this.Dispose();
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            _controller = null;
+            if (_scheduler != null) _scheduler.Dispose();
+        }
+
+        #endregion
 
     }
 

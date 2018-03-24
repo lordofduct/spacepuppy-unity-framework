@@ -84,15 +84,15 @@ namespace com.spacepuppyeditor.Anim
         private void DrawTargetAnimatorProperty()
         {
             var targWrapperProp = this.serializedObject.FindProperty(PROP_TARGETANIMATOR);
-            var targProp = targWrapperProp.FindPropertyRelative(TriggerableTargetObjectPropertyDrawer.PROP_TARGET);
 
             _targetDrawer.ManuallyConfigured = true;
             
             var label = EditorHelper.TempContent(targWrapperProp.displayName);
             var rect = EditorGUILayout.GetControlRect(true, _targetDrawer.GetPropertyHeight(targWrapperProp, label));
             _targetDrawer.OnGUI(rect, targWrapperProp, label);
+            
 
-
+            var targProp = targWrapperProp.FindPropertyRelative(TriggerableTargetObjectPropertyDrawer.PROP_TARGET);
             var obj = targProp.objectReferenceValue;
             if (obj == null || i_PlayAnimation.IsAcceptibleAnimator(obj))
                 return;

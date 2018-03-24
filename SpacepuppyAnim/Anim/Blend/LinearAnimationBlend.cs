@@ -12,7 +12,7 @@ namespace com.spacepuppy.Anim.Blend
     /// 
     /// Assumes that all anims in the collection operate on the same TimeSupplier.
     /// </summary>
-    public class LinearAnimationBlend : ICollection<LinearAnimationBlend.StateData>, ISPAnim, System.IDisposable
+    public class LinearAnimationBlend : ICollection<LinearAnimationBlend.StateData>, ISPAnim
     {
 
         #region Fields
@@ -152,6 +152,18 @@ namespace com.spacepuppy.Anim.Blend
                     _currentStateL.Anim.TimeSupplier = _timeSupplier;
                 if (_currentStateH != null)
                     _currentStateH.Anim.TimeSupplier = _timeSupplier;
+            }
+        }
+
+        public WrapMode WrapMode
+        {
+            get
+            {
+                return WrapMode.Default;
+            }
+            set
+            {
+                //do nothing
             }
         }
 
@@ -315,13 +327,25 @@ namespace com.spacepuppy.Anim.Blend
 
         #region IDisposable Interface
 
+        public bool IsDisposed
+        {
+            get
+            {
+                if (object.ReferenceEquals(_controller, null)) return true;
+                if (_controller == null)
+                {
+                    //dead but still active
+                    this.Dispose();
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public void Dispose()
         {
-            if (_scheduler != null)
-            {
-                _scheduler.Dispose();
-                _scheduler = null;
-            }
+            _controller = null;
+            if (_scheduler != null) _scheduler.Dispose();
         }
 
         #endregion

@@ -12,7 +12,7 @@ namespace com.spacepuppy.Waypoints
         Vector3 GetPositionAt(float t);
         Waypoint GetWaypointAt(float t);
 
-        Vector3[] GetDetailedPositions(float segmentLength);
+        int GetDetailedPositions(ICollection<Vector3> coll, float segmentLength);
     }
 
     public interface IIndexedWaypointPath : IWaypointPath, IEnumerable<IWaypoint>

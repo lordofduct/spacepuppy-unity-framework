@@ -7,7 +7,7 @@ using System;
 namespace com.spacepuppy.Anim
 {
 
-    public class SPAnim : ISPAnim, IRadicalWaitHandle, System.ICloneable, ISPDisposable
+    public class SPAnim : ISPAnim, IRadicalWaitHandle, System.ICloneable
     {
 
         #region Fields
@@ -176,7 +176,8 @@ namespace com.spacepuppy.Anim
             }
             else
             {
-                this.Play(-_speed, QueueMode.PlayNow, playMode);
+                _speed = -_speed;
+                this.Play(QueueMode.PlayNow, playMode);
             }
         }
 
@@ -240,6 +241,7 @@ namespace com.spacepuppy.Anim
             _state = _controller.PlayQueuedInternal(_clipId, queueMode, playMode, _layer);
             _state.weight = _weight;
             _state.speed = this.RealSpeed;
+            _state.time = (_state.speed >= 0f) ? 0f : _state.length;
             _state.layer = _layer;
             _state.wrapMode = _wrapMode;
             _state.blendMode = _blendMode;
@@ -254,6 +256,7 @@ namespace com.spacepuppy.Anim
             _state = _controller.CrossFadeQueuedInternal(_clipId, fadeLength, queueMode, playMode, _layer);
             _state.weight = _weight;
             _state.speed = this.RealSpeed;
+            _state.time = (_state.speed >= 0f) ? 0f : _state.length;
             _state.layer = _layer;
             _state.wrapMode = _wrapMode;
             _state.blendMode = _blendMode;
@@ -465,6 +468,18 @@ namespace com.spacepuppy.Anim
                 set { }
             }
 
+            public WrapMode WrapMode
+            {
+                get
+                {
+                    return WrapMode.Default;
+                }
+                set
+                {
+                    //do nothing
+                }
+            }
+
             public bool IsPlaying
             {
                 get { return false; }
@@ -555,6 +570,20 @@ namespace com.spacepuppy.Anim
                 {
                     return true;
                 }
+            }
+
+            #endregion
+
+            #region IDisposable Interface
+
+            bool ISPDisposable.IsDisposed
+            {
+                get { return false; }
+            }
+
+            void System.IDisposable.Dispose()
+            {
+                //do nothing
             }
 
             #endregion

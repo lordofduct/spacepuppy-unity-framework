@@ -464,6 +464,19 @@ namespace com.spacepuppy
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class DisableIfAttribute : PropertyModifierAttribute
+    {
+        public readonly string MemberName;
+        public bool DisableIfNot;
+        
+        public DisableIfAttribute(string memberName)
+        {
+            this.MemberName = memberName;
+        }
+
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class ReadOnlyAttribute : PropertyModifierAttribute
     {
 

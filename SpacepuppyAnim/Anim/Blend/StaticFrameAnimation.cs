@@ -96,6 +96,18 @@ namespace com.spacepuppy.Anim.Blend
             }
         }
 
+        public WrapMode WrapMode
+        {
+            get
+            {
+                return WrapMode.Loop;
+            }
+            set
+            {
+                //do nothing
+            }
+        }
+
         public bool IsPlaying
         {
             get { return _state.IsPlaying; }
@@ -187,6 +199,23 @@ namespace com.spacepuppy.Anim.Blend
         bool IRadicalWaitHandle.Cancelled
         {
             get { return false; }
+        }
+
+        #endregion
+
+        #region IDisposable Interface
+        
+        public bool IsDisposed
+        {
+            get
+            {
+                return _state == null;
+            }
+        }
+        
+        public void Dispose()
+        {
+            _state = null;
         }
 
         #endregion

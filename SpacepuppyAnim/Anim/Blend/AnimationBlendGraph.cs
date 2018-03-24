@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace com.spacepuppy.Anim.Blend
 {
-    public class AnimationBlendGraph : ISPAnim, System.IDisposable
+    public class AnimationBlendGraph : ISPAnim
     {
 
         #region Fields
@@ -53,6 +53,18 @@ namespace com.spacepuppy.Anim.Blend
         }
 
         public ITimeSupplier TimeSupplier
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+            set
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        public WrapMode WrapMode
         {
             get
             {
@@ -156,13 +168,16 @@ namespace com.spacepuppy.Anim.Blend
 
         #region IDisposable Interface
 
+        public bool IsDisposed
+        {
+            get;
+            private set;
+        }
+
         public void Dispose()
         {
-            if (_scheduler != null)
-            {
-                _scheduler.Dispose();
-                _scheduler = null;
-            }
+            if (_scheduler != null) _scheduler.Dispose();
+            this.IsDisposed = true;
         }
 
         #endregion

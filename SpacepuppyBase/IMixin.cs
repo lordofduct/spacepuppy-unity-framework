@@ -74,6 +74,35 @@ namespace com.spacepuppy
     }
 
     /// <summary>
+    /// Sometimes you want to run Start late, to allow Start to be called on all other scripts. Basically adding a final ordering for Start similar to LateUpdate.
+    /// </summary>
+    public interface IMLateStartReceiver : IMixin, IEventfulComponent
+    {
+        void OnLateStart();
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Interface)]
+    public class MLateStartReceiverConstructorAttribute : MixinConstructorAttribute
+    {
+
+        public override void OnConstructed(IMixin obj)
+        {
+            var c = obj as IMLateStartReceiver;
+            if (c != null)
+            {
+                c.OnStarted += (s, e) =>
+                {
+                    GameLoopEntry.UpdateHandle.BeginInvoke(() =>
+                    {
+                        c.OnLateStart();
+                    });
+                };
+            }
+        }
+
+    }
+
+    /// <summary>
     /// Sometimes you want to run StartOrEnable late, to allow Start to be called on all other scripts. Basically adding a final ordering point for Start similar to LateUpdate.
     /// </summary>
     [MLateStartOrEnableReceiverConstructor]

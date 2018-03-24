@@ -352,8 +352,8 @@ namespace com.spacepuppy.Utils
                 comp = null;
                 return false;
             }
-            comp = obj.GetComponent(typeof(T)) as T;
-            return (comp != null);
+            comp = obj.GetComponent<T>();
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
         public static bool GetComponent<T>(this Component obj, out T comp) where T : class
         {
@@ -362,8 +362,8 @@ namespace com.spacepuppy.Utils
                 comp = null;
                 return false;
             }
-            comp = obj.GetComponent(typeof(T)) as T;
-            return (comp != null);
+            comp = obj.GetComponent<T>();
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
 
         public static bool GetComponent(this GameObject obj, System.Type tp, out Component comp)
@@ -374,7 +374,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = obj.GetComponent(tp);
-            return (comp != null);
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
         public static bool GetComponent(this Component obj, System.Type tp, out Component comp)
         {
@@ -384,7 +384,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = obj.GetComponent(tp);
-            return (comp != null);
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
 
         #endregion
@@ -448,7 +448,7 @@ namespace com.spacepuppy.Utils
                 while (e.MoveNext())
                 {
                     c = e.Current as T;
-                    if (c != null) lst.Add(c);
+                    if (ObjUtil.IsObjectAlive(c as UnityEngine.Object)) lst.Add(c);
                 }
             }
         }
@@ -478,7 +478,7 @@ namespace com.spacepuppy.Utils
                 while (e.MoveNext())
                 {
                     c = (filter != null) ? filter(e.Current) : e.Current as T;
-                    if (c != null)
+                    if (ObjUtil.IsObjectAlive(c as UnityEngine.Object))
                     {
                         lst.Add(c);
                     }
@@ -543,7 +543,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = obj.GetComponentInChildren(typeof(T)) as T;
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
 
         public static bool GetComponentInChildren<T>(this Component obj, out T comp) where T : class
@@ -554,7 +554,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = obj.GetComponentInChildren(typeof(T)) as T;
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
 
         public static bool GetComponentInChildren<T>(this GameObject obj, System.Type tp, out Component comp)
@@ -565,7 +565,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = obj.GetComponentInChildren(tp);
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp);
         }
 
         public static bool GetComponentInChildren<T>(this Component obj, System.Type tp, out Component comp)
@@ -576,7 +576,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = obj.GetComponentInChildren(tp);
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp);
         }
 
         public static T GetComponentInChildrenAlt<T>(this GameObject obj) where T : class
@@ -876,7 +876,7 @@ namespace com.spacepuppy.Utils
         public static bool FindComponent<T>(this GameObject go, out T comp) where T : class
         {
             comp = FindComponent<T>(go);
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
 
         public static bool FindComponent<T>(this Component c, out T comp) where T : class
@@ -887,7 +887,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = FindComponent<T>(c.gameObject);
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp as UnityEngine.Object);
         }
 
         /// <summary>
@@ -929,7 +929,7 @@ namespace com.spacepuppy.Utils
         public static bool FindComponent(this GameObject go, System.Type tp, out Component comp)
         {
             comp = FindComponent(go, tp);
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp);
         }
 
         public static bool FindComponent(this Component c, System.Type tp, out Component comp)
@@ -940,7 +940,7 @@ namespace com.spacepuppy.Utils
                 return false;
             }
             comp = FindComponent(c.gameObject, tp);
-            return comp != null;
+            return ObjUtil.IsObjectAlive(comp);
         }
 
 #endregion

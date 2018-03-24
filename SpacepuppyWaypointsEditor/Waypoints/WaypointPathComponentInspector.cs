@@ -33,7 +33,7 @@ namespace com.spacepuppyeditor.Waypoints
 
         private List<Transform> _lastNodeCache = new List<Transform>();
         private IEnumerable<Transform> _currentNodes;
-
+        
         #endregion
 
         #region CONSTRUCTOR
@@ -205,10 +205,13 @@ namespace com.spacepuppyeditor.Waypoints
             var matrix = (c.started && c.TransformRelativeTo != null) ? Matrix4x4.TRS(c.TransformRelativeTo.position, c.TransformRelativeTo.rotation, Vector3.one) : Matrix4x4.identity;
 
             Gizmos.color = Color.red;
-            var pnts = path.GetDetailedPositions(SEG_LENGTH);
-            for (int i = 1; i < pnts.Length; i++)
+            using (var pnts = com.spacepuppy.Collections.TempCollection.GetList<Vector3>())
             {
-                Gizmos.DrawLine(matrix.MultiplyPoint3x4(pnts[i - 1]), matrix.MultiplyPoint3x4(pnts[i]));
+                path.GetDetailedPositions(pnts, SEG_LENGTH);
+                for(int i = 1; i < pnts.Count; i++)
+                {
+                    Gizmos.DrawLine(matrix.MultiplyPoint3x4(pnts[i - 1]), matrix.MultiplyPoint3x4(pnts[i]));
+                }
             }
 
             IWaypoint pnt;
