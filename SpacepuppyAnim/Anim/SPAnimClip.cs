@@ -34,7 +34,7 @@ namespace com.spacepuppy.Anim
         public const string PROP_MASKS = "_masks";
 
         #region Fields
-        
+
         [SerializeField()]
         private string _name;
         [SerializeField()]
@@ -118,7 +118,7 @@ namespace com.spacepuppy.Anim
             //_firstFrame = 0;
             //_lastFrame = -1;
         }
-        
+
         public void Init(SPAnimationController controller, string uniqueHash = null)
         {
             if (_controller != null) throw new System.InvalidOperationException("Cannot initialize a clip that has already been initialized.");
@@ -307,7 +307,7 @@ namespace com.spacepuppy.Anim
                     this.Speed = this.Duration / value;
             }
         }
-        
+
         public bool Enabled
         {
             get { return (_state != null) ? _state.enabled : false; }
@@ -353,8 +353,8 @@ namespace com.spacepuppy.Anim
         public ISPAnim CreateAnimatableState()
         {
             if (_controller == null) throw new System.InvalidOperationException("This clip has not been initialized.");
-            
-            if(_clip is AnimationClip)
+
+            if (_clip is AnimationClip)
             {
                 if (_state == null)
                 {
@@ -373,7 +373,7 @@ namespace com.spacepuppy.Anim
                 if (_timeSupplier.IsCustom) a.TimeSupplier = _timeSupplier.TimeSupplier as ITimeSupplier;
                 return a;
             }
-            else if(_clip is IScriptableAnimationClip)
+            else if (_clip is IScriptableAnimationClip)
             {
                 var a = (_clip as IScriptableAnimationClip).CreateState(_controller) ?? SPAnim.Null;
                 a.Speed = _speed;
@@ -391,7 +391,7 @@ namespace com.spacepuppy.Anim
         {
             if (_controller == null) return;
 
-            if(_clip is AnimationClip)
+            if (_clip is AnimationClip)
             {
                 if (_state == null)
                 {
@@ -408,7 +408,7 @@ namespace com.spacepuppy.Anim
                 //_controller.PlayInternal(_state.name, mode, _layer);
                 _controller.PlayInternal(_id, mode, _layer);
             }
-            else if(_clip is IScriptableAnimationClip)
+            else if (_clip is IScriptableAnimationClip)
             {
                 var state = (_clip as IScriptableAnimationClip).CreateState(_controller) ?? SPAnim.Null;
                 state.Speed = _speed;
@@ -421,7 +421,7 @@ namespace com.spacepuppy.Anim
         public ISPAnim Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             var a = this.CreateAnimatableState();
-            if(a != null) a.Play(queueMode, playMode);
+            if (a != null) a.Play(queueMode, playMode);
             return a;
         }
 
@@ -574,6 +574,15 @@ namespace com.spacepuppy.Anim
             }
 
             public string Name { get { return _name; } }
+        }
+
+        #endregion
+
+        #region Static Utils
+
+        public static bool IsValid(SPAnimClip clip)
+        {
+            return clip != null && clip.Clip != null && clip.Initialized;
         }
 
         #endregion

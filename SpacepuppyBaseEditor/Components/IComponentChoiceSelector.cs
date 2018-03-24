@@ -205,4 +205,52 @@ namespace com.spacepuppyeditor.Components
 
     }
 
+    public class MultiTypeComponentChoiceSelector : DefaultComponentChoiceSelector
+    {
+
+        public System.Type[] AllowedTypes;
+
+        protected override Component[] DoGetComponents()
+        {
+            return GetComponentsFromSerializedProperty(this.Property, this.AllowedTypes, this.RestrictionType, this.Drawer.ForceOnlySelf, this.Drawer.SearchChildren, this.AllowProxy);
+        }
+        
+        public static Component[] GetComponentsFromSerializedProperty(SerializedProperty property, System.Type[] allowedTypes, System.Type restrictionType, bool forceSelfOnly, bool searchChildren, bool allowProxy)
+        {
+            if (allowedTypes == null || allowedTypes.Length == 0) return ArrayUtil.Empty<Component>();
+
+            var go = DefaultComponentChoiceSelector.GetGameObjectFromSource(property, forceSelfOnly);
+            if (go == null) return ArrayUtil.Empty<Component>();
+
+            using (var set = com.spacepuppy.Collections.TempCollection.GetSet<Component>())
+            {
+                if (searchChildren)
+                {
+                    foreach (var c in go.GetComponentsInChildren<Component>())
+                    {
+                        if (!ObjUtil.IsType(c, restrictionType, allowProxy)) continue;
+                        foreach (var tp in allowedTypes)
+                        {
+                            if (ObjUtil.IsType(c, tp, allowProxy)) set.Add(c);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var c in go.GetComponents<Component>())
+                    {
+                        if (!ObjUtil.IsType(c, restrictionType, allowProxy)) continue;
+                        foreach (var tp in allowedTypes)
+                        {
+                            if (ObjUtil.IsType(c, tp, allowProxy)) set.Add(c);
+                        }
+                    }
+                }
+
+                return (from c in set orderby c.GetType().Name select c).ToArray();
+            }
+        }
+
+    }
+
 }

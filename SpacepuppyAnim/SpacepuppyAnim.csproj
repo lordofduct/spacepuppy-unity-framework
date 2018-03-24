@@ -68,7 +68,6 @@
     <Compile Include="Anim\Legacy\SPLegacyAnimation.cs" />
     <Compile Include="Anim\MaskCollection.cs" />
     <Compile Include="Anim\PropertyAttributes.cs" />
-    <Compile Include="Anim\SPAnimUtil.cs" />
     <Compile Include="Mecanim\MecanimSpeedScaler.cs" />
     <Compile Include="Anim\SPAnimationController.cs" />
     <Compile Include="Anim\SPAnimClip.cs" />

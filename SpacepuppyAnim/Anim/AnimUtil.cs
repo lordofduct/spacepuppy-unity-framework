@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using System.Linq;
 
+using com.spacepuppy.Utils;
+
 namespace com.spacepuppy.Anim
 {
     public static class AnimUtil
     {
+        
+        #region Animation Extension Methods
 
         public static void ClearAnimations(Animation anim)
         {
@@ -36,6 +40,80 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        #endregion
+
+        #region ISPAnim Extension Methods
+
+        public static void Play(this ISPAnim anim, float speed, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (anim == null) throw new System.ArgumentNullException("anim");
+            anim.Speed = speed;
+            anim.Play(queueMode, playMode);
+        }
+
+        public static void Play(this ISPAnim anim, float speed, float startTime, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (anim == null) throw new System.ArgumentNullException("anim");
+            anim.Speed = speed;
+            anim.Play(queueMode, playMode);
+            anim.Time = Mathf.Clamp(startTime, 0f, anim.Duration);
+        }
+
+        public static void CrossFade(this ISPAnim anim, float speed, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (anim == null) throw new System.ArgumentNullException("anim");
+            anim.Speed = speed;
+            anim.CrossFade(fadeLength, queueMode, playMode);
+        }
+
+        public static void CrossFade(this ISPAnim anim, float speed, float fadeLength, float startTime, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
+        {
+            if (anim == null) throw new System.ArgumentNullException("anim");
+            anim.Speed = speed;
+            anim.CrossFade(fadeLength, queueMode, playMode);
+            anim.Time = Mathf.Clamp(startTime, 0f, anim.Duration);
+        }
+
+        #endregion
+
+        #region Scheduling Methods
+
+        public static bool TrySchedule(object animtoken, System.Action<object> callback)
+        {
+            if (callback == null) throw new System.ArgumentNullException("callback");
+            if (animtoken == null) return false;
+
+            if(animtoken is ISPAnim)
+            {
+                (animtoken as ISPAnim).Schedule((a) => callback(a));
+                return true;
+            }
+            else if(animtoken is IRadicalWaitHandle)
+            {
+                var handle = animtoken as IRadicalWaitHandle;
+                if(handle.IsComplete)
+                {
+                    callback(animtoken);
+                }
+                else
+                {
+                    handle.OnComplete((h) => callback(h));
+                }
+
+                return true;
+            }
+            else if (animtoken is AnimationState)
+            {
+                GameLoopEntry.Hook.StartCoroutine((animtoken as AnimationState).ScheduleLegacy((a) => callback(a)));
+                return true;
+            }
+            else
+            {
+                GameLoopEntry.Hook.StartCoroutine(CoroutineUtil.Wait(animtoken, callback));
+            }
+
+            return false;
+        }
 
         public static void Schedule(this ISPAnim anim, System.Action<ISPAnim> callback, SPTimePeriod period)
         {
@@ -82,6 +160,20 @@ namespace com.spacepuppy.Anim
                 return handle;
             }
         }
+
+        public static System.Collections.IEnumerator ScheduleLegacy(this AnimationState state, System.Action<AnimationState> callback)
+        {
+            if (callback == null) throw new System.ArgumentNullException("callback");
+
+            while (state != null)
+            {
+                yield return null;
+            }
+
+            callback(state);
+        }
+
+        #endregion
 
     }
 }

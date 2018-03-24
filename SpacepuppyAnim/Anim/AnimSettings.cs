@@ -46,6 +46,21 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        public void Apply(ISPAnim anim)
+        {
+            if(anim is SPAnim)
+            {
+                this.Apply(anim as SPAnim);
+                return;
+            }
+            //can't set weight
+            anim.Speed = this.speed;
+            anim.Layer = this.layer;
+            anim.WrapMode = this.wrapMode;
+            //can't set blend mode
+            anim.TimeSupplier = this.timeSupplier.TimeSupplier;
+        }
+
         #endregion
 
         #region Static Interface

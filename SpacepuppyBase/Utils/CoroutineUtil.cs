@@ -5,6 +5,13 @@ namespace com.spacepuppy.Utils
     public static class CoroutineUtil
     {
 
+        public static System.Collections.IEnumerator Wait(object instruction, System.Action<object> callback)
+        {
+            if (callback == null) throw new System.ArgumentNullException("callback");
+            yield return instruction;
+            callback(instruction);
+        }
+
         #region StartCoroutine
 
         public static Coroutine StartCoroutine(this MonoBehaviour behaviour, System.Collections.IEnumerable enumerable)

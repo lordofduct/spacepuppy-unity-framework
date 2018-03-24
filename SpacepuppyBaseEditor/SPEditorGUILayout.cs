@@ -121,6 +121,33 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region FlatPropertyField
+
+        /// <summary>
+        /// Draws all children of a property
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static bool FlatChildPropertyField(SerializedProperty property)
+        {
+            if (property == null) throw new System.ArgumentNullException("property");
+
+            EditorGUI.BeginChangeCheck();
+            var iterator = property.Copy();
+            var end = property.GetEndProperty();
+            for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
+            {
+                if (SerializedProperty.EqualContents(iterator, end))
+                    break;
+                
+                PropertyField(iterator, EditorHelper.TempContent(iterator.displayName), true);
+            }
+            return EditorGUI.EndChangeCheck();
+        }
+
+        #endregion
+
         #region LayerMaskField
 
         public static LayerMask LayerMaskField(string label, int selectedMask)

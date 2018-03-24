@@ -12,6 +12,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Anim
 {
 
+    [System.Obsolete("Use i_PlayAnimation instead!")]
     [Infobox("Be aware that this is a BlockingTriggerableMechanism, if called from a BlockingTrigger (in a coroutine for example), it will block that sequence until complete is fired. If it shouldn't block, be sure to uncheck 'UseAsBlockingYieldInstruction'.", MessageType = InfoBoxMessageType.Info)]
     public class i_PlaySPAnimation : TriggerableMechanism, IObservableTrigger, IBlockingTriggerableMechanism
     {

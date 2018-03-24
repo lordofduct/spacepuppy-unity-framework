@@ -166,11 +166,15 @@ namespace com.spacepuppyeditor
                             }
                         }
 
+                        /*
+                         * Unity now supports doing this itself.
+                         * 
                         var obsoleteAttrib = componentType.GetCustomAttributes(typeof(System.ObsoleteAttribute), false).FirstOrDefault() as System.ObsoleteAttribute;
                         if (obsoleteAttrib != null)
                         {
                             _headerDrawers.Add(new ObsoleteHeaderDrawer("This script is considered deprecated:\n\t" + obsoleteAttrib.Message));
                         }
+                        */
 
                         _addons = SPEditorAddonDrawer.GetDrawers(this.serializedObject);
                     }

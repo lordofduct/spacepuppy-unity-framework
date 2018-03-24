@@ -33,15 +33,15 @@ namespace com.spacepuppyeditor.Scenario
 
         #region Fields
 
-        public System.Type TargetType;
-        public bool SearchChildren;
+        private System.Type _targetType;
         public bool ManuallyConfigured;
         public bool DefaultFromSelf;
         public bool AlwaysExpanded;
 
         private SelectableComponentPropertyDrawer _objectDrawer = new SelectableComponentPropertyDrawer()
         {
-            AllowNonComponents = true
+            AllowNonComponents = true,
+            AllowProxy = true
         };
         private bool _defaultSet;
 
@@ -61,6 +61,32 @@ namespace com.spacepuppyeditor.Scenario
             this.SearchChildren = searchChildren;
             this.DefaultFromSelf = defaultFromSelf;
             this.AlwaysExpanded = alwaysExpanded;
+        }
+
+        #endregion
+
+        #region Properties
+        
+        public System.Type TargetType
+        {
+            get { return _targetType; }
+            set
+            {
+                _targetType = value;
+                _objectDrawer.RestrictionType = value ?? typeof(Component);
+            }
+        }
+
+        public bool SearchChildren
+        {
+            get { return _objectDrawer.SearchChildren; }
+            set { _objectDrawer.SearchChildren = value; }
+        }
+
+        public IComponentChoiceSelector ChoiceSelector
+        {
+            get { return _objectDrawer.ChoiceSelector; }
+            set { _objectDrawer.ChoiceSelector = value; }
         }
 
         #endregion
@@ -175,9 +201,6 @@ namespace com.spacepuppyeditor.Scenario
             }
             else
             {
-                _objectDrawer.RestrictionType = this.TargetType ?? typeof(Component);
-                _objectDrawer.SearchChildren = this.SearchChildren;
-                _objectDrawer.AllowProxy = true;
                 _objectDrawer.OnGUI(r1, targetProp, GUIContent.none);
             }
 
