@@ -44,9 +44,10 @@ namespace com.spacepuppyeditor.Anim
             this.DrawPropertyField(PROP_ORDER);
 
             this.DrawTargetAnimatorProperty();
-            
-            var controller = this.serializedObject.FindProperty(PROP_TARGETANIMATOR).FindPropertyRelative(TriggerableTargetObjectPropertyDrawer.PROP_TARGET).objectReferenceValue;
-            if(controller is Animation || controller is SPAnimationController)
+
+            var propTarget = this.serializedObject.FindProperty(PROP_TARGETANIMATOR);
+            var controller = propTarget.FindPropertyRelative(TriggerableTargetObjectPropertyDrawer.PROP_TARGET).objectReferenceValue;
+            if(controller is Animation || controller is SPAnimationController || object.ReferenceEquals(controller, null))
             {
                 var propMode = this.serializedObject.FindProperty(PROP_MODE);
                 SPEditorGUILayout.PropertyField(propMode);

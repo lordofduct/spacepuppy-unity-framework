@@ -695,6 +695,14 @@ namespace com.spacepuppy.Collections
             return this.DoRemoveFromBack();
         }
 
+        public T PeekPop()
+        {
+            if (this.IsEmpty)
+                throw new InvalidOperationException("The deque is empty.");
+
+            return this.DoGetItem(Count - 1);
+        }
+
         /// <summary>
         /// Removes and returns the first element of this deque.
         /// </summary>
@@ -706,6 +714,14 @@ namespace com.spacepuppy.Collections
                 throw new InvalidOperationException("The deque is empty.");
 
             return this.DoRemoveFromFront();
+        }
+
+        public T PeekUnshift()
+        {
+            if (this.IsEmpty)
+                throw new InvalidOperationException("The deque is empty.");
+
+            return this.DoGetItem(0);
         }
 
         /// <summary>
@@ -858,7 +874,10 @@ namespace com.spacepuppy.Collections
         private T DoRemoveFromFront()
         {
             --Count;
-            return buffer[PostIncrement(1)];
+            int index = PostIncrement(1);
+            var result = buffer[index];
+            buffer[index] = default(T);
+            return result;
         }
 
         /// <summary>

@@ -9,4 +9,13 @@
         Texture = 3
     }
 
+    public enum MaterialPropertyValueTypeMember
+    {
+        None = 0,
+        X,
+        Y,
+        Z,
+        W
+    }
+
 }

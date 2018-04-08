@@ -38,7 +38,13 @@ namespace com.spacepuppy
 
         public static T Get<T>() where T : class, IService
         {
-            return Entry<T>.Instance;
+            var result = Entry<T>.Instance;
+            if (!object.ReferenceEquals(result, null) && result.IsNullOrDestroyed())
+            {
+                result = null;
+                Entry<T>.Instance = null;
+            }
+            return result;
         }
 
         public static void Register<T>(T service) where T : class, IService
@@ -67,17 +73,26 @@ namespace com.spacepuppy
             if (tp == null) throw new System.ArgumentNullException("tp");
             if (!typeof(IService).IsAssignableFrom(tp)) throw new System.ArgumentException("Type is not a IService");
 
+            object result = null;
             try
             {
                 var klass = typeof(Entry<>);
                 klass.MakeGenericType(tp);
                 var field = klass.GetField("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                return field.GetValue(null);
+                result = field.GetValue(null);
+
+                if (!object.ReferenceEquals(result, null) && result.IsNullOrDestroyed())
+                {
+                    result = null;
+                    field.SetValue(null, null);
+                }
             }
             catch (System.Exception ex)
             {
                 throw new System.InvalidOperationException("Failed to resolve type '" + tp.Name + "'.", ex);
             }
+
+            return result;
         }
 
         public static void Register(System.Type tp, IService service)
@@ -131,6 +146,7 @@ namespace com.spacepuppy
             if (destroyIfCan && inst is UnityEngine.Object)
                 ObjUtil.SmartDestroy(inst as UnityEngine.Object);
         }
+
 
 
         public static TConcrete Create<TServiceType, TConcrete>(bool persistent = false, string name = null) where TServiceType : class, IService

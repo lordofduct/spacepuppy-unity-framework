@@ -356,31 +356,27 @@ namespace com.spacepuppy.Movement
             public void PurgeStackedState(IMovementStyle style)
             {
                 if (object.ReferenceEquals(style, null)) throw new System.ArgumentNullException("style");
-                if (_styleStack.Count == 0) return;
 
-                //purge it
-                //int depth = _styleStack.Depth(style);
-                //if (depth > 0)
-                //{
-                //    var st = new Stack<IMovementStyle>(depth);
-                //    while (st.Count < depth) st.Push(_styleStack.Pop());
-                //    _styleStack.Pop();
-                //    style.OnPurgedFromStack();
-                //    while (st.Count > 0) _styleStack.Push(st.Pop());
-                //}
-                //else if (depth == 0)
-                //{
-                //    _styleStack.Pop();
-                //    style.OnPurgedFromStack();
-                //}
-
-                int index = _styleStack.IndexOf(style);
-                if(index > 0)
+                if (_styleStack.Count > 0)
                 {
-                    _styleStack.RemoveAt(index);
-                    style.OnPurgedFromStack();
+                    if (object.ReferenceEquals(_current, style))
+                    {
+                        this.PopState();
+                    }
+                    else
+                    {
+                        int index = _styleStack.IndexOf(style);
+                        if (index > 0)
+                        {
+                            _styleStack.RemoveAt(index);
+                            style.OnPurgedFromStack();
+                        }
+                    }
                 }
-                //we don't purge if the stack doesn't contain the style, or if it's the bottom entry... the bottom entry can only be swapped out
+                else if (object.ReferenceEquals(_current, style))
+                {
+                    this.ChangeStateToNull(float.NegativeInfinity);
+                }
             }
 
             public void ChangeCurrentUnstackedState(IMovementStyle style)

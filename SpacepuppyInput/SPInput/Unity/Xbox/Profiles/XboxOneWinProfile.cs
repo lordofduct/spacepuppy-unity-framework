@@ -9,6 +9,7 @@ namespace com.spacepuppy.SPInput.Unity.Xbox.Profiles
     [InputProfileDescription("Xbox One Controller", TargetPlatform.Windows, Description = "Xbox One Controller (Windows)")]
     [InputProfileJoystickName(XboxInputProfile.GENERIC_XBOXONE)]
     [InputProfileJoystickName("Controller (XBOX One For Windows)")]
+    [InputProfileJoystickName("Controller (Xbox One For Windows)")]
     public class XboxOneWinProfile : XboxInputProfile
     {
 

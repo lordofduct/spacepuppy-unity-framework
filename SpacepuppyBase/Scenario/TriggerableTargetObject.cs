@@ -11,7 +11,7 @@ namespace com.spacepuppy.Scenario
     [System.Serializable()]
     public class TriggerableTargetObject
     {
-        
+
         public enum FindCommand
         {
             Direct = 0,
@@ -31,7 +31,7 @@ namespace com.spacepuppy.Scenario
         }
 
         #region Fields
-        
+
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("_source")]
         private bool _configured = true;
@@ -43,7 +43,7 @@ namespace com.spacepuppy.Scenario
         private ResolveByCommand _resolveBy;
         [SerializeField()]
         private string _queryString;
-        
+
         #endregion
 
         #region CONSTRUCTOR
@@ -56,12 +56,20 @@ namespace com.spacepuppy.Scenario
         {
             _configured = !defaultTriggerArg;
         }
-
-        public TriggerableTargetObject(bool defaultTriggerArg, FindCommand find, ResolveByCommand resolve)
+        
+        public TriggerableTargetObject(UnityEngine.Object target)
         {
-            _configured = !defaultTriggerArg;
-            _find = find;
-            _resolveBy = resolve;
+            this.Configure(target);
+        }
+
+        public TriggerableTargetObject(UnityEngine.Object target, FindCommand find, ResolveByCommand resolveBy = ResolveByCommand.Nothing, string resolveQuery = null)
+        {
+            this.Configure(target, find, resolveBy, resolveQuery);
+        }
+
+        public TriggerableTargetObject(FindCommand find, ResolveByCommand resolveBy, string resolveQuery)
+        {
+            this.Configure(find, resolveBy, resolveQuery);
         }
 
         #endregion
@@ -85,11 +93,14 @@ namespace com.spacepuppy.Scenario
         {
             get { return !_configured || _find >= FindCommand.FindInScene; }
         }
-        
+
         public UnityEngine.Object Target
         {
             get { return _target; }
-            set { _target = value; }
+            set
+            {
+                _target = value;
+            }
         }
 
         public FindCommand Find
@@ -109,10 +120,38 @@ namespace com.spacepuppy.Scenario
             get { return _queryString; }
             set { _queryString = value; }
         }
-        
+
         #endregion
 
         #region Methods
+
+        public void Configure(UnityEngine.Object target)
+        {
+            _configured = true;
+            _target = target;
+            _find = FindCommand.Direct;
+            _resolveBy = ResolveByCommand.Nothing;
+            _queryString = null;
+        }
+
+        public void Configure(UnityEngine.Object target, FindCommand find, ResolveByCommand resolveBy = ResolveByCommand.Nothing, string resolveQuery = null)
+        {
+            _configured = true;
+            _target = target;
+            _find = find;
+            _resolveBy = resolveBy;
+            _queryString = resolveQuery;
+        }
+
+        public void Configure(FindCommand find, ResolveByCommand resolveBy, string resolveQuery)
+        {
+            _configured = false;
+            _target = null;
+            _find = find;
+            _resolveBy = resolveBy;
+            _queryString = resolveQuery;
+        }
+        
 
         public T GetTarget<T>(object triggerArg) where T : class
         {
@@ -633,7 +672,7 @@ namespace com.spacepuppy.Scenario
         }
 
         #endregion
-        
+
         #region Special Types
 
         public class ConfigAttribute : System.Attribute

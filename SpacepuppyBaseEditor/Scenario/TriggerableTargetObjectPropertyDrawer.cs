@@ -145,6 +145,7 @@ namespace com.spacepuppyeditor.Scenario
 
             var configProp = property.FindPropertyRelative(PROP_CONFIGURED);
             var targetProp = property.FindPropertyRelative(PROP_TARGET);
+            var findProp = property.FindPropertyRelative(PROP_FIND);
 
             //var r0 = new Rect(rect.xMin, rect.yMin, EditorGUIUtility.labelWidth, rect.height);
             //rect = new Rect(r0.xMax, rect.yMin, rect.width - r0.width, rect.height);
@@ -162,6 +163,7 @@ namespace com.spacepuppyeditor.Scenario
             {
                 UpdateTargetFromSource(targetProp, e);
                 configProp.boolValue = (e != TargetSource.Arg);
+                if(e != TargetSource.Arg) findProp.SetEnumValue(TriggerableTargetObject.FindCommand.Direct);
             }
             else if(e == TargetSource.Config && !_defaultSet && targetProp.objectReferenceValue == null)
             {
@@ -176,7 +178,6 @@ namespace com.spacepuppyeditor.Scenario
             var r1 = new Rect(rect.xMin + r0.width, rect.yMin, rect.width - r0.width, rect.height);
             if(!configProp.boolValue)
             {
-                var findProp = property.FindPropertyRelative(PROP_FIND);
                 var e0 = findProp.GetEnumValue<TriggerableTargetObject.FindCommand>();
                 switch(e0)
                 {
@@ -218,8 +219,7 @@ namespace com.spacepuppyeditor.Scenario
                 r0 = new Rect(rect.xMin, rect.yMin, w0, rect.height);
                 r1 = new Rect(r0.xMax, rect.yMin, w1, rect.height);
                 var r2 = new Rect(r1.xMax, rect.yMin, w2, rect.height);
-
-                var findProp = property.FindPropertyRelative(PROP_FIND);
+                
                 var resolveProp = property.FindPropertyRelative(PROP_RESOLVEBY);
                 var queryProp = property.FindPropertyRelative(PROP_QUERY);
 
