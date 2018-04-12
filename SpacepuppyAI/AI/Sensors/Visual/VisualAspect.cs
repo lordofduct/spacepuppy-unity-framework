@@ -11,43 +11,41 @@ namespace com.spacepuppy.AI.Sensors.Visual
 
         #region Static Multiton Interface
 
-        private static MultitonPool<IAspect> _pool = new MultitonPool<IAspect>();
-
-        public static MultitonPool<IAspect> Pool { get { return _pool; } }
-
+        public static readonly MultitonPool<IAspect> Pool = new MultitonPool<IAspect>();
+        
         [System.Obsolete("Use VisualAspect.Pool instead.")]
         public static IAspect[] GetAspects()
         {
-            return _pool.FindAll(null);
+            return Pool.FindAll(null);
         }
 
         public static bool Any(System.Func<IAspect, bool> predicate)
         {
-            return !object.ReferenceEquals(_pool.Find(predicate), null);
+            return !object.ReferenceEquals(Pool.Find(predicate), null);
         }
 
         [System.Obsolete("Use VisualAspect.Pool.Find instead.")]
         public static IAspect GetAspect(System.Func<IAspect, bool> predicate)
         {
-            return _pool.Find(predicate);
+            return Pool.Find(predicate);
         }
 
         [System.Obsolete("Use VisualAspect.Pool.FindAll instead.")]
         public static IList<IAspect> GetAspects(System.Func<IAspect, bool> predicate)
         {
-            return _pool.FindAll(predicate);
+            return Pool.FindAll(predicate);
         }
 
         [System.Obsolete("Use VisualAspect.Pool.FindAll instead.")]
         public static int GetAspects(ICollection<IAspect> lst, System.Func<IAspect, bool> predicate)
         {
-            return _pool.FindAll(lst, predicate);
+            return Pool.FindAll(lst, predicate);
         }
 
         [System.Obsolete("Use VisualAspect.Pool.FindAll instead.")]
         public static int GetAspects<T>(ICollection<T> lst, System.Func<T, bool> predicate) where T : class, IAspect
         {
-            return _pool.FindAll<T>(lst, predicate);
+            return Pool.FindAll<T>(lst, predicate);
         }
 
         #endregion
@@ -69,7 +67,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
 
         protected override void OnEnable()
         {
-            _pool.AddReference(this);
+            Pool.AddReference(this);
 
             base.OnEnable();
         }
@@ -78,7 +76,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
         {
             base.OnDisable();
 
-            _pool.RemoveReference(this);
+            Pool.RemoveReference(this);
         }
 
         #endregion
