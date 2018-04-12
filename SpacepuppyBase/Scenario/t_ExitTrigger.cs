@@ -4,8 +4,10 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class t_ExitTrigger : TriggerComponent, ICompoundTriggerResponder
+    public class t_ExitTrigger : TriggerComponent, ICompoundTriggerExitResponder
     {
+
+        #region Fields
 
         public ScenarioActivatorMask Mask;
         public float CooldownInterval = 0.0f;
@@ -13,6 +15,10 @@ namespace com.spacepuppy.Scenario
 
         [System.NonSerialized()]
         private bool _coolingDown;
+
+        #endregion
+
+        #region Methods
 
         private void DoTestTriggerExit(Collider other)
         {
@@ -45,17 +51,13 @@ namespace com.spacepuppy.Scenario
             this.DoTestTriggerExit(other);
         }
 
-
-        void ICompoundTriggerResponder.OnCompoundTriggerEnter(Collider other)
-        {
-            //do nothing
-        }
-
-        void ICompoundTriggerResponder.OnCompoundTriggerExit(Collider other)
+        
+        void ICompoundTriggerExitResponder.OnCompoundTriggerExit(Collider other)
         {
             this.DoTestTriggerExit(other);
         }
 
+        #endregion
 
     }
 }

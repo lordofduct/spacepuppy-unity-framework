@@ -9,12 +9,16 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy
 {
     
-    public interface ICompoundTriggerResponder
+    public interface ICompoundTriggerEnterResponder
     {
         void OnCompoundTriggerEnter(Collider other);
-        void OnCompoundTriggerExit(Collider other);
     }
 
+    public interface ICompoundTriggerExitResponder
+    {
+        void OnCompoundTriggerExit(Collider other);
+    }
+    
     public class CompoundTrigger : SPComponent
     {
 
@@ -22,8 +26,8 @@ namespace com.spacepuppy
         
         private Dictionary<Collider, CompoundTriggerMember> _colliders = new Dictionary<Collider, CompoundTriggerMember>(ObjectInstanceIDEqualityComparer<Collider>.Default);
         private HashSet<Collider> _active = new HashSet<Collider>();
-        private System.Action<ICompoundTriggerResponder, Collider> _onEnter;
-        private System.Action<ICompoundTriggerResponder, Collider> _onExit;
+        private System.Action<ICompoundTriggerEnterResponder, Collider> _onEnter;
+        private System.Action<ICompoundTriggerExitResponder, Collider> _onExit;
 
         #endregion
 
@@ -44,7 +48,16 @@ namespace com.spacepuppy
         }
 
         #endregion
-        
+
+        #region Properties
+
+        public ICollection<Collider> Colliders
+        {
+            get { return _colliders.Keys; }
+        }
+
+        #endregion
+
         #region Methods
 
         public void SyncTriggers()
@@ -153,13 +166,13 @@ namespace com.spacepuppy
         protected virtual void OnCompoundTriggerEnter(Collider other)
         {
             if (_onEnter == null) _onEnter = (x, y) => x.OnCompoundTriggerEnter(y);
-            Messaging.Execute<ICompoundTriggerResponder, Collider>(this.gameObject, other, _onEnter);
+            Messaging.Execute<ICompoundTriggerEnterResponder, Collider>(this.gameObject, other, _onEnter);
         }
 
         protected virtual void OnCompoundTriggerExit(Collider other)
         {
             if (_onExit == null) _onExit = (x, y) => x.OnCompoundTriggerExit(y);
-            Messaging.Execute<ICompoundTriggerResponder, Collider>(this.gameObject, other, _onExit);
+            Messaging.Execute<ICompoundTriggerExitResponder, Collider>(this.gameObject, other, _onExit);
         }
 
         #endregion

@@ -55,6 +55,24 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        public SPAnimClip this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= _dict.Count) throw new System.IndexOutOfRangeException();
+
+                var e = _dict.GetEnumerator();
+                int j = 0;
+                while(e.MoveNext())
+                {
+                    if (index == j) return e.Current.Value;
+                    j++;
+                }
+
+                return null;
+            }
+        }
+
         public ICollection<string> Keys { get { return _dict.Keys; } }
 
         #endregion
