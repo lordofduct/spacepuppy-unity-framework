@@ -72,7 +72,22 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
         public void SignalBlip()
         {
+            if (_currentToken != null) return;
 
+            var pos = this.transform.position;
+            float d, r;
+
+            var e = AudibleSensor.Pool.GetEnumerator();
+            while (e.MoveNext())
+            {
+                var sensor = e.Current;
+                d = (sensor.transform.position - pos).sqrMagnitude;
+                r = (sensor.Range + _range);
+                if (d < r * r)
+                {
+                    sensor.SignalBlip(this);
+                }
+            }
         }
 
         public SirenToken BeginSignalSiren()
@@ -81,6 +96,7 @@ namespace com.spacepuppy.AI.Sensors.Audible
             if (_activeSensors == null) _activeSensors = new HashSet<AudibleSensor>();
 
             _currentToken = new SirenToken(this);
+            (this as IUpdateable).Update();
             GameLoopEntry.UpdatePump.Add(this);
             return _currentToken;
         }
