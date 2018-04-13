@@ -51,6 +51,26 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
+        #region Properties
+
+        public Trigger OnComplete
+        {
+            get { return _onComplete; }
+        }
+
+        public Trigger OnTick
+        {
+            get { return _onTick; }
+        }
+
+        public string TweenToken
+        {
+            get { return _tweenToken; }
+            set { _tweenToken = value; }
+        }
+
+        #endregion
+
         #region Methods
 
         #endregion
