@@ -97,7 +97,7 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
             _currentToken = new SirenToken(this);
             (this as IUpdateable).Update();
-            GameLoopEntry.UpdatePump.Add(this);
+            GameLoopEntry.RegisterNextUpdate(this);
             return _currentToken;
         }
 
