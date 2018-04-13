@@ -266,6 +266,7 @@
     <Compile Include="Scenario\i_TriggerOnIfThen.cs" />
     <Compile Include="Scenario\i_TriggerRandomElimination.cs" />
     <Compile Include="Scenario\i_TriggerSequence.cs" />
+    <Compile Include="Scenario\i_TweenTo.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
     <Compile Include="Scenario\t_Flicker.cs" />
     <Compile Include="Scenario\t_OnClick.cs" />

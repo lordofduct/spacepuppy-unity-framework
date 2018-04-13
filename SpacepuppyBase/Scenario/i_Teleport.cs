@@ -41,6 +41,12 @@ namespace com.spacepuppy.Scenario
             get { return _location; }
         }
 
+        public bool OrientWithLocationRotation
+        {
+            get { return _orientWithLocationRotation; }
+            set { _orientWithLocationRotation = value; }
+        }
+
         public bool TeleportEntireEntity
         {
             get { return _teleportEntireEntity; }
