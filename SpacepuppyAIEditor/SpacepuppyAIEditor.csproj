@@ -54,6 +54,9 @@
     <Compile Include="AI\AISubControllerInspector.cs" />
     <Compile Include="AI\AIVariableNamePropertyDrawer.cs" />
     <Compile Include="AI\IAIStateHierarchyDrawer.cs" />
+    <Compile Include="AI\Sensors\Audible\AudibleAspectInspector.cs" />
+    <Compile Include="AI\Sensors\Audible\AudibleSensorInspector.cs" />
+    <Compile Include="AI\Sensors\SensorRenderUtil.cs" />
     <Compile Include="AI\Sensors\Visual\RightCylindricalVisualSensorInspector.cs" />
     <Compile Include="AI\Sensors\Visual\SphericalVisionVisualSensorInspector.cs" />
     <Compile Include="AI\Sensors\Visual\TunnelVisionVisualSensorInspector.cs" />

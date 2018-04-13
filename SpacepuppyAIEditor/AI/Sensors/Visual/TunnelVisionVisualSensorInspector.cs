@@ -13,50 +13,7 @@ namespace com.spacepuppyeditor.AI.Sensors.Visual
     [CustomEditor(typeof(TunnelVisionVisualSensor))]
     public class TunnelVisionVisualSensorInspector : SPEditor
     {
-
-        #region Fields
-
-        private static Material _material;
-        private static Material _lineMaterial;
-        private static Material Material
-        {
-            get
-            {
-                if (_material == null)
-                {
-                    var shader = Shader.Find("SPEditor/VisualSensorArcShader");
-                    if (shader == null)
-                    {
-                        shader = MaterialHelper.DefaultMaterial.shader;
-                    }
-                    _material = new Material(shader);
-                    _material.hideFlags = HideFlags.HideAndDontSave;
-                    _material.shader.hideFlags = HideFlags.HideAndDontSave;
-                }
-                return _material;
-            }
-        }
-        private static Material LineMaterial
-        {
-            get
-            {
-                if (_lineMaterial == null)
-                {
-                    var shader = Shader.Find("SPEditor/VisualSensorLineShader");
-                    if (shader == null)
-                    {
-                        shader = MaterialHelper.DefaultLineMaterial.shader;
-                    }
-                    _lineMaterial = new Material(shader);
-                    _lineMaterial.hideFlags = HideFlags.HideAndDontSave;
-                    _lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
-                }
-                return _lineMaterial;
-            }
-        }
-
-        #endregion
-
+        
         #region OnInspector
 
         #endregion
@@ -78,7 +35,7 @@ namespace com.spacepuppyeditor.AI.Sensors.Visual
             var localEnd = new Vector3(0f, 0f, targ.Range);
 
 
-            var lineMat = TunnelVisionVisualSensorInspector.LineMaterial;
+            var lineMat = SensorRenderUtil.LineMaterial;
             lineMat.SetColor("_Color", color);
             for (int i = 0; i < lineMat.passCount; ++i)
             {
@@ -101,7 +58,7 @@ namespace com.spacepuppyeditor.AI.Sensors.Visual
                 }
             }
 
-            var mat = TunnelVisionVisualSensorInspector.Material;
+            var mat = SensorRenderUtil.ArcMaterial;
             mat.SetColor("_Color", color);
             mat.SetFloat("_angle", 360f / 360f);
             for (int i = 0; i < mat.passCount; ++i)

@@ -55,6 +55,10 @@
     <Compile Include="AI\IAINode.cs" />
     <Compile Include="AI\Scenario\i_ChangeAIState.cs" />
     <Compile Include="AI\Scenario\t_OnSense.cs" />
+    <Compile Include="AI\Sensors\Audible\AudibleAspect.cs" />
+    <Compile Include="AI\Sensors\Audible\AudibleSensor.cs" />
+    <Compile Include="AI\Sensors\Audible\IAudibleResponder.cs" />
+    <Compile Include="AI\Sensors\Audible\SirenToken.cs" />
     <Compile Include="AI\Sensors\Collision\ColliderAspect.cs" />
     <Compile Include="AI\Sensors\Collision\ColliderSensor.cs" />
     <Compile Include="AI\Sensors\IAspect.cs" />

@@ -43,6 +43,15 @@ namespace com.spacepuppy
             }
         }
 
+        /// <summary>
+        /// Adds the IUpdateable after the next update cycle.
+        /// </summary>
+        /// <param name="obj"></param>
+        public void DelayedAdd(IUpdateable obj)
+        {
+            _toAdd.Add(obj);
+        }
+
         public void Remove(IUpdateable obj)
         {
             if (_inUpdate)
