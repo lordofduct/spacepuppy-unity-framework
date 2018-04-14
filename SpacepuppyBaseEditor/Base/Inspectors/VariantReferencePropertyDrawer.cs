@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Components;
@@ -17,6 +18,7 @@ namespace com.spacepuppyeditor.Base
 
         #region Fields
 
+        const string PROP_VARIANTTYPE = "_type";
         const string PROP_UNITYOBJREF = "_unityObjectReference";
         const string PROP_STRING = "_string";
         const float REF_SELECT_WIDTH = 70f;
@@ -290,6 +292,7 @@ namespace com.spacepuppyeditor.Base
             _selectComponentDrawer.ShowXButton = false;
             var targProp = property.FindPropertyRelative(PROP_UNITYOBJREF);
             var memberProp = property.FindPropertyRelative(PROP_STRING);
+            var vtypeProp = property.FindPropertyRelative(PROP_VARIANTTYPE);
 
             if (targProp.objectReferenceValue == null)
             {
@@ -300,7 +303,12 @@ namespace com.spacepuppyeditor.Base
                 var r1 = new Rect(position.xMin, position.yMin, position.width * 0.4f, position.height);
                 var r2 = new Rect(r1.xMax, position.yMin, position.width - r1.width, position.height);
                 _selectComponentDrawer.OnGUI(r1, targProp);
-                memberProp.stringValue = SPEditorGUI.ReflectedPropertyField(r2, targProp.objectReferenceValue, memberProp.stringValue, com.spacepuppy.Dynamic.DynamicMemberAccess.Read);
+                
+                System.Reflection.MemberInfo selectedMember;
+                EditorGUI.BeginChangeCheck();
+                memberProp.stringValue = SPEditorGUI.ReflectedPropertyField(r2, targProp.objectReferenceValue, memberProp.stringValue, com.spacepuppy.Dynamic.DynamicMemberAccess.Read, out selectedMember);
+                if (EditorGUI.EndChangeCheck())
+                    vtypeProp.SetEnumValue<VariantType>(selectedMember != null ? VariantReference.GetVariantType(DynamicUtil.GetReturnType(selectedMember)) : VariantType.Null);
             }
         }
 
@@ -311,11 +319,13 @@ namespace com.spacepuppyeditor.Base
             _selectComponentDrawer.ShowXButton = false;
             var targProp = property.FindPropertyRelative(PROP_UNITYOBJREF);
             var evalProp = property.FindPropertyRelative(PROP_STRING);
+            var vtypeProp = property.FindPropertyRelative(PROP_VARIANTTYPE);
 
             var r1 = new Rect(position.xMin, position.yMin, position.width * 0.4f, position.height);
             var r2 = new Rect(r1.xMax, position.yMin, position.width - r1.width, position.height);
             _selectComponentDrawer.OnGUI(r1, targProp);
             evalProp.stringValue = EditorGUI.TextField(r2, evalProp.stringValue);
+            vtypeProp.SetEnumValue<VariantType>(VariantType.Null);
         }
 
         #endregion

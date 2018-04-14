@@ -95,12 +95,44 @@ namespace com.spacepuppy.Dynamic
         private static com.spacepuppy.Collections.ObjectCachePool<Evaluator> _pool = new ObjectCachePool<Evaluator>(64);
         private static com.spacepuppy.Collections.ObjectCachePool<ReusableStringReader> _readerPool = new ObjectCachePool<ReusableStringReader>(64);
 
-        public static Vector4 Eval(string command, object x)
+        public static object EvalValue(string command, object x)
         {
             var obj = _pool.GetInstance();
             try
             {
-                return obj.EvalStatement(command, x);
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                State t1;
+                bool t2;
+                Vector4 result = obj.EvalStatement(out t1, out t2);
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                switch (t1)
+                {
+                    case State.None:
+                        return result;
+                    case State.Scalar:
+                        return result.x;
+                    case State.Vector:
+                        return result;
+                    case State.Quaternion:
+                        return ConvertUtil.ToQuaternion(result);
+                    default:
+                        return result;
+                }
             }
             finally
             {
@@ -140,6 +172,19 @@ namespace com.spacepuppy.Dynamic
             try
             {
                 return ConvertUtil.ToVector3(obj.EvalStatement(command, x));
+            }
+            finally
+            {
+                _pool.Release(obj);
+            }
+        }
+
+        public static Vector4 EvalVector4(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            try
+            {
+                return obj.EvalStatement(command, x);
             }
             finally
             {

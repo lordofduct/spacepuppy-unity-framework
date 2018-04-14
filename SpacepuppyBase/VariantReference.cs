@@ -69,38 +69,52 @@ namespace com.spacepuppy
         {
             get
             {
-                switch (_type)
+                if(_mode == RefMode.Eval)
                 {
-                    case VariantType.Object:
-                        return this.ObjectValue;
-                    case VariantType.String:
-                        return this.StringValue;
-                    case VariantType.Boolean:
-                        return this.BoolValue;
-                    case VariantType.Integer:
-                        return this.IntValue;
-                    case VariantType.Float:
-                        return this.FloatValue;
-                    case VariantType.Double:
-                        return this.DoubleValue;
-                    case VariantType.Vector2:
-                        return this.Vector2Value;
-                    case VariantType.Vector3:
-                        return this.Vector3Value;
-                    case VariantType.Quaternion:
-                        return this.QuaternionValue;
-                    case VariantType.Color:
-                        return this.ColorValue;
-                    case VariantType.DateTime:
-                        return this.DateValue;
-                    case VariantType.GameObject:
-                        return this.GameObjectValue;
-                    case VariantType.Component:
-                        return this.ComponentValue;
-                    case VariantType.LayerMask:
-                        return this.LayerMaskValue;
-                    case VariantType.Rect:
-                        return this.RectValue;
+                    try
+                    {
+                        return Evaluator.EvalValue(_string, _unityObjectReference);
+                    }
+                    catch
+                    {
+                        Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                    }
+                }
+                else
+                {
+                    switch (_type)
+                    {
+                        case VariantType.Object:
+                            return this.ObjectValue;
+                        case VariantType.String:
+                            return this.StringValue;
+                        case VariantType.Boolean:
+                            return this.BoolValue;
+                        case VariantType.Integer:
+                            return this.IntValue;
+                        case VariantType.Float:
+                            return this.FloatValue;
+                        case VariantType.Double:
+                            return this.DoubleValue;
+                        case VariantType.Vector2:
+                            return this.Vector2Value;
+                        case VariantType.Vector3:
+                            return this.Vector3Value;
+                        case VariantType.Quaternion:
+                            return this.QuaternionValue;
+                        case VariantType.Color:
+                            return this.ColorValue;
+                        case VariantType.DateTime:
+                            return this.DateValue;
+                        case VariantType.GameObject:
+                            return this.GameObjectValue;
+                        case VariantType.Component:
+                            return this.ComponentValue;
+                        case VariantType.LayerMask:
+                            return this.LayerMaskValue;
+                        case VariantType.Rect:
+                            return this.RectValue;
+                    }
                 }
 
                 return null;
@@ -649,7 +663,7 @@ namespace com.spacepuppy
                     case RefMode.Eval:
                         try
                         {
-                            return Evaluator.Eval(_string, _unityObjectReference);
+                            return Evaluator.EvalVector4(_string, _unityObjectReference);
                         }
                         catch
                         {
@@ -1163,6 +1177,7 @@ namespace com.spacepuppy
 
             _string = statement;
             _unityObjectReference = optionalParam;
+            _type = VariantType.Null;
         }
 
         private object EvaluateProperty()
