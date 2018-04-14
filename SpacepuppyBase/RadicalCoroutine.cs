@@ -184,7 +184,7 @@ namespace com.spacepuppy
         #endregion
 
         #region Properties
-
+        
         public RadicalCoroutineDisableMode DisableMode { get { return _disableMode; } }
 
         /// <summary>
@@ -285,6 +285,30 @@ namespace com.spacepuppy
             _manager.RegisterCoroutine(this);
             _token = behaviour.StartCoroutine(this);
 
+        }
+
+        public void StartAutoKill(MonoBehaviour behaviour, object autoKillToken, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (_state != RadicalCoroutineOperatingState.Inactive) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (autoKillToken == null) throw new System.ArgumentNullException("autoKillToken");
+
+#if SP_LIB
+            var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
+#else
+            var manager = behaviour.GetComponent<RadicalCoroutineManager>();
+            if (manager == null) manager = behaviour.gameObject.AddComponent<RadicalCoroutineManager>();
+#endif
+            
+            _state = RadicalCoroutineOperatingState.Active;
+            _owner = behaviour;
+            _disableMode = disableMode;
+
+            if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
+
+            _manager = manager;
+            _manager.RegisterCoroutine(this, autoKillToken);
+            _token = behaviour.StartCoroutine(this);
         }
 
         internal void Resume(MonoBehaviour behaviour)
