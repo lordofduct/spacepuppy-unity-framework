@@ -229,6 +229,15 @@ namespace com.spacepuppy
                     _naiveTrackerTable.Remove(comp);
                 }
             }
+
+            if(_autoKillTable != null && routine.AutoKillToken != null)
+            {
+                RadicalCoroutine other;
+                if(_autoKillTable.TryGetValue(routine.AutoKillToken, out other))
+                {
+                    if (object.ReferenceEquals(other, routine)) _autoKillTable.Remove(routine.AutoKillToken);
+                }
+            }
         }
         
         private void OnComponentEnabled(object sender, System.EventArgs e)
