@@ -19,6 +19,157 @@ namespace com.spacepuppy.SPInput.Unity
         [System.NonSerialized]
         private System.Delegate _buttonDelegate;
 
+        public AxisDelegateFactory CreateAxisDelegateFactory()
+        {
+            switch (this.Type)
+            {
+                case InputType.Unknown:
+                    return null;
+                case InputType.Joystick:
+                    {
+                        switch (this.Mode)
+                        {
+                            case InputMode.Axis:
+                                {
+                                    if (float.IsNaN(this.DeadZone))
+                                        return SPInputFactory.CreateAxisDelegateFactory((SPInputId)this.Value, (SPInputId)this.AltValue);
+                                    else
+                                        return SPInputFactory.CreateAxisDelegateFactory((SPInputId)this.Value, this.AltValue != 0);
+                                }
+                            case InputMode.Trigger:
+                                return SPInputFactory.CreateTriggerDelegateFactory((SPInputId)this.Value, (AxleValueConsideration)this.AltValue);
+                            case InputMode.LongTrigger:
+                                return SPInputFactory.CreateLongTriggerDelegateFactory((SPInputId)this.Value);
+                            case InputMode.Button:
+                                return SPInputFactory.CreateTriggerDelegateFactory((SPInputId)this.Value);
+                            case InputMode.AxleButton:
+                                {
+                                    var axis = (SPInputId)this.Value;
+                                    var consid = (AxleValueConsideration)this.AltValue;
+                                    var dead = this.DeadZone;
+                                    return (j) => SPInputFactory.CreateTriggerDelegate(SPInputFactory.CreateAxleButtonDelegate(axis, consid, j, dead));
+                                }
+
+                        }
+                    }
+                    break;
+                case InputType.Keyboard:
+                    {
+                        switch (this.Mode)
+                        {
+                            case InputMode.Axis:
+                                return SPInputFactory.CreateAxisDelegateFactory((KeyCode)this.Value, (KeyCode)this.AltValue);
+                            case InputMode.Trigger:
+                            case InputMode.LongTrigger:
+                            case InputMode.Button:
+                            case InputMode.AxleButton:
+                                return SPInputFactory.CreateTriggerDelegateFactory((KeyCode)this.Value);
+                        }
+                    }
+                    break;
+                case InputType.Custom:
+                    {
+                        if (_axisDelegate is AxisDelegateFactory)
+                        {
+                            return (_axisDelegate as AxisDelegateFactory);
+                        }
+                        else if (_axisDelegate is AxisDelegate)
+                        {
+                            var d = _axisDelegate as AxisDelegate;
+                            return (j) => d;
+                        }
+                        else if (_buttonDelegate is ButtonDelegateFactory)
+                        {
+                            var d = _buttonDelegate as ButtonDelegateFactory;
+                            return (j) => SPInputFactory.CreateTriggerDelegate(d(j));
+                        }
+                        else if (_buttonDelegate is ButtonDelegate)
+                        {
+                            var d = _buttonDelegate as ButtonDelegate;
+                            return (j) => SPInputFactory.CreateTriggerDelegate(d);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+            }
+            return null;
+        }
+
+        public ButtonDelegateFactory CreateButtonDelegateFactory(Joystick joystick = Joystick.All)
+        {
+            switch (this.Type)
+            {
+                case InputType.Unknown:
+                    return null;
+                case InputType.Joystick:
+                    {
+                        switch (this.Mode)
+                        {
+                            case InputMode.Axis:
+                                return SPInputFactory.CreateAxleButtonDelegateFactory((SPInputId)this.Value, AxleValueConsideration.Absolute);
+                            case InputMode.Trigger:
+                                return SPInputFactory.CreateAxleButtonDelegateFactory((SPInputId)this.Value, (AxleValueConsideration)this.AltValue);
+                            case InputMode.LongTrigger:
+                                var id = (SPInputId)this.Value;
+                                return (j) => SPInputFactory.CreateAxleButtonDelegate(SPInputFactory.CreateLongTriggerDelegate(id, j), AxleValueConsideration.Positive);
+                            case InputMode.Button:
+                                return SPInputFactory.CreateButtonDelegateFactory((SPInputId)this.Value);
+                            case InputMode.AxleButton:
+                                return SPInputFactory.CreateAxleButtonDelegateFactory((SPInputId)this.Value, (AxleValueConsideration)this.AltValue, this.DeadZone);
+                        }
+                    }
+                    break;
+                case InputType.Keyboard:
+                    {
+                        switch (this.Mode)
+                        {
+                            case InputMode.Axis:
+                                {
+                                    KeyCode p = (KeyCode)Value;
+                                    KeyCode n = (KeyCode)AltValue;
+                                    return (j) => () => Input.GetKey(p) || Input.GetKey(n);
+                                }
+                            case InputMode.Trigger:
+                            case InputMode.LongTrigger:
+                            case InputMode.Button:
+                            case InputMode.AxleButton:
+                                return SPInputFactory.CreateButtonDelegateFactory((KeyCode)this.Value);
+                        }
+                    }
+                    break;
+                case InputType.Custom:
+                    {
+                        if (_buttonDelegate is ButtonDelegateFactory)
+                        {
+                            var d = _buttonDelegate as ButtonDelegateFactory;
+                            return d;
+                        }
+                        else if (_buttonDelegate is ButtonDelegate)
+                        {
+                            var d = _buttonDelegate as ButtonDelegate;
+                            return (j) => d;
+                        }
+                        else if (_axisDelegate is AxisDelegateFactory)
+                        {
+                            var d = _axisDelegate as AxisDelegateFactory;
+                            return (j) => SPInputFactory.CreateAxleButtonDelegate(d(j), AxleValueConsideration.Absolute);
+                        }
+                        else if (_axisDelegate is AxisDelegate)
+                        {
+                            var d = _axisDelegate as AxisDelegate;
+                            return (j) => SPInputFactory.CreateAxleButtonDelegate(d, AxleValueConsideration.Absolute);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+            }
+            return null;
+        }
+
         public AxisDelegate CreateAxisDelegate(Joystick joystick = Joystick.All)
         {
             switch(this.Type)

@@ -303,6 +303,18 @@ namespace com.spacepuppy.SPInput.Unity
             return CreateAxisDelegateFactory(id.ToSPInputId(), invert);
         }
 
+
+
+        public static AxisDelegateFactory CreateTriggerDelegateFactory(SPInputId axis, AxleValueConsideration axisConsideration = AxleValueConsideration.Positive)
+        {
+            return (j) => CreateTriggerDelegate(axis, j, axisConsideration);
+        }
+
+        public static AxisDelegateFactory CreateTriggerDelegateFactory(UnityEngine.KeyCode key)
+        {
+            return (j) => CreateTriggerDelegate(key);
+        }
+
         /// <summary>
         /// The PS4 Controller L2/R2 triggers on some platforms registers -1 when depressed, and 1 when pressed. This creates a factory that normalizes those values to 0->1
         /// </summary>
@@ -365,6 +377,16 @@ namespace com.spacepuppy.SPInput.Unity
                 }
                 return false;
             };
+        }
+
+        public static InputToken MergeAsAxis(this InputToken t1, InputToken t2)
+        {
+            return InputToken.CreateCustom((j) => t1.CreateAxisDelegate(j).Merge(t2.CreateAxisDelegate(j)));
+        }
+
+        public static InputToken MergeAsButton(this InputToken t1, InputToken t2)
+        {
+            return InputToken.CreateCustom((j) => t1.CreateButtonDelegate(j).Merge(t2.CreateButtonDelegate(j)));
         }
 
         #endregion
