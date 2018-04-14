@@ -783,6 +783,79 @@ namespace com.spacepuppy.Utils
             return v;
         }
 
+        public static Vector3 Set(this Vector3 v, CartesianAxis axis, float value)
+        {
+            switch(axis)
+            {
+                case CartesianAxis.Zneg:
+                    v.z = -value;
+                    return v;
+                case CartesianAxis.Yneg:
+                    v.y = -value;
+                    return v;
+                case CartesianAxis.Xneg:
+                    v.x = -value;
+                    return v;
+                case CartesianAxis.X:
+                    v.x = value;
+                    return v;
+                case CartesianAxis.Y:
+                    v.y = value;
+                    return v;
+                case CartesianAxis.Z:
+                    v.z = value;
+                    return v;
+                default:
+                    return v;
+            }
+        }
+
+        public static void Set(ref Vector3 v, CartesianAxis axis, float value)
+        {
+            switch (axis)
+            {
+                case CartesianAxis.Zneg:
+                    v.z = -value;
+                    break;
+                case CartesianAxis.Yneg:
+                    v.y = -value;
+                    break;
+                case CartesianAxis.Xneg:
+                    v.x = -value;
+                    break;
+                case CartesianAxis.X:
+                    v.x = value;
+                    break;
+                case CartesianAxis.Y:
+                    v.y = value;
+                    break;
+                case CartesianAxis.Z:
+                    v.z = value;
+                    break;
+            }
+        }
+
+        public static float Get(this Vector3 v, CartesianAxis axis)
+        {
+            switch (axis)
+            {
+                case CartesianAxis.Zneg:
+                    return -v.z;
+                case CartesianAxis.Yneg:
+                    return -v.y;
+                case CartesianAxis.Xneg:
+                    return -v.x;
+                case CartesianAxis.X:
+                    return v.x;
+                case CartesianAxis.Y:
+                    return v.y;
+                case CartesianAxis.Z:
+                    return v.z;
+                default:
+                    return 0f;
+            }
+        }
+
         #endregion
 
 

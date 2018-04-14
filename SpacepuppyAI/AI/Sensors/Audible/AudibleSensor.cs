@@ -21,7 +21,7 @@ namespace com.spacepuppy.AI.Sensors.Audible
         #region Fields
 
         [SerializeField()]
-        private Color _sensorColor = Color.blue;
+        private Color _sensorColor = Color.red;
 
         [SerializeField]
         private float _range;

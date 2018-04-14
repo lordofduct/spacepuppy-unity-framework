@@ -16,6 +16,7 @@ namespace com.spacepuppyeditor.AI.Sensors.Audible
     public class AudibleAspectInspector : SPEditor
     {
 
+        /*
         #region OnSceneGUI
 
         void OnSceneGUI()
@@ -53,6 +54,19 @@ namespace com.spacepuppyeditor.AI.Sensors.Audible
         }
 
         #endregion
+        */
+
+
+        [DrawGizmo(GizmoType.Selected | GizmoType.InSelectionHierarchy | GizmoType.Active | GizmoType.Pickable)]
+        static void DrawGizmoForMyScript(AudibleAspect targ, GizmoType gizmoType)
+        {
+            Vector3 pos = targ.transform.position;
+            var color = targ.AspectColor;
+            color.a = 0.4f;
+
+            Gizmos.color = color;
+            Gizmos.DrawSphere(pos, targ.Range);
+        }
 
     }
 
