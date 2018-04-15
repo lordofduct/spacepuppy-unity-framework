@@ -834,7 +834,7 @@ namespace com.spacepuppy
         #endregion
 
         #region IImmediatelyResumingYieldInstruction Handler
-
+        
         private System.EventHandler _onImmediatelyResumingYieldInstructionSignaled;
         private System.EventHandler OnImmediatelyResumingYieldInstructionSignaled
         {
@@ -858,20 +858,6 @@ namespace com.spacepuppy
                 return _onImmediatelyResumingYieldInstructionSignaled;
             }
         }
-        //private void OnImmediatelyResumingYieldInstructionSignaled(object sender, System.EventArgs e)
-        //{
-        //    var instruction = sender as IImmediatelyResumingYieldInstruction;
-        //    if (instruction == null) return;
-        //    if (_stack.CurrentOperation == instruction)
-        //    {
-        //        _stack.Pop();
-        //        this.ForceTick();
-        //    }
-        //    else
-        //    {
-        //        instruction.Signal -= this.OnImmediatelyResumingYieldInstructionSignaled;
-        //    }
-        //}
 
         #endregion
 

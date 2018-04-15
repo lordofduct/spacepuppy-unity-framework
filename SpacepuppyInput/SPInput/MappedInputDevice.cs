@@ -36,6 +36,12 @@ namespace com.spacepuppy.SPInput
             _signatures = sig ?? new MappedInputSignatureCollection<T>();
         }
 
+        public MappedInputDevice(string id, IEqualityComparer<T> comparer)
+        {
+            _id = id;
+            _signatures = new MappedInputSignatureCollection<T>(comparer);
+        }
+
         #endregion
 
         #region Properties

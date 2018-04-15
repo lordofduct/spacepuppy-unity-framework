@@ -13,8 +13,31 @@ namespace com.spacepuppy.SPInput
 
         #region Fields
 
-        private Dictionary<T, IInputSignature> _table = new Dictionary<T, IInputSignature>();
+        private Dictionary<T, IInputSignature> _table;
         private List<IInputSignature> _sortedList = new List<IInputSignature>();
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public MappedInputSignatureCollection()
+        {
+            _table = new Dictionary<T, IInputSignature>();
+        }
+
+        public MappedInputSignatureCollection(IEqualityComparer<T> comparer)
+        {
+            _table = new Dictionary<T, IInputSignature>(comparer);
+        }
+
+        #endregion
+
+        #region Properties
+
+        public IEqualityComparer<T> Comparer
+        {
+            get { return _table.Comparer; }
+        }
 
         #endregion
 
