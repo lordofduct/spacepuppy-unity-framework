@@ -827,8 +827,24 @@ namespace com.spacepuppy
 
         event System.EventHandler IImmediatelyResumingYieldInstruction.Signal
         {
-            add { _immediatelyResumingSignal += value; }
-            remove { _immediatelyResumingSignal -= value; }
+            add
+            {
+                if (_immediatelyResumingSignal == null)
+                    _immediatelyResumingSignal = value;
+                else if (_immediatelyResumingSignal == value)
+                    return;
+                else
+                    _immediatelyResumingSignal += value;
+            }
+            remove
+            {
+                if (_immediatelyResumingSignal == null)
+                    return;
+                else if (_immediatelyResumingSignal == value)
+                    _immediatelyResumingSignal = null;
+                else
+                    _immediatelyResumingSignal -= value;
+            }
         }
 
         #endregion
