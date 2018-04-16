@@ -51,9 +51,12 @@ namespace com.spacepuppy.Anim
         [SerializeField()]
         private AnimationBlendMode _blendMode = AnimationBlendMode.Blend;
         [SerializeField()]
-        private MaskCollection _masks;
-        [SerializeField()]
         private SPTime _timeSupplier;
+
+        
+
+        [SerializeField()]
+        private MaskCollection _masks;
 
         [System.NonSerialized()]
         private string _id;

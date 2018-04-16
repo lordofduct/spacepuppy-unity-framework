@@ -91,38 +91,73 @@ namespace com.spacepuppyeditor.Render
         private void _valuesList_DrawElement(Rect area, int index, bool isActive, bool isFocused)
         {
             var valueProp = _valuesProp.GetArrayElementAtIndex(index);
-            //_variantDrawer.VariantTypeRestrictedTo = GetVariantType(_property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>());
-            _variantDrawer.TypeRestrictedTo = GetType(_property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>());
+
+            var evtp = _property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUETYPE).GetEnumValue<MaterialPropertyValueType>();
+            var emtp = _property.FindPropertyRelative(MaterialPropertyReferencePropertyDrawer.PROP_VALUEMEMBER).GetEnumValue<MaterialPropertyValueTypeMember>();
+
+            _variantDrawer.TypeRestrictedTo = GetType(evtp, emtp);
             _variantDrawer.OnGUI(area, valueProp, GUIContent.none);
         }
 
         #endregion
 
-        private static VariantType GetVariantType(MaterialPropertyValueType etp)
+        private static VariantType GetVariantType(MaterialPropertyValueType evtp, MaterialPropertyValueTypeMember emtp)
         {
-            switch(etp)
+            switch (evtp)
             {
                 case MaterialPropertyValueType.Float:
                     return VariantType.Float;
                 case MaterialPropertyValueType.Color:
-                    return VariantType.Color;
+                    {
+                        switch (emtp)
+                        {
+                            case MaterialPropertyValueTypeMember.None:
+                                return VariantType.Color;
+                            default:
+                                return VariantType.Float;
+                        }
+                    }
                 case MaterialPropertyValueType.Vector:
-                    return VariantType.Vector4;
+                    {
+                        switch (emtp)
+                        {
+                            case MaterialPropertyValueTypeMember.None:
+                                return VariantType.Vector4;
+                            default:
+                                return VariantType.Float;
+                        }
+                    }
                 default:
                     return VariantType.Float;
             }
         }
 
-        private static System.Type GetType(MaterialPropertyValueType etp)
+        private static System.Type GetType(MaterialPropertyValueType evtp, MaterialPropertyValueTypeMember emtp)
         {
-            switch (etp)
+            switch (evtp)
             {
                 case MaterialPropertyValueType.Float:
                     return typeof(float);
                 case MaterialPropertyValueType.Color:
-                    return typeof(UnityEngine.Color);
+                    {
+                        switch(emtp)
+                        {
+                            case MaterialPropertyValueTypeMember.None:
+                                return typeof(UnityEngine.Color);
+                            default:
+                                return typeof(float);
+                        }
+                    }
                 case MaterialPropertyValueType.Vector:
-                    return typeof(UnityEngine.Vector4);
+                    {
+                        switch (emtp)
+                        {
+                            case MaterialPropertyValueTypeMember.None:
+                                return typeof(UnityEngine.Vector4);
+                            default:
+                                return typeof(float);
+                        }
+                    }
                 default:
                     return typeof(float);
             }
