@@ -67,7 +67,7 @@ namespace com.spacepuppy.Anim
         {
             var m = _masks[index];
             _masks.RemoveAt(index);
-            if (_owner != null) _owner.RemoveMixingTransform(m.Transform);
+            if (_owner != null && m.Transform != null) _owner.RemoveMixingTransform(m.Transform);
             if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
         }
 
@@ -113,7 +113,7 @@ namespace com.spacepuppy.Anim
         {
             foreach (var m in _masks)
             {
-                state.AddMixingTransform(m.Transform, m.Recursive);
+                if (m.Transform != null) state.AddMixingTransform(m.Transform, m.Recursive);
             }
         }
 
@@ -125,7 +125,7 @@ namespace com.spacepuppy.Anim
             {
                 foreach (var m in _masks)
                 {
-                    _owner.RemoveMixingTransform(m.Transform);
+                    if (m.Transform != null) _owner.RemoveMixingTransform(m.Transform);
                 }
             }
             _masks.Clear();
@@ -143,11 +143,11 @@ namespace com.spacepuppy.Anim
             if (i >= 0)
             {
                 _masks.RemoveAt(i);
-                if (_owner != null) _owner.RemoveMixingTransform(item.Transform);
+                if (_owner != null && item.Transform != null) _owner.RemoveMixingTransform(item.Transform);
             }
 
             _masks.Add(item);
-            if (_owner != null) _owner.AddMixingTransform(item.Transform, item.Recursive);
+            if (_owner != null && item.Transform != null) _owner.AddMixingTransform(item.Transform, item.Recursive);
             if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
         }
 
@@ -157,7 +157,7 @@ namespace com.spacepuppy.Anim
             {
                 foreach (var m in _masks)
                 {
-                    _owner.RemoveMixingTransform(m.Transform);
+                    if (m.Transform != null) _owner.RemoveMixingTransform(m.Transform);
                 }
             }
             _masks.Clear();
@@ -189,7 +189,7 @@ namespace com.spacepuppy.Anim
             if (_masks.Contains(item))
             {
                 _masks.Remove(item);
-                if (_owner != null) _owner.RemoveMixingTransform(item.Transform);
+                if (_owner != null && item.Transform != null) _owner.RemoveMixingTransform(item.Transform);
                 if (this.Changed != null) this.Changed(this, System.EventArgs.Empty);
                 return true;
             }
