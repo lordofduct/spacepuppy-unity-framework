@@ -17,7 +17,7 @@ namespace com.spacepuppy
     public interface ITokenizable
     {
 
-        object GetStateToken();
+        object CreateStateToken();
         void RestoreFromStateToken(object token);
 
     }

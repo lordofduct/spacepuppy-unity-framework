@@ -154,12 +154,12 @@ namespace com.spacepuppy.Render
 
         #region ITokenizable Interface
 
-        object ITokenizable.GetStateToken()
+        object ITokenizable.CreateStateToken()
         {
-            return this.GetStateToken();
+            return this.CreateStateToken();
         }
 
-        public Token GetStateToken()
+        public Token CreateStateToken()
         {
             var obj = new Token();
             obj.DefaultReflectionResolution = this.DefaultReflectionResolution;

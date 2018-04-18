@@ -1060,7 +1060,7 @@ namespace com.spacepuppy.Dynamic
             {
                 try
                 {
-                    return (obj as ITokenizable).GetStateToken();
+                    return (obj as ITokenizable).CreateStateToken();
                 }
                 catch
                 {
