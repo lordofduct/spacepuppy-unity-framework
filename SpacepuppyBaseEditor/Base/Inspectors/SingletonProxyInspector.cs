@@ -7,7 +7,7 @@ using System.Reflection;
 using com.spacepuppy;
 using com.spacepuppy.Dynamic;
 
-namespace com.spacepuppyeditor.Base.Inspectors
+namespace com.spacepuppyeditor.Base
 {
 
     [CustomEditor(typeof(SingletonProxy))]

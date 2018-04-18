@@ -6,7 +6,7 @@ using System.Linq;
 using com.spacepuppy.Anim;
 using com.spacepuppy.Utils;
 
-using com.spacepuppyeditor.Base.Inspectors;
+using com.spacepuppyeditor.Base;
 using com.spacepuppyeditor.Components;
 using com.spacepuppyeditor.Internal;
 

@@ -222,7 +222,7 @@ namespace com.spacepuppy.Render
             }
             else
             {
-                Dynamic.DynamicUtil.RestoreFromStateTokenDirect(this, token);
+                Dynamic.DynamicUtil.CopyState(this, token);
             }
         }
 

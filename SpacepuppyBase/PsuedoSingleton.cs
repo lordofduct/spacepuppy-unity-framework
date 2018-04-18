@@ -69,6 +69,11 @@ namespace com.spacepuppy
             return DynamicUtil.GetMembers(PsuedoSingleton<T>.Instance, includeNonPublic);
         }
 
+        IEnumerable<string> IDynamic.GetMemberNames(bool includeNonPublic)
+        {
+            return DynamicUtil.GetMemberNames(PsuedoSingleton<T>.Instance, includeNonPublic);
+        }
+
         object IDynamic.GetValue(string sMemberName, params object[] args)
         {
             return DynamicUtil.GetValue(PsuedoSingleton<T>.Instance, sMemberName, args);

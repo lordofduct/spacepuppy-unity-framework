@@ -12,7 +12,7 @@ namespace com.spacepuppy.Dynamic
     /// or used with the tween engine for dynamically configured state animation. As well as any number of other applications you may deem fit.
     /// </summary>
     [System.Serializable]
-    public class StateToken : IDynamic, IEnumerable<KeyValuePair<string, object>>, System.IDisposable, System.Runtime.Serialization.ISerializable
+    public class StateToken : IDynamic, IToken, IEnumerable<KeyValuePair<string, object>>, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
 
         private const int TEMP_STACKSIZE = 3;
@@ -137,6 +137,10 @@ namespace com.spacepuppy.Dynamic
                 DynamicUtil.SetValue(obj, e.Current.Key, e.Current.Value);
             }
         }
+
+        #endregion
+
+        #region IToken Interface
 
         /// <summary>
         /// Iterates over keys in this collection and attempts to update the values associated with that 
@@ -272,6 +276,11 @@ namespace com.spacepuppy.Dynamic
             {
                 yield return new DynamicPropertyInfo(k, tp);
             }
+        }
+
+        IEnumerable<string> IDynamic.GetMemberNames(bool includeNonPublic)
+        {
+            return _table.Keys;
         }
 
         System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)

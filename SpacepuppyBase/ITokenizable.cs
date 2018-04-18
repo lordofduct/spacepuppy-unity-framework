@@ -21,4 +21,22 @@ namespace com.spacepuppy
         void RestoreFromStateToken(object token);
 
     }
+
+    public interface IToken
+    {
+
+        /// <summary>
+        /// Copy the tokens state onto some target 'obj'.
+        /// </summary>
+        /// <param name="obj"></param>
+        void CopyTo(object obj);
+
+        /// <summary>
+        /// Copies the the member's of obj with the same members as the IToken.
+        /// </summary>
+        /// <param name="obj"></param>
+        void SyncFrom(object obj);
+
+    }
+
 }

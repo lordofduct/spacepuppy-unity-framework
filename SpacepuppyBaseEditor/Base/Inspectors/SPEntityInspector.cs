@@ -5,7 +5,7 @@ using System.Linq;
 
 using com.spacepuppy;
 
-namespace com.spacepuppyeditor.Base.Inspectors
+namespace com.spacepuppyeditor.Base
 {
     [CustomEditor(typeof(SPEntity), true)]
     public class SPEntityInspector : SPEditor
