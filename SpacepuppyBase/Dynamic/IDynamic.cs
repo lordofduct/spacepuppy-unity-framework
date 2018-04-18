@@ -106,6 +106,28 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
+        public static object GetValue(this object obj, MemberInfo member, params object[] args)
+        {
+            if (obj == null) return null;
+
+            if (obj is IDynamic)
+            {
+                try
+                {
+                    return (obj as IDynamic).GetValue(member.Name, args);
+                }
+                catch
+                {
+
+                }
+            }
+            else
+            {
+                return GetValueDirect(obj, member, args);
+            }
+            return null;
+        }
+
         public static bool TryGetValue(this object obj, string sMemberName, out object result, params object[] args)
         {
             if(obj == null)
@@ -180,6 +202,20 @@ namespace com.spacepuppy.Dynamic
             else
             {
                 return GetMembersFromType(obj.GetType(), includeNonPublic);
+            }
+        }
+
+        public static IEnumerable<MemberInfo> GetMembers(object obj, bool includeNonPublic, MemberTypes mask)
+        {
+            if (obj == null) return Enumerable.Empty<MemberInfo>();
+
+            if (obj is IDynamic)
+            {
+                return FilterMembers((obj as IDynamic).GetMembers(includeNonPublic), mask);
+            }
+            else
+            {
+                return GetMembersFromType(obj.GetType(), includeNonPublic, mask);
             }
         }
 
@@ -302,6 +338,39 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
+        public static object GetValueDirect(this object obj, MemberInfo member, params object[] args)
+        {
+            switch (member.MemberType)
+            {
+                case System.Reflection.MemberTypes.Field:
+                    var field = member as System.Reflection.FieldInfo;
+                    return field.GetValue(obj);
+
+                case System.Reflection.MemberTypes.Property:
+                    {
+                        var prop = member as System.Reflection.PropertyInfo;
+                        var paramInfos = prop.GetIndexParameters();
+                        if (prop.CanRead && DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                        {
+                            return prop.GetValue(obj, args);
+                        }
+                        break;
+                    }
+                case System.Reflection.MemberTypes.Method:
+                    {
+                        var meth = member as System.Reflection.MethodInfo;
+                        var paramInfos = meth.GetParameters();
+                        if (DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                        {
+                            return meth.Invoke(obj, args);
+                        }
+                        break;
+                    }
+            }
+
+            return null;
+        }
+
         public static bool TryGetValueDirect(object obj, string sprop, out object result, params object[] args)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
@@ -392,12 +461,12 @@ namespace com.spacepuppy.Dynamic
             
             return TypeHasMember(obj.GetType(), name, includeNonPublic);
         }
-
-        public static IEnumerable<MemberInfo> GetMembersDirect(object obj, bool includeNonPublic)
+        
+        public static IEnumerable<MemberInfo> GetMembersDirect(object obj, bool includeNonPublic, MemberTypes mask = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method)
         {
             if (obj == null) return Enumerable.Empty<MemberInfo>();
 
-            return GetMembersFromType(obj.GetType(), includeNonPublic);
+            return GetMembersFromType(obj.GetType(), includeNonPublic, mask);
         }
 
 
@@ -427,21 +496,20 @@ namespace com.spacepuppy.Dynamic
             }
             return false;
         }
-
-        public static IEnumerable<MemberInfo> GetMembersFromType(System.Type tp, bool includeNonPublic)
+        
+        public static IEnumerable<MemberInfo> GetMembersFromType(System.Type tp, bool includeNonPublic, MemberTypes mask = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method)
         {
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
             const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            const MemberTypes MASK = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method;
             if (tp == null) yield break;
 
             foreach (var m in tp.GetMembers(BINDING))
             {
-                if ((m.MemberType & MASK) != 0)
+                if ((m.MemberType & mask) != 0)
                 {
                     yield return m;
 
-                    
+
                 }
             }
 
@@ -451,7 +519,7 @@ namespace com.spacepuppy.Dynamic
                 {
                     foreach (var m in tp.GetMembers(PRIV_BINDING))
                     {
-                        if ((m.MemberType & MASK) != 0)
+                        if ((m.MemberType & mask) != 0)
                         {
                             yield return m;
                         }
@@ -972,6 +1040,84 @@ namespace com.spacepuppy.Dynamic
 
         #endregion
 
+        #region Tokens
+
+        /// <summary>
+        /// Returns a state token with a shallow copy of all public properties/fields of 'obj'.
+        /// The state token is possibly serializable but not guaranteed. 
+        /// If 'obj' implements ITokenizable, then the object itself controls if the token is serializable.
+        /// Otherwise a StateToken is returned which is serializable, but not all of the values of the copied members are serializable. That's up to them
+        /// 
+        /// Note - by serializable, this refers to .net serialization or any engine that supports the ISerialable interface. Not the unity serialization engine.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static object CreateStateToken(object obj)
+        {
+            if (obj == null)
+                return null;
+            else if (obj is ITokenizable)
+            {
+                try
+                {
+                    return (obj as ITokenizable).GetStateToken();
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                var token = new StateToken();
+                token.CopyFrom(obj);
+                return token;
+            }
+        }
+
+        /// <summary>
+        /// Restores the state of 'obj' based on 'token'. Token should be a state object that was returned by 'CreateStateToken'. 
+        /// Respects ITokenizable interface on 'obj'.
+        /// If the type of 'token' is mismatched, then this may likely fail.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="token"></param>
+        public static void RestoreFromStateToken(object obj, object token)
+        {
+            if (obj is ITokenizable)
+            {
+                try
+                {
+                    (obj as ITokenizable).RestoreFromStateToken(token);
+                }
+                catch
+                {
+                }
+            }
+            else
+                RestoreFromStateTokenDirect(obj, token);
+        }
+
+        /// <summary>
+        /// Like RestoreFromStateToken, but ignores ITokenizable interface.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="token"></param>
+        public static void RestoreFromStateTokenDirect(object obj, object token)
+        {
+            if (token is StateToken)
+                (token as StateToken).CopyTo(obj);
+            else if (token != null)
+            {
+                foreach (var m in GetMembers(token, false, MemberTypes.Property | MemberTypes.Field))
+                {
+                    SetValue(obj, m.Name, GetValue(token, m));
+                }
+            }
+        }
+
+        #endregion
+
 
 
 
@@ -1051,6 +1197,14 @@ namespace com.spacepuppy.Dynamic
             }
 
             return true;
+        }
+
+        private static IEnumerable<MemberInfo> FilterMembers(IEnumerable<MemberInfo> members, MemberTypes mask)
+        {
+            foreach (var m in members)
+            {
+                if ((m.MemberType & mask) != 0) yield return m;
+            }
         }
 
         #endregion

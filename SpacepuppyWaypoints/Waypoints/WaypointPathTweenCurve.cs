@@ -387,7 +387,7 @@ namespace com.spacepuppy.Waypoints
                                 if(m != null)
                                 {
                                     state.CopyTo(curState);
-                                    curState.CopyFrom(targ);
+                                    curState.SyncFrom(targ);
                                     curState.LerpTo(state, lerpT);
                                     m.ModifyWith(state, curState);
                                 }

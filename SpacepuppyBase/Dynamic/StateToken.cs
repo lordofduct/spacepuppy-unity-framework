@@ -6,7 +6,13 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Dynamic
 {
-    public class StateToken : IDynamic, IEnumerable<KeyValuePair<string, object>>, System.IDisposable
+
+    /// <summary>
+    /// A dynamic class for storing the state of another object in. This can be used for serializing arbitrary state information, 
+    /// or used with the tween engine for dynamically configured state animation. As well as any number of other applications you may deem fit.
+    /// </summary>
+    [System.Serializable]
+    public class StateToken : IDynamic, IEnumerable<KeyValuePair<string, object>>, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
 
         private const int TEMP_STACKSIZE = 3;
@@ -52,7 +58,7 @@ namespace com.spacepuppy.Dynamic
         public bool LerpValue(string skey, object value, float t)
         {
             object a;
-            if(_table.TryGetValue(skey, out a))
+            if (_table.TryGetValue(skey, out a))
             {
                 a = Evaluator.TryLerp(a, value, t);
                 _table[skey] = a;
@@ -80,7 +86,7 @@ namespace com.spacepuppy.Dynamic
         public T GetValue<T>(string skey)
         {
             object obj;
-            if(_table.TryGetValue(skey, out obj))
+            if (_table.TryGetValue(skey, out obj))
             {
                 if (obj is T) return (T)obj;
                 if (ConvertUtil.IsSupportedType(typeof(T))) return ConvertUtil.ToPrim<T>(obj);
@@ -137,21 +143,34 @@ namespace com.spacepuppy.Dynamic
         /// key to the value pulled from a property on object.
         /// </summary>
         /// <param name="obj"></param>
-        public void CopyFrom(object obj)
+        public void SyncFrom(object obj)
         {
             using (var lst = TempCollection.GetList<string>())
             {
                 var e = _table.Keys.GetEnumerator();
-                while(e.MoveNext())
+                while (e.MoveNext())
                 {
                     lst.Add(e.Current);
                 }
 
                 var e2 = lst.GetEnumerator();
-                while(e2.MoveNext())
+                while (e2.MoveNext())
                 {
                     _table[e2.Current] = DynamicUtil.GetValue(obj, e2.Current);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Dumps the keys in this collection, and then copies keys to match the entire state of the passed in object.
+        /// </summary>
+        /// <param name="obj"></param>
+        public void CopyFrom(object obj)
+        {
+            _table.Clear();
+            foreach (var m in DynamicUtil.GetMembers(obj, false, System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Field))
+            {
+                _table[m.Name] = DynamicUtil.GetValue(obj, m);
             }
         }
 
@@ -249,7 +268,7 @@ namespace com.spacepuppy.Dynamic
         IEnumerable<System.Reflection.MemberInfo> IDynamic.GetMembers(bool includeNonPublic)
         {
             var tp = this.GetType();
-            foreach(var k in _table.Keys)
+            foreach (var k in _table.Keys)
             {
                 yield return new DynamicPropertyInfo(k, tp);
             }
@@ -289,20 +308,49 @@ namespace com.spacepuppy.Dynamic
         void IDisposable.Dispose()
         {
             _table.Clear();
-            if (_tempTokens == null) _tempTokens = new SamplingStack<StateToken>(TEMP_STACKSIZE);
-            _tempTokens.Push(this);
+            if (_tempTokens == null) _tempTokens = new ObjectCachePool<StateToken>(TEMP_STACKSIZE);
+            _tempTokens.Release(this);
+        }
+
+        #endregion
+
+        #region ISerializable Interface
+
+        protected StateToken(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        {
+            var e = info.GetEnumerator();
+            while (e.MoveNext())
+            {
+                _table[e.Current.Name] = e.Current.Value;
+            }
+        }
+
+        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        {
+            var e = _table.GetEnumerator();
+            while (e.MoveNext())
+            {
+                try
+                {
+                    info.AddValue(e.Current.Key, e.Current.Value);
+                }
+                catch (System.Exception)
+                {
+                    //tried to add a non-serializable value
+                }
+            }
         }
 
         #endregion
 
         #region Static Utils
-        
-        private static SamplingStack<StateToken> _tempTokens;
+
+        private static ObjectCachePool<StateToken> _tempTokens;
 
         public static StateToken GetTempToken()
         {
             StateToken t;
-            if(_tempTokens != null && _tempTokens.TryPop(out t))
+            if (_tempTokens != null && _tempTokens.TryGetInstance(out t))
             {
                 return t;
             }
@@ -312,7 +360,13 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
+        public static void ReleaseTempToken(StateToken token)
+        {
+            if (token != null) (token as System.IDisposable).Dispose();
+        }
+
         #endregion
 
     }
+
 }

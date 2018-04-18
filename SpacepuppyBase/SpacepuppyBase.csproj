@@ -155,6 +155,7 @@
     <Compile Include="IRadicalEnumerator.cs" />
     <Compile Include="IRadicalWaitHandle.cs" />
     <Compile Include="ISPDisposable.cs" />
+    <Compile Include="ITokenizable.cs" />
     <Compile Include="IUpdateable.cs" />
     <Compile Include="Pathfinding\IPath.cs" />
     <Compile Include="Pathfinding\IPathFactory.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="Render\MaterialUtil.cs" />
     <Compile Include="Render\RenderEnums.cs" />
     <Compile Include="Render\RendererMaterialSwap.cs" />
+    <Compile Include="Render\RenderSettingsProxy.cs" />
     <Compile Include="Scenario\ActivateEvent.cs" />
     <Compile Include="Scenario\AutoTriggerableMechanism.cs" />
     <Compile Include="Scenario\AutoTriggerComponent.cs" />
