@@ -182,6 +182,7 @@
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
     <Compile Include="Scenario\i_TriggerRandomEliminationInspector.cs" />
     <Compile Include="Scenario\i_TriggerSequenceInspector.cs" />
+    <Compile Include="Scenario\i_TweenStateInspector.cs" />
     <Compile Include="Scenario\i_TweenValueInspector.cs" />
     <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerableTargetObjectPropertyDrawer.cs" />
