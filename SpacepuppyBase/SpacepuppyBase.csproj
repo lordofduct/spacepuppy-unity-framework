@@ -118,6 +118,7 @@
     <Compile Include="CompoundTrigger.cs" />
     <Compile Include="Dynamic\Accessors\DynamicMemberAccessor.cs" />
     <Compile Include="Dynamic\DoubleEvaluator.cs" />
+    <Compile Include="Dynamic\DynamicTweenExtension.cs" />
     <Compile Include="Dynamic\DynamicObjectAccessor.cs" />
     <Compile Include="Dynamic\DynamicParameterInfo.cs" />
     <Compile Include="Dynamic\IDynamicMemberInfo.cs" />
@@ -155,7 +156,7 @@
     <Compile Include="IRadicalEnumerator.cs" />
     <Compile Include="IRadicalWaitHandle.cs" />
     <Compile Include="ISPDisposable.cs" />
-    <Compile Include="ITokenizable.cs" />
+    <Compile Include="Dynamic\ITokenizable.cs" />
     <Compile Include="IUpdateable.cs" />
     <Compile Include="Pathfinding\IPath.cs" />
     <Compile Include="Pathfinding\IPathFactory.cs" />
@@ -241,7 +242,7 @@
     <Compile Include="Scenario\i_AutoSequenceSignal.cs" />
     <Compile Include="Scenario\i_ChangeCursorProperties.cs" />
     <Compile Include="Scenario\i_ChangeStateOfSimpleStateMachine.cs" />
-    <Compile Include="Scenario\i_CopyFrom.cs" />
+    <Compile Include="Scenario\i_CopyState.cs" />
     <Compile Include="Scenario\i_DebugLog.cs" />
     <Compile Include="Scenario\i_Destroy.cs" />
     <Compile Include="Scenario\i_Enable.cs" />
@@ -269,6 +270,7 @@
     <Compile Include="Scenario\i_TriggerOnIfThen.cs" />
     <Compile Include="Scenario\i_TriggerRandomElimination.cs" />
     <Compile Include="Scenario\i_TriggerSequence.cs" />
+    <Compile Include="Scenario\i_TweenState.cs" />
     <Compile Include="Scenario\i_TweenTo.cs" />
     <Compile Include="Scenario\i_TweenValue.cs" />
     <Compile Include="Scenario\t_Flicker.cs" />
@@ -365,6 +367,7 @@
     <Compile Include="Tween\Accessors\TransformLocalTransAccessor.cs" />
     <Compile Include="Tween\Accessors\TransformRelativePositionAccessor.cs" />
     <Compile Include="Tween\CallbackTweener.cs" />
+    <Compile Include="Tween\Curves\BoolMemberCurve.cs" />
     <Compile Include="Tween\Curves\Color32MemberCurve.cs" />
     <Compile Include="Tween\Curves\ColorMemberCurve.cs" />
     <Compile Include="Tween\Curves\FollowTargetPositionCurve.cs" />

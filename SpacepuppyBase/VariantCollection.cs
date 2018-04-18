@@ -11,7 +11,7 @@ namespace com.spacepuppy
 {
 
     [System.Serializable()]
-    public class VariantCollection : IDynamic, IToken, ISerializationCallbackReceiver, ISerializable, IEnumerable<KeyValuePair<string, object>>
+    public class VariantCollection : IStateToken, ISerializationCallbackReceiver, ISerializable, IEnumerable<KeyValuePair<string, object>>
     {
         
         #region Fields
@@ -419,6 +419,41 @@ namespace com.spacepuppy
                         hash.To(e.Current.Key, ease, value, dur);
                         break;
                 }
+            }
+        }
+
+        #endregion
+
+        #region ITokenizable Interface
+
+        public object CreateStateToken()
+        {
+            if (_table.Count == 0) return com.spacepuppy.Utils.ArrayUtil.Empty<KeyValuePair<string, VariantReference>>();
+            KeyValuePair<string, VariantReference>[] arr = new KeyValuePair<string, VariantReference>[_table.Count];
+            var e = _table.GetEnumerator();
+            int i = 0;
+            while(e.MoveNext())
+            {
+                arr[i] = e.Current;
+                i++;
+            }
+            return arr;
+        }
+
+        public void RestoreFromStateToken(object token)
+        {
+            if(token is KeyValuePair<string, VariantReference>[])
+            {
+                _table.Clear();
+                var arr = token as KeyValuePair<string, VariantReference>[];
+                foreach(var pair in arr)
+                {
+                    _table[pair.Key] = pair.Value;
+                }
+            }
+            else
+            {
+                DynamicUtil.CopyState(this, token);
             }
         }
 

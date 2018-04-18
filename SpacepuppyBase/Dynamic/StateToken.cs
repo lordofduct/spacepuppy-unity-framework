@@ -12,7 +12,7 @@ namespace com.spacepuppy.Dynamic
     /// or used with the tween engine for dynamically configured state animation. As well as any number of other applications you may deem fit.
     /// </summary>
     [System.Serializable]
-    public class StateToken : IDynamic, IToken, IEnumerable<KeyValuePair<string, object>>, System.IDisposable, System.Runtime.Serialization.ISerializable
+    public class StateToken : IStateToken, IEnumerable<KeyValuePair<string, object>>, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
 
         private const int TEMP_STACKSIZE = 3;
@@ -229,6 +229,38 @@ namespace com.spacepuppy.Dynamic
 
         #endregion
 
+        #region ITokenizable Interface
+
+        public object CreateStateToken()
+        {
+            var token = GetToken();
+            var e = _table.GetEnumerator();
+            while(e.MoveNext())
+            {
+                token._table[e.Current.Key] = e.Current.Value;
+            }
+            return token;
+        }
+
+        public void RestoreFromStateToken(object token)
+        {
+            if(token is StateToken)
+            {
+                _table.Clear();
+                var e = (token as StateToken)._table.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    _table[e.Current.Key] = e.Current.Value;
+                }
+            }
+            else
+            {
+                DynamicUtil.CopyState(this, token);
+            }
+        }
+
+        #endregion
+
         #region IDynamic Interface
 
         object IDynamic.this[string sMemberName]
@@ -356,7 +388,7 @@ namespace com.spacepuppy.Dynamic
 
         private static ObjectCachePool<StateToken> _tempTokens;
 
-        public static StateToken GetTempToken()
+        public static StateToken GetToken()
         {
             StateToken t;
             if (_tempTokens != null && _tempTokens.TryGetInstance(out t))

@@ -10,7 +10,7 @@ namespace com.spacepuppy
     /// <summary>
     /// A component you can stick variables into willy-nilly.
     /// </summary>
-    public class VariableStore : SPComponent, IDynamic, IToken
+    public class VariableStore : SPComponent, IStateToken
     {
 
         #region Fields
@@ -108,13 +108,27 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region ITokenizable Interface
+
+        public object CreateStateToken()
+        {
+            return _variables.CreateStateToken();
+        }
+
+        public void RestoreFromStateToken(object token)
+        {
+            _variables.RestoreFromStateToken(token);
+        }
+
+        #endregion
+
     }
 
     /// <summary>
     /// A ScriptableObject you can stick variables into willy-nilly.
     /// </summary>
     [CreateAssetMenu(fileName = "VariableStore", menuName = "Spacepuppy/VariableStore")]
-    public class VariableStoreAsset : ScriptableObject, IDynamic, IToken
+    public class VariableStoreAsset : ScriptableObject, IStateToken
     {
 
         #region Fields
@@ -208,6 +222,20 @@ namespace com.spacepuppy
         public void SyncFrom(object obj)
         {
             _variables.SyncFrom(obj);
+        }
+
+        #endregion
+
+        #region ITokenizable Interface
+
+        public object CreateStateToken()
+        {
+            return _variables.CreateStateToken();
+        }
+
+        public void RestoreFromStateToken(object token)
+        {
+            _variables.RestoreFromStateToken(token);
         }
 
         #endregion

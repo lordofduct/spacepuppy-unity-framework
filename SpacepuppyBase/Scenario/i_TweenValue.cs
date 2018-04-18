@@ -15,8 +15,8 @@ namespace com.spacepuppy.Scenario
         private SPTime _timeSupplier;
 
         [SerializeField()]
-        [SelectableComponent()]
-        private Component _target;
+        [SelectableObject()]
+        private UnityEngine.Object _target;
 
         [SerializeField()]
         private TweenData[] _data;
@@ -30,6 +30,9 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         [Tooltip("Leave blank for tweens to be unique to this component.")]
         private string _tweenToken;
+
+        [SerializeField]
+        private bool _killOnDisable;
 
         #endregion
 
@@ -45,8 +48,9 @@ namespace com.spacepuppy.Scenario
         protected override void OnDisable()
         {
             base.OnDisable();
-
-            SPTween.KillAll(_target, _tweenToken);
+            
+            if (_killOnDisable)
+                SPTween.KillAll(_target, _tweenToken);
         }
 
         #endregion

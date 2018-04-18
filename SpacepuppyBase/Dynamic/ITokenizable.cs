@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace com.spacepuppy
+namespace com.spacepuppy.Dynamic
 {
 
     /// <summary>
@@ -36,6 +36,15 @@ namespace com.spacepuppy
         /// </summary>
         /// <param name="obj"></param>
         void SyncFrom(object obj);
+
+    }
+
+    /// <summary>
+    /// Implies that the object is a dynamic token for storing states. 
+    /// The members of the token should only be fields/properties, and not methods.
+    /// </summary>
+    public interface IStateToken : IDynamic, IToken, ITokenizable
+    {
 
     }
 

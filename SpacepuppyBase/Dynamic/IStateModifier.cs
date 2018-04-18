@@ -16,15 +16,15 @@ namespace com.spacepuppy.Dynamic
         /// Copy the current state of the IModifier to the StateToken. 
         /// Used to allow callers to gather the state and modify it further.
         /// </summary>
-        /// <param name="token"></param>
-        void CopyTo(StateToken token);
+        /// <param name="obj"></param>
+        void CopyTo(object targ);
         /// <summary>
         /// Lerp a StateToken to the current state of the IModifier, just pass along what is need to 'StateToken.LerpTo'. 
         /// Used to allow callers to gather the state and modify it further.
         /// </summary>
         /// <param name="token"></param>
         /// <param name="t"></param>
-        void LerpTo(StateToken token, float t);
+        void LerpTo(object targ, float t);
         /// <summary>
         /// Set the state of some target to that of the IModifier using the IModifier rules.
         /// </summary>
@@ -35,7 +35,7 @@ namespace com.spacepuppy.Dynamic
         /// </summary>
         /// <param name="targ"></param>
         /// <param name="token"></param>
-        void ModifyWith(object targ, StateToken token);
+        void ModifyWith(object targ, object source);
 
     }
 

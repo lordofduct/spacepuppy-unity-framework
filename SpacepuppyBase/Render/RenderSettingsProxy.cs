@@ -2,6 +2,8 @@
 using UnityEngine.Rendering;
 using System.Collections.Generic;
 
+using com.spacepuppy.Dynamic;
+
 namespace com.spacepuppy.Render
 {
 

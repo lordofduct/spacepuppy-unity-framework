@@ -29,14 +29,14 @@ namespace com.spacepuppy.Cameras
         
         #region IModifier Interface
 
-        void IStateModifier.CopyTo(StateToken token)
+        void IStateModifier.CopyTo(object targ)
         {
-            _cameraSettings.CopyTo(token);
+            _cameraSettings.CopyTo(targ);
         }
 
-        void IStateModifier.LerpTo(StateToken token, float t)
+        void IStateModifier.LerpTo(object targ, float t)
         {
-            _cameraSettings.LerpTo(token, t);
+            _cameraSettings.LerpTo(targ, t);
         }
 
         void IStateModifier.Modify(object targ)
@@ -47,12 +47,12 @@ namespace com.spacepuppy.Cameras
             _cameraSettings.CopyTo(cam);
         }
 
-        void IStateModifier.ModifyWith(object targ, StateToken token)
+        void IStateModifier.ModifyWith(object targ, object source)
         {
             var cam = ComponentUtil.GetComponentFromSource<Camera>(targ);
             if (cam == null) return;
 
-            token.CopyTo(cam);
+            DynamicUtil.CopyState(cam, source);
         }
 
         #endregion
