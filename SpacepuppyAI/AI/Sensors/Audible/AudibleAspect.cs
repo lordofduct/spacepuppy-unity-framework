@@ -7,7 +7,7 @@ using com.spacepuppy.Collections;
 namespace com.spacepuppy.AI.Sensors.Audible
 {
 
-    public class AudibleAspect : SPComponent, IAspect, IUpdateable
+    public class AudibleAspect : SPEntityComponent, IAspect, IUpdateable
     {
 
         #region Static Multiton Interface
@@ -121,7 +121,7 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
             if (token != null && !token.IsComplete) token.SignalComplete();
         }
-        
+
         #endregion
 
         #region IAspect Interface
@@ -130,7 +130,7 @@ namespace com.spacepuppy.AI.Sensors.Audible
         {
             get { return this.isActiveAndEnabled; }
         }
-
+        
         public float Precedence
         {
             get { return _precedence; }

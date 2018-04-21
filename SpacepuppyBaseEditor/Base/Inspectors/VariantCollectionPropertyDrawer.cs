@@ -10,7 +10,7 @@ using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Internal;
 
-namespace com.spacepuppyeditor.Base.Inspectors
+namespace com.spacepuppyeditor.Base
 {
 
     [CustomPropertyDrawer(typeof(VariantCollection), true)]
@@ -53,15 +53,9 @@ namespace com.spacepuppyeditor.Base.Inspectors
             if(this.fieldInfo != null)
             {
                 var attrib = this.fieldInfo.GetCustomAttributes(typeof(VariantCollection.AsPropertyListAttribute), false).FirstOrDefault() as VariantCollection.AsPropertyListAttribute;
-                _propertyListTargetType = (attrib != null) ? attrib.TargetType : null;
                 if(attrib != null && attrib.TargetType != null)
                 {
-                    _propertyListTargetType = attrib.TargetType;
-
-                    _propertyListMembers = (from m
-                                             in DynamicUtil.GetEasilySerializedMembersFromType(_propertyListTargetType, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, DynamicMemberAccess.Write)
-                                            select m).ToArray();
-                    _propertyListNames = (from m in _propertyListMembers select m.Name).ToArray();
+                    this.ConfigurePropertyList(attrib.TargetType);
                 }
             }
         }
@@ -74,10 +68,12 @@ namespace com.spacepuppyeditor.Base.Inspectors
             _currentValuesProp = null;
             _label = null;
 
-
-            _propertyListTargetType = null;
-            _propertyListMembers = null;
-            _propertyListNames = null;
+            if(this.fieldInfo != null)
+            {
+                _propertyListTargetType = null;
+                _propertyListMembers = null;
+                _propertyListNames = null;
+            }
 
             _variantDrawer.RestrictVariantType = false;
             _variantDrawer.ForcedObjectType = null;
@@ -85,7 +81,28 @@ namespace com.spacepuppyeditor.Base.Inspectors
 
         #endregion
 
+        #region Properties
+
+        #endregion
+
         #region Methods
+
+        public void ConfigurePropertyList(System.Type tp)
+        {
+            _propertyListTargetType = tp;
+            if(tp != null)
+            {
+                _propertyListMembers = (from m
+                                         in DynamicUtil.GetEasilySerializedMembersFromType(_propertyListTargetType, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, DynamicMemberAccess.Write)
+                                        select m).ToArray();
+                _propertyListNames = (from m in _propertyListMembers select m.Name).ToArray();
+            }
+            else
+            {
+                _propertyListMembers = null;
+                _propertyListNames = null;
+            }
+        }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {

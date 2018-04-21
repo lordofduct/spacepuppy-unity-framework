@@ -342,7 +342,7 @@ namespace com.spacepuppy.Waypoints
                             {
                                 if (mb != null)
                                 {
-                                    using (var state = StateToken.GetTempToken())
+                                    using (var state = StateToken.GetToken())
                                     {
                                         ma.CopyTo(state);
                                         mb.LerpTo(state, data.TPrime);
@@ -361,8 +361,8 @@ namespace com.spacepuppy.Waypoints
                         }
                         else
                         {
-                            using (var curState = StateToken.GetTempToken())
-                            using (var state = StateToken.GetTempToken())
+                            using (var curState = StateToken.GetToken())
+                            using (var state = StateToken.GetToken())
                             {
                                 IStateModifier m = null;
                                 if(ma != null)
@@ -387,7 +387,7 @@ namespace com.spacepuppy.Waypoints
                                 if(m != null)
                                 {
                                     state.CopyTo(curState);
-                                    curState.CopyFrom(targ);
+                                    curState.SyncFrom(targ);
                                     curState.LerpTo(state, lerpT);
                                     m.ModifyWith(state, curState);
                                 }

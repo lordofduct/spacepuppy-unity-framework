@@ -6,7 +6,7 @@ using com.spacepuppy.Collections;
 
 namespace com.spacepuppy.AI.Sensors.Visual
 {
-    public class VisualAspect : SPComponent, IAspect
+    public class VisualAspect : SPEntityComponent, IAspect
     {
 
         #region Static Multiton Interface

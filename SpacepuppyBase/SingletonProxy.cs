@@ -96,6 +96,12 @@ namespace com.spacepuppy
             return DynamicUtil.GetMembersFromType(_singletonType.Type, includeNonPublic);
         }
 
+        IEnumerable<string> IDynamic.GetMemberNames(bool includeNonPublic)
+        {
+            if (_singletonType == null || _singletonType.Type == null) return Enumerable.Empty<string>();
+            return DynamicUtil.GetMemberNamesFromType(_singletonType.Type, includeNonPublic);
+        }
+
         System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
         {
             if (_singletonType == null || _singletonType.Type == null) return null;
@@ -166,6 +172,15 @@ namespace com.spacepuppy
                 return DynamicUtil.GetMembers(obj, includeNonPublic);
             else
                 return DynamicUtil.GetMembersFromType(typeof(T), includeNonPublic);
+        }
+
+        IEnumerable<string> IDynamic.GetMemberNames(bool includeNonPublic)
+        {
+            var obj = this.ConcreteInstance;
+            if (obj != null)
+                return DynamicUtil.GetMemberNames(obj, includeNonPublic);
+            else
+                return DynamicUtil.GetMemberNamesFromType(typeof(T), includeNonPublic);
         }
 
         System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)

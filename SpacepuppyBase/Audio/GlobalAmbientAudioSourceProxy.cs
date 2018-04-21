@@ -44,6 +44,11 @@ namespace com.spacepuppy.Audio
             return DynamicUtil.GetMembersFromType(typeof(AudioSource), includeNonPublic);
         }
 
+        IEnumerable<string> IDynamic.GetMemberNames(bool includeNonPublic)
+        {
+            return DynamicUtil.GetMemberNamesFromType(typeof(AudioSource), includeNonPublic);
+        }
+
         object IDynamic.GetValue(string sMemberName, params object[] args)
         {
             return DynamicUtil.GetValue(this.Target, sMemberName, args);

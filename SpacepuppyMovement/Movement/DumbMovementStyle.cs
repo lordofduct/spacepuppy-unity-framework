@@ -16,7 +16,7 @@ namespace com.spacepuppy.Movement
     /// 
     /// Some MovementStyles though may only need
     /// </summary>
-    public abstract class DumbMovementStyle : SPComponent, IMovementStyle, IIgnorableCollision
+    public abstract class DumbMovementStyle : SPEntityComponent, IMovementStyle, IIgnorableCollision
     {
 
         public enum UpdateMode
@@ -651,7 +651,7 @@ namespace com.spacepuppy.Movement
     /// 
     /// Some MovementStyles though may only need
     /// </summary>
-    internal abstract class DumbMovementStyle_Old : SPComponent, IMovementStyle, IIgnorableCollision
+    internal abstract class DumbMovementStyle_Old : SPEntityComponent, IMovementStyle, IIgnorableCollision
     {
 
         public enum UpdateMode

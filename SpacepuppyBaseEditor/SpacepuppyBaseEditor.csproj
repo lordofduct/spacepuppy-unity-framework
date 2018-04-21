@@ -70,6 +70,7 @@
     <Compile Include="Base\Inspectors\ProxyPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ShortUidPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\TetherJointInspector.cs" />
+    <Compile Include="Base\Inspectors\VariableStoreInspector.cs" />
     <Compile Include="Base\Inspectors\VersionInfoPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\DisableIfModifier.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Render\MaterialPropertyReferencePropertyDrawer.cs" />
     <Compile Include="Render\MaterialSourceInspector.cs" />
     <Compile Include="Render\MaterialTransitionPropertyDrawer.cs" />
+    <Compile Include="Render\RenderSettingsProxyInpsector.cs" />
     <Compile Include="ReorderableListHelper.cs" />
     <Compile Include="Scenario\ITriggerableMechanismAddonDrawer.cs" />
     <Compile Include="Scenario\i_EnableInspector.cs" />
@@ -180,6 +182,7 @@
     <Compile Include="Scenario\i_TriggerOnIfThenInspector.cs" />
     <Compile Include="Scenario\i_TriggerRandomEliminationInspector.cs" />
     <Compile Include="Scenario\i_TriggerSequenceInspector.cs" />
+    <Compile Include="Scenario\i_TweenStateInspector.cs" />
     <Compile Include="Scenario\i_TweenValueInspector.cs" />
     <Compile Include="Scenario\ObservableTargetDataPropertyDrawer.cs" />
     <Compile Include="Scenario\TriggerableTargetObjectPropertyDrawer.cs" />

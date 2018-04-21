@@ -332,6 +332,28 @@ namespace com.spacepuppyeditor.Scenario
 
         #endregion
 
+        #region Static Utils
+
+        public static void ResetTriggerableTargetObjectTarget(SerializedProperty prop)
+        {
+            if (prop == null) return;
+
+            try
+            {
+                prop.FindPropertyRelative(PROP_CONFIGURED).boolValue = true;
+                prop.FindPropertyRelative(PROP_TARGET).objectReferenceValue = null;
+                prop.FindPropertyRelative(PROP_FIND).SetEnumValue(TriggerableTargetObject.FindCommand.Direct);
+                prop.FindPropertyRelative(PROP_RESOLVEBY).SetEnumValue(TriggerableTargetObject.ResolveByCommand.Nothing);
+                prop.FindPropertyRelative(PROP_QUERY).stringValue = string.Empty;
+            }
+            catch
+            {
+
+            }
+        }
+
+        #endregion
+
     }
 
 }

@@ -349,6 +349,11 @@ namespace com.spacepuppy
             return DynamicUtil.GetMembers(this.GetTarget(), includeNonPublic);
         }
 
+        IEnumerable<string> IDynamic.GetMemberNames(bool includeNonPublic)
+        {
+            return DynamicUtil.GetMemberNames(this.GetTarget(), includeNonPublic);
+        }
+
         System.Reflection.MemberInfo IDynamic.GetMember(string sMemberName, bool includeNonPublic)
         {
             return DynamicUtil.GetMember(this.GetTarget(), sMemberName, includeNonPublic);

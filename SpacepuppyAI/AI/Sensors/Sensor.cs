@@ -7,7 +7,7 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.AI.Sensors
 {
 
-    public abstract class Sensor : SPComponent
+    public abstract class Sensor : SPEntityComponent
     {
 
         #region Fields
