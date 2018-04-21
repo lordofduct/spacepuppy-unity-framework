@@ -1200,24 +1200,27 @@ namespace com.spacepuppy.Utils
 
         public static bool IsParentOf(this GameObject parent, GameObject possibleChild)
         {
-            if (parent == null || possibleChild == null) return false;
+            //if (parent == null || possibleChild == null) return false;
             return IsParentOf(parent.transform, possibleChild.transform);
         }
 
         public static bool IsParentOf(this Transform parent, GameObject possibleChild)
         {
-            if (parent == null || possibleChild == null) return false;
+            //if (parent == null || possibleChild == null) return false;
             return IsParentOf(parent, possibleChild.transform);
         }
 
         public static bool IsParentOf(this GameObject parent, Transform possibleChild)
         {
-            if (parent == null || possibleChild == null) return false;
+            //if (parent == null || possibleChild == null) return false;
             return IsParentOf(parent.transform, possibleChild);
         }
 
         public static bool IsParentOf(this Transform parent, Transform possibleChild)
         {
+            /*
+             * Since implementation of this, Unity has since added 'IsChildOf' that is far superior in efficiency
+             * 
             if (parent == null || possibleChild == null) return false;
             while (possibleChild != null)
             {
@@ -1225,6 +1228,9 @@ namespace com.spacepuppy.Utils
                 possibleChild = possibleChild.parent;
             }
             return false;
+            */
+
+            return possibleChild.IsChildOf(parent);
         }
 
         // ##############

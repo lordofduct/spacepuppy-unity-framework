@@ -16,13 +16,13 @@ namespace com.spacepuppy
     {
 
         #region Multiton Interface
-
-        private static UniqueToGameObjectMultitonPool<MultiTag> _pool = new UniqueToGameObjectMultitonPool<MultiTag>();
-        public static UniqueToGameObjectMultitonPool<MultiTag> Pool { get { return _pool; } }
         
+        public static readonly MultiTagPool Pool = new MultiTagPool();
+
+
         internal static bool TryGetMultiTag(GameObject go, out MultiTag c)
         {
-            return _pool.TryGet(go, out c);
+            return Pool.TryGet(go, out c);
         }
 
         internal static MultiTag[] FindAll(string tag)
@@ -32,7 +32,7 @@ namespace com.spacepuppy
 
         internal static void FindAll(string tag, ICollection<GameObject> coll)
         {
-            var e = _pool.GetEnumerator();
+            var e = Pool.GetEnumerator();
             while(e.MoveNext())
             {
                 if (e.Current.HasTag(tag)) coll.Add(e.Current.gameObject);
@@ -41,7 +41,7 @@ namespace com.spacepuppy
 
         internal static MultiTag Find(string tag)
         {
-            var e = _pool.GetEnumerator();
+            var e = Pool.GetEnumerator();
             while(e.MoveNext())
             {
                 if (e.Current.HasTag(tag)) return e.Current;
@@ -71,7 +71,7 @@ namespace com.spacepuppy
 
         protected override void OnStartOrEnable()
         {
-            _pool.AddReference(this);
+            Pool.AddReference(this);
 
             base.OnStartOrEnable();
         }
@@ -80,7 +80,7 @@ namespace com.spacepuppy
         {
             base.OnDisable();
 
-            _pool.RemoveReference(this);
+            Pool.RemoveReference(this);
         }
 
         #endregion
@@ -275,6 +275,61 @@ namespace com.spacepuppy
             {
                 _index = 0;
             }
+
+        }
+        
+        public class MultiTagPool : MultitonPool<MultiTag>
+        {
+            private Dictionary<GameObject, MultiTag> _table = new Dictionary<GameObject, MultiTag>(ObjectReferenceEqualityComparer<GameObject>.Default);
+
+            public override void AddReference(MultiTag obj)
+            {
+                if (object.ReferenceEquals(obj, null)) throw new System.ArgumentNullException();
+
+                if (this.IsQuerying)
+                {
+                    if (!_table.Contains(obj)) this.QueryCompleteAction += () => _table[obj.gameObject] = obj;
+                }
+                else
+                {
+                    _table[obj.gameObject] = obj;
+                }
+
+                base.AddReference(obj);
+            }
+
+            public override bool RemoveReference(MultiTag obj)
+            {
+                if (object.ReferenceEquals(obj, null)) throw new System.ArgumentNullException();
+
+                if (this.IsQuerying)
+                {
+                    if (_table.Contains(obj))
+                    {
+                        this.QueryCompleteAction += () => _table.Remove(obj.gameObject);
+                    }
+                }
+                else
+                {
+                    _table.Remove(obj.gameObject);
+                }
+
+                return base.RemoveReference(obj);
+            }
+
+            public bool TryGet(GameObject go, out MultiTag c)
+            {
+                if (_table.TryGetValue(go, out c))
+                {
+                    return true;
+                }
+                else
+                {
+                    c = go.GetComponent<MultiTag>();
+                    return c != null;
+                }
+            }
+
 
         }
 
