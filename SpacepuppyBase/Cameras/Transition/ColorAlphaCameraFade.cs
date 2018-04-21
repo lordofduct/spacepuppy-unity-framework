@@ -62,7 +62,7 @@ namespace com.spacepuppy.Cameras.Transition
 
         public static ColorAlphaCameraFade Create(Color c, int drawDepth = 0, bool persistBetweenLoads = true)
         {
-            var go = GameObjectUtil.CreateRoot("ColorAlphaCameraFade");
+            var go = new GameObject("ColorAlphaCameraFade");
             if (persistBetweenLoads) GameObject.DontDestroyOnLoad(go);
             var fade = go.AddComponent<ColorAlphaCameraFade>();
             fade.DestroyOnComplete = true;

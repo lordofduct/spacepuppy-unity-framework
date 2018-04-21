@@ -10,24 +10,6 @@ namespace com.spacepuppy.Utils
     public static class GameObjectUtil
     {
         
-        public static GameObject CreateRoot(string name)
-        {
-            var go = new GameObject(name);
-            go.AddTag(SPConstants.TAG_ROOT);
-            return go;
-        }
-
-        public static GameObject CreateRoot(string name, params System.Type[] components)
-        {
-            var go = new GameObject(name);
-            go.AddTag(SPConstants.TAG_ROOT);
-            foreach (var tp in components)
-            {
-                go.AddComponent(tp);
-            }
-            return go;
-        }
-        
 #region Get*FromSource
 
         public static bool IsGameObjectSource(object obj)
@@ -136,10 +118,8 @@ namespace com.spacepuppy.Utils
                 return (obj as Transform).FindRoot();
             else if (obj is GameObject)
                 return (obj as GameObject).FindRoot();
-            else if (obj is SPComponent)
-            {
-                return (obj as SPComponent).entityRoot;
-            }
+            else if (obj is SPEntityComponent)
+                return (obj as SPEntityComponent).entityRoot.gameObject;
             else if (obj is Component)
                 return (obj as Component).FindRoot();
             else if (obj is IGameObjectSource)
@@ -164,9 +144,9 @@ namespace com.spacepuppy.Utils
                 return (obj as Transform).FindTrueRoot();
             else if (obj is GameObject)
                 return (obj as GameObject).FindTrueRoot();
-            else if (obj is SPComponent)
+            else if (obj is SPEntityComponent)
             {
-                var r = (obj as SPComponent).entityRoot;
+                var r = (obj as SPEntityComponent).entityRoot.gameObject;
                 if (r.HasTag(SPConstants.TAG_ROOT))
                     return r;
                 else
@@ -860,63 +840,7 @@ namespace com.spacepuppy.Utils
 #endregion
 
 #region Find Root
-
-        /**
-         * HasTrueRoot
-         */
-
-        /// <summary>
-        /// Returns true if 
-        /// </summary>
-        /// <param name="go"></param>
-        /// <returns></returns>
-        public static bool HasTrueRoot(this GameObject go)
-        {
-            if (go == null) return false;
-
-            var t = go.transform;
-            while(t != null)
-            {
-                if (MultiTagHelper.HasTag(t.gameObject, SPConstants.TAG_ROOT)) return true;
-            }
-
-            return false;
-        }
-
-        public static bool HasTrueRoot(this Component c)
-        {
-            if (c == null) return false;
-            return HasTrueRoot(c.gameObject);
-        }
-
-        public static bool HasTrueRoot(this GameObject go, out GameObject root)
-        {
-            root = null;
-            if (go == null) return false;
-
-            var t = go.transform;
-            while(t != null)
-            {
-                if(MultiTagHelper.HasTag(t.gameObject, SPConstants.TAG_ROOT))
-                {
-                    root = t.gameObject;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool HasTrueRoot(this Component c, out GameObject root)
-        {
-            if (c == null)
-            {
-                root = null;
-                return false;
-            }
-            return HasTrueRoot(c.gameObject, out root);
-        }
-
+        
         /**
          * FindTrueRoot
          */
@@ -930,13 +854,22 @@ namespace com.spacepuppy.Utils
         {
             if (go == null) return null;
 
-            return FindParentWithTag(go.transform, SPConstants.TAG_ROOT);
+            var entity = SPEntity.Pool.GetFromSource(go);
+            if (entity != null)
+                return entity.gameObject;
+            else
+                return FindParentWithTag(go.transform, SPConstants.TAG_ROOT);
         }
 
         public static GameObject FindTrueRoot(this Component c)
         {
             if (c == null) return null;
-            return FindParentWithTag(c.transform, SPConstants.TAG_ROOT);
+
+            var entity = SPEntity.Pool.GetFromSource(c);
+            if (entity != null)
+                return entity.gameObject;
+            else
+                return FindParentWithTag(c.transform, SPConstants.TAG_ROOT);
         }
 
         /**
@@ -951,18 +884,29 @@ namespace com.spacepuppy.Utils
         public static GameObject FindRoot(this GameObject go)
         {
             if (go == null) return null;
-
-            var root = FindParentWithTag(go.transform, SPConstants.TAG_ROOT);
-            return (root != null) ? root : go; //we return self if no root was found...
+            
+            var entity = SPEntity.Pool.GetFromSource(go);
+            if (entity != null)
+                return entity.gameObject;
+            else
+            {
+                var root = FindParentWithTag(go.transform, SPConstants.TAG_ROOT);
+                return (root != null) ? root : go; //we return self if no root was found...
+            }
         }
 
         public static GameObject FindRoot(this Component c)
         {
             if (c == null) return null;
 
-            //return FindRoot(c.gameObject);
-            var root = FindParentWithTag(c.transform, SPConstants.TAG_ROOT);
-            return (root != null) ? root : c.gameObject;
+            var entity = SPEntity.Pool.GetFromSource(c);
+            if (entity != null)
+                return entity.gameObject;
+            else
+            {
+                var root = FindParentWithTag(c.transform, SPConstants.TAG_ROOT);
+                return (root != null) ? root : c.gameObject;
+            }
         }
 
 
@@ -1238,10 +1182,7 @@ namespace com.spacepuppy.Utils
         // ##########
 
         /// <summary>
-        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
-        /// to child and all its children signaling it that the change occurred, unless suppressed by the suppress parameter. 
-        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
-        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// Set the parent of some GameObject to this GameObject.
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="child"></param>
@@ -1254,14 +1195,10 @@ namespace com.spacepuppy.Utils
         }
         
         /// <summary>
-        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
-        /// to child and all its children signaling it that the change occurred, unless suppressed by the suppress parameter. 
-        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
-        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// Set the parent of some GameObject to this GameObject.
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="child"></param>
-        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
         public static void AddChild(this GameObject obj, Transform child)
         {
             var p = (obj != null) ? obj.transform : null;
@@ -1269,14 +1206,10 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
-        /// to child and all its children signaling it that the change occurred, unless suppressed by the suppress parameter. 
-        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
-        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// Set the parent of some GameObject to this GameObject.
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="child"></param>
-        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
         public static void AddChild(this Transform obj, GameObject child)
         {
             var t = (child != null) ? child.transform : null;
@@ -1284,14 +1217,10 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Set the parent of some GameObject to this GameObject. The 'OnTransformHierarchyChanged' message will be broadcasted 
-        /// to child and all its children signaling it that the change occurred, unless the new child is already a child of the GameObject. 
-        /// Note that changing the parent of complex hierarchies is expensive regardless of the suppress, if you're calling this 
-        /// method frequently, you probably have a design flaw in your game. Reparenting shouldn't occur that frequently.
+        /// Set the parent of some GameObject to this GameObject.
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="child"></param>
-        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
         public static void AddChild(this Transform obj, Transform child)
         {
             if (child == null) throw new System.ArgumentNullException("child");
@@ -1301,11 +1230,9 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Sets the parent property of this GameObject to null. The 'OnTrasformHieararchyChanged' message will be 
-        /// broadcasted to it and all of its children signaling this change occurred, unless the parent is already null.
+        /// Sets the parent property of this GameObject to null.
         /// </summary>
         /// <param name="obj"></param>
-        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
         public static void RemoveFromParent(this GameObject obj)
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
@@ -1316,11 +1243,9 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Sets the parent property of this GameObject to null. The 'OnTrasformHieararchyChanged' message will be 
-        /// broadcasted to it and all of its children signaling this change occurred, unless the parent is already null.
+        /// Sets the parent property of this GameObject to null.
         /// </summary>
         /// <param name="obj"></param>
-        /// <param name="suppressChangeHierarchyMessage">Don't send the OnTransformHierarchyChanged message.</param>
         public static void RemoveFromParent(this Transform obj)
         {
             if (obj == null) throw new System.ArgumentNullException("t");

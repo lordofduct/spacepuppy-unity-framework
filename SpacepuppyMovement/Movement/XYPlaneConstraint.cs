@@ -19,9 +19,9 @@ namespace com.spacepuppy.Movement
             }
             else
             {
-                var pos = this.entityRoot.transform.position;
+                var pos = this.Motor.Controller.transform.position;
                 pos.z = 0;
-                this.entityRoot.transform.position = pos;
+                this.Motor.Controller.transform.position = pos;
             }
         }
 

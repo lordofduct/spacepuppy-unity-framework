@@ -6,7 +6,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.AI.Sensors.Collision
 {
-    public class ColliderAspect : AbstractAspect
+    public class ColliderAspect : SPEntityComponent, IAspect
     {
 
         #region Fields
@@ -37,15 +37,14 @@ namespace com.spacepuppy.AI.Sensors.Collision
 
         #region IAspect Interface
 
-        public override bool IsActive
+        bool IAspect.IsActive
         {
             get { return _collider.IsActiveAndEnabled(); }
         }
 
-        public override float Precedence
+        public float Precedence
         {
             get { return 0f; }
-            set { }
         }
         
         #endregion

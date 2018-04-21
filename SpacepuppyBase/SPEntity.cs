@@ -304,8 +304,7 @@ namespace com.spacepuppy
                 if(!_synced)
                 {
                     _synced = true;
-                    var go = GameObjectUtil.GetTrueRootFromSource(this.gameObject);
-                    _entity = go != null ? go.GetComponent<SPEntity>() : null;
+                    _entity = this.GetComponentInParent<SPEntity>();
                 }
                 return _entity;
             }

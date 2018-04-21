@@ -14,7 +14,7 @@ namespace com.spacepuppy
     /// ragdolling.
     /// </summary>
     [AddComponentMenu("SpacePuppy/Armature Rig")]
-    public class ArmatureRig : SPComponent, IIgnorableCollision
+    public class ArmatureRig : SPEntityComponent, IIgnorableCollision
     {
 
         #region Fields
