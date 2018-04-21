@@ -23,7 +23,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
         private LayerMask _aspectLayerMask = -1;
         [SerializeField()]
         [FormerlySerializedAs("AspectTagMask")]
-        private TagMask _aspectTagMask;
+        private TagMask _aspectTagMask = new TagMask();
 
         [SerializeField()]
         [FormerlySerializedAs("RequiresLineOfSight")]
