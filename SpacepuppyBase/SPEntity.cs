@@ -101,8 +101,15 @@ namespace com.spacepuppy
         #endregion
 
         #region Multiton Interface
-        
-        public static readonly EntityPool Pool = new EntityPool();
+
+        private static EntityPool _pool = new EntityPool();
+        public static EntityPool Pool
+        {
+            get
+            {
+                return _pool;
+            }
+        }
         
         [System.Obsolete("Access SPEntity.Pool instead.")]
         public static SPEntity[] FindAll(System.Func<SPEntity, bool> predicate)
@@ -191,7 +198,7 @@ namespace com.spacepuppy
                 return GetFromSource(obj) != null;
             }
 
-            public SPEntity GetFromSource(object obj)
+            public virtual SPEntity GetFromSource(object obj)
             {
                 if (obj == null) return null;
 
@@ -225,7 +232,7 @@ namespace com.spacepuppy
                 return GetFromSource<TSub>(obj) != null;
             }
 
-            public TSub GetFromSource<TSub>(object obj) where TSub : SPEntity
+            public virtual TSub GetFromSource<TSub>(object obj) where TSub : SPEntity
             {
                 if (obj == null) return null;
                 if (obj is TSub) return obj as TSub;
@@ -238,8 +245,8 @@ namespace com.spacepuppy
 
                 return go.AddOrGetComponent<SPEntityHook>().GetEntity() as TSub;
             }
-            
-            public SPEntity GetFromSource(System.Type tp, object obj)
+
+            public virtual SPEntity GetFromSource(System.Type tp, object obj)
             {
                 if (tp == null || obj == null) return null;
                 if (obj is SPEntity) return TypeUtil.IsType(obj.GetType(), tp) ? obj as SPEntity : null;

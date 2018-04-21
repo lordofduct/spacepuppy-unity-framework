@@ -117,13 +117,6 @@ namespace com.spacepuppy.AI.Sensors.Visual
             if (this.RequiresLineOfSight)
             {
                 var v = otherPos - center;
-                //RaycastHit[] hits = Physics.RaycastAll(this.transform.position, v, v.magnitude, this.LineOfSightMask);
-                //foreach (var hit in hits)
-                //{
-                //    //we ignore ourself
-                //    var r = hit.collider.FindRoot();
-                //    if (r != aspect.entityRoot && r != this.entityRoot) return false;
-                //}
                 using (var lst = com.spacepuppy.Collections.TempCollection.GetList<RaycastHit>())
                 {
                     int cnt = PhysicsUtil.RaycastAll(this.transform.position, v, lst, v.magnitude, this.LineOfSightMask);
