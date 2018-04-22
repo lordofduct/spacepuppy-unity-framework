@@ -26,7 +26,7 @@ namespace com.spacepuppy.Anim
         {
             foreach (AnimationState a in animation)
             {
-                if (a.layer == layer)
+                if (a.enabled && a.layer == layer)
                 {
                     var nm = a.name;
                     if (animation.IsPlaying(nm))
