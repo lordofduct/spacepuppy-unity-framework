@@ -35,6 +35,7 @@ namespace com.spacepuppyeditor.Scenario
         private const string PROP_DATA_VALUES = "ValueS";
         private const string PROP_DATA_VALUEE = "ValueE";
         private const string PROP_DATA_DUR = "Duration";
+        private const string PROP_DATA_OPTION = "Option";
 
 
         private SPReorderableList _dataList;
@@ -48,7 +49,7 @@ namespace com.spacepuppyeditor.Scenario
             _dataList = new SPReorderableList(this.serializedObject, this.serializedObject.FindProperty(PROP_TWEENDATA));
             _dataList.drawHeaderCallback = _dataList_DrawHeader;
             _dataList.drawElementCallback = _dataList_DrawElement;
-            _dataList.elementHeight = EditorGUIUtility.singleLineHeight * 6f + 7f;
+            _dataList.elementHeight = EditorGUIUtility.singleLineHeight * 7f + 7f;
             
         }
 
@@ -103,7 +104,10 @@ namespace com.spacepuppyeditor.Scenario
 
             position = CalcNextRect(ref area);
             SPEditorGUI.PropertyField(position, el.FindPropertyRelative(PROP_DATA_EASE));
-
+            
+            position = CalcNextRect(ref area);
+            this.DrawOption(position, ref propType, el.FindPropertyRelative(PROP_DATA_OPTION));
+            
             position = CalcNextRect(ref area);
             SPEditorGUI.PropertyField(position, el.FindPropertyRelative(PROP_DATA_DUR));
 
@@ -179,6 +183,31 @@ namespace com.spacepuppyeditor.Scenario
             var pos = new Rect(area.xMin, area.yMin + 1f, area.width, EditorGUIUtility.singleLineHeight);
             area = new Rect(pos.xMin, pos.yMax, area.width, area.height - EditorGUIUtility.singleLineHeight + 1f);
             return pos;
+        }
+
+        private void DrawOption(Rect position, ref System.Type propType, SerializedProperty optionProp)
+        {
+            if(propType == typeof(Vector2) || propType == typeof(Vector3) || propType == typeof(Vector4) || propType == typeof(Color))
+            {
+                bool value = ConvertUtil.ToBool(optionProp.intValue);
+                value = EditorGUI.Toggle(position, "Option (Use Slerp)", value);
+                optionProp.intValue = value ? 1 : 0;
+            }
+            else if(propType == typeof(Quaternion))
+            {
+                QuaternionTweenOption value = QuaternionTweenOption.Spherical;
+                if (System.Enum.IsDefined(typeof(QuaternionTweenOption), optionProp.intValue))
+                    value = (QuaternionTweenOption)optionProp.intValue;
+                
+                value = (QuaternionTweenOption)EditorGUI.EnumPopup(position, "Option", value);
+                optionProp.intValue = (int)value;
+                if (value == QuaternionTweenOption.Long)
+                    propType = typeof(Vector3);
+            }
+            else
+            {
+                EditorGUI.LabelField(position, "Option", "(no option available)");
+            }
         }
 
         #endregion

@@ -31,6 +31,8 @@ namespace com.spacepuppyeditor.Base
         private System.Reflection.MemberInfo[] _propertyListMembers;
         private string[] _propertyListNames;
 
+        private List<int> _memberLookupTable = new List<int>(); 
+
         #endregion
 
         #region CONSTRUCTOR
@@ -44,13 +46,15 @@ namespace com.spacepuppyeditor.Base
 
             _currentValuesProp.arraySize = _currentKeysProp.arraySize;
 
-            _lst = CachedReorderableList.GetListDrawer(_currentKeysProp, _lst_DrawHeader, _lst_DrawElement, _lst_OnAdd, _lst_OnRemove);
+            _lst = CachedReorderableList.GetListDrawer(_memberLookupTable, _currentProp, _lst_DrawHeader, _lst_DrawElement, _lst_OnAdd, _lst_OnRemove, null, null, _lst_OnReorder);
             //_lst.draggable = false;
+            _memberLookupTable.Clear();
+            for(int i = 0; i < _currentKeysProp.arraySize; i++)
+            {
+                _memberLookupTable.Add(i);
+            }
 
-
-
-
-            if(this.fieldInfo != null)
+            if (this.fieldInfo != null)
             {
                 var attrib = this.fieldInfo.GetCustomAttributes(typeof(VariantCollection.AsPropertyListAttribute), false).FirstOrDefault() as VariantCollection.AsPropertyListAttribute;
                 if(attrib != null && attrib.TargetType != null)
@@ -201,6 +205,19 @@ namespace com.spacepuppyeditor.Base
             if(index < 0 || index >= _currentKeysProp.arraySize) return;
             _currentKeysProp.DeleteArrayElementAtIndex(index);
             if (index < _currentValuesProp.arraySize) _currentValuesProp.DeleteArrayElementAtIndex(index);
+        }
+        
+        private void _lst_OnReorder(ReorderableList lst)
+        {
+            if (lst.index < 0 || lst.index >= _memberLookupTable.Count) return;
+
+            int i = lst.index;
+            int j = _memberLookupTable[lst.index];
+
+            _currentKeysProp.MoveArrayElement(j, i);
+            _currentValuesProp.MoveArrayElement(j, i);
+            _currentProp.serializedObject.ApplyModifiedProperties();
+            _currentProp.serializedObject.Update();
         }
 
         #endregion

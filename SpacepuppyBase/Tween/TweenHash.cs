@@ -346,6 +346,12 @@ namespace com.spacepuppy.Tween
             return this;
         }
 
+        public TweenHash ByAnimMode(AnimMode mode, string memberName, Ease ease, object value, float dur, object end, object option)
+        {
+            _props.Add(new PropInfo(mode, memberName, ease, value, dur, option, end));
+            return this;
+        }
+
         /// <summary>
         /// Creates a curve that will animate from the current value to the end value, but will rescale the duration from how long it should have 
         /// taken from start to end, but already animated up to current.

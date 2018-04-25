@@ -791,6 +791,32 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+
+        #region Vector Field
+
+        public static Vector3 DelayedVector3Field(Rect position, GUIContent label, Vector3 value)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+
+            const float LBL_WIDTH = 13f;
+            float w = position.width / 3f;
+
+            EditorGUI.LabelField(new Rect(position.xMin, position.yMin, LBL_WIDTH, EditorGUIUtility.singleLineHeight), "X");
+            value.x = EditorGUI.DelayedFloatField(new Rect(position.xMin + LBL_WIDTH, position.yMin, w - LBL_WIDTH - 1f, EditorGUIUtility.singleLineHeight), value.x);
+            position = new Rect(position.xMin + w, position.yMin, position.width - w, position.height);
+
+            EditorGUI.LabelField(new Rect(position.xMin, position.yMin, LBL_WIDTH, EditorGUIUtility.singleLineHeight), "Y");
+            value.y = EditorGUI.DelayedFloatField(new Rect(position.xMin + LBL_WIDTH, position.yMin, w - LBL_WIDTH - 1f, EditorGUIUtility.singleLineHeight), value.y);
+            position = new Rect(position.xMin + w, position.yMin, position.width - w, position.height);
+
+            EditorGUI.LabelField(new Rect(position.xMin, position.yMin, LBL_WIDTH, EditorGUIUtility.singleLineHeight), "Z");
+            value.z = EditorGUI.DelayedFloatField(new Rect(position.xMin + LBL_WIDTH, position.yMin, w - LBL_WIDTH - 1f, EditorGUIUtility.singleLineHeight), value.z);
+            
+            return value;
+        }
+
+        #endregion
+
         #region Quaternion Field
 
         public static Quaternion QuaternionField(Rect position, GUIContent label, Quaternion value, bool useRadians = false)
@@ -802,18 +828,14 @@ namespace com.spacepuppyeditor
                 vRot.y = vRot.y * Mathf.Deg2Rad;
                 vRot.z = vRot.z * Mathf.Deg2Rad;
             }
-
-            //vRot.x = MathUtil.NormalizeAngle(vRot.x, useRadians);
-            //vRot.y = MathUtil.NormalizeAngle(vRot.y, useRadians);
-            //vRot.z = MathUtil.NormalizeAngle(vRot.z, useRadians);
-
+            
             EditorGUI.BeginChangeCheck();
-            var vNewRot = EditorGUI.Vector3Field(position, label, vRot);
+            var vNewRot = DelayedVector3Field(position, label, vRot);
             if(EditorGUI.EndChangeCheck())
             {
-                vNewRot.x = MathUtil.NormalizeAngle(vNewRot.x, useRadians);
-                vNewRot.y = MathUtil.NormalizeAngle(vNewRot.y, useRadians);
-                vNewRot.z = MathUtil.NormalizeAngle(vNewRot.z, useRadians);
+                //vNewRot.x = MathUtil.NormalizeAngle(vNewRot.x, useRadians);
+                //vNewRot.y = MathUtil.NormalizeAngle(vNewRot.y, useRadians);
+                //vNewRot.z = MathUtil.NormalizeAngle(vNewRot.z, useRadians);
                 if (useRadians)
                 {
                     vNewRot.x = vNewRot.x * Mathf.Rad2Deg;

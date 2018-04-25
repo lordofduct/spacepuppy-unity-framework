@@ -12,6 +12,9 @@ namespace com.spacepuppyeditor.Internal
 
     public class SPReorderableList : ReorderableList
     {
+
+        #region CONSTRUCTOR
+
         public SPReorderableList(SerializedObject serializedObj, SerializedProperty property)
             : base(serializedObj, property)
         {
@@ -32,6 +35,10 @@ namespace com.spacepuppyeditor.Internal
         {
 
         }
+
+        #endregion
+
+        #region Methods
 
         public new void DoLayoutList()
         {
@@ -89,6 +96,8 @@ namespace com.spacepuppyeditor.Internal
             }
         }
 
+        #endregion
+
     }
 
     public sealed class CachedReorderableList : SPReorderableList
@@ -98,6 +107,11 @@ namespace com.spacepuppyeditor.Internal
 
         private CachedReorderableList(SerializedObject serializedObj, SerializedProperty property)
             : base(serializedObj, property)
+        {
+        }
+
+        private CachedReorderableList(System.Collections.IList memberList)
+            : base(memberList, null)
         {
         }
 
@@ -118,6 +132,24 @@ namespace com.spacepuppyeditor.Internal
             }
 
             this.serializedProperty = prop;
+            this.list = null;
+        }
+
+        private void ReInit(System.Collections.IList memberList)
+        {
+            try
+            {
+                if (_m_SerializedObject == null)
+                    _m_SerializedObject = typeof(ReorderableList).GetField("m_SerializedObject", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                _m_SerializedObject.SetValue(this, null);
+            }
+            catch
+            {
+                UnityEngine.Debug.LogWarning("This version of Spacepuppy Framework does not support the version of Unity it's being used with (CachedReorderableList).");
+            }
+
+            this.serializedProperty = null;
+            this.list = memberList;
         }
 
         #endregion
@@ -144,6 +176,54 @@ namespace com.spacepuppyeditor.Internal
             else
             {
                 lst = new CachedReorderableList(property.serializedObject, property);
+                _lstCache[hash] = lst;
+            }
+
+            lst.drawHeaderCallback = drawHeaderCallback;
+            lst.drawElementCallback = drawElementCallback;
+            lst.onAddCallback = onAddCallback;
+            lst.onRemoveCallback = onRemoveCallback;
+            lst.onSelectCallback = onSelectCallback;
+            lst.onChangedCallback = onChangedCallback;
+            lst.onReorderCallback = onReorderCallback;
+            lst.onCanRemoveCallback = onCanRemoveCallback;
+            lst.onAddDropdownCallback = onAddDropdownCallback;
+
+            return lst;
+        }
+
+        /// <summary>
+        /// Creates a cached ReorderableList that can be used on a IList. The serializedProperty passed is used for look-up and is not used in the ReorderableList itself.
+        /// </summary>
+        /// <param name="memberList"></param>
+        /// <param name="tokenProperty"></param>
+        /// <param name="drawHeaderCallback"></param>
+        /// <param name="drawElementCallback"></param>
+        /// <param name="onAddCallback"></param>
+        /// <param name="onRemoveCallback"></param>
+        /// <param name="onSelectCallback"></param>
+        /// <param name="onChangedCallback"></param>
+        /// <param name="onReorderCallback"></param>
+        /// <param name="onCanRemoveCallback"></param>
+        /// <param name="onAddDropdownCallback"></param>
+        /// <returns></returns>
+        public static CachedReorderableList GetListDrawer(System.Collections.IList memberList, SerializedProperty tokenProperty, ReorderableList.HeaderCallbackDelegate drawHeaderCallback, ReorderableList.ElementCallbackDelegate drawElementCallback,
+                                                  ReorderableList.AddCallbackDelegate onAddCallback = null, ReorderableList.RemoveCallbackDelegate onRemoveCallback = null, ReorderableList.SelectCallbackDelegate onSelectCallback = null,
+                                                  ReorderableList.ChangedCallbackDelegate onChangedCallback = null, ReorderableList.ReorderCallbackDelegate onReorderCallback = null, ReorderableList.CanRemoveCallbackDelegate onCanRemoveCallback = null,
+                                                  ReorderableList.AddDropdownCallbackDelegate onAddDropdownCallback = null)
+        {
+            if (memberList == null) throw new System.ArgumentNullException("memberList");
+            if (tokenProperty == null) throw new System.ArgumentNullException("property");
+
+            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(tokenProperty);
+            CachedReorderableList lst;
+            if (_lstCache.TryGetValue(hash, out lst))
+            {
+                lst.ReInit(memberList);
+            }
+            else
+            {
+                lst = new CachedReorderableList(memberList);
                 _lstCache[hash] = lst;
             }
 

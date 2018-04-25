@@ -21,4 +21,15 @@ namespace com.spacepuppy.Tween
         RightToLeftJumble = 3
     }
 
+    public enum QuaternionTweenOption
+    {
+        Spherical,
+        Linear,
+        /// <summary>
+        /// Rotate full rotation. So if you pass in values 0,0,0 -> 0,720,0 
+        /// it will rotate the full 720 degrees.
+        /// </summary>
+        Long
+    }
+
 }

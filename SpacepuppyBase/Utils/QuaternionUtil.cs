@@ -4,7 +4,7 @@ namespace com.spacepuppy.Utils
 {
     public static class QuaternionUtil
     {
-
+        
         public static bool IsNaN(Quaternion q)
         {
             return float.IsNaN(q.x * q.y * q.z * q.w);
@@ -19,7 +19,7 @@ namespace com.spacepuppy.Utils
         {
             return System.String.Format("<{0}, {1}, {2}, {3}>", v.x, v.y, v.z, v.w);
         }
-
+        
         public static Quaternion Normalize(Quaternion q)
         {
             var mag = System.Math.Sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
@@ -60,6 +60,78 @@ namespace com.spacepuppy.Utils
             if (bUseRadians) angularSpeed *= Mathf.Rad2Deg;
             var da = angularSpeed * dt;
             return Quaternion.RotateTowards(from, to, da);
+        }
+
+        /// <summary>
+        /// Massages incoming data as a Quaternion.
+        /// Vectors will be treated as euler values.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Quaternion MassageAsQuaternion(object value)
+        {
+            if (value == null) return Quaternion.identity;
+            if (value is Vector2)
+            {
+                var v = (Vector2)value;
+                return Quaternion.Euler(v.x, v.y, 0f);
+            }
+            if (value is Vector3)
+            {
+                var v = (Vector3)value;
+                return Quaternion.Euler(v);
+            }
+            if (value is Vector4)
+            {
+                var v = (Vector4)value;
+                return new Quaternion(v.x, v.y, v.z, v.w);
+            }
+            if (value is Quaternion)
+            {
+                return (Quaternion)value;
+            }
+            if (ConvertUtil.ValueIsNumericType(value))
+            {
+                float v = ConvertUtil.ToSingle(value);
+                return Quaternion.Euler(v, 0f, 0f);
+            }
+            return ConvertUtil.ToQuaternion(System.Convert.ToString(value));
+        }
+
+        /// <summary>
+        /// Massages incoming data as a an euler vector.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3 MassageAsEuler(object value)
+        {
+            if (value == null) return Vector3.zero;
+            if (value is Vector2)
+            {
+                var v = (Vector2)value;
+                return new Vector3(v.x, v.y, 0f);
+            }
+            if (value is Vector3)
+            {
+                var v = (Vector3)value;
+                return v;
+            }
+            if (value is Vector4)
+            {
+                var v = (Vector4)value;
+                return (new Quaternion(v.x, v.y, v.z, v.w)).eulerAngles;
+            }
+            if (value is Quaternion)
+            {
+                return ((Quaternion)value).eulerAngles;
+            }
+            if (ConvertUtil.ValueIsNumericType(value))
+            {
+                float v = ConvertUtil.ToSingle(value);
+                return new Vector3(v, 0f, 0f);
+            }
+            
+            return ConvertUtil.ToVector3(System.Convert.ToString(value));
         }
 
         #region Transform

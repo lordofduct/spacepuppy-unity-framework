@@ -1838,7 +1838,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector2 ToVector2(float value)
         {
-            return new Vector2(value, 0f);
+            return new Vector2(value, value);
         }
 
         /// <summary>
@@ -1887,7 +1887,7 @@ namespace com.spacepuppy.Utils
             }
             if (ValueIsNumericType(value))
             {
-                return new Vector2(ToSingle(value), 0f);
+                return Vector2.one * ToSingle(value);
             }
             return ToVector2(System.Convert.ToString(value));
         }
@@ -1898,7 +1898,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector3 ToVector3(float value)
         {
-            return new Vector3(value, 0f, 0f);
+            return new Vector3(value, value, value);
         }
 
         public static Vector3 ToVector3(Vector2 vec)
@@ -1954,7 +1954,7 @@ namespace com.spacepuppy.Utils
             }
             if (ValueIsNumericType(value))
             {
-                return new Vector3(ToSingle(value), 0f);
+                return Vector3.one * ToSingle(value);
             }
             return ToVector3(System.Convert.ToString(value));
         }
@@ -1965,7 +1965,7 @@ namespace com.spacepuppy.Utils
 
         public static Vector4 ToVector4(float value)
         {
-            return new Vector4(value, 0f, 0f, 0f);
+            return new Vector4(value, value, value, value);
         }
 
         public static Vector4 ToVector4(Vector2 vec)
@@ -2028,7 +2028,7 @@ namespace com.spacepuppy.Utils
             {
                 return new Vector4(ToSingle(value), 0f);
             }
-            return ToVector4(System.Convert.ToString(value));
+            return Vector4.one * ToSingle(value);
         }
 
         #endregion
@@ -2094,7 +2094,7 @@ namespace com.spacepuppy.Utils
             }
             return ToQuaternion(System.Convert.ToString(value));
         }
-
+        
         #endregion
 
 

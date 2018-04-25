@@ -55,8 +55,8 @@ namespace com.spacepuppyeditor.Base
 
             public override SPEntity GetFromSource(object obj)
             {
-                if (Application.isPlaying)
-                    return base.GetFromSource(obj);
+                //if (Application.isPlaying)
+                //    return base.GetFromSource(obj);
 
                 var go = GameObjectUtil.GetGameObjectFromSource(obj);
                 if (go != null)
@@ -67,8 +67,8 @@ namespace com.spacepuppyeditor.Base
 
             public override TSub GetFromSource<TSub>(object obj)
             {
-                if (Application.isPlaying)
-                    return base.GetFromSource<TSub>(obj);
+                //if (Application.isPlaying)
+                //    return base.GetFromSource<TSub>(obj);
 
                 var go = GameObjectUtil.GetGameObjectFromSource(obj);
                 if (go != null)
@@ -82,8 +82,8 @@ namespace com.spacepuppyeditor.Base
 
             public override SPEntity GetFromSource(System.Type tp, object obj)
             {
-                if (Application.isPlaying)
-                    return base.GetFromSource(tp, obj);
+                //if (Application.isPlaying)
+                //    return base.GetFromSource(tp, obj);
 
                 var go = GameObjectUtil.GetGameObjectFromSource(obj);
                 if (go != null)
