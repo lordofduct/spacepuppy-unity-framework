@@ -4,22 +4,14 @@ namespace com.spacepuppy.Utils
 {
     public static class QuaternionUtil
     {
-        
+
         public static bool IsNaN(Quaternion q)
         {
             return float.IsNaN(q.x * q.y * q.z * q.w);
         }
 
-        public static string Stringify(Quaternion q)
-        {
-            return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + q.w.ToString();
-        }
+        #region Utils
 
-        public static string ToDetailedString(this Quaternion v)
-        {
-            return System.String.Format("<{0}, {1}, {2}, {3}>", v.x, v.y, v.z, v.w);
-        }
-        
         public static Quaternion Normalize(Quaternion q)
         {
             var mag = System.Math.Sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
@@ -71,24 +63,24 @@ namespace com.spacepuppy.Utils
         public static Quaternion MassageAsQuaternion(object value)
         {
             if (value == null) return Quaternion.identity;
-            if (value is Vector2)
+            if (value is Quaternion)
             {
-                var v = (Vector2)value;
-                return Quaternion.Euler(v.x, v.y, 0f);
+                return (Quaternion)value;
             }
             if (value is Vector3)
             {
                 var v = (Vector3)value;
                 return Quaternion.Euler(v);
             }
+            if (value is Vector2)
+            {
+                var v = (Vector2)value;
+                return Quaternion.Euler(v.x, v.y, 0f);
+            }
             if (value is Vector4)
             {
                 var v = (Vector4)value;
                 return new Quaternion(v.x, v.y, v.z, v.w);
-            }
-            if (value is Quaternion)
-            {
-                return (Quaternion)value;
             }
             if (ConvertUtil.ValueIsNumericType(value))
             {
@@ -106,24 +98,24 @@ namespace com.spacepuppy.Utils
         public static Vector3 MassageAsEuler(object value)
         {
             if (value == null) return Vector3.zero;
-            if (value is Vector2)
-            {
-                var v = (Vector2)value;
-                return new Vector3(v.x, v.y, 0f);
-            }
             if (value is Vector3)
             {
                 var v = (Vector3)value;
                 return v;
             }
+            if (value is Quaternion)
+            {
+                return ((Quaternion)value).eulerAngles;
+            }
+            if (value is Vector2)
+            {
+                var v = (Vector2)value;
+                return new Vector3(v.x, v.y, 0f);
+            }
             if (value is Vector4)
             {
                 var v = (Vector4)value;
                 return (new Quaternion(v.x, v.y, v.z, v.w)).eulerAngles;
-            }
-            if (value is Quaternion)
-            {
-                return ((Quaternion)value).eulerAngles;
             }
             if (ConvertUtil.ValueIsNumericType(value))
             {
@@ -133,6 +125,16 @@ namespace com.spacepuppy.Utils
             
             return ConvertUtil.ToVector3(System.Convert.ToString(value));
         }
+
+        public static Vector3 Normalize(Vector3 euler)
+        {
+            euler.x = MathUtil.NormalizeAngle(euler.x, false);
+            euler.y = MathUtil.NormalizeAngle(euler.y, false);
+            euler.z = MathUtil.NormalizeAngle(euler.z, false);
+            return euler;
+        }
+
+        #endregion
 
         #region Transform
 
@@ -234,7 +236,21 @@ namespace com.spacepuppy.Utils
                 axis.Normalize();
             }
         }
-        
+
+        #endregion
+
+        #region String
+
+        public static string Stringify(Quaternion q)
+        {
+            return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + q.w.ToString();
+        }
+
+        public static string ToDetailedString(this Quaternion v)
+        {
+            return System.String.Format("<{0}, {1}, {2}, {3}>", v.x, v.y, v.z, v.w);
+        }
+
         #endregion
 
     }

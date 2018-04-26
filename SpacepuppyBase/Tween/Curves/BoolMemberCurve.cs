@@ -8,7 +8,7 @@ namespace com.spacepuppy.Tween.Curves
     /// The BoolMemberCurve favors 'true'.
     /// </summary>
     [CustomMemberCurve(typeof(bool))]
-    public class BoolMemberCurve : MemberCurve
+    public class BoolMemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -39,10 +39,19 @@ namespace com.spacepuppy.Tween.Curves
             _end = end;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = ConvertUtil.ToBool(start);
             _end = ConvertUtil.ToBool(end);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            var c = ConvertUtil.ToBool(current);
+            var e = ConvertUtil.ToBool(end);
+            _start = c;
+            _end = e;
+            this.Duration = (c == e) ? 0f : totalDur;
         }
 
         #endregion

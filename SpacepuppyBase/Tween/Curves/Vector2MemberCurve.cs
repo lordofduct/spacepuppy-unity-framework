@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(Vector2))]
-    public class Vector2MemberCurve : MemberCurve
+    public class Vector2MemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
         
         #region Fields
@@ -56,11 +56,48 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = ConvertUtil.ToVector2(start);
             _end = ConvertUtil.ToVector2(end);
             _useSlerp = ConvertUtil.ToBool(option);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            _useSlerp = ConvertUtil.ToBool(option);
+            
+            if (_useSlerp)
+            {
+                var c = ConvertUtil.ToVector2(current);
+                var s = ConvertUtil.ToVector2(start);
+                var e = ConvertUtil.ToVector2(end);
+                _start = c;
+                _end = e;
+
+                var at = Vector2.Angle(s, e);
+                if ((System.Math.Abs(at) < MathUtil.EPSILON))
+                {
+                    this.Duration = 0f;
+                }
+                else
+                {
+                    var ap = Vector2.Angle(s, c);
+                    this.Duration = (1f - ap / at) * totalDur;
+                }
+            }
+            else
+            {
+                var c = ConvertUtil.ToVector2(current);
+                var s = ConvertUtil.ToVector2(start);
+                var e = ConvertUtil.ToVector2(end);
+                _start = c;
+                _end = e;
+
+                c -= s;
+                e -= s;
+                this.Duration = totalDur * (VectorUtil.NearZeroVector(e) ? 0f : 1f - c.magnitude / e.magnitude);
+            }
         }
 
         #endregion

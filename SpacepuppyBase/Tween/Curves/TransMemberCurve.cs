@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(Trans))]
-    public class TransMemberCurve : MemberCurve
+    public class TransMemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -56,7 +56,7 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = (start is Trans) ? (Trans)start : Trans.Identity;
             if (end is Trans)
@@ -68,6 +68,13 @@ namespace com.spacepuppy.Tween.Curves
             else
                 _end = Trans.Identity;
             _useSlerp = ConvertUtil.ToBool(option);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            //TODO - determine mid point
+            this.ReflectiveInit(memberType, current, end, option);
+            this.Duration = totalDur;
         }
 
         #endregion

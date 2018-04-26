@@ -52,7 +52,7 @@ namespace com.spacepuppy.Tween.Curves
             _target = target;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             var trans = GameObjectUtil.GetTransformFromSource(start);
             if (trans != null)

@@ -59,7 +59,8 @@ namespace com.spacepuppy.Dynamic.Accessors
 
         private void SetEulerAngles(Transform targ, object value)
         {
-            targ.eulerAngles = ConvertUtil.ToVector3(value);
+            //targ.eulerAngles = ConvertUtil.ToVector3(value);
+            targ.rotation = QuaternionUtil.MassageAsQuaternion(value);
         }
 
         private object GetEulerAngles(Transform targ)
@@ -69,7 +70,8 @@ namespace com.spacepuppy.Dynamic.Accessors
 
         private void SetLocalEulerAngles(Transform targ, object value)
         {
-            targ.localEulerAngles = ConvertUtil.ToVector3(value);
+            //targ.localEulerAngles = ConvertUtil.ToVector3(value);
+            targ.localRotation = QuaternionUtil.MassageAsQuaternion(value);
         }
 
         private object GetLocalEulerAngles(Transform targ)
@@ -79,7 +81,8 @@ namespace com.spacepuppy.Dynamic.Accessors
 
         private void SetRotation(Transform targ, object value)
         {
-            targ.rotation = ConvertUtil.ToQuaternion(value);
+            //targ.rotation = ConvertUtil.ToQuaternion(value);
+            targ.rotation = QuaternionUtil.MassageAsQuaternion(value);
         }
 
         private object GetRotation(Transform targ)
@@ -89,7 +92,8 @@ namespace com.spacepuppy.Dynamic.Accessors
 
         private void SetLocalRotation(Transform targ, object value)
         {
-            targ.localRotation = ConvertUtil.ToQuaternion(value);
+            //targ.localRotation = ConvertUtil.ToQuaternion(value);
+            targ.localRotation = QuaternionUtil.MassageAsQuaternion(value);
         }
 
         private object GetLocalRotation(Transform targ)

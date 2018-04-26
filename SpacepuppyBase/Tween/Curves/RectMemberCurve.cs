@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(Rect))]
-    public class RectMemberCurve : MemberCurve
+    public class RectMemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -44,10 +44,17 @@ namespace com.spacepuppy.Tween.Curves
             _end = end;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = (start is Rect) ? (Rect)start : new Rect();
             _end = (end is Rect) ? (Rect)end : new Rect();
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            //TODO - determine mid point
+            this.ReflectiveInit(memberType, current, end, option);
+            this.Duration = totalDur;
         }
 
         #endregion

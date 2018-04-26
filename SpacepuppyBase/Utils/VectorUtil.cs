@@ -481,6 +481,11 @@ namespace com.spacepuppy.Utils
             return MathUtil.FuzzyEqual(Mathf.Abs(Vector3.Dot(a.normalized, b.normalized)), 1.0f, epsilon);
         }
 
+        public static bool NearZeroVector(this Vector4 v)
+        {
+            return MathUtil.FuzzyEqual(v.sqrMagnitude, 0f, MathUtil.EPSILON_SQR);
+        }
+
         public static bool NearZeroVector(this Vector3 v)
         {
             return MathUtil.FuzzyEqual(v.sqrMagnitude, 0f, MathUtil.EPSILON_SQR);

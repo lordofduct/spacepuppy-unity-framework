@@ -60,7 +60,7 @@ namespace com.spacepuppy.Waypoints
 
         #region MemberCurve Interface
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             //do nothing
         }

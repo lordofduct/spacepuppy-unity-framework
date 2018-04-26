@@ -5,7 +5,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(float))]
-    public class FloatMemberCurve : MemberCurve
+    public class FloatMemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
         
         #region Fields
@@ -36,10 +36,23 @@ namespace com.spacepuppy.Tween.Curves
             _end = end;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = ConvertUtil.ToSingle(start);
             _end = ConvertUtil.ToSingle(end);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            var c = ConvertUtil.ToSingle(current);
+            var s = ConvertUtil.ToSingle(_start);
+            var e = ConvertUtil.ToSingle(end);
+            _start = c;
+            _end = e;
+
+            c -= s;
+            e -= s;
+            this.Duration = System.Math.Abs(e) < MathUtil.EPSILON ? 0f : (1f - c / e) * totalDur;
         }
 
         #endregion

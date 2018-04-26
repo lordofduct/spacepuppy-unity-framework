@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(Vector3))]
-    public class Vector3MemberCurve : MemberCurve
+    public class Vector3MemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -56,11 +56,48 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = slerp;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = ConvertUtil.ToVector3(start);
             _end = ConvertUtil.ToVector3(end);
             _useSlerp = ConvertUtil.ToBool(option);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            _useSlerp = ConvertUtil.ToBool(option);
+
+            if (_useSlerp)
+            {
+                var c = ConvertUtil.ToVector3(current);
+                var s = ConvertUtil.ToVector3(start);
+                var e = ConvertUtil.ToVector3(end);
+                _start = c;
+                _end = e;
+
+                var at = Vector3.Angle(s, e);
+                if ((System.Math.Abs(at) < MathUtil.EPSILON))
+                {
+                    this.Duration = 0f;
+                }
+                else
+                {
+                    var ap = Vector3.Angle(s, c);
+                    this.Duration = (1f - ap / at) * totalDur;
+                }
+            }
+            else
+            {
+                var c = ConvertUtil.ToVector3(current);
+                var s = ConvertUtil.ToVector3(start);
+                var e = ConvertUtil.ToVector3(end);
+                _start = c;
+                _end = e;
+
+                c -= s;
+                e -= s;
+                this.Duration = totalDur * (VectorUtil.NearZeroVector(e) ? 0f : 1f - c.magnitude / e.magnitude);
+            }
         }
 
         #endregion

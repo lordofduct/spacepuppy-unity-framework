@@ -2281,7 +2281,7 @@ namespace com.spacepuppy.Utils
                     return false;
             }
         }
-
+        
         #endregion
 
         #region "wildcard"

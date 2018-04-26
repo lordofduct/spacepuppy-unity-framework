@@ -14,7 +14,7 @@ namespace com.spacepuppy.Tween.Curves
     [CustomMemberCurve(typeof(byte), priority = int.MinValue)]
     [CustomMemberCurve(typeof(uint), priority = int.MinValue)]
     [CustomMemberCurve(typeof(ulong), priority = int.MinValue)]
-    public class NumericMemberCurve : MemberCurve
+    public class NumericMemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -46,10 +46,32 @@ namespace com.spacepuppy.Tween.Curves
             _end = end;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = ConvertUtil.ToDouble(start);
             _end = ConvertUtil.ToDouble(end);
+            if (memberType != null && ConvertUtil.IsNumericType(memberType))
+                _numericType = System.Type.GetTypeCode(memberType);
+            else
+                _numericType = TypeCode.Double;
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            var c = ConvertUtil.ToDouble(current);
+            var s = ConvertUtil.ToDouble(_start);
+            var e = ConvertUtil.ToDouble(end);
+            _start = c;
+            _end = e;
+
+            c -= s;
+            e -= s;
+            this.Duration = (float)(System.Math.Abs(e) < MathUtil.DBL_EPSILON ? 0f : (1d - c / e) * totalDur);
+
+            if (memberType != null && ConvertUtil.IsNumericType(memberType))
+                _numericType = System.Type.GetTypeCode(memberType);
+            else
+                _numericType = TypeCode.Double;
         }
 
         #endregion

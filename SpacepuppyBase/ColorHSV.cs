@@ -372,6 +372,27 @@ namespace com.spacepuppy
             return r;
         }
 
+        /// <summary>
+        /// Returns the value of t that would give 'current' if Slerp(start, end, t). 
+        /// If any input is invalid, NaN is returned.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public static float InverseSlerp(ColorHSV current, ColorHSV start, ColorHSV end)
+        {
+            if(start.v < 0f || end.v < 0f || current.v < 0f || start.s < 0f || end.s < 0f || current.s < 0f)
+            {
+                return float.NaN;
+            }
+            else
+            {
+                var total = (end.h - start.h) % 1f;
+                var sub = (current.h - start.h) % 1f;
+                return System.Math.Abs(total) < 0.0001f ? 0f : sub / total;
+            }
+        }
+
         #endregion
 
         #region Colors

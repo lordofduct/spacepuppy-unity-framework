@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(string))]
-    public class StringCurve : MemberCurve
+    public class StringCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -41,11 +41,29 @@ namespace com.spacepuppy.Tween.Curves
             _style = style;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = Convert.ToString(start) ?? string.Empty;
             _end = Convert.ToString(end) ?? string.Empty;
             _style = ConvertUtil.ToEnum<StringTweenStyle>(option, StringTweenStyle.Default);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            _style = ConvertUtil.ToEnum<StringTweenStyle>(option, StringTweenStyle.Default);
+
+            var c = Convert.ToString(current) ?? string.Empty;
+            var s = Convert.ToString(start) ?? string.Empty;
+            var e = Convert.ToString(end) ?? string.Empty;
+            _start = c;
+            _end = e;
+
+            int tl = e.Length - s.Length;
+            int l = c.Length - s.Length;
+            if (tl == 0)
+                this.Duration = 0f;
+            else
+                this.Duration = totalDur * (1f - (float)l / (float)tl);
         }
 
         #endregion

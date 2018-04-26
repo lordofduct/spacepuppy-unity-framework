@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(Quaternion))]
-    public class QuaternionMemberCurve : MemberCurve
+    public class QuaternionMemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
         
         #region Fields
@@ -76,7 +76,7 @@ namespace com.spacepuppy.Tween.Curves
             _endLong = eulerEnd;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _option = ConvertUtil.ToEnum<QuaternionTweenOption>(option);
             if(_option == QuaternionTweenOption.Long)
@@ -92,6 +92,52 @@ namespace com.spacepuppy.Tween.Curves
                 _end = QuaternionUtil.MassageAsQuaternion(end);
                 _startLong = _start.eulerAngles;
                 _endLong = _end.eulerAngles;
+            }
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            _option = ConvertUtil.ToEnum<QuaternionTweenOption>(option);
+            if (_option == QuaternionTweenOption.Long)
+            {
+                var c = QuaternionUtil.MassageAsEuler(current);
+                var s = QuaternionUtil.MassageAsEuler(start);
+                var e = QuaternionUtil.MassageAsEuler(end);
+
+                c.x = MathUtil.NormalizeAngleToRange(c.x, s.x, e.x, false);
+                c.y = MathUtil.NormalizeAngleToRange(c.y, s.y, e.y, false);
+                c.z = MathUtil.NormalizeAngleToRange(c.z, s.z, e.z, false);
+
+                _startLong = c;
+                _endLong = e;
+                _start = Quaternion.Euler(_startLong);
+                _end = Quaternion.Euler(_endLong);
+                
+                c -= s;
+                e -= s;
+                this.Duration = totalDur * (VectorUtil.NearZeroVector(e) ? 0f : 1f - c.magnitude / e.magnitude);
+            }
+            else
+            {
+                //treat as quat
+                var c = QuaternionUtil.MassageAsQuaternion(current);
+                var s = QuaternionUtil.MassageAsQuaternion(start);
+                var e = QuaternionUtil.MassageAsQuaternion(end);
+                _start = c;
+                _end = e;
+                _startLong = _start.eulerAngles;
+                _endLong = _end.eulerAngles;
+
+                var at = Quaternion.Angle(s, e);
+                if ((System.Math.Abs(at) < MathUtil.EPSILON))
+                {
+                    this.Duration = 0f;
+                }
+                else
+                {
+                    var ap = Quaternion.Angle(s, c);
+                    this.Duration = (1f - ap / at) * totalDur;
+                }
             }
         }
 
@@ -170,7 +216,7 @@ namespace com.spacepuppy.Tween.Curves
         }
 
         #endregion
-
+        
     }
 
 }

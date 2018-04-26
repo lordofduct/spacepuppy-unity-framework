@@ -175,7 +175,7 @@ namespace com.spacepuppy.Utils
         /// <remarks></remarks>
         public static float Truncate(float value)
         {
-            return Convert.ToSingle(Math.Truncate(value));
+            return (float)Math.Truncate(value);
         }
 
         /// <summary>
@@ -197,36 +197,25 @@ namespace com.spacepuppy.Utils
         /// <param name="min"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static bool InRange(float value, float max, float min)
+        public static bool InRange(float value, float max, float min = 0f)
         {
-            return (value >= min && value <= max);
-        }
+            if (max < min) return (value >= max && value <= min);
+            else return (value >= min && value <= max);
 
-        public static bool InRange(float value, float max)
+        }
+        
+        public static bool InRange(int value, int max, int min = 0)
         {
-            return InRange(value, max, 0);
+            if (max < min) return (value >= max && value <= min);
+            else return (value >= min && value <= max);
         }
-
-        public static bool InRange(int value, int max, int min)
+        
+        public static bool InRangeExclusive(float value, float max, float min = 0f)
         {
-            return (value >= min && value <= max);
+            if (max < min) return (value > max && value < min);
+            else return (value > min && value < max);
         }
-
-        public static bool InRange(int value, int max)
-        {
-            return InRange(value, max, 0);
-        }
-
-        public static bool InRangeExclusive(float value, float max, float min)
-        {
-            return (value > min && value < max);
-        }
-
-        public static bool InRangeExclusive(float value, float max)
-        {
-            return InRangeExclusive(value, max, 0);
-        }
-
+        
         /// <summary>
         /// Returns if the value is a valid index in list of length 'bound'.
         /// </summary>
@@ -1333,8 +1322,8 @@ namespace com.spacepuppy.Utils
         /// Returns a value for dependant that is a value that is the shortest angle between dep and ind from ind.
         /// 
         /// 
-        /// for instance if dep=-170 degrees and ind=170 degrees then 190 degrees will be returned as an alternative to -170 degrees
-        /// note: angle is passed in radians, this written example is in degrees for ease of reading
+        /// for instance if dep=-190 degrees and ind=10 degrees then 170 degrees will be returned 
+        /// since the shortest path from 10 to -190 is to rotate to 170.
         /// </summary>
         /// <param name="dep"></param>
         /// <param name="ind"></param>
@@ -1346,10 +1335,10 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
-        /// Returns a value for dependant that is the shortest angle counter-clockwise from ind.
+        /// Returns a value for dependant that is the shortest angle in the positive direction from ind.
         /// 
-        /// for instance if dep=-170 degrees, and ind=10 degrees, then 200 degrees will be returned as an alternative to -160. The shortest 
-        /// path from 10 to -160 moving counter-clockwise is 190 degrees away.
+        /// for instance if dep=-170 degrees, and ind=10 degrees, then 190 degrees will be returned as an alternative to -170. 
+        /// Since 190 is the smallest angle > 10 equal to -170.
         /// </summary>
         /// <param name="dep"></param>
         /// <param name="ind"></param>
@@ -1357,29 +1346,34 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static float NormalizeAngleToAnother(float dep, float ind, bool useRadians)
         {
-            if(useRadians)
+            float div = useRadians ? TWO_PI : 360f;
+            float v = (dep - ind) / div;
+            return dep - (float)Math.Floor(v) * div;
+        }
+
+        public static float NormalizeAngleToRange(float value, float start, float end, bool useRadians)
+        {
+            float div = useRadians ? TWO_PI : 360f;
+            float d = (end - start) / div;
+            float v = (value - start) / div;
+            if (!MathUtil.InRange(v, d))
             {
-                if(dep < ind)
+                if (Math.Abs(d) > 1.0)
                 {
-                    while (dep < ind) dep += MathUtil.TWO_PI;
+                    //the start->end range is larger than 360, so just land inside it
+                    v = (float)Math.Round((double)v, System.MidpointRounding.AwayFromZero);
+                    value -= v * div;
                 }
-                else if(dep - ind > MathUtil.TWO_PI)
+                else
                 {
-                    while(dep - ind > MathUtil.TWO_PI) dep -= MathUtil.TWO_PI;
+                    //the start->end range is smaller than 360
+                    //so lets land as close as we can to the bounds of the range on either end
+                    v = (float)Math.Truncate((double)v);
+                    value -= v * div;
+                    if (Math.Abs(value - end) > 180.0) value -= Math.Sign(value - end) * div;
                 }
             }
-            else
-            {
-                if (dep < ind)
-                {
-                    while (dep < ind) dep += 360f;
-                }
-                else if (dep - ind > 360f)
-                {
-                    while (dep - ind > MathUtil.TWO_PI) dep -= 360f;
-                }
-            }
-            return dep;
+            return value;
         }
 
         /// <summary>

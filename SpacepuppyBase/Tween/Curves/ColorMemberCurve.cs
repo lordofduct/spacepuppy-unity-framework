@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(Color))]
-    public class ColorMemberCurve : MemberCurve
+    public class ColorMemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -56,11 +56,42 @@ namespace com.spacepuppy.Tween.Curves
             _useSlerp = useSlerp;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = ConvertUtil.ToColor(start);
             _end = ConvertUtil.ToColor(end);
             _useSlerp = ConvertUtil.ToBool(option);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            var sc = ConvertUtil.ToColor(start);
+            _start = ConvertUtil.ToColor(current);
+            _end = ConvertUtil.ToColor(end);
+            _useSlerp = ConvertUtil.ToBool(option);
+
+            if(_useSlerp)
+            {
+                var c = (ColorHSV)_start;
+                var s = (ColorHSV)sc;
+                var e = (ColorHSV)_end;
+
+                var t = ColorHSV.InverseSlerp((ColorHSV)_start, (ColorHSV)sc, (ColorHSV)e);
+                if (float.IsNaN(t))
+                    this.Duration = totalDur;
+                else
+                    this.Duration = (1f - t) * totalDur;
+            }
+            else
+            {
+                var c = ConvertUtil.ToVector4(_start);
+                var s = ConvertUtil.ToVector4(sc);
+                var e = ConvertUtil.ToVector4(_end);
+
+                c -= s;
+                e -= s;
+                this.Duration = totalDur * (VectorUtil.NearZeroVector(e) ? 0f : 1f - c.magnitude / e.magnitude);
+            }
         }
 
         #endregion

@@ -514,7 +514,7 @@ namespace com.spacepuppy.Tween
                     case AnimMode.FromTo:
                         return MemberCurve.CreateFromTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
                     case AnimMode.RedirectTo:
-                        return MemberCurve.CreateRedirectTo(_targ, prop.name, ease, ConvertUtil.ToSingle(prop.value), ConvertUtil.ToSingle(prop.altValue), dur, prop.option);
+                        return MemberCurve.CreateRedirectTo(_targ, prop.name, ease, prop.value, prop.altValue, dur, prop.option);
                 }
             }
             catch

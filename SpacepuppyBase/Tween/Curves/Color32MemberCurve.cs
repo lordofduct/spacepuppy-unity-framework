@@ -6,7 +6,7 @@ namespace com.spacepuppy.Tween.Curves
 {
 
     [CustomMemberCurve(typeof(Color32))]
-    public class Color32MemberCurve : MemberCurve
+    public class Color32MemberCurve : MemberCurve, ISupportRedirectToMemberCurve
     {
 
         #region Fields
@@ -37,10 +37,25 @@ namespace com.spacepuppy.Tween.Curves
             _end = end;
         }
 
-        protected override void ReflectiveInit(object start, object end, object option)
+        protected override void ReflectiveInit(System.Type memberType, object start, object end, object option)
         {
             _start = ConvertUtil.ToColor32(start);
             _end = ConvertUtil.ToColor32(end);
+        }
+
+        void ISupportRedirectToMemberCurve.ConfigureAsRedirectTo(System.Type memberType, float totalDur, object current, object start, object end, object option)
+        {
+            var sc = ConvertUtil.ToColor32(start);
+            _start = ConvertUtil.ToColor32(current);
+            _end = ConvertUtil.ToColor32(end);
+
+            var c = ConvertUtil.ToVector4(_start);
+            var s = ConvertUtil.ToVector4(sc);
+            var e = ConvertUtil.ToVector4(_end);
+
+            c -= s;
+            e -= s;
+            this.Duration = totalDur * (VectorUtil.NearZeroVector(e) ? 0f : 1f - c.magnitude / e.magnitude);
         }
 
         #endregion
