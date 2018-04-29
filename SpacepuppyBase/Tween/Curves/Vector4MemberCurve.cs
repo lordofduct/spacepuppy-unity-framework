@@ -51,9 +51,16 @@ namespace com.spacepuppy.Tween.Curves
             _start = c;
             _end = e;
 
-            c -= s;
-            e -= s;
-            this.Duration = totalDur * (VectorUtil.NearZeroVector(e) ? 0f : 1f - c.magnitude / e.magnitude);
+            c -= e;
+            s -= e;
+            if (VectorUtil.NearZeroVector(s))
+            {
+                this.Duration = 0f;
+            }
+            else
+            {
+                this.Duration = totalDur * Vector3.Dot(c, s.normalized) / Vector3.Dot(s, c.normalized);
+            }
         }
 
         #endregion

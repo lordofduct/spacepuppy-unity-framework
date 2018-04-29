@@ -695,6 +695,7 @@ namespace com.spacepuppy
                 }
 
 
+                ResolveCurrentInstruction:
                 //deal with the current yieldObject
                 if (current == null)
                 {
@@ -760,8 +761,10 @@ namespace com.spacepuppy
                     var e = (current as IEnumerable).GetEnumerator();
                     if (e.MoveNext())
                     {
-                        _currentIEnumeratorYieldValue = e.Current;
+                        //_currentIEnumeratorYieldValue = e.Current;
+                        current = e.Current;
                         _stack.Push(EnumWrapper.Create(e));
+                        goto ResolveCurrentInstruction;
                     }
                 }
                 else if (current is IEnumerator)
@@ -769,8 +772,10 @@ namespace com.spacepuppy
                     var e = current as IEnumerator;
                     if (e.MoveNext())
                     {
-                        _currentIEnumeratorYieldValue = e.Current;
+                        //_currentIEnumeratorYieldValue = e.Current;
+                        current = e.Current;
                         _stack.Push(EnumWrapper.Create(e));
+                        goto ResolveCurrentInstruction;
                     }
                 }
                 else if (current is RadicalCoroutineEndCommand)

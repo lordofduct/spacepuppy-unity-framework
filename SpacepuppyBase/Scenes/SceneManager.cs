@@ -19,6 +19,14 @@ namespace com.spacepuppy.Scenes
 
         AsyncOperation UnloadScene(Scene scene);
         Scene GetActiveScene();
+
+        /// <summary>
+        /// Test if a scene by the name exists.
+        /// </summary>
+        /// <param name="excludeInactive">False to test if the scene exists as a loadable scene, True if to test if the scene exists and is actively loaded.</param>
+        /// <returns></returns>
+        bool SceneExists(string sceneName, bool excludeInactive = false);
+
     }
     
     public class SPSceneManager : ServiceScriptableObject<ISceneManager>, ISceneManager
@@ -97,7 +105,7 @@ namespace com.spacepuppy.Scenes
         public LoadSceneWaitHandle LoadScene(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode.Single, LoadSceneBehaviour behaviour = LoadSceneBehaviour.Async)
         {
             if (sceneBuildIndex < 0 || sceneBuildIndex >= SceneManager.sceneCountInBuildSettings) throw new System.IndexOutOfRangeException("sceneBuildIndex");
-
+            
             string sceneName = "#" + sceneBuildIndex.ToString();
 
             switch (behaviour)
@@ -141,6 +149,19 @@ namespace com.spacepuppy.Scenes
         public Scene GetActiveScene()
         {
             return SceneManager.GetActiveScene();
+        }
+
+        public bool SceneExists(string sceneName, bool excludeInactive = false)
+        {
+            if(excludeInactive)
+            {
+                var sc = SceneManager.GetSceneByName(sceneName);
+                return sc.IsValid();
+            }
+            else
+            {
+                return SceneUtility.GetBuildIndexByScenePath(sceneName) >= 0;
+            }
         }
         
         #endregion

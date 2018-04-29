@@ -88,9 +88,16 @@ namespace com.spacepuppy.Tween.Curves
                 var s = ConvertUtil.ToVector4(sc);
                 var e = ConvertUtil.ToVector4(_end);
 
-                c -= s;
-                e -= s;
-                this.Duration = totalDur * (VectorUtil.NearZeroVector(e) ? 0f : 1f - c.magnitude / e.magnitude);
+                c -= e;
+                s -= e;
+                if (VectorUtil.NearZeroVector(s))
+                {
+                    this.Duration = 0f;
+                }
+                else
+                {
+                    this.Duration = totalDur * Vector3.Dot(c, s.normalized) / Vector3.Dot(s, c.normalized);
+                }
             }
         }
 

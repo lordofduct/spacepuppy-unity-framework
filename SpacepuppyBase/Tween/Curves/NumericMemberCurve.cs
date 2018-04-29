@@ -64,9 +64,9 @@ namespace com.spacepuppy.Tween.Curves
             _start = c;
             _end = e;
 
-            c -= s;
-            e -= s;
-            this.Duration = (float)(System.Math.Abs(e) < MathUtil.DBL_EPSILON ? 0f : (1d - c / e) * totalDur);
+            c -= e;
+            s -= e;
+            this.Duration = (float)(System.Math.Abs(s) < MathUtil.DBL_EPSILON ? 0f : totalDur * c / s);
 
             if (memberType != null && ConvertUtil.IsNumericType(memberType))
                 _numericType = System.Type.GetTypeCode(memberType);

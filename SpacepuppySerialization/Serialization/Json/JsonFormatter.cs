@@ -119,8 +119,9 @@ namespace com.spacepuppy.Serialization.Json
             if (this.SurrogateSelector != null && (surrogate = this.SurrogateSelector.GetSurrogate(tp, this.Context, out selector)) != null)
             {
                 var si = new SerializationInfo(tp, this.Converter);
-                if (tp.IsPrimitive)
-                    surrogate.GetObjectData(graph, si, this.Context);
+                //if (tp.IsPrimitive)
+                //    surrogate.GetObjectData(graph, si, this.Context);
+                surrogate.GetObjectData(graph, si, this.Context);
 
                 this.WriteFromSerializationInfo(si);
             }

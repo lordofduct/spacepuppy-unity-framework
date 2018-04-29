@@ -50,9 +50,9 @@ namespace com.spacepuppy.Tween.Curves
             _start = c;
             _end = e;
 
-            c -= s;
-            e -= s;
-            this.Duration = System.Math.Abs(e) < MathUtil.EPSILON ? 0f : (1f - c / e) * totalDur;
+            c -= e;
+            s -= e;
+            this.Duration = System.Math.Abs(s) < MathUtil.EPSILON ? 0f : totalDur * c / s;
         }
 
         #endregion
