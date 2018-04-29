@@ -26,7 +26,7 @@ namespace com.spacepuppyeditor.Scenario
         protected override void OnEnable()
         {
             base.OnEnable();
-            _targetsDrawer.CustomizeEntryLabel = CustomizeLabel;
+            _targetsDrawer.OnDrawCustomizedEntryLabel = CustomizeLabel;
         }
 
         protected override void OnSPInspectorGUI()
@@ -48,18 +48,32 @@ namespace com.spacepuppyeditor.Scenario
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        private void CustomizeLabel(GUIContent label, int index)
+        private void CustomizeLabel(Rect area, SerializedProperty property, int index)
         {
-            if (!Application.isPlaying) return;
-            if (this.serializedObject.isEditingMultipleObjects) return;
-
             var targ = this.serializedObject.targetObject as i_TriggerRandomElimination;
-            if (targ == null) return;
 
-            if(targ.TargetHasBeenUsed(index))
+            if (!Application.isPlaying ||
+                this.serializedObject.isEditingMultipleObjects ||
+                targ == null)
             {
-                label.text = "X " + label.text;
+                TriggerPropertyDrawer.DrawDefaultListElementLabel(area, property, index);
             }
+            else
+            {
+                if (targ.TargetHasBeenUsed(index))
+                {
+                    var r0 = new Rect(area.xMin, area.yMin, Mathf.Min(36f, area.width), EditorGUIUtility.singleLineHeight);
+                    var r1 = new Rect(r0.xMax, area.yMin, Mathf.Max(0f, area.width - r0.width), EditorGUIUtility.singleLineHeight);
+                    EditorGUI.LabelField(r0, index.ToString("X 00:"));
+                    TriggerTargetPropertyDrawer.DrawTriggerActivationTypeDropdown(r1, property, false);
+                }
+                else
+                {
+                    TriggerPropertyDrawer.DrawDefaultListElementLabel(area, property, index);
+                }
+            }
+
+
         }
 
     }

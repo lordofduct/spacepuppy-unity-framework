@@ -92,7 +92,7 @@ namespace com.spacepuppyeditor.Scenario
             }
         }
 
-        public System.Action<GUIContent, int> CustomizeEntryLabel
+        public System.Action<Rect, SerializedProperty, int> OnDrawCustomizedEntryLabel
         {
             get;
             set;
@@ -275,9 +275,6 @@ namespace com.spacepuppyeditor.Scenario
             EditorGUI.BeginProperty(area, GUIContent.none, targProp);
 
             Rect trigRect;
-            var actInfo = TriggerTargetPropertyDrawer.GetTriggerActivationInfo(element);
-            GUIContent labelContent = EditorHelper.TempContent(index.ToString("00: ") + actInfo.ActivationTypeDisplayName);
-            if (this.CustomizeEntryLabel != null) this.CustomizeEntryLabel(labelContent, index);
             if (_drawWeight && area.width > FULLWEIGHT_WIDTH)
             {
                 var top = area.yMin + MARGIN;
@@ -289,7 +286,10 @@ namespace com.spacepuppyeditor.Scenario
                 var weightProp = element.FindPropertyRelative(PROP_WEIGHT);
                 float weight = weightProp.floatValue;
 
-                EditorGUI.LabelField(labelRect, labelContent);
+                if (this.OnDrawCustomizedEntryLabel != null)
+                    this.OnDrawCustomizedEntryLabel(labelRect, element, index);
+                else
+                    DrawDefaultListElementLabel(labelRect, element, index);
                 weightProp.floatValue = EditorGUI.FloatField(weightRect, weight);
                 float p = (_totalWeight > 0f) ? (100f * weight / _totalWeight) : ((index == 0) ? 100f : 0f);
                 EditorGUI.LabelField(percRect, string.Format("{0:0.#}%", p));
@@ -298,9 +298,13 @@ namespace com.spacepuppyeditor.Scenario
             {
                 //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
                 var top = area.yMin + MARGIN;
-                var labelRect = new Rect(area.xMin, top, area.width, EditorGUIUtility.singleLineHeight);
+                var labelRect = new Rect(area.xMin, top, EditorGUIUtility.labelWidth, EditorGUIUtility.singleLineHeight);
+                trigRect = new Rect(area.xMin + EditorGUIUtility.labelWidth, top, area.width - EditorGUIUtility.labelWidth, EditorGUIUtility.singleLineHeight);
 
-                trigRect = EditorGUI.PrefixLabel(labelRect, labelContent);
+                if (this.OnDrawCustomizedEntryLabel != null)
+                    this.OnDrawCustomizedEntryLabel(labelRect, element, index);
+                else
+                    DrawDefaultListElementLabel(labelRect, element, index);
             }
 
             //Draw Triggerable - this is the simple case to make a clean designer set up for newbs
@@ -308,6 +312,7 @@ namespace com.spacepuppyeditor.Scenario
             var targObj = TriggerTargetPropertyDrawer.TargetObjectField(trigRect, GUIContent.none, targProp.objectReferenceValue);
             if(EditorGUI.EndChangeCheck())
             {
+                var actInfo = TriggerTargetPropertyDrawer.GetTriggerActivationInfo(element);
                 targProp.objectReferenceValue = TriggerTargetPropertyDrawer.IsValidTriggerTarget(targObj, actInfo.ActivationType) ? targObj : null;
             }
             EditorGUI.EndProperty();
@@ -329,6 +334,18 @@ namespace com.spacepuppyeditor.Scenario
                 obj.Weight = 1f;
                 lst.serializedProperty.serializedObject.Update();
             }
+        }
+
+        #endregion
+
+        #region Static Utils
+
+        public static void DrawDefaultListElementLabel(Rect area, SerializedProperty property, int index)
+        {
+            var r0 = new Rect(area.xMin, area.yMin, Mathf.Min(25f, area.width), EditorGUIUtility.singleLineHeight);
+            var r1 = new Rect(r0.xMax, area.yMin, Mathf.Max(0f, area.width - r0.width), EditorGUIUtility.singleLineHeight);
+            EditorGUI.LabelField(r0, index.ToString("00:"));
+            TriggerTargetPropertyDrawer.DrawTriggerActivationTypeDropdown(r1, property, false);
         }
 
         #endregion
