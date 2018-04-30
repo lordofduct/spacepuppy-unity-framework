@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace com.spacepuppy.Scenes
 {
 
-    public class LoadSceneWaitHandle : System.EventArgs, IProgressingYieldInstruction
+    public class LoadSceneWaitHandle : System.EventArgs, IProgressingYieldInstruction, ISPDisposable
     {
 
         #region Fields
@@ -32,14 +32,9 @@ namespace com.spacepuppy.Scenes
             _initialized = false;
         }
 
-        ~LoadSceneWaitHandle()
-        {
-            //make sure we clean ourselves up
-            SceneManager.sceneLoaded -= this.OnSceneLoaded;
-        }
-
         public void Init(Scene sc, AsyncOperation op)
         {
+            if (_disposed) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle was disposed.");
             if (_initialized) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle has already been initialized.");
             _initialized = true;
             _scene = sc;
@@ -49,6 +44,19 @@ namespace com.spacepuppy.Scenes
                 _op.allowSceneActivation = false;
             }
             SceneManager.sceneLoaded += this.OnSceneLoaded;
+        }
+
+        /// <summary>
+        /// Initialize the handle after load for use as an EventArgs.
+        /// </summary>
+        /// <param name="sc"></param>
+        public void FalseInit(Scene sc)
+        {
+            if (_disposed) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle was disposed.");
+            if (_initialized) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle has already been initialized.");
+            _initialized = true;
+            _scene = sc;
+            _op = null;
         }
 
         #endregion
@@ -111,7 +119,6 @@ namespace com.spacepuppy.Scenes
         {
             if (_op != null) _op.allowSceneActivation = true;
         }
-
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
@@ -223,6 +230,34 @@ namespace com.spacepuppy.Scenes
 
         #endregion
 
+        #region IDisposable Interface
+
+        private bool _disposed;
+        public bool IsDisposed
+        {
+            get { return _disposed; }
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _sceneName = null;
+                _op = null;
+                SceneManager.sceneLoaded -= this.OnSceneLoaded;
+            }
+
+            _disposed = true;
+        }
+
+        ~LoadSceneWaitHandle()
+        {
+            //make sure we clean ourselves up
+            this.Dispose();
+        }
+
+        #endregion
+
     }
-    
+
 }

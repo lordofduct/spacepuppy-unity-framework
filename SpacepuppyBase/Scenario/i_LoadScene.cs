@@ -21,9 +21,8 @@ namespace com.spacepuppy.Scenario
         private LoadSceneBehaviour _behaviour;
 
         [SerializeField]
-        [TriggerableTargetObject.Config(typeof(object))]
         [Tooltip("A token used to persist data across scenes.")]
-        TriggerableTargetObject _persistentToken;
+        VariantReference _persistentToken;
         
         #endregion
 
@@ -54,7 +53,7 @@ namespace com.spacepuppy.Scenario
 
             if (handle != null)
             {
-                handle.PersistentToken = _persistentToken.GetTarget<object>(arg);
+                handle.PersistentToken = com.spacepuppy.Utils.ObjUtil.ReduceIfProxy(_persistentToken.Value);
             }
 
             return true;

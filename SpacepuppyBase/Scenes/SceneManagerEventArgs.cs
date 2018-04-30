@@ -21,34 +21,7 @@ namespace com.spacepuppy.Scenes
         }
 
     }
-
-    public class SceneLoadedEventArgs : System.EventArgs
-    {
-
-        private SceneLoadedEventArgs()
-        {
-            //protect
-        }
-
-        public SceneLoadedEventArgs(Scene scene, LoadSceneMode mode)
-        {
-            this.Scene = scene;
-            this.Mode = mode;
-        }
-
-        public Scene Scene
-        {
-            get;
-            set;
-        }
-
-        public LoadSceneMode Mode
-        {
-            get;
-            set;
-        }
-    }
-
+    
     public class ActiveSceneChangedEventArgs : System.EventArgs
     {
 

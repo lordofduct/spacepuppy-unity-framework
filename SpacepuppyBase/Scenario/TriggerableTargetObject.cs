@@ -682,12 +682,7 @@ namespace com.spacepuppy.Scenario
             public bool SearchChildren;
             public bool DefaultFromSelf;
             public bool AlwaysExpanded;
-
-            public ConfigAttribute()
-            {
-                this.TargetType = typeof(GameObject);
-            }
-
+            
             public ConfigAttribute(System.Type targetType)
             {
                 //if (targetType == null || 
