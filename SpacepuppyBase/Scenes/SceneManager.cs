@@ -5,6 +5,15 @@ using System.Collections.Generic;
 namespace com.spacepuppy.Scenes
 {
 
+    /*
+     * NOTES - some information to keep me reminded about scenes.
+     * 
+     * The Scene struct is really just a wrapper around an int/handle. All calls and comparisons reach through. 
+     * So even though it's a struct, it acts more like a reference type.
+     * 
+     */
+
+
     public interface ISceneManager : IService
     {
 
@@ -105,8 +114,9 @@ namespace com.spacepuppy.Scenes
         public LoadSceneWaitHandle LoadScene(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode.Single, LoadSceneBehaviour behaviour = LoadSceneBehaviour.Async)
         {
             if (sceneBuildIndex < 0 || sceneBuildIndex >= SceneManager.sceneCountInBuildSettings) throw new System.IndexOutOfRangeException("sceneBuildIndex");
-            
-            string sceneName = "#" + sceneBuildIndex.ToString();
+
+            //string sceneName = "#" + sceneBuildIndex.ToString();
+            string sceneName = SceneUtility.GetScenePathByBuildIndex(sceneBuildIndex);
 
             switch (behaviour)
             {

@@ -282,6 +282,7 @@
     <Compile Include="Scenario\t_RandomInterval.cs" />
     <Compile Include="Scenario\t_OnTriggerOccupied.cs" />
     <Compile Include="Scenes\Enums.cs" />
+    <Compile Include="Scenes\ISceneLoadedMessageReceiver.cs" />
     <Compile Include="Scenes\SceneManagerEventArgs.cs" />
     <Compile Include="Scenes\LoadSceneAsyncWaitHandle.cs" />
     <Compile Include="Scenes\SceneManager.cs" />

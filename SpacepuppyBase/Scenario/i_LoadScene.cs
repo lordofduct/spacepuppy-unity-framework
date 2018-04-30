@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0649 // variable declared but not used.
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
@@ -18,6 +19,11 @@ namespace com.spacepuppy.Scenario
         private LoadSceneMode _mode;
         [SerializeField]
         private LoadSceneBehaviour _behaviour;
+
+        [SerializeField]
+        [TriggerableTargetObject.Config(typeof(object))]
+        [Tooltip("A token used to persist data across scenes.")]
+        TriggerableTargetObject _persistentToken;
         
         #endregion
 
@@ -29,7 +35,8 @@ namespace com.spacepuppy.Scenario
             if (string.IsNullOrEmpty(_sceneName)) return false;
             
             var nm = _sceneName;
-            if(nm.StartsWith("#"))
+            LoadSceneWaitHandle handle;
+            if (nm.StartsWith("#"))
             {
                 nm = nm.Substring(1);
                 int index;
@@ -38,27 +45,16 @@ namespace com.spacepuppy.Scenario
                 if (index < 0 || index >= SceneManager.sceneCountInBuildSettings)
                     return false;
 
-                var manager = Services.Get<ISceneManager>();
-                if (manager != null)
-                {
-                    manager.LoadScene(index, _mode, _behaviour);
-                }
-                else
-                {
-                    SceneManagerUtils.LoadScene(index, _mode, _behaviour);
-                }
+                handle = SceneManagerUtils.LoadScene(index, _mode, _behaviour);
             }
             else
             {
-                var manager = Services.Get<ISceneManager>();
-                if (manager != null)
-                {
-                    manager.LoadScene(_sceneName, _mode, _behaviour);
-                }
-                else
-                {
-                    SceneManagerUtils.LoadScene(_sceneName, _mode, _behaviour);
-                }
+                handle = SceneManagerUtils.LoadScene(_sceneName, _mode, _behaviour);
+            }
+
+            if (handle != null)
+            {
+                handle.PersistentToken = _persistentToken.GetTarget<object>(arg);
             }
 
             return true;

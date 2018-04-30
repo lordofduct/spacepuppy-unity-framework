@@ -3,12 +3,17 @@ using System.Collections.Generic;
 
 namespace com.spacepuppy.Scenes
 {
+    
     public static class SceneManagerUtils
     {
+
         #region Static Utils
 
-        internal static LoadSceneWaitHandle LoadScene(string sceneName, LoadSceneMode mode, LoadSceneBehaviour behaviour)
+        public static LoadSceneWaitHandle LoadScene(string sceneName, LoadSceneMode mode, LoadSceneBehaviour behaviour)
         {
+            var manager = Services.Get<ISceneManager>();
+            if (manager != null) return manager.LoadScene(sceneName, mode, behaviour);
+
             switch (behaviour)
             {
                 case LoadSceneBehaviour.Standard:
@@ -38,11 +43,15 @@ namespace com.spacepuppy.Scenes
             throw new System.InvalidOperationException("Unsupported LoadSceneBehaviour.");
         }
 
-        internal static LoadSceneWaitHandle LoadScene(int sceneBuildIndex, LoadSceneMode mode, LoadSceneBehaviour behaviour)
+        public static LoadSceneWaitHandle LoadScene(int sceneBuildIndex, LoadSceneMode mode, LoadSceneBehaviour behaviour)
         {
             if (sceneBuildIndex < 0 || sceneBuildIndex >= SceneManager.sceneCountInBuildSettings) throw new System.IndexOutOfRangeException("sceneBuildIndex");
 
-            string sceneName = "#" + sceneBuildIndex.ToString();
+            var manager = Services.Get<ISceneManager>();
+            if (manager != null) return manager.LoadScene(sceneBuildIndex, mode, behaviour);
+
+            //string sceneName = "#" + sceneBuildIndex.ToString();
+            string sceneName = SceneUtility.GetScenePathByBuildIndex(sceneBuildIndex);
 
             switch (behaviour)
             {
@@ -74,5 +83,7 @@ namespace com.spacepuppy.Scenes
         }
 
         #endregion
+        
     }
+
 }
