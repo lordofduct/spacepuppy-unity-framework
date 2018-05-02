@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0649 // variable declared but not used.
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
@@ -452,7 +453,7 @@ namespace com.spacepuppyeditor.Base
                                                TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace,
                                                System.Predicate<System.Type> searchPredicate = null)
         {
-            int controlID = GUIUtility.GetControlID(TypeSelectionDropDownWindow.s_TypePopupHash, EditorGUIUtility.native, position);
+            int controlID = GUIUtility.GetControlID(TypeSelectionDropDownWindow.s_TypePopupHash, FocusType.Passive, position);
             position = EditorGUI.PrefixLabel(position, controlID, label);
 
             selectedType = CallbackInfo.GetSelectedValueForControl(controlID, selectedType);
@@ -496,7 +497,7 @@ namespace com.spacepuppyeditor.Base
                                            TypeDropDownListingStyle listType = TypeDropDownListingStyle.Namespace,
                                            System.Predicate<System.Type> searchPredicate = null)
         {
-            int controlID = GUIUtility.GetControlID(TypeSelectionDropDownWindow.s_TypeCustomHash, EditorGUIUtility.native, positionUnder);
+            int controlID = GUIUtility.GetControlID(TypeSelectionDropDownWindow.s_TypeCustomHash, FocusType.Passive, positionUnder);
             CallbackInfo.instance = new CallbackInfo(controlID, null, callback);
             TypeSelectionDropDownWindow.DisplayCustomMenu(positionUnder, GUIContent.none, baseType, null, allowAbstractTypes, allowInterfaces, defaultType, excludedTypes, listType, searchPredicate);
         }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0618 // ignore obsolete since this is the editor for said obsolete type
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;

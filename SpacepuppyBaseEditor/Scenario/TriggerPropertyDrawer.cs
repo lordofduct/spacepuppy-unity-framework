@@ -52,7 +52,7 @@ namespace com.spacepuppyeditor.Scenario
             {
                 if (this.fieldInfo != null)
                 {
-                    var attribs = this.fieldInfo.GetCustomAttributes(typeof(Trigger.ConfigAttribute), false) as Trigger.ConfigAttribute[];
+                    var attribs = this.fieldInfo.GetCustomAttributes(typeof(SPEvent.ConfigAttribute), false) as SPEvent.ConfigAttribute[];
                     if (attribs != null && attribs.Length > 0)
                     {
                         _drawWeight = attribs[0].Weighted;

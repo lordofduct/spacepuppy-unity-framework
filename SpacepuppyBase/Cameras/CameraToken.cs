@@ -46,7 +46,8 @@ namespace com.spacepuppy.Cameras
             camera.renderingPath = this.renderingPath;
             camera.targetTexture = this.targetTexture;
             camera.useOcclusionCulling = this.useOcclusionCulling;
-            camera.hdr = this.hdr;
+            //camera.hdr = this.hdr;
+            camera.allowHDR = this.hdr;
         }
 
         public static CameraToken FromCamera(Camera camera)
@@ -65,7 +66,7 @@ namespace com.spacepuppy.Cameras
                 renderingPath = camera.renderingPath,
                 targetTexture = camera.targetTexture,
                 useOcclusionCulling = camera.useOcclusionCulling,
-                hdr = camera.hdr
+                hdr = camera.allowHDR // camera.hdr
             };
         }
 

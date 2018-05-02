@@ -15,6 +15,7 @@ namespace com.spacepuppyeditor.Internal
 
         private Dictionary<int, IPropertyHandler> _table = new Dictionary<int, IPropertyHandler>();
 
+
         public IPropertyHandler GetHandler(SerializedProperty property)
         {
             if (property == null) throw new System.ArgumentNullException("property");
@@ -90,6 +91,6 @@ namespace com.spacepuppyeditor.Internal
 
             return num;
         }
-
+        
     }
 }

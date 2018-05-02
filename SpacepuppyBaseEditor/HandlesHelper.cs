@@ -366,7 +366,8 @@ namespace com.spacepuppyeditor
 
         public static void DrawSphere(Vector3 center, Quaternion rot, float radius)
         {
-            Handles.SphereCap(0, center, rot, radius * 2.0f);
+            //Handles.SphereCap(0, center, rot, radius * 2.0f);
+            Handles.SphereHandleCap(0, center, rot, radius * 2.0f, EventType.Repaint);
         }
 
         public static void DrawCapsule(Vector3 bottom, Vector3 top, float radius)

@@ -219,7 +219,7 @@
     <Compile Include="Project\ResourceLinkTable.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
-    <Compile Include="Project\SceneRef.cs" />
+    <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
     <Compile Include="PsuedoSingleton.cs" />
     <Compile Include="RadicalEnums.cs" />

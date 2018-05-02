@@ -467,7 +467,7 @@ namespace com.spacepuppy.Scenario
         public IRadicalYieldInstruction ActivateTriggerYielding(object sender, T arg)
         {
             return base.ActivateTriggerYielding(sender, arg);
-            this.OnTriggerActivated(sender, arg);
+            //this.OnTriggerActivated(sender, arg);
         }
 
         public void DaisyChainTriggerYielding(object sender, T arg, BlockingTriggerYieldInstruction instruction)
@@ -579,7 +579,7 @@ namespace com.spacepuppy.Scenario
         public IRadicalYieldInstruction ActivateTriggerYielding(object sender, T arg)
         {
             return base.ActivateTriggerYielding(sender, arg);
-            this.OnTriggerActivated(sender, arg);
+            //this.OnTriggerActivated(sender, arg);
         }
 
         public void DaisyChainTriggerYielding(object sender, T arg, BlockingTriggerYieldInstruction instruction)
@@ -652,19 +652,19 @@ namespace com.spacepuppy.Scenario
         #region Special Types
 
         /*
-         * This may be defined here, it is still usable on all types inheriting from BaseSPEvent. It's only here for namespace purposes to be consistent across the framework.
+         * Moved to SPEvent
          */
-        public class ConfigAttribute : System.Attribute
-        {
-            public bool Weighted;
-            public bool AlwaysExpanded;
+        //public class ConfigAttribute : System.Attribute
+        //{
+        //    public bool Weighted;
+        //    public bool AlwaysExpanded;
 
-            public ConfigAttribute()
-            {
+        //    public ConfigAttribute()
+        //    {
 
-            }
+        //    }
 
-        }
+        //}
 
         #endregion
 

@@ -1,5 +1,4 @@
 ﻿#pragma warning disable 0649 // variable declared but not used.
-
 using UnityEngine;
 
 namespace com.spacepuppy.Anim.Legacy
@@ -93,7 +92,7 @@ namespace com.spacepuppy.Anim.Legacy
             return s;
         }
 
-        public void Stop(string name)
+        public new void Stop(string name)
         {
             if (this.animation == null) throw new AnimationInvalidAccessException();
             var state = this.States[name];
@@ -102,7 +101,7 @@ namespace com.spacepuppy.Anim.Legacy
             this.animation.Stop(state.Name);
         }
 
-        public void StopAll()
+        public new void StopAll()
         {
             if (this.animation == null) throw new AnimationInvalidAccessException();
             this.animation.Stop();
