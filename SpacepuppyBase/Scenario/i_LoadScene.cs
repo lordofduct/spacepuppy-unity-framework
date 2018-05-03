@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0649 // variable declared but not used.
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
@@ -6,19 +7,55 @@ using com.spacepuppy.Scenes;
 
 namespace com.spacepuppy.Scenario
 {
-    public class i_LoadScene : TriggerableMechanism
+    public class i_LoadScene : AutoTriggerableMechanism, ISerializationCallbackReceiver
     {
-        
+
         #region Fields
 
         [SerializeField]
         [Tooltip("Prefix with # to load by index.")]
-        private string _sceneName;
+        private SceneRef _scene;
+
         [SerializeField]
         private LoadSceneMode _mode;
         [SerializeField]
         private LoadSceneBehaviour _behaviour;
-        
+
+        [SerializeField]
+        [Tooltip("A token used to persist data across scenes.")]
+        VariantReference _persistentToken = new VariantReference();
+
+        [HideInInspector]
+        [SerializeField]
+        private string _sceneName;
+
+        #endregion
+
+        #region Properties
+
+        public SceneRef Scene
+        {
+            get { return _scene; }
+            set { _scene = value; }
+        }
+
+        public LoadSceneMode Mode
+        {
+            get { return _mode; }
+            set { _mode = value; }
+        }
+
+        public LoadSceneBehaviour Behaviour
+        {
+            get { return _behaviour; }
+            set { _behaviour = value; }
+        }
+
+        public object PersistentToken
+        {
+            get { return _persistentToken; }
+        }
+
         #endregion
 
         #region Methods
@@ -26,10 +63,11 @@ namespace com.spacepuppy.Scenario
         public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
-            if (string.IsNullOrEmpty(_sceneName)) return false;
+            if (string.IsNullOrEmpty(_scene.SceneName)) return false;
             
-            var nm = _sceneName;
-            if(nm.StartsWith("#"))
+            var nm = _scene.SceneName;
+            LoadSceneWaitHandle handle;
+            if (nm.StartsWith("#"))
             {
                 nm = nm.Substring(1);
                 int index;
@@ -38,30 +76,38 @@ namespace com.spacepuppy.Scenario
                 if (index < 0 || index >= SceneManager.sceneCountInBuildSettings)
                     return false;
 
-                var manager = Services.Get<ISceneManager>();
-                if (manager != null)
-                {
-                    manager.LoadScene(index, _mode, _behaviour);
-                }
-                else
-                {
-                    SceneManagerUtils.LoadScene(index, _mode, _behaviour);
-                }
+                handle = SceneManagerUtils.LoadScene(index, _mode, _behaviour);
             }
             else
             {
-                var manager = Services.Get<ISceneManager>();
-                if (manager != null)
-                {
-                    manager.LoadScene(_sceneName, _mode, _behaviour);
-                }
-                else
-                {
-                    SceneManagerUtils.LoadScene(_sceneName, _mode, _behaviour);
-                }
+                handle = SceneManagerUtils.LoadScene(nm, _mode, _behaviour);
+            }
+
+            if (handle != null)
+            {
+                handle.PersistentToken = com.spacepuppy.Utils.ObjUtil.ReduceIfProxy(_persistentToken.Value);
             }
 
             return true;
+        }
+
+        #endregion
+
+        #region ISerializationCallback Receiver
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            //exists for backwards compatability
+            if(!string.IsNullOrEmpty(_sceneName))
+            {
+                _scene = new SceneRef(_sceneName);
+                _sceneName = null;
+            }
+        }
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+
         }
 
         #endregion

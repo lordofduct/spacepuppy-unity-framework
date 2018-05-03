@@ -5,13 +5,22 @@ using System.Collections.Generic;
 namespace com.spacepuppy.Scenes
 {
 
+    /*
+     * NOTES - some information to keep me reminded about scenes.
+     * 
+     * The Scene struct is really just a wrapper around an int/handle. All calls and comparisons reach through. 
+     * So even though it's a struct, it acts more like a reference type.
+     * 
+     */
+
+
     public interface ISceneManager : IService
     {
 
         event System.EventHandler<LoadSceneWaitHandle> BeforeSceneLoaded;
         event System.EventHandler<SceneUnloadedEventArgs> BeforeSceneUnloaded;
         event System.EventHandler<SceneUnloadedEventArgs> SceneUnloaded;
-        event System.EventHandler<SceneLoadedEventArgs> SceneLoaded;
+        event System.EventHandler<LoadSceneWaitHandle> SceneLoaded;
         event System.EventHandler<ActiveSceneChangedEventArgs> ActiveSceneChanged;
         
         LoadSceneWaitHandle LoadScene(string sceneName, LoadSceneMode mode = LoadSceneMode.Single, LoadSceneBehaviour behaviour = LoadSceneBehaviour.Async);
@@ -35,8 +44,9 @@ namespace com.spacepuppy.Scenes
         #region Fields
         
         private SceneUnloadedEventArgs _unloadArgs;
-        private SceneLoadedEventArgs _loadArgs;
         private ActiveSceneChangedEventArgs _activeChangeArgs;
+
+        private Dictionary<Scene, LoadSceneWaitHandle> _table = new Dictionary<Scene, LoadSceneWaitHandle>();
 
         #endregion
 
@@ -65,7 +75,7 @@ namespace com.spacepuppy.Scenes
         public event System.EventHandler<LoadSceneWaitHandle> BeforeSceneLoaded;
         public event System.EventHandler<SceneUnloadedEventArgs> BeforeSceneUnloaded;
         public event System.EventHandler<SceneUnloadedEventArgs> SceneUnloaded;
-        public event System.EventHandler<SceneLoadedEventArgs> SceneLoaded;
+        public event System.EventHandler<LoadSceneWaitHandle> SceneLoaded;
         public event System.EventHandler<ActiveSceneChangedEventArgs> ActiveSceneChanged;
         
         public LoadSceneWaitHandle LoadScene(string sceneName, LoadSceneMode mode = LoadSceneMode.Single, LoadSceneBehaviour behaviour = LoadSceneBehaviour.Async)
@@ -77,7 +87,9 @@ namespace com.spacepuppy.Scenes
                         var handle = new LoadSceneWaitHandle(sceneName, mode, behaviour);
                         this.OnBeforeSceneLoaded(handle);
                         SceneManager.LoadScene(sceneName, mode);
-                        handle.Init(SceneManager.GetSceneAt(SceneManager.sceneCount - 1), null);
+                        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+                        _table[scene] = handle;
+                        handle.Init(scene, null);
                         return handle;
                     }
                 case LoadSceneBehaviour.Async:
@@ -85,7 +97,9 @@ namespace com.spacepuppy.Scenes
                         var handle = new LoadSceneWaitHandle(sceneName, mode, behaviour);
                         this.OnBeforeSceneLoaded(handle);
                         var op = SceneManager.LoadSceneAsync(sceneName, mode);
-                        handle.Init(SceneManager.GetSceneAt(SceneManager.sceneCount - 1), op);
+                        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+                        _table[scene] = handle;
+                        handle.Init(scene, op);
                         return handle;
                     }
                 case LoadSceneBehaviour.AsyncAndWait:
@@ -94,7 +108,9 @@ namespace com.spacepuppy.Scenes
                         this.OnBeforeSceneLoaded(handle);
                         var op = SceneManager.LoadSceneAsync(sceneName, mode);
                         op.allowSceneActivation = false;
-                        handle.Init(SceneManager.GetSceneAt(SceneManager.sceneCount - 1), op);
+                        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+                        _table[scene] = handle;
+                        handle.Init(scene, op);
                         return handle;
                     }
             }
@@ -105,8 +121,9 @@ namespace com.spacepuppy.Scenes
         public LoadSceneWaitHandle LoadScene(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode.Single, LoadSceneBehaviour behaviour = LoadSceneBehaviour.Async)
         {
             if (sceneBuildIndex < 0 || sceneBuildIndex >= SceneManager.sceneCountInBuildSettings) throw new System.IndexOutOfRangeException("sceneBuildIndex");
-            
-            string sceneName = "#" + sceneBuildIndex.ToString();
+
+            //string sceneName = "#" + sceneBuildIndex.ToString();
+            string sceneName = SceneUtility.GetScenePathByBuildIndex(sceneBuildIndex);
 
             switch (behaviour)
             {
@@ -115,7 +132,9 @@ namespace com.spacepuppy.Scenes
                         var handle = new LoadSceneWaitHandle(sceneName, mode, behaviour);
                         this.OnBeforeSceneLoaded(handle);
                         SceneManager.LoadScene(sceneBuildIndex, mode);
-                        handle.Init(SceneManager.GetSceneAt(SceneManager.sceneCount - 1), null);
+                        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+                        _table[scene] = handle;
+                        handle.Init(scene, null);
                         return handle;
                     }
                 case LoadSceneBehaviour.Async:
@@ -123,7 +142,9 @@ namespace com.spacepuppy.Scenes
                         var handle = new LoadSceneWaitHandle(sceneName, mode, behaviour);
                         this.OnBeforeSceneLoaded(handle);
                         var op = SceneManager.LoadSceneAsync(sceneBuildIndex, mode);
-                        handle.Init(SceneManager.GetSceneAt(SceneManager.sceneCount - 1), op);
+                        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+                        _table[scene] = handle;
+                        handle.Init(scene, op);
                         return handle;
                     }
                 case LoadSceneBehaviour.AsyncAndWait:
@@ -132,7 +153,9 @@ namespace com.spacepuppy.Scenes
                         this.OnBeforeSceneLoaded(handle);
                         var op = SceneManager.LoadSceneAsync(sceneBuildIndex, mode);
                         op.allowSceneActivation = false;
-                        handle.Init(SceneManager.GetSceneAt(SceneManager.sceneCount - 1), op);
+                        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+                        _table[scene] = handle;
+                        handle.Init(scene, op);
                         return handle;
                     }
             }
@@ -214,24 +237,21 @@ namespace com.spacepuppy.Scenes
 
         protected virtual void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            LoadSceneWaitHandle handle;
+            if (_table.TryGetValue(scene, out handle))
+            {
+                _table.Remove(scene);
+            }
             var d = this.SceneLoaded;
             if (d == null) return;
 
-            var e = _loadArgs;
-            _loadArgs = null;
-            if (e == null)
-                e = new SceneLoadedEventArgs(scene, mode);
-            else
+            if(handle == null)
             {
-                e.Scene = scene;
-                e.Mode = mode;
+                handle = new LoadSceneWaitHandle(scene.name, mode, LoadSceneBehaviour.Standard);
+                handle.Init(scene, null);
             }
-
-            d(this, e);
-
-            _loadArgs = e;
-            _loadArgs.Scene = default(Scene);
-            _loadArgs.Mode = default(LoadSceneMode);
+            
+            d(this, handle);
         }
 
         protected virtual void OnActiveSceneChanged(Scene lastScene, Scene nextScene)

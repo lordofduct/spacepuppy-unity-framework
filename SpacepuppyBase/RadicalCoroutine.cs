@@ -1247,7 +1247,6 @@ namespace com.spacepuppy
 
 
             internal IEnumerator _e;
-            private bool _complete;
 
             private EnumWrapper()
             {

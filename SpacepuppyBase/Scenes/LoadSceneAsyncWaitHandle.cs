@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace com.spacepuppy.Scenes
 {
 
-    public class LoadSceneWaitHandle : System.EventArgs, IProgressingYieldInstruction
+    public class LoadSceneWaitHandle : System.EventArgs, IProgressingYieldInstruction, ISPDisposable
     {
 
         #region Fields
@@ -34,6 +34,8 @@ namespace com.spacepuppy.Scenes
 
         public void Init(Scene sc, AsyncOperation op)
         {
+            if (_disposed) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle was disposed.");
+            if (_initialized) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle has already been initialized.");
             _initialized = true;
             _scene = sc;
             _op = op;
@@ -41,6 +43,20 @@ namespace com.spacepuppy.Scenes
             {
                 _op.allowSceneActivation = false;
             }
+            SceneManager.sceneLoaded += this.OnSceneLoaded;
+        }
+
+        /// <summary>
+        /// Initialize the handle after load for use as an EventArgs.
+        /// </summary>
+        /// <param name="sc"></param>
+        public void FalseInit(Scene sc)
+        {
+            if (_disposed) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle was disposed.");
+            if (_initialized) throw new System.InvalidOperationException("LoadSceneAsyncWaitHandle has already been initialized.");
+            _initialized = true;
+            _scene = sc;
+            _op = null;
         }
 
         #endregion
@@ -72,6 +88,17 @@ namespace com.spacepuppy.Scenes
             get { return !object.ReferenceEquals(_op, null) && _op.progress >= 0.9f && !_op.isDone; }
         }
 
+        /// <summary>
+        /// Use this to pass some token between scenes. 
+        /// Anything that handles the ISceneLoadedMessageReceiver will receiver a reference to this handle, and therefore this token.
+        /// The token should not be something that is destroyed by the load process.
+        /// </summary>
+        public object PersistentToken
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         #region Methods
@@ -91,6 +118,16 @@ namespace com.spacepuppy.Scenes
         public void ActivateScene()
         {
             if (_op != null) _op.allowSceneActivation = true;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            //note Scene == Scene compares the handle and works just fine
+            if (_scene == scene)
+            {
+                SceneManager.sceneLoaded -= this.OnSceneLoaded;
+                com.spacepuppy.Utils.Messaging.FindAndBroadcast<ISceneLoadedMessageReceiver>((o) => o.OnSceneLoaded(this));
+            }
         }
 
         #endregion
@@ -193,91 +230,34 @@ namespace com.spacepuppy.Scenes
 
         #endregion
 
-    }
+        #region IDisposable Interface
 
-
-    public class LoadSceneAsyncWaitHandle : IProgressingYieldInstruction
-    {
-
-        #region Fields
-
-        private AsyncOperation _op;
-        private Scene _scene;
-        private bool _waitingForHandle;
-
-        #endregion
-
-        #region CONSTRUCTOR
-
-        public LoadSceneAsyncWaitHandle(AsyncOperation op, Scene scene)
+        private bool _disposed;
+        public bool IsDisposed
         {
-            //if (op == null) throw new System.ArgumentNullException("op");
-            _op = op;
-            _scene = scene; 
+            get { return _disposed; }
         }
 
-        internal LoadSceneAsyncWaitHandle()
+        public void Dispose()
         {
-            _waitingForHandle = true;
-        }
-        internal void Init(AsyncOperation op, Scene scene)
-        {
-            //if (op == null) throw new System.ArgumentNullException("op");
-            _op = op;
-            _scene = scene;
-            _waitingForHandle = false;
-        }
-
-        #endregion
-
-        #region Properties
-
-        public Scene Scene
-        {
-            get { return _scene; }
-        }
-
-        #endregion
-
-        #region IProgressingAsyncOperation Interface
-
-        public float Progress
-        {
-            get
+            if (!_disposed)
             {
-                if (_waitingForHandle)
-                    return 0f;
-                else
-                    return _op.progress;
+                _sceneName = null;
+                _op = null;
+                SceneManager.sceneLoaded -= this.OnSceneLoaded;
             }
+
+            _disposed = true;
         }
 
-        public bool IsComplete
+        ~LoadSceneWaitHandle()
         {
-            get
-            {
-                if (_waitingForHandle)
-                    return false;
-                else
-                    return _op.isDone;
-            }
-        }
-
-        bool IRadicalYieldInstruction.Tick(out object yieldObject)
-        {
-            if (!_waitingForHandle && _op.isDone)
-            {
-                yieldObject = null;
-                return false;
-            }
-            else
-            {
-                yieldObject = _op;
-                return true;
-            }
+            //make sure we clean ourselves up
+            this.Dispose();
         }
 
         #endregion
 
     }
+
 }

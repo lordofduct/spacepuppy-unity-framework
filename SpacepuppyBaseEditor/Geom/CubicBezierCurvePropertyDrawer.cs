@@ -27,7 +27,7 @@ namespace com.spacepuppyeditor.Geom
 
         internal static void DoCurveField(Rect position, CubicBezierCurve curve, Color color, SerializedProperty property)
         {
-            int id = GUIUtility.GetControlID(EditorGUIUtility.native, position);
+            int id = GUIUtility.GetControlID(FocusType.Passive, position);
             Event current = Event.current;
             position.width = Mathf.Max(position.width, 2f);
             position.height = Mathf.Max(position.height, 2f);

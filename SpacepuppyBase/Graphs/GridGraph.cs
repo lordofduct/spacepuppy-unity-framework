@@ -153,8 +153,6 @@ namespace com.spacepuppy.Graphs
                 default:
                     return default(T);
             }
-
-            return default(T);
         }
 
         public T GetNeighbour(int index, GridNeighbour side)

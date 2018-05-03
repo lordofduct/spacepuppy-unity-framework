@@ -18,6 +18,8 @@ namespace com.spacepuppyeditor
         public const string PROP_SCRIPT = "m_Script";
         public const string PROP_ORDER = "_order";
 
+        public const float OBJFIELD_DOT_WIDTH = 18f;
+
 
         private static Texture2D s_WhiteTexture;
         public static Texture2D WhiteTexture
@@ -624,6 +626,47 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+
+
+        #region State Cache
+
+        private static Dictionary<int, object> _states = new Dictionary<int, object>();
+
+        /// <summary>
+        /// Get a state object that can be stored between PropertyHandler.OnGUI calls.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static T GetCachedState<T>(SerializedProperty property)
+        {
+            if (property == null) return default(T);
+
+            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(property);
+            object result;
+            if (_states.TryGetValue(hash, out result) && result is T)
+                return (T)result;
+            else
+                return default(T);
+        }
+
+        /// <summary>
+        /// Set a state object that can be stored between PropertyHandler.OnGUI calls.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <param name="state"></param>
+        public static void SetCachedState(SerializedProperty property, object state)
+        {
+            if (property == null) return;
+
+            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(property);
+            if (state == null)
+                _states.Remove(hash);
+            else
+                _states[hash] = state;
+        }
+
+        #endregion
+        
     }
 
 }

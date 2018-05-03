@@ -167,7 +167,7 @@ namespace com.spacepuppyeditor.Internal
             if (property == null) throw new System.ArgumentNullException("property");
             if (!property.isArray) throw new System.ArgumentException("SerializedProperty must be a property for an Array or List", "property");
 
-            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(property);
+            int hash = PropertyHandlerCache.GetIndexRespectingPropertyHash(property);
             CachedReorderableList lst;
             if (_lstCache.TryGetValue(hash, out lst))
             {
@@ -215,7 +215,7 @@ namespace com.spacepuppyeditor.Internal
             if (memberList == null) throw new System.ArgumentNullException("memberList");
             if (tokenProperty == null) throw new System.ArgumentNullException("property");
 
-            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(tokenProperty);
+            int hash = PropertyHandlerCache.GetIndexRespectingPropertyHash(tokenProperty);
             CachedReorderableList lst;
             if (_lstCache.TryGetValue(hash, out lst))
             {

@@ -39,12 +39,12 @@ namespace com.spacepuppy.Anim
 
         #region Methods
 
-        public void Stop(string name)
+        public new void Stop(string name)
         {
             this.animation.Stop(name);
         }
 
-        public void StopAll()
+        public new void StopAll()
         {
             this.animation.Stop();
         }

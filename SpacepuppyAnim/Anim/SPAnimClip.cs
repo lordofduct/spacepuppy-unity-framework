@@ -585,6 +585,11 @@ namespace com.spacepuppy.Anim
 
         public static bool IsValid(SPAnimClip clip)
         {
+            return clip != null && clip.Clip != null;
+        }
+
+        public static bool IsValidAndInitialized(SPAnimClip clip)
+        {
             return clip != null && clip.Clip != null && clip.Initialized;
         }
 

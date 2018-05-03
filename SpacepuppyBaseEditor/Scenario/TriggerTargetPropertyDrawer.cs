@@ -60,7 +60,7 @@ namespace com.spacepuppyeditor.Scenario
                     h += EditorGUIUtility.singleLineHeight * (2.0f + _callMethodModeExtraLines);
                     break;
                 case TriggerActivationType.EnableTarget:
-                    h += EditorGUIUtility.singleLineHeight * 2.0f;
+                    h += EditorGUIUtility.singleLineHeight;
                     break;
                 case TriggerActivationType.DestroyTarget:
                     h += EditorGUIUtility.singleLineHeight;
@@ -132,10 +132,7 @@ namespace com.spacepuppyeditor.Scenario
                     //enable
                     actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>(TriggerActivationType.EnableTarget);
                     var argProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
-                    if(argProp.stringValue == EnableMode.Disable.ToString())
-                    {
-                        argProp.stringValue = EnableMode.Enable.ToString();
-                    }
+                    argProp.stringValue = EnableMode.Enable.ToString();
                 }
                 else if(index == 5)
                 {
@@ -145,6 +142,13 @@ namespace com.spacepuppyeditor.Scenario
                     argProp.stringValue = EnableMode.Disable.ToString();
                 }
                 else if(index == 6)
+                {
+                    //toggle
+                    actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>(TriggerActivationType.EnableTarget);
+                    var argProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
+                    argProp.stringValue = EnableMode.Toggle.ToString();
+                }
+                else if(index == 7)
                 {
                     //destroy
                     actInfo.ActivationTypeProperty.SetEnumValue<TriggerActivationType>(TriggerActivationType.DestroyTarget);
@@ -551,7 +555,7 @@ DrawMethodName:
             //targProp.objectReferenceValue = TransformField(targRect, targLabel, targProp.objectReferenceValue);
             targProp.objectReferenceValue = TransformOrProxyField(targRect, targLabel, targProp.objectReferenceValue);
 
-
+            /*
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
             var argProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
@@ -559,6 +563,7 @@ DrawMethodName:
             var e = ConvertUtil.ToEnum<EnableMode>(argProp.stringValue, EnableMode.Enable);
             e = (EnableMode)EditorGUI.EnumPopup(argRect, "Mode", e);
             argProp.stringValue = e.ToString();
+            */
         }
 
         private void DrawAdvanced_DestroyTarget(Rect area, SerializedProperty property)
@@ -583,6 +588,7 @@ DrawMethodName:
             "Call Method On Selected Target",
             "Enable Target",
             "Disable Target",
+            "Toggle Target",
             "Destroy Target"
         };
         public struct TriggerActivationInfo
@@ -604,14 +610,25 @@ DrawMethodName:
                 case TriggerActivationType.CallMethodOnSelectedTarget:
                     result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[(int)result.ActivationType];
                     break;
-                case TriggerActivationType.DestroyTarget:
-                    result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[6];
-                    break;
                 case TriggerActivationType.EnableTarget:
                     {
                         var argProp = triggerTargetProperty.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_METHODNAME);
-                        result.ActivationTypeDisplayName = (argProp.stringValue == EnableMode.Disable.ToString()) ? _triggerActivationTypeDisplayNames[5] : _triggerActivationTypeDisplayNames[4];
+                        switch (ConvertUtil.ToEnum<EnableMode>(argProp.stringValue))
+                        {
+                            case EnableMode.Enable:
+                                result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[4];
+                                break;
+                            case EnableMode.Disable:
+                                result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[5];
+                                break;
+                            case EnableMode.Toggle:
+                                result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[6];
+                                break;
+                        }
                     }
+                    break;
+                case TriggerActivationType.DestroyTarget:
+                    result.ActivationTypeDisplayName = _triggerActivationTypeDisplayNames[7];
                     break;
             }
             return result;

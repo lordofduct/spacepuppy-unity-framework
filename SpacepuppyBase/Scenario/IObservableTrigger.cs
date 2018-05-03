@@ -1,6 +1,6 @@
 ﻿namespace com.spacepuppy.Scenario
 {
-    public interface IObservableTrigger : IComponent
+    public interface IObservableTrigger
     {
         
         Trigger[] GetTriggers();

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0649 // variable declared but not used.
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
@@ -82,7 +83,7 @@ namespace com.spacepuppyeditor.Base
             }
 
 
-            int id = GUIUtility.GetControlID(FocusType.Native, rect);
+            int id = GUIUtility.GetControlID(FocusType.Passive, rect);
 
             Rect knobRect = new Rect(rect.x, rect.y, rect.height, rect.height);
 

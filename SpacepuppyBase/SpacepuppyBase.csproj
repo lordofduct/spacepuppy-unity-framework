@@ -219,7 +219,8 @@
     <Compile Include="Project\ResourceLinkTable.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
-    <Compile Include="Project\SceneRef.cs" />
+    <Compile Include="Scenario\HijackTriggerEvents.cs" />
+    <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
     <Compile Include="PsuedoSingleton.cs" />
     <Compile Include="RadicalEnums.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="Scenario\t_RandomInterval.cs" />
     <Compile Include="Scenario\t_OnTriggerOccupied.cs" />
     <Compile Include="Scenes\Enums.cs" />
+    <Compile Include="Scenes\ISceneLoadedMessageReceiver.cs" />
     <Compile Include="Scenes\SceneManagerEventArgs.cs" />
     <Compile Include="Scenes\LoadSceneAsyncWaitHandle.cs" />
     <Compile Include="Scenes\SceneManager.cs" />
