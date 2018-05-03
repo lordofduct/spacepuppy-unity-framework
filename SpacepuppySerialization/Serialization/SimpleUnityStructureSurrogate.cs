@@ -300,7 +300,7 @@ namespace com.spacepuppy.Serialization
             m.m33 = info.GetSingle("33");
             return m;
         }
-
+        
         #endregion
 
     }

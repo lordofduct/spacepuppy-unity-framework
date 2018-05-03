@@ -80,32 +80,41 @@ namespace com.spacepuppy.Scenario
             if (_triggered) return;
 
             ObservableTargetData targ;
-            var d = new System.Action<ObservableTargetData>(this.OnTriggerActivated);
+            var d = new System.EventHandler<TempEventArgs>(this.OnTriggerActivated);
             for (int i = 0; i < _observedTargets.Length; i++)
             {
                 targ = _observedTargets[i];
-                targ.AddHandler(d);
+                if (targ != null)
+                {
+                    targ.Init();
+                    targ.TriggerActivated += d;
+                }
             }
         }
 
         private void UnRegisterListeners()
         {
             ObservableTargetData targ;
-            var d = new System.Action<ObservableTargetData>(this.OnTriggerActivated);
+            var d = new System.EventHandler<TempEventArgs>(this.OnTriggerActivated);
             for (int i = 0; i < _observedTargets.Length; i++)
             {
                 targ = _observedTargets[i];
-                if (targ != null) targ.RemoveHandler(d);
+                if (targ != null)
+                {
+                    targ.TriggerActivated -= d;
+                    targ.DeInit();
+                }
             }
         }
 
-        private void OnTriggerActivated(ObservableTargetData sender)
+        private void OnTriggerActivated(object sender, TempEventArgs arg)
         {
             if (_triggered) return;
 
-            _activatedTriggers.Add(sender);
+            var targ = sender as ObservableTargetData;
+            if (targ != null) _activatedTriggers.Add(targ);
 
-            if(_activatedTriggers.SetEquals(_observedTargets))
+            if (_activatedTriggers.SetEquals(_observedTargets))
             {
                 _activatedTriggers.Clear();
                 if (this._resetOnTriggered)

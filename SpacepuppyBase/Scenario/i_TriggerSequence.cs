@@ -140,15 +140,7 @@ namespace com.spacepuppy.Scenario
         {
             int i = this.CurrentIndexNormalized;
             if (i < 0 || i >= _trigger.Targets.Count) return;
-
-            //if (_signal == SignalMode.Auto && _trigger.Targets[i].Target != null)
-            //{
-            //    var signal = _trigger.Targets[i].Target.GetComponentInChildren<IAutoSequenceSignal>();
-            //    if (signal != null)
-            //    {
-            //        _routine = this.StartRadicalCoroutine(this.DoAutoSequence(signal), RadicalCoroutineDisableMode.Pauses);
-            //    }
-            //}
+            
             if (_signal == SignalMode.Auto)
             {
                 IAutoSequenceSignal signal;
@@ -173,19 +165,7 @@ namespace com.spacepuppy.Scenario
             {
                 int i = this.CurrentIndexNormalized;
                 if (i < 0 || i >= _trigger.Targets.Count) yield break;
-                _currentIndex++;
-
-                //if (_trigger.Targets[i].Target != null && _trigger.Targets[i].Target.GetComponentInChildren<IAutoSequenceSignal>(out signal))
-                //{
-                //    var handle = signal.Wait();
-                //    _trigger.ActivateTriggerAt(i, this, null);
-                //    yield return handle;
-                //}
-                //else
-                //{
-                //    _trigger.ActivateTriggerAt(i, this, null);
-                //    yield return null;
-                //}
+                
                 var go = GameObjectUtil.GetGameObjectFromSource(_trigger.Targets[i].Target);
                 if (go != null && go.GetComponentInChildren<IAutoSequenceSignal>(out signal))
                 {
@@ -198,6 +178,8 @@ namespace com.spacepuppy.Scenario
                     _trigger.ActivateTriggerAt(i, this, null);
                     yield return null;
                 }
+
+                _currentIndex++;
             }
         }
         

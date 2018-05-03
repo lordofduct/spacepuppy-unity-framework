@@ -310,8 +310,7 @@ namespace com.spacepuppy.Serialization.Json
                 var si = this.ReadAsSerializationInfo(tp);
                 try
                 {
-                    result = FormatterServices.GetUninitializedObject(tp);
-                    surrogate.SetObjectData(result, si, this.Context, selector);
+                    result = surrogate.SetObjectData(FormatterServices.GetUninitializedObject(tp), si, this.Context, selector);
                 }
                 catch(System.Exception ex)
                 {
@@ -386,13 +385,15 @@ namespace com.spacepuppy.Serialization.Json
                                         }
                                         else if(stp.EndsWith("[]"))
                                         {
-                                            arrayType = Type.GetType(stp.Substring(0, stp.Length - 2));
+                                            stp = stp.Substring(0, stp.Length - 2);
+                                            arrayType = Type.GetType(stp);
                                             if (arrayType == null) arrayType = TypeUtil.FindType(stp, true);
                                             if (arrayType != null) arrayType = arrayType.MakeArrayType();
                                         }
                                         else if(stp.EndsWith("<>"))
                                         {
-                                            arrayType = Type.GetType(stp.Substring(0, stp.Length - 2));
+                                            stp = stp.Substring(0, stp.Length - 2);
+                                            arrayType = Type.GetType(stp);
                                             if (arrayType == null) arrayType = TypeUtil.FindType(stp, true);
                                             if (arrayType != null) arrayType = typeof(List<>).MakeGenericType(arrayType);
                                         }
@@ -477,13 +478,15 @@ namespace com.spacepuppy.Serialization.Json
                                 }
                                 else if (stp.EndsWith("[]"))
                                 {
-                                    arrayType = Type.GetType(stp.Substring(0, stp.Length - 2));
+                                    stp = stp.Substring(0, stp.Length - 2);
+                                    arrayType = Type.GetType(stp);
                                     if (arrayType == null) arrayType = TypeUtil.FindType(stp, true);
                                     if (arrayType != null) arrayType = arrayType.MakeArrayType();
                                 }
                                 else if (stp.EndsWith("<>"))
                                 {
-                                    arrayType = Type.GetType(stp.Substring(0, stp.Length - 2));
+                                    stp = stp.Substring(0, stp.Length - 2);
+                                    arrayType = Type.GetType(stp);
                                     if (arrayType == null) arrayType = TypeUtil.FindType(stp, true);
                                     if (arrayType != null) arrayType = typeof(List<>).MakeGenericType(arrayType);
                                 }
@@ -554,13 +557,15 @@ namespace com.spacepuppy.Serialization.Json
                                 }
                                 else if (stp.EndsWith("[]"))
                                 {
-                                    arrayType = Type.GetType(stp.Substring(0, stp.Length - 2));
+                                    stp = stp.Substring(0, stp.Length - 2);
+                                    arrayType = Type.GetType(stp);
                                     if (arrayType == null) arrayType = TypeUtil.FindType(stp, true);
                                     if (arrayType != null) arrayType = arrayType.MakeArrayType();
                                 }
                                 else if (stp.EndsWith("<>"))
                                 {
-                                    arrayType = Type.GetType(stp.Substring(0, stp.Length - 2));
+                                    stp = stp.Substring(0, stp.Length - 2);
+                                    arrayType = Type.GetType(stp);
                                     if (arrayType == null) arrayType = TypeUtil.FindType(stp, true);
                                     if (arrayType != null) arrayType = typeof(List<>).MakeGenericType(arrayType);
                                 }
