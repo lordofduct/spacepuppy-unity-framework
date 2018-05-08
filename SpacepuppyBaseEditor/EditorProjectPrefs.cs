@@ -18,6 +18,7 @@ namespace com.spacepuppyeditor
         private const string PREFS_DIR = @"../ProjectSettings";
         private const string PREFS_PATH = PREFS_DIR + @"/Spacepuppy.EditorProjectPrefs.xml";
         private static string _path;
+        private static bool _autoSaveGroupSettingsOnModify = true;
         private static XDocument _xdoc;
         private static string _projectId;
 
@@ -70,6 +71,12 @@ namespace com.spacepuppyeditor
         public static LocalSettings Local { get { return _local; } }
 
         public static GroupSettings Group { get { return _group; } }
+
+        public static bool AutoSaveGroupSettingsOnModify
+        {
+            get { return _autoSaveGroupSettingsOnModify; }
+            set { _autoSaveGroupSettingsOnModify = value; }
+        }
 
         #endregion
 
@@ -210,7 +217,7 @@ namespace com.spacepuppyeditor
         {
 
             private const string NODE_NAME = "setting";
-
+            
             public void Save()
             {
                 _xdoc.Save(_path);
@@ -220,11 +227,13 @@ namespace com.spacepuppyeditor
             public void DeleteAll()
             {
                 _xdoc.Root.Elements().Remove();
+                if (_autoSaveGroupSettingsOnModify) this.Save();
             }
 
             public void DeleteKey(string key)
             {
                 _xdoc.Root.Elements(key).Remove();
+                if (_autoSaveGroupSettingsOnModify) this.Save();
             }
 
             public bool HasKey(string key)
@@ -320,6 +329,7 @@ namespace com.spacepuppyeditor
                     else
                         xel.Add(new XAttribute("value", sval));
                 }
+                if (_autoSaveGroupSettingsOnModify) this.Save();
             }
 
         }

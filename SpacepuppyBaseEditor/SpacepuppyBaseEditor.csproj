@@ -77,6 +77,7 @@
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
+    <Compile Include="SpacepuppySettings.cs" />
     <Compile Include="BuildSettings.cs" />
     <Compile Include="Cameras\CameraControllerInspector.cs" />
     <Compile Include="Cameras\CameraMovementControllerInspector.cs" />
@@ -95,7 +96,7 @@
     <Compile Include="Geom\TransformAltContextMenu.cs" />
     <Compile Include="Hooks\CollisionSignalSourcePropertyDrawer.cs" />
     <Compile Include="IArrayHandlingPropertyDrawer.cs" />
-    <Compile Include="Base\BaseSettings.cs" />
+    <Compile Include="Base\SpacepuppySettingsWindow.cs" />
     <Compile Include="Base\Commands\ComponentSearchWindow.cs" />
     <Compile Include="Base\Commands\TransformCopyMenu.cs" />
     <Compile Include="Base\Inspectors\ComparisonOperatorPropertyDrawer.cs" />

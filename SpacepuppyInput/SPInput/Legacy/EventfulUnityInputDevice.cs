@@ -197,6 +197,11 @@ namespace com.spacepuppy.SPInput.Legacy
         {
             return false;
         }
+
+        IInputSignature IInputDevice.GetSignature(string id)
+        {
+            return null;
+        }
         
         public float GetAxleState(string id)
         {
@@ -213,12 +218,6 @@ namespace com.spacepuppy.SPInput.Legacy
                 return ButtonState.Held;
             else
                 return ButtonState.None;
-        }
-
-        public bool GetButtonPressed(string id, float duration)
-        {
-            //TODO - how to track this?
-            throw new System.NotSupportedException();
         }
         
         public Vector2 GetCursorState(string id)

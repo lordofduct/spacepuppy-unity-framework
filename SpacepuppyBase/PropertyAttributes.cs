@@ -94,6 +94,12 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class ConstantlyRepaintEditorAttribute : System.Attribute
+    {
+        public bool RuntimeOnly;
+    }
+
     #endregion
 
     #region Property Drawer Attributes

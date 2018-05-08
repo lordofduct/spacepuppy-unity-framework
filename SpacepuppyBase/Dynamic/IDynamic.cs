@@ -85,6 +85,20 @@ namespace com.spacepuppy.Dynamic
             return false;
         }
 
+        public static bool SetValue(this object obj, MemberInfo member, object value)
+        {
+            if (obj == null) return false;
+
+            return SetValueDirect(obj, member, value, (object[])null);
+        }
+
+        public static bool SetValue(this object obj, MemberInfo member, object value, params object[] index)
+        {
+            if (obj == null) return false;
+
+            return SetValueDirect(obj, member, value, index);
+        }
+
         public static object GetValue(this object obj, string sprop, params object[] args)
         {
             if (obj == null) return null;
@@ -293,6 +307,47 @@ namespace com.spacepuppy.Dynamic
                     case MemberTypes.Property:
                         (member as PropertyInfo).SetValue(obj, value, index);
                         return true;
+                    case MemberTypes.Method:
+                        var arr = ArrayUtil.Temp(value);
+                        (member as MethodInfo).Invoke(obj, arr);
+                        ArrayUtil.ReleaseTemp(arr);
+                        return true;
+                }
+            }
+            catch
+            {
+
+            }
+
+            return false;
+        }
+
+        public static bool SetValueDirect(object obj, MemberInfo member, object value)
+        {
+            return SetValueDirect(obj, member, value, (object[])null);
+        }
+
+        public static bool SetValueDirect(object obj, MemberInfo member, object value, params object[] index)
+        {
+            if (obj == null) return false;
+
+            if (member == null) return false;
+
+            try
+            {
+                switch (member.MemberType)
+                {
+                    case MemberTypes.Field:
+                        (member as FieldInfo).SetValue(obj, value);
+                        return true;
+                    case MemberTypes.Property:
+                        if ((member as PropertyInfo).CanWrite)
+                        {
+                            (member as PropertyInfo).SetValue(obj, value, index);
+                            return true;
+                        }
+                        else
+                            return false;
                     case MemberTypes.Method:
                         var arr = ArrayUtil.Temp(value);
                         (member as MethodInfo).Invoke(obj, arr);

@@ -231,7 +231,8 @@ namespace com.spacepuppyeditor
 
         public static object DefaultPropertyField(Rect position, GUIContent label, object value, System.Type valueType)
         {
-            var propertyType = (valueType != null) ? EditorHelper.GetPropertyType(valueType) : SerializedPropertyType.Generic;
+            SerializedPropertyType propertyType = SerializedPropertyType.Generic;
+            if (valueType != null) propertyType = (valueType.IsInterface) ? SerializedPropertyType.ObjectReference : EditorHelper.GetPropertyType(valueType);
 
             switch (propertyType)
             {

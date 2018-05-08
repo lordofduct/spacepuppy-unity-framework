@@ -89,6 +89,116 @@ namespace com.spacepuppy.SPInput
             return value;
         }
 
+        #region Button Duration Methods
+
+        /// <summary>
+        /// Returns true if button was pressed down and released in less than duration.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="id"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        public static bool GetButtonTapped(this IInputDevice device, string id, float duration)
+        {
+            if (device == null) return false;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return false;
+
+            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) <= duration;
+        }
+
+        /// <summary>
+        /// Returns true if button was pressed down and released in less than duration.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="device"></param>
+        /// <param name="id"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        public static bool GetButtonTapped<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
+        {
+            if (device == null) return false;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return false;
+
+            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) <= duration;
+        }
+
+        /// <summary>
+        /// Returns true if button was pressed down and released after duration.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="id"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        public static bool GetButtonPressed(this IInputDevice device, string id, float duration)
+        {
+            if (device == null) return false;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return false;
+
+            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
+        }
+
+        /// <summary>
+        /// Returns true if button was pressed down and released after duration.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="device"></param>
+        /// <param name="id"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        public static bool GetButtonPressed<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
+        {
+            if (device == null) return false;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return false;
+
+            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
+        }
+
+        /// <summary>
+        /// Returns true if button was pressed and is still held down after duration.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="id"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        public static bool GetButtonHeld(this IInputDevice device, string id, float duration)
+        {
+            if (device == null) return false;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return false;
+
+            return sig.CurrentState > ButtonState.None && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
+        }
+
+        /// <summary>
+        /// Returns true if button was pressed and is still held down after duration.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="device"></param>
+        /// <param name="id"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        public static bool GetButtonHeld<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
+        {
+            if (device == null) return false;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return false;
+
+            return sig.CurrentState > ButtonState.None && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
+        }
+
+        #endregion
+
+
 
 
         public static bool TestCursorOver(Camera cursorCamera, Vector2 cursorPos, out Collider collider, float maxDistance = float.PositiveInfinity, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)

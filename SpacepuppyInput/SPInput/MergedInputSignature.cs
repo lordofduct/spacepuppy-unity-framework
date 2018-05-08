@@ -103,28 +103,9 @@ namespace com.spacepuppy.SPInput
             return (getFixedState) ? _currentFixed : _current;
         }
 
-        public bool GetPressed(float duration, bool getFixedState)
+        public float LastDownTime
         {
-            if (getFixedState)
-            {
-                return _currentFixed == ButtonState.Released && Time.realtimeSinceStartup - _lastDown <= duration;
-            }
-            else
-            {
-                return _current == ButtonState.Released && Time.realtimeSinceStartup - _lastDown <= duration;
-            }
-        }
-
-        public bool GetHeld(float duration, bool getFixedState)
-        {
-            if (getFixedState)
-            {
-                return _currentFixed == ButtonState.Released && Time.realtimeSinceStartup - _lastDown >= duration;
-            }
-            else
-            {
-                return _current == ButtonState.Released && Time.realtimeSinceStartup - _lastDown >= duration;
-            }
+            get { return _lastDown; }
         }
 
         public override void Update()

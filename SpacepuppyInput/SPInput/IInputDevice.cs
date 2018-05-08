@@ -13,10 +13,10 @@ namespace com.spacepuppy.SPInput
 
         bool Contains(string id);
 
+        IInputSignature GetSignature(string id);
+
         ButtonState GetButtonState(string id);
-
-        bool GetButtonPressed(string id, float duration);
-
+        
         float GetAxleState(string id);
 
         Vector2 GetDualAxleState(string id);

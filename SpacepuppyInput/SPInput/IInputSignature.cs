@@ -29,20 +29,10 @@ namespace com.spacepuppy.SPInput
         ButtonState GetCurrentState(bool getFixedState);
 
         /// <summary>
-        /// The button was pressed and released in a set amount of time.
+        /// Last time 'Down' was signaled (as realTimeSinceStartup)
         /// </summary>
-        /// <param name="duration"></param>
-        /// <param name="getFixedState"></param>
-        /// <returns></returns>
-        bool GetPressed(float duration, bool getFixedState);
-
-        /// <summary>
-        /// The button was pressed and released after a set amount of time.
-        /// </summary>
-        /// <param name="duration"></param>
-        /// <param name="getFixedState"></param>
-        /// <returns></returns>
-        bool GetHeld(float duration, bool getFixedState);
+        float LastDownTime { get; }
+        
     }
 
     public interface IAxleInputSignature : IInputSignature
