@@ -294,6 +294,15 @@ namespace com.spacepuppy
         /// </summary>
         public string ChildPropertyToDrawAsElementEntry;
 
+        /// <summary>
+        /// A method on the serialized object that is called when a new entry is added to the list/array. Should accept the list member type 
+        /// as a parameter, and then also return it (used for updating).
+        /// 
+        /// Like:
+        /// object OnObjectAddedToList(object obj)
+        /// </summary>
+        public string OnAddCallback;
+
         public ReorderableArrayAttribute()
         {
 

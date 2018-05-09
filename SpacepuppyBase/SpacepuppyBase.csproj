@@ -439,6 +439,7 @@
     <Compile Include="Utils\SpecializedComponents\EarlyParentSetter.cs" />
     <Compile Include="Utils\StreamUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
+    <Compile Include="Utils\TextureUtil.cs" />
     <Compile Include="Utils\TransformUtil.cs" />
     <Compile Include="Utils\TypeUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />

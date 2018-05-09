@@ -54,6 +54,7 @@ namespace com.spacepuppyeditor.Base
                 else
                 {
                     var pchild = property.GetArrayElementAtIndex(0);
+                    /*
                     if (_internalDrawer != null)
                     {
                         lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
@@ -75,6 +76,8 @@ namespace com.spacepuppyeditor.Base
                     {
                         lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1f;
                     }
+                    */
+                    lst.elementHeight = this.GetElementHeight(pchild, label, false) + 2f;
                 }
             }
             else
@@ -97,6 +100,25 @@ namespace com.spacepuppyeditor.Base
                 _hideElementLabel = attrib.HideElementLabel;
                 _childPropertyAsLabel = attrib.ChildPropertyToDrawAsElementLabel;
                 _childPropertyAsEntry = attrib.ChildPropertyToDrawAsElementEntry;
+                if(!string.IsNullOrEmpty(attrib.OnAddCallback))
+                {
+                    _addCallback = (lst) =>
+                    {
+                        lst.serializedProperty.arraySize++;
+                        lst.index = lst.serializedProperty.arraySize - 1;
+                        lst.serializedProperty.serializedObject.ApplyModifiedProperties();
+
+                        var prop = lst.serializedProperty.GetArrayElementAtIndex(lst.index);
+                        var obj = EditorHelper.GetTargetObjectOfProperty(prop);
+                        obj = com.spacepuppy.Dynamic.DynamicUtil.InvokeMethod(lst.serializedProperty.serializedObject.targetObject, attrib.OnAddCallback, obj);
+                        EditorHelper.SetTargetObjectOfProperty(prop, obj);
+                        lst.serializedProperty.serializedObject.Update();
+                    };
+                }
+                else
+                {
+                    _addCallback = null;
+                }
             }
 
             _label = label;
@@ -175,6 +197,7 @@ namespace com.spacepuppyeditor.Base
                     if(_drawElementAtBottom && _lst.index >= 0 && _lst.index < property.arraySize)
                     {
                         var pchild = property.GetArrayElementAtIndex(_lst.index);
+                        /*
                         if (_internalDrawer != null)
                         {
                             h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD + TOP_PAD;
@@ -189,6 +212,8 @@ namespace com.spacepuppyeditor.Base
                         {
                             h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, false) + BOTTOM_PAD + TOP_PAD;
                         }
+                        */
+                        h += this.GetElementHeight(pchild, label, true) + BOTTOM_PAD + TOP_PAD;
                     }
                 }
                 else
@@ -375,9 +400,34 @@ namespace com.spacepuppyeditor.Base
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_lst, area, index, isActive, isFocused);
         }
 
+        protected virtual float GetElementHeight(SerializedProperty element, GUIContent label, bool elementIsAtBottom)
+        {
+            if (_internalDrawer != null)
+            {
+                return _internalDrawer.GetPropertyHeight(element, label);
+            }
+            else if (ElementIsFlatChildField(element))
+            {
+                //we don't draw this way if it's a built-in type from Unity
+                element.isExpanded = true;
+                if (_hideElementLabel || elementIsAtBottom)
+                {
+                    return SPEditorGUI.GetDefaultPropertyHeight(element, label, true) - EditorGUIUtility.singleLineHeight;
+                }
+                else
+                {
+                    return SPEditorGUI.GetDefaultPropertyHeight(element, label, true);
+                }
+            }
+            else
+            {
+                return SPEditorGUI.GetDefaultPropertyHeight(element, label, false);
+            }
+        }
+
         #endregion
 
-        
+
         private GUIContent TempElementLabel(SerializedProperty element, int index)
         {
             var target = EditorHelper.GetTargetObjectOfProperty(element);
