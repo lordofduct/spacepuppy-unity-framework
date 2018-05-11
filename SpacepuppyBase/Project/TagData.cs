@@ -16,12 +16,7 @@ namespace com.spacepuppy.Project
         {
             get
             {
-                if (!_loaded)
-                {
-                    _instance = Resources.Load(@"TagData") as TagData;
-                    if (_instance == null) _instance = ScriptableObject.CreateInstance<TagData>();
-                    _loaded = true;
-                }
+                if (!_loaded) Reload();
                 return (_instance != null) ? _instance._readonlyTags : null;
             }
         }
@@ -29,6 +24,22 @@ namespace com.spacepuppy.Project
         public static bool IsValidTag(string stag)
         {
             return TagData.Tags.Contains(stag);
+        }
+
+        public static TagData Asset
+        {
+            get
+            {
+                if (!_loaded) Reload();
+                return _instance;
+            }
+        }
+
+        private static void Reload()
+        {
+            _instance = Resources.Load(@"TagData") as TagData;
+            if (_instance == null) _instance = ScriptableObject.CreateInstance<TagData>();
+            _loaded = true;
         }
 
         #endregion

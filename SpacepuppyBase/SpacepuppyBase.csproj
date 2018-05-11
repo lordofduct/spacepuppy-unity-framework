@@ -132,6 +132,7 @@
     <Compile Include="Geom\BezierSpline.cs" />
     <Compile Include="Geom\Box.cs" />
     <Compile Include="Geom\CatmullRomSpline.cs" />
+    <Compile Include="Geom\Cone.cs" />
     <Compile Include="Geom\Cylinder.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
     <Compile Include="Geom\PlanarSurfaceComponent.cs" />

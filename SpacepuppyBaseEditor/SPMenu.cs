@@ -75,7 +75,7 @@ namespace com.spacepuppyeditor
                             SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
                             SerializedProperty tagsProp = tagManager.FindProperty("tags");
 
-                            var arr = (from st in tags where !TagData.IsDefaultUnityTag(st) select st).ToArray();
+                            var arr = (from st in tags where !string.IsNullOrEmpty(st) && !TagData.IsDefaultUnityTag(st) select st).ToArray();
                             tagsProp.arraySize = arr.Length;
                             for(int i = 0; i < arr.Length; i++)
                             {
