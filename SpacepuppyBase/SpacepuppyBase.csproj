@@ -105,6 +105,7 @@
     <Compile Include="Collections\SerializableDictionaryBase.cs" />
     <Compile Include="Collections\ReusableStringReader.cs" />
     <Compile Include="Collections\TempCollection.cs" />
+    <Compile Include="Collections\TempDictionary.cs" />
     <Compile Include="Collections\TempHashSet.cs" />
     <Compile Include="Collections\TempList.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
@@ -431,6 +432,8 @@
     <Compile Include="Utils\LayerUtil.cs" />
     <Compile Include="Utils\MathUtil.cs" />
     <Compile Include="Utils\MouseUtil.cs" />
+    <Compile Include="INameable.cs" />
+    <Compile Include="Utils\NameCache.cs" />
     <Compile Include="Utils\ObjUtil.cs" />
     <Compile Include="Utils\PrefabUtil.cs" />
     <Compile Include="Utils\PrimitiveUtil.cs" />

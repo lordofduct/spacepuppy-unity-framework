@@ -378,6 +378,8 @@ namespace com.spacepuppy
     public class DisplayFlatAttribute : SPPropertyAttribute
     {
 
+        public bool CanShrinkAndExpand;
+
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]

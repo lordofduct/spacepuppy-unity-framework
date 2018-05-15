@@ -346,23 +346,6 @@ namespace com.spacepuppy.Utils
         
 #region Search/Find
 
-        public static bool CompareName(this GameObject go, string name)
-        {
-            if (go == null) return false;
-
-            return go.name == name;
-        }
-
-        public static bool CompareName(this Component c, string name)
-        {
-            if (c == null) return false;
-
-            if (c is SPEntity)
-                return (c as SPEntity).CompareName(name);
-            else
-                return c.name == name;
-        }
-
         public static GameObject Find(this GameObject go, string spath)
         {
             if (go == null) throw new System.ArgumentNullException("go");

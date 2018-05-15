@@ -38,13 +38,13 @@ namespace com.spacepuppy.Spawn
 
         public static SpawnPool Pool(string name)
         {
-            if (_defaultPool != null && _defaultPool.name == name) return _defaultPool;
+            if (_defaultPool != null && _defaultPool.CompareName(name)) return _defaultPool;
 
             //TODO - should cache 'name' for access so this doesn't generate garbage
             var e = _pools.GetEnumerator();
             while(e.MoveNext())
             {
-                if (e.Current.name == name) return e.Current;
+                if (e.Current.CompareName(name)) return e.Current;
             }
             return null;
         }
@@ -66,7 +66,7 @@ namespace com.spacepuppy.Spawn
                 if (_defaultPool != null) return true;
 
                 _defaultPool = null;
-                var point = (from p in GameObject.FindObjectsOfType<SpawnPool>() where p.name == DEFAULT_SPAWNPOOL_NAME select p).FirstOrDefault();
+                var point = (from p in GameObject.FindObjectsOfType<SpawnPool>() where p.CompareName(DEFAULT_SPAWNPOOL_NAME) select p).FirstOrDefault();
                 if (!object.ReferenceEquals(point, null))
                 {
                     _defaultPool = point;
@@ -496,7 +496,7 @@ namespace com.spacepuppy.Spawn
         }
 
         #endregion
-
+        
         #region Special Types
 
         [System.Serializable()]

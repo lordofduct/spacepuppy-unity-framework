@@ -63,7 +63,7 @@ namespace com.spacepuppy.Render
                 
                 if (duration < float.PositiveInfinity)
                 {
-                    _flashRoutine = this.InvokeRadical(this.StopSwap, duration);
+                    _flashRoutine = this.Invoke(this.StopSwap, duration);
                 }
             }
             else
@@ -75,7 +75,7 @@ namespace com.spacepuppy.Render
 
                 if (duration < float.PositiveInfinity)
                 {
-                    _flashRoutine = this.InvokeRadical(this.StopSwap, duration);
+                    _flashRoutine = this.Invoke(this.StopSwap, duration);
                 }
             }
         }

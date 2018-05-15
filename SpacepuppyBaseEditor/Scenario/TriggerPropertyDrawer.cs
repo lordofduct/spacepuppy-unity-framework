@@ -47,8 +47,8 @@ namespace com.spacepuppyeditor.Scenario
             _currentLabel = label;
 
             _targetList = CachedReorderableList.GetListDrawer(prop.FindPropertyRelative(PROP_TARGETS), _targetList_DrawHeader, _targetList_DrawElement, _targetList_OnAdd);
-
-            if(!_customInspector)
+            
+            if (!_customInspector)
             {
                 if (this.fieldInfo != null)
                 {

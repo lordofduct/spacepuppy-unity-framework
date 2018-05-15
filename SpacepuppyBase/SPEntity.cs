@@ -15,7 +15,7 @@ namespace com.spacepuppy
     /// Failure to do so will result in IEntityAwakeHandler receivers to be messaged out of order.
     /// </summary>
     [DisallowMultipleComponent()]
-    public class SPEntity : SPNotifyingComponent, IIgnorableCollision
+    public class SPEntity : SPNotifyingComponent, IIgnorableCollision, INameable
     {
         
         #region Fields
@@ -29,6 +29,7 @@ namespace com.spacepuppy
         
         protected override void Awake()
         {
+            _nameCache = new NameCache.UnityObjectNameCache(this);
             this.AddTag(SPConstants.TAG_ROOT);
             Pool.AddReference(this);
 
@@ -54,16 +55,26 @@ namespace com.spacepuppy
 
         #endregion
 
-        #region Methods
+        #region INameable Interface
 
-        private string _cachedName;
-        public bool CompareName(string value)
+        private NameCache.UnityObjectNameCache _nameCache;
+        public new string name
         {
-            if(_cachedName == null)
-            {
-                _cachedName = this.gameObject.name;
-            }
-            return _cachedName == value;
+            get { return _nameCache.Name; }
+            set { _nameCache.Name = value; }
+        }
+        string INameable.Name
+        {
+            get { return _nameCache.Name; }
+            set { _nameCache.Name = value; }
+        }
+        public bool CompareName(string nm)
+        {
+            return _nameCache.CompareName(nm);
+        }
+        void INameable.SetDirty()
+        {
+            _nameCache.SetDirty();
         }
 
         #endregion
