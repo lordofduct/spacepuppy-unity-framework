@@ -30,10 +30,14 @@ namespace com.spacepuppy
     /// *State
     /// Poll the state of the coroutine, if it's finished/active/cancelled, what MonoBehaviour is operating the coroutine, etc.
     /// 
-    /// *Start/Pause/Resume/Cancel
+    /// *Start/Pause/Cancel
     /// RadicalCoroutines can be paused and restarted later (they can not be reset). When starting a RadicalCoroutine you can 
     /// include an enum value that determines what should be done with the coroutine when the operating MonoBehaviour is disabled, 
     /// automatically pausing or cancelling the coroutine as desired, and automatically resuming it when re-enabled.
+    /// 
+    /// * Wait & Resume
+    /// RadicalCoroutines can return a special 'RadicalCoroutine.PauseSelfInstruction' yield instruction. With this the coroutine will block until 'Resume' 
+    /// is called on the RadicalCoroutine.
     /// 
     /// *Scheduling
     /// Schedule a coroutine to run when a current coroutine is complete.
@@ -132,7 +136,7 @@ namespace com.spacepuppy
             _token = null;
             _manager = null;
         }
-
+        
         #endregion
 
         #region Fields
@@ -318,75 +322,74 @@ namespace com.spacepuppy
             _token = behaviour.StartCoroutine(this);
         }
 
-        internal void Resume(MonoBehaviour behaviour)
-        {
-            if (_state != RadicalCoroutineOperatingState.Inactive && _state != RadicalCoroutineOperatingState.Paused) throw new System.InvalidOperationException("Failed to start RadicalCoroutine. The Coroutine is already being processed.");
-            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
-
-            _state = RadicalCoroutineOperatingState.Active;
-            _owner = behaviour;
-
-            if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
-
-#if SP_LIB
-            var manager = behaviour.AddOrGetComponent<RadicalCoroutineManager>();
-#else
-            var manager = behaviour.GetComponent<RadicalCoroutineManager>();
-            if (manager == null) manager = behaviour.gameObject.AddComponent<RadicalCoroutineManager>();
-#endif
-            _manager = manager;
-            _manager.RegisterCoroutine(this);
-            _token = behaviour.StartCoroutine(this);
-        }
-
         /// <summary>
-        /// Stops the coroutine, but preserves the state of it, so that it could be resumed again later by calling start.
+        /// Stops the coroutine, but preserves the state of it, so that it could be resumed again later by calling Start.
+        /// 
+        /// This differs from Pause in that it tosses out any information related to the MonoBehaviour that operates it. You must use 'Start' to resume it.
         /// </summary>
-        /// <param name="behaviour">A reference to the MonoBehaviour that is handling the coroutine.</param>
         public void Stop()
         {
-            this.Stop(false);
+            switch (_state)
+            {
+                case RadicalCoroutineOperatingState.Cancelling:
+                    this.OnFinish(true);
+                    return;
+                case RadicalCoroutineOperatingState.Active:
+                    {
+                        if (_owner != null)
+                        {
+                            try
+                            {
+                                if (_owner != null) _owner.StopCoroutine(this);//NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                            }
+                            catch (System.Exception ex) { Debug.LogException(ex, _owner); }
+                        }
+
+                        _state = RadicalCoroutineOperatingState.Inactive;
+                        _owner = null;
+                        _token = null;
+
+                        if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnPause();
+                    }
+                    return;
+                case RadicalCoroutineOperatingState.Completing:
+                    this.OnFinish(false);
+                    return;
+            }
         }
 
         /// <summary>
-        /// Should only be ever called from RadicalCoroutineManager.
+        /// Pause the operation of the coroutine. The state is preserved and it can be resumed again in the future by calling 'Resume'.
+        /// 
+        /// This differs from Stop in that it preserves the information of the coroutine that processes it. You can use 'Resume' to resume operation.
         /// </summary>
-        /// <param name="stalledByManager"></param>
-        internal void Stop(bool stalledByManager)
+        public void Pause()
         {
-            if (_state == RadicalCoroutineOperatingState.Inactive) return;
-
-            if (_state == RadicalCoroutineOperatingState.Cancelling || _state == RadicalCoroutineOperatingState.Completing)
+            switch (_state)
             {
-                this.OnFinish(_state == RadicalCoroutineOperatingState.Cancelling);
-            }
-            else if (_state == RadicalCoroutineOperatingState.Active)
-            {
-                if (_owner != null)
-                {
-                    try
+                case RadicalCoroutineOperatingState.Cancelling:
+                    this.OnFinish(true);
+                    return;
+                case RadicalCoroutineOperatingState.Active:
                     {
-                        if (_owner != null) _owner.StopCoroutine(this);//NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                        if (_owner != null)
+                        {
+                            try
+                            {
+                                if (_owner != null) _owner.StopCoroutine(this);//NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                            }
+                            catch (System.Exception ex) { Debug.LogException(ex, _owner); }
+                        }
+
+                        _state = RadicalCoroutineOperatingState.Paused;
+                        _token = null;
+
+                        if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnPause();
                     }
-                    catch (System.Exception ex) { Debug.LogException(ex, _owner); }
-                }
-
-                if (!stalledByManager && _manager != null)
-                {
-                    _manager.UnregisterCoroutine(this);
-
-                    _state = RadicalCoroutineOperatingState.Inactive;
-                    _owner = null;
-                    _token = null;
-                }
-                else
-                {
-                    _state = RadicalCoroutineOperatingState.Paused;
-                    _token = null;
-
-                }
-
-                if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnPause();
+                    return;
+                case RadicalCoroutineOperatingState.Completing:
+                    this.OnFinish(false);
+                    return;
             }
         }
 
@@ -395,7 +398,31 @@ namespace com.spacepuppy
         /// </summary>
         public void Cancel()
         {
-            if (this.Finished) return;
+            switch (_state)
+            {
+                case RadicalCoroutineOperatingState.Cancelling:
+                    this.OnFinish(true);
+                    return;
+                case RadicalCoroutineOperatingState.Active:
+                    {
+                        _state = RadicalCoroutineOperatingState.Cancelling;
+                        if (this.OnCancelling != null) this.OnCancelling(this, System.EventArgs.Empty);
+                    }
+                    return;
+                case RadicalCoroutineOperatingState.Paused:
+                    {
+                        _state = RadicalCoroutineOperatingState.Cancelling;
+                        if (this.OnCancelling != null) this.OnCancelling(this, System.EventArgs.Empty);
+                        _state = RadicalCoroutineOperatingState.Cancelled;
+                        this.OnFinish(true);
+                    }
+                    return;
+                case RadicalCoroutineOperatingState.Completing:
+                    this.OnFinish(false);
+                    return;
+            }
+
+
             _state = RadicalCoroutineOperatingState.Cancelling;
             if (this.OnCancelling != null) this.OnCancelling(this, System.EventArgs.Empty);
         }
@@ -403,18 +430,32 @@ namespace com.spacepuppy
         /// <summary>
         /// Should only be ever called from RadicalCoroutineManager.
         /// </summary>
-        /// <param name="cancelledByManager"></param>
-        internal void Cancel(bool cancelledByManager)
+        internal void ManagerCancel()
         {
-            if (this.Finished) return;
-            _state = RadicalCoroutineOperatingState.Cancelling;
-            if (cancelledByManager)
-            {
-                _manager = null;
-            }
-            if (this.OnCancelling != null) this.OnCancelling(this, System.EventArgs.Empty);
+            _manager = null;
+            this.Cancel();
         }
+        
+        public void Resume()
+        {
+            if (_state != RadicalCoroutineOperatingState.Paused) throw new System.InvalidOperationException("Failed to resume RadicalCoroutine. The Coroutine is not in a paused state.");
+            if (_owner == null) throw new System.InvalidOperationException("The controlling MonoBehaviour has either been lost or destroyed since last Pausing the coroutine.");
 
+            _state = RadicalCoroutineOperatingState.Active;
+
+            if (_stack.CurrentOperation is IPausibleYieldInstruction) (_stack.CurrentOperation as IPausibleYieldInstruction).OnResume();
+
+#if SP_LIB
+            var manager = _owner.AddOrGetComponent<RadicalCoroutineManager>();
+#else
+            var manager = _owner.GetComponent<RadicalCoroutineManager>();
+            if (manager == null) manager = _owner.gameObject.AddComponent<RadicalCoroutineManager>();
+#endif
+            _manager = manager;
+            _manager.RegisterCoroutine(this);
+            _token = _owner.StartCoroutine(this);
+        }
+        
         #endregion
 
         #region Scheduling
@@ -594,7 +635,7 @@ namespace com.spacepuppy
 
         bool IEnumerator.MoveNext()
         {
-            if (_state == RadicalCoroutineOperatingState.Inactive) return false;
+            if (_state == RadicalCoroutineOperatingState.Inactive || _state == RadicalCoroutineOperatingState.Paused) return false;
 
             if (this.Cancelled)
             {
@@ -778,18 +819,6 @@ namespace com.spacepuppy
                         goto ResolveCurrentInstruction;
                     }
                 }
-                else if (current is RadicalCoroutineEndCommand)
-                {
-                    switch ((RadicalCoroutineEndCommand)current)
-                    {
-                        case RadicalCoroutineEndCommand.Stop:
-                            this.Stop();
-                            return false;
-                        case RadicalCoroutineEndCommand.Cancel:
-                            this.Cancel();
-                            return false;
-                    }
-                }
                 else if (current == com.spacepuppy.Async.RadicalTask.JumpToAsync)
                 {
                     //auto async flag
@@ -806,6 +835,11 @@ namespace com.spacepuppy
                     {
                         if (_stack.CurrentOperation == instruction) _stack.Pop();
                     }
+                }
+                else if(current == RadicalCoroutine.PauseSelfInstruction)
+                {
+                    this.Pause();
+                    _currentIEnumeratorYieldValue = null;
                 }
                 else
                 {
@@ -895,8 +929,27 @@ namespace com.spacepuppy
 
         public void Dispose()
         {
-            if (this.Active) this.Stop(false);
+            if (this.Active) this.Cancel();
 
+            switch(_state)
+            {
+                case RadicalCoroutineOperatingState.Cancelling:
+                case RadicalCoroutineOperatingState.Paused:
+                case RadicalCoroutineOperatingState.Active:
+                case RadicalCoroutineOperatingState.Completing:
+                    try
+                    {
+                        if (_owner != null) _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                    }
+                    catch (System.Exception ex) { Debug.LogException(ex); }
+
+                    if (_manager != null)
+                    {
+                        _manager.UnregisterCoroutine(this);
+                    }
+                    break;
+            }
+            
             _owner = null;
             _token = null;
             _manager = null;
@@ -1053,6 +1106,8 @@ namespace com.spacepuppy
                 yield return null;
             }
         }
+
+        public static readonly object PauseSelfInstruction = new object();
 
         #endregion
 
@@ -1302,6 +1357,7 @@ namespace com.spacepuppy
 
             void System.IDisposable.Dispose()
             {
+                if (_e is System.IDisposable) (_e as System.IDisposable).Dispose();
                 _e = null;
                 _pool.Release(this);
             }
@@ -1387,6 +1443,7 @@ namespace com.spacepuppy
                 {
                     if (_currentOperation is IPooledYieldInstruction) (_currentOperation as IPooledYieldInstruction).Dispose();
                     if (_currentOperation is IImmediatelyResumingYieldInstruction) (_currentOperation as IImmediatelyResumingYieldInstruction).Signal -= _owner.OnImmediatelyResumingYieldInstructionSignaled;
+                    if (_currentOperation is System.IDisposable) (_currentOperation as System.IDisposable).Dispose();
                 }
 
                 if(_stack != null && _stack.Count > 0)
@@ -1396,6 +1453,7 @@ namespace com.spacepuppy
                     {
                         if (e.Current is IPooledYieldInstruction) (e.Current as IPooledYieldInstruction).Dispose();
                         if (e.Current is IImmediatelyResumingYieldInstruction) (e.Current as IImmediatelyResumingYieldInstruction).Signal -= _owner.OnImmediatelyResumingYieldInstructionSignaled;
+                        if (e.Current is System.IDisposable) (e.Current as System.IDisposable).Dispose();
                     }
                     _stack.Clear();
                 }
@@ -1452,6 +1510,14 @@ namespace com.spacepuppy
                     return _currentOperation;
                 else
                     return _stack.Last();
+            }
+
+            public IRadicalYieldInstruction First()
+            {
+                if (_stack == null || _stack.Count == 0)
+                    return _currentOperation;
+                else
+                    return _stack.First();
             }
 
 #endregion

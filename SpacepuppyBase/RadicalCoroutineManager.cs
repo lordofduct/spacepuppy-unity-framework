@@ -139,7 +139,7 @@ namespace com.spacepuppy
                 {
                     for(int i = 0; i < lst.Count; i++)
                     {
-                        lst[i].Cancel(true);
+                        lst[i].ManagerCancel();
                         _routines.Remove(lst[i]);
                     }
                 }
@@ -207,7 +207,7 @@ namespace com.spacepuppy
                 RadicalCoroutine old;
                 if (_autoKillTable.TryGetValue(autoKillToken, out old))
                 {
-                    old.Cancel(true);
+                    old.ManagerCancel();
                 }
             }
             _autoKillTable[autoKillToken] = routine;
@@ -280,7 +280,7 @@ namespace com.spacepuppy
                                 continue;
                             case RadicalCoroutineOperatingState.Inactive:
                             case RadicalCoroutineOperatingState.Paused:
-                                if (e.Current.DisableMode.HasFlag(RadicalCoroutineDisableMode.Resumes))
+                                if ((e.Current.DisableMode & RadicalCoroutineDisableMode.Resumes) != 0)
                                 {
                                     toresume.Add(e.Current);
                                 }
@@ -311,7 +311,7 @@ namespace com.spacepuppy
                 {
                     for(int i = 0; i < toresume.Count; i++)
                     {
-                        toresume[i].Resume(component);
+                        toresume[i].Resume();
                     }
                 }
             }
@@ -335,27 +335,21 @@ namespace com.spacepuppy
                         for (int i = 0; i < lst.Count; i++)
                         {
                             routine = lst[i];
-                            if (routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.CancelOnDisable))
+                            if ((routine.DisableMode & RadicalCoroutineDisableMode.CancelOnDisable) != 0)
                             {
-                                routine.Cancel(true);
-                                _routines.Remove(lst[i]);
-                                lst.RemoveAt(i);
-                                i--;
+                                routine.ManagerCancel();
+                                _routines.Remove(routine);
                             }
-                            else if(routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.StopOnDisable))
+                            else if ((routine.DisableMode & RadicalCoroutineDisableMode.StopOnDisable) != 0)
                             {
-                                routine.Stop(true);
-                                if (routine.Finished)
+                                if (!routine.Finished && (routine.DisableMode & RadicalCoroutineDisableMode.Resumes) != 0)
                                 {
-                                    _routines.Remove(lst[i]);
-                                    lst.RemoveAt(i);
-                                    i--;
+                                    routine.Pause();
                                 }
-                                else if (!routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.Resumes))
+                                else
                                 {
-                                    _routines.Remove(lst[i]);
-                                    lst.RemoveAt(i);
-                                    i--;
+                                    routine.Stop();
+                                    _routines.Remove(routine);
                                 }
                             }
                         }
@@ -365,28 +359,22 @@ namespace com.spacepuppy
                         for (int i = 0; i < lst.Count; i++)
                         {
                             routine = lst[i];
-                            if (routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.StopOnDeactivate))
+                            if ((routine.DisableMode & RadicalCoroutineDisableMode.StopOnDeactivate) != 0)
                             {
-                                routine.Stop(true);
-                                if (routine.Finished)
+                                if (!routine.Finished && (routine.DisableMode & RadicalCoroutineDisableMode.Resumes) != 0)
                                 {
-                                    _routines.Remove(lst[i]);
-                                    lst.RemoveAt(i);
-                                    i--;
+                                    routine.Pause();
                                 }
-                                else if (!routine.DisableMode.HasFlag(RadicalCoroutineDisableMode.Resumes))
+                                else
                                 {
-                                    _routines.Remove(lst[i]);
-                                    lst.RemoveAt(i);
-                                    i--;
+                                    routine.Stop();
+                                    _routines.Remove(routine);
                                 }
                             }
                             else
                             {
-                                routine.Cancel(true);
-                                _routines.Remove(lst[i]);
-                                lst.RemoveAt(i);
-                                i--;
+                                routine.ManagerCancel();
+                                _routines.Remove(routine);
                             }
                         }
                     }
@@ -415,7 +403,7 @@ namespace com.spacepuppy
                 RadicalCoroutine old;
                 if (_autoKillTable.TryGetValue(autoKillToken, out old))
                 {
-                    old.Cancel(true);
+                    old.ManagerCancel();
                     _autoKillTable.Remove(autoKillToken);
                 }
             }

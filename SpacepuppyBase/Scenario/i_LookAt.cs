@@ -136,14 +136,14 @@ namespace com.spacepuppy.Scenario
                     case SlerpStyle.Speed:
                         {
                             var dur = a / _slerpValue;
-                            var twn = com.spacepuppy.Tween.SPTween.Tween(observer).To("rotation", q, dur);
+                            var twn = com.spacepuppy.Tween.SPTween.Tween(observer).To("rotation", dur, q);
                             if (_onSlerpComplete.Count > 0) twn.OnFinish((s, e) => _onSlerpComplete.ActivateTrigger(this, null));
                             twn.Play(true);
                         }
                         break;
                     case SlerpStyle.Time:
                         {
-                            var twn = com.spacepuppy.Tween.SPTween.Tween(observer).To("rotation", q, _slerpValue);
+                            var twn = com.spacepuppy.Tween.SPTween.Tween(observer).To("rotation", _slerpValue, q);
                             if (_onSlerpComplete.Count > 0) twn.OnFinish((s, e) => _onSlerpComplete.ActivateTrigger(this, null));
                             twn.Play(true);
                         }

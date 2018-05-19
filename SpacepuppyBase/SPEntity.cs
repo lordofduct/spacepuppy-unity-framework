@@ -26,10 +26,14 @@ namespace com.spacepuppy
         #endregion
 
         #region CONSTRUCTOR
+
+        public SPEntity()
+        {
+            _nameCache = new NameCache.UnityObjectNameCache(this);
+        }
         
         protected override void Awake()
         {
-            _nameCache = new NameCache.UnityObjectNameCache(this);
             this.AddTag(SPConstants.TAG_ROOT);
             Pool.AddReference(this);
 

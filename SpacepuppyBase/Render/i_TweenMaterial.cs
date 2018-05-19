@@ -129,10 +129,9 @@ namespace com.spacepuppy.Render
             }
 
             var twn = SPTween.Tween(_transition)
-                             .FromTo("Position", 0f, 1f, _duration)
+                             .FromTo("Position", EaseMethods.GetEase(_ease), _duration, 0f, 1f)
                              .SetId(this.AutoKillId)
-                             .Use(_timeSupplier.TimeSupplier)
-                             .Ease(EaseMethods.GetEase(_ease));
+                             .Use(_timeSupplier.TimeSupplier);
             
             if (_onComplete.Count > 0)
                 twn.OnFinish((t) => _onComplete.ActivateTrigger(this, null));

@@ -96,7 +96,7 @@ namespace com.spacepuppy.Scenario
             var twn = SPTween.Tween(_target);
             for (int i = 0; i < _data.Length; i++)
             {
-                twn.ByAnimMode(_data[i].Mode, _data[i].MemberName, EaseMethods.GetEase(_data[i].Ease), _data[i].ValueS.Value, _data[i].Duration, _data[i].ValueE.Value, _data[i].Option);
+                twn.ByAnimMode(_data[i].Mode, _data[i].MemberName, EaseMethods.GetEase(_data[i].Ease), _data[i].Duration, _data[i].ValueS.Value, _data[i].ValueE.Value, _data[i].Option);
             }
             twn.Use(_timeSupplier.TimeSupplier);
             twn.SetId(_target);

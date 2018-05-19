@@ -100,7 +100,7 @@ namespace com.spacepuppy.Utils
 
             public UnityObjectNameCache(UnityEngine.Object obj)
             {
-                if (obj == null) throw new System.ArgumentNullException("obj");
+                if (object.ReferenceEquals(obj, null)) throw new System.ArgumentNullException("obj");
                 _obj = obj;
             }
 

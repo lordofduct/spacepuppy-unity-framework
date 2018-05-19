@@ -30,16 +30,7 @@ namespace com.spacepuppy
         PausesOnDisable = 12,
         Pauses = 14
     }
-
-    /// <summary>
-    /// When ending a coroutine you can yield one of these to tell the RadicalCoroutine how to clean up the routine.
-    /// </summary>
-    public enum RadicalCoroutineEndCommand
-    {
-        Stop = 0,
-        Cancel = 2
-    }
-
+    
     /// <summary>
     /// Represents the operating state of a RadicalCoroutine.
     /// </summary>

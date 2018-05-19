@@ -130,8 +130,8 @@ namespace com.spacepuppy.Scenario
 
             var twn = SPTween.Tween(targ);
             
-            twn.To("position", loc.position, _duration.Seconds);
-            if (_orientWithLocationRotation) twn.To("rotation", loc.rotation, _duration.Seconds);
+            twn.To("position", _duration.Seconds, loc.position);
+            if (_orientWithLocationRotation) twn.To("rotation", _duration.Seconds, loc.rotation);
 
             twn.Use(_duration.TimeSupplier);
             twn.SetId(_target);
