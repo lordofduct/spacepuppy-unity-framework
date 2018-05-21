@@ -83,7 +83,7 @@ namespace com.spacepuppy
             {
                 //we're paused
             }
-            else if (_lastTotal == double.NegativeInfinity)
+            else if (double.IsNegativeInfinity(_lastTotal))
             {
                 //first time being called
                 _lastTotal = _supplier.TotalPrecise;

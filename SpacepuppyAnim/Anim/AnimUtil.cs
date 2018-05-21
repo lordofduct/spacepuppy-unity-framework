@@ -104,7 +104,8 @@ namespace com.spacepuppy.Anim
             }
             else if (animtoken is AnimationState)
             {
-                GameLoopEntry.Hook.StartCoroutine((animtoken as AnimationState).ScheduleLegacy((a) => callback(a)));
+                //GameLoopEntry.Hook.StartCoroutine((animtoken as AnimationState).ScheduleLegacy((a) => callback(a)));
+                InvokeHandle.Begin(GameLoopEntry.UpdatePump, () => callback(animtoken), ScheduleLegacyForInvokeHandle(animtoken as AnimationState));
                 return true;
             }
             else
@@ -173,6 +174,11 @@ namespace com.spacepuppy.Anim
             callback(state);
         }
 
+        private static System.Collections.IEnumerator ScheduleLegacyForInvokeHandle(AnimationState state)
+        {
+            while (state != null) yield return null;
+        }
+        
         #endregion
 
     }

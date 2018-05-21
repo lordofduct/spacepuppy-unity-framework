@@ -14,7 +14,7 @@ namespace com.spacepuppy.Collections
 
         #region Fields
         
-        private Stack<T> _inactive;
+        private Bag<T> _inactive;
 
         private int _cacheSize;
         private Func<T> _constructorDelegate;
@@ -28,21 +28,21 @@ namespace com.spacepuppy.Collections
         public ObjectCachePool(int cacheSize)
         {
             _cacheSize = cacheSize;
-            _inactive = (_cacheSize <= 0) ? new Stack<T>() : new Stack<T>(_cacheSize);
+            _inactive = (_cacheSize <= 0) ? new Bag<T>() : new Bag<T>(_cacheSize);
             _constructorDelegate = this.SimpleConstructor;
         }
 
         public ObjectCachePool(int cacheSize, Func<T> constructorDelegate)
         {
             _cacheSize = cacheSize;
-            _inactive = (_cacheSize <= 0) ? new Stack<T>() : new Stack<T>(_cacheSize);
+            _inactive = (_cacheSize <= 0) ? new Bag<T>() : new Bag<T>(_cacheSize);
             _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
         }
 
         public ObjectCachePool(int cacheSize, Func<T> constructorDelegate, Action<T> resetObjectDelegate)
         {
             _cacheSize = cacheSize;
-            _inactive = (_cacheSize <= 0) ? new Stack<T>() : new Stack<T>(_cacheSize);
+            _inactive = (_cacheSize <= 0) ? new Bag<T>() : new Bag<T>(_cacheSize);
             _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
             _resetObjectDelegate = resetObjectDelegate;
         }
@@ -50,7 +50,7 @@ namespace com.spacepuppy.Collections
         public ObjectCachePool(int cacheSize, Func<T> constructorDelegate, Action<T> resetObjectDelegate, bool resetOnGet)
         {
             _cacheSize = cacheSize;
-            _inactive = (_cacheSize <= 0) ? new Stack<T>() : new Stack<T>(_cacheSize);
+            _inactive = (_cacheSize <= 0) ? new Bag<T>() : new Bag<T>(_cacheSize);
             _constructorDelegate = (constructorDelegate != null) ? constructorDelegate : this.SimpleConstructor;
             _resetObjectDelegate = resetObjectDelegate;
             _resetOnGet = resetOnGet;
@@ -167,14 +167,14 @@ namespace com.spacepuppy.Collections
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
             
-            int cacheSize = _cacheSize > 0 ? _cacheSize : 1024;
+            int cacheSize = _cacheSize > 0 ? _cacheSize : 1024; //we actually don't allow the cache size to get out of hand
             if (!_resetOnGet && _resetObjectDelegate != null && _inactive.Count < cacheSize) _resetObjectDelegate(obj);
 
             lock(_inactive)
             {
                 if(_inactive.Count < cacheSize)
                 {
-                    _inactive.Push(obj);
+                    _inactive.Add(obj);
                     return true;
                 }
             }

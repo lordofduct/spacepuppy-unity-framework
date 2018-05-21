@@ -145,7 +145,7 @@ namespace com.spacepuppyeditor.Base
     }
 
     [CustomEditor(typeof(Singleton), true)]
-    public class GameLoopEntryInspector : SPEditor
+    public class SingletonInspector : SPEditor
     {
 
 

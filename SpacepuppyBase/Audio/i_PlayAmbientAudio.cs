@@ -107,21 +107,21 @@ namespace com.spacepuppy.Audio
 
             if (clip != null)
             {
-                if (this._delay > 0)
+                if (_delay > 0)
                 {
-                    this.Invoke(() =>
+                    this.InvokeGuaranteed(() =>
                     {
                         if (src != null)
                         {
-                            _completeRoutine = this.InvokeRadical(this.OnAudioComplete, clip.length);
+                            _completeRoutine = this.Invoke(this.OnAudioComplete, clip.length);
                             //src.Play();
                             src.PlayOneShot(clip);
                         }
-                    }, this._delay);
+                    }, _delay);
                 }
                 else
                 {
-                    _completeRoutine = this.InvokeRadical(this.OnAudioComplete, clip.length);
+                    _completeRoutine = this.Invoke(this.OnAudioComplete, clip.length);
                     //src.Play();
                     src.PlayOneShot(clip);
                 }

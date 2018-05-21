@@ -225,7 +225,7 @@ namespace com.spacepuppy.Anim
             var anim = this.TryPlay(targ);
             if (anim == null)
             {
-                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0.01f);
+                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0f);
                 return false;
             }
 
@@ -251,7 +251,7 @@ namespace com.spacepuppy.Anim
             var anim = this.TryPlay(targ);
             if (anim == null)
             {
-                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0.01f);
+                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0f);
                 return false;
             }
 

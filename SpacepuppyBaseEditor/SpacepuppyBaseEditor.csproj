@@ -67,6 +67,7 @@
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\GameLoopEntryInspector.cs" />
     <Compile Include="Base\Inspectors\InputIDPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ProxyPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ShortUidPropertyDrawer.cs" />

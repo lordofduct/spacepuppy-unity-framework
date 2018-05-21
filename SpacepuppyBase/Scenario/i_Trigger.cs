@@ -73,7 +73,7 @@ namespace com.spacepuppy.Scenario
 
             if (_delay > 0f)
             {
-                this.Invoke(() =>
+                this.InvokeGuaranteed(() =>
                 {
                     this.DoTriggerNext(arg);
                 }, _delay);

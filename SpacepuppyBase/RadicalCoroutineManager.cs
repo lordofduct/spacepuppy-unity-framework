@@ -219,24 +219,31 @@ namespace com.spacepuppy
         /// <param name="routine"></param>
         internal void UnregisterCoroutine(RadicalCoroutine routine)
         {
-            _routines.Remove(routine);
-
-            if(_naiveTrackerTable != null)
+            try
             {
-                var comp = routine.Operator;
-                if(_naiveTrackerTable.ContainsKey(comp) && !this.GetComponentIsCurrentlyManaged(comp))
+                _routines.Remove(routine);
+
+                if (_naiveTrackerTable != null)
                 {
-                    _naiveTrackerTable.Remove(comp);
+                    var comp = routine.Operator;
+                    if (_naiveTrackerTable.ContainsKey(comp) && !this.GetComponentIsCurrentlyManaged(comp))
+                    {
+                        _naiveTrackerTable.Remove(comp);
+                    }
+                }
+
+                if (_autoKillTable != null && routine.AutoKillToken != null)
+                {
+                    RadicalCoroutine other;
+                    if (_autoKillTable.TryGetValue(routine.AutoKillToken, out other))
+                    {
+                        if (object.ReferenceEquals(other, routine)) _autoKillTable.Remove(routine.AutoKillToken);
+                    }
                 }
             }
-
-            if(_autoKillTable != null && routine.AutoKillToken != null)
+            catch(System.Exception ex)
             {
-                RadicalCoroutine other;
-                if(_autoKillTable.TryGetValue(routine.AutoKillToken, out other))
-                {
-                    if (object.ReferenceEquals(other, routine)) _autoKillTable.Remove(routine.AutoKillToken);
-                }
+                Debug.LogException(ex);
             }
         }
         

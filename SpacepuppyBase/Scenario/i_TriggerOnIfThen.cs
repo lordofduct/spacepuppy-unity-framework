@@ -57,7 +57,7 @@ namespace com.spacepuppy.Scenario
                 {
                     if (_delay > 0f)
                     {
-                        this.Invoke(() =>
+                        this.InvokeGuaranteed(() =>
                         {
                             c.Trigger.ActivateTrigger(this,arg);
                         }, _delay);
@@ -73,7 +73,7 @@ namespace com.spacepuppy.Scenario
             //if we reached here, it's else
             if (_delay > 0f)
             {
-                this.Invoke(() =>
+                this.InvokeGuaranteed(() =>
                 {
                     _elseCondition.ActivateTrigger(this, arg);
                 }, _delay);
