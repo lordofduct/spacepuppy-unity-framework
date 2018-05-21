@@ -9,7 +9,7 @@ namespace com.spacepuppy.SPInput
 
         IInputSignature GetSignature(T id);
 
-        ButtonState GetButtonState(T btn);
+        ButtonState GetButtonState(T btn, bool consume = false);
         float GetAxleState(T axis);
         Vector2 GetDualAxleState(T axis);
         Vector2 GetCursorState(T mapping);

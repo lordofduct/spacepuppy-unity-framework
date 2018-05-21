@@ -6,14 +6,11 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public class i_Trigger : SPComponent, ITriggerableMechanism, IObservableTrigger
+    public class i_Trigger : AutoTriggerableMechanism, IObservableTrigger
     {
 
         #region Fields
-
-        [SerializeField()]
-        private int _order;
-
+        
         [SerializeField()]
         private Trigger _trigger;
 
@@ -34,7 +31,7 @@ namespace com.spacepuppy.Scenario
 
         #region Properties
 
-        public Trigger Trigger
+        public Trigger TriggerEvent
         {
             get
             {
@@ -69,26 +66,11 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region ITriggerableMechanism Interface
-
-        public int Order
-        {
-            get { return _order; }
-        }
-
-        public bool CanTrigger
-        {
-            get { return this.isActiveAndEnabled; }
-        }
-
-        public void ActivateTrigger()
-        {
-            this.ActivateTrigger(null);
-        }
         
-        public bool ActivateTrigger(object arg)
+        public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
-            
+
             if (_delay > 0f)
             {
                 this.Invoke(() =>
@@ -102,11 +84,6 @@ namespace com.spacepuppy.Scenario
             }
 
             return true;
-        }
-        
-        bool ITriggerableMechanism.Trigger(object sender, object arg)
-        {
-            return this.ActivateTrigger(arg);
         }
 
         #endregion

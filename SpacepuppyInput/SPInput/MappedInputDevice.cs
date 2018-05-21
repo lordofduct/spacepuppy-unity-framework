@@ -112,15 +112,17 @@ namespace com.spacepuppy.SPInput
             return _signatures.GetSignature(id);
         }
 
-        public ButtonState GetButtonState(string id)
+        public ButtonState GetButtonState(string id, bool consume = false)
         {
             if (!_active) return ButtonState.None;
 
             var sig = _signatures.GetSignature(id);
-            if (sig == null) return ButtonState.None;
+            //if (sig == null) return ButtonState.None;
             if (!(sig is IButtonInputSignature)) return ButtonState.None;
 
-            return (sig as IButtonInputSignature).CurrentState;
+            var result = (sig as IButtonInputSignature).CurrentState;
+            if (consume) (sig as IButtonInputSignature).Consume();
+            return result;
         }
         
         public float GetAxleState(string id)
@@ -165,15 +167,17 @@ namespace com.spacepuppy.SPInput
             return _signatures.GetSignature(mapping);
         }
 
-        public ButtonState GetButtonState(T mapping)
+        public ButtonState GetButtonState(T mapping, bool consume = false)
         {
             if (!_active) return ButtonState.None;
 
             var sig = _signatures.GetSignature(mapping);
-            if (sig == null) return ButtonState.None;
+            //if (sig == null) return ButtonState.None;
             if (!(sig is IButtonInputSignature)) return ButtonState.None;
 
-            return (sig as IButtonInputSignature).CurrentState;
+            var result = (sig as IButtonInputSignature).CurrentState;
+            if (consume) (sig as IButtonInputSignature).Consume();
+            return result;
         }
         
         public float GetAxleState(T mapping)

@@ -219,7 +219,18 @@ namespace com.spacepuppy.SPInput.Legacy
             else
                 return ButtonState.None;
         }
-        
+
+        /// <summary>
+        /// Get ButtonState of Unity's Input manager. Does not support 'consume'.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="consume"></param>
+        /// <returns></returns>
+        ButtonState IInputDevice.GetButtonState(string id, bool consume)
+        {
+            return this.GetButtonState(id);
+        }
+
         public Vector2 GetCursorState(string id)
         {
             return Vector2.zero;

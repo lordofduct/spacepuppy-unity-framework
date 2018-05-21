@@ -2,8 +2,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppy.Scenario
 {
@@ -15,12 +15,23 @@ namespace com.spacepuppy.Scenario
     public class i_TriggerForEachArg : AutoTriggerableMechanism
     {
 
+        public enum TargetMode
+        {
+            All = 0,
+            First = 1,
+            FirstUnique = 2
+        }
+
         #region Fields
 
         [SerializeField]
-        [SelectableObject()]
+        [Tooltip("When running each query which entries should be used. Note that 'FirstUnique' is the slowest.")]
+        private TargetMode _targetSearchMode = TargetMode.All;
+
+        [SerializeField]
         [ReorderableArray]
-        private UnityEngine.Object[] _args;
+        [TriggerableTargetObject.Config(typeof(UnityEngine.Object), AlwaysExpanded = true)]
+        private TriggerableTargetObject[] _targets;
 
         [SerializeField]
         private Trigger _action;
@@ -32,10 +43,42 @@ namespace com.spacepuppy.Scenario
         public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
-
-            foreach(var obj in _args)
+            
+            switch(_targetSearchMode)
             {
-                _action.ActivateTrigger(this, obj);
+                case TargetMode.All:
+                    foreach (var t1 in _targets)
+                    {
+                        foreach (var t2 in t1.GetTargets<UnityEngine.Object>(arg))
+                        {
+                            if (t2 != null) _action.ActivateTrigger(this, t2);
+                        }
+                    }
+                    break;
+                case TargetMode.First:
+                    foreach (var t1 in _targets)
+                    {
+                        var t2 = t1.GetTarget<UnityEngine.Object>(arg);
+                        if (t2 != null) _action.ActivateTrigger(this, t2);
+                    }
+                    break;
+                case TargetMode.FirstUnique:
+                    using(var set = TempCollection.GetSet<UnityEngine.Object>())
+                    {
+                        foreach (var t1 in _targets)
+                        {
+                            foreach (var t2 in t1.GetTargets<UnityEngine.Object>(arg))
+                            {
+                                if(t2 != null && !set.Contains(t2))
+                                {
+                                    set.Add(t2);
+                                    _action.ActivateTrigger(this, t2);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    break;
             }
             return true;
         }

@@ -480,13 +480,41 @@ namespace com.spacepuppy.SPInput.Unity
             }
         }
 
+        public static ButtonDelegate CreateAxleButtonDelegate<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, 
+                                                                        TInputId axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, 
+                                                                        Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null,
+                                                                        float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+            where TInputId : struct, System.IConvertible
+        {
+            using (var lst = TempCollection.GetList<IInputProfile<TInputId>>(from p in profiles where p != null select p))
+            {
+                if (comparison != null) lst.Sort(comparison);
+
+                if (lst.Count == 0)
+                    return null;
+                if (lst.Count == 1)
+                    return CreateAxleButtonDelegate(lst[0].GetMapping(axis).CreateAxisDelegate(joystick), consideration, axleButtonDeadZone);
+                if (lst.Count == 2)
+                {
+                    return CreateAxleButtonDelegate(lst[0].GetMapping(axis).CreateAxisDelegate(joystick), consideration, axleButtonDeadZone).Merge(
+                           CreateAxleButtonDelegate(lst[1].GetMapping(axis).CreateAxisDelegate(joystick), consideration, axleButtonDeadZone));
+                }
+
+                var arr = (from p in lst select CreateAxleButtonDelegate(p.GetMapping(axis).CreateAxisDelegate(joystick), consideration, axleButtonDeadZone)).ToArray();
+                return Merge(arr);
+            }
+        }
+
         public static IButtonInputSignature CreateButtonSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
             where TInputId : struct, System.IConvertible
         {
             return new DelegatedButtonInputSignature(id, CreateButtonDelegate(profiles, button, joystick, comparison));
         }
 
-        public static IButtonInputSignature CreateAxleButtonSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null, float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
+        public static IButtonInputSignature CreateAxleButtonSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, 
+                                                                                TInputId axis, AxleValueConsideration consideration = AxleValueConsideration.Positive, 
+                                                                                Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null, 
+                                                                                float axleButtonDeadZone = InputUtil.DEFAULT_AXLEBTNDEADZONE)
             where TInputId : struct, System.IConvertible
         {
             return new DelegatedAxleButtonInputSignature(id, CreateAxisDelegate(profiles, axis, joystick, comparison), consideration, axleButtonDeadZone);

@@ -9,6 +9,21 @@ namespace com.spacepuppy.SPInput
 
         public const float DEFAULT_AXLEBTNDEADZONE = 0.707f;
 
+        public static ButtonState ConsumeButtonState(ButtonState current)
+        {
+            switch(current)
+            {
+                case ButtonState.Released:
+                case ButtonState.None:
+                    return ButtonState.None;
+                case ButtonState.Down:
+                case ButtonState.Held:
+                    return ButtonState.Held;
+                default:
+                    return ButtonState.None;
+            }
+        }
+
         public static ButtonState GetNextButtonState(ButtonState current, bool isButtonActive)
         {
             if (isButtonActive)

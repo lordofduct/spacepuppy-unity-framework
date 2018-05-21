@@ -29,6 +29,11 @@ namespace com.spacepuppy.SPInput
         ButtonState GetCurrentState(bool getFixedState);
 
         /// <summary>
+        /// Consumes any 'Down' or 'Released' ButtonState so no other object can react to it by converting 'Down' to 'Held' and 'Released' to 'None'.
+        /// </summary>
+        void Consume();
+
+        /// <summary>
         /// Last time 'Down' was signaled (as realTimeSinceStartup)
         /// </summary>
         float LastDownTime { get; }

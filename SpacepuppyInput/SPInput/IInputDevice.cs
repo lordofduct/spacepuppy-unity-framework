@@ -15,7 +15,7 @@ namespace com.spacepuppy.SPInput
 
         IInputSignature GetSignature(string id);
 
-        ButtonState GetButtonState(string id);
+        ButtonState GetButtonState(string id, bool consume = false);
         
         float GetAxleState(string id);
 

@@ -3,6 +3,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
+
     public class t_OnStart : TriggerComponent
     {
 
@@ -47,4 +48,5 @@ namespace com.spacepuppy.Scenario
         #endregion
 
     }
+
 }

@@ -61,6 +61,18 @@ namespace com.spacepuppy.SPInput
         {
             return (getFixedState) ? _currentFixed : _current;
         }
+
+        public void Consume()
+        {
+            if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
+            {
+                _currentFixed = InputUtil.ConsumeButtonState(_currentFixed);
+            }
+            else
+            {
+                _current = InputUtil.ConsumeButtonState(_current);
+            }
+        }
         
         public float LastDownTime
         {
@@ -161,6 +173,18 @@ namespace com.spacepuppy.SPInput
         public ButtonState GetCurrentState(bool getFixedState)
         {
             return (getFixedState) ? _currentFixed : _current;
+        }
+
+        public void Consume()
+        {
+            if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
+            {
+                _currentFixed = InputUtil.ConsumeButtonState(_currentFixed);
+            }
+            else
+            {
+                _current = InputUtil.ConsumeButtonState(_current);
+            }
         }
 
         public float LastDownTime
