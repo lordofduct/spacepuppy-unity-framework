@@ -9,51 +9,6 @@ namespace com.spacepuppy.SPInput
 
         public const float DEFAULT_AXLEBTNDEADZONE = 0.707f;
 
-        public static ButtonState ConsumeButtonState(ButtonState current)
-        {
-            switch(current)
-            {
-                case ButtonState.Released:
-                case ButtonState.None:
-                    return ButtonState.None;
-                case ButtonState.Down:
-                case ButtonState.Held:
-                    return ButtonState.Held;
-                default:
-                    return ButtonState.None;
-            }
-        }
-
-        public static ButtonState GetNextButtonState(ButtonState current, bool isButtonActive)
-        {
-            if (isButtonActive)
-            {
-                switch (current)
-                {
-                    case ButtonState.None:
-                    case ButtonState.Released:
-                        return ButtonState.Down;
-                    case ButtonState.Down:
-                    case ButtonState.Held:
-                        return ButtonState.Held;
-                }
-            }
-            else
-            {
-                switch (current)
-                {
-                    case ButtonState.None:
-                    case ButtonState.Released:
-                        return ButtonState.None;
-                    case ButtonState.Down:
-                    case ButtonState.Held:
-                        return ButtonState.Released;
-                }
-            }
-
-            return ButtonState.None;
-        }
-
         public static float CutoffAxis(float value, float deadzone, DeadZoneCutoff cutoff)
         {
             if (deadzone < 0f) deadzone = 0f;
@@ -104,115 +59,97 @@ namespace com.spacepuppy.SPInput
             return value;
         }
 
-        #region Button Duration Methods
 
-        /// <summary>
-        /// Returns true if button was pressed down and released in less than duration.
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="id"></param>
-        /// <param name="duration"></param>
-        /// <returns></returns>
-        public static bool GetButtonTapped(this IInputDevice device, string id, float duration)
+        public static ButtonState ConsumeButtonState(ButtonState current)
         {
-            if (device == null) return false;
-
-            var sig = device.GetSignature(id) as IButtonInputSignature;
-            if (sig == null) return false;
-
-            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) <= duration;
+            switch (current)
+            {
+                case ButtonState.Released:
+                case ButtonState.None:
+                    return ButtonState.None;
+                case ButtonState.Down:
+                case ButtonState.Held:
+                    return ButtonState.Held;
+                default:
+                    return ButtonState.None;
+            }
         }
 
-        /// <summary>
-        /// Returns true if button was pressed down and released in less than duration.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="device"></param>
-        /// <param name="id"></param>
-        /// <param name="duration"></param>
-        /// <returns></returns>
-        public static bool GetButtonTapped<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
+        public static ButtonState GetNextButtonState(ButtonState current, bool isButtonActive)
         {
-            if (device == null) return false;
+            if (isButtonActive)
+            {
+                switch (current)
+                {
+                    case ButtonState.None:
+                    case ButtonState.Released:
+                        return ButtonState.Down;
+                    case ButtonState.Down:
+                    case ButtonState.Held:
+                        return ButtonState.Held;
+                }
+            }
+            else
+            {
+                switch (current)
+                {
+                    case ButtonState.None:
+                    case ButtonState.Released:
+                        return ButtonState.None;
+                    case ButtonState.Down:
+                    case ButtonState.Held:
+                        return ButtonState.Released;
+                }
+            }
 
-            var sig = device.GetSignature(id) as IButtonInputSignature;
-            if (sig == null) return false;
-
-            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) <= duration;
+            return ButtonState.None;
         }
 
-        /// <summary>
-        /// Returns true if button was pressed down and released after duration.
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="id"></param>
-        /// <param name="duration"></param>
-        /// <returns></returns>
-        public static bool GetButtonPressed(this IInputDevice device, string id, float duration)
+        
+        public static ButtonPress GetButtonPress(this IInputDevice device, string id, float duration)
         {
-            if (device == null) return false;
+            if (device == null) return ButtonPress.None;
 
             var sig = device.GetSignature(id) as IButtonInputSignature;
-            if (sig == null) return false;
+            if (sig == null) return ButtonPress.None;
 
-            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
+            switch(sig.CurrentState)
+            {
+                case ButtonState.Released:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Tapped : ButtonPress.Released;
+                case ButtonState.None:
+                    return ButtonPress.None;
+                case ButtonState.Down:
+                    return ButtonPress.Down;
+                case ButtonState.Held:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Holding : ButtonPress.Held;
+                default:
+                    return ButtonPress.None;
+            }
         }
 
-        /// <summary>
-        /// Returns true if button was pressed down and released after duration.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="device"></param>
-        /// <param name="id"></param>
-        /// <param name="duration"></param>
-        /// <returns></returns>
-        public static bool GetButtonPressed<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
+        public static ButtonPress GetButtonPress<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
         {
-            if (device == null) return false;
+            if (device == null) return ButtonPress.None;
 
             var sig = device.GetSignature(id) as IButtonInputSignature;
-            if (sig == null) return false;
+            if (sig == null) return ButtonPress.None;
 
-            return sig.CurrentState == ButtonState.Released && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
+            switch (sig.CurrentState)
+            {
+                case ButtonState.Released:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Tapped : ButtonPress.Released;
+                case ButtonState.None:
+                    return ButtonPress.None;
+                case ButtonState.Down:
+                    return ButtonPress.Down;
+                case ButtonState.Held:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Holding : ButtonPress.Held;
+                default:
+                    return ButtonPress.None;
+            }
         }
-
-        /// <summary>
-        /// Returns true if button was pressed and is still held down after duration.
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="id"></param>
-        /// <param name="duration"></param>
-        /// <returns></returns>
-        public static bool GetButtonHeld(this IInputDevice device, string id, float duration)
-        {
-            if (device == null) return false;
-
-            var sig = device.GetSignature(id) as IButtonInputSignature;
-            if (sig == null) return false;
-
-            return sig.CurrentState > ButtonState.None && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
-        }
-
-        /// <summary>
-        /// Returns true if button was pressed and is still held down after duration.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="device"></param>
-        /// <param name="id"></param>
-        /// <param name="duration"></param>
-        /// <returns></returns>
-        public static bool GetButtonHeld<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
-        {
-            if (device == null) return false;
-
-            var sig = device.GetSignature(id) as IButtonInputSignature;
-            if (sig == null) return false;
-
-            return sig.CurrentState > ButtonState.None && (Time.realtimeSinceStartup - sig.LastDownTime) >= duration;
-        }
-
-        #endregion
-
+        
 
 
 

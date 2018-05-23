@@ -34,7 +34,7 @@ namespace com.spacepuppy
 
             this.enabled = false;
         }
-
+        
         #endregion
 
         #region Update Messages

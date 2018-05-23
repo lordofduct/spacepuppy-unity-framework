@@ -7,8 +7,8 @@ namespace com.spacepuppy
 {
 
     /// <summary>
-    /// Implement on a component that should receive the 'EntityAwake' message. This is called when the Entity 
-    /// has had its Awake function called.
+    /// Implement on a component that should receive the 'EntityAwake' message. 
+    /// This is called after the entire entity hierarchy has had Awake called on it, but before Start is called.
     /// 
     /// This is useful if you want to initialize a script inside an entity after the entire entity has had 
     /// Awake called on it. This is called on all scripts, including those that are inactive. If a script is 

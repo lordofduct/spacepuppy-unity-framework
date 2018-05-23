@@ -63,7 +63,7 @@ namespace com.spacepuppy.Anim
 
                 var e = _dict.GetEnumerator();
                 int j = 0;
-                while(e.MoveNext())
+                while (e.MoveNext())
                 {
                     if (index == j) return e.Current.Value;
                     j++;
@@ -97,7 +97,7 @@ namespace com.spacepuppy.Anim
         internal void SyncMasterAnims()
         {
             if (!this.Initialized) throw new System.InvalidOperationException("SPAnimationClipCollection must be initialized as a master collection first.");
-            if(_controller.States != this) throw new System.InvalidOperationException("Attempted to sync non-master SPAnimClipCollection as if it were a master collection.");
+            if (_controller.States != this) throw new System.InvalidOperationException("Attempted to sync non-master SPAnimClipCollection as if it were a master collection.");
 
             //var e = _dict.GetEnumerator();
             //while (e.MoveNext())
@@ -125,7 +125,7 @@ namespace com.spacepuppy.Anim
             if (this.Initialized) throw new System.InvalidOperationException("SPAnimClipCollection already has been initilized.");
             _controller = controller;
             _uniqueHash = uniqueHash;
-            
+
             var e = _dict.GetEnumerator();
             while (e.MoveNext())
             {
@@ -164,7 +164,7 @@ namespace com.spacepuppy.Anim
 
             var ac = clip.AnimationClip;
             AnimationState st = null;
-            if(ac != null)
+            if (ac != null)
             {
                 _controller.animation.AddClip(ac, id);
                 st = _controller.animation[id];
@@ -328,9 +328,9 @@ namespace com.spacepuppy.Anim
         public void Dispose()
         {
             if (object.ReferenceEquals(_controller, null)) return;
-            
+
             var e = _dict.GetEnumerator();
-            while(e.MoveNext())
+            while (e.MoveNext())
             {
                 e.Current.Value.Dispose();
             }

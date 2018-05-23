@@ -324,8 +324,9 @@ namespace com.spacepuppy.Anim
 
         //public Animation Container { get { return _container; } }
 
-        public bool Initialized { get { return !object.ReferenceEquals(_controller, null); } }
-
+        //public bool Initialized { get { return !object.ReferenceEquals(_controller, null); } }
+        public bool Initialized { get { return _controller != null; } }
+        
         #endregion
 
         #region Methods
