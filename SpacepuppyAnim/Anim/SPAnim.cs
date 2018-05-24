@@ -20,8 +20,8 @@ namespace com.spacepuppy.Anim
         private int _layer;
         private WrapMode _wrapMode;
         private AnimationBlendMode _blendMode = AnimationBlendMode.Blend;
-        private MaskCollection _masks = new MaskCollection();
         private ITimeSupplier _timeSupplier;
+        private ISPAnimationMask _mask;
 
         private AnimationState _state;
         private AnimEventScheduler _scheduler;
@@ -97,9 +97,7 @@ namespace com.spacepuppy.Anim
                 if (_state != null) _state.blendMode = value;
             }
         }
-
-        public MaskCollection Masks { get { return _masks; } }
-
+        
         public ITimeSupplier TimeSupplier
         {
             get { return (_timeSupplier == null) ? SPTime.Normal : _timeSupplier; }
@@ -154,6 +152,12 @@ namespace com.spacepuppy.Anim
 
                 return Mathf.Abs(this.Duration / spd);
             }
+        }
+
+        public ISPAnimationMask Mask
+        {
+            get { return _mask; }
+            set { _mask = value; }
         }
 
         ///// <summary>
@@ -245,7 +249,7 @@ namespace com.spacepuppy.Anim
             _state.layer = _layer;
             _state.wrapMode = _wrapMode;
             _state.blendMode = _blendMode;
-            _masks.Apply(_state);
+            if (_mask != null) _mask.Apply(_controller, _state);
             this.RegisterTimeScaleChangedEvent();
         }
         
@@ -260,7 +264,7 @@ namespace com.spacepuppy.Anim
             _state.layer = _layer;
             _state.wrapMode = _wrapMode;
             _state.blendMode = _blendMode;
-            _masks.Apply(_state);
+            if (_mask != null) _mask.Apply(_controller, _state);
             this.RegisterTimeScaleChangedEvent();
         }
 
@@ -359,7 +363,7 @@ namespace com.spacepuppy.Anim
             a._layer = _layer;
             a._wrapMode = _wrapMode;
             a._blendMode = _blendMode;
-            if (_masks.Count > 0) a._masks.Copy(_masks);
+            a._mask = _mask;
             a._timeSupplier = _timeSupplier;
             return a;
         }
@@ -397,7 +401,7 @@ namespace com.spacepuppy.Anim
             _layer = 0;
             _wrapMode = UnityEngine.WrapMode.Default;
             _blendMode = AnimationBlendMode.Blend;
-            _masks.Clear();
+            _mask = null;
             this.UnregisterTimeScaleChangedEvent();
             _timeSupplier = null;
 

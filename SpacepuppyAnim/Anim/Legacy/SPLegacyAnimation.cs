@@ -42,6 +42,7 @@ namespace com.spacepuppy.Anim.Legacy
             return state.CreateAnimatableState();
         }
 
+        [System.Obsolete("Doesn't support latest SPAnimationMask")]
         public void PlayDirectly(string name, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.animation == null) throw new AnimationInvalidAccessException();
@@ -51,6 +52,7 @@ namespace com.spacepuppy.Anim.Legacy
             this.animation.Play(state.Name, playMode);
         }
 
+        [System.Obsolete("Doesn't support latest SPAnimationMask")]
         public AnimationState QueueDirectly(string name, QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.animation == null) throw new AnimationInvalidAccessException();
@@ -63,10 +65,10 @@ namespace com.spacepuppy.Anim.Legacy
             s.layer = state.Layer;
             s.wrapMode = state.WrapMode;
             s.blendMode = state.BlendMode;
-            if (state.Masks.Count > 0) state.Masks.Apply(s);
             return s;
         }
 
+        [System.Obsolete("Doesn't support latest SPAnimationMask")]
         public void CrossFadeDirectly(string name, float fadeLength, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.animation == null) throw new AnimationInvalidAccessException();
@@ -76,6 +78,7 @@ namespace com.spacepuppy.Anim.Legacy
             this.animation.CrossFade(state.Name, fadeLength, playMode);
         }
 
+        [System.Obsolete("Doesn't support latest SPAnimationMask")]
         public AnimationState QueueCrossFadeDirectly(string name, float fadeLength, QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.animation == null) throw new AnimationInvalidAccessException();
@@ -88,7 +91,6 @@ namespace com.spacepuppy.Anim.Legacy
             s.layer = state.Layer;
             s.wrapMode = state.WrapMode;
             s.blendMode = state.BlendMode;
-            if (state.Masks.Count > 0) state.Masks.Apply(s);
             return s;
         }
 

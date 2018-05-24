@@ -293,25 +293,53 @@ namespace com.spacepuppy.Dynamic
             //    obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
             if (obj == null) return false;
 
-            var vtp = (value != null) ? value.GetType() : null;
-            var member = GetValueSetterMemberFromType(obj.GetType(), sprop, vtp, false);
-            if (member == null) return false;
-
             try
             {
-                switch(member.MemberType)
+                var vtp = (value != null) ? value.GetType() : null;
+                var member = GetValueSetterMemberFromType(obj.GetType(), sprop, vtp, true);
+                if (member != null)
                 {
-                    case MemberTypes.Field:
-                        (member as FieldInfo).SetValue(obj, value);
-                        return true;
-                    case MemberTypes.Property:
-                        (member as PropertyInfo).SetValue(obj, value, index);
-                        return true;
-                    case MemberTypes.Method:
-                        var arr = ArrayUtil.Temp(value);
-                        (member as MethodInfo).Invoke(obj, arr);
-                        ArrayUtil.ReleaseTemp(arr);
-                        return true;
+                    switch (member.MemberType)
+                    {
+                        case MemberTypes.Field:
+                            (member as FieldInfo).SetValue(obj, value);
+                            return true;
+                        case MemberTypes.Property:
+                            (member as PropertyInfo).SetValue(obj, value, index);
+                            return true;
+                        case MemberTypes.Method:
+                            var arr = ArrayUtil.Temp(value);
+                            (member as MethodInfo).Invoke(obj, arr);
+                            ArrayUtil.ReleaseTemp(arr);
+                            return true;
+                    }
+                }
+
+                if(vtp != null)
+                {
+                    member = GetValueSetterMemberFromType(obj.GetType(), sprop, null, true);
+                    if (member != null)
+                    {
+                        var rtp = GetReturnType(member);
+                        object cobj = null;
+                        if (ConvertUtil.TryToPrim(obj, rtp, out cobj))
+                            obj = cobj;
+
+                        switch (member.MemberType)
+                        {
+                            case MemberTypes.Field:
+                                (member as FieldInfo).SetValue(obj, value);
+                                return true;
+                            case MemberTypes.Property:
+                                (member as PropertyInfo).SetValue(obj, value, index);
+                                return true;
+                            case MemberTypes.Method:
+                                var arr = ArrayUtil.Temp(value);
+                                (member as MethodInfo).Invoke(obj, arr);
+                                ArrayUtil.ReleaseTemp(arr);
+                                return true;
+                        }
+                    }
                 }
             }
             catch
@@ -599,8 +627,6 @@ namespace com.spacepuppy.Dynamic
                 if ((m.MemberType & mask) != 0)
                 {
                     yield return m;
-
-
                 }
             }
 
@@ -650,10 +676,12 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        public static MemberInfo GetMemberFromType(Type tp, string sMemberName, bool includeNonPublic)
+
+
+        public static MemberInfo GetMemberFromType(Type tp, string sMemberName, bool includeNonPublic, MemberTypes mask = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method)
         {
             const BindingFlags BINDING_PUBLIC = BindingFlags.Public | BindingFlags.Instance;
-            const BindingFlags BINDING_NONPUBLIC = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
             if (tp == null) throw new ArgumentNullException("tp");
 
             //if (sMemberName.Contains('.'))
@@ -664,34 +692,65 @@ namespace com.spacepuppy.Dynamic
 
             try
             {
-                while (tp != null)
+                MemberInfo[] members;
+
+                members = tp.GetMember(sMemberName, BINDING_PUBLIC);
+                foreach(var member in members)
                 {
-                    var members = tp.GetMember(sMemberName, (includeNonPublic) ? BINDING_NONPUBLIC : BINDING_PUBLIC);
-                    if (members == null || members.Length == 0) return null;
+                    if ((member.MemberType & mask) != 0) return member;
+                }
+
+                while (includeNonPublic && tp != null)
+                {
+                    members = tp.GetMember(sMemberName, PRIV_BINDING);
+                    tp = tp.BaseType;
+                    if (members == null || members.Length == 0) continue;
 
                     foreach (var member in members)
                     {
-                        switch (member.MemberType)
-                        {
-                            case System.Reflection.MemberTypes.Field:
-                                return member;
-
-                            case System.Reflection.MemberTypes.Property:
-                                {
-                                    var prop = member as System.Reflection.PropertyInfo;
-                                    if (prop.CanRead && prop.GetIndexParameters().Length == 0) return prop;
-                                    break;
-                                }
-                            case System.Reflection.MemberTypes.Method:
-                                {
-                                    var meth = member as System.Reflection.MethodInfo;
-                                    if (meth.GetParameters().Length == 0) return meth;
-                                    break;
-                                }
-                        }
+                        if ((member.MemberType & mask) != 0) return member;
                     }
+                }
+            }
+            catch
+            {
 
+            }
+            return null;
+        }
+        
+        public static MemberInfo GetValueMemberFromType(Type tp, string sprop, bool includeNonPublic)
+        {
+            const BindingFlags BINDING_PUBLIC = BindingFlags.Public | BindingFlags.Instance;
+            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            if (tp == null) throw new ArgumentNullException("tp");
+
+            //if (sprop.Contains('.'))
+            //{
+            //    tp = DynamicUtil.ReduceSubType(tp, sprop, includeNonPublic, out sprop);
+            //    if (tp == null) return null;
+            //}
+
+            try
+            {
+                MemberInfo[] members;
+
+                members = tp.GetMember(sprop, BINDING_PUBLIC);
+                foreach (var member in members)
+                {
+                    if (IsValidValueMember(member)) return member;
+                }
+
+                while (includeNonPublic && tp != null)
+                {
+                    members = tp.GetMember(sprop, PRIV_BINDING);
                     tp = tp.BaseType;
+                    if (members == null || members.Length == 0) continue;
+
+                    foreach (var member in members)
+                    {
+                        if (IsValidValueMember(member)) return member;
+                    }
                 }
             }
             catch
@@ -703,7 +762,8 @@ namespace com.spacepuppy.Dynamic
 
         public static MemberInfo GetValueSetterMemberFromType(Type tp, string sprop, Type valueType, bool includeNonPublic)
         {
-            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            const BindingFlags BINDING_PUBLIC = BindingFlags.Public | BindingFlags.Instance;
+            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
             if (tp == null) throw new ArgumentNullException("tp");
 
             //if (sprop.Contains('.'))
@@ -711,72 +771,30 @@ namespace com.spacepuppy.Dynamic
             //    tp = DynamicUtil.ReduceSubType(tp, sprop, includeNonPublic, out sprop);
             //    if (tp == null) return null;
             //}
-            
+
             try
             {
-                while (tp != null)
+                System.Type ltp;
+                MemberInfo[] members;
+                
+                //first strict test
+                members = tp.GetMember(sprop, BINDING_PUBLIC);
+                foreach (var member in members)
                 {
-                    var members = tp.GetMember(sprop, BINDING);
-                    if (members == null || members.Length == 0) return null;
+                    if (IsValidValueSetterMember(member, valueType)) return member;
+                }
 
-                    if (valueType != null)
-                    {
-                        //first strict test
-                        foreach (var member in members)
-                        {
-                            switch (member.MemberType)
-                            {
-                                case System.Reflection.MemberTypes.Field:
-                                    var field = member as System.Reflection.FieldInfo;
-                                    if (valueType == null || field.FieldType == valueType)
-                                    {
-                                        return field;
-                                    }
+                ltp = tp;
+                while (includeNonPublic && ltp != null)
+                {
+                    members = ltp.GetMember(sprop, PRIV_BINDING);
+                    ltp = ltp.BaseType;
+                    if (members == null || members.Length == 0) continue;
 
-                                    break;
-                                case System.Reflection.MemberTypes.Property:
-                                    var prop = member as System.Reflection.PropertyInfo;
-                                    if (prop.CanWrite && (valueType == null || prop.PropertyType == valueType) && prop.GetIndexParameters().Length == 0)
-                                    {
-                                        return prop;
-                                    }
-                                    break;
-                                case System.Reflection.MemberTypes.Method:
-                                    {
-                                        var meth = member as System.Reflection.MethodInfo;
-                                        var paramInfos = meth.GetParameters();
-                                        if (paramInfos.Length == 1 && paramInfos[0].ParameterType.IsAssignableFrom(valueType)) return meth;
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-
-                    //now weak test
                     foreach (var member in members)
                     {
-                        switch (member.MemberType)
-                        {
-                            case System.Reflection.MemberTypes.Field:
-                                return member;
-                            case System.Reflection.MemberTypes.Property:
-                                var prop = member as System.Reflection.PropertyInfo;
-                                if (prop.CanWrite)
-                                {
-                                    return prop;
-                                }
-                                break;
-                            case System.Reflection.MemberTypes.Method:
-                                {
-                                    var meth = member as System.Reflection.MethodInfo;
-                                    var paramInfos = meth.GetParameters();
-                                    if (paramInfos.Length == 1) return meth;
-                                }
-                                break;
-                        }
+                        if (IsValidValueSetterMember(member, valueType)) return member;
                     }
-
-                    tp = tp.BaseType;
                 }
             }
             catch
@@ -787,55 +805,8 @@ namespace com.spacepuppy.Dynamic
             return null;
         }
 
-        public static MemberInfo GetValueGetterMemberFromType(Type tp, string sprop, bool includeNonPublic)
-        {
-            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-            //if (sprop.Contains('.'))
-            //{
-            //    tp = DynamicUtil.ReduceSubType(tp, sprop, includeNonPublic, out sprop);
-            //    if (tp == null) return null;
-            //}
-
-            try
-            {
-                while (tp != null)
-                {
-                    var members = tp.GetMember(sprop, BINDING);
-                    if (members == null || members.Length == 0) return null;
-
-                    foreach (var member in members)
-                    {
-                        switch (member.MemberType)
-                        {
-                            case System.Reflection.MemberTypes.Field:
-                                return member;
-
-                            case System.Reflection.MemberTypes.Property:
-                                {
-                                    var prop = member as System.Reflection.PropertyInfo;
-                                    if (prop.CanRead && prop.GetIndexParameters().Length == 0) return prop;
-                                    break;
-                                }
-                            case System.Reflection.MemberTypes.Method:
-                                {
-                                    var meth = member as System.Reflection.MethodInfo;
-                                    if (meth.GetParameters().Length == 0) return meth;
-                                    break;
-                                }
-                        }
-                    }
-
-                    tp = tp.BaseType;
-                }
-            }
-            catch
-            {
-
-            }
-            return null;
-        }
-
+        
         [System.Obsolete("Poorly named method and return type. Use GetDynamicParameterInfo instead.")]
         public static System.Type[] GetParameters(MemberInfo info)
         {
@@ -1298,7 +1269,7 @@ namespace com.spacepuppy.Dynamic
             lastProp = arr[arr.Length - 1];
             for (int i = 0; i < arr.Length - 1; i++)
             {
-                var member = DynamicUtil.GetValueGetterMemberFromType(tp, arr[i], includeNonPublic);
+                var member = DynamicUtil.GetValueMemberFromType(tp, arr[i], includeNonPublic);
                 if (member == null) return null;
 
                 tp = GetReturnType(member);
@@ -1349,6 +1320,59 @@ namespace com.spacepuppy.Dynamic
             {
                 if ((m.MemberType & mask) != 0) yield return m;
             }
+        }
+
+        private static bool IsValidValueMember(MemberInfo member)
+        {
+            switch (member.MemberType)
+            {
+                case System.Reflection.MemberTypes.Field:
+                    return true;
+
+                case System.Reflection.MemberTypes.Property:
+                    {
+                        var prop = member as System.Reflection.PropertyInfo;
+                        if (prop.CanRead && prop.GetIndexParameters().Length == 0) return true;
+                        break;
+                    }
+                case System.Reflection.MemberTypes.Method:
+                    {
+                        var meth = member as System.Reflection.MethodInfo;
+                        if (meth.GetParameters().Length == 0) return true;
+                        break;
+                    }
+            }
+            return false;
+        }
+
+        private static bool IsValidValueSetterMember(MemberInfo member, System.Type valueType)
+        {
+            switch (member.MemberType)
+            {
+                case System.Reflection.MemberTypes.Field:
+                    var field = member as System.Reflection.FieldInfo;
+                    if (valueType == null || field.FieldType == valueType)
+                    {
+                        return true;
+                    }
+
+                    break;
+                case System.Reflection.MemberTypes.Property:
+                    var prop = member as System.Reflection.PropertyInfo;
+                    if (prop.CanWrite && (valueType == null || prop.PropertyType.IsAssignableFrom(valueType)) && prop.GetIndexParameters().Length == 0)
+                    {
+                        return true;
+                    }
+                    break;
+                case System.Reflection.MemberTypes.Method:
+                    {
+                        var meth = member as System.Reflection.MethodInfo;
+                        var paramInfos = meth.GetParameters();
+                        if (paramInfos.Length == 1 && paramInfos[0].ParameterType.IsAssignableFrom(valueType)) return true;
+                    }
+                    break;
+            }
+            return false;
         }
 
         #endregion

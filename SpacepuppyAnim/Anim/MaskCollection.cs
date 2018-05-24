@@ -5,6 +5,7 @@ using System.Linq;
 namespace com.spacepuppy.Anim
 {
 
+    [System.Obsolete("Use SPAnimationMask Intead")]
     [System.Serializable()]
     public class MaskCollection : ICollection<TransformMask>
     {

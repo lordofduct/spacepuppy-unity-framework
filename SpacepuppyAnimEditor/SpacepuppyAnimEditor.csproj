@@ -57,6 +57,7 @@
     <Compile Include="Anim\Legacy\SPLegacyAnimationInspector.cs" />
     <Compile Include="Anim\MaskCollectionPropertyDrawer.cs" />
     <Compile Include="Anim\SPAnimationControllerInspector.cs" />
+    <Compile Include="Anim\SPAnimationMaskAssetInspector.cs" />
     <Compile Include="Anim\SPAnimClipCollectionPropertyDrawer.cs" />
     <Compile Include="Anim\SPAnimClipPropertyDrawer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

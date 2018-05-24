@@ -640,29 +640,32 @@ namespace com.spacepuppy.Utils
         public static string GetPathNameRelativeTo(this Transform t, Transform parent)
         {
             if (t == null) return null;
-            if (t == parent) return null;
+            if (parent != null && !t.IsChildOf(parent)) return null;
 
             var bldr = StringUtil.GetTempStringBuilder();
             bldr.Append(t.name);
             t = t.parent;
-            while(t != null && t != parent)
+            while(t != parent)
             {
                 bldr.Insert(0, '/');
                 bldr.Insert(0, t.name);
+                t = t.parent;
             }
             return StringUtil.Release(bldr);
         }
 
         public static string GetFullPathName(this Transform t)
         {
-            var builder = StringUtil.GetTempStringBuilder();
-            while (t.parent != null)
+            var bldr = StringUtil.GetTempStringBuilder();
+            bldr.Append(t.name);
+            t = t.parent;
+            while (t != null)
             {
+                bldr.Insert(0, @"\");
+                bldr.Insert(0, t.name);
                 t = t.parent;
-                builder.Insert(0, @"\");
-                builder.Insert(0, t.name);
             }
-            return StringUtil.Release(builder);
+            return StringUtil.Release(bldr);
         }
 
 #endregion

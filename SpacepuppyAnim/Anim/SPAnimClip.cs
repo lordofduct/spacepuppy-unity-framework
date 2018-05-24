@@ -31,7 +31,8 @@ namespace com.spacepuppy.Anim
         public const string PROP_BLENDMODE = "_blendMode";
         public const string PROP_TIMESUPPLIER = "_timeSupplier";
         public const string PROP_SCALEDDURATION = "ScaledDuration";
-        public const string PROP_MASKS = "_masks";
+        public const string PROP_MASK = "_mask";
+        //public const string PROP_MASKS = "_masks";
 
         #region Fields
 
@@ -53,10 +54,8 @@ namespace com.spacepuppy.Anim
         [SerializeField()]
         private SPTime _timeSupplier;
 
-        
-
-        [SerializeField()]
-        private MaskCollection _masks;
+        [SerializeField]
+        private SPAnimMaskSerializedRef _mask;
 
         [System.NonSerialized()]
         private string _id;
@@ -78,8 +77,7 @@ namespace com.spacepuppy.Anim
         #endregion
 
         #region CONSTRUCTOR
-
-
+        
         /// <summary>
         /// For deserializer ONLY
         /// </summary>
@@ -96,8 +94,8 @@ namespace com.spacepuppy.Anim
         {
             _name = name;
             _clip = null;
-            _masks = new MaskCollection();
             _timeSupplier = new SPTime();
+            _mask = new SPAnimMaskSerializedRef();
             //_firstFrame = 0;
             //_lastFrame = -1;
         }
@@ -106,8 +104,8 @@ namespace com.spacepuppy.Anim
         {
             _name = name;
             _clip = clip;
-            _masks = new MaskCollection();
             _timeSupplier = new SPTime();
+            _mask = new SPAnimMaskSerializedRef();
             //_firstFrame = 0;
             //_lastFrame = -1;
         }
@@ -116,8 +114,8 @@ namespace com.spacepuppy.Anim
         {
             _name = name;
             _clip = clip;
-            _masks = new MaskCollection();
             _timeSupplier = new SPTime(timeSupplier);
+            _mask = new SPAnimMaskSerializedRef();
             //_firstFrame = 0;
             //_lastFrame = -1;
         }
@@ -154,7 +152,6 @@ namespace com.spacepuppy.Anim
                 _state.layer = _layer;
                 _state.wrapMode = _wrapMode;
                 _state.blendMode = _blendMode;
-                _masks.SetState(_state);
             }
         }
 
@@ -240,10 +237,20 @@ namespace com.spacepuppy.Anim
         {
             get { return _timeSupplier.TimeSupplier; }
         }
-
-        public MaskCollection Masks
+        
+        /// <summary>
+        /// The mask attached to this SPAnimClip. Note this mask may be a shared mask, so be careful when modifying it.
+        /// </summary>
+        public ISPAnimationMask Mask
         {
-            get { return _masks; }
+            get
+            {
+                return _mask.Value;
+            }
+            set
+            {
+                _mask.Value = value;
+            }
         }
 
         //***SEE NOTES IN CLASS DESCRIPTION
@@ -373,7 +380,7 @@ namespace com.spacepuppy.Anim
                 a.Layer = _layer;
                 a.WrapMode = _wrapMode;
                 a.BlendMode = _blendMode;
-                if (_masks.Count > 0) a.Masks.Copy(_masks);
+                a.Mask = this.Mask;
                 if (_timeSupplier.IsCustom) a.TimeSupplier = _timeSupplier.TimeSupplier as ITimeSupplier;
                 return a;
             }
@@ -543,7 +550,7 @@ namespace com.spacepuppy.Anim
             }
             _controller = null;
             _state = null;
-            _masks.SetState(null);
+            _mask.Value = null;
         }
 
         #endregion
