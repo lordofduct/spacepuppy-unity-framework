@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0649 // variable declared but not used.
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -54,6 +55,9 @@ namespace com.spacepuppy
         #region Fields
 
         [SerializeField]
+        private bool _searchableIfInactive;
+
+        [SerializeField]
         private string[] _tags;
 
         #endregion
@@ -69,16 +73,31 @@ namespace com.spacepuppy
                 this.gameObject.tag = SPConstants.TAG_MULTITAG;
         }
 
-        protected override void OnStartOrEnable()
+        //protected override void OnStartOrEnable()
+        //{
+        //    Pool.AddReference(this);
+
+        //    base.OnStartOrEnable();
+        //}
+
+        protected override void OnEnable()
         {
             Pool.AddReference(this);
 
-            base.OnStartOrEnable();
+            base.OnEnable();
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
+
+            if(!_searchableIfInactive)
+                Pool.RemoveReference(this);
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
 
             Pool.RemoveReference(this);
         }

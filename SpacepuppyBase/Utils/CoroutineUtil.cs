@@ -197,6 +197,30 @@ namespace com.spacepuppy.Utils
             return co;
         }
         
+
+
+        public static RadicalCoroutine StartValidatedRadicalCoroutine(this MonoBehaviour behaviour, System.Collections.IEnumerator routine, System.Func<bool> validator, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
+        {
+            if (behaviour == null) throw new System.ArgumentNullException("behaviour");
+            if (routine == null) throw new System.ArgumentNullException("routine");
+            if (validator == null) throw new System.ArgumentNullException("validator");
+
+            var co = new RadicalCoroutine(ValidatedRoutine(routine, validator));
+            co.Start(behaviour, disableMode);
+            return co;
+        }
+
+        public static System.Collections.IEnumerator ValidatedRoutine(System.Collections.IEnumerator routine, System.Func<bool> validator)
+        {
+            if (routine == null) throw new System.ArgumentNullException("routine");
+            if (validator == null) throw new System.ArgumentNullException("validator");
+
+            while(validator() && routine.MoveNext())
+            {
+                yield return routine.Current;
+            }
+        }
+
         #endregion
 
         #region Invoke

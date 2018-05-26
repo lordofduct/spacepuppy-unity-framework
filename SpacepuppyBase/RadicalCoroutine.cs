@@ -101,7 +101,7 @@ namespace com.spacepuppy
             _forcedTick = false;
             try
             {
-                if (_owner != null) _owner.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
+                if (this.Operator != null) this.Operator.StopCoroutine(this); //NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
             }
             catch (System.Exception ex) { Debug.LogException(ex); }
 
@@ -144,7 +144,7 @@ namespace com.spacepuppy
         private MonoBehaviour _owner;
         private Coroutine _token;
         private RadicalCoroutineManager _manager;
-        private RadicalCoroutineDisableMode _disableMode;
+        private RadicalCoroutineDisableMode _disableMode = RadicalCoroutineDisableMode.Default;
 
         private RadicalOperationStack _stack;
         private object _currentIEnumeratorYieldValue;
@@ -223,9 +223,23 @@ namespace com.spacepuppy
         public RadicalCoroutineOperatingState OperatingState { get { return _state; } }
 
         /// <summary>
-        /// The MonoBehaviour operating this routine. This may be null if it hasn't been started, or it's being manually ticked.
+        /// The MonoBehaviour that dictates the behaviour of this routine, this is usually the MonoBehaviour operating the routine. This may may be null if it hasn't been start, or it's manually ticked.
         /// </summary>
-        public MonoBehaviour Operator { get { return _owner; } }
+        public MonoBehaviour Owner { get { return _owner; } }
+
+        /// <summary>
+        /// The MonoBehaviour operating this routine, this is usually the owner, but may be the GameLoop if PlayUntilDestroy mode is used. This may be null if it hasn't been started, or it's being manually ticked.
+        /// </summary>
+        public MonoBehaviour Operator
+        {
+            get
+            {
+                if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+                    return GameLoopEntry.Hook;
+                else
+                    return _owner;
+            }
+        }
 
         internal RadicalOperationStack OperationStack
         {
@@ -269,8 +283,10 @@ namespace com.spacepuppy
 #endif
             _manager = manager;
             _manager.RegisterCoroutine(this);
-            _token = behaviour.StartCoroutine(this);
-
+            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+                _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
+            else
+                _token = behaviour.StartCoroutine(this);
         }
 
         public void StartAsync(MonoBehaviour behaviour, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
@@ -293,8 +309,10 @@ namespace com.spacepuppy
 #endif
             _manager = manager;
             _manager.RegisterCoroutine(this);
-            _token = behaviour.StartCoroutine(this);
-
+            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+                _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
+            else
+                _token = behaviour.StartCoroutine(this);
         }
 
         public void StartAutoKill(MonoBehaviour behaviour, object autoKillToken, RadicalCoroutineDisableMode disableMode = RadicalCoroutineDisableMode.Default)
@@ -319,7 +337,10 @@ namespace com.spacepuppy
             this.AutoKillToken = autoKillToken;
             _manager = manager;
             _manager.RegisterCoroutine(this, autoKillToken);
-            _token = behaviour.StartCoroutine(this);
+            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+                _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
+            else
+                _token = behaviour.StartCoroutine(this);
         }
 
         /// <summary>
@@ -336,14 +357,11 @@ namespace com.spacepuppy
                     return;
                 case RadicalCoroutineOperatingState.Active:
                     {
-                        if (_owner != null)
+                        try
                         {
-                            try
-                            {
-                                if (_owner != null) _owner.StopCoroutine(this);//NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
-                            }
-                            catch (System.Exception ex) { Debug.LogException(ex, _owner); }
+                            if (this.Operator != null) this.Operator.StopCoroutine(this);//NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
                         }
+                        catch (System.Exception ex) { Debug.LogException(ex, _owner); }
 
                         _state = RadicalCoroutineOperatingState.Inactive;
                         _owner = null;
@@ -372,14 +390,11 @@ namespace com.spacepuppy
                     return;
                 case RadicalCoroutineOperatingState.Active:
                     {
-                        if (_owner != null)
+                        try
                         {
-                            try
-                            {
-                                if (_owner != null) _owner.StopCoroutine(this);//NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
-                            }
-                            catch (System.Exception ex) { Debug.LogException(ex, _owner); }
+                            if (this.Operator != null) this.Operator.StopCoroutine(this);//NOTE - due to a bug in unity, a runtime warning appears if you pass in the Coroutine token while this routine is 'WaitForSeconds'
                         }
+                        catch (System.Exception ex) { Debug.LogException(ex, _owner); }
 
                         _state = RadicalCoroutineOperatingState.Paused;
                         _token = null;
@@ -453,7 +468,10 @@ namespace com.spacepuppy
 #endif
             _manager = manager;
             _manager.RegisterCoroutine(this);
-            _token = _owner.StartCoroutine(this);
+            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+                _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
+            else
+                _token = _owner.StartCoroutine(this);
         }
         
         #endregion
@@ -972,6 +990,18 @@ namespace com.spacepuppy
 
 
         #region Static Utils
+
+        private static System.Collections.IEnumerator PlayUntilDestroyedIterator(RadicalCoroutine routine)
+        {
+            if (routine == null) yield break;
+
+            var e = routine as System.Collections.IEnumerator;
+            while(!object.ReferenceEquals(routine.Owner, null) && ObjUtil.IsObjectAlive(routine.Owner) 
+                  && e.MoveNext())
+            {
+                yield return e.Current;
+            }
+        }
 
         public static void AutoKill(GameObject go, object autoKillToken)
         {
