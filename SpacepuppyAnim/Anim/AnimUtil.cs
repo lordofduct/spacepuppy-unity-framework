@@ -39,7 +39,7 @@ namespace com.spacepuppy.Anim
                 }
             }
         }
-
+        
         #endregion
 
         #region ISPAnim Extension Methods

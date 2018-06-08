@@ -13,7 +13,7 @@ namespace com.spacepuppy.Audio
         #region Fields
         
         [SerializeField()]
-        [OneOrMany()]
+        [ReorderableArray()]
         private AudioClip[] _clips;
 
         [SerializeField()]

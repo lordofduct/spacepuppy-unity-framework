@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace com.spacepuppy.Scenes
 {
 
-    public class LoadSceneWaitHandle : System.EventArgs, IProgressingYieldInstruction, ISPDisposable
+    public class LoadSceneWaitHandle : System.EventArgs, IProgressingYieldInstruction, IRadicalWaitHandle, ISPDisposable
     {
 
         #region Fields
@@ -15,6 +15,7 @@ namespace com.spacepuppy.Scenes
         private LoadSceneBehaviour _behaviour;
         private Scene _scene;
         private AsyncOperation _op;
+        private System.Action<LoadSceneWaitHandle> _onComplete;
 
         private bool _initialized;
 
@@ -126,7 +127,12 @@ namespace com.spacepuppy.Scenes
             if (_scene == scene)
             {
                 SceneManager.sceneLoaded -= this.OnSceneLoaded;
-                com.spacepuppy.Utils.Messaging.FindAndBroadcast<ISceneLoadedMessageReceiver>((o) => o.OnSceneLoaded(this));
+
+                var d = _onComplete;
+                _onComplete = null;
+                if (d != null) d(this);
+
+                com.spacepuppy.Utils.Messaging.FindAndBroadcast<ISceneLoadedFoundHandler>((o) => o.OnSceneLoaded(this));
             }
         }
 
@@ -226,6 +232,26 @@ namespace com.spacepuppy.Scenes
                     yieldObject = null;
                     return false;
             }
+        }
+
+        #endregion
+
+        #region IRadicalWaitHandle Interface
+
+        public void OnComplete(System.Action<LoadSceneWaitHandle> callback)
+        {
+            _onComplete += callback;
+        }
+
+        bool IRadicalWaitHandle.Cancelled
+        {
+            get { return !_disposed; }
+        }
+
+        void IRadicalWaitHandle.OnComplete(System.Action<IRadicalWaitHandle> callback)
+        {
+            if (callback == null) return;
+            _onComplete += (h) => callback(h);
         }
 
         #endregion

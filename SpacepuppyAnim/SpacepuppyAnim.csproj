@@ -52,6 +52,7 @@
     <Compile Include="Anim\Blend\AnimationBlendGraph.cs" />
     <Compile Include="Anim\Blend\IndexedAnimationSelector.cs" />
     <Compile Include="Anim\Exceptions.cs" />
+    <Compile Include="Anim\IAnimControllerMask.cs" />
     <Compile Include="Anim\IKSolver.cs" />
     <Compile Include="Anim\IScriptableAnimationClip.cs" />
     <Compile Include="Anim\ISPAnimator.cs" />

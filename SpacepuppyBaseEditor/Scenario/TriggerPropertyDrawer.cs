@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
@@ -47,7 +48,7 @@ namespace com.spacepuppyeditor.Scenario
             _currentLabel = label;
 
             _targetList = CachedReorderableList.GetListDrawer(prop.FindPropertyRelative(PROP_TARGETS), _targetList_DrawHeader, _targetList_DrawElement, _targetList_OnAdd);
-            
+
             if (!_customInspector)
             {
                 if (this.fieldInfo != null)
@@ -209,6 +210,30 @@ namespace com.spacepuppyeditor.Scenario
                 property.serializedObject.ApplyModifiedProperties();
             if (_targetList.index >= _targetList.count) _targetList.index = -1;
 
+            var ev = Event.current;
+            if (ev != null)
+            {
+                switch(ev.type)
+                {
+                    case EventType.DragUpdated:
+                    case EventType.DragPerform:
+                        {
+                            if(listRect.Contains(ev.mousePosition))
+                            {
+                                var refs = (from o in DragAndDrop.objectReferences let go = GameObjectUtil.GetGameObjectFromSource(o, false) select go);
+                                DragAndDrop.visualMode = refs.Any() ? DragAndDropVisualMode.Link : DragAndDropVisualMode.Rejected;
+
+                                if(ev.type == EventType.DragPerform && refs.Any())
+                                {
+                                    ev.Use();
+                                    AddObjectsToTrigger(property, refs.ToArray());
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+            
             return new Rect(position.xMin, listRect.yMax, position.width, position.height - listRect.height);
         }
 
@@ -346,6 +371,49 @@ namespace com.spacepuppyeditor.Scenario
             var r1 = new Rect(r0.xMax, area.yMin, Mathf.Max(0f, area.width - r0.width), EditorGUIUtility.singleLineHeight);
             EditorGUI.LabelField(r0, index.ToString("00:"));
             TriggerTargetPropertyDrawer.DrawTriggerActivationTypeDropdown(r1, property, false);
+        }
+
+        /// <summary>
+        /// Adds targets to a Trigger/SPEvent.
+        /// 
+        /// This method applies changes to the SerializedProperty. Only call if you expect this behaviour.
+        /// </summary>
+        /// <param name="triggerProperty"></param>
+        /// <param name="objs"></param>
+        public static void AddObjectsToTrigger(SerializedProperty triggerProperty, GameObject[] objs)
+        {
+            if (triggerProperty == null) throw new System.ArgumentNullException("triggerProperty");
+
+            try
+            {
+                triggerProperty.serializedObject.ApplyModifiedProperties();
+                var trigger = EditorHelper.GetTargetObjectOfProperty(triggerProperty) as BaseSPEvent;
+                if (trigger == null) return;
+
+                using (var set = TempCollection.GetList<GameObject>())
+                {
+                    for (int i = 0; i < trigger.Targets.Count; i++)
+                    {
+                        var go = GameObjectUtil.GetGameObjectFromSource(trigger.Targets[i].Target);
+                        if (go != null) set.Add(go);
+                    }
+
+                    foreach(var go in objs)
+                    {
+                        if (set.Contains(go)) continue;
+                        set.Add(go);
+
+                        var targ = trigger.AddNew();
+                        targ.ConfigureTriggerAll(go);
+                        targ.Weight = 1f;
+                    }
+                }
+                triggerProperty.serializedObject.Update();
+            }
+            catch(System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         #endregion

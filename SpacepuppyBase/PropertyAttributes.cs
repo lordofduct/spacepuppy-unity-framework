@@ -303,6 +303,11 @@ namespace com.spacepuppy
         /// </summary>
         public string OnAddCallback;
 
+        /// <summary>
+        /// If the array/list accepts UnityEngine.Objects, this will allow the dragging of objects onto the inspector to auto add without needing to click the + button.
+        /// </summary>
+        public bool AllowDragAndDrop = true;
+
         public ReorderableArrayAttribute()
         {
 

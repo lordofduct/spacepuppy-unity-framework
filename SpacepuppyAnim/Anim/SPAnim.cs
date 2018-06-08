@@ -544,7 +544,7 @@ namespace com.spacepuppy.Anim
                     //do nothing
                 }
             }
-
+            
             #endregion
 
             #region IRadicalWaitHandle Interface

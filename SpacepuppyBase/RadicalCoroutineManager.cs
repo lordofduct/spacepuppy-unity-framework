@@ -121,7 +121,7 @@ namespace com.spacepuppy
             var e = _routines.GetEnumerator();
             while (e.MoveNext())
             {
-                if(e.Current.Operator == behaviour) yield return e.Current;
+                if(e.Current.Owner == behaviour) yield return e.Current;
             }
         }
 
@@ -132,7 +132,7 @@ namespace com.spacepuppy
                 var e = _routines.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    if (e.Current.Operator == component) lst.Add(e.Current);
+                    if (e.Current.Owner == component) lst.Add(e.Current);
                 }
 
                 if(lst.Count > 0)
@@ -169,7 +169,7 @@ namespace com.spacepuppy
             //if (_routines.Contains(routine)) throw new System.InvalidOperationException("Attempted to register a routine that is already operating.");
             if (_routines.Contains(routine)) return;
 
-            var component = routine.Operator;
+            var component = routine.Owner;
             if (component == null) throw new System.InvalidOperationException("Attempted to register a routine with a null component.");
 
             if (component is SPComponent)
@@ -225,7 +225,7 @@ namespace com.spacepuppy
 
                 if (_naiveTrackerTable != null)
                 {
-                    var comp = routine.Operator;
+                    var comp = routine.Owner;
                     if (_naiveTrackerTable.ContainsKey(comp) && !this.GetComponentIsCurrentlyManaged(comp))
                     {
                         _naiveTrackerTable.Remove(comp);
@@ -277,7 +277,7 @@ namespace com.spacepuppy
                 var e = _routines.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    if (e.Current.Operator == component)
+                    if (e.Current.Owner == component)
                     {
                         switch (e.Current.OperatingState)
                         {
@@ -331,13 +331,13 @@ namespace com.spacepuppy
                 var e = _routines.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    if (e.Current.Operator == component) lst.Add(e.Current);
+                    if (e.Current.Owner == component) lst.Add(e.Current);
                 }
 
                 if (lst.Count > 0)
                 {
                     RadicalCoroutine routine;
-                    if (this.gameObject.activeInHierarchy)
+                    if (ObjUtil.IsObjectAlive(this) && this.gameObject.activeInHierarchy)
                     {
                         for (int i = 0; i < lst.Count; i++)
                         {
@@ -394,7 +394,7 @@ namespace com.spacepuppy
             var e = _routines.GetEnumerator();
             while(e.MoveNext())
             {
-                if (e.Current.Operator == component) return true;
+                if (e.Current.Owner == component) return true;
             }
             return false;
         }

@@ -32,7 +32,7 @@ namespace com.spacepuppyeditor.Base
                     var routine = routines[i];
                     EditorGUILayout.LabelField(string.Format("[{0:00}] Routine {1}", i, RadicalCoroutine.EditorHelper.GetInternalRoutineID(routine)));
                     EditorGUI.indentLevel += 2;
-                    EditorGUILayout.LabelField("Component:", (routine.Operator != null) ? routine.Operator.GetType().Name : "UNKNOWN");
+                    EditorGUILayout.LabelField("Component:", (routine.Owner != null) ? routine.Owner.GetType().Name : "UNKNOWN");
                     EditorGUILayout.LabelField("State:", routine.OperatingState.ToString());
                     EditorGUILayout.LabelField("Yield:", RadicalCoroutine.EditorHelper.GetYieldID(routine));
                     EditorGUILayout.LabelField("Derivative:", RadicalCoroutine.EditorHelper.GetDerivativeID(routine));

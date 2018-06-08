@@ -16,7 +16,7 @@ namespace com.spacepuppy.Scenario
         private TriggerableTargetObject _targetAudioSource = new TriggerableTargetObject();
 
         [SerializeField()]
-        [OneOrMany()]
+        [ReorderableArray()]
         private AudioClip[] _clips;
         
         [SerializeField()]
