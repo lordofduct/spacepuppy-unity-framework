@@ -65,20 +65,14 @@ namespace com.spacepuppy.Anim
 
         #region Static Interface
 
-        public static AnimSettings Default
+        public static readonly AnimSettings Default = new AnimSettings()
         {
-            get
-            {
-                return new AnimSettings()
-                {
-                    weight = 1f,
-                    speed = 1f,
-                    layer = 0,
-                    wrapMode = WrapMode.Default,
-                    blendMode = AnimationBlendMode.Blend
-                };
-            }
-        }
+            weight = 1f,
+            speed = 1f,
+            layer = 0,
+            wrapMode = WrapMode.Default,
+            blendMode = AnimationBlendMode.Blend
+        };
 
         public static AnimSettings From(SPAnim anim)
         {

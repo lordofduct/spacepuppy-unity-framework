@@ -10,11 +10,9 @@ namespace com.spacepuppy.Anim
     /// Represents a non-standard AnimationClip that isn't a UnityEngine.AnimationClip. 
     /// This could be a animation blend tree, or a scriptable animation, or any other custom implementation of a clip.
     /// </summary>
-    public interface IScriptableAnimationClip
+    public interface IScriptableAnimationClip : IAnimatable
     {
-
-        float Length { get; }
-
+        
         ISPAnim CreateState(SPAnimationController controller);
 
     }

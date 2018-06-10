@@ -160,7 +160,7 @@ namespace com.spacepuppy.Anim.Blend
             }
         }
 
-        float ISPAnim.Duration
+        float IAnimatable.Duration
         {
             get { return 0f; }
         }

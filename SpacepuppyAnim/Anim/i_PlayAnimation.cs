@@ -69,13 +69,14 @@ namespace com.spacepuppy.Anim
         {
             if (clip is AnimationClip)
             {
-                var anim = controller.CreateAuxiliarySPAnim(clip as AnimationClip);
-                if (_applyCustomSettings) _settings.Apply(anim);
                 if (_crossFadeDur > 0f)
-                    anim.CrossFade(_crossFadeDur, _queueMode, _playMode);
+                    return controller.CrossFadeAuxiliary(clip as AnimationClip,
+                                                         _applyCustomSettings ? _settings : AnimSettings.Default,
+                                                         _crossFadeDur, _queueMode, _playMode);
                 else
-                    anim.Play(_queueMode, _playMode);
-                return anim;
+                    return controller.PlayAuxiliary(clip as AnimationClip,
+                                                    _applyCustomSettings ? _settings : AnimSettings.Default,
+                                                    _queueMode, _playMode);
             }
             else if (clip is IScriptableAnimationClip)
             {

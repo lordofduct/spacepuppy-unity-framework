@@ -35,9 +35,11 @@ namespace com.spacepuppy.Anim
         private SPTime _timeSupplier;
         [SerializeField()]
         private float _speed = 1f;
+        [SerializeField]
+        private AnimControllerMaskSerializedRef _mask;
 
         [SerializeField()]
-        private SPAnimClipCollection _states = new SPAnimClipCollection();
+        private SPAnimClipCollection _states;
 
         [SerializeField()]
         private string _animToPlayOnStart = null;
@@ -61,6 +63,9 @@ namespace com.spacepuppy.Anim
         protected override void Awake()
         {
             base.Awake();
+
+            if (_mask == null) _mask = new AnimControllerMaskSerializedRef();
+            if (_states == null) _states = new SPAnimClipCollection();
 
             _animation = this.AddOrGetComponent<Animation>();
             _animation.playAutomatically = false;
@@ -128,6 +133,12 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        public IAnimControllerMask ControllerMask
+        {
+            get { return _mask.Value; }
+            set { _mask.Value = value; }
+        }
+
         #endregion
 
         #region Methods
@@ -140,6 +151,7 @@ namespace com.spacepuppy.Anim
             var state = _states[clipId];
             //if (state == null) throw new UnknownStateException(clipId);
             if (state == null) return null;
+            if (this.ControllerMask != null && !this.ControllerMask.CanPlay(state)) return null;
 
             return state.Play(queueMode, playMode);
         }
@@ -152,7 +164,8 @@ namespace com.spacepuppy.Anim
             var state = _states[clipId];
             //if (state == null) throw new UnknownStateException(clipId);
             if (state == null) return null;
-            
+            if (this.ControllerMask != null && !this.ControllerMask.CanPlay(state)) return null;
+
             return state.CrossFade(fadeLength, queueMode, playMode);
         }
 
@@ -161,7 +174,8 @@ namespace com.spacepuppy.Anim
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
             if (!_initialized) this.Init();
-            
+            if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip)) return SPAnim.Null;
+
             var state = clip.CreateState(this) ?? SPAnim.Null;
             state.Play(QueueMode.PlayNow, mode);
             return state;
@@ -204,6 +218,8 @@ namespace com.spacepuppy.Anim
 
             if (clip.Clip is AnimationClip)
             {
+                if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip)) return null;
+
                 var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
                 var anim = SPAnim.Create(_animation, id);
                 anim.Weight = clip.Weight;
@@ -221,7 +237,7 @@ namespace com.spacepuppy.Anim
             }
             else
             {
-                return SPAnim.Null;
+                return null;
             }
         }
 
@@ -233,6 +249,8 @@ namespace com.spacepuppy.Anim
 
             if (clip.Clip is AnimationClip)
             {
+                if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip)) return null;
+
                 var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
                 var anim = SPAnim.Create(_animation, id);
                 anim.Weight = clip.Weight;
@@ -250,42 +268,36 @@ namespace com.spacepuppy.Anim
             }
             else
             {
-                return SPAnim.Null;
+                return null;
             }
         }
 
-        public SPAnim PlayAuxiliary(AnimationClip clip, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        public SPAnim PlayAuxiliary(AnimationClip clip, AnimSettings settings, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
             if (!_initialized) this.Init();
+            if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip, settings)) return null;
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = SPAnim.Create(_animation, id);
+            settings.Apply(anim);
             anim.Play(queueMode, playMode);
             return anim;
         }
 
-        public SPAnim CrossFadeAuxiliary(AnimationClip clip, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        public SPAnim CrossFadeAuxiliary(AnimationClip clip, AnimSettings settings, float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
             if (!_initialized) this.Init();
+            if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip, settings)) return null;
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = SPAnim.Create(_animation, id);
+            settings.Apply(anim);
             anim.CrossFade(fadeLength, queueMode, playMode);
             return anim;
-        }
-
-        public SPAnim CreateAuxiliarySPAnim(AnimationClip clip, string auxId = null)
-        {
-            if (_animation == null) throw new AnimationInvalidAccessException();
-            if (clip == null) throw new System.ArgumentNullException("clip");
-            if (!_initialized) this.Init();
-
-            var id = this.AddAuxiliaryClip(clip, auxId);
-            return SPAnim.Create(_animation, id);
         }
 
 
@@ -298,6 +310,8 @@ namespace com.spacepuppy.Anim
 
             if (clip.Clip is AnimationClip)
             {
+                if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip)) return null;
+
                 var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
                 var anim = _animation[id];
                 anim.weight = clip.Weight;
@@ -324,6 +338,8 @@ namespace com.spacepuppy.Anim
 
             if (clip.Clip is AnimationClip)
             {
+                if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip)) return null;
+
                 var id = this.AddAuxiliaryClip(clip.Clip as AnimationClip, auxId);
                 var anim = _animation[id];
                 anim.weight = clip.Weight;
@@ -342,26 +358,30 @@ namespace com.spacepuppy.Anim
             return null;
         }
 
-        public string PlayAuxiliaryDirectly(AnimationClip clip, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        public string PlayAuxiliaryDirectly(AnimationClip clip, AnimSettings settings, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
             if (!_initialized) this.Init();
+            if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip, settings)) return null;
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = _animation[id];
+            settings.Apply(anim);
             this.PlayInternal(id, playMode, anim.layer);
             return id;
         }
 
-        public string CrossFadeAuxiliaryDirectly(AnimationClip clip, float fadeLength, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
+        public string CrossFadeAuxiliaryDirectly(AnimationClip clip, AnimSettings settings, float fadeLength, PlayMode playMode = PlayMode.StopSameLayer, string auxId = null)
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (clip == null) throw new System.ArgumentNullException("clip");
             if (!_initialized) this.Init();
+            if (this.ControllerMask != null && !this.ControllerMask.CanPlay(clip, settings)) return null;
 
             var id = this.AddAuxiliaryClip(clip, auxId);
             var anim = _animation[id];
+            settings.Apply(anim);
             this.CrossFadeInternal(id, fadeLength, playMode, anim.layer);
             return id;
         }
@@ -373,9 +393,8 @@ namespace com.spacepuppy.Anim
         {
             if (_animation == null) throw new AnimationInvalidAccessException();
             if (!_initialized) this.Init();
-
+            
             _animation.Play(clipId, mode);
-
             if(_scriptableAnims != null && _scriptableAnims.Count > 0)
             {
                 if (mode == PlayMode.StopAll)
@@ -536,7 +555,7 @@ namespace com.spacepuppy.Anim
         #endregion
 
         #region Special Types
-
+        
         private class AnimationCallbackData
         {
             public AnimationEventCallback Callback;

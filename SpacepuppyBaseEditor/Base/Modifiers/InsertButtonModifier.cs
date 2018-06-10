@@ -17,7 +17,7 @@ namespace com.spacepuppyeditor.Modifiers
         protected internal override void OnBeforeGUI(SerializedProperty property)
         {
             var attrib = this.attribute as InsertButtonAttribute;
-            if(attrib.PrecedeProperty)
+            if(attrib.PrecedeProperty && (!attrib.RuntimeOnly || Application.isPlaying))
             {
                 this.DrawButton(property, attrib);
             }
@@ -26,7 +26,7 @@ namespace com.spacepuppyeditor.Modifiers
         protected internal override void OnPostGUI(SerializedProperty property)
         {
             var attrib = this.attribute as InsertButtonAttribute;
-            if (!attrib.PrecedeProperty)
+            if (!attrib.PrecedeProperty && (!attrib.RuntimeOnly || Application.isPlaying))
             {
                 this.DrawButton(property, attrib);
             }

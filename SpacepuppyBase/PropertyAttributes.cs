@@ -543,6 +543,7 @@ namespace com.spacepuppy
         public string Label;
         public string OnClick;
         public bool PrecedeProperty;
+        public bool RuntimeOnly;
 
         public InsertButtonAttribute(string label, string onClick)
         {

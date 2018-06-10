@@ -174,7 +174,9 @@ namespace com.spacepuppy.Anim
 
         public void PlayReverse(PlayMode playMode = PlayMode.StopSameLayer)
         {
-            if(this.IsPlaying)
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
+
+            if (this.IsPlaying)
             {
                 this.Speed = -this.Speed;
             }
@@ -188,6 +190,8 @@ namespace com.spacepuppy.Anim
 
         public SPAnim Queue(QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return null;
+
             var a = this.Clone();
             a.Play(queueMode, playMode);
             return a;
@@ -195,6 +199,8 @@ namespace com.spacepuppy.Anim
 
         public SPAnim QueueCrossFade(float fadeLength, QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return null;
+
             var a = this.Clone();
             a.CrossFade(fadeLength, queueMode, playMode);
             return a;
@@ -202,6 +208,8 @@ namespace com.spacepuppy.Anim
 
         public SPAnim QueueInReverse(QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return null;
+
             var a = this.Clone();
             if (this.IsPlaying)
             {
@@ -241,6 +249,7 @@ namespace com.spacepuppy.Anim
         public void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.IsPlaying) return;
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
             _state = _controller.PlayQueuedInternal(_clipId, queueMode, playMode, _layer);
             _state.weight = _weight;
@@ -256,6 +265,7 @@ namespace com.spacepuppy.Anim
         public void CrossFade(float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.IsPlaying) return;
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
             _state = _controller.CrossFadeQueuedInternal(_clipId, fadeLength, queueMode, playMode, _layer);
             _state.weight = _weight;
