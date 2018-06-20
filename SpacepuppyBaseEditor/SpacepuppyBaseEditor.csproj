@@ -58,6 +58,7 @@
     <Compile Include="Base\AdvancedInputManagerWindow.cs" />
     <Compile Include="Base\Commands\FindReferencesToObjectMenu.cs" />
     <Compile Include="Base\Commands\ScreenshotUtil.cs" />
+    <Compile Include="Base\Commands\ScreenshotRecorderWindow.cs" />
     <Compile Include="Base\Commands\SPCreateRagdollWizard.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />

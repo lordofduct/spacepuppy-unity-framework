@@ -410,6 +410,7 @@
     <Compile Include="UI\TextSettings.cs" />
     <Compile Include="Utils\Assertions.cs" />
     <Compile Include="Utils\AudioUtils.cs" />
+    <Compile Include="Utils\ColliderUtil.cs" />
     <Compile Include="Utils\ColorUtil.cs" />
     <Compile Include="Utils\CompareUtil.cs" />
     <Compile Include="Utils\ComponentUtil.cs" />

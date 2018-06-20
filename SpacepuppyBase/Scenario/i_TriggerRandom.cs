@@ -51,7 +51,7 @@ namespace com.spacepuppy.Scenario
             else
                 _targets.ActivateRandomTrigger(this, null, true);
         }
-
+        
         #endregion
 
         #region ITriggerableMechanism Interface
