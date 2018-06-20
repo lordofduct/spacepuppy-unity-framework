@@ -105,18 +105,20 @@ namespace com.spacepuppyeditor.Base.Commands
             if (!_recording) return;
 
             float t = Time.unscaledTime - _lastRecordTime;
-            if(t > (1f / _frequency))
+            if (t > (1f / _frequency))
             {
                 _frameCount++;
                 _lastRecordTime = Time.unscaledTime;
 
                 string fn;
-                if(_timestamp)
-                    fn = string.Format("Image{0}{1:yyyyMMdd_HHmmss_fff}{2}", _frameCount, System.DateTime.Now, ScreenshotUtil.GetExtension(_format));
+                if (_timestamp)
+                    fn = string.Format("Image{0}_{1:yyyyMMdd_HHmmss_fff}{2}", _frameCount, System.DateTime.Now, ScreenshotUtil.GetExtension(_format));
                 else
                     fn = string.Format("Image{0}{1}", _frameCount, ScreenshotUtil.GetExtension(_format));
 
                 ScreenshotUtil.TakeScreenshot(System.IO.Path.Combine(_filePath, fn), _format);
+                _status = "Recorded " + fn;
+                this.Repaint();
             }
         }
 
