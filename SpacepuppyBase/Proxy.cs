@@ -277,13 +277,13 @@ namespace com.spacepuppy
             switch (_triggerAction)
             {
                 case TriggerActivationType.TriggerAllOnTarget:
-                    TriggerTarget.TriggerAllOnTarget(targ, sender, arg);
+                    EventTriggerEvaluator.Current.TriggerAllOnTarget(targ, sender, arg);
                     return true;
                 case TriggerActivationType.TriggerSelectedTarget:
-                    TriggerTarget.TriggerSelectedTarget(targ, sender, arg);
+                    EventTriggerEvaluator.Current.TriggerSelectedTarget(targ, sender, arg);
                     return true;
                 case TriggerActivationType.DestroyTarget:
-                    TriggerTarget.DestroyTarget(targ);
+                    EventTriggerEvaluator.Current.DestroyTarget(targ);
                     return true;
             }
 

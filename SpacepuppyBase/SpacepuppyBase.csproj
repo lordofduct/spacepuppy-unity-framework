@@ -224,6 +224,7 @@
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
     <Compile Include="Project\SerializableInterfaceRef.cs" />
+    <Compile Include="Scenario\EventTriggerEvaluator.cs" />
     <Compile Include="Scenario\HijackTriggerEvents.cs" />
     <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />

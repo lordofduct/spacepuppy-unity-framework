@@ -81,6 +81,7 @@
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
     <Compile Include="Project\SerializableInterfaceRefPropertyDrawer.cs" />
+    <Compile Include="Scenario\EventTriggerEvaluatorInspector.cs" />
     <Compile Include="SpacepuppySettings.cs" />
     <Compile Include="BuildSettings.cs" />
     <Compile Include="Cameras\CameraControllerInspector.cs" />
