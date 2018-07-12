@@ -989,18 +989,18 @@ namespace com.spacepuppy.Dynamic
         {
             if (obj == null) yield break;
 
-            bool bRead = access.HasFlag(DynamicMemberAccess.Read);
-            bool bWrite = access.HasFlag(DynamicMemberAccess.Write);
+            bool bRead = (access & DynamicMemberAccess.Read) != 0;
+            bool bWrite = (access & DynamicMemberAccess.Write) != 0;
             var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembers(obj, false);
             foreach (var mi in members)
             {
                 if ((mi.MemberType & mask) == 0) continue;
                 if (ignoreObsoleteMembers && mi.IsObsolete()) continue;
 
-                if (mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
-                    mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||
-                    mi.DeclaringType.IsAssignableFrom(typeof(SPNotifyingComponent))) continue;
-                
+                if ((mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
+                     mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||
+                     mi.DeclaringType.IsAssignableFrom(typeof(SPNotifyingComponent))) && mi.Name != "enabled") continue;
+
                 switch (mi.MemberType)
                 {
                     case System.Reflection.MemberTypes.Method:
@@ -1057,16 +1057,16 @@ namespace com.spacepuppy.Dynamic
         {
             if (tp == null) yield break;
 
-            bool bRead = access.HasFlag(DynamicMemberAccess.Read);
-            bool bWrite = access.HasFlag(DynamicMemberAccess.Write);
+            bool bRead = (access & DynamicMemberAccess.Read) != 0;
+            bool bWrite = (access & DynamicMemberAccess.Write) != 0;
             var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembersFromType(tp, false);
             foreach (var mi in members)
             {
                 if ((mi.MemberType & mask) == 0) continue;
 
-                if (mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
-                    mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||
-                    mi.DeclaringType.IsAssignableFrom(typeof(SPNotifyingComponent))) continue;
+                if ((mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
+                     mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||
+                     mi.DeclaringType.IsAssignableFrom(typeof(SPNotifyingComponent))) && mi.Name != "enabled") continue;
 
                 switch (mi.MemberType)
                 {

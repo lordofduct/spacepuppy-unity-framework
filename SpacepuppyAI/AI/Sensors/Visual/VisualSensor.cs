@@ -168,7 +168,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
             if (_aspectLayerMask != -1 && !aspect.gameObject.IntersectsLayerMask(_aspectLayerMask)) return false;
             if (!_aspectTagMask.Intersects(vaspect)) return false;
             if (!_canDetectSelf && vaspect.entityRoot == this.entityRoot) return false;
-            return this.TestVisibility(vaspect);
+            return vaspect.OmniPresent || this.TestVisibility(vaspect);
         }
 
         protected abstract bool TestVisibility(VisualAspect aspect);

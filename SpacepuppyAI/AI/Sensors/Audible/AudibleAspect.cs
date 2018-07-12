@@ -27,6 +27,10 @@ namespace com.spacepuppy.AI.Sensors.Audible
         [SerializeField()]
         private Color _aspectColor = Color.blue;
 
+        [SerializeField]
+        [Tooltip("This Aspect is always visible regardless.")]
+        private bool _omniPresent;
+
         [System.NonSerialized]
         private SirenToken _currentToken;
         [System.NonSerialized]
@@ -81,11 +85,18 @@ namespace com.spacepuppy.AI.Sensors.Audible
             while (e.MoveNext())
             {
                 var sensor = e.Current;
-                d = (sensor.transform.position - pos).sqrMagnitude;
-                r = (sensor.Range + _range);
-                if (d < r * r)
+                if(_omniPresent)
                 {
                     sensor.SignalBlip(this);
+                }
+                else
+                {
+                    d = (sensor.transform.position - pos).sqrMagnitude;
+                    r = (sensor.Range + _range);
+                    if (d < r * r)
+                    {
+                        sensor.SignalBlip(this);
+                    }
                 }
             }
         }
@@ -143,6 +154,12 @@ namespace com.spacepuppy.AI.Sensors.Audible
             set { _aspectColor = value; }
         }
 
+        public bool OmniPresent
+        {
+            get { return _omniPresent; }
+            set { _omniPresent = value; }
+        }
+
         #endregion
 
         #region IUpdateable Interface
@@ -167,12 +184,20 @@ namespace com.spacepuppy.AI.Sensors.Audible
                 var sensor = e.Current;
                 if (_activeSensors.Contains(sensor) || sensor.Ignores(this)) continue;
 
-                d = (sensor.transform.position - pos).sqrMagnitude;
-                r = (sensor.Range + _range);
-                if (d < r * r)
+                if(_omniPresent)
                 {
                     _activeSensors.Add(sensor);
                     sensor.SignalEnterSiren(this);
+                }
+                else
+                {
+                    d = (sensor.transform.position - pos).sqrMagnitude;
+                    r = (sensor.Range + _range);
+                    if (d < r * r)
+                    {
+                        _activeSensors.Add(sensor);
+                        sensor.SignalEnterSiren(this);
+                    }
                 }
             }
 
@@ -183,16 +208,19 @@ namespace com.spacepuppy.AI.Sensors.Audible
                 {
                     var sensor = e.Current;
 
-                    d = (sensor.transform.position - pos).sqrMagnitude;
-                    r = (sensor.Range + _range);
-                    if (d < r * r)
+                    if(!_omniPresent)
                     {
-                        sensor.SignalSirenStay(this);
-                    }
-                    else
-                    {
-                        _activeSensors.Remove(sensor);
-                        sensor.SignalExitSiren(this);
+                        d = (sensor.transform.position - pos).sqrMagnitude;
+                        r = (sensor.Range + _range);
+                        if (d < r * r)
+                        {
+                            sensor.SignalSirenStay(this);
+                        }
+                        else
+                        {
+                            _activeSensors.Remove(sensor);
+                            sensor.SignalExitSiren(this);
+                        }
                     }
                 }
 

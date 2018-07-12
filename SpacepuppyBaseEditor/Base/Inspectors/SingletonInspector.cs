@@ -57,7 +57,7 @@ namespace com.spacepuppyeditor.Base
                 var arr = (this.target as SingletonManager).GetComponents<Singleton>();
                 for (int i = 0; i < arr.Length; i ++ )
                 {
-                    if(arr[i] != this.target && arr[i].LifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever))
+                    if(arr[i] != this.target && (arr[i].LifeCycle & SingletonLifeCycleRule.LivesForever) != 0)
                     {
                         (this.target as SingletonManager).MaintainOnLoad = true;
                         EditorUtility.SetDirty(this.target);

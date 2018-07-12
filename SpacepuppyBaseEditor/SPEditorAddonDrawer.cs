@@ -66,6 +66,11 @@ namespace com.spacepuppyeditor
 
         }
 
+        public virtual bool RequiresConstantRepaint()
+        {
+            return false;
+        }
+
         #endregion
 
 

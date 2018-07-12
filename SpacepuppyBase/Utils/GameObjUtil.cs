@@ -56,9 +56,9 @@ namespace com.spacepuppy.Utils
             if (obj is GameObject)
                 return obj as GameObject;
             if (obj is Component)
-                return (obj as Component).gameObject;
+                return ObjUtil.IsObjectAlive(obj as Component) ? (obj as Component).gameObject : null;
             if (obj is IGameObjectSource)
-                return (obj as IGameObjectSource).gameObject;
+                return obj.IsNullOrDestroyed() ? null : (obj as IGameObjectSource).gameObject;
 
             return null;
         }
@@ -93,11 +93,11 @@ namespace com.spacepuppy.Utils
             if (obj is Transform)
                 return obj as Transform;
             if (obj is GameObject)
-                return (obj as GameObject).transform;
+                return ObjUtil.IsObjectAlive(obj as GameObject) ? (obj as GameObject).transform : null;
             if (obj is Component)
-                return (obj as Component).transform;
+                return ObjUtil.IsObjectAlive(obj as Component) ? (obj as Component).transform : null;
             if (obj is IGameObjectSource)
-                return (obj as IGameObjectSource).transform;
+                return obj.IsNullOrDestroyed() ? null : (obj as IGameObjectSource).transform;
 
             return null;
         }
@@ -109,7 +109,7 @@ namespace com.spacepuppy.Utils
             if (respectProxy && obj is IProxy)
             {
                 obj = (obj as IProxy).GetTarget();
-                if (obj == null) return null;
+                if (obj.IsNullOrDestroyed()) return null;
             }
 
             if (obj is IComponent) obj = (obj as IComponent).component;
@@ -135,7 +135,7 @@ namespace com.spacepuppy.Utils
             if (respectProxy && obj is IProxy)
             {
                 obj = (obj as IProxy).GetTarget();
-                if (obj == null) return null;
+                if (obj.IsNullOrDestroyed()) return null;
             }
 
             if (obj is IComponent) obj = (obj as IComponent).component;

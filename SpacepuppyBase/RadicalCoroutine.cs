@@ -234,7 +234,8 @@ namespace com.spacepuppy
         {
             get
             {
-                if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+                //if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+                if (_disableMode == RadicalCoroutineDisableMode.PlayUntilDestroyed)
                     return GameLoopEntry.Hook;
                 else
                     return _owner;
@@ -283,7 +284,9 @@ namespace com.spacepuppy
 #endif
             _manager = manager;
             _manager.RegisterCoroutine(this);
-            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+
+            //if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+            if (_disableMode == RadicalCoroutineDisableMode.PlayUntilDestroyed)
                 _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
             else
                 _token = behaviour.StartCoroutine(this);
@@ -309,7 +312,9 @@ namespace com.spacepuppy
 #endif
             _manager = manager;
             _manager.RegisterCoroutine(this);
-            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+
+            //if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+            if (_disableMode == RadicalCoroutineDisableMode.PlayUntilDestroyed)
                 _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
             else
                 _token = behaviour.StartCoroutine(this);
@@ -337,7 +342,9 @@ namespace com.spacepuppy
             this.AutoKillToken = autoKillToken;
             _manager = manager;
             _manager.RegisterCoroutine(this, autoKillToken);
-            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+
+            //if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+            if (_disableMode == RadicalCoroutineDisableMode.PlayUntilDestroyed)
                 _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
             else
                 _token = behaviour.StartCoroutine(this);
@@ -468,7 +475,9 @@ namespace com.spacepuppy
 #endif
             _manager = manager;
             _manager.RegisterCoroutine(this);
-            if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+
+            //if ((_disableMode & RadicalCoroutineDisableMode.CancelOnDeactivate) == 0)
+            if (_disableMode == RadicalCoroutineDisableMode.PlayUntilDestroyed)
                 _token = GameLoopEntry.Hook.StartCoroutine(PlayUntilDestroyedIterator(this));
             else
                 _token = _owner.StartCoroutine(this);
@@ -762,7 +771,7 @@ namespace com.spacepuppy
                 }
                 else if (current is YieldInstruction)
                 {
-                    if (current is WaitForSeconds && _disableMode.HasFlag(RadicalCoroutineDisableMode.Resumes))
+                    if (current is WaitForSeconds && (_disableMode & RadicalCoroutineDisableMode.Resumes) != 0)
                     {
                         _currentIEnumeratorYieldValue = null;
                         _stack.Push(WaitForDuration.FromWaitForSeconds(current as WaitForSeconds));

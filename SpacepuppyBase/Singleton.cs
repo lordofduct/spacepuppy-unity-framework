@@ -342,7 +342,7 @@ namespace com.spacepuppy
                     if (_lifeCycle == value) return;
                     _lifeCycle = value;
 
-                    if (_target != null && !_flaggedSelfMaintaining && _lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)) this.UpdateMaintainOnLoadStatus();
+                    if (_target != null && !_flaggedSelfMaintaining && (_lifeCycle & SingletonLifeCycleRule.LivesForever) != 0) this.UpdateMaintainOnLoadStatus();
                 }
             }
 
@@ -412,7 +412,7 @@ namespace com.spacepuppy
                     if (_target.gameObject != null && _target.gameObject != Singleton.GameObjectSource)
                     {
                         var others = _target.gameObject.GetComponents<Singleton>();
-                        if (!(others.Length > 1 && !(from s in others select s.LifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)).Any()))
+                        if (!(others.Length > 1 && !(from s in others select (s.LifeCycle & SingletonLifeCycleRule.LivesForever) != 0).Any()))
                         {
                             ObjUtil.SmartDestroy(_target.gameObject);
                         }
@@ -422,7 +422,7 @@ namespace com.spacepuppy
             
             private void OnLevelWasLoaded(Scene sc, LoadSceneMode mode)
             {
-                if (_lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever)) return;
+                if ((_lifeCycle & SingletonLifeCycleRule.LivesForever) != 0) return;
                 if (_target.component == null) return;
                 if (_target.component.HasComponent<SingletonManager>()) return; //let the manager take care of this
 
@@ -444,7 +444,7 @@ namespace com.spacepuppy
                 }
                 else if(_target.component != null)
                 {
-                    if(_lifeCycle.HasFlag(SingletonLifeCycleRule.AlwaysReplace))
+                    if((_lifeCycle & SingletonLifeCycleRule.AlwaysReplace) != 0)
                     {
                         _singletonRefs[targTp] = _target;
                         if (_target.component.HasComponent<SingletonManager>())
@@ -494,7 +494,7 @@ namespace com.spacepuppy
                 if (_target.component.HasComponent<SingletonManager>()) return;
 
                 //for singletons not on the primary singleton source
-                if (!_flaggedSelfMaintaining && _lifeCycle.HasFlag(SingletonLifeCycleRule.LivesForever))
+                if (!_flaggedSelfMaintaining && (_lifeCycle & SingletonLifeCycleRule.LivesForever) != 0)
                 {
                     GameObject.DontDestroyOnLoad(_target.gameObject);
                     _flaggedSelfMaintaining = true;

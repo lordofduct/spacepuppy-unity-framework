@@ -19,6 +19,30 @@ namespace com.spacepuppy.Scenario
         [TimeUnitsSelector()]
         private float _fadeOutDur;
 
+        [SerializeField]
+        private DisableMode _disableAudioSource;
+
+        #endregion
+
+        #region Properties
+
+        public TriggerableTargetObject Target
+        {
+            get { return _target; }
+        }
+
+        public float FadeOutDur
+        {
+            get { return _fadeOutDur; }
+            set { _fadeOutDur = value; }
+        }
+
+        public DisableMode DisableAudioSource
+        {
+            get { return _disableAudioSource; }
+            set { _disableAudioSource = value; }
+        }
+
         #endregion
 
 
@@ -39,12 +63,30 @@ namespace com.spacepuppy.Scenario
                        {
                            targ.Stop();
                            targ.volume = cache;
+                           switch(_disableAudioSource)
+                           {
+                               case DisableMode.DisableComponent:
+                                   targ.enabled = false;
+                                   break;
+                               case DisableMode.DisableGameObject:
+                                   targ.gameObject.SetActive(false);
+                                   break;
+                           }
                        })
                        .Play(true);
             }
             else
             {
                 targ.Stop();
+                switch (_disableAudioSource)
+                {
+                    case DisableMode.DisableComponent:
+                        targ.enabled = false;
+                        break;
+                    case DisableMode.DisableGameObject:
+                        targ.gameObject.SetActive(false);
+                        break;
+                }
             }
 
             return true;

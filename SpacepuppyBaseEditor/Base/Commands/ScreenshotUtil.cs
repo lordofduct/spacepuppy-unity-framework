@@ -87,22 +87,30 @@ namespace com.spacepuppyeditor.Base.Commands
         {
             if (cam != null || format != ImageFormat.PNG)
             {
-                if (cam == null) cam = Camera.main;
+                Texture2D screenshot;
+                if(cam != null)
+                {
+                    var tmp = RenderTexture.GetTemporary(cam.pixelWidth, cam.pixelHeight);
+                    var cache = cam.targetTexture;
+                    cam.targetTexture = tmp;
+                    cam.Render();
 
-                var tmp = RenderTexture.GetTemporary(cam.pixelWidth, cam.pixelHeight);
-                var cache = cam.targetTexture;
-                cam.targetTexture = tmp;
-                cam.Render();
+                    RenderTexture.active = tmp;
+                    screenshot = new Texture2D(tmp.width, tmp.height, ScreenshotUtil.TextureFormat, false);
+                    screenshot.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
 
-                RenderTexture.active = tmp;
-                var screenshot = new Texture2D(tmp.width, tmp.height, ScreenshotUtil.TextureFormat, false);
-                screenshot.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
+                    RenderTexture.active = null;
 
-                RenderTexture.active = null;
+                    cam.targetTexture = cache;
+                    tmp.Release();
+                }
+                else
+                {
+                    screenshot = new Texture2D(Screen.width, Screen.height, ScreenshotUtil.TextureFormat, false);
+                    screenshot.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+                    screenshot.Apply();
+                }
                 
-                cam.targetTexture = cache;
-                tmp.Release();
-
                 byte[] bytes;
                 switch(format)
                 {
@@ -146,8 +154,7 @@ namespace com.spacepuppyeditor.Base.Commands
                     return string.Empty;
             }
         }
-
-
+        
     }
 
 }

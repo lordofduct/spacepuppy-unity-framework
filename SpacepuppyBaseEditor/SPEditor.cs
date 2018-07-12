@@ -37,7 +37,7 @@ namespace com.spacepuppyeditor
             foreach (var f in fields)
             {
                 var attribs = f.GetCustomAttributes(typeof(ShowNonSerializedPropertyAttribute), false) as ShowNonSerializedPropertyAttribute[];
-                if(attribs != null && attribs.Length > 0)
+                if (attribs != null && attribs.Length > 0)
                 {
                     if (_shownFields == null) _shownFields = new List<ShownPropertyInfo>();
                     var attrib = attribs[0];
@@ -55,7 +55,7 @@ namespace com.spacepuppyeditor
 
         protected virtual void OnDisable()
         {
-            
+
         }
 
         #endregion
@@ -183,11 +183,11 @@ namespace com.spacepuppyeditor
                     }
                 }
             }
-            
+
             for (int i = 0; i < _headerDrawers.Count; i++)
             {
                 var drawer = _headerDrawers[i];
-                if(drawer is DecoratorDrawer)
+                if (drawer is DecoratorDrawer)
                 {
                     var decorator = drawer as DecoratorDrawer;
                     var h = decorator.GetHeight();
@@ -203,7 +203,7 @@ namespace com.spacepuppyeditor
                 }
             }
 
-            if(_addons != null)
+            if (_addons != null)
             {
                 foreach (var d in _addons)
                 {
@@ -225,9 +225,10 @@ namespace com.spacepuppyeditor
 
         public override bool RequiresConstantRepaint()
         {
-            return base.RequiresConstantRepaint() || 
+            return base.RequiresConstantRepaint() ||
                    (Application.isPlaying && _shownFields != null && _shownFields.Count > 0) ||
-                   (_constantlyRepaint != null && (Application.isPlaying || !_constantlyRepaint.RuntimeOnly));
+                   (_constantlyRepaint != null && (Application.isPlaying || !_constantlyRepaint.RuntimeOnly)) ||
+                   (_addons != null && _addons.Length > 0 && _addons.Any((o) => o.RequiresConstantRepaint()));
         }
 
         #endregion

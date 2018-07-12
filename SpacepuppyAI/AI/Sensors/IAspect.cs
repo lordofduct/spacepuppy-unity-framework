@@ -32,6 +32,11 @@ namespace com.spacepuppy.AI.Sensors
             get;
             set;
         }
+
+        public abstract bool OmniPresent
+        {
+            get;
+        }
         
         #endregion
 

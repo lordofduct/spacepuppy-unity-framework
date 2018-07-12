@@ -61,6 +61,10 @@ namespace com.spacepuppy.AI.Sensors.Visual
         [SerializeField()]
         private Color _aspectColor = Color.blue;
 
+        [SerializeField]
+        [Tooltip("This Aspect is always visible regardless.")]
+        private bool _omniPresent;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -98,6 +102,12 @@ namespace com.spacepuppy.AI.Sensors.Visual
         {
             get { return _aspectColor; }
             set { _aspectColor = value; }
+        }
+
+        public bool OmniPresent
+        {
+            get { return _omniPresent; }
+            set { _omniPresent = value; }
         }
 
         #endregion

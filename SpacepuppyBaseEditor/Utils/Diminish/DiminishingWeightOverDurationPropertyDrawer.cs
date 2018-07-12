@@ -64,7 +64,7 @@ namespace com.spacepuppyeditor.Utils.Diminish
                 var r1 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
                 var r2 = new Rect(position.xMin + LINE2_MARGIN, r1.yMax, Mathf.Max(position.width - LINE2_MARGIN, 0f), EditorGUIUtility.singleLineHeight);
 
-                if(this.DrawFoldout) property.isExpanded = EditorGUI.Foldout(r1, property.isExpanded, GUIContent.none);
+                if(this.DrawFoldout) property.isExpanded = SPEditorGUI.PrefixFoldoutLabel(r1, property.isExpanded, GUIContent.none);
 
                 var weightProp = property.FindPropertyRelative(PROP_WEIGHT);
 
@@ -94,7 +94,7 @@ namespace com.spacepuppyeditor.Utils.Diminish
             }
             else
             {
-                if (this.DrawFoldout) property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, GUIContent.none);
+                if (this.DrawFoldout) property.isExpanded = SPEditorGUI.PrefixFoldoutLabel(position, property.isExpanded, GUIContent.none);
 
                 var weightProp = property.FindPropertyRelative(PROP_WEIGHT);
                 _line1[0] = weightProp.floatValue;

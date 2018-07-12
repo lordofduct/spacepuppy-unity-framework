@@ -364,6 +364,70 @@ namespace com.spacepuppy
 
     }
 
+    [CreateAssetMenu(fileName = "TargetProxy", menuName = "Spacepuppy/TargetProxy")]
+    public class TargetProxyToken : ScriptableObject, IProxy
+    {
+
+        #region Fields
+
+        [SerializeField]
+        private TriggerableTargetObject _target = new TriggerableTargetObject(TriggerableTargetObject.FindCommand.FindInScene, TriggerableTargetObject.ResolveByCommand.Nothing, string.Empty);
+        [SerializeField]
+        [TypeReference.Config(typeof(Component), allowAbstractClasses = true, allowInterfaces = true)]
+        private TypeReference _componentTypeOnTarget = new TypeReference();
+
+        [Space()]
+        [SerializeField]
+        [Tooltip("Cache the target when it's first retrieved. This is useful for speeding up any 'Find' commands if called repeatedly, but is hindered if the target is changing.")]
+        private bool _cache;
+        [System.NonSerialized]
+        private UnityEngine.Object _object;
+
+        #endregion
+
+        #region IProxy Interface
+
+        public object GetTarget()
+        {
+            if (_cache)
+            {
+                if (_object != null) return _object;
+
+                _object = _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), null) as UnityEngine.Object;
+                return _object;
+            }
+            else
+            {
+                return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), null) as UnityEngine.Object;
+            }
+        }
+
+        public object GetTarget(object arg)
+        {
+            if (_cache)
+            {
+                if (_object != null) return _object;
+
+                if (_componentTypeOnTarget == null) return null;
+                _object = _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;
+                return _object;
+            }
+            else
+            {
+                if (_componentTypeOnTarget == null) return null;
+                return _target.GetTarget(_componentTypeOnTarget.Type ?? typeof(UnityEngine.Object), arg) as UnityEngine.Object;
+            }
+        }
+
+        public System.Type GetTargetType()
+        {
+            if (_componentTypeOnTarget.Type != null) return _componentTypeOnTarget.Type;
+            return (_cache && _object != null) ? _object.GetType() : typeof(UnityEngine.Object);
+        }
+
+        #endregion
+
+    }
 
 
     [CreateAssetMenu(fileName = "ProxyMediator", menuName = "Spacepuppy/ProxyMediator")]

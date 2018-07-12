@@ -106,9 +106,9 @@ namespace com.spacepuppy.Tween.Curves
             t = (this.Duration == 0) ? 1f : this.Ease(t, 0f, 1f, this.Duration);
             if (float.IsNaN(t)) throw new System.ArgumentException("t must be a real number.", "t");
 
-            if (!_style.HasFlag(StringTweenStyle.Jumble))
+            if ((_style & StringTweenStyle.Jumble) == 0)
             {
-                if(!_style.HasFlag(StringTweenStyle.RightToLeft))
+                if((_style & StringTweenStyle.RightToLeft) == 0)
                 {
                     //left to right, none jumble
                     if(_start.Length == 0)
@@ -209,7 +209,7 @@ namespace com.spacepuppy.Tween.Curves
             }
             else
             {
-                if (!_style.HasFlag(StringTweenStyle.RightToLeft))
+                if ((_style & StringTweenStyle.RightToLeft) == 0)
                 {
                     //left to right, jumble
 

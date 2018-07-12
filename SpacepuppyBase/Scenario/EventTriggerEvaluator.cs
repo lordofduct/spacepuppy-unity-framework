@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using com.spacepuppy.Dynamic;
+using com.spacepuppy.Project;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
@@ -38,14 +39,36 @@ namespace com.spacepuppy.Scenario
         
         #region Methods
 
+        private ITriggerableMechanism[] GetCache(GameObject go)
+        {
+            //we don't trigger inactive GameObjects unless they are prefabs
+
+            EventTriggerCache cache;
+            if (go.activeInHierarchy)
+            {
+                cache = go.AddOrGetComponent<EventTriggerCache>();
+                return cache.Targets ?? cache.RefreshCache();
+            }
+            else if (go.HasComponent<PrefabToken>())
+            {
+                cache = go.GetComponent<EventTriggerCache>();
+                if (cache != null) return cache.Targets ?? cache.RefreshCache();
+
+                return go.GetComponents<ITriggerableMechanism>();
+            }
+            else
+            {
+                return ArrayUtil.Empty<ITriggerableMechanism>();
+            }
+        }
+
+
         public void GetAllTriggersOnTarget(object target, List<ITriggerableMechanism> outputColl)
         {
             var go = GameObjectUtil.GetGameObjectFromSource(target);
             if (go != null)
             {
-                var cache = go.AddOrGetComponent<EventTriggerCache>();
-                var arr = cache.Targets ?? cache.RefreshCache();
-                outputColl.AddRange(arr);
+                outputColl.AddRange(this.GetCache(go));
             }
             else if (target is ITriggerableMechanism)
                 outputColl.Add(target as ITriggerableMechanism);
@@ -56,8 +79,7 @@ namespace com.spacepuppy.Scenario
             var go = GameObjectUtil.GetGameObjectFromSource(target);
             if (go != null)
             {
-                var cache = go.AddOrGetComponent<EventTriggerCache>();
-                var arr = cache.Targets ?? cache.RefreshCache();
+                var arr = this.GetCache(go);
 
                 if (instruction != null)
                 {

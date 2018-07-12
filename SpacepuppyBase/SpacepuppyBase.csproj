@@ -151,6 +151,7 @@
     <Compile Include="Graphs\LinkedNodeGraph.cs" />
     <Compile Include="Graphs\NodeGraph.cs" />
     <Compile Include="Hooks\EarlyStartHook.cs" />
+    <Compile Include="IEventActivatorMask.cs" />
     <Compile Include="IMixin.cs" />
     <Compile Include="IEntityAwakeHandler.cs" />
     <Compile Include="IImmediatelyResumingYieldInstruction.cs" />
@@ -218,6 +219,7 @@
     <Compile Include="IRandom.cs" />
     <Compile Include="Project\GameSettingsBase.cs" />
     <Compile Include="Project\AssetPool.cs" />
+    <Compile Include="Project\PrefabToken.cs" />
     <Compile Include="Project\QueryableAssetSet.cs" />
     <Compile Include="Project\ResourceLink.cs" />
     <Compile Include="Project\ResourceLinkTable.cs" />
@@ -226,6 +228,8 @@
     <Compile Include="Project\SerializableInterfaceRef.cs" />
     <Compile Include="Scenario\EventTriggerEvaluator.cs" />
     <Compile Include="Scenario\HijackTriggerEvents.cs" />
+    <Compile Include="Scenario\i_KillTween.cs" />
+    <Compile Include="Scenario\t_Timer.cs" />
     <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
     <Compile Include="PsuedoSingleton.cs" />

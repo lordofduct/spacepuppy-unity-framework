@@ -72,7 +72,7 @@ namespace com.spacepuppyeditor.Base
                     return;
                 }
 
-                if (canShrink) cache = EditorGUI.Foldout(position, property.isExpanded, GUIContent.none);
+                if (canShrink) cache = SPEditorGUI.PrefixFoldoutLabel(position, property.isExpanded, GUIContent.none);
 
                 if (property.isExpanded)
                 {

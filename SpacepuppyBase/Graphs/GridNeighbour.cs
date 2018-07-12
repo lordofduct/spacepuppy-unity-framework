@@ -83,20 +83,22 @@ namespace com.spacepuppy.Graphs
             if (side == GridNeighbour.None) return GridNeighbour.None;
 
             GridNeighbour start = GridNeighbour.North;
-            if(side.HasFlag(start))
+            if ((side & start) != 0) //if start
             {
-                if (!side.HasFlag(GridNeighbour.North.Rotate(-1))) return GridNeighbour.North;
+                //if (!side.HasFlag(GridNeighbour.North.Rotate(-1))) return GridNeighbour.North;
+                if ((side & GridNeighbour.North.Rotate(-1)) == 0) return GridNeighbour.North;
 
-                for(int i = 1; i < 8; i++)
+                for (int i = 1; i < 8; i++)
                 {
-                    if(!side.HasFlag(1 << i))
+                    //if(!side.HasFlag(1 << i))
+                    if(((int)side & (1 << i)) == 0)
                     {
                         start = (GridNeighbour)(1 << (i + 1));
                     }
                 }
             }
 
-            while(!side.HasFlag(start))
+            while ((side & start) == 0) //while not start
             {
                 start = (GridNeighbour)((int)start << 1);
             }
