@@ -11,6 +11,8 @@ namespace com.spacepuppy.SPInput
 
         bool Active { get; set; }
 
+        bool AnyInputActivated { get; }
+
         bool Contains(string id);
 
         IInputSignature GetSignature(string id);

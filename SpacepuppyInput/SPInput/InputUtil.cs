@@ -151,6 +151,22 @@ namespace com.spacepuppy.SPInput
         }
         
 
+        public static bool GetInputIsActivated(this IInputSignature sig)
+        {
+            if (sig == null) return false;
+
+            if (sig is IButtonInputSignature)
+                return (sig as IButtonInputSignature).CurrentState != ButtonState.None;
+            else if (sig is IAxleInputSignature)
+                return (sig as IAxleInputSignature).CurrentState > 0f;
+            else if (sig is IDualAxleInputSignature)
+                return (sig as IDualAxleInputSignature).CurrentState.sqrMagnitude > 0.0001f;
+            else if (sig is IInputDevice)
+                return (sig as IInputDevice).AnyInputActivated;
+
+            return false;
+        }
+
 
 
         public static bool TestCursorOver(Camera cursorCamera, Vector2 cursorPos, out Collider collider, float maxDistance = float.PositiveInfinity, int layerMask = Physics.AllLayers, QueryTriggerInteraction query = QueryTriggerInteraction.UseGlobal)

@@ -182,9 +182,13 @@ namespace com.spacepuppyeditor.Scenario
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
             var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
             var targLabel = EditorHelper.TempContent("Triggerable Target");
-            targProp.objectReferenceValue = TargetObjectField(targRect, targLabel, targProp.objectReferenceValue);
-            if (!GameObjectUtil.IsGameObjectSource(targProp.objectReferenceValue) && !(targProp.objectReferenceValue is ITriggerableMechanism))
-                targProp.objectReferenceValue = null;
+
+            EditorGUI.BeginChangeCheck();
+            var targObj = TargetObjectField(targRect, targLabel, targProp.objectReferenceValue);
+            if(EditorGUI.EndChangeCheck())
+            {
+                targProp.objectReferenceValue = TriggerTarget.IsValidTriggerTarget(targObj, TriggerActivationType.TriggerAllOnTarget) ? targObj : null;
+            }
 
             //Draw Triggerable Arg
             var argRect = new Rect(area.xMin, targRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
@@ -218,70 +222,6 @@ namespace com.spacepuppyeditor.Scenario
 
         private void DrawAdvanced_TriggerSelected(Rect area, SerializedProperty property)
         {
-            /*
-            //Draw Target
-            var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
-            var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
-            var targLabel = EditorHelper.TempContent("Triggerable Target");
-            var targGo = GameObjectUtil.GetGameObjectFromSource(targProp.objectReferenceValue);
-            var newTargGo = EditorGUI.ObjectField(targRect, targLabel, targGo, typeof(GameObject), true) as GameObject;
-            if (newTargGo != targGo)
-            {
-                targGo = newTargGo;
-                targProp.objectReferenceValue = (targGo != null) ? targGo.GetComponent<ITriggerableMechanism>() as Component : null;
-            }
-
-            var targCompPopupRect = new Rect(area.xMin, targRect.yMax, area.width, EditorGUIUtility.singleLineHeight);
-            if (targProp.objectReferenceValue != null)
-            {
-                var selectedType = targProp.objectReferenceValue.GetType();
-                var availableMechanismTypes = (from c in targGo.GetComponents<ITriggerableMechanism>() select c.GetType()).ToArray();
-                var availableMechanismTypeNames = availableMechanismTypes.Select((tp) => tp.Name).ToArray();
-
-                var index = System.Array.IndexOf(availableMechanismTypes, selectedType);
-                EditorGUI.BeginChangeCheck();
-                index = EditorGUI.Popup(targCompPopupRect, "Target Component", index, availableMechanismTypeNames);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    targProp.objectReferenceValue = (index >= 0) ? targGo.GetComponent(availableMechanismTypes[index]) : null;
-                }
-            }
-            else
-            {
-                EditorGUI.LabelField(targCompPopupRect, "Target Component", "(First Select a Target)");
-            }
-
-            //Draw Triggerable Arg
-            var argRect = new Rect(area.xMin, targCompPopupRect.yMax, area.width - ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var btnRect = new Rect(argRect.xMax, argRect.yMin, ARG_BTN_WIDTH, EditorGUIUtility.singleLineHeight);
-            var argArrayProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLEARGS);
-            if (argArrayProp.arraySize == 0)
-            {
-                EditorGUI.LabelField(argRect, _defaultArgLabel, _undefinedArgLabel);
-                if (GUI.Button(btnRect, _argBtnLabel))
-                {
-                    argArrayProp.arraySize = 1;
-                    argArrayProp.serializedObject.ApplyModifiedProperties();
-                }
-            }
-            else
-            {
-                if (argArrayProp.arraySize > 1) argArrayProp.arraySize = 1;
-                var argProp = argArrayProp.GetArrayElementAtIndex(0);
-                //EditorGUI.PropertyField(argRect, argProp, _defaultArgLabel);
-                _variantDrawer.RestrictVariantType = false;
-                _variantDrawer.ForcedObjectType = null;
-                _variantDrawer.OnGUI(argRect, argProp, _defaultArgLabel);
-
-                if (GUI.Button(btnRect, _argBtnLabel))
-                {
-                    argArrayProp.arraySize = 0;
-                    argArrayProp.serializedObject.ApplyModifiedProperties();
-                }
-            }
-            */
-
-
             var targRect = new Rect(area.xMin, area.yMin, area.width, EditorGUIUtility.singleLineHeight);
             var targProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_TRIGGERABLETARG);
             targRect = EditorGUI.PrefixLabel(targRect, EditorHelper.TempContent("Triggerable Target"));
@@ -649,7 +589,7 @@ DrawMethodName:
             var actProp = property.FindPropertyRelative(TriggerTargetPropertyDrawer.PROP_ACTIVATIONTYPE);
             var act = actProp.GetEnumValue<TriggerActivationType>();
             
-            if(!IsValidTriggerTarget(targProp.objectReferenceValue, act))
+            if(!TriggerTarget.IsValidTriggerTarget(targProp.objectReferenceValue, act))
             {
                 targProp.objectReferenceValue = null;
                 return false;
@@ -659,28 +599,7 @@ DrawMethodName:
                 return true;
             }
         }
-
-        public static bool IsValidTriggerTarget(UnityEngine.Object obj, TriggerActivationType act)
-        {
-            if (obj == null) return true;
-            
-            switch (act)
-            {
-                case TriggerActivationType.TriggerAllOnTarget:
-                case TriggerActivationType.TriggerSelectedTarget:
-                    return (GameObjectUtil.IsGameObjectSource(obj) || obj is ITriggerableMechanism);
-                case TriggerActivationType.SendMessage:
-                    return GameObjectUtil.IsGameObjectSource(obj);
-                case TriggerActivationType.CallMethodOnSelectedTarget:
-                    return true;
-                case TriggerActivationType.EnableTarget:
-                case TriggerActivationType.DestroyTarget:
-                    return GameObjectUtil.IsGameObjectSource(obj);
-            }
-
-            return false;
-        }
-
+        
         public static UnityEngine.Object TargetObjectField(Rect position, GUIContent label, UnityEngine.Object target)
         {
             EditorGUI.BeginChangeCheck();

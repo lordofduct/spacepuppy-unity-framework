@@ -354,7 +354,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region Casting
-
+        
         public static object ReduceIfProxy(this object obj)
         {
             if (obj is IProxy) return (obj as IProxy).GetTarget();

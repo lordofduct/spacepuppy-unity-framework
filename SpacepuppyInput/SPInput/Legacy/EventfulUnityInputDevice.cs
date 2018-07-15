@@ -189,6 +189,14 @@ namespace com.spacepuppy.SPInput.Legacy
             }
         }
 
+        public bool AnyInputActivated
+        {
+            get
+            {
+                return Input.anyKey;
+            }
+        }
+
         void IInputSignature.FixedUpdate()
         {
         }

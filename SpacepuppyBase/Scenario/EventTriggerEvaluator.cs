@@ -65,6 +65,7 @@ namespace com.spacepuppy.Scenario
 
         public void GetAllTriggersOnTarget(object target, List<ITriggerableMechanism> outputColl)
         {
+            if (target is IProxy) target = (target as IProxy).GetTarget();
             var go = GameObjectUtil.GetGameObjectFromSource(target);
             if (go != null)
             {
@@ -76,6 +77,7 @@ namespace com.spacepuppy.Scenario
 
         public void TriggerAllOnTarget(object target, object sender, object arg, BlockingTriggerYieldInstruction instruction = null)
         {
+            if (target is IProxy) target = (target as IProxy).GetTarget();
             var go = GameObjectUtil.GetGameObjectFromSource(target);
             if (go != null)
             {
@@ -133,6 +135,7 @@ namespace com.spacepuppy.Scenario
 
         public void TriggerSelectedTarget(object target, object sender, object arg, BlockingTriggerYieldInstruction instruction = null)
         {
+            if (target is IProxy) target = (target as IProxy).GetTarget();
             if (target != null && target is ITriggerableMechanism)
             {
                 if (instruction != null && target is IBlockingTriggerableMechanism)
@@ -150,7 +153,7 @@ namespace com.spacepuppy.Scenario
 
         public void SendMessageToTarget(object target, string message, object arg)
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(target);
+            var go = GameObjectUtil.GetGameObjectFromSource(target, true);
             if (go != null && message != null)
             {
                 go.SendMessage(message, arg, SendMessageOptions.DontRequireReceiver);
@@ -159,6 +162,7 @@ namespace com.spacepuppy.Scenario
 
         public void CallMethodOnSelectedTarget(object target, string methodName, VariantReference[] methodArgs)
         {
+            if (target is IProxy) target = (target as IProxy).GetTarget();
             if (methodName != null)
             {
                 //CallMethod does not support using the passed in arg
@@ -187,7 +191,7 @@ namespace com.spacepuppy.Scenario
 
         public void EnableTarget(object target, EnableMode mode)
         {
-            var go = GameObjectUtil.GetGameObjectFromSource(target);
+            var go = GameObjectUtil.GetGameObjectFromSource(target, true);
             if (go != null)
             {
                 switch (mode)
@@ -207,6 +211,7 @@ namespace com.spacepuppy.Scenario
 
         public void DestroyTarget(object target)
         {
+            if (target is IProxy) target = (target as IProxy).GetTarget();
             var go = GameObjectUtil.GetGameObjectFromSource(target);
             if (go != null)
             {

@@ -131,6 +131,32 @@ namespace com.spacepuppy.Scenario
             this._methodName = null;
         }
 
+        public void ConfigureTriggerAll(UnityEngine.Object targ, object arg = null)
+        {
+            if (targ == null) throw new System.ArgumentNullException("targ");
+            if(GameObjectUtil.IsGameObjectSource(targ))
+            {
+                this.ConfigureTriggerAll(GameObjectUtil.GetGameObjectFromSource(targ));
+                return;
+            }
+            else if (!TriggerTarget.IsValidTriggerTarget(targ, TriggerActivationType.TriggerAllOnTarget))
+            {
+                throw new System.ArgumentException("Must be a game object source of some sort.", "targ");
+            }
+
+            this._triggerable = targ;
+            if (arg == null)
+            {
+                this._triggerableArgs = null;
+            }
+            else
+            {
+                this._triggerableArgs = new VariantReference[] { new VariantReference(arg) };
+            }
+            this._activationType = TriggerActivationType.TriggerAllOnTarget;
+            this._methodName = null;
+        }
+
         public void ConfigureTriggerTarget(ITriggerableMechanism mechanism, object arg = null)
         {
             if (mechanism == null) throw new System.ArgumentNullException("mechanism");
@@ -164,10 +190,10 @@ namespace com.spacepuppy.Scenario
             this._activationType = TriggerActivationType.SendMessage;
         }
 
-        public void ConfigureCallMethod(GameObject targ, string methodName, params object[] args)
+        public void ConfigureCallMethod(UnityEngine.Object targ, string methodName, params object[] args)
         {
             if (targ == null) throw new System.ArgumentNullException("targ");
-            this._triggerable = targ.transform;
+            this._triggerable = targ;
             if (args == null || args.Length == 0)
             {
                 this._triggerableArgs = null;
@@ -229,41 +255,37 @@ namespace com.spacepuppy.Scenario
                 {
                     case TriggerActivationType.TriggerAllOnTarget:
                         {
-                            EventTriggerEvaluator.Current.TriggerAllOnTarget(_triggerable, sender, outgoingArg, instruction);
+                            EventTriggerEvaluator.Current.TriggerAllOnTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable, 
+                                                                             sender, outgoingArg, instruction);
                         }
                         break;
                     case TriggerActivationType.TriggerSelectedTarget:
                         {
-                            //UnityEngine.Object targ = _triggerable;
-                            //if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                            //TriggerSelectedTarget(targ, sender, outgoingArg, instruction);
-                            EventTriggerEvaluator.Current.TriggerSelectedTarget(_triggerable, sender, outgoingArg, instruction);
+                            EventTriggerEvaluator.Current.TriggerSelectedTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                                sender, outgoingArg, instruction);
                         }
                         break;
                     case TriggerActivationType.SendMessage:
                         {
-                            object targ = _triggerable;
-                            if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                            EventTriggerEvaluator.Current.SendMessageToTarget(targ, _methodName, outgoingArg);
+                            EventTriggerEvaluator.Current.SendMessageToTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                              _methodName, outgoingArg);
                         }
                         break;
                     case TriggerActivationType.CallMethodOnSelectedTarget:
                         {
-                            EventTriggerEvaluator.Current.CallMethodOnSelectedTarget(_triggerable, _methodName, _triggerableArgs);
+                            EventTriggerEvaluator.Current.CallMethodOnSelectedTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                                     _methodName, _triggerableArgs);
                         }
                         break;
                     case TriggerActivationType.EnableTarget:
                         {
-                            object targ = _triggerable;
-                            if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                            EventTriggerEvaluator.Current.EnableTarget(_triggerable, ConvertUtil.ToEnum<EnableMode>(_methodName));
+                            EventTriggerEvaluator.Current.EnableTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                       ConvertUtil.ToEnum<EnableMode>(_methodName));
                         }
                         break;
                     case TriggerActivationType.DestroyTarget:
                         {
-                            object targ = _triggerable;
-                            if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                            EventTriggerEvaluator.Current.DestroyTarget(_triggerable);
+                            EventTriggerEvaluator.Current.DestroyTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable);
                         }
                         break;
                 }
@@ -275,7 +297,33 @@ namespace com.spacepuppy.Scenario
         }
 
         #endregion
-        
+
+
+        #region Static Utils
+
+        public static bool IsValidTriggerTarget(UnityEngine.Object obj, TriggerActivationType act)
+        {
+            if (obj == null) return true;
+
+            switch (act)
+            {
+                case TriggerActivationType.TriggerAllOnTarget:
+                case TriggerActivationType.TriggerSelectedTarget:
+                    return (GameObjectUtil.IsGameObjectSource(obj) || obj is ITriggerableMechanism || obj is IProxy);
+                case TriggerActivationType.SendMessage:
+                    return GameObjectUtil.IsGameObjectSource(obj) || obj is IProxy;
+                case TriggerActivationType.CallMethodOnSelectedTarget:
+                    return true;
+                case TriggerActivationType.EnableTarget:
+                case TriggerActivationType.DestroyTarget:
+                    return GameObjectUtil.IsGameObjectSource(obj) || obj is IProxy;
+            }
+
+            return false;
+        }
+
+        #endregion
+
     }
 
 }

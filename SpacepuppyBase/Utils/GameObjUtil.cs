@@ -27,7 +27,7 @@ namespace com.spacepuppy.Utils
 
             return (obj is GameObject || obj is Component || obj is IGameObjectSource);
         }
-
+        
         /*
         public static GameObject GetGameObjectFromSource(object obj)
         {

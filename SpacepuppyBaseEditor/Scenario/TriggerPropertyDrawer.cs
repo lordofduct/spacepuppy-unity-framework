@@ -220,13 +220,13 @@ namespace com.spacepuppyeditor.Scenario
                         {
                             if(listRect.Contains(ev.mousePosition))
                             {
-                                var refs = (from o in DragAndDrop.objectReferences let go = GameObjectUtil.GetGameObjectFromSource(o, false) select go);
-                                DragAndDrop.visualMode = refs.Any() ? DragAndDropVisualMode.Link : DragAndDropVisualMode.Rejected;
+                                var refs = DragAndDrop.objectReferences;
+                                DragAndDrop.visualMode = refs.Length > 0 ? DragAndDropVisualMode.Link : DragAndDropVisualMode.Rejected;
 
-                                if(ev.type == EventType.DragPerform && refs.Any())
+                                if (ev.type == EventType.DragPerform && refs.Length > 0)
                                 {
                                     ev.Use();
-                                    AddObjectsToTrigger(property, refs.ToArray());
+                                    AddObjectsToTrigger(property, refs);
                                 }
                             }
                         }
@@ -338,7 +338,7 @@ namespace com.spacepuppyeditor.Scenario
             if(EditorGUI.EndChangeCheck())
             {
                 var actInfo = TriggerTargetPropertyDrawer.GetTriggerActivationInfo(element);
-                targProp.objectReferenceValue = TriggerTargetPropertyDrawer.IsValidTriggerTarget(targObj, actInfo.ActivationType) ? targObj : null;
+                targProp.objectReferenceValue = TriggerTarget.IsValidTriggerTarget(targObj, actInfo.ActivationType) ? targObj : null;
             }
             EditorGUI.EndProperty();
             
@@ -372,7 +372,7 @@ namespace com.spacepuppyeditor.Scenario
             EditorGUI.LabelField(r0, index.ToString("00:"));
             TriggerTargetPropertyDrawer.DrawTriggerActivationTypeDropdown(r1, property, false);
         }
-
+        
         /// <summary>
         /// Adds targets to a Trigger/SPEvent.
         /// 
@@ -380,7 +380,7 @@ namespace com.spacepuppyeditor.Scenario
         /// </summary>
         /// <param name="triggerProperty"></param>
         /// <param name="objs"></param>
-        public static void AddObjectsToTrigger(SerializedProperty triggerProperty, GameObject[] objs)
+        public static void AddObjectsToTrigger(SerializedProperty triggerProperty, UnityEngine.Object[] objs)
         {
             if (triggerProperty == null) throw new System.ArgumentNullException("triggerProperty");
 
@@ -390,27 +390,30 @@ namespace com.spacepuppyeditor.Scenario
                 var trigger = EditorHelper.GetTargetObjectOfProperty(triggerProperty) as BaseSPEvent;
                 if (trigger == null) return;
 
-                using (var set = TempCollection.GetList<GameObject>())
+                using (var set = TempCollection.GetSet<UnityEngine.Object>())
                 {
                     for (int i = 0; i < trigger.Targets.Count; i++)
                     {
-                        var go = GameObjectUtil.GetGameObjectFromSource(trigger.Targets[i].Target);
-                        if (go != null) set.Add(go);
+                        set.Add(trigger.Targets[i].Target);
                     }
 
-                    foreach(var go in objs)
+                    foreach (var obj in objs)
                     {
-                        if (set.Contains(go)) continue;
-                        set.Add(go);
+                        if (set.Contains(obj)) continue;
+                        set.Add(obj);
 
                         var targ = trigger.AddNew();
-                        targ.ConfigureTriggerAll(go);
+                        if (TriggerTarget.IsValidTriggerTarget(obj, TriggerActivationType.TriggerAllOnTarget))
+                            targ.ConfigureTriggerAll(obj);
+                        else
+                            targ.ConfigureCallMethod(obj, "");
                         targ.Weight = 1f;
                     }
                 }
+
                 triggerProperty.serializedObject.Update();
             }
-            catch(System.Exception ex)
+            catch (System.Exception ex)
             {
                 Debug.LogException(ex);
             }

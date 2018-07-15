@@ -54,7 +54,7 @@ namespace com.spacepuppy
             if (this.Build == 0)
                 return string.Format("{0}.{1}.{2}", Major, Minor, Patch);
             else
-                return string.Format("{0}.{1}.{2} build {3}", Major, Minor, Patch, Build);
+                return string.Format("{0}.{1}.{2}.{3}", Major, Minor, Patch, Build);
         }
 
         public override bool Equals(object other)

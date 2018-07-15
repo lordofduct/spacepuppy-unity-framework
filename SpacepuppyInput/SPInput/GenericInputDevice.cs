@@ -94,6 +94,19 @@ namespace com.spacepuppy.SPInput
             set { _active = value; }
         }
 
+        public bool AnyInputActivated
+        {
+            get
+            {
+                var e = _signatures.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current.GetInputIsActivated()) return true;
+                }
+                return false;
+            }
+        }
+
         public bool Contains(string id)
         {
             return _signatures.Contains(id);
