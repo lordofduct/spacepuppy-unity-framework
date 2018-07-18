@@ -25,7 +25,7 @@ namespace com.spacepuppy.Spawn
         private bool _spawnAsChild = false;
 
         [SerializeField()]
-        [OneOrMany()]
+        [ReorderableArray()]
         [Tooltip("Objects available for spawning. When spawn is called with no arguments a prefab is selected at random, unless a ISpawnSelector is available on the SpawnPoint.")]
         private GameObject[] _prefabs;
 

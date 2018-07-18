@@ -85,6 +85,7 @@
     <Compile Include="Collections\IForeachEnumerator.cs" />
     <Compile Include="Collections\LightEnumerator.cs" />
     <Compile Include="Collections\MultitonPool.cs" />
+    <Compile Include="Collections\PointOctree.cs" />
     <Compile Include="Collections\SamplingCharEnumerator.cs" />
     <Compile Include="Collections\BiDictionary.cs" />
     <Compile Include="Collections\CircularQueue.cs" />

@@ -15,6 +15,8 @@ namespace com.spacepuppy.AI.Sensors
 
         SPEntity Entity { get; }
 
+        bool OmniPresent { get; }
+
     }
 
     public abstract class AbstractAspect : SPEntityComponent, IAspect

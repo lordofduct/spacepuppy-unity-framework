@@ -57,6 +57,15 @@ namespace com.spacepuppy.AI.Sensors.Visual
 
         #region Methods
 
+        public override BoundingSphere GetBoundingSphere()
+        {
+            var pos = this.transform.position + this.Direction * this.Range * 0.5f;
+
+            double r1 = this.Range / 2d;
+            double r2 = System.Math.Max(this.StartRadius, this.EndRadius);
+            return new BoundingSphere(pos, (float)System.Math.Sqrt(r1 * r1 + r2 * r2));
+        }
+
         protected override bool TestVisibility(VisualAspect aspect)
         {
             //if not in cylinder, can not see it

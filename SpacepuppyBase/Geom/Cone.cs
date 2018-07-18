@@ -128,8 +128,13 @@ namespace com.spacepuppy.Geom
 
         public Sphere GetBoundingSphere()
         {
-            //TODO
-            throw new System.NotImplementedException();
+            var rod = _end - _start;
+            double r1 = rod.magnitude;
+            rod /= (float)r1;
+            r1 /= 2d;
+            double r2 = System.Math.Max(_startRad, _endRad);
+
+            return new Sphere(_start + rod * (float)r1, (float)System.Math.Sqrt(r1 * r1 + r2 * r2));
         }
 
         public IEnumerable<Vector3> GetAxes()

@@ -12,46 +12,114 @@ namespace com.spacepuppy.AI.Sensors.Visual
         #region Static Multiton Interface
 
         public static readonly MultitonPool<IAspect> Pool = new MultitonPool<IAspect>();
+
+        private static readonly PointOctree<IAspect> _staticOctree = new PointOctree<IAspect>(10, (a) => a != null ? a.transform.position : Vector3.zero);
+        private static readonly PointOctree<IAspect> _dynamicOctree = new PointOctree<IAspect>(10, (a) => a != null ? a.transform.position : Vector3.zero);
+        private static readonly HashSet<VisualAspect> _omniAspects = new HashSet<VisualAspect>();
+
+        public static int GetNearby(ICollection<IAspect> coll, Vector3 pos, float radius)
+        {
+            //TODO - replace this with the octree implementation once bug fixed
+
+            int cnt = 0;
+
+            var e = Pool.GetEnumerator();
+            float r2 = radius * radius;
+            while(e.MoveNext())
+            {
+                if(e.Current.OmniPresent || (e.Current.transform.position - pos).sqrMagnitude <= r2)
+                {
+                    cnt++;
+                    coll.Add(e.Current);
+                }
+            }
+
+            return cnt;
+        }
+
+        /*
+         * TODO - must first bug-fix Octree to use this.
+         * 
         
-        [System.Obsolete("Use VisualAspect.Pool instead.")]
-        public static IAspect[] GetAspects()
+        public static int GetNearby(ICollection<IAspect> coll, Vector3 pos, float radius)
         {
-            return Pool.FindAll(null);
+            int cnt = 0;
+
+            if(_omniAspects.Count > 0)
+            {
+                var e = _omniAspects.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    coll.Add(e.Current);
+                    cnt++;
+                }
+            }
+
+            if(_staticOctree.Count > 0)
+            {
+                cnt += _staticOctree.GetNearby(coll, pos, radius);
+            }
+
+            if (_dynamicOctree.Count > 0)
+            {
+                cnt += _dynamicOctree.GetNearby(coll, pos, radius);
+            }
+
+            return cnt;
         }
 
-        public static bool Any(System.Func<IAspect, bool> predicate)
+        static VisualAspect()
         {
-            return !object.ReferenceEquals(Pool.Find(predicate), null);
+            GameLoopEntry.EarlyUpdate += OnUpdate;
         }
 
-        [System.Obsolete("Use VisualAspect.Pool.Find instead.")]
-        public static IAspect GetAspect(System.Func<IAspect, bool> predicate)
+        private static float _timer;
+        private static void OnUpdate(object sender, System.EventArgs ev)
         {
-            return Pool.Find(predicate);
+            _timer += Time.unscaledDeltaTime;
+            if(_timer > 0.1f)
+            {
+                _timer = 0f;
+                _dynamicOctree.Resync();
+            }
+        }
+         */
+
+        private void CategorizeAspect()
+        {
+            Pool.AddReference(this);
+            //if (_omniPresent)
+            //{
+            //    _omniAspects.Add(this);
+            //}
+            //else if (_dynamic)
+            //{
+            //    _dynamicOctree.Add(this);
+            //}
+            //else
+            //{
+            //    _staticOctree.Add(this);
+            //}
         }
 
-        [System.Obsolete("Use VisualAspect.Pool.FindAll instead.")]
-        public static IList<IAspect> GetAspects(System.Func<IAspect, bool> predicate)
+        private void DecategorizeAspect()
         {
-            return Pool.FindAll(predicate);
-        }
-
-        [System.Obsolete("Use VisualAspect.Pool.FindAll instead.")]
-        public static int GetAspects(ICollection<IAspect> lst, System.Func<IAspect, bool> predicate)
-        {
-            return Pool.FindAll(lst, predicate);
-        }
-
-        [System.Obsolete("Use VisualAspect.Pool.FindAll instead.")]
-        public static int GetAspects<T>(ICollection<T> lst, System.Func<T, bool> predicate) where T : class, IAspect
-        {
-            return Pool.FindAll<T>(lst, predicate);
+            Pool.RemoveReference(this);
+            //if (_omniPresent)
+            //{
+            //    _omniAspects.Remove(this);
+            //}
+            //else if (_dynamic)
+            //{
+            //    _dynamicOctree.Remove(this);
+            //}
+            //else
+            //{
+            //    _staticOctree.Remove(this);
+            //}
         }
 
         #endregion
-
-
-
 
         #region Fields
 
@@ -65,13 +133,17 @@ namespace com.spacepuppy.AI.Sensors.Visual
         [Tooltip("This Aspect is always visible regardless.")]
         private bool _omniPresent;
 
+        [SerializeField]
+        [Tooltip("This aspect can move and therefore should have the octree updated.")]
+        private bool _dynamic;
+
         #endregion
 
         #region CONSTRUCTOR
 
         protected override void OnEnable()
         {
-            Pool.AddReference(this);
+            this.CategorizeAspect();
 
             base.OnEnable();
         }
@@ -80,7 +152,51 @@ namespace com.spacepuppy.AI.Sensors.Visual
         {
             base.OnDisable();
 
-            Pool.RemoveReference(this);
+            this.DecategorizeAspect();
+        }
+
+        #endregion
+
+        #region Properties
+
+        public bool OmniPresent
+        {
+            get { return _omniPresent; }
+            set
+            {
+                if (_omniPresent == value) return;
+
+                if (this.isActiveAndEnabled)
+                {
+                    this.DecategorizeAspect();
+                    _omniPresent = value;
+                    this.CategorizeAspect();
+                }
+                else
+                {
+                    _omniPresent = value;
+                }
+            }
+        }
+
+        public bool Dynamic
+        {
+            get { return _dynamic; }
+            set
+            {
+                if (_dynamic == value) return;
+
+                if (this.isActiveAndEnabled)
+                {
+                    this.DecategorizeAspect();
+                    _dynamic = value;
+                    if (this.isActiveAndEnabled) this.CategorizeAspect();
+                }
+                else
+                {
+                    _dynamic = value;
+                }
+            }
         }
 
         #endregion
@@ -103,14 +219,8 @@ namespace com.spacepuppy.AI.Sensors.Visual
             get { return _aspectColor; }
             set { _aspectColor = value; }
         }
-
-        public bool OmniPresent
-        {
-            get { return _omniPresent; }
-            set { _omniPresent = value; }
-        }
-
+        
         #endregion
-
+        
     }
 }

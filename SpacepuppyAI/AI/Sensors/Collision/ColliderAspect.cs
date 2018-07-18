@@ -47,7 +47,7 @@ namespace com.spacepuppy.AI.Sensors.Collision
             get { return 0f; }
         }
 
-        bool OmniPresent
+        bool IAspect.OmniPresent
         {
             get { return false; }
         }
