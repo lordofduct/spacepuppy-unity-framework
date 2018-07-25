@@ -11,7 +11,7 @@ namespace com.spacepuppy.Collections
 
         #region Fields
 
-        private static ObjectCachePool<TempList<T>> _pool = new ObjectCachePool<TempList<T>>(-1, () => new TempList<T>());
+        private static ObjectCachePool<TempList<T>> _pool = new ObjectCachePool<TempList<T>>(10, () => new TempList<T>());
 
         private int _maxCapacityOnRelease;
         private int _version;

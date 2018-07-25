@@ -90,6 +90,15 @@ namespace com.spacepuppy.AI.Sensors.Visual
             return this.transform.position + (this.transform.rotation * _center);
         }
 
+        public override BoundingSphere GetBoundingSphere()
+        {
+            Vector3 pos = this.GetCenterInWorldSpace();
+            double rad = (_height / 2d);
+            rad = System.Math.Sqrt(rad * rad + (double)(_radius * _radius));
+
+            return new BoundingSphere(pos, (float)rad);
+        }
+
         protected override bool TestVisibility(VisualAspect aspect)
         {
             //if not in cylinder, can not see it

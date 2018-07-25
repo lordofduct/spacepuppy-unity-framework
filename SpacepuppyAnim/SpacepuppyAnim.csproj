@@ -52,6 +52,7 @@
     <Compile Include="Anim\Blend\AnimationBlendGraph.cs" />
     <Compile Include="Anim\Blend\IndexedAnimationSelector.cs" />
     <Compile Include="Anim\Exceptions.cs" />
+    <Compile Include="Anim\IAnimControllerMask.cs" />
     <Compile Include="Anim\IKSolver.cs" />
     <Compile Include="Anim\IScriptableAnimationClip.cs" />
     <Compile Include="Anim\ISPAnimator.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Anim\Legacy\SPLegacyAnimation.cs" />
     <Compile Include="Anim\MaskCollection.cs" />
     <Compile Include="Anim\PropertyAttributes.cs" />
+    <Compile Include="Anim\ISPAnimationMask.cs" />
     <Compile Include="Mecanim\MecanimSpeedScaler.cs" />
     <Compile Include="Anim\SPAnimationController.cs" />
     <Compile Include="Anim\SPAnimClip.cs" />

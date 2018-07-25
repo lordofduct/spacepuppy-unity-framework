@@ -12,7 +12,7 @@ namespace com.spacepuppy.Collections
 
         #region Fields
 
-        private static ObjectCachePool<TempHashSet<T>> _pool = new ObjectCachePool<TempHashSet<T>>(-1, () => new TempHashSet<T>());
+        private static ObjectCachePool<TempHashSet<T>> _pool = new ObjectCachePool<TempHashSet<T>>(10, () => new TempHashSet<T>());
 
         private int _maxCapacityOnRelease;
         //private int _version;

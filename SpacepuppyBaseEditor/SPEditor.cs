@@ -24,6 +24,7 @@ namespace com.spacepuppyeditor
         private SPEditorAddonDrawer[] _addons;
 
         private List<ShownPropertyInfo> _shownFields;
+        private ConstantlyRepaintEditorAttribute _constantlyRepaint;
 
         #endregion
 
@@ -32,27 +33,29 @@ namespace com.spacepuppyeditor
         protected virtual void OnEnable()
         {
             var tp = this.target.GetType();
-            var fields = tp.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-            foreach(var f in fields)
+            var fields = tp.GetMembers(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
+            foreach (var f in fields)
             {
                 var attribs = f.GetCustomAttributes(typeof(ShowNonSerializedPropertyAttribute), false) as ShowNonSerializedPropertyAttribute[];
-                if(attribs != null && attribs.Length > 0)
+                if (attribs != null && attribs.Length > 0)
                 {
                     if (_shownFields == null) _shownFields = new List<ShownPropertyInfo>();
                     var attrib = attribs[0];
                     _shownFields.Add(new ShownPropertyInfo()
                     {
                         Attrib = attrib,
-                        FieldInfo = f,
+                        MemberInfo = f,
                         Label = new GUIContent(attrib.Label ?? f.Name, attrib.Tooltip)
                     });
                 }
             }
+
+            _constantlyRepaint = tp.GetCustomAttributes(typeof(ConstantlyRepaintEditorAttribute), false).FirstOrDefault() as ConstantlyRepaintEditorAttribute;
         }
 
         protected virtual void OnDisable()
         {
-            
+
         }
 
         #endregion
@@ -61,7 +64,7 @@ namespace com.spacepuppyeditor
 
         public sealed override void OnInspectorGUI()
         {
-            if (!(this.target is SPComponent) && !EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_SPEDITOR_ISDEFAULT_ACTIVE, true))
+            if (!(this.target is SPComponent) && !SpacepuppySettings.UseSPEditorAsDefaultEditor)
             {
                 base.OnInspectorGUI();
                 return;
@@ -95,12 +98,12 @@ namespace com.spacepuppyeditor
                 {
                     var cache = SPGUI.DisableIf(info.Attrib.Readonly);
 
-                    var value = info.FieldInfo.GetValue(this.target);
+                    var value = DynamicUtil.GetValue(this.target, info.MemberInfo);
                     EditorGUI.BeginChangeCheck();
-                    value = SPEditorGUILayout.DefaultPropertyField(info.Label, value, info.FieldInfo.FieldType);
+                    value = SPEditorGUILayout.DefaultPropertyField(info.Label, value, DynamicUtil.GetReturnType(info.MemberInfo));
                     if (EditorGUI.EndChangeCheck())
                     {
-                        info.FieldInfo.SetValue(this.target, value);
+                        DynamicUtil.SetValue(this.target, info.MemberInfo, value);
                     }
 
                     cache.Reset();
@@ -180,11 +183,11 @@ namespace com.spacepuppyeditor
                     }
                 }
             }
-            
+
             for (int i = 0; i < _headerDrawers.Count; i++)
             {
                 var drawer = _headerDrawers[i];
-                if(drawer is DecoratorDrawer)
+                if (drawer is DecoratorDrawer)
                 {
                     var decorator = drawer as DecoratorDrawer;
                     var h = decorator.GetHeight();
@@ -200,7 +203,7 @@ namespace com.spacepuppyeditor
                 }
             }
 
-            if(_addons != null)
+            if (_addons != null)
             {
                 foreach (var d in _addons)
                 {
@@ -222,7 +225,10 @@ namespace com.spacepuppyeditor
 
         public override bool RequiresConstantRepaint()
         {
-            return base.RequiresConstantRepaint() || (Application.isPlaying && _shownFields != null);
+            return base.RequiresConstantRepaint() ||
+                   (Application.isPlaying && _shownFields != null && _shownFields.Count > 0) ||
+                   (_constantlyRepaint != null && (Application.isPlaying || !_constantlyRepaint.RuntimeOnly)) ||
+                   (_addons != null && _addons.Length > 0 && _addons.Any((o) => o.RequiresConstantRepaint()));
         }
 
         #endregion
@@ -304,7 +310,7 @@ namespace com.spacepuppyeditor
         {
 
             public ShowNonSerializedPropertyAttribute Attrib;
-            public System.Reflection.FieldInfo FieldInfo;
+            public System.Reflection.MemberInfo MemberInfo;
             public GUIContent Label;
 
         }

@@ -75,13 +75,13 @@ namespace com.spacepuppy.AI.BehaviourTree.Components
             }
             else
             {
-                if(_variableUpdateParams.HasFlag(VariableUpdateOptions.OnlyUpdateAspectIfPreviousUnseen))
+                if((_variableUpdateParams & VariableUpdateOptions.OnlyUpdateAspectIfPreviousUnseen) != 0)
                 {
                     var old = ai.Variables[_variable] as IAspect;
                     if (old != null && _sensor.Visible(old)) return ActionResult.Success;
                 }
 
-                if(_variableUpdateParams.HasFlag(VariableUpdateOptions.ClearPreviousAspectIfUnseen))
+                if((_variableUpdateParams & VariableUpdateOptions.ClearPreviousAspectIfUnseen) != 0)
                 {
                     var old = ai.Variables[_variable] as IAspect;
                     if (old != null && !_sensor.Visible(old)) ai.Variables[_variable] = null;
@@ -112,14 +112,14 @@ namespace com.spacepuppy.AI.BehaviourTree.Components
 
                 if (target == null)
                 {
-                    if (_variableUpdateParams.HasFlag(VariableUpdateOptions.AlwaysUpdate))
+                    if ((_variableUpdateParams & VariableUpdateOptions.AlwaysUpdate) != 0)
                         ai.Variables[_variable] = null;
 
                     return ActionResult.Failed;
                 }
                 else
                 {
-                    if (_variableUpdateParams.HasFlag(VariableUpdateOptions.StoreOnlyPosition))
+                    if ((_variableUpdateParams & VariableUpdateOptions.StoreOnlyPosition) != 0)
                         ai.Variables[_variable] = target.transform.position;
                     else
                         ai.Variables[_variable] = target;

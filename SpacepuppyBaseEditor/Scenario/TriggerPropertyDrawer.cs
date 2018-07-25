@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
 
@@ -48,7 +49,7 @@ namespace com.spacepuppyeditor.Scenario
 
             _targetList = CachedReorderableList.GetListDrawer(prop.FindPropertyRelative(PROP_TARGETS), _targetList_DrawHeader, _targetList_DrawElement, _targetList_OnAdd);
 
-            if(!_customInspector)
+            if (!_customInspector)
             {
                 if (this.fieldInfo != null)
                 {
@@ -209,6 +210,30 @@ namespace com.spacepuppyeditor.Scenario
                 property.serializedObject.ApplyModifiedProperties();
             if (_targetList.index >= _targetList.count) _targetList.index = -1;
 
+            var ev = Event.current;
+            if (ev != null)
+            {
+                switch(ev.type)
+                {
+                    case EventType.DragUpdated:
+                    case EventType.DragPerform:
+                        {
+                            if(listRect.Contains(ev.mousePosition))
+                            {
+                                var refs = DragAndDrop.objectReferences;
+                                DragAndDrop.visualMode = refs.Length > 0 ? DragAndDropVisualMode.Link : DragAndDropVisualMode.Rejected;
+
+                                if (ev.type == EventType.DragPerform && refs.Length > 0)
+                                {
+                                    ev.Use();
+                                    AddObjectsToTrigger(property, refs);
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+            
             return new Rect(position.xMin, listRect.yMax, position.width, position.height - listRect.height);
         }
 
@@ -313,7 +338,7 @@ namespace com.spacepuppyeditor.Scenario
             if(EditorGUI.EndChangeCheck())
             {
                 var actInfo = TriggerTargetPropertyDrawer.GetTriggerActivationInfo(element);
-                targProp.objectReferenceValue = TriggerTargetPropertyDrawer.IsValidTriggerTarget(targObj, actInfo.ActivationType) ? targObj : null;
+                targProp.objectReferenceValue = TriggerTarget.IsValidTriggerTarget(targObj, actInfo.ActivationType) ? targObj : null;
             }
             EditorGUI.EndProperty();
             
@@ -346,6 +371,52 @@ namespace com.spacepuppyeditor.Scenario
             var r1 = new Rect(r0.xMax, area.yMin, Mathf.Max(0f, area.width - r0.width), EditorGUIUtility.singleLineHeight);
             EditorGUI.LabelField(r0, index.ToString("00:"));
             TriggerTargetPropertyDrawer.DrawTriggerActivationTypeDropdown(r1, property, false);
+        }
+        
+        /// <summary>
+        /// Adds targets to a Trigger/SPEvent.
+        /// 
+        /// This method applies changes to the SerializedProperty. Only call if you expect this behaviour.
+        /// </summary>
+        /// <param name="triggerProperty"></param>
+        /// <param name="objs"></param>
+        public static void AddObjectsToTrigger(SerializedProperty triggerProperty, UnityEngine.Object[] objs)
+        {
+            if (triggerProperty == null) throw new System.ArgumentNullException("triggerProperty");
+
+            try
+            {
+                triggerProperty.serializedObject.ApplyModifiedProperties();
+                var trigger = EditorHelper.GetTargetObjectOfProperty(triggerProperty) as BaseSPEvent;
+                if (trigger == null) return;
+
+                using (var set = TempCollection.GetSet<UnityEngine.Object>())
+                {
+                    for (int i = 0; i < trigger.Targets.Count; i++)
+                    {
+                        set.Add(trigger.Targets[i].Target);
+                    }
+
+                    foreach (var obj in objs)
+                    {
+                        if (set.Contains(obj)) continue;
+                        set.Add(obj);
+
+                        var targ = trigger.AddNew();
+                        if (TriggerTarget.IsValidTriggerTarget(obj, TriggerActivationType.TriggerAllOnTarget))
+                            targ.ConfigureTriggerAll(obj);
+                        else
+                            targ.ConfigureCallMethod(obj, "");
+                        targ.Weight = 1f;
+                    }
+                }
+
+                triggerProperty.serializedObject.Update();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         #endregion

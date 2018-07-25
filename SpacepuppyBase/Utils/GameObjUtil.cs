@@ -27,7 +27,7 @@ namespace com.spacepuppy.Utils
 
             return (obj is GameObject || obj is Component || obj is IGameObjectSource);
         }
-
+        
         /*
         public static GameObject GetGameObjectFromSource(object obj)
         {
@@ -56,9 +56,9 @@ namespace com.spacepuppy.Utils
             if (obj is GameObject)
                 return obj as GameObject;
             if (obj is Component)
-                return (obj as Component).gameObject;
+                return ObjUtil.IsObjectAlive(obj as Component) ? (obj as Component).gameObject : null;
             if (obj is IGameObjectSource)
-                return (obj as IGameObjectSource).gameObject;
+                return obj.IsNullOrDestroyed() ? null : (obj as IGameObjectSource).gameObject;
 
             return null;
         }
@@ -93,11 +93,11 @@ namespace com.spacepuppy.Utils
             if (obj is Transform)
                 return obj as Transform;
             if (obj is GameObject)
-                return (obj as GameObject).transform;
+                return ObjUtil.IsObjectAlive(obj as GameObject) ? (obj as GameObject).transform : null;
             if (obj is Component)
-                return (obj as Component).transform;
+                return ObjUtil.IsObjectAlive(obj as Component) ? (obj as Component).transform : null;
             if (obj is IGameObjectSource)
-                return (obj as IGameObjectSource).transform;
+                return obj.IsNullOrDestroyed() ? null : (obj as IGameObjectSource).transform;
 
             return null;
         }
@@ -109,7 +109,7 @@ namespace com.spacepuppy.Utils
             if (respectProxy && obj is IProxy)
             {
                 obj = (obj as IProxy).GetTarget();
-                if (obj == null) return null;
+                if (obj.IsNullOrDestroyed()) return null;
             }
 
             if (obj is IComponent) obj = (obj as IComponent).component;
@@ -135,7 +135,7 @@ namespace com.spacepuppy.Utils
             if (respectProxy && obj is IProxy)
             {
                 obj = (obj as IProxy).GetTarget();
-                if (obj == null) return null;
+                if (obj.IsNullOrDestroyed()) return null;
             }
 
             if (obj is IComponent) obj = (obj as IComponent).component;
@@ -345,23 +345,6 @@ namespace com.spacepuppy.Utils
 #endregion
         
 #region Search/Find
-
-        public static bool CompareName(this GameObject go, string name)
-        {
-            if (go == null) return false;
-
-            return go.name == name;
-        }
-
-        public static bool CompareName(this Component c, string name)
-        {
-            if (c == null) return false;
-
-            if (c is SPEntity)
-                return (c as SPEntity).CompareName(name);
-            else
-                return c.name == name;
-        }
 
         public static GameObject Find(this GameObject go, string spath)
         {
@@ -657,29 +640,32 @@ namespace com.spacepuppy.Utils
         public static string GetPathNameRelativeTo(this Transform t, Transform parent)
         {
             if (t == null) return null;
-            if (t == parent) return null;
+            if (parent != null && !t.IsChildOf(parent)) return null;
 
             var bldr = StringUtil.GetTempStringBuilder();
             bldr.Append(t.name);
             t = t.parent;
-            while(t != null && t != parent)
+            while(t != parent)
             {
                 bldr.Insert(0, '/');
                 bldr.Insert(0, t.name);
+                t = t.parent;
             }
             return StringUtil.Release(bldr);
         }
 
         public static string GetFullPathName(this Transform t)
         {
-            var builder = StringUtil.GetTempStringBuilder();
-            while (t.parent != null)
+            var bldr = StringUtil.GetTempStringBuilder();
+            bldr.Append(t.name);
+            t = t.parent;
+            while (t != null)
             {
+                bldr.Insert(0, @"\");
+                bldr.Insert(0, t.name);
                 t = t.parent;
-                builder.Insert(0, @"\");
-                builder.Insert(0, t.name);
             }
-            return StringUtil.Release(builder);
+            return StringUtil.Release(bldr);
         }
 
 #endregion

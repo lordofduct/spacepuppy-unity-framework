@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0618 // ignore obsolete warning
+using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using com.spacepuppyeditor.Internal;
 namespace com.spacepuppyeditor.Anim
 {
 
+    [System.Obsolete("MaskCollection is obsolete, so is its inspector.")]
     [CustomPropertyDrawer(typeof(MaskCollection))]
     public class MaskCollectionPropertyDrawer : PropertyDrawer
     {

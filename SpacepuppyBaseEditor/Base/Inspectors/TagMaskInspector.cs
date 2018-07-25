@@ -8,67 +8,65 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Base
 {
+
     [CustomPropertyDrawer(typeof(TagMask))]
     public class TagMaskInspector : PropertyDrawer
     {
 
-        #region Properties
-
-        private bool _showTags;
-
-        #endregion
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if(_showTags)
-            {
-                //+1 for the foldout
-                return (UnityEditorInternal.InternalEditorUtility.tags.Length + 1) * EditorGUIUtility.singleLineHeight;
-            }
-            else
-            {
-                return EditorGUIUtility.singleLineHeight;
-            }
+            return EditorGUIUtility.singleLineHeight;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var r = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
+            com.spacepuppyeditor.Project.TagDataInspector.Touch();
+            var targ = EditorHelper.GetTargetObjectOfProperty(property) as TagMask;
 
-            //this may change in later releases...
-            _showTags = EditorGUI.Foldout(r, _showTags, label);
-
-            if (_showTags)
+            var tags = UnityEditorInternal.InternalEditorUtility.tags;
+            int mask = 0;
+            if(targ.IntersectAll)
             {
-                EditorGUI.indentLevel++;
-
-                var targ = EditorHelper.GetTargetObjectOfProperty(property) as TagMask;
-
-                EditorGUI.BeginChangeCheck();
-                var tags = (from tag in UnityEditorInternal.InternalEditorUtility.tags select tag).ToArray();
-                foreach (var tag in tags)
-                {
-                    var bSelected = targ.Intersects(tag);
-                    r = new Rect(r.xMin, r.yMax, r.width, EditorGUIUtility.singleLineHeight);
-                    if (EditorGUI.Toggle(r,tag, bSelected))
-                    {
-                        targ.Add(tag);
-                    }
-                    else if(bSelected)
-                    {
-                        targ.Remove(tag);
-                    }
-                }
-
-                if (EditorGUI.EndChangeCheck())
-                {
-                    property.serializedObject.Update();
-                }
-
-                EditorGUI.indentLevel--;
+                mask = -1;
             }
-        }
+            else
+            {
+                for (int i = 0; i < tags.Length; i++)
+                {
+                    if (targ != null && targ.Intersects(tags[i]))
+                    {
+                        mask |= (1 << i);
+                    }
+                }
+            }
 
+            EditorGUI.BeginChangeCheck();
+            mask = EditorGUI.MaskField(position, label, mask, tags);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                property.serializedObject.ApplyModifiedProperties();
+                if (mask == -1 || mask == (1 << tags.Length) - 1)
+                {
+                    targ.IntersectAll = true;
+                }
+                else
+                {
+                    targ.Clear();
+                    for (int i = 0; i < tags.Length; i++)
+                    {
+                        if((mask & (1 << i)) != 0)
+                        {
+                            targ.Add(tags[i]);
+                        }
+                    }
+                }
+                property.serializedObject.Update();
+            }
+
+        }
+        
     }
 
 }

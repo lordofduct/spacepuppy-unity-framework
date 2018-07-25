@@ -73,7 +73,7 @@ namespace com.spacepuppyeditor.Scenario
             set
             {
                 _targetType = value;
-                _objectDrawer.RestrictionType = value ?? typeof(Component);
+                _objectDrawer.RestrictionType = value ?? typeof(UnityEngine.Object); //typeof(Component);
             }
         }
 

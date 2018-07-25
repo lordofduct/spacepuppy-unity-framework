@@ -239,7 +239,15 @@ namespace com.spacepuppyeditor.Components
         {
             if (ComponentUtil.IsAcceptableComponentType(this.RestrictionType))
             {
-                var fieldObjType = (!this.SearchChildren && !this.AllowProxy && TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Component))) ? this.RestrictionType : typeof(UnityEngine.GameObject);
+                //var fieldObjType = (!this.SearchChildren && !this.AllowProxy && TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Component))) ? this.RestrictionType : typeof(UnityEngine.GameObject);
+                System.Type fieldObjType;
+                if (this.AllowProxy)
+                    fieldObjType = typeof(UnityEngine.Object);
+                else if (!this.SearchChildren && TypeUtil.IsType(this.RestrictionType, typeof(UnityEngine.Component)))
+                    fieldObjType = this.RestrictionType;
+                else
+                    fieldObjType = typeof(UnityEngine.GameObject);
+
                 var obj = EditorGUI.ObjectField(position, property.objectReferenceValue, fieldObjType, this.AllowSceneObjects);
                 if(this.ForceOnlySelf)
                 {

@@ -69,13 +69,14 @@ namespace com.spacepuppy.Anim
         {
             if (clip is AnimationClip)
             {
-                var anim = controller.CreateAuxiliarySPAnim(clip as AnimationClip);
-                if (_applyCustomSettings) _settings.Apply(anim);
                 if (_crossFadeDur > 0f)
-                    anim.CrossFade(_crossFadeDur, _queueMode, _playMode);
+                    return controller.CrossFadeAuxiliary(clip as AnimationClip,
+                                                         _applyCustomSettings ? _settings : AnimSettings.Default,
+                                                         _crossFadeDur, _queueMode, _playMode);
                 else
-                    anim.Play(_queueMode, _playMode);
-                return anim;
+                    return controller.PlayAuxiliary(clip as AnimationClip,
+                                                    _applyCustomSettings ? _settings : AnimSettings.Default,
+                                                    _queueMode, _playMode);
             }
             else if (clip is IScriptableAnimationClip)
             {
@@ -223,9 +224,9 @@ namespace com.spacepuppy.Anim
             if (targ == null) return false;
 
             var anim = this.TryPlay(targ);
-            if (anim == null)
+            if (anim.IsNullOrDestroyed())
             {
-                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0.01f);
+                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0f);
                 return false;
             }
 
@@ -251,7 +252,7 @@ namespace com.spacepuppy.Anim
             var anim = this.TryPlay(targ);
             if (anim == null)
             {
-                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0.01f);
+                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0f);
                 return false;
             }
 
@@ -285,7 +286,7 @@ namespace com.spacepuppy.Anim
         {
             return obj is ISPAnimationSource || obj is ISPAnimator || obj is Animation;
         }
-
+        
         #endregion
 
     }

@@ -21,7 +21,7 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         [SerializeField()]
-        [SelectableObject()]
+        [SelectableObject]
         [DefaultFromSelf(HandleOnce =true)]
         private UnityEngine.Object _target;
         [SerializeField()]

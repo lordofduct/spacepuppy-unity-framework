@@ -122,5 +122,12 @@
         DoNotPlayIfPlaying = 1,
         PlayOverExisting = 2
     }
-    
+
+    public enum DisableMode
+    {
+        None,
+        DisableComponent,
+        DisableGameObject
+    }
+
 }

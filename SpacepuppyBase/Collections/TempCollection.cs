@@ -80,6 +80,16 @@ namespace com.spacepuppy.Collections
             return TempHashSet<T>.GetSet(e);
         }
 
+        public static TempDictionary<TKey, TValue> GetDict<TKey, TValue>()
+        {
+            return TempDictionary<TKey, TValue>.GetDict();
+        }
+
+        public static TempDictionary<TKey, TValue> GetDict<TKey, TValue>(IDictionary<TKey, TValue> dict)
+        {
+            return TempDictionary<TKey, TValue>.GetDict(dict);
+        }
+
         #endregion
 
     }

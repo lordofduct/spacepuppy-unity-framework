@@ -39,7 +39,8 @@ namespace com.spacepuppyeditor.Base
                     if (tp == typeof(IService)) return false;
 
                     //currently only allow interface services be listed
-                    return tp.IsInterface;
+                    //return tp.IsInterface;
+                    return true;
                 }
                 else if (typeof(ISingleton).IsAssignableFrom(tp))
                 {

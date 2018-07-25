@@ -110,18 +110,18 @@ namespace com.spacepuppy.AI.BehaviourTree
             const ParallelPassOptions mask = ParallelPassOptions.SucceedOnAny | ParallelPassOptions.FailOnAny;
             if ((_passOption & mask) > 0)
             {
-                if (_passOption.HasFlag(ParallelPassOptions.SucceedOnTie))
+                if ((_passOption & ParallelPassOptions.SucceedOnTie) != 0)
                 {
-                    if (_passOption.HasFlag(ParallelPassOptions.FailOnAny) && cntFail > 0)
+                    if ((_passOption & ParallelPassOptions.FailOnAny) != 0 && cntFail > 0)
                         return ActionResult.Failed;
-                    if (_passOption.HasFlag(ParallelPassOptions.SucceedOnAny) && cntSucc > 0)
+                    if ((_passOption & ParallelPassOptions.SucceedOnAny) != 0 && cntSucc > 0)
                         return ActionResult.Success;
                 }
                 else
                 {
-                    if (_passOption.HasFlag(ParallelPassOptions.SucceedOnAny) && cntSucc > 0)
+                    if ((_passOption & ParallelPassOptions.SucceedOnAny) != 0 && cntSucc > 0)
                         return ActionResult.Success;
-                    if (_passOption.HasFlag(ParallelPassOptions.FailOnAny) && cntFail > 0)
+                    if ((_passOption & ParallelPassOptions.FailOnAny) != 0 && cntFail > 0)
                         return ActionResult.Failed;
                 }
             }

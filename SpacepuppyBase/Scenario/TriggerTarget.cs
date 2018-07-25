@@ -3,8 +3,6 @@ using System.Linq;
 
 using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
-using System;
-using System.Collections.Generic;
 
 namespace com.spacepuppy.Scenario
 {
@@ -39,11 +37,7 @@ namespace com.spacepuppy.Scenario
         [UnityEngine.Serialization.FormerlySerializedAs("MethodName")]
         [SerializeField()]
         private string _methodName;
-
-
-        [System.NonSerialized()]
-        private ITriggerableMechanism[] _triggerAllCache;
-
+        
         #endregion
 
         #region Properties
@@ -100,7 +94,6 @@ namespace com.spacepuppy.Scenario
             this._triggerableArgs = null;
             this._activationType = TriggerActivationType.TriggerAllOnTarget;
             this._methodName = null;
-            _triggerAllCache = null;
         }
 
         public void ConfigureTriggerAll(GameObject targ, object arg = null)
@@ -117,7 +110,6 @@ namespace com.spacepuppy.Scenario
             }
             this._activationType = TriggerActivationType.TriggerAllOnTarget;
             this._methodName = null;
-            _triggerAllCache = null;
         }
 
         public void ConfigureTriggerAll(ITriggerableMechanism mechanism, object arg = null)
@@ -137,7 +129,32 @@ namespace com.spacepuppy.Scenario
             }
             this._activationType = TriggerActivationType.TriggerAllOnTarget;
             this._methodName = null;
-            _triggerAllCache = null;
+        }
+
+        public void ConfigureTriggerAll(UnityEngine.Object targ, object arg = null)
+        {
+            if (targ == null) throw new System.ArgumentNullException("targ");
+            if(GameObjectUtil.IsGameObjectSource(targ))
+            {
+                this.ConfigureTriggerAll(GameObjectUtil.GetGameObjectFromSource(targ));
+                return;
+            }
+            else if (!TriggerTarget.IsValidTriggerTarget(targ, TriggerActivationType.TriggerAllOnTarget))
+            {
+                throw new System.ArgumentException("Must be a game object source of some sort.", "targ");
+            }
+
+            this._triggerable = targ;
+            if (arg == null)
+            {
+                this._triggerableArgs = null;
+            }
+            else
+            {
+                this._triggerableArgs = new VariantReference[] { new VariantReference(arg) };
+            }
+            this._activationType = TriggerActivationType.TriggerAllOnTarget;
+            this._methodName = null;
         }
 
         public void ConfigureTriggerTarget(ITriggerableMechanism mechanism, object arg = null)
@@ -155,7 +172,6 @@ namespace com.spacepuppy.Scenario
             }
             this._activationType = TriggerActivationType.TriggerSelectedTarget;
             this._methodName = null;
-            _triggerAllCache = null;
         }
 
         public void ConfigureSendMessage(GameObject targ, string message, object arg = null)
@@ -172,13 +188,12 @@ namespace com.spacepuppy.Scenario
             }
             this._methodName = message;
             this._activationType = TriggerActivationType.SendMessage;
-            _triggerAllCache = null;
         }
 
-        public void ConfigureCallMethod(GameObject targ, string methodName, params object[] args)
+        public void ConfigureCallMethod(UnityEngine.Object targ, string methodName, params object[] args)
         {
             if (targ == null) throw new System.ArgumentNullException("targ");
-            this._triggerable = targ.transform;
+            this._triggerable = targ;
             if (args == null || args.Length == 0)
             {
                 this._triggerableArgs = null;
@@ -189,7 +204,6 @@ namespace com.spacepuppy.Scenario
             }
             this._methodName = methodName;
             this._activationType = TriggerActivationType.CallMethodOnSelectedTarget;
-            _triggerAllCache = null;
         }
 
         #endregion
@@ -232,355 +246,82 @@ namespace com.spacepuppy.Scenario
             var arg0 = (this._triggerableArgs != null && this._triggerableArgs.Length > 0) ? this._triggerableArgs[0].Value : arg;
             this.Trigger_Imp(sender, arg, arg0, instruction);
         }
-
+        
         private void Trigger_Imp(object sender, object incomingArg, object outgoingArg, BlockingTriggerYieldInstruction instruction)
         {
-            switch (this._activationType)
+            try
             {
-                case TriggerActivationType.TriggerAllOnTarget:
-                    {
-                        if (_triggerAllCache == null)
+                switch (this._activationType)
+                {
+                    case TriggerActivationType.TriggerAllOnTarget:
                         {
-                            //_triggerAllCache = _triggerable.GetComponentsAlt<ITriggerableMechanism>();
-                            var go = GameObjectUtil.GetGameObjectFromSource(_triggerable);
-                            if (go != null)
-                                _triggerAllCache = go.GetComponents<ITriggerableMechanism>();
-                            else if (_triggerable is ITriggerableMechanism)
-                                _triggerAllCache = new ITriggerableMechanism[] { _triggerable as ITriggerableMechanism };
-                            else
-                                _triggerAllCache = ArrayUtil.Empty<ITriggerableMechanism>();
-
-                            if(_triggerableArgs.Length > 1)
-                                System.Array.Sort(_triggerableArgs, TriggerableMechanismOrderComparer.Default);
+                            EventTriggerEvaluator.Current.TriggerAllOnTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable, 
+                                                                             sender, outgoingArg, instruction);
                         }
-                        if (instruction != null)
+                        break;
+                    case TriggerActivationType.TriggerSelectedTarget:
                         {
-                            foreach (var t in _triggerAllCache)
-                            {
-                                if (t.CanTrigger)
-                                {
-                                    if (t is IBlockingTriggerableMechanism)
-                                        (t as IBlockingTriggerableMechanism).Trigger(sender, outgoingArg, instruction);
-                                    else
-                                        t.Trigger(sender, outgoingArg);
-                                }
-                            }
+                            EventTriggerEvaluator.Current.TriggerSelectedTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                                sender, outgoingArg, instruction);
                         }
-                        else
+                        break;
+                    case TriggerActivationType.SendMessage:
                         {
-                            foreach (var t in _triggerAllCache)
-                            {
-                                if (t.CanTrigger)
-                                {
-                                    t.Trigger(sender, outgoingArg);
-                                }
-                            }
+                            EventTriggerEvaluator.Current.SendMessageToTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                              _methodName, outgoingArg);
                         }
-                    }
-                    break;
-                case TriggerActivationType.TriggerSelectedTarget:
-                    {
-                        //UnityEngine.Object targ = _triggerable;
-                        //if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                        //TriggerSelectedTarget(targ, sender, outgoingArg, instruction);
-                        TriggerSelectedTarget(_triggerable, sender, outgoingArg, instruction);
-                    }
-                    break;
-                case TriggerActivationType.SendMessage:
-                    {
-                        object targ = _triggerable;
-                        if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                        SendMessageToTarget(targ, _methodName, outgoingArg);
-                    }
-                    break;
-                case TriggerActivationType.CallMethodOnSelectedTarget:
-                    {
-                        CallMethodOnSelectedTarget(_triggerable, _methodName, _triggerableArgs);
-                    }
-                    break;
-                case TriggerActivationType.EnableTarget:
-                    {
-                        object targ = _triggerable;
-                        if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                        EnableTarget(_triggerable, ConvertUtil.ToEnum<EnableMode>(_methodName));
-                    }
-                    break;
-                case TriggerActivationType.DestroyTarget:
-                    {
-                        object targ = _triggerable;
-                        if (targ is IProxy) targ = (targ as IProxy).GetTarget(incomingArg);
-                        DestroyTarget(_triggerable);
-                    }
-                    break;
+                        break;
+                    case TriggerActivationType.CallMethodOnSelectedTarget:
+                        {
+                            EventTriggerEvaluator.Current.CallMethodOnSelectedTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                                     _methodName, _triggerableArgs);
+                        }
+                        break;
+                    case TriggerActivationType.EnableTarget:
+                        {
+                            EventTriggerEvaluator.Current.EnableTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable,
+                                                                       ConvertUtil.ToEnum<EnableMode>(_methodName));
+                        }
+                        break;
+                    case TriggerActivationType.DestroyTarget:
+                        {
+                            EventTriggerEvaluator.Current.DestroyTarget((_triggerable is IProxy) ? (_triggerable as IProxy).GetTarget(incomingArg) : _triggerable);
+                        }
+                        break;
+                }
+            }
+            catch(System.Exception ex)
+            {
+                Debug.LogException(ex, sender as UnityEngine.Object);
             }
         }
-
-        /*
-
-        private void Trigger_Imp_Old(object sender, object arg, BlockingTriggerYieldInstruction instruction)
-        {
-            switch (this._activationType)
-            {
-                case TriggerActivationType.TriggerAllOnTarget:
-                    {
-                        if (_triggerAllCache == null)
-                        {
-                            //_triggerAllCache = (from t in this._triggerable.GetComponentsAlt<ITriggerableMechanism>() orderby t.Order ascending select t).ToArray();
-                            _triggerAllCache = _triggerable.GetComponentsAlt<ITriggerableMechanism>();
-                            System.Array.Sort(_triggerableArgs, MechanismComparer.Default);
-                        }
-                        if (instruction != null)
-                        {
-                            foreach (var t in _triggerAllCache)
-                            {
-                                if (t.component != null && t.CanTrigger)
-                                {
-                                    if (t is IBlockingTriggerableMechanism)
-                                        (t as IBlockingTriggerableMechanism).Trigger(arg, instruction);
-                                    else
-                                        t.Trigger(arg);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (var t in _triggerAllCache)
-                            {
-                                if (t.component != null && t.CanTrigger)
-                                {
-                                    t.Trigger(arg);
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case TriggerActivationType.TriggerSelectedTarget:
-                    {
-                        if (_triggerable != null && _triggerable is ITriggerableMechanism)
-                        {
-                            if (instruction != null && _triggerable is IBlockingTriggerableMechanism)
-                            {
-                                var t = _triggerable as IBlockingTriggerableMechanism;
-                                if (t.CanTrigger) t.Trigger(arg);
-                            }
-                            else
-                            {
-                                var t = _triggerable as ITriggerableMechanism;
-                                if (t.CanTrigger) t.Trigger(arg);
-                            }
-                        }
-                    }
-                    break;
-                case TriggerActivationType.SendMessage:
-                    {
-                        var go = GameObjectUtil.GetGameObjectFromSource(this._triggerable);
-                        if (go != null && this._methodName != null)
-                        {
-                            go.SendMessage(this._methodName, arg, SendMessageOptions.DontRequireReceiver);
-                        }
-                    }
-                    break;
-                case TriggerActivationType.CallMethodOnSelectedTarget:
-                    {
-                        if (this._methodName != null)
-                        {
-                            //CallMethod does not support using the passed in arg
-                            //var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
-
-                            object[] args = null;
-                            if (_triggerableArgs != null && _triggerableArgs.Length > 0)
-                            {
-                                args = new object[_triggerableArgs.Length];
-                                for (int i = 0; i < args.Length; i++)
-                                {
-                                    if (_triggerableArgs[i] != null) args[i] = _triggerableArgs[i].Value;
-                                }
-                            }
-
-                            if (args != null && args.Length == 1)
-                            {
-                                DynamicUtil.SetValue(this._triggerable, this._methodName, args[0]);
-                            }
-                            else
-                            {
-                                DynamicUtil.InvokeMethod(this._triggerable, this._methodName, args);
-                            }
-                        }
-                    }
-                    break;
-                case TriggerActivationType.EnableTarget:
-                    {
-                        var go = GameObjectUtil.GetGameObjectFromSource(_triggerable);
-                        if (go != null)
-                        {
-                            switch (ConvertUtil.ToEnum<EnableMode>(_methodName))
-                            {
-                                case EnableMode.Disable:
-                                    go.SetActive(false);
-                                    break;
-                                case EnableMode.Enable:
-                                    go.SetActive(true);
-                                    break;
-                                case EnableMode.Toggle:
-                                    go.SetActive(!go.activeSelf);
-                                    break;
-                            }
-                        }
-                    }
-                    break;
-                case TriggerActivationType.DestroyTarget:
-                    {
-                        var go = GameObjectUtil.GetGameObjectFromSource(_triggerable);
-                        if (go != null)
-                        {
-                            ObjUtil.SmartDestroy(go);
-                        }
-                    }
-                    break;
-            }
-        }
-
-        */
 
         #endregion
 
 
-            
-        #region Static Methods
+        #region Static Utils
 
-        public static void TriggerAllOnTarget(object target, object sender, object arg, BlockingTriggerYieldInstruction instruction = null)
+        public static bool IsValidTriggerTarget(UnityEngine.Object obj, TriggerActivationType act)
         {
-            //var go = GameObjectUtil.GetGameObjectFromSource(target);
-            //if (go == null) return;
+            if (obj == null) return true;
 
-            using (var lst = com.spacepuppy.Collections.TempCollection.GetList<ITriggerableMechanism>())
+            switch (act)
             {
-                var go = GameObjectUtil.GetGameObjectFromSource(target);
-                if (go != null)
-                {
-                    go.GetComponents<ITriggerableMechanism>(lst);
-                    lst.Sort(TriggerableMechanismOrderComparer.Default);
-                }
-                else if (target is ITriggerableMechanism)
-                    lst.Add(target as ITriggerableMechanism);
-                
-                if (instruction != null)
-                {
-                    var e = lst.GetEnumerator();
-                    while (e.MoveNext())
-                    {
-                        var t = e.Current;
-                        if (t.CanTrigger)
-                        {
-                            if (t is IBlockingTriggerableMechanism)
-                                (t as IBlockingTriggerableMechanism).Trigger(sender, arg, instruction);
-                            else
-                                t.Trigger(sender, arg);
-                        }
-                    }
-                }
-                else
-                {
-                    var e = lst.GetEnumerator();
-                    while (e.MoveNext())
-                    {
-                        var t = e.Current;
-                        if (t.CanTrigger)
-                        {
-                            t.Trigger(sender, arg);
-                        }
-                    }
-                }
+                case TriggerActivationType.TriggerAllOnTarget:
+                case TriggerActivationType.TriggerSelectedTarget:
+                    return (GameObjectUtil.IsGameObjectSource(obj) || obj is ITriggerableMechanism || obj is IProxy);
+                case TriggerActivationType.SendMessage:
+                    return GameObjectUtil.IsGameObjectSource(obj) || obj is IProxy;
+                case TriggerActivationType.CallMethodOnSelectedTarget:
+                    return true;
+                case TriggerActivationType.EnableTarget:
+                case TriggerActivationType.DestroyTarget:
+                    return GameObjectUtil.IsGameObjectSource(obj) || obj is IProxy;
             }
+
+            return false;
         }
 
-        public static void TriggerSelectedTarget(object target, object sender, object arg, BlockingTriggerYieldInstruction instruction = null)
-        {
-            if (target != null && target is ITriggerableMechanism)
-            {
-                if (instruction != null && target is IBlockingTriggerableMechanism)
-                {
-                    var t = target as IBlockingTriggerableMechanism;
-                    if (t.CanTrigger) t.Trigger(sender, arg);
-                }
-                else
-                {
-                    var t = target as ITriggerableMechanism;
-                    if (t.CanTrigger) t.Trigger(sender, arg);
-                }
-            }
-        }
-
-        public static void SendMessageToTarget(object target, string message, object arg)
-        {
-            var go = GameObjectUtil.GetGameObjectFromSource(target);
-            if (go != null && message != null)
-            {
-                go.SendMessage(message, arg, SendMessageOptions.DontRequireReceiver);
-            }
-        }
-
-        public static void CallMethodOnSelectedTarget(object target, string methodName, VariantReference[] methodArgs)
-        {
-            if (methodName != null)
-            {
-                //CallMethod does not support using the passed in arg
-                //var args = (from a in this._triggerableArgs select (a != null) ? a.Value : null).ToArray();
-
-                object[] args = null;
-                if (methodArgs != null && methodArgs.Length > 0)
-                {
-                    args = new object[methodArgs.Length];
-                    for (int i = 0; i < args.Length; i++)
-                    {
-                        if (methodArgs[i] != null) args[i] = methodArgs[i].Value;
-                    }
-                }
-
-                if (args != null && args.Length == 1)
-                {
-                    DynamicUtil.SetValue(target, methodName, args[0]);
-                }
-                else
-                {
-                    DynamicUtil.InvokeMethod(target, methodName, args);
-                }
-            }
-        }
-
-        public static void EnableTarget(object target, EnableMode mode)
-        {
-            var go = GameObjectUtil.GetGameObjectFromSource(target);
-            if (go != null)
-            {
-                switch (mode)
-                {
-                    case EnableMode.Disable:
-                        go.SetActive(false);
-                        break;
-                    case EnableMode.Enable:
-                        go.SetActive(true);
-                        break;
-                    case EnableMode.Toggle:
-                        go.SetActive(!go.activeSelf);
-                        break;
-                }
-            }
-        }
-
-        public static void DestroyTarget(object target)
-        {
-            var go = GameObjectUtil.GetGameObjectFromSource(target);
-            if (go != null)
-            {
-                ObjUtil.SmartDestroy(go);
-            }
-            else if(target is UnityEngine.Object)
-            {
-                ObjUtil.SmartDestroy(target as UnityEngine.Object);
-            }
-        }
-        
         #endregion
 
     }

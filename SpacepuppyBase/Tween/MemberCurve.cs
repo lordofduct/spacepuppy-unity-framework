@@ -169,7 +169,7 @@ namespace com.spacepuppy.Tween
                 var attribs = tp.GetCustomAttributes(typeof(CustomMemberCurveAttribute), false).Cast<CustomMemberCurveAttribute>().ToArray();
                 foreach(var attrib in attribs)
                 {
-                    if (!priorities.ContainsKey(attrib.HandledMemberType) || priorities[attrib.HandledMemberType] > attrib.priority)
+                    if (!priorities.ContainsKey(attrib.HandledMemberType) || priorities[attrib.HandledMemberType] < attrib.priority)
                     {
                         priorities[attrib.HandledMemberType] = attrib.priority;
                         _memberTypeToCurveType[attrib.HandledMemberType] = tp;
@@ -269,7 +269,7 @@ namespace com.spacepuppy.Tween
             if (target == null) throw new System.ArgumentNullException("target");
             System.Type memberType;
             var accessor = MemberCurve.GetAccessor(target, propName, out memberType);
-
+            
             return MemberCurve.Create(memberType, accessor, ease, dur, start, end, option);
         }
 

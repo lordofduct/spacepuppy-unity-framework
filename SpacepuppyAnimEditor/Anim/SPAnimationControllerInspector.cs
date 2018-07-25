@@ -19,6 +19,7 @@ namespace com.spacepuppyeditor.Anim
         public const string PROP_ANIMCULLING = "_animCullingType";
         public const string PROP_TIMESUPPLIER = "_timeSupplier";
         public const string PROP_SPEED = "_speed";
+        public const string PROP_MASK = "_mask";
         public const string PROP_STATES_SERIALIZEDSTATES = "_serializedStates";
         public const string PROP_ANIMTOPLAYONSTART = "_animToPlayOnStart";
 
@@ -75,6 +76,7 @@ namespace com.spacepuppyeditor.Anim
                 var cache = SPGUI.Disable();
                 this.DrawPropertyField(PROP_TIMESUPPLIER);
                 this.DrawPropertyField(PROP_SPEED);
+                this.DrawPropertyField(PROP_MASK);
                 cache.Reset();
                 this.DrawPropertyField(PROP_STATES);
             }
@@ -84,6 +86,7 @@ namespace com.spacepuppyeditor.Anim
                 this.DrawPropertyField(PROP_ANIMCULLING, "Culling Type", false);
                 this.DrawPropertyField(PROP_TIMESUPPLIER);
                 this.DrawPropertyField(PROP_SPEED);
+                this.DrawPropertyField(PROP_MASK);
                 this.DrawPropertyField(PROP_STATES);
             }
         }

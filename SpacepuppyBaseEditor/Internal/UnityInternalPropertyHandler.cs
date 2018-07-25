@@ -49,6 +49,18 @@ namespace com.spacepuppyeditor.Internal
             }
         }
 
+        protected List<DecoratorDrawer> DecoratorDrawers
+        {
+            get
+            {
+                return _internalPropertyHandler.GetProperty("m_DecoratorDrawers") as List<DecoratorDrawer>;
+            }
+            set
+            {
+                _internalPropertyHandler.SetProperty("m_DecoratorDrawers", value);
+            }
+        }
+
         #endregion
 
         #region Methods

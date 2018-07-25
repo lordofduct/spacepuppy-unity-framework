@@ -189,6 +189,14 @@ namespace com.spacepuppy.SPInput.Legacy
             }
         }
 
+        public bool AnyInputActivated
+        {
+            get
+            {
+                return Input.anyKey;
+            }
+        }
+
         void IInputSignature.FixedUpdate()
         {
         }
@@ -196,6 +204,11 @@ namespace com.spacepuppy.SPInput.Legacy
         public bool Contains(string id)
         {
             return false;
+        }
+
+        IInputSignature IInputDevice.GetSignature(string id)
+        {
+            return null;
         }
         
         public float GetAxleState(string id)
@@ -215,12 +228,17 @@ namespace com.spacepuppy.SPInput.Legacy
                 return ButtonState.None;
         }
 
-        public bool GetButtonPressed(string id, float duration)
+        /// <summary>
+        /// Get ButtonState of Unity's Input manager. Does not support 'consume'.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="consume"></param>
+        /// <returns></returns>
+        ButtonState IInputDevice.GetButtonState(string id, bool consume)
         {
-            //TODO - how to track this?
-            throw new System.NotSupportedException();
+            return this.GetButtonState(id);
         }
-        
+
         public Vector2 GetCursorState(string id)
         {
             return Vector2.zero;

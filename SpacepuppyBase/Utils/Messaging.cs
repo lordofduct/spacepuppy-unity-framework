@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 using com.spacepuppy.Collections;
 
@@ -117,7 +118,7 @@ namespace com.spacepuppy.Utils
                 p = p.parent;
             }
         }
-
+        
         #endregion
 
         #region Global Execute
@@ -217,7 +218,161 @@ namespace com.spacepuppy.Utils
         }
 
         #endregion
+        
+        #region Broadcast Token
 
+        /// <summary>
+        /// Create a MessageToken to invoke at a later point. If no targets found null is returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="go"></param>
+        /// <returns></returns>
+        public static MessageToken<T> CreateExecuteToken<T>(GameObject go) where T : class
+        {
+            using (var lst = TempCollection.GetList<T>())
+            {
+                go.GetComponents<T>(lst);
+                if (lst.Count > 0)
+                {
+                    return new MessageToken<T>(lst.ToArray());
+                }
+            }
+
+
+            return null;
+        }
+
+        /// <summary>
+        /// Create a MessageToken to invoke at a later point. If no targets found null is returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="go"></param>
+        /// <returns></returns>
+        public static MessageToken<T> CreateExecuteUpwardsToken<T>(GameObject go) where T : class
+        {
+            using (var lst = TempCollection.GetList<T>())
+            {
+                var p = go.transform;
+                while (p != null)
+                {
+                    p.GetComponents<T>(lst);
+                    p = p.parent;
+                }
+
+                if (lst.Count > 0)
+                    return new MessageToken<T>(lst.ToArray());
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Create a MessageToken to invoke at a later point. If no targets found null is returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="go"></param>
+        /// <param name="includeInactiveObjects"></param>
+        /// <param name="includeDisabledComponents"></param>
+        /// <returns></returns>
+        public static MessageToken<T> CreateBroadcastToken<T>(GameObject go, bool includeInactiveObjects = false, bool includeDisabledComponents = false) where T : class
+        {
+            if (go == null) return null;
+
+            using (var lst = TempCollection.GetList<T>())
+            {
+                go.GetComponentsInChildren<T>(includeInactiveObjects, lst);
+                if (lst.Count > 0)
+                {
+                    return new MessageToken<T>(lst.ToArray());
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Create a MessageToken to invoke at a later point. If no targets found null is returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static MessageToken<T> CreateBroadcastToken<T>() where T : class
+        {
+            if (GlobalMessagePool<T>.Count == 0) return null;
+
+            return new MessageToken<T>(GlobalMessagePool<T>.CopyReceivers());
+        }
+
+        /// <summary>
+        /// Create a MessageToken to invoke at a later point. If no targets found null is returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="includeDisabledComponents"></param>
+        /// <returns></returns>
+        public static MessageToken<T> CreateFindAndBroadcastToken<T>(bool includeDisabledComponents = false) where T : class
+        {
+            using (var lst = TempCollection.GetSet<T>())
+            {
+                ObjUtil.FindObjectsOfInterface<T>(lst);
+                if (lst.Count == 0) return null;
+
+                if (includeDisabledComponents)
+                    return new MessageToken<T>(lst.ToArray());
+
+                using (var lst2 = TempCollection.GetList<T>(lst.Count))
+                {
+                    var e = lst.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (TargetIsValid(e.Current)) lst.Add(e.Current);
+                    }
+
+                    if (lst.Count > 0)
+                        return new MessageToken<T>(lst2.ToArray());
+                }
+            }
+
+            return null;
+        }
+
+        public class MessageToken<T> where T : class
+        {
+
+            private T[] _targets;
+
+            public MessageToken(T[] targets)
+            {
+                if (targets == null) throw new System.ArgumentNullException("targets");
+                _targets = targets;
+            }
+
+            public int Count
+            {
+                get { return _targets.Length; }
+            }
+
+            public void Invoke(System.Action<T> functor)
+            {
+                if (functor == null) throw new System.ArgumentNullException("functor");
+
+                foreach(var t in _targets)
+                {
+                    functor(t);
+                }
+            }
+
+            public void Invoke<TArg>(TArg arg, System.Action<T, TArg> functor)
+            {
+                if (functor == null) throw new System.ArgumentNullException("functor");
+
+                foreach (var t in _targets)
+                {
+                    functor(t, arg);
+                }
+            }
+
+        }
+
+        #endregion
 
 
 
@@ -247,6 +402,11 @@ namespace com.spacepuppy.Utils
             private static ExecutingState _state;
             private static TempHashSet<T> _toAdd;
             private static TempHashSet<T> _toRemove;
+
+            public static int Count
+            {
+                get { return _receivers.Count; }
+            }
 
             public static void Add(T listener)
             {
@@ -284,6 +444,11 @@ namespace com.spacepuppy.Utils
                         _receivers.Remove(listener);
                         break;
                 }
+            }
+
+            public static T[] CopyReceivers()
+            {
+                return _receivers.ToArray();
             }
 
             public static void Execute(System.Action<T> functor)
@@ -403,7 +568,7 @@ namespace com.spacepuppy.Utils
                     _state = ExecutingState.None;
                 }
             }
-
+            
         }
 
         #endregion

@@ -273,14 +273,14 @@ namespace com.spacepuppy.Tween
 
         public TweenHash UseCurve(TweenCurve curve)
         {
-            _props.Add(new PropInfo(AnimMode.Curve, null, null, curve, float.NaN, null));
+            _props.Add(new PropInfo(AnimMode.Curve, null, null, float.NaN, curve, null));
             return this;
         }
 
         public TweenHash UseCurve(string memberName, AnimationCurve curve, float dur, object option = null)
         {
             if (curve == null) throw new System.ArgumentNullException("curve");
-            _props.Add(new PropInfo(AnimMode.AnimCurve, memberName, EaseMethods.FromAnimationCurve(curve), null, dur, option));
+            _props.Add(new PropInfo(AnimMode.AnimCurve, memberName, EaseMethods.FromAnimationCurve(curve), dur, null, option));
             return this;
         }
 
@@ -288,83 +288,67 @@ namespace com.spacepuppy.Tween
         {
             if (curve == null) throw new System.ArgumentNullException("curve");
             float dur = (curve.keys.Length > 0) ? curve.keys.Last().time : 0f;
-            _props.Add(new PropInfo(AnimMode.AnimCurve, memberName, EaseMethods.FromAnimationCurve(curve), null, dur, option));
+            _props.Add(new PropInfo(AnimMode.AnimCurve, memberName, EaseMethods.FromAnimationCurve(curve), dur, null, option));
             return this;
         }
 
-        public TweenHash To(string memberName, object end, float dur, object option = null)
+        public TweenHash To(string memberName, Ease ease, float dur, object end, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.To, memberName, null, end, dur, option));
+            _props.Add(new PropInfo(AnimMode.To, memberName, ease, dur, end, option));
             return this;
         }
 
-        public TweenHash To(string memberName, Ease ease, object end, float dur, object option = null)
+        public TweenHash To(string memberName, float dur, object end, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.To, memberName, ease, end, dur, option));
+            _props.Add(new PropInfo(AnimMode.To, memberName, null, dur, end, option));
             return this;
         }
 
-        public TweenHash From(string memberName, object start, float dur, object option = null)
+        public TweenHash From(string memberName, Ease ease, float dur, object start, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.From, memberName, null, start, dur, option));
+            _props.Add(new PropInfo(AnimMode.From, memberName, ease, dur, start, option));
             return this;
         }
 
-        public TweenHash From(string memberName, Ease ease, object start, float dur, object option = null)
+        public TweenHash From(string memberName, float dur, object start, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.From, memberName, ease, start, dur, option));
+            _props.Add(new PropInfo(AnimMode.From, memberName, null, dur, start, option));
             return this;
         }
 
-        public TweenHash By(string memberName, object amt, float dur, object option = null)
+        public TweenHash By(string memberName, Ease ease, float dur, object amt, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.By, memberName, null, amt, dur, option));
+            _props.Add(new PropInfo(AnimMode.By, memberName, ease, dur, amt, option));
             return this;
         }
 
-        public TweenHash By(string memberName, Ease ease, object amt, float dur, object option = null)
+        public TweenHash By(string memberName, float dur, object amt, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.By, memberName, ease, amt, dur, option));
+            _props.Add(new PropInfo(AnimMode.By, memberName, null, dur, amt, option));
             return this;
         }
 
-        public TweenHash FromTo(string memberName, object start, object end, float dur, object option = null)
+        public TweenHash FromTo(string memberName, Ease ease, float dur, object start, object end, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.FromTo, memberName, null, start, dur, option, end));
+            _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, dur, start, option, end));
             return this;
         }
 
-        public TweenHash FromTo(string memberName, Ease ease, object start, object end, float dur, object option = null)
+        public TweenHash FromTo(string memberName, float dur, object start, object end, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.FromTo, memberName, ease, start, dur, option, end));
+            _props.Add(new PropInfo(AnimMode.FromTo, memberName, null, dur, start, option, end));
             return this;
         }
 
-        public TweenHash ByAnimMode(AnimMode mode, string memberName, Ease ease, object value, float dur, object end)
+        public TweenHash ByAnimMode(AnimMode mode, string memberName, Ease ease, float dur, object value, object end)
         {
-            _props.Add(new PropInfo(mode, memberName, ease, value, dur, null, end));
+            _props.Add(new PropInfo(mode, memberName, ease, dur, value, null, end));
             return this;
         }
 
-        public TweenHash ByAnimMode(AnimMode mode, string memberName, Ease ease, object value, float dur, object end, object option)
+        public TweenHash ByAnimMode(AnimMode mode, string memberName, Ease ease, float dur, object value, object end, object option)
         {
-            _props.Add(new PropInfo(mode, memberName, ease, value, dur, option, end));
-            return this;
-        }
-
-        /// <summary>
-        /// Creates a curve that will animate from the current value to the end value, but will rescale the duration from how long it should have 
-        /// taken from start to end, but already animated up to current.
-        /// </summary>
-        /// <param name="memberName"></param>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <param name="dur"></param>
-        /// <param name="option"></param>
-        /// <returns></returns>
-        public TweenHash RedirectTo(string memberName, object start, object end, float dur, object option = null)
-        {
-            _props.Add(new PropInfo(AnimMode.RedirectTo, memberName, null, start, dur, option, end));
+            _props.Add(new PropInfo(mode, memberName, ease, dur, value, option, end));
             return this;
         }
 
@@ -379,9 +363,25 @@ namespace com.spacepuppy.Tween
         /// <param name="dur"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        public TweenHash RedirectTo(string memberName, Ease ease, object start, object end, float dur, object option = null)
+        public TweenHash RedirectTo(string memberName, Ease ease, float dur, object start, object end, object option = null)
         {
-            _props.Add(new PropInfo(AnimMode.RedirectTo, memberName, ease, start, dur, option, end));
+            _props.Add(new PropInfo(AnimMode.RedirectTo, memberName, ease, dur, start, option, end));
+            return this;
+        }
+
+        /// <summary>
+        /// Creates a curve that will animate from the current value to the end value, but will rescale the duration from how long it should have 
+        /// taken from start to end, but already animated up to current.
+        /// </summary>
+        /// <param name="memberName"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="dur"></param>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public TweenHash RedirectTo(string memberName, float dur, object start, object end, object option = null)
+        {
+            _props.Add(new PropInfo(AnimMode.RedirectTo, memberName, null, dur, start, option, end));
             return this;
         }
 
@@ -708,12 +708,12 @@ namespace com.spacepuppy.Tween
             public AnimMode mode;
             public string name;
             public Ease ease;
-            public object value;
             public float dur;
+            public object value;
             public object altValue;
             public object option;
 
-            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option)
+            public PropInfo(AnimMode mode, string nm, Ease e, float d, object v, object option)
             {
                 this.mode = mode;
                 this.name = nm;
@@ -724,7 +724,7 @@ namespace com.spacepuppy.Tween
                 this.option = option;
             }
 
-            public PropInfo(AnimMode mode, string nm, Ease e, object v, float d, object option, object altV)
+            public PropInfo(AnimMode mode, string nm, Ease e, float d, object v, object option, object altV)
             {
                 this.mode = mode;
                 this.name = nm;

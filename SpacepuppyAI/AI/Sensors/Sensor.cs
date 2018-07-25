@@ -22,7 +22,7 @@ namespace com.spacepuppy.AI.Sensors
         protected override void Awake()
         {
             base.Awake();
-
+            
             this.SyncCompositeSensorParent();
         }
 
@@ -71,9 +71,9 @@ namespace com.spacepuppy.AI.Sensors
         public abstract int SenseAll(ICollection<IAspect> lst, System.Func<IAspect, bool> p = null);
 
         public abstract int SenseAll<T>(ICollection<T> lst, System.Func<T, bool> p = null) where T : class, IAspect;
-        
-        #endregion
 
+        #endregion
+        
     }
 
 }

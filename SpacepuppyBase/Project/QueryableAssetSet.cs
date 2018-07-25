@@ -47,7 +47,25 @@ namespace com.spacepuppy.Project
             else
                 return null;
         }
-        
+
+        public IEnumerable<UnityEngine.Object> GetAllAssets()
+        {
+            if (_table == null) this.SetupTable();
+
+            return _table.Values;
+        }
+
+        public IEnumerable<T> GetAllAssets<T>() where T : class
+        {
+            if (_table == null) this.SetupTable();
+
+            var e = _table.Values.GetEnumerator();
+            while(e.MoveNext())
+            {
+                if (e.Current is T) yield return e.Current as T;
+            }
+        }
+
         #endregion
 
         #region IAssetBundle Interface

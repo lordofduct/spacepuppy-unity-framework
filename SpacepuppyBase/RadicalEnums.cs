@@ -9,37 +9,29 @@ namespace com.spacepuppy
     [System.Flags()]
     public enum RadicalCoroutineDisableMode
     {
+        PlayUntilDestroyed = 0,
         /// <summary>
         /// The default action from Unity. The routine cancels on deactivate, and plays through disable.
         /// </summary>
-        Default = 0,
+        Default = 1,
         /// <summary>
         /// The default action from Unity. The routine cancels on deactivate, and plays through disable.
         /// </summary>
-        CancelOnDeactivate = 0,
+        CancelOnDeactivate = 1,
         /// <summary>
         /// Cancels on disable, still cancels on Deactivate as well.
         /// </summary>
-        CancelOnDisable = 1,
-        StopOnDeactivate = 2,
-        StopOnDisable = 4,
-        Stops = 6,
-        Resumes = 8,
+        CancelOnDisable = 2,
+        StopOnDeactivate = 4,
+        StopOnDisable = 8,
+        Stops = 12,
+        Resumes = 16,
 
-        PausesOnDeactivate = 10,
-        PausesOnDisable = 12,
-        Pauses = 14
+        PausesOnDeactivate = 20,
+        PausesOnDisable = 24,
+        Pauses = 28
     }
-
-    /// <summary>
-    /// When ending a coroutine you can yield one of these to tell the RadicalCoroutine how to clean up the routine.
-    /// </summary>
-    public enum RadicalCoroutineEndCommand
-    {
-        Stop = 0,
-        Cancel = 2
-    }
-
+    
     /// <summary>
     /// Represents the operating state of a RadicalCoroutine.
     /// </summary>

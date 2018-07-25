@@ -51,7 +51,7 @@ namespace com.spacepuppy.Scenario
             else
                 _targets.ActivateRandomTrigger(this, null, true);
         }
-
+        
         #endregion
 
         #region ITriggerableMechanism Interface
@@ -62,7 +62,7 @@ namespace com.spacepuppy.Scenario
 
             if (this._delay > 0f)
             {
-                this.Invoke(() =>
+                this.InvokeGuaranteed(() =>
                 {
                     this.DoTriggerNext(arg);
                 }, this._delay);

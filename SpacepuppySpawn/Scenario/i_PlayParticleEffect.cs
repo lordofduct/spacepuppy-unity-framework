@@ -26,7 +26,7 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField()]
         [TimeUnitsSelector()]
-        [Tooltip("Delete particle effect after a duration. Leave 0 to use the 'duration' of the particle effect, or use negative value (-1) to never delete.")]
+        [Tooltip("Delete particle effect after a duration. Leave 0 to use the 'duration' of the particle effect.")]
         [FormerlySerializedAs("Duration")]
         private float _duration;
 
@@ -101,10 +101,13 @@ namespace com.spacepuppy.Scenario
             var go = _spawnMechanism.Spawn(_effectPrefab.gameObject, this.transform.position, this.transform.rotation, (_spawnAsChild) ? this.transform : null);
             if (go == null) return null;
 
-            var dur = (_duration == 0f) ? _effectPrefab.main.duration : _duration;
-            if (dur > 0f && dur != float.PositiveInfinity)
+            var dur = (_duration > 0.00001f) ? _duration : _effectPrefab.main.duration;
+            if (!float.IsNaN(dur) && !float.IsInfinity(dur))
             {
-                GameLoopEntry.Hook.Invoke(go.Kill, dur);
+                this.InvokeGuaranteed(() =>
+                {
+                    go.Kill();
+                }, dur);
             }
 
             if (_onSpawnedObject != null && _onSpawnedObject.Count > 0)
@@ -145,6 +148,27 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
+        #region INotificationDispatcher Interface
+
+        [System.NonSerialized]
+        private NotificationDispatcher _observers;
+
+        protected virtual void OnDespawn()
+        {
+            if (_observers != null) _observers.PurgeHandlers();
+        }
+
+        public NotificationDispatcher Observers
+        {
+            get
+            {
+                if (_observers == null) _observers = new NotificationDispatcher(this);
+                return _observers;
+            }
+        }
+
+        #endregion
+        
     }
 
 }

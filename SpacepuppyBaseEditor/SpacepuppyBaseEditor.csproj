@@ -57,6 +57,8 @@
     <Compile Include="AssetHelper.cs" />
     <Compile Include="Base\AdvancedInputManagerWindow.cs" />
     <Compile Include="Base\Commands\FindReferencesToObjectMenu.cs" />
+    <Compile Include="Base\Commands\ScreenshotUtil.cs" />
+    <Compile Include="Base\Commands\ScreenshotRecorderWindow.cs" />
     <Compile Include="Base\Commands\SPCreateRagdollWizard.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\GameLoopEntryInspector.cs" />
     <Compile Include="Base\Inspectors\InputIDPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ProxyPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ShortUidPropertyDrawer.cs" />
@@ -77,6 +80,10 @@
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
+    <Compile Include="BulkBuildSettings.cs" />
+    <Compile Include="Project\SerializableInterfaceRefPropertyDrawer.cs" />
+    <Compile Include="Scenario\EventTriggerEvaluatorInspector.cs" />
+    <Compile Include="SpacepuppySettings.cs" />
     <Compile Include="BuildSettings.cs" />
     <Compile Include="Cameras\CameraControllerInspector.cs" />
     <Compile Include="Cameras\CameraMovementControllerInspector.cs" />
@@ -95,7 +102,7 @@
     <Compile Include="Geom\TransformAltContextMenu.cs" />
     <Compile Include="Hooks\CollisionSignalSourcePropertyDrawer.cs" />
     <Compile Include="IArrayHandlingPropertyDrawer.cs" />
-    <Compile Include="Base\BaseSettings.cs" />
+    <Compile Include="Base\SpacepuppySettingsWindow.cs" />
     <Compile Include="Base\Commands\ComponentSearchWindow.cs" />
     <Compile Include="Base\Commands\TransformCopyMenu.cs" />
     <Compile Include="Base\Inspectors\ComparisonOperatorPropertyDrawer.cs" />

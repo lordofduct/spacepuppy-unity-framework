@@ -3,6 +3,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
+
     public class t_OnStart : TriggerComponent
     {
 
@@ -33,7 +34,7 @@ namespace com.spacepuppy.Scenario
 
             if (_delay > 0f)
             {
-                this.Invoke(() =>
+                this.InvokeGuaranteed(() =>
                 {
                     this.ActivateTrigger(this);
                 }, _delay);
@@ -47,4 +48,5 @@ namespace com.spacepuppy.Scenario
         #endregion
 
     }
+
 }

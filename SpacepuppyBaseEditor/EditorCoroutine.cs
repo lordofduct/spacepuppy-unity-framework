@@ -46,6 +46,17 @@ namespace com.spacepuppyeditor
             };
         }
 
+        public static void Invoke(System.Action act, float dur)
+        {
+            if (act == null) return;
+            StartEditorCoroutine(InvokeCallback(act, dur));
+        }
+        private static System.Collections.IEnumerator InvokeCallback(System.Action act, float dur)
+        {
+            if (act == null) yield break;
+            if (dur > 0f) yield return YieldForDuration(dur);
+            act();
+        }
 
 
 

@@ -11,26 +11,53 @@ namespace com.spacepuppy.Utils
     public static class EnumUtil
     {
 
-        public static object ToEnumsNumericType(ulong v, System.TypeCode code)
+        public static object ToEnumsNumericType(System.Enum e)
+        {
+            if (e == null) return null;
+
+            switch(e.GetTypeCode())
+            {
+                case System.TypeCode.SByte:
+                    return System.Convert.ToSByte(e);
+                case System.TypeCode.Byte:
+                    return System.Convert.ToByte(e);
+                case System.TypeCode.Int16:
+                    return System.Convert.ToInt16(e);
+                case System.TypeCode.UInt16:
+                    return System.Convert.ToUInt16(e);
+                case System.TypeCode.Int32:
+                    return System.Convert.ToInt32(e);
+                case System.TypeCode.UInt32:
+                    return System.Convert.ToUInt32(e);
+                case System.TypeCode.Int64:
+                    return System.Convert.ToInt64(e);
+                case System.TypeCode.UInt64:
+                    return System.Convert.ToUInt64(e);
+                default:
+                    return null;
+            }
+        }
+
+        private static object ToEnumsNumericType(ulong v, System.TypeCode code)
         {
             switch (code)
             {
                 case System.TypeCode.Byte:
-                    return System.Convert.ToByte(v);
+                    return (byte)v;
                 case System.TypeCode.SByte:
-                    return System.Convert.ToSByte(v);
+                    return (sbyte)v;
                 case System.TypeCode.Int16:
-                    return System.Convert.ToInt16(v);
+                    return (short)v;
                 case System.TypeCode.UInt16:
-                    return System.Convert.ToUInt16(v);
+                    return (ushort)v;
                 case System.TypeCode.Int32:
-                    return System.Convert.ToInt32(v);
+                    return (int)v;
                 case System.TypeCode.UInt32:
-                    return System.Convert.ToUInt32(v);
+                    return (uint)v;
                 case System.TypeCode.Int64:
-                    return System.Convert.ToInt64(v);
+                    return (long)v;
                 case System.TypeCode.UInt64:
-                    return System.Convert.ToUInt64(v);
+                    return v;
                 default:
                     return null;
             }
@@ -40,14 +67,15 @@ namespace com.spacepuppy.Utils
         {
             if (enumType == null) throw new System.ArgumentNullException("enumType");
             if (!enumType.IsEnum) throw new System.ArgumentException("Must be enum type.", "enumType");
+            if (value == null) return false;
 
             try
             {
-                if(value is string)
+                if (value is string)
                     return System.Enum.IsDefined(enumType, value);
-                else if(ConvertUtil.IsNumeric(value))
+                else if (ConvertUtil.IsNumeric(value))
                 {
-                    value = ToEnumsNumericType(System.Convert.ToUInt64(value), System.Type.GetTypeCode(enumType));
+                    value = ConvertUtil.ToPrim(value, System.Type.GetTypeCode(enumType));
                     return System.Enum.IsDefined(enumType, value);
                 }
             }
@@ -172,21 +200,51 @@ namespace com.spacepuppy.Utils
             }
         }
 
-#if SP_LIB
-
         public static IEnumerable<System.Enum> GetUniqueEnumFlags(System.Type enumType)
         {
             if (enumType == null) throw new System.ArgumentNullException("enumType");
             if (!enumType.IsEnum) throw new System.ArgumentException("Type must be an enum.", "enumType");
 
-            foreach (var e in System.Enum.GetValues(enumType))
+            foreach (System.Enum e in System.Enum.GetValues(enumType))
             {
-                var d = System.Convert.ToDecimal(e);
-                if (d > 0 && MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(d))) yield return e as System.Enum;
+                //var d = System.Convert.ToDecimal(e);
+                //if (d > 0 && MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(d))) yield return e as System.Enum;
+
+                switch (e.GetTypeCode())
+                {
+                    case System.TypeCode.Byte:
+                    case System.TypeCode.UInt16:
+                    case System.TypeCode.UInt32:
+                    case System.TypeCode.UInt64:
+                        if (MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(e))) yield return e;
+                        break;
+                    case System.TypeCode.SByte:
+                        {
+                            sbyte i = System.Convert.ToSByte(e);
+                            if (i == -128 || (i > 0 && MathUtil.IsPowerOfTwo((ulong)i))) yield return e;
+                        }
+                        break;
+                    case System.TypeCode.Int16:
+                        {
+                            short i = System.Convert.ToInt16(e);
+                            if (i == -32768 || (i > 0 && MathUtil.IsPowerOfTwo((ulong)i))) yield return e;
+                        }
+                        break;
+                    case System.TypeCode.Int32:
+                        {
+                            int i = System.Convert.ToInt32(e);
+                            if (i == -2147483648 || (i > 0 && MathUtil.IsPowerOfTwo((ulong)i))) yield return e;
+                        }
+                        break;
+                    case System.TypeCode.Int64:
+                        {
+                            long i = System.Convert.ToInt64(e);
+                            if (i == -9223372036854775808 || (i > 0 && MathUtil.IsPowerOfTwo((ulong)i))) yield return e;
+                        }
+                        break;
+                }
             }
         }
 
-#endif
-        
     }
 }

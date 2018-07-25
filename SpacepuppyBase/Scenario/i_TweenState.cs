@@ -131,7 +131,7 @@ namespace com.spacepuppy.Scenario
             var source = _source.GetTarget<object>(arg);
 
             var twn = SPTween.Tween(targ)
-                             .TweenWithToken(_mode, EaseMethods.GetEase(_ease), source, _duration.Seconds, _sourceAlt)
+                             .TweenWithToken(_mode, EaseMethods.GetEase(_ease), _duration.Seconds, source, _sourceAlt)
                              .Use(_duration.TimeSupplier)
                              .SetId(targ);
             if (_onComplete.Count > 0)

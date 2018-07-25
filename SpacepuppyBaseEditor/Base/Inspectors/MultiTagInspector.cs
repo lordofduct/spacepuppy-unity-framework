@@ -12,6 +12,7 @@ namespace com.spacepuppyeditor.Base
     public class MultiTagInspector : SPEditor
     {
 
+        public const string PROP_SEARCHABLEIFINACTIVE = "_searchableIfInactive";
         public const string PROP_TAGS = "_tags";
 
         #region Properties
@@ -34,6 +35,10 @@ namespace com.spacepuppyeditor.Base
         protected override void OnSPInspectorGUI()
         {
             this.serializedObject.Update();
+
+            //this.DrawPropertyField(PROP_SEARCHABLEIFINACTIVE);
+            var searchableProp = this.serializedObject.FindProperty(PROP_SEARCHABLEIFINACTIVE);
+            searchableProp.boolValue = EditorGUILayout.ToggleLeft(searchableProp.displayName, searchableProp.boolValue);
 
             //this may change in later releases...
             _showTags = EditorGUILayout.Foldout(_showTags, "Tags");
@@ -64,7 +69,9 @@ namespace com.spacepuppyeditor.Base
 
                 EditorGUI.indentLevel--;
             }
-            
+
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_SEARCHABLEIFINACTIVE, PROP_TAGS);
+
             this.serializedObject.ApplyModifiedProperties();
         }
 

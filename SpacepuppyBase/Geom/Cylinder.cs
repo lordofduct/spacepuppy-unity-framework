@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace com.spacepuppy.Geom
 {
+
     public struct Cylinder : IGeom
     {
 
@@ -59,16 +60,13 @@ namespace com.spacepuppy.Geom
         {
             get
             {
-                if (_end == _start)
-                    return _rad;
-                else
-                    return (_end - _start).magnitude + _rad * 2.0f;
+                return (_end - _start).magnitude;
             }
             set
             {
                 var c = this.Center;
                 var up = (_end - _start).normalized;
-                var change = up * (value - (_rad * 2.0f));
+                var change = up * value / 2.0f;
                 _start = c - change;
                 _end = c + change;
             }
@@ -211,4 +209,5 @@ namespace com.spacepuppy.Geom
 
         #endregion
     }
+
 }

@@ -64,7 +64,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region Search Methods
-
+        
         public static UnityEngine.Object Find(SearchBy search, string query)
         {
             switch(search)
@@ -354,7 +354,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region Casting
-
+        
         public static object ReduceIfProxy(this object obj)
         {
             if (obj is IProxy) return (obj as IProxy).GetTarget();
@@ -747,6 +747,8 @@ namespace com.spacepuppy.Utils
                 return (obj as ISPDisposable).IsDisposed;
             else if (obj is UnityEngine.Object)
                 return !_isObjectAlive(obj as UnityEngine.Object);
+            else if (obj is UnityEngine.TrackedReference)
+                return (obj as UnityEngine.TrackedReference) == null;
             else if (obj is IComponent)
                 return !_isObjectAlive((obj as IComponent).component);
             else if (obj is IGameObjectSource)
@@ -770,6 +772,8 @@ namespace com.spacepuppy.Utils
                 return (obj as ISPDisposable).IsDisposed;
             else if (obj is UnityEngine.Object)
                 return !_isObjectAlive(obj as UnityEngine.Object);
+            else if (obj is UnityEngine.TrackedReference)
+                return (obj as UnityEngine.TrackedReference) == null;
             else if (obj is IComponent)
                 return !_isObjectAlive((obj as IComponent).component);
             else if (obj is IGameObjectSource)

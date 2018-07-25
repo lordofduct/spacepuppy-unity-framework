@@ -56,11 +56,20 @@ namespace com.spacepuppyeditor.Base
 
             if (this.fieldInfo != null)
             {
-                var attrib = this.fieldInfo.GetCustomAttributes(typeof(VariantCollection.AsPropertyListAttribute), false).FirstOrDefault() as VariantCollection.AsPropertyListAttribute;
-                if(attrib != null && attrib.TargetType != null)
+                var asPropAttrib = this.fieldInfo.GetCustomAttributes(typeof(VariantCollection.AsPropertyListAttribute), false).FirstOrDefault() as VariantCollection.AsPropertyListAttribute;
+                if(asPropAttrib != null && asPropAttrib.TargetType != null)
                 {
-                    this.ConfigurePropertyList(attrib.TargetType);
+                    this.ConfigurePropertyList(asPropAttrib.TargetType);
                 }
+
+                var asTypedList = this.fieldInfo.GetCustomAttributes(typeof(VariantCollection.AsTypedList), false).FirstOrDefault() as VariantCollection.AsTypedList;
+                if(asTypedList != null && asTypedList.TargetType != null && VariantReference.AcceptableType(asTypedList.TargetType))
+                {
+                    _variantDrawer.RestrictVariantType = true;
+                    _variantDrawer.TypeRestrictedTo = asTypedList.TargetType;
+                    _variantDrawer.ForcedObjectType = asTypedList.TargetType;
+                }
+
             }
         }
 

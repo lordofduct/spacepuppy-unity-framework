@@ -177,5 +177,26 @@ namespace com.spacepuppy.Spawn
 
         #endregion
 
+        #region INotificationDispatcher Interface
+
+        [System.NonSerialized]
+        private NotificationDispatcher _observers;
+
+        protected virtual void OnDespawn()
+        {
+            if (_observers != null) _observers.PurgeHandlers();
+        }
+
+        public NotificationDispatcher Observers
+        {
+            get
+            {
+                if (_observers == null) _observers = new NotificationDispatcher(this);
+                return _observers;
+            }
+        }
+
+        #endregion
+
     }
 }

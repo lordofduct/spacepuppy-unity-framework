@@ -9,36 +9,6 @@ namespace com.spacepuppy.SPInput
 
         public const float DEFAULT_AXLEBTNDEADZONE = 0.707f;
 
-        public static ButtonState GetNextButtonState(ButtonState current, bool isButtonActive)
-        {
-            if (isButtonActive)
-            {
-                switch (current)
-                {
-                    case ButtonState.None:
-                    case ButtonState.Released:
-                        return ButtonState.Down;
-                    case ButtonState.Down:
-                    case ButtonState.Held:
-                        return ButtonState.Held;
-                }
-            }
-            else
-            {
-                switch (current)
-                {
-                    case ButtonState.None:
-                    case ButtonState.Released:
-                        return ButtonState.None;
-                    case ButtonState.Down:
-                    case ButtonState.Held:
-                        return ButtonState.Released;
-                }
-            }
-
-            return ButtonState.None;
-        }
-
         public static float CutoffAxis(float value, float deadzone, DeadZoneCutoff cutoff)
         {
             if (deadzone < 0f) deadzone = 0f;
@@ -87,6 +57,114 @@ namespace com.spacepuppy.SPInput
             }
 
             return value;
+        }
+
+
+        public static ButtonState ConsumeButtonState(ButtonState current)
+        {
+            switch (current)
+            {
+                case ButtonState.Released:
+                case ButtonState.None:
+                    return ButtonState.None;
+                case ButtonState.Down:
+                case ButtonState.Held:
+                    return ButtonState.Held;
+                default:
+                    return ButtonState.None;
+            }
+        }
+
+        public static ButtonState GetNextButtonState(ButtonState current, bool isButtonActive)
+        {
+            if (isButtonActive)
+            {
+                switch (current)
+                {
+                    case ButtonState.None:
+                    case ButtonState.Released:
+                        return ButtonState.Down;
+                    case ButtonState.Down:
+                    case ButtonState.Held:
+                        return ButtonState.Held;
+                }
+            }
+            else
+            {
+                switch (current)
+                {
+                    case ButtonState.None:
+                    case ButtonState.Released:
+                        return ButtonState.None;
+                    case ButtonState.Down:
+                    case ButtonState.Held:
+                        return ButtonState.Released;
+                }
+            }
+
+            return ButtonState.None;
+        }
+
+        
+        public static ButtonPress GetButtonPress(this IInputDevice device, string id, float duration)
+        {
+            if (device == null) return ButtonPress.None;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return ButtonPress.None;
+
+            switch(sig.CurrentState)
+            {
+                case ButtonState.Released:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Tapped : ButtonPress.Released;
+                case ButtonState.None:
+                    return ButtonPress.None;
+                case ButtonState.Down:
+                    return ButtonPress.Down;
+                case ButtonState.Held:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Holding : ButtonPress.Held;
+                default:
+                    return ButtonPress.None;
+            }
+        }
+
+        public static ButtonPress GetButtonPress<T>(this IMappedInputDevice<T> device, T id, float duration) where T : struct, System.IConvertible
+        {
+            if (device == null) return ButtonPress.None;
+
+            var sig = device.GetSignature(id) as IButtonInputSignature;
+            if (sig == null) return ButtonPress.None;
+
+            switch (sig.CurrentState)
+            {
+                case ButtonState.Released:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Tapped : ButtonPress.Released;
+                case ButtonState.None:
+                    return ButtonPress.None;
+                case ButtonState.Down:
+                    return ButtonPress.Down;
+                case ButtonState.Held:
+                    return (Time.realtimeSinceStartup - sig.LastDownTime) <= duration ? ButtonPress.Holding : ButtonPress.Held;
+                default:
+                    return ButtonPress.None;
+            }
+        }
+        
+
+        public static bool GetInputIsActivated(this IInputSignature sig)
+        {
+            if (sig == null) return false;
+
+            if (sig is IButtonInputSignature)
+                return (sig as IButtonInputSignature).CurrentState != ButtonState.None;
+            else if (sig is IAxleInputSignature)
+                return (sig as IAxleInputSignature).CurrentState > 0f;
+            else if (sig is IDualAxleInputSignature)
+                return (sig as IDualAxleInputSignature).CurrentState.sqrMagnitude > 0.0001f;
+            else if (sig is IInputDevice)
+                return (sig as IInputDevice).AnyInputActivated;
+
+            return false;
         }
 
 

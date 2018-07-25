@@ -26,7 +26,7 @@ namespace com.spacepuppyeditor
 
         static EditorHierarchyAlternateContextMenuEvents()
         {
-            SetActive(EditorProjectPrefs.Local.GetBool(BaseSettings.SETTING_HIEARCHYALTERNATECONTEXTMENU_ACTIVE, true));
+            SetActive(SpacepuppySettings.UseHierarchyAlternateContextMenu);
         }
 
         #endregion

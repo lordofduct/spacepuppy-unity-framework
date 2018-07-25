@@ -16,6 +16,8 @@ namespace com.spacepuppyeditor.Base
     public class ReorderableArrayPropertyDrawer : PropertyDrawer, IArrayHandlingPropertyDrawer
     {
 
+        public delegate string FormatElementLabelCallback(SerializedProperty property, int index, bool isActive, bool isFocused);
+
         private static readonly float TOP_PAD = 2f + EditorGUIUtility.singleLineHeight;
         private const float BOTTOM_PAD = 2f;
         private const float MARGIN = 2f;
@@ -33,6 +35,7 @@ namespace com.spacepuppyeditor.Base
         private string _childPropertyAsLabel;
         private string _childPropertyAsEntry;
         private ReorderableList.AddCallbackDelegate _addCallback;
+        private bool _allowDragAndDrop = true;
 
         private PropertyDrawer _internalDrawer;
 
@@ -54,6 +57,7 @@ namespace com.spacepuppyeditor.Base
                 else
                 {
                     var pchild = property.GetArrayElementAtIndex(0);
+                    /*
                     if (_internalDrawer != null)
                     {
                         lst.elementHeight = _internalDrawer.GetPropertyHeight(pchild, label);
@@ -75,6 +79,8 @@ namespace com.spacepuppyeditor.Base
                     {
                         lst.elementHeight = SPEditorGUI.GetDefaultPropertyHeight(pchild, label) + 1f;
                     }
+                    */
+                    lst.elementHeight = this.GetElementHeight(pchild, label, false) + 2f;
                 }
             }
             else
@@ -97,6 +103,26 @@ namespace com.spacepuppyeditor.Base
                 _hideElementLabel = attrib.HideElementLabel;
                 _childPropertyAsLabel = attrib.ChildPropertyToDrawAsElementLabel;
                 _childPropertyAsEntry = attrib.ChildPropertyToDrawAsElementEntry;
+                _allowDragAndDrop = attrib.AllowDragAndDrop;
+                if (!string.IsNullOrEmpty(attrib.OnAddCallback))
+                {
+                    _addCallback = (lst) =>
+                    {
+                        lst.serializedProperty.arraySize++;
+                        lst.index = lst.serializedProperty.arraySize - 1;
+                        lst.serializedProperty.serializedObject.ApplyModifiedProperties();
+
+                        var prop = lst.serializedProperty.GetArrayElementAtIndex(lst.index);
+                        var obj = EditorHelper.GetTargetObjectOfProperty(prop);
+                        obj = com.spacepuppy.Dynamic.DynamicUtil.InvokeMethod(lst.serializedProperty.serializedObject.targetObject, attrib.OnAddCallback, obj);
+                        EditorHelper.SetTargetObjectOfProperty(prop, obj);
+                        lst.serializedProperty.serializedObject.Update();
+                    };
+                }
+                else
+                {
+                    _addCallback = null;
+                }
             }
 
             _label = label;
@@ -156,6 +182,21 @@ namespace com.spacepuppyeditor.Base
             get { return _addCallback; }
             set { _addCallback = value; }
         }
+        
+        public FormatElementLabelCallback FormatElementLabel
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Can drag entries onto the inspector without needing to click + button. Only works for array/list of UnityEngine.Object sub/types.
+        /// </summary>
+        public bool AllowDragAndDrop
+        {
+            get { return _allowDragAndDrop; }
+            set { _allowDragAndDrop = false; }
+        }
 
         #endregion
 
@@ -175,6 +216,7 @@ namespace com.spacepuppyeditor.Base
                     if(_drawElementAtBottom && _lst.index >= 0 && _lst.index < property.arraySize)
                     {
                         var pchild = property.GetArrayElementAtIndex(_lst.index);
+                        /*
                         if (_internalDrawer != null)
                         {
                             h += _internalDrawer.GetPropertyHeight(pchild, label) + BOTTOM_PAD + TOP_PAD;
@@ -189,6 +231,8 @@ namespace com.spacepuppyeditor.Base
                         {
                             h += SPEditorGUI.GetDefaultPropertyHeight(pchild, label, false) + BOTTOM_PAD + TOP_PAD;
                         }
+                        */
+                        h += this.GetElementHeight(pchild, label, true) + BOTTOM_PAD + TOP_PAD;
                     }
                 }
                 else
@@ -212,22 +256,25 @@ namespace com.spacepuppyeditor.Base
                 //const float WIDTH_FOLDOUT = 5f;
                 var foldoutRect = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
                 position = EditorGUI.IndentedRect(position);
+                Rect listArea = position;
 
                 if(_disallowFoldout)
                 {
+                    listArea = new Rect(position.xMin, position.yMin, position.width, _lst.GetHeight());
                     this.StartOnGUI(property, label);
                     //_lst.DoList(EditorGUI.IndentedRect(position));
-                    _lst.DoList(position);
+                    _lst.DoList(listArea);
                     this.EndOnGUI(property, label);
                 }
                 else
                 {
                     if (property.isExpanded)
                     {
+                        listArea = new Rect(position.xMin, position.yMin, position.width, _lst.GetHeight());
                         this.StartOnGUI(property, label);
                         property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, GUIContent.none);
                         //_lst.DoList(EditorGUI.IndentedRect(position));
-                        _lst.DoList(position);
+                        _lst.DoList(listArea);
                         this.EndOnGUI(property, label);
                     }
                     else
@@ -242,6 +289,31 @@ namespace com.spacepuppyeditor.Base
                             //ReorderableListHelper.DrawRetractedHeader(EditorGUI.IndentedRect(position), label);
                             ReorderableListHelper.DrawRetractedHeader(position, label);
                         }
+                    }
+                }
+
+                if(_allowDragAndDrop && this.fieldInfo != null && Event.current != null)
+                {
+                    var ev = Event.current;
+                    switch (ev.type)
+                    {
+                        case EventType.DragUpdated:
+                        case EventType.DragPerform:
+                            {
+                                if (listArea.Contains(ev.mousePosition))
+                                {
+                                    var tp = TypeUtil.GetElementTypeOfListType(this.fieldInfo.FieldType);
+                                    var refs = (from o in DragAndDrop.objectReferences let obj = ObjUtil.GetAsFromSource(tp, o, false) where obj != null select obj);
+                                    DragAndDrop.visualMode = refs.Any() ? DragAndDropVisualMode.Link : DragAndDropVisualMode.Rejected;
+
+                                    if (ev.type == EventType.DragPerform && refs.Any())
+                                    {
+                                        DragAndDrop.AcceptDrag();
+                                        AddObjectsToArray(property, refs.ToArray());
+                                    }
+                                }
+                            }
+                            break;
                     }
                 }
 
@@ -288,7 +360,7 @@ namespace com.spacepuppyeditor.Base
             }
             else
             {
-                EditorGUI.PropertyField(position, property, label, false);
+                SPEditorGUI.DefaultPropertyField(position, property, label, false);
             }
         }
 
@@ -316,7 +388,12 @@ namespace com.spacepuppyeditor.Base
             //EditorGUI.PropertyField(area, element, GUIContent.none, false);
             var attrib = this.attribute as ReorderableArrayAttribute;
             GUIContent label = null;
-            if(attrib != null)
+            if(this.FormatElementLabel != null)
+            {
+                string slbl = this.FormatElementLabel(element, index, isActive, isFocused);
+                if (slbl != null) label = EditorHelper.TempContent(slbl);
+            }
+            else if(attrib != null)
             {
                 if (attrib.ElementLabelFormatString != null)
                 {
@@ -375,9 +452,34 @@ namespace com.spacepuppyeditor.Base
             if (GUI.enabled) ReorderableListHelper.DrawDraggableElementDeleteContextMenu(_lst, area, index, isActive, isFocused);
         }
 
+        protected virtual float GetElementHeight(SerializedProperty element, GUIContent label, bool elementIsAtBottom)
+        {
+            if (_internalDrawer != null)
+            {
+                return _internalDrawer.GetPropertyHeight(element, label);
+            }
+            else if (ElementIsFlatChildField(element))
+            {
+                //we don't draw this way if it's a built-in type from Unity
+                element.isExpanded = true;
+                if (_hideElementLabel || elementIsAtBottom)
+                {
+                    return SPEditorGUI.GetDefaultPropertyHeight(element, label, true) - EditorGUIUtility.singleLineHeight;
+                }
+                else
+                {
+                    return SPEditorGUI.GetDefaultPropertyHeight(element, label, true);
+                }
+            }
+            else
+            {
+                return SPEditorGUI.GetDefaultPropertyHeight(element, label, false);
+            }
+        }
+
         #endregion
 
-        
+
         private GUIContent TempElementLabel(SerializedProperty element, int index)
         {
             var target = EditorHelper.GetTargetObjectOfProperty(element);
@@ -418,6 +520,31 @@ namespace com.spacepuppyeditor.Base
         {
             //return property.hasChildren && property.objectReferenceValue is MonoBehaviour;
             return property.hasChildren && property.propertyType == SerializedPropertyType.Generic;
+        }
+
+        private static void AddObjectsToArray(SerializedProperty listProp, object[] objs)
+        {
+            if (listProp == null) throw new System.ArgumentNullException("listProp");
+            if (!listProp.isArray) throw new System.ArgumentException("Must be a SerializedProperty for an array/list.", "listProp");
+            if (objs == null || objs.Length == 0) return;
+
+            try
+            {
+                int start = listProp.arraySize;
+                listProp.arraySize += objs.Length;
+                for(int i = 0; i < objs.Length; i++)
+                {
+                    var element = listProp.GetArrayElementAtIndex(start + i);
+                    if(element.propertyType == SerializedPropertyType.ObjectReference)
+                    {
+                        element.objectReferenceValue = objs[i] as UnityEngine.Object;
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         #endregion

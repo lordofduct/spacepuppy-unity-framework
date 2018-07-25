@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Collections;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Tween
 {
 
-    [Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
-    public class SPTween : Singleton
+    //[Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
+    public class SPTween : ServiceComponent<SPTween>, IService
     {
 
         #region Singleton Entrance
 
         private const string SPECIAL_NAME = "Spacepuppy.SPTween";
-
         private static SPTween _instance;
 
         #endregion
@@ -34,6 +34,25 @@ namespace com.spacepuppy.Tween
         #endregion
 
         #region CONSTRUCTOR
+
+        public static void Init()
+        {
+            if (!object.ReferenceEquals(_instance, null))
+            {
+                if (ObjUtil.IsDestroyed(_instance))
+                {
+                    ObjUtil.SmartDestroy(_instance.gameObject);
+                    _instance = null;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            _instance = Services.Create<SPTween>(true, SPECIAL_NAME);
+            //_instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
+        }
 
         protected override void OnValidAwake()
         {
@@ -72,7 +91,7 @@ namespace com.spacepuppy.Tween
         internal static void AddReference(Tweener tween)
         {
             if (GameLoopEntry.ApplicationClosing) return;
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
+            if (_instance == null) Init();
             _instance.AddReference_Imp(tween);
         }
         private void AddReference_Imp(Tweener tween)
@@ -181,8 +200,8 @@ namespace com.spacepuppy.Tween
             if (tween.Id == null) throw new System.ArgumentException("Can only register a Tweener with a valid 'Id' for autokill.");
             if (GameLoopEntry.ApplicationClosing) return;
             if (!tween.IsPlaying) throw new System.ArgumentException("Can only register a playing Tweener for autokill.");
-            if (_instance == null) _instance = Singleton.CreateSpecialInstance<SPTween>(SPECIAL_NAME, SingletonLifeCycleRule.LivesForever);
-            
+            if (_instance == null) Init();
+
             var token = new TokenPairing(tween.Id, tween.AutoKillToken);
             
             Tweener old;

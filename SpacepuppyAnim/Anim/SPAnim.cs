@@ -20,8 +20,8 @@ namespace com.spacepuppy.Anim
         private int _layer;
         private WrapMode _wrapMode;
         private AnimationBlendMode _blendMode = AnimationBlendMode.Blend;
-        private MaskCollection _masks = new MaskCollection();
         private ITimeSupplier _timeSupplier;
+        private ISPAnimationMask _mask;
 
         private AnimationState _state;
         private AnimEventScheduler _scheduler;
@@ -97,9 +97,7 @@ namespace com.spacepuppy.Anim
                 if (_state != null) _state.blendMode = value;
             }
         }
-
-        public MaskCollection Masks { get { return _masks; } }
-
+        
         public ITimeSupplier TimeSupplier
         {
             get { return (_timeSupplier == null) ? SPTime.Normal : _timeSupplier; }
@@ -156,6 +154,12 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        public ISPAnimationMask Mask
+        {
+            get { return _mask; }
+            set { _mask = value; }
+        }
+
         ///// <summary>
         ///// Don't actually modify this thing, here for debug purposes.
         ///// </summary>
@@ -170,7 +174,9 @@ namespace com.spacepuppy.Anim
 
         public void PlayReverse(PlayMode playMode = PlayMode.StopSameLayer)
         {
-            if(this.IsPlaying)
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
+
+            if (this.IsPlaying)
             {
                 this.Speed = -this.Speed;
             }
@@ -184,6 +190,8 @@ namespace com.spacepuppy.Anim
 
         public SPAnim Queue(QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return null;
+
             var a = this.Clone();
             a.Play(queueMode, playMode);
             return a;
@@ -191,6 +199,8 @@ namespace com.spacepuppy.Anim
 
         public SPAnim QueueCrossFade(float fadeLength, QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return null;
+
             var a = this.Clone();
             a.CrossFade(fadeLength, queueMode, playMode);
             return a;
@@ -198,6 +208,8 @@ namespace com.spacepuppy.Anim
 
         public SPAnim QueueInReverse(QueueMode queueMode = QueueMode.CompleteOthers, PlayMode playMode = PlayMode.StopSameLayer)
         {
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return null;
+
             var a = this.Clone();
             if (this.IsPlaying)
             {
@@ -237,6 +249,7 @@ namespace com.spacepuppy.Anim
         public void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.IsPlaying) return;
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
             _state = _controller.PlayQueuedInternal(_clipId, queueMode, playMode, _layer);
             _state.weight = _weight;
@@ -245,13 +258,14 @@ namespace com.spacepuppy.Anim
             _state.layer = _layer;
             _state.wrapMode = _wrapMode;
             _state.blendMode = _blendMode;
-            _masks.Apply(_state);
+            if (_mask != null) _mask.Apply(_controller, _state);
             this.RegisterTimeScaleChangedEvent();
         }
         
         public void CrossFade(float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer)
         {
             if (this.IsPlaying) return;
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
             _state = _controller.CrossFadeQueuedInternal(_clipId, fadeLength, queueMode, playMode, _layer);
             _state.weight = _weight;
@@ -260,7 +274,7 @@ namespace com.spacepuppy.Anim
             _state.layer = _layer;
             _state.wrapMode = _wrapMode;
             _state.blendMode = _blendMode;
-            _masks.Apply(_state);
+            if (_mask != null) _mask.Apply(_controller, _state);
             this.RegisterTimeScaleChangedEvent();
         }
 
@@ -359,7 +373,7 @@ namespace com.spacepuppy.Anim
             a._layer = _layer;
             a._wrapMode = _wrapMode;
             a._blendMode = _blendMode;
-            if (_masks.Count > 0) a._masks.Copy(_masks);
+            a._mask = _mask;
             a._timeSupplier = _timeSupplier;
             return a;
         }
@@ -397,7 +411,7 @@ namespace com.spacepuppy.Anim
             _layer = 0;
             _wrapMode = UnityEngine.WrapMode.Default;
             _blendMode = AnimationBlendMode.Blend;
-            _masks.Clear();
+            _mask = null;
             this.UnregisterTimeScaleChangedEvent();
             _timeSupplier = null;
 
@@ -540,7 +554,7 @@ namespace com.spacepuppy.Anim
                     //do nothing
                 }
             }
-
+            
             #endregion
 
             #region IRadicalWaitHandle Interface

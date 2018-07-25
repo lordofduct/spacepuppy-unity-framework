@@ -25,7 +25,7 @@ namespace com.spacepuppy.Spawn
         private bool _spawnAsChild = false;
 
         [SerializeField()]
-        [OneOrMany()]
+        [ReorderableArray()]
         [Tooltip("Objects available for spawning. When spawn is called with no arguments a prefab is selected at random, unless a ISpawnSelector is available on the SpawnPoint.")]
         private GameObject[] _prefabs;
 
@@ -91,7 +91,7 @@ namespace com.spacepuppy.Spawn
             if (_prefabs == null) return null;
             for (int i = 0; i < _prefabs.Length; i++)
             {
-                if (this.Prefabs[i].name == name) return this.Spawn(_prefabs[i]);
+                if (this.Prefabs[i].CompareName(name)) return this.Spawn(_prefabs[i]);
             }
             return null;
         }
@@ -181,6 +181,27 @@ namespace com.spacepuppy.Spawn
         Trigger[] IObservableTrigger.GetTriggers()
         {
             return new Trigger[] { _onSpawnedObject };
+        }
+
+        #endregion
+
+        #region INotificationDispatcher Interface
+
+        [System.NonSerialized]
+        private NotificationDispatcher _observers;
+        
+        protected virtual void OnDespawn()
+        {
+            if (_observers != null) _observers.PurgeHandlers();
+        }
+        
+        public NotificationDispatcher Observers
+        {
+            get
+            {
+                if (_observers == null) _observers = new NotificationDispatcher(this);
+                return _observers;
+            }
         }
 
         #endregion

@@ -19,9 +19,16 @@ namespace com.spacepuppy.Anim
     /// 
     /// Furthermore, in regards of scaled time layers. When calling to play an animation 'directly' on this clip, it will only respect the timescale of the 'normal' time. The value exists solely 
     /// for when calling 'PlayQueued', as this is the preferred way of playing animations.
+    /// 
+    /// About the Mask!
+    /// If you plan to modify the Mask associated with this, make sure to set the Mask property null THEN make the changes THEN set the Mask property back to the updated mask.
+    /// This has to occur because there is no way for us to 'clear' all masks from an AnimationState. So instead when you set Mask to null we call Redact on the mask removing the known transforms.
+    /// We can thank Unity for this ass backwards way of doing things.
+    /// 
+    /// Honestly, you shouldn't be changing masks at runtime that are already assigned to an animation. Create a new mask if you really need to.
     /// </remarks>
     [System.Serializable()]
-    public class SPAnimClip : ISPDisposable
+    public class SPAnimClip : ISPDisposable, IAnimatable
     {
 
         public const string PROP_WEIGHT = "_weight";
@@ -31,7 +38,8 @@ namespace com.spacepuppy.Anim
         public const string PROP_BLENDMODE = "_blendMode";
         public const string PROP_TIMESUPPLIER = "_timeSupplier";
         public const string PROP_SCALEDDURATION = "ScaledDuration";
-        public const string PROP_MASKS = "_masks";
+        public const string PROP_MASK = "_mask";
+        //public const string PROP_MASKS = "_masks";
 
         #region Fields
 
@@ -53,10 +61,8 @@ namespace com.spacepuppy.Anim
         [SerializeField()]
         private SPTime _timeSupplier;
 
-        
-
-        [SerializeField()]
-        private MaskCollection _masks;
+        [SerializeField]
+        private SPAnimMaskSerializedRef _mask;
 
         [System.NonSerialized()]
         private string _id;
@@ -78,8 +84,7 @@ namespace com.spacepuppy.Anim
         #endregion
 
         #region CONSTRUCTOR
-
-
+        
         /// <summary>
         /// For deserializer ONLY
         /// </summary>
@@ -96,8 +101,8 @@ namespace com.spacepuppy.Anim
         {
             _name = name;
             _clip = null;
-            _masks = new MaskCollection();
             _timeSupplier = new SPTime();
+            _mask = new SPAnimMaskSerializedRef();
             //_firstFrame = 0;
             //_lastFrame = -1;
         }
@@ -106,8 +111,8 @@ namespace com.spacepuppy.Anim
         {
             _name = name;
             _clip = clip;
-            _masks = new MaskCollection();
             _timeSupplier = new SPTime();
+            _mask = new SPAnimMaskSerializedRef();
             //_firstFrame = 0;
             //_lastFrame = -1;
         }
@@ -116,8 +121,8 @@ namespace com.spacepuppy.Anim
         {
             _name = name;
             _clip = clip;
-            _masks = new MaskCollection();
             _timeSupplier = new SPTime(timeSupplier);
+            _mask = new SPAnimMaskSerializedRef();
             //_firstFrame = 0;
             //_lastFrame = -1;
         }
@@ -154,7 +159,7 @@ namespace com.spacepuppy.Anim
                 _state.layer = _layer;
                 _state.wrapMode = _wrapMode;
                 _state.blendMode = _blendMode;
-                _masks.SetState(_state);
+                if (this.Mask != null) this.Mask.Apply(_controller, _state);
             }
         }
 
@@ -239,11 +244,33 @@ namespace com.spacepuppy.Anim
         public ITimeSupplier TimeSupplier
         {
             get { return _timeSupplier.TimeSupplier; }
+            set { _timeSupplier.TimeSupplier = value; }
         }
-
-        public MaskCollection Masks
+        
+        /// <summary>
+        /// The mask attached to this SPAnimClip. Note this mask may be a shared mask, so be careful when modifying it.
+        /// </summary>
+        public ISPAnimationMask Mask
         {
-            get { return _masks; }
+            get
+            {
+                return _mask.Value;
+            }
+            set
+            {
+                if (_mask.Value == value) return;
+
+                if (_controller != null && _mask.Value != null)
+                {
+                    _mask.Value.Redact(_controller, _state);
+                    if (value != null) value.Apply(_controller, _state);
+                    _mask.Value = value;
+                }
+                else
+                {
+                    _mask.Value = value;
+                }
+            }
         }
 
         //***SEE NOTES IN CLASS DESCRIPTION
@@ -282,7 +309,7 @@ namespace com.spacepuppy.Anim
                     if (_clip is AnimationClip)
                         return (_clip as AnimationClip).length;
                     else if (_clip is IScriptableAnimationClip)
-                        return (_clip as IScriptableAnimationClip).Length;
+                        return (_clip as IScriptableAnimationClip).Duration;
                 }
 
                 return 0f;
@@ -324,8 +351,9 @@ namespace com.spacepuppy.Anim
 
         //public Animation Container { get { return _container; } }
 
-        public bool Initialized { get { return !object.ReferenceEquals(_controller, null); } }
-
+        //public bool Initialized { get { return !object.ReferenceEquals(_controller, null); } }
+        public bool Initialized { get { return _controller != null; } }
+        
         #endregion
 
         #region Methods
@@ -356,6 +384,7 @@ namespace com.spacepuppy.Anim
         public ISPAnim CreateAnimatableState()
         {
             if (_controller == null) throw new System.InvalidOperationException("This clip has not been initialized.");
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return null;
 
             if (_clip is AnimationClip)
             {
@@ -372,7 +401,7 @@ namespace com.spacepuppy.Anim
                 a.Layer = _layer;
                 a.WrapMode = _wrapMode;
                 a.BlendMode = _blendMode;
-                if (_masks.Count > 0) a.Masks.Copy(_masks);
+                a.Mask = this.Mask;
                 if (_timeSupplier.IsCustom) a.TimeSupplier = _timeSupplier.TimeSupplier as ITimeSupplier;
                 return a;
             }
@@ -393,6 +422,7 @@ namespace com.spacepuppy.Anim
         public void PlayDirectly(PlayMode mode = PlayMode.StopSameLayer)
         {
             if (_controller == null) return;
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
             if (_clip is AnimationClip)
             {
@@ -438,6 +468,7 @@ namespace com.spacepuppy.Anim
         public void CrossFadeDirectly(float fadeLength, PlayMode mode = PlayMode.StopSameLayer)
         {
             if (_controller == null) return;
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
             if (_clip is AnimationClip)
             {
@@ -489,6 +520,7 @@ namespace com.spacepuppy.Anim
                 //throw new System.InvalidOperationException("This clip was unexpectedly destroyed, make sure the animation hasn't been destroyed, or another clip was added with the same name.");
                 return;
             }
+            if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
             _controller.animation.Rewind(_id);
         }
 
@@ -542,7 +574,7 @@ namespace com.spacepuppy.Anim
             }
             _controller = null;
             _state = null;
-            _masks.SetState(null);
+            _mask.Value = null;
         }
 
         #endregion

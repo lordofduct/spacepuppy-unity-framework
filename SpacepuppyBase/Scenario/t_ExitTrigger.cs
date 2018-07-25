@@ -10,11 +10,22 @@ namespace com.spacepuppy.Scenario
         #region Fields
 
         public ScenarioActivatorMask Mask;
-        public float CooldownInterval = 0.0f;
+        public float CooldownInterval = 0f;
         public bool IncludeColliderAsTriggerArg = true;
 
         [System.NonSerialized()]
         private bool _coolingDown;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            _coolingDown = false;
+        }
 
         #endregion
 
@@ -35,18 +46,20 @@ namespace com.spacepuppy.Scenario
                     this.ActivateTrigger();
                 }
 
-                _coolingDown = true;
-                //use global incase this gets disable
-                GameLoopEntry.Hook.Invoke(() =>
+                if(this.CooldownInterval > 0f)
                 {
-                    _coolingDown = false;
-                }, this.CooldownInterval);
+                    _coolingDown = true;
+                    this.InvokeGuaranteed(() =>
+                    {
+                        _coolingDown = false;
+                    }, this.CooldownInterval);
+                }
             }
         }
 
         void OnTriggerExit(Collider other)
         {
-            if (this.HasComponent<CompoundTrigger>()) return;
+            if (_coolingDown || this.HasComponent<CompoundTrigger>()) return;
 
             this.DoTestTriggerExit(other);
         }

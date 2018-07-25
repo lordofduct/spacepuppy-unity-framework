@@ -3,6 +3,7 @@ using UnityEngine.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.AI.Sensors.Visual
@@ -73,7 +74,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
         #region Methods
 
         private System.Func<IAspect, bool> _cachedPred;
-        private System.Func<IAspect, bool> GetPredicate(System.Func<IAspect, bool> p)
+        protected System.Func<IAspect, bool> GetPredicate(System.Func<IAspect, bool> p)
         {
             if(p == null)
             {
@@ -86,6 +87,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
             }
         }
 
+        public abstract BoundingSphere GetBoundingSphere();
 
         public override bool ConcernedWith(UnityEngine.Object obj)
         {
@@ -123,40 +125,120 @@ namespace com.spacepuppy.AI.Sensors.Visual
 
         public override bool SenseAny(System.Func<IAspect, bool> p = null)
         {
-            return VisualAspect.Any(this.GetPredicate(p));
+            //return VisualAspect.Pool.Any(this.GetPredicate(p));
+
+            var sphere = this.GetBoundingSphere();
+            using (var lst = TempCollection.GetList<IAspect>())
+            {
+                if(VisualAspect.GetNearby(lst, sphere.position, sphere.radius) > 0)
+                {
+                    p = this.GetPredicate(p);
+                    for(int i = 0; i < lst.Count; i++)
+                    {
+                        if (p(lst[i])) return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public override IAspect Sense(System.Func<IAspect, bool> p = null)
         {
-            p = this.GetPredicate(p);
-            return VisualAspect.Pool.Find(p);
+            //p = this.GetPredicate(p);
+            //return VisualAspect.Pool.Find(p);
+
+            var sphere = this.GetBoundingSphere();
+            using (var lst = TempCollection.GetList<IAspect>())
+            {
+                if (VisualAspect.GetNearby(lst, sphere.position, sphere.radius) > 0)
+                {
+                    p = this.GetPredicate(p);
+                    for (int i = 0; i < lst.Count; i++)
+                    {
+                        if (p(lst[i])) return lst[i];
+                    }
+                }
+            }
+
+            return null;
         }
 
         public override IEnumerable<IAspect> SenseAll(System.Func<IAspect, bool> p = null)
         {
-            p = this.GetPredicate(p);
-            //return VisualAspect.Pool.FindAll(p);
-            foreach(var a in VisualAspect.Pool)
+            //p = this.GetPredicate(p);
+            //foreach(var a in VisualAspect.Pool)
+            //{
+            //    if (p(a)) yield return a;
+            //}
+
+            var sphere = this.GetBoundingSphere();
+            using (var lst = TempCollection.GetList<IAspect>())
             {
-                if (p(a)) yield return a;
+                if (VisualAspect.GetNearby(lst, sphere.position, sphere.radius) > 0)
+                {
+                    p = this.GetPredicate(p);
+                    for (int i = 0; i < lst.Count; i++)
+                    {
+                        if (p(lst[i])) yield return lst[i];
+                    }
+                }
             }
         }
 
-        public override int SenseAll(ICollection<IAspect> lst, System.Func<IAspect, bool> p = null)
+        public override int SenseAll(ICollection<IAspect> results, System.Func<IAspect, bool> p = null)
         {
-            p = this.GetPredicate(p);
-            return VisualAspect.Pool.FindAll(lst, p);
+            //p = this.GetPredicate(p);
+            //return VisualAspect.Pool.FindAll(results, p);
+
+            int cnt = 0;
+            var sphere = this.GetBoundingSphere();
+            using (var lst = TempCollection.GetList<IAspect>())
+            {
+                if (VisualAspect.GetNearby(lst, sphere.position, sphere.radius) > 0)
+                {
+                    p = this.GetPredicate(p);
+                    for (int i = 0; i < lst.Count; i++)
+                    {
+                        if (p(lst[i]))
+                        {
+                            results.Add(lst[i]);
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            return cnt;
         }
 
-        public override int SenseAll<T>(ICollection<T> lst, System.Func<T, bool> p = null)
+        public override int SenseAll<T>(ICollection<T> results, System.Func<T, bool> p = null)
         {
-            System.Func<T, bool> p2;
-            if (p == null)
-                p2 = (a) => this.Visible(a);
-            else
-                p2 = (a) => this.Visible(a) && p(a);
+            //System.Func<T, bool> p2;
+            //if (p == null)
+            //    p2 = (a) => this.Visible(a);
+            //else
+            //    p2 = (a) => this.Visible(a) && p(a);
 
-            return VisualAspect.Pool.FindAll<T>(lst, p2);
+            //return VisualAspect.Pool.FindAll<T>(lst, p2);
+
+            int cnt = 0;
+            var sphere = this.GetBoundingSphere();
+            using (var lst = TempCollection.GetList<IAspect>())
+            {
+                if (VisualAspect.GetNearby(lst, sphere.position, sphere.radius) > 0)
+                {
+                    for (int i = 0; i < lst.Count; i++)
+                    {
+                        if (lst[i] is T && this.Visible(lst[i]))
+                        {
+                            if (p != null && !p(lst[i] as T)) continue;
+                            results.Add(lst[i] as T);
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            return cnt;
         }
 
         public override bool Visible(IAspect aspect)
@@ -168,7 +250,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
             if (_aspectLayerMask != -1 && !aspect.gameObject.IntersectsLayerMask(_aspectLayerMask)) return false;
             if (!_aspectTagMask.Intersects(vaspect)) return false;
             if (!_canDetectSelf && vaspect.entityRoot == this.entityRoot) return false;
-            return this.TestVisibility(vaspect);
+            return vaspect.OmniPresent || this.TestVisibility(vaspect);
         }
 
         protected abstract bool TestVisibility(VisualAspect aspect);

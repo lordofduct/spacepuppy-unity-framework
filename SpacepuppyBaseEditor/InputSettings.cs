@@ -11,7 +11,7 @@ using com.spacepuppyeditor.Internal;
 namespace com.spacepuppyeditor
 {
 
-    [CreateAssetMenu(fileName = "InputSettings", menuName = "Spacepuppy/Input Settings", order = int.MaxValue)]
+    [CreateAssetMenu(fileName = "InputSettings", menuName = "Spacepuppy Build Pipeline/Input Settings")]
     public class InputSettings : ScriptableObject
     {
         
@@ -422,6 +422,12 @@ namespace com.spacepuppyeditor
         #region Static Utils
 
         private static System.Func<string[]> _overrideGetGlobalInputIds;
+        /// <summary>
+        /// Get the input id's that should show up in a drop down list for any InputID property. This includes in the t_OnSimpleButtonPress editor.
+        /// 
+        /// Set this delegate to override the default entries as defined in InputManager.asset. This can be useful if you're using a custom input system 
+        /// that has named inputs unique from what is found in the InputSettings.asset configuration.
+        /// </summary>
         public static System.Func<string[]> GetGlobalInputIds
         {
             get

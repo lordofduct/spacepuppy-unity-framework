@@ -175,6 +175,14 @@ namespace com.spacepuppyeditor
 
         #region Prefix
 
+        public static bool PrefixFoldoutLabel(Rect position, bool foldout, GUIContent label)
+        {
+            //EditorGUI.PrefixLabel(position, label);
+
+            var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, EditorGUIUtility.labelWidth), EditorGUIUtility.singleLineHeight);
+            return EditorGUI.Foldout(r, foldout, label);
+        }
+
         public static bool PrefixFoldoutLabel(ref Rect position, bool foldout, GUIContent label)
         {
             //EditorGUI.PrefixLabel(position, label);
@@ -231,7 +239,8 @@ namespace com.spacepuppyeditor
 
         public static object DefaultPropertyField(Rect position, GUIContent label, object value, System.Type valueType)
         {
-            var propertyType = (valueType != null) ? EditorHelper.GetPropertyType(valueType) : SerializedPropertyType.Generic;
+            SerializedPropertyType propertyType = SerializedPropertyType.Generic;
+            if (valueType != null) propertyType = (valueType.IsInterface) ? SerializedPropertyType.ObjectReference : EditorHelper.GetPropertyType(valueType);
 
             switch (propertyType)
             {
@@ -576,8 +585,43 @@ namespace com.spacepuppyeditor
 
         public static int EnumFlagField(Rect position, System.Type enumType, GUIContent label, int value)
         {
-            var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
-            return EditorGUI.MaskField(position, label, value, names);
+            //var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
+            //return EditorGUI.MaskField(position, label, value, names);
+
+            var code = System.Type.GetTypeCode(enumType);
+            switch(code)
+            {
+                case System.TypeCode.SByte:
+                case System.TypeCode.Int16:
+                case System.TypeCode.Int32:
+                    {
+                        int[] acceptedValues = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select System.Convert.ToInt32(e)).ToArray();
+                        return EnumFlagField(position, enumType, acceptedValues, label, value);
+                    }
+                case System.TypeCode.Byte:
+                case System.TypeCode.UInt16:
+                case System.TypeCode.UInt32:
+                    {
+                        int[] acceptedValues = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select (int)System.Convert.ToUInt32(e)).ToArray();
+                        return EnumFlagField(position, enumType, acceptedValues, label, value);
+                    }
+                case System.TypeCode.Int64:
+                    {
+                        //unity MaskField only supports 'int', so we redact all values that are too large
+                        int[] acceptedValues = (from e in EnumUtil.GetUniqueEnumFlags(enumType) let i = System.Convert.ToInt64(e) where i <= int.MaxValue && i >= int.MinValue select (int)i).ToArray();
+                        return EnumFlagField(position, enumType, acceptedValues, label, value);
+                    }
+                case System.TypeCode.UInt64:
+                    {
+                        //unity MaskField only supports 'int', so we redact all values that are too large
+                        int[] acceptedValues = (from e in EnumUtil.GetUniqueEnumFlags(enumType) let i = (long)System.Convert.ToUInt64(e) where i <= int.MaxValue && i >= int.MinValue select (int)i).ToArray();
+                        return EnumFlagField(position, enumType, acceptedValues, label, value);
+                    }
+                default:
+                    EditorGUI.LabelField(position, label, EditorHelper.TempContent("64-bit enum not supported..."));
+                    return value;
+                    
+            }
         }
 
         public static System.Enum EnumFlagField(Rect position, GUIContent label, System.Enum value)
@@ -598,7 +642,9 @@ namespace com.spacepuppyeditor
             {
                 foreach (var e in acceptedFlags)
                 {
-                    if (MathUtil.IsPowerOfTwo(System.Convert.ToUInt64(e)) && EnumUtil.EnumValueIsDefined(e, enumType)) lst.Add(System.Convert.ToInt32(e));
+                    if ((e == (1 << 31) || (e > 0 && MathUtil.IsPowerOfTwo((ulong)e)))
+                       && EnumUtil.EnumValueIsDefined(e, enumType))
+                        lst.Add(e);
                 }
 
                 var evalue = ConvertUtil.ToEnumOfType(enumType, value);
@@ -791,7 +837,6 @@ namespace com.spacepuppyeditor
 
         #endregion
 
-
         #region Vector Field
 
         public static Vector3 DelayedVector3Field(Rect position, GUIContent label, Vector3 value)
@@ -910,6 +955,59 @@ namespace com.spacepuppyeditor
             }
 
             return null;
+        }
+
+        #endregion
+
+        #region Path Textfields
+
+        public const float ELLIPSIS_BTN_WIDTH = 22f;
+        public static string FolderPathTextfield(Rect position, string label, string path, string popupTitle)
+        {
+            return FolderPathTextfield(position, EditorHelper.TempContent(label), path, popupTitle);
+        }
+        public static string FolderPathTextfield(Rect position, GUIContent label, string path, string popupTitle)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+
+            float w1 = Mathf.Max(position.width - ELLIPSIS_BTN_WIDTH, 0f);
+            float w2 = Mathf.Clamp(ELLIPSIS_BTN_WIDTH, 0f, position.width - w1);
+            var r1 = new Rect(position.xMin, position.yMin, w1, EditorGUIUtility.singleLineHeight);
+            var r2 = new Rect(r1.xMax, position.yMin, w2, EditorGUIUtility.singleLineHeight);
+            path = EditorGUI.TextField(r1, path);
+            if (GUI.Button(r2, "..."))
+            {
+                var result = EditorUtility.OpenFolderPanel(popupTitle, path, string.Empty);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    path = result;
+                }
+            }
+            return path;
+        }
+
+        public static string SaveFilePathTextfield(Rect position, string label, string path, string popupTitle, string extension)
+        {
+            return SaveFilePathTextfield(position, EditorHelper.TempContent(label), path, popupTitle, extension);
+        }
+        public static string SaveFilePathTextfield(Rect position, GUIContent label, string path, string popupTitle, string extension)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+
+            float w1 = Mathf.Max(position.width - ELLIPSIS_BTN_WIDTH, 0f);
+            float w2 = Mathf.Clamp(ELLIPSIS_BTN_WIDTH, 0f, position.width - w1);
+            var r1 = new Rect(position.xMin, position.yMin, w1, EditorGUIUtility.singleLineHeight);
+            var r2 = new Rect(r1.xMax, position.yMin, w2, EditorGUIUtility.singleLineHeight);
+            path = EditorGUI.TextField(r1, path);
+            if (GUI.Button(r2, "..."))
+            {
+                var result = EditorUtility.SaveFilePanel(popupTitle, System.IO.Path.GetDirectoryName(path), System.IO.Path.GetFileName(path), extension);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    path = result;
+                }
+            }
+            return path;
         }
 
         #endregion

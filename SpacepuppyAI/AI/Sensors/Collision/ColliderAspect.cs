@@ -46,9 +46,14 @@ namespace com.spacepuppy.AI.Sensors.Collision
         {
             get { return 0f; }
         }
-        
+
+        bool IAspect.OmniPresent
+        {
+            get { return false; }
+        }
+
         #endregion
-        
+
         #region Static Interface
 
         public static ColliderAspect GetAspect(Collider coll)

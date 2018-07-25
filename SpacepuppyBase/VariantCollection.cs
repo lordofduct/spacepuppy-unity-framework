@@ -416,7 +416,7 @@ namespace com.spacepuppy
                     case VariantType.Quaternion:
                     case VariantType.Color:
                     case VariantType.Rect:
-                        hash.To(e.Current.Key, ease, value, dur);
+                        hash.To(e.Current.Key, ease, dur, value);
                         break;
                 }
             }
@@ -688,6 +688,9 @@ namespace com.spacepuppy
 
         #region Special Types
 
+        /// <summary>
+        /// Configure the list to include name/type pairs reflected from a target type.
+        /// </summary>
         [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
         public class AsPropertyListAttribute : System.Attribute
         {
@@ -703,7 +706,23 @@ namespace com.spacepuppy
 
         }
 
+        /// <summary>
+        /// Configure the list to only accept a single type through the inspector.
+        /// </summary>
+        [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+        public class AsTypedList : System.Attribute
+        {
 
+            private System.Type _tp;
+
+            public AsTypedList(System.Type tp)
+            {
+                _tp = tp;
+            }
+
+            public System.Type TargetType { get { return _tp; } }
+
+        }
 
 
 

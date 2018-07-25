@@ -104,11 +104,29 @@ namespace com.spacepuppyeditor.Internal
                     _modifiers.Add(modifier);
                 }
             }
-            else
+            else if(attribute is TooltipAttribute || attribute is ContextMenuItemAttribute)
             {
                 base.HandleAttribute(attribute, field, propertyType);
-                var drawer = this.InternalDrawer; //this retrieves the drawer that was selected by called 'base.HandleAttribute'
-                this.AppendDrawer(drawer);
+            }
+            else
+            {
+                var drawerTypeForType = ScriptAttributeUtility.GetDrawerTypeForType(attribute.GetType());
+                if (drawerTypeForType == null)
+                    return;
+                else if (typeof(PropertyDrawer).IsAssignableFrom(drawerTypeForType))
+                {
+                    base.HandleAttribute(attribute, field, propertyType);
+                    var drawer = this.InternalDrawer; //this retrieves the drawer that was selected by called 'base.HandleAttribute'
+                    this.AppendDrawer(drawer);
+                }
+                else if (typeof(DecoratorDrawer).IsAssignableFrom(drawerTypeForType))
+                {
+                    DecoratorDrawer instance = (DecoratorDrawer)System.Activator.CreateInstance(drawerTypeForType);
+                    com.spacepuppy.Dynamic.DynamicUtil.SetValue(instance, "m_Attribute", attribute);
+                    if (this.DecoratorDrawers == null)
+                        this.DecoratorDrawers = new List<DecoratorDrawer>();
+                    this.DecoratorDrawers.Add(instance);
+                }
             }
         }
 

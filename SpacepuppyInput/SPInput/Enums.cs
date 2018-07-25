@@ -30,12 +30,46 @@ namespace com.spacepuppy.SPInput
         Absolute = 2
     }
 
+    /// <summary>
+    /// Represents the current state of a button.
+    /// </summary>
     public enum ButtonState : sbyte
     {
         None = 0,
         Down = 1,
         Held = 2,
         Released = -1
+    }
+    
+    /// <summary>
+    /// Represents a button press over some duration of time. Returned by 'GetButtonPress'.
+    /// </summary>
+    public enum ButtonPress
+    {
+        /// <summary>
+        /// Button was pressed and released after the defined time.
+        /// </summary>
+        Released = -2,
+        /// <summary>
+        /// Button was pressed and released before the defined time.
+        /// </summary>
+        Tapped = -1,
+        /// <summary>
+        /// Button is not active.
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Button just became active.
+        /// </summary>
+        Down = 1,
+        /// <summary>
+        /// Button is down but the duration has yet to pass.
+        /// </summary>
+        Holding = 2,
+        /// <summary>
+        /// Button is down and the duration has passed.
+        /// </summary>
+        Held = 3
     }
 
     public enum DeadZoneCutoff

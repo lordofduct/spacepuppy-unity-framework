@@ -6,22 +6,28 @@ using System.Text;
 namespace com.spacepuppy.Anim
 {
 
+    public interface IAnimatable
+    {
+
+        int Layer { get; set; }
+        float Duration { get; }
+
+    }
+
     /// <summary>
     /// An animation state generated from a clip. Similar to Unity AnimationState.
     /// </summary>
-    public interface ISPAnim : IRadicalWaitHandle, System.IDisposable, ISPDisposable
+    public interface ISPAnim : IAnimatable, IRadicalWaitHandle, ISPDisposable
     {
 
         SPAnimationController Controller { get; }
-        int Layer { get; set; }
-        float Speed { get; set; }
-        ITimeSupplier TimeSupplier { get; set; }
-        WrapMode WrapMode { get; set; }
-        bool IsPlaying { get; }
-        float Time { get; set; }
-        float Duration { get; }
-        float ScaledDuration { get; }
 
+        WrapMode WrapMode { get; set; }
+        float Speed { get; set; }
+        float ScaledDuration { get; }
+        float Time { get; set; }
+        ITimeSupplier TimeSupplier { get; set; }
+        bool IsPlaying { get; }
 
         void Play(QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer);
         void CrossFade(float fadeLength, QueueMode queueMode = QueueMode.PlayNow, PlayMode playMode = PlayMode.StopSameLayer);

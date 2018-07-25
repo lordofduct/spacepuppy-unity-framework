@@ -2844,7 +2844,7 @@ namespace com.spacepuppy.Utils
             return ConvertUtil.ToPrim(value, tp, code);
         }
 
-        public static bool TryToPrim<T>(object value, ref T output)
+        public static bool TryToPrim<T>(object value, out T output)
         {
             try
             {
@@ -2854,12 +2854,13 @@ namespace com.spacepuppy.Utils
             }
             catch
             {
+                output = default(T);
             }
 
             return false;
         }
 
-        public static bool TryToPrim(object value, System.Type tp, ref object output)
+        public static bool TryToPrim(object value, System.Type tp, out object output)
         {
             try
             {
@@ -2868,6 +2869,7 @@ namespace com.spacepuppy.Utils
             }
             catch
             {
+                output = null;
             }
 
             return false;

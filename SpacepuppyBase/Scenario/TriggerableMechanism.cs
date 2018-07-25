@@ -4,7 +4,7 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
-    public abstract class TriggerableMechanism : SPNotifyingComponent, ITriggerableMechanism
+    public abstract class TriggerableMechanism : SPComponent, ITriggerableMechanism
     {
 
         #region Fields

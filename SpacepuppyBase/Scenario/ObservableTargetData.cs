@@ -93,6 +93,7 @@ namespace com.spacepuppy.Scenario
                 _targetEvent.TriggerActivated -= this.OnTriggerActivated;
                 _targetEvent = null;
             }
+            _initialized = false;
         }
         
         public bool BeginHijack()

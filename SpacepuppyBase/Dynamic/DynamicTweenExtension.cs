@@ -11,7 +11,7 @@ namespace com.spacepuppy.Dynamic
     public static class DynamicTweenExtension
     {
 
-        public static TweenHash TweenWithToken(this TweenHash hash, TweenHash.AnimMode mode, com.spacepuppy.Tween.Ease ease, object valueToken, float dur, object valueAltToken)
+        public static TweenHash TweenWithToken(this TweenHash hash, TweenHash.AnimMode mode, com.spacepuppy.Tween.Ease ease, float dur, object valueToken, object valueAltToken)
         {
             if (hash == null || valueToken == null) return hash;
 
@@ -23,7 +23,7 @@ namespace com.spacepuppy.Dynamic
                 {
                     value = st.GetValue(sname);
                     if (value == null) continue;
-                    
+
                     switch (VariantReference.GetVariantType(value.GetType()))
                     {
                         case VariantType.String:
@@ -37,7 +37,7 @@ namespace com.spacepuppy.Dynamic
                         case VariantType.Quaternion:
                         case VariantType.Color:
                         case VariantType.Rect:
-                            hash.ByAnimMode(mode, sname, ease, value, dur, DynamicUtil.GetValue(valueAltToken, sname));
+                            hash.ByAnimMode(mode, sname, ease, dur, value, DynamicUtil.GetValue(valueAltToken, sname));
                             break;
                     }
                 }
@@ -62,7 +62,7 @@ namespace com.spacepuppy.Dynamic
                         case VariantType.Quaternion:
                         case VariantType.Color:
                         case VariantType.Rect:
-                            hash.ByAnimMode(mode, sname, ease, value, dur, DynamicUtil.GetValue(valueAltToken, sname));
+                            hash.ByAnimMode(mode, sname, ease, dur, value, DynamicUtil.GetValue(valueAltToken, sname));
                             break;
                     }
                 }
@@ -71,15 +71,15 @@ namespace com.spacepuppy.Dynamic
             return hash;
         }
 
-        public static TweenHash TweenToToken(this TweenHash hash, com.spacepuppy.Tween.Ease ease, object token, float dur)
+        public static TweenHash TweenToToken(this TweenHash hash, com.spacepuppy.Tween.Ease ease, float dur, object token)
         {
             if (hash == null || token == null) return hash;
-            
+
             object value;
-            if(token is IStateToken)
+            if (token is IStateToken)
             {
                 var st = token as IStateToken;
-                foreach(var sname in st.GetMemberNames(false))
+                foreach (var sname in st.GetMemberNames(false))
                 {
                     value = st.GetValue(sname);
                     if (value == null) continue;
@@ -97,14 +97,14 @@ namespace com.spacepuppy.Dynamic
                         case VariantType.Quaternion:
                         case VariantType.Color:
                         case VariantType.Rect:
-                            hash.To(sname, ease, value, dur);
+                            hash.To(sname, ease, dur, value);
                             break;
                     }
                 }
             }
             else
             {
-                foreach(var sname in DynamicUtil.GetMemberNames(token, false, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property))
+                foreach (var sname in DynamicUtil.GetMemberNames(token, false, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property))
                 {
                     value = DynamicUtil.GetValue(token, sname);
                     if (value == null) continue;
@@ -122,7 +122,7 @@ namespace com.spacepuppy.Dynamic
                         case VariantType.Quaternion:
                         case VariantType.Color:
                         case VariantType.Rect:
-                            hash.To(sname, ease, value, dur);
+                            hash.To(sname, ease, dur, value);
                             break;
                     }
                 }

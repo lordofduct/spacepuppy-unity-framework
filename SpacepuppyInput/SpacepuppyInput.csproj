@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameInputManager.cs" />
+    <Compile Include="Scenario\t_OnAnyInput.cs" />
     <Compile Include="Scenario\t_OnSimpleButtonPress.cs" />
     <Compile Include="SPInput\CompositeInputSignature.cs" />
     <Compile Include="SPInput\DelegatedInputSignature.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="SPInput\ISequence.cs" />
     <Compile Include="SPInput\MappedInputDevice.cs" />
     <Compile Include="SPInput\MappedInputSignatureCollection.cs" />
+    <Compile Include="SPInput\RepeatingButtonInputSignature.cs" />
     <Compile Include="SPInput\Sequences\ButtonTap.cs" />
     <Compile Include="SPInput\Sequences\CursorMove.cs" />
     <Compile Include="SPInput\Sequences\FirstSuccessfulSequence.cs" />

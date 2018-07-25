@@ -85,6 +85,7 @@
     <Compile Include="Collections\IForeachEnumerator.cs" />
     <Compile Include="Collections\LightEnumerator.cs" />
     <Compile Include="Collections\MultitonPool.cs" />
+    <Compile Include="Collections\PointOctree.cs" />
     <Compile Include="Collections\SamplingCharEnumerator.cs" />
     <Compile Include="Collections\BiDictionary.cs" />
     <Compile Include="Collections\CircularQueue.cs" />
@@ -104,7 +105,9 @@
     <Compile Include="Collections\SamplingStack.cs" />
     <Compile Include="Collections\SerializableDictionaryBase.cs" />
     <Compile Include="Collections\ReusableStringReader.cs" />
+    <Compile Include="Collections\StateFlagStack.cs" />
     <Compile Include="Collections\TempCollection.cs" />
+    <Compile Include="Collections\TempDictionary.cs" />
     <Compile Include="Collections\TempHashSet.cs" />
     <Compile Include="Collections\TempList.cs" />
     <Compile Include="Collections\TrackablObjectCachePool.cs" />
@@ -132,6 +135,7 @@
     <Compile Include="Geom\BezierSpline.cs" />
     <Compile Include="Geom\Box.cs" />
     <Compile Include="Geom\CatmullRomSpline.cs" />
+    <Compile Include="Geom\Cone.cs" />
     <Compile Include="Geom\Cylinder.cs" />
     <Compile Include="Geom\I3dSpline.cs" />
     <Compile Include="Geom\PlanarSurfaceComponent.cs" />
@@ -147,6 +151,8 @@
     <Compile Include="Graphs\IPathResolver.cs" />
     <Compile Include="Graphs\LinkedNodeGraph.cs" />
     <Compile Include="Graphs\NodeGraph.cs" />
+    <Compile Include="Hooks\EarlyStartHook.cs" />
+    <Compile Include="IEventActivatorMask.cs" />
     <Compile Include="IMixin.cs" />
     <Compile Include="IEntityAwakeHandler.cs" />
     <Compile Include="IImmediatelyResumingYieldInstruction.cs" />
@@ -214,12 +220,17 @@
     <Compile Include="IRandom.cs" />
     <Compile Include="Project\GameSettingsBase.cs" />
     <Compile Include="Project\AssetPool.cs" />
+    <Compile Include="Project\PrefabToken.cs" />
     <Compile Include="Project\QueryableAssetSet.cs" />
     <Compile Include="Project\ResourceLink.cs" />
     <Compile Include="Project\ResourceLinkTable.cs" />
     <Compile Include="Project\ResourcePackage.cs" />
     <Compile Include="Project\IAssetBundle.cs" />
+    <Compile Include="Project\SerializableInterfaceRef.cs" />
+    <Compile Include="Scenario\EventTriggerEvaluator.cs" />
     <Compile Include="Scenario\HijackTriggerEvents.cs" />
+    <Compile Include="Scenario\i_KillTween.cs" />
+    <Compile Include="Scenario\t_Timer.cs" />
     <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
     <Compile Include="PsuedoSingleton.cs" />
@@ -283,7 +294,7 @@
     <Compile Include="Scenario\t_RandomInterval.cs" />
     <Compile Include="Scenario\t_OnTriggerOccupied.cs" />
     <Compile Include="Scenes\Enums.cs" />
-    <Compile Include="Scenes\ISceneLoadedMessageReceiver.cs" />
+    <Compile Include="Scenes\ISceneLoadedFoundHandler.cs" />
     <Compile Include="Scenes\SceneManagerEventArgs.cs" />
     <Compile Include="Scenes\LoadSceneAsyncWaitHandle.cs" />
     <Compile Include="Scenes\SceneManager.cs" />
@@ -405,6 +416,7 @@
     <Compile Include="UI\TextSettings.cs" />
     <Compile Include="Utils\Assertions.cs" />
     <Compile Include="Utils\AudioUtils.cs" />
+    <Compile Include="Utils\ColliderUtil.cs" />
     <Compile Include="Utils\ColorUtil.cs" />
     <Compile Include="Utils\CompareUtil.cs" />
     <Compile Include="Utils\ComponentUtil.cs" />
@@ -423,6 +435,7 @@
     <Compile Include="Dynamic\Accessors\MemberAccessorException.cs" />
     <Compile Include="Dynamic\Accessors\MemberAccessorPool.cs" />
     <Compile Include="Dynamic\Accessors\PropertyAccessor.cs" />
+    <Compile Include="Utils\InvokeHandle.cs" />
     <Compile Include="Utils\Messaging.cs" />
     <Compile Include="Utils\GameObjUtil.cs" />
     <Compile Include="Utils\Gizmo\GizmoGhost.cs" />
@@ -430,15 +443,17 @@
     <Compile Include="Utils\LayerUtil.cs" />
     <Compile Include="Utils\MathUtil.cs" />
     <Compile Include="Utils\MouseUtil.cs" />
+    <Compile Include="INameable.cs" />
+    <Compile Include="Utils\NameCache.cs" />
     <Compile Include="Utils\ObjUtil.cs" />
     <Compile Include="Utils\PrefabUtil.cs" />
     <Compile Include="Utils\PrimitiveUtil.cs" />
     <Compile Include="Utils\QuaternionUtil.cs" />
     <Compile Include="Utils\RandomUtil.cs" />
     <Compile Include="Utils\Rand\RandomRange.cs" />
-    <Compile Include="Utils\SpecializedComponents\EarlyParentSetter.cs" />
     <Compile Include="Utils\StreamUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />
+    <Compile Include="Utils\TextureUtil.cs" />
     <Compile Include="Utils\TransformUtil.cs" />
     <Compile Include="Utils\TypeUtil.cs" />
     <Compile Include="Utils\VectorUtil.cs" />

@@ -15,6 +15,8 @@ namespace com.spacepuppy.AI.Sensors
 
         SPEntity Entity { get; }
 
+        bool OmniPresent { get; }
+
     }
 
     public abstract class AbstractAspect : SPEntityComponent, IAspect
@@ -31,6 +33,11 @@ namespace com.spacepuppy.AI.Sensors
         {
             get;
             set;
+        }
+
+        public abstract bool OmniPresent
+        {
+            get;
         }
         
         #endregion

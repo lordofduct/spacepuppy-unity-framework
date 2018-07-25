@@ -24,6 +24,15 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region Properties
+
+        public int Count
+        {
+            get { return _set.Count; }
+        }
+
+        #endregion
+
         #region Methods
 
         public bool Contains(IUpdateable obj)

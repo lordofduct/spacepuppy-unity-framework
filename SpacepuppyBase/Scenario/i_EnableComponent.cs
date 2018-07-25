@@ -56,7 +56,7 @@ namespace com.spacepuppy.Scenario
 
             if (_delay > 0f)
             {
-                this.Invoke(() =>
+                this.InvokeGuaranteed(() =>
                 {
                     this.SetEnabledByMode(arg);
                 }, _delay);

@@ -1,6 +1,7 @@
 ﻿#pragma warning disable 0649 // variable declared but not used.
 
 using UnityEngine;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {

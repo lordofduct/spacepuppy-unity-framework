@@ -269,6 +269,21 @@ namespace com.spacepuppy.Utils
         }
 
         /// <summary>
+        /// Emulates Vector3.SignedAngle from unity 2017. Note that this does not do any projections, so this is not a measure of the rotation around that axis, just the direction around that axis.
+        /// Use AngleOffAroundAxis to get the projected rotation around an axis.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="axis"></param>
+        /// <returns></returns>
+        public static float SignedAngle(Vector3 a, Vector3 b, Vector3 axis)
+        {
+            a.Normalize();
+            b.Normalize();
+            return Mathf.Acos(Mathf.Clamp(Vector3.Dot(a, b), -1f, 1f)) * MathUtil.RAD_TO_DEG * Mathf.Sign(Vector3.Dot(axis, Vector3.Cross(a, b)));
+        }
+
+        /// <summary>
         /// Returns a vector adjacent to up in the general direction of forward.
         /// </summary>
         /// <param name="up"></param>

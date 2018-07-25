@@ -129,7 +129,7 @@ namespace com.spacepuppy.Anim
             if (_currentAnimState == null)
             {
                 //this.Invoke(() => { this.OnAnimCompleteCallback(null); }, 0f);
-                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0.01f);
+                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0f);
                 return false;
             }
             
@@ -157,7 +157,7 @@ namespace com.spacepuppy.Anim
             if (_currentAnimState == null)
             {
                 //this.Invoke(() => { this.OnAnimCompleteCallback(null); }, 0f);
-                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0.01f);
+                if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0f);
                 return false;
             }
 

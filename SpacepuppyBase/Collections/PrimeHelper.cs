@@ -2,6 +2,7 @@
 
 namespace com.spacepuppy.Collections
 {
+
     public static class PrimeHelper
     {
         private static readonly int[] primes = new int[]
@@ -130,4 +131,5 @@ namespace com.spacepuppy.Collections
         }
 
     }
+
 }

@@ -5,8 +5,62 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Anim
 {
+
+    public enum AnimatorType
+    {
+        Unknown = 0,
+        Animation,
+        Animator,
+        SPAnimController,
+        SPAnimator,
+        SPAnimSource
+    }
+
     public static class AnimUtil
     {
+
+        #region AnimatorType Enum
+
+        public static AnimatorType GetAnimatorType(System.Type tp)
+        {
+            if (tp == null)
+                return AnimatorType.Unknown;
+            else if (TypeUtil.IsType(tp, typeof(Animation)))
+                return AnimatorType.Animation;
+            else if (TypeUtil.IsType(tp, typeof(Animator)))
+                return AnimatorType.Animator;
+            else if (TypeUtil.IsType(tp, typeof(SPAnimationController)))
+                return AnimatorType.SPAnimController;
+            else if (TypeUtil.IsType(tp, typeof(ISPAnimator)))
+                return AnimatorType.SPAnimator;
+            else if (TypeUtil.IsType(tp, typeof(ISPAnimationSource)))
+                return AnimatorType.SPAnimSource;
+            else
+                return AnimatorType.Unknown;
+        }
+
+        public static AnimatorType GetAnimatorType(object obj)
+        {
+            if (obj == null) return AnimatorType.Unknown;
+            if (obj is System.Type) return GetAnimatorType(obj as System.Type);
+
+            if (obj is Animation)
+                return AnimatorType.Animation;
+            else if (obj is Animator)
+                return AnimatorType.Animator;
+            else if (obj is SPAnimationController)
+                return AnimatorType.SPAnimController;
+            else if (obj is ISPAnimator)
+                return AnimatorType.SPAnimator;
+            else if (obj is ISPAnimationSource)
+                return AnimatorType.SPAnimSource;
+            else if (obj is IProxy)
+                return GetAnimatorType((obj as IProxy).GetTargetType());
+            else
+                return AnimatorType.Unknown;
+        }
+
+        #endregion
         
         #region Animation Extension Methods
 
@@ -81,17 +135,17 @@ namespace com.spacepuppy.Anim
         public static bool TrySchedule(object animtoken, System.Action<object> callback)
         {
             if (callback == null) throw new System.ArgumentNullException("callback");
-            if (animtoken == null) return false;
+            if (animtoken.IsNullOrDestroyed()) return false;
 
-            if(animtoken is ISPAnim)
+            if (animtoken is ISPAnim)
             {
                 (animtoken as ISPAnim).Schedule((a) => callback(a));
                 return true;
             }
-            else if(animtoken is IRadicalWaitHandle)
+            else if (animtoken is IRadicalWaitHandle)
             {
                 var handle = animtoken as IRadicalWaitHandle;
-                if(handle.IsComplete)
+                if (handle.IsComplete)
                 {
                     callback(animtoken);
                 }
@@ -104,7 +158,8 @@ namespace com.spacepuppy.Anim
             }
             else if (animtoken is AnimationState)
             {
-                GameLoopEntry.Hook.StartCoroutine((animtoken as AnimationState).ScheduleLegacy((a) => callback(a)));
+                //GameLoopEntry.Hook.StartCoroutine((animtoken as AnimationState).ScheduleLegacy((a) => callback(a)));
+                InvokeHandle.Begin(GameLoopEntry.UpdatePump, () => callback(animtoken), ScheduleLegacyForInvokeHandle(animtoken as AnimationState));
                 return true;
             }
             else
@@ -171,6 +226,11 @@ namespace com.spacepuppy.Anim
             }
 
             callback(state);
+        }
+
+        private static System.Collections.IEnumerator ScheduleLegacyForInvokeHandle(AnimationState state)
+        {
+            while (state != null) yield return null;
         }
 
         #endregion

@@ -20,7 +20,10 @@ namespace com.spacepuppy.AI.Sensors.Visual
         [FormerlySerializedAs("Radius")]
         [MinRange(0f)]
         [SerializeField()]
-        private float _radius = 1.0f;
+        private float _startRadius = 1.0f;
+        [MinRange(0f)]
+        [SerializeField]
+        private float _endRadius = 1.0f;
         
         #endregion
 
@@ -36,10 +39,16 @@ namespace com.spacepuppy.AI.Sensors.Visual
             set { _range = Mathf.Max(value, 0f); }
         }
 
-        public float Radius
+        public float StartRadius
         {
-            get { return _radius; }
-            set { _radius = Mathf.Max(value, 0f); }
+            get { return _startRadius; }
+            set { _startRadius = Mathf.Max(value, 0f); }
+        }
+
+        public float EndRadius
+        {
+            get { return _endRadius; }
+            set { _endRadius = Mathf.Max(value, 0f); }
         }
 
         public Vector3 Direction { get { return this.transform.forward; } }
@@ -48,12 +57,22 @@ namespace com.spacepuppy.AI.Sensors.Visual
 
         #region Methods
 
+        public override BoundingSphere GetBoundingSphere()
+        {
+            var pos = this.transform.position + this.Direction * this.Range * 0.5f;
+
+            double r1 = this.Range / 2d;
+            double r2 = System.Math.Max(this.StartRadius, this.EndRadius);
+            return new BoundingSphere(pos, (float)System.Math.Sqrt(r1 * r1 + r2 * r2));
+        }
+
         protected override bool TestVisibility(VisualAspect aspect)
         {
             //if not in cylinder, can not see it
-            if(!Cylinder.ContainsPoint(this.transform.position,
+            if(!Cone.ContainsPoint(this.transform.position,
                                        this.transform.position + this.Direction * _range,
-                                       _radius, 
+                                       _startRadius,
+                                       _endRadius,
                                        aspect.transform.position))
             {
                 return false;
@@ -62,13 +81,6 @@ namespace com.spacepuppy.AI.Sensors.Visual
             if (this.RequiresLineOfSight)
             {
                 var v = aspect.transform.position - this.transform.position;
-                //RaycastHit[] hits = Physics.RaycastAll(this.transform.position, v, v.magnitude, this.LineOfSightMask);
-                //foreach (var hit in hits)
-                //{
-                //    //we ignore ourself
-                //    var r = hit.collider.FindRoot();
-                //    if (r != aspect.entityRoot && r != this.entityRoot) return false;
-                //}
                 using (var lst = com.spacepuppy.Collections.TempCollection.GetList<RaycastHit>())
                 {
                     int cnt = PhysicsUtil.RaycastAll(this.transform.position, v, lst, v.magnitude, this.LineOfSightMask);

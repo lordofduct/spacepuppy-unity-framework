@@ -11,17 +11,35 @@ namespace com.spacepuppy.Dynamic.Accessors
 
         static MemberAccessorPool()
         {
-            _isAOT = (UnityEngine.Application.platform == UnityEngine.RuntimePlatform.IPhonePlayer);
+            switch (UnityEngine.Application.platform)
+            {
+                case UnityEngine.RuntimePlatform.OSXEditor:
+                case UnityEngine.RuntimePlatform.OSXPlayer:
+                case UnityEngine.RuntimePlatform.WindowsPlayer:
+                case UnityEngine.RuntimePlatform.OSXDashboardPlayer:
+                case UnityEngine.RuntimePlatform.WindowsEditor:
+                case UnityEngine.RuntimePlatform.LinuxPlayer:
+                case UnityEngine.RuntimePlatform.LinuxEditor:
+                case UnityEngine.RuntimePlatform.WSAPlayerX86:
+                case UnityEngine.RuntimePlatform.WSAPlayerX64:
+                case UnityEngine.RuntimePlatform.WSAPlayerARM:
+                    _ignoreEmit = false;
+                    break;
+                default:
+                    _ignoreEmit = true;
+                    break;
+            }
         }
 
-        private static bool _isAOT;
+        public static bool UseEmitCompiledMemerAccessorIfSupported = true;
+        private static bool _ignoreEmit;
         private static Dictionary<MemberInfo, IMemberAccessor> _pool;
         private static Queue<IMemberAccessor> _chainBuilder = new Queue<IMemberAccessor>();
         private static Dictionary<string, DynamicMemberAccessor> _dynPool;
 
         public static IMemberAccessor GetAccessor(MemberInfo memberInfo)
         {
-            return GetAccessor(memberInfo, _isAOT);
+            return GetAccessor(memberInfo, _ignoreEmit || !UseEmitCompiledMemerAccessorIfSupported);
         }
 
         public static IMemberAccessor GetAccessor(MemberInfo memberInfo, bool useBasicMemberAccessor)

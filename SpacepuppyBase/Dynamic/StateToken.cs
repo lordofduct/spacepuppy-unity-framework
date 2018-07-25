@@ -221,7 +221,7 @@ namespace com.spacepuppy.Dynamic
                     case VariantType.Quaternion:
                     case VariantType.Color:
                     case VariantType.Rect:
-                        hash.To(e.Current.Key, ease, value, dur);
+                        hash.To(e.Current.Key, ease, dur, value);
                         break;
                 }
             }

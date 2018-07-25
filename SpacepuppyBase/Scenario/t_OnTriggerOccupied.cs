@@ -21,9 +21,9 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField]
         private bool _useEntity;
-
+        
         [SerializeField]
-        private ScenarioActivatorMask _mask = new ScenarioActivatorMask(-1);
+        private EventActivatorMaskRef _mask = new EventActivatorMaskRef();
 
         [SerializeField]
         private HashSet<GameObject> _activeObjects = new HashSet<GameObject>();
@@ -48,9 +48,10 @@ namespace com.spacepuppy.Scenario
             set { _useEntity = value; }
         }
 
-        public ScenarioActivatorMask Mask
+        public IEventActivatorMask Mask
         {
-            get { return _mask; }
+            get { return _mask.Value; }
+            set { _mask.Value = value; }
         }
 
         #endregion
@@ -67,7 +68,7 @@ namespace com.spacepuppy.Scenario
                 obj = entity.gameObject;
             }
 
-            if (_mask == null || !_mask.Intersects(obj)) return;
+            if (_mask.Value != null && !_mask.Value.Intersects(obj)) return;
 
             if(_activeObjects.Count == 0)
             {
