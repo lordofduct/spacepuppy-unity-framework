@@ -288,6 +288,28 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Path Textfields
+        
+        public static string FolderPathTextfield(string label, string path, string popupTitle)
+        {
+            return SPEditorGUI.FolderPathTextfield(EditorGUILayout.GetControlRect(true), label, path, popupTitle);
+        }
+        public static string FolderPathTextfield(GUIContent label, string path, string popupTitle)
+        {
+            return SPEditorGUI.FolderPathTextfield(EditorGUILayout.GetControlRect(true), label, path, popupTitle);
+        }
+
+        public static string SaveFilePathTextfield(string label, string path, string popupTitle, string extension)
+        {
+            return SPEditorGUI.SaveFilePathTextfield(EditorGUILayout.GetControlRect(true), label, path, popupTitle, extension);
+        }
+        public static string SaveFilePathTextfield(GUIContent label, string path, string popupTitle, string extension)
+        {
+            return SPEditorGUI.SaveFilePathTextfield(EditorGUILayout.GetControlRect(true), label, path, popupTitle, extension);
+        }
+
+        #endregion
+
 
         #region ReflectedPropertyField
 

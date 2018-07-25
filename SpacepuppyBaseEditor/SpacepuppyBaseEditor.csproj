@@ -80,6 +80,7 @@
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
+    <Compile Include="BulkBuildSettings.cs" />
     <Compile Include="Project\SerializableInterfaceRefPropertyDrawer.cs" />
     <Compile Include="Scenario\EventTriggerEvaluatorInspector.cs" />
     <Compile Include="SpacepuppySettings.cs" />

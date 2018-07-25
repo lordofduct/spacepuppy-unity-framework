@@ -837,7 +837,6 @@ namespace com.spacepuppyeditor
 
         #endregion
 
-
         #region Vector Field
 
         public static Vector3 DelayedVector3Field(Rect position, GUIContent label, Vector3 value)
@@ -956,6 +955,59 @@ namespace com.spacepuppyeditor
             }
 
             return null;
+        }
+
+        #endregion
+
+        #region Path Textfields
+
+        public const float ELLIPSIS_BTN_WIDTH = 22f;
+        public static string FolderPathTextfield(Rect position, string label, string path, string popupTitle)
+        {
+            return FolderPathTextfield(position, EditorHelper.TempContent(label), path, popupTitle);
+        }
+        public static string FolderPathTextfield(Rect position, GUIContent label, string path, string popupTitle)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+
+            float w1 = Mathf.Max(position.width - ELLIPSIS_BTN_WIDTH, 0f);
+            float w2 = Mathf.Clamp(ELLIPSIS_BTN_WIDTH, 0f, position.width - w1);
+            var r1 = new Rect(position.xMin, position.yMin, w1, EditorGUIUtility.singleLineHeight);
+            var r2 = new Rect(r1.xMax, position.yMin, w2, EditorGUIUtility.singleLineHeight);
+            path = EditorGUI.TextField(r1, path);
+            if (GUI.Button(r2, "..."))
+            {
+                var result = EditorUtility.OpenFolderPanel(popupTitle, path, string.Empty);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    path = result;
+                }
+            }
+            return path;
+        }
+
+        public static string SaveFilePathTextfield(Rect position, string label, string path, string popupTitle, string extension)
+        {
+            return SaveFilePathTextfield(position, EditorHelper.TempContent(label), path, popupTitle, extension);
+        }
+        public static string SaveFilePathTextfield(Rect position, GUIContent label, string path, string popupTitle, string extension)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+
+            float w1 = Mathf.Max(position.width - ELLIPSIS_BTN_WIDTH, 0f);
+            float w2 = Mathf.Clamp(ELLIPSIS_BTN_WIDTH, 0f, position.width - w1);
+            var r1 = new Rect(position.xMin, position.yMin, w1, EditorGUIUtility.singleLineHeight);
+            var r2 = new Rect(r1.xMax, position.yMin, w2, EditorGUIUtility.singleLineHeight);
+            path = EditorGUI.TextField(r1, path);
+            if (GUI.Button(r2, "..."))
+            {
+                var result = EditorUtility.SaveFilePanel(popupTitle, System.IO.Path.GetDirectoryName(path), System.IO.Path.GetFileName(path), extension);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    path = result;
+                }
+            }
+            return path;
         }
 
         #endregion

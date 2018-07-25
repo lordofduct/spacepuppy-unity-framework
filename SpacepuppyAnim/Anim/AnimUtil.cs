@@ -59,9 +59,9 @@ namespace com.spacepuppy.Anim
             else
                 return AnimatorType.Unknown;
         }
-        
-        #endregion
 
+        #endregion
+        
         #region Animation Extension Methods
 
         public static void ClearAnimations(Animation anim)
@@ -135,7 +135,7 @@ namespace com.spacepuppy.Anim
         public static bool TrySchedule(object animtoken, System.Action<object> callback)
         {
             if (callback == null) throw new System.ArgumentNullException("callback");
-            if (animtoken == null) return false;
+            if (animtoken.IsNullOrDestroyed()) return false;
 
             if (animtoken is ISPAnim)
             {

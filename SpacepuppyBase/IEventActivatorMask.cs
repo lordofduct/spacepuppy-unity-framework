@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 0649 // variable declared but not used.
+using UnityEngine;
 using System.Collections.Generic;
 using com.spacepuppy.Utils;
 

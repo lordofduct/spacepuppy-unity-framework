@@ -224,7 +224,7 @@ namespace com.spacepuppy.Anim
             if (targ == null) return false;
 
             var anim = this.TryPlay(targ);
-            if (anim == null)
+            if (anim.IsNullOrDestroyed())
             {
                 if (_triggerCompleteIfNoAnim) this.Invoke(() => { _onAnimComplete.ActivateTrigger(this, arg); }, 0f);
                 return false;
@@ -286,7 +286,7 @@ namespace com.spacepuppy.Anim
         {
             return obj is ISPAnimationSource || obj is ISPAnimator || obj is Animation;
         }
-
+        
         #endregion
 
     }

@@ -330,7 +330,7 @@ namespace com.spacepuppy.Serialization.Json
             _builder.Append(c);
             while (true)
             {
-                switch (_reader.Peek())
+                switch ((char)_reader.Peek())
                 {
                     case '0':
                     case '1':
@@ -373,9 +373,10 @@ namespace com.spacepuppy.Serialization.Json
                     case ' ':
                     case '\t':
                     case '\n':
+                    case '\r':
                         goto done;
                     default:
-                        throw new JsonException("Malformed numeric value.");
+                        throw new JsonException("Malformed numeric value (" + _builder.ToString() + (char)_reader.Peek() + ").");
                 }
             }
 

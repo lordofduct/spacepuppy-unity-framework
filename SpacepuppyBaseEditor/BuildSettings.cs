@@ -10,15 +10,27 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppyeditor
 {
 
-    [CreateAssetMenu(fileName = "BuildSettings", menuName = "Spacepuppy/Build Settings", order = int.MaxValue)]
+    [CreateAssetMenu(fileName = "BuildSettings", menuName = "Spacepuppy Build Pipeline/Build Settings")]
     public class BuildSettings : ScriptableObject
     {
+
+        [System.Flags]
+        public enum PostBuildOption
+        {
+            Nothing = 0,
+            OpenFolder = 1,
+            Run = 2,
+            OpenFolderAndRun = 3
+        }
 
         #region Fields
 
         [SerializeField]
         [Tooltip("Leave blank if you want to be asked for a filename every time you build.")]
         public string BuildFileName;
+        [SerializeField]
+        [Tooltip("Paths can be relative to the 'Assets' folder.\nLeave blank if you want to be asked for a directory every time you build.")]
+        public string BuildDirectory;
 
         [SerializeField]
         public VersionInfo Version;
@@ -98,147 +110,30 @@ namespace com.spacepuppyeditor
 
         #endregion
 
-    }
-
-    [CustomEditor(typeof(BuildSettings), true)]
-    public class BuildSettingsEditor : SPEditor
-    {
-
-        [System.Flags]
-        public enum PostBuildOption
-        {
-            Nothing = 0,
-            OpenFolder = 1,
-            Run = 2,
-            OpenFolderAndRun = 3
-        }
-
-        public const string PROP_BUILDFILENAME = "BuildFileName";
-        public const string PROP_VERSION = "Version";
-        public const string PROP_BOOTSCENE = "_bootScene";
-        public const string PROP_SCENES = "_scenes";
-        public const string PROP_BUILDTARGET = "_buildTarget";
-        public const string PROP_BUILDOPTIONS = "_buildOptions";
-        public const string PROP_INPUTSETTINGS = "_inputSettings";
-        public const string PROP_DEFINESYMBOLS = "_defineSymbols";
-        public const string PROP_SYMBOLS = "_symbols";
-
-        #region Fields
-
-        private com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer _scenesDrawer = new com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer();
-
-        #endregion
-
-        #region Properties
-
-        public com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer ScenesDrawer
-        {
-            get { return _scenesDrawer; }
-        }
-
-        #endregion
 
         #region Methods
 
-        protected override void OnEnable()
+        public string GetBuildFileNameWithExtension()
         {
-            base.OnEnable();
+            if (string.IsNullOrEmpty(this.BuildFileName)) return string.Empty;
 
-            _scenesDrawer.FormatElementLabel = (p, i, b1, b2) =>
+            string extension = GetExtension(this.BuildTarget);
+            string fileName = this.BuildFileName;
+            if (!string.IsNullOrEmpty(extension))
             {
-                return string.Format("Scene #{0}", i + 1);
-            };
-        }
-
-        protected override void OnSPInspectorGUI()
-        {
-            this.serializedObject.Update();
-
-            this.DrawPropertyField(PROP_BUILDFILENAME);
-            this.DrawPropertyField(PROP_VERSION);
-
-            this.DrawScenes();
-
-            this.DrawBuildOptions();
-
-            this.DrawInputSettings();
-
-            this.serializedObject.ApplyModifiedProperties();
-
-            //build button
-            if (this.serializedObject.isEditingMultipleObjects) return;
-
-            EditorGUILayout.Space();
-
-            this.DrawBuildButtons();
-        }
-
-        public virtual void DrawScenes()
-        {
-            //this.DrawPropertyField(PROP_BOOTSCENE);
-            //this.DrawPropertyField(PROP_SCENES);
-
-            this.DrawPropertyField(PROP_BOOTSCENE, "Boot Scene #0", false);
-
-            var propScenes = this.serializedObject.FindProperty(PROP_SCENES);
-            var lblScenes = EditorHelper.TempContent(propScenes.displayName, propScenes.tooltip);
-            var h = _scenesDrawer.GetPropertyHeight(propScenes, lblScenes);
-            _scenesDrawer.OnGUI(EditorGUILayout.GetControlRect(true, h), propScenes, lblScenes);
-        }
-
-        public virtual void DrawBuildOptions()
-        {
-            //TODO - upgrade this to more specialized build options gui
-            this.DrawPropertyField(PROP_BUILDTARGET);
-            this.DrawPropertyField(PROP_BUILDOPTIONS);
-
-            var propDefineSymbols = this.serializedObject.FindProperty(PROP_DEFINESYMBOLS);
-            SPEditorGUILayout.PropertyField(propDefineSymbols);
-            if (propDefineSymbols.boolValue)
-            {
-                this.DrawPropertyField(PROP_SYMBOLS);
+                string ext = "." + extension;
+                if (!fileName.EndsWith(ext)) fileName += ext;
             }
+            return fileName;
         }
-
-        public virtual void DrawInputSettings()
-        {
-            this.DrawPropertyField(PROP_INPUTSETTINGS);
-        }
-
-        public virtual void DrawBuildButtons()
-        {
-            if (GUILayout.Button("Build"))
-            {
-                EditorCoroutine.StartEditorCoroutine(this.DoBuild(PostBuildOption.OpenFolder));
-            }
-            if (GUILayout.Button("Build & Run"))
-            {
-                EditorCoroutine.StartEditorCoroutine(this.DoBuild(PostBuildOption.OpenFolderAndRun));
-            }
-            if (GUILayout.Button("Sync To Global Build"))
-            {
-                this.SyncToGlobalBuild();
-            }
-        }
-
-        protected virtual System.Collections.IEnumerator DoBuild(PostBuildOption postBuildOption)
-        {
-            this.Build(postBuildOption);
-
-            yield break;
-        }
-
-
-
 
         public virtual string[] GetScenePaths()
         {
             using (var lst = TempCollection.GetList<string>())
             {
-                var settings = this.target as BuildSettings;
-                if (settings.BootScene != null) lst.Add(AssetDatabase.GetAssetPath(settings.BootScene));
+                if (this.BootScene != null) lst.Add(AssetDatabase.GetAssetPath(this.BootScene));
 
-                foreach (var scene in settings.Scenes)
+                foreach (var scene in this.Scenes)
                 {
                     lst.Add(AssetDatabase.GetAssetPath(scene));
                 }
@@ -247,54 +142,68 @@ namespace com.spacepuppyeditor
             }
         }
 
-        public virtual void SyncToGlobalBuild()
+        public virtual bool Build(PostBuildOption option)
         {
-            var lst = new List<EditorBuildSettingsScene>();
-            var settings = this.target as BuildSettings;
-            foreach (var sc in this.GetScenePaths())
-            {
-                lst.Add(new EditorBuildSettingsScene(sc, true));
-            }
-            EditorBuildSettings.scenes = lst.ToArray();
-        }
-
-        public bool Build(PostBuildOption option)
-        {
+            string path;
             try
             {
-                var settings = this.target as BuildSettings;
-                var scenes = this.GetScenePaths();
-                var buildGroup = BuildPipeline.GetBuildTargetGroup(settings.BuildTarget);
-
-                //set version
-                settings.Version.Build++;
-                EditorUtility.SetDirty(settings);
-                PlayerSettings.bundleVersion = settings.Version.ToString();
-                AssetDatabase.SaveAssets();
-
                 //get output directory
-                string extension = GetExtension(settings.BuildTarget);
                 var dir = EditorProjectPrefs.Local.GetString("LastBuildDirectory", string.Empty);
-                string path;
-                if(string.IsNullOrEmpty(settings.BuildFileName))
+                if (string.IsNullOrEmpty(this.BuildFileName))
                 {
+                    string extension = GetExtension(this.BuildTarget);
                     path = EditorUtility.SaveFilePanel("Build", dir, string.IsNullOrEmpty(extension) ? Application.productName + "." + extension : Application.productName, extension);
+                    if(!string.IsNullOrEmpty(path))
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
-                    path = EditorUtility.OpenFolderPanel("Build", dir, string.Empty);
-                    if (!string.IsNullOrEmpty(path))
+                    string possiblePath = this.BuildDirectory;
+                    if (!string.IsNullOrEmpty(possiblePath) && possiblePath.StartsWith(".")) possiblePath = System.IO.Path.Combine(Application.dataPath, possiblePath);
+                    if(!string.IsNullOrEmpty(possiblePath) && System.IO.Directory.Exists(possiblePath))
                     {
-                        string fileName = settings.BuildFileName;
-                        if(!string.IsNullOrEmpty(extension))
+                        path = System.IO.Path.Combine(possiblePath, this.GetBuildFileNameWithExtension());
+                        path = System.IO.Path.GetFullPath(path);
+                    }
+                    else
+                    {
+                        path = EditorUtility.OpenFolderPanel("Build", dir, string.Empty);
+                        if (!string.IsNullOrEmpty(path))
                         {
-                            string ext = "." + extension;
-                            if (!fileName.EndsWith(ext)) fileName += ext;
+                            path = System.IO.Path.Combine(path, this.GetBuildFileNameWithExtension());
                         }
-                        path = System.IO.Path.Combine(path, fileName);
+                        else
+                        {
+                            return false;
+                        }
                     }
                 }
 
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+                return false;
+            }
+
+            return this.Build(path, option);
+        }
+
+        public virtual bool Build(string path, PostBuildOption option)
+        {
+            try
+            {
+                var scenes = this.GetScenePaths();
+                var buildGroup = BuildPipeline.GetBuildTargetGroup(this.BuildTarget);
+
+                //set version
+                this.Version.Build++;
+                EditorUtility.SetDirty(this);
+                PlayerSettings.bundleVersion = this.Version.ToString();
+                AssetDatabase.SaveAssets();
+                
                 //build
                 if (!string.IsNullOrEmpty(path))
                 {
@@ -306,18 +215,18 @@ namespace com.spacepuppyeditor
                     InputSettings cacheInputs = null;
                     string cacheSymbols = null;
 
-                    if (settings.InputSettings != null)
+                    if (this.InputSettings != null)
                     {
                         cacheInputs = InputSettings.LoadGlobalInputSettings(false);
-                        settings.InputSettings.ApplyToGlobal();
+                        this.InputSettings.ApplyToGlobal();
                     }
-                    if (settings.DefineSymbols)
+                    if (this.DefineSymbols)
                     {
                         cacheSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildGroup) ?? string.Empty;
-                        PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, settings.Symbols);
+                        PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, this.Symbols);
                     }
 
-                    BuildPipeline.BuildPlayer(scenes, path, settings.BuildTarget, settings.BuildOptions);
+                    BuildPipeline.BuildPlayer(scenes, path, this.BuildTarget, this.BuildOptions);
 
                     if (cacheInputs != null)
                     {
@@ -380,6 +289,155 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+    }
+
+    [CustomEditor(typeof(BuildSettings), true)]
+    public class BuildSettingsEditor : SPEditor
+    {
+        
+        public const string PROP_BUILDFILENAME = "BuildFileName";
+        public const string PROP_BUILDDIR = "BuildDirectory";
+        public const string PROP_VERSION = "Version";
+        public const string PROP_BOOTSCENE = "_bootScene";
+        public const string PROP_SCENES = "_scenes";
+        public const string PROP_BUILDTARGET = "_buildTarget";
+        public const string PROP_BUILDOPTIONS = "_buildOptions";
+        public const string PROP_INPUTSETTINGS = "_inputSettings";
+        public const string PROP_DEFINESYMBOLS = "_defineSymbols";
+        public const string PROP_SYMBOLS = "_symbols";
+
+        #region Fields
+
+        private com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer _scenesDrawer = new com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer();
+
+        #endregion
+
+        #region Properties
+
+        public com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer ScenesDrawer
+        {
+            get { return _scenesDrawer; }
+        }
+
+        #endregion
+
+        #region Methods
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            _scenesDrawer.FormatElementLabel = (p, i, b1, b2) =>
+            {
+                return string.Format("Scene #{0}", i + 1);
+            };
+        }
+
+        protected override void OnSPInspectorGUI()
+        {
+            this.serializedObject.Update();
+
+            var propFileName = this.serializedObject.FindProperty(PROP_BUILDFILENAME);
+            EditorGUILayout.PropertyField(propFileName);
+            if(!string.IsNullOrEmpty(propFileName.stringValue))
+            {
+                var propBuildDir = this.serializedObject.FindProperty(PROP_BUILDDIR);
+                propBuildDir.stringValue = SPEditorGUILayout.FolderPathTextfield(EditorHelper.TempContent(propBuildDir.displayName, propBuildDir.tooltip), propBuildDir.stringValue, "Build Directory");
+            }
+            
+            this.DrawPropertyField(PROP_VERSION);
+
+            this.DrawScenes();
+
+            this.DrawBuildOptions();
+
+            this.DrawInputSettings();
+
+            this.serializedObject.ApplyModifiedProperties();
+
+            //build button
+            if (this.serializedObject.isEditingMultipleObjects) return;
+
+            EditorGUILayout.Space();
+
+            this.DrawBuildButtons();
+        }
+
+        public virtual void DrawScenes()
+        {
+            //this.DrawPropertyField(PROP_BOOTSCENE);
+            //this.DrawPropertyField(PROP_SCENES);
+
+            this.DrawPropertyField(PROP_BOOTSCENE, "Boot Scene #0", false);
+
+            var propScenes = this.serializedObject.FindProperty(PROP_SCENES);
+            var lblScenes = EditorHelper.TempContent(propScenes.displayName, propScenes.tooltip);
+            var h = _scenesDrawer.GetPropertyHeight(propScenes, lblScenes);
+            _scenesDrawer.OnGUI(EditorGUILayout.GetControlRect(true, h), propScenes, lblScenes);
+        }
+
+        public virtual void DrawBuildOptions()
+        {
+            //TODO - upgrade this to more specialized build options gui
+            this.DrawPropertyField(PROP_BUILDTARGET);
+            this.DrawPropertyField(PROP_BUILDOPTIONS);
+
+            var propDefineSymbols = this.serializedObject.FindProperty(PROP_DEFINESYMBOLS);
+            SPEditorGUILayout.PropertyField(propDefineSymbols);
+            if (propDefineSymbols.boolValue)
+            {
+                this.DrawPropertyField(PROP_SYMBOLS);
+            }
+        }
+
+        public virtual void DrawInputSettings()
+        {
+            this.DrawPropertyField(PROP_INPUTSETTINGS);
+        }
+
+        public virtual void DrawBuildButtons()
+        {
+            if (GUILayout.Button("Build"))
+            {
+                EditorCoroutine.StartEditorCoroutine(this.DoBuild(BuildSettings.PostBuildOption.OpenFolder));
+            }
+            if (GUILayout.Button("Build & Run"))
+            {
+                EditorCoroutine.StartEditorCoroutine(this.DoBuild(BuildSettings.PostBuildOption.OpenFolderAndRun));
+            }
+            if (GUILayout.Button("Sync To Global Build"))
+            {
+                this.SyncToGlobalBuild();
+            }
+        }
+
+        protected virtual System.Collections.IEnumerator DoBuild(BuildSettings.PostBuildOption postBuildOption)
+        {
+            var settings = this.target as BuildSettings;
+            if(settings != null)
+            {
+                settings.Build(postBuildOption);
+            }
+
+            yield break;
+        }
+
+
+
+        
+        public virtual void SyncToGlobalBuild()
+        {
+            var lst = new List<EditorBuildSettingsScene>();
+            var settings = this.target as BuildSettings;
+            foreach (var sc in settings.GetScenePaths())
+            {
+                lst.Add(new EditorBuildSettingsScene(sc, true));
+            }
+            EditorBuildSettings.scenes = lst.ToArray();
+        }
+        
+        #endregion
+        
     }
 
 }

@@ -270,7 +270,7 @@ namespace com.spacepuppy.Utils
 
         /// <summary>
         /// Emulates Vector3.SignedAngle from unity 2017. Note that this does not do any projections, so this is not a measure of the rotation around that axis, just the direction around that axis.
-        /// Use AngleOffAroundAxis to get the project rotation around an axis.
+        /// Use AngleOffAroundAxis to get the projected rotation around an axis.
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>

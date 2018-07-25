@@ -23,7 +23,7 @@ namespace com.spacepuppy.Scenario
         private bool _useEntity;
         
         [SerializeField]
-        private EventActivatorMaskRef _mask;
+        private EventActivatorMaskRef _mask = new EventActivatorMaskRef();
 
         [SerializeField]
         private HashSet<GameObject> _activeObjects = new HashSet<GameObject>();
