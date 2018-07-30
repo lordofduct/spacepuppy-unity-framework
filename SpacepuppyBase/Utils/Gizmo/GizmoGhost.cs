@@ -32,7 +32,7 @@ namespace com.spacepuppy.Utils.Gizmo
         {
             if (!Application.isEditor)
             {
-                if (this.gameObject == Singleton.GameObjectSource)
+                if (this.gameObject == Singleton.GetGameObjectSource(false))
                     Object.Destroy(this);
                 else
                     Object.Destroy(this.gameObject);

@@ -165,6 +165,15 @@ namespace com.spacepuppy.Anim.Blend
             get { return 0f; }
         }
 
+        public float ScaledTime
+        {
+            get { return 0f; }
+            set
+            {
+                //do nothing
+            }
+        }
+
         public float ScaledDuration
         {
             get

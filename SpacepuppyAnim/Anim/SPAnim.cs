@@ -23,6 +23,7 @@ namespace com.spacepuppy.Anim
         private ITimeSupplier _timeSupplier;
         private ISPAnimationMask _mask;
 
+        private float _startTime;
         private AnimationState _state;
         private AnimEventScheduler _scheduler;
         private bool _timeSupplierScaleEventRegistered;
@@ -143,6 +144,21 @@ namespace com.spacepuppy.Anim
             }
         }
 
+        public float ScaledTime
+        {
+            get
+            {
+                var spd = this.Speed;
+                if (spd == 0f) return 0f;
+
+                return this.Time / spd;
+            }
+            set
+            {
+                this.Time = value * this.Speed;
+            }
+        }
+
         public float ScaledDuration
         {
             get
@@ -167,6 +183,14 @@ namespace com.spacepuppy.Anim
         //{
         //    get { return _state; }
         //}
+
+        /// <summary>
+        /// The game time that the animation started playing at.
+        /// </summary>
+        public float StartTime
+        {
+            get { return _startTime; }
+        }
 
         #endregion
 
@@ -251,6 +275,7 @@ namespace com.spacepuppy.Anim
             if (this.IsPlaying) return;
             if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
+            _startTime = UnityEngine.Time.time;
             _state = _controller.PlayQueuedInternal(_clipId, queueMode, playMode, _layer);
             _state.weight = _weight;
             _state.speed = this.RealSpeed;
@@ -267,6 +292,7 @@ namespace com.spacepuppy.Anim
             if (this.IsPlaying) return;
             if (_controller.ControllerMask != null && !_controller.ControllerMask.CanPlay(this)) return;
 
+            _startTime = UnityEngine.Time.time;
             _state = _controller.CrossFadeQueuedInternal(_clipId, fadeLength, queueMode, playMode, _layer);
             _state.weight = _weight;
             _state.speed = this.RealSpeed;
@@ -511,6 +537,15 @@ namespace com.spacepuppy.Anim
             public float Duration
             {
                 get { return 0f; }
+            }
+
+            public float ScaledTime
+            {
+                get { return 0f; }
+                set
+                {
+                    //do nothing
+                }
             }
 
             public float ScaledDuration

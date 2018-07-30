@@ -99,7 +99,7 @@ namespace com.spacepuppyeditor
         [MenuItem(SPMenu.MENU_NAME_ROOT + "/Create SingletonSource", priority = MENU_PRIORITY_SINGLETON)]
         public static void CreateSingletonSource()
         {
-            var mainSrc = Singleton.GameObjectSource;
+            var mainSrc = Singleton.GetGameObjectSource(false);
             if(mainSrc == null)
             {
                 mainSrc = new GameObject(Singleton.GAMEOBJECT_NAME);

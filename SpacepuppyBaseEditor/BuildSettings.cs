@@ -337,6 +337,8 @@ namespace com.spacepuppyeditor
         {
             this.serializedObject.Update();
 
+            this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
+
             var propFileName = this.serializedObject.FindProperty(PROP_BUILDFILENAME);
             EditorGUILayout.PropertyField(propFileName);
             if(!string.IsNullOrEmpty(propFileName.stringValue))

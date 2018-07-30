@@ -233,6 +233,21 @@ namespace com.spacepuppy.Anim.Blend
             }
         }
 
+        public float ScaledTime
+        {
+            get
+            {
+                var spd = this.Speed;
+                if (spd == 0f) return 0f;
+
+                return this.Time / spd;
+            }
+            set
+            {
+                this.Time = value * this.Speed;
+            }
+        }
+
         public float ScaledDuration
         {
             get

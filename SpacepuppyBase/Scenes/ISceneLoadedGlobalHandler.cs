@@ -4,9 +4,9 @@ namespace com.spacepuppy.Scenes
 {
 
     /// <summary>
-    /// A found message receiver to handle OnSceneLoaded event.
+    /// A global message receiver to handle OnSceneLoaded event.
     /// </summary>
-    public interface ISceneLoadedFoundHandler
+    public interface ISceneLoadedGlobalHandler
     {
 
         void OnSceneLoaded(LoadSceneWaitHandle handle);

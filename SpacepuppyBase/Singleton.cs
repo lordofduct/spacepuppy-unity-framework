@@ -107,28 +107,25 @@ namespace com.spacepuppy
         private static GameObject _gameObject;
         private static Dictionary<System.Type, IManagedSingleton> _singletonRefs = new Dictionary<System.Type, IManagedSingleton>();
 
-        public static GameObject GameObjectSource
+        public static GameObject GetGameObjectSource(bool createIfNotExist)
         {
-            get
+            if (Application.isPlaying)
             {
-                if(Application.isPlaying)
+                if (_gameObject == null && !GameLoopEntry.ApplicationClosing)
                 {
-                    if (_gameObject == null && !GameLoopEntry.ApplicationClosing)
+                    _gameObject = GameObject.Find(GAMEOBJECT_NAME);
+                    if (_gameObject == null && createIfNotExist)
                     {
-                        _gameObject = GameObject.Find(GAMEOBJECT_NAME);
-                        if (_gameObject == null)
-                        {
-                            _gameObject = new GameObject(GAMEOBJECT_NAME);
-                            _gameObject.AddComponent<SingletonManager>();
-                        }
+                        _gameObject = new GameObject(GAMEOBJECT_NAME);
+                        _gameObject.AddComponent<SingletonManager>();
                     }
-                    return _gameObject;
                 }
-                else
-                {
-                    _gameObject = null;
-                    return GameObject.Find(GAMEOBJECT_NAME);
-                }
+                return _gameObject;
+            }
+            else
+            {
+                _gameObject = null;
+                return GameObject.Find(GAMEOBJECT_NAME);
             }
         }
 
@@ -139,7 +136,7 @@ namespace com.spacepuppy
             if (GameLoopEntry.ApplicationClosing) return null;
 
             if (bDoNotCreateIfNotExist)
-                return Singleton.GameObjectSource.GetComponent<T>();
+                return Singleton.GetGameObjectSource(true).GetComponent<T>();
             else
             {
                 var tp = typeof(T);
@@ -147,7 +144,7 @@ namespace com.spacepuppy
                 if (attrib != null && attrib.ExcludeFromSingletonManager)
                     return CreateSpecialInstance<T>(tp.Name, attrib.DefaultLifeCycle);
                 else
-                    return Singleton.GameObjectSource.AddOrGetComponent<T>();
+                    return Singleton.GetGameObjectSource(true).AddOrGetComponent<T>();
             }
         }
 
@@ -161,14 +158,14 @@ namespace com.spacepuppy
             if (GameLoopEntry.ApplicationClosing) return null;
 
             if (bDoNotCreateIfNotExist)
-                return Singleton.GameObjectSource.GetComponent(tp) as IManagedSingleton;
+                return Singleton.GetGameObjectSource(true).GetComponent(tp) as IManagedSingleton;
             else
             {
                 var attrib = tp.GetCustomAttributes(typeof(ConfigAttribute), false).FirstOrDefault() as ConfigAttribute;
                 if (attrib != null && attrib.ExcludeFromSingletonManager)
                     return CreateSpecialInstance(tp, tp.Name, attrib.DefaultLifeCycle);
                 else
-                    return Singleton.GameObjectSource.AddOrGetComponent(tp) as IManagedSingleton;
+                    return Singleton.GetGameObjectSource(true).AddOrGetComponent(tp) as IManagedSingleton;
             }
         }
 
@@ -409,7 +406,7 @@ namespace com.spacepuppy
                 //if this isn't on the GameObjectSource, we should check if we need to delete our GameObject.
                 if (!GameLoopEntry.ApplicationClosing)
                 {
-                    if (_target.gameObject != null && _target.gameObject != Singleton.GameObjectSource)
+                    if (_target.gameObject != null && _target.gameObject != Singleton.GetGameObjectSource(false))
                     {
                         var others = _target.gameObject.GetComponents<Singleton>();
                         if (!(others.Length > 1 && !(from s in others select (s.LifeCycle & SingletonLifeCycleRule.LivesForever) != 0).Any()))

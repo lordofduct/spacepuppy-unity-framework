@@ -17,7 +17,7 @@ namespace com.spacepuppy.Spawn
         public const string DEFAULT_SPAWNPOOL_NAME = "Spacepuppy.PrimarySpawnPool";
 
         private static SpawnPool _defaultPool;
-        private static List<SpawnPool> _pools = new List<SpawnPool>();
+        public static readonly MultitonPool<SpawnPool> Pools = new MultitonPool<SpawnPool>();
 
         public static SpawnPool DefaultPool
         {
@@ -27,31 +27,20 @@ namespace com.spacepuppy.Spawn
                 return _defaultPool;
             }
         }
-
-        public static SpawnPool Pool(int index)
-        {
-            if(index < 0 || index > _pools.Count) throw new System.IndexOutOfRangeException();
-            if (_defaultPool == null) CreatePrimaryPool();
-            if (index == 0) return _defaultPool;
-
-            return _pools[index - 1];
-        }
-
+        
         public static SpawnPool Pool(string name)
         {
             if (_defaultPool != null && _defaultPool.CompareName(name)) return _defaultPool;
 
             //TODO - should cache 'name' for access so this doesn't generate garbage
-            var e = _pools.GetEnumerator();
+            var e = Pools.GetEnumerator();
             while(e.MoveNext())
             {
                 if (e.Current.CompareName(name)) return e.Current;
             }
             return null;
         }
-
-        public static int PoolCount { get { return _pools.Count + 1; } }
-
+        
         public static void CreatePrimaryPool()
         {
             if (PrimaryPoolExists) return;
@@ -67,16 +56,27 @@ namespace com.spacepuppy.Spawn
                 if (_defaultPool != null) return true;
 
                 _defaultPool = null;
-                var point = (from p in GameObject.FindObjectsOfType<SpawnPool>() where p.CompareName(DEFAULT_SPAWNPOOL_NAME) select p).FirstOrDefault();
-                if (!object.ReferenceEquals(point, null))
+                if (Pools.Count > 0)
                 {
-                    _defaultPool = point;
-                    return true;
+                    SpawnPool point = null;
+                    var e = Pools.GetEnumerator();
+                    while(e.MoveNext())
+                    {
+                        if(e.Current.CompareName(DEFAULT_SPAWNPOOL_NAME))
+                        {
+                            point = e.Current;
+                            break;
+                        }
+                    }
+
+                    if (!object.ReferenceEquals(point, null))
+                    {
+                        _defaultPool = point;
+                        return true;
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
         }
 
@@ -97,10 +97,8 @@ namespace com.spacepuppy.Spawn
         protected override void Awake()
         {
             base.Awake();
-            if (!object.ReferenceEquals(this, _defaultPool))
-            {
-                _pools.Add(this);
-            }
+
+            Pools.AddReference(this);
         }
 
         protected override void Start()
@@ -118,13 +116,10 @@ namespace com.spacepuppy.Spawn
         {
             base.OnDestroy();
 
+            Pools.RemoveReference(this);
             if (Object.ReferenceEquals(this, _defaultPool))
             {
                 _defaultPool = null;
-            }
-            else
-            {
-                _pools.Remove(this);
             }
         }
 

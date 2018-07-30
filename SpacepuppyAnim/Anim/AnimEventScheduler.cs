@@ -6,15 +6,13 @@ using com.spacepuppy.Collections;
 
 namespace com.spacepuppy.Anim
 {
-    public class AnimEventScheduler : System.IDisposable
+    public class AnimEventScheduler : System.IDisposable, IUpdateable
     {
 
         #region Fields
 
         private ISPAnim _state;
-
-        private RadicalCoroutine _waitRoutine;
-
+        
         private CallbackInfo _endOfLineCallback;
         private HashSet<CallbackInfo> _timeoutInfos = new HashSet<CallbackInfo>();
         private ITempCollection<CallbackInfo> _toAddOrRemove;
@@ -66,7 +64,7 @@ namespace com.spacepuppy.Anim
                     _timeoutInfos.Clear();
                 }
             }
-            if (_waitRoutine != null && _waitRoutine.Active) _waitRoutine.Stop();
+            GameLoopEntry.UpdatePump.Remove(this);
         }
         
         public void Schedule(System.Action<ISPAnim> callback)
@@ -74,11 +72,10 @@ namespace com.spacepuppy.Anim
             //if (!_state.IsPlaying) throw new System.InvalidOperationException("Can only schedule a callback on a playing animation.");
             if (callback == null) throw new System.ArgumentNullException("callback");
 
-            if (_endOfLineCallback == null) _endOfLineCallback = new CallbackInfo() { timeout = float.PositiveInfinity };
+            if (_endOfLineCallback == null) _endOfLineCallback = new CallbackInfo() { timeout = float.NaN };
             _endOfLineCallback.callback += callback;
 
-            if (_waitRoutine == null || _waitRoutine.Finished) this.InitWaitRoutine();
-            if (!_waitRoutine.Active) _waitRoutine.Start(_state.Controller);
+            GameLoopEntry.UpdatePump.Add(this);
         }
 
         public void Schedule(System.Action<ISPAnim> callback, float timeout, ITimeSupplier timeSupplier)
@@ -86,15 +83,16 @@ namespace com.spacepuppy.Anim
             //if (!_state.IsPlaying) throw new System.InvalidOperationException("Can only schedule a callback on a playing animation.");
             if (callback == null) throw new System.ArgumentNullException("callback");
 
-            if(timeout == float.PositiveInfinity)
+            if(float.IsPositiveInfinity(timeout) || float.IsNaN(timeout))
             {
-                if (_endOfLineCallback == null) _endOfLineCallback = new CallbackInfo() { timeout = float.PositiveInfinity };
+                if (_endOfLineCallback == null) _endOfLineCallback = new CallbackInfo() { timeout = float.NaN };
                 _endOfLineCallback.callback += callback;
             }
             else
             {
                 var info = _pool.GetInstance();
                 info.callback = callback;
+                info.current = 0f;
                 info.timeout = timeout;
                 info.supplier = (timeSupplier != null) ? timeSupplier : SPTime.Normal;
                 if (_inUpdate)
@@ -108,106 +106,15 @@ namespace com.spacepuppy.Anim
                 }
             }
 
-            if (_waitRoutine == null || _waitRoutine.Finished) this.InitWaitRoutine();
-            if (!_waitRoutine.Active) _waitRoutine.Start(_state.Controller);
+            GameLoopEntry.UpdatePump.Add(this);
         }
-
-        private System.Collections.IEnumerator DoUpdate()
-        {
-            while(true)
-            {
-                yield return null;
-                this.Update();
-            }
-        }
-
-        private void Update()
-        {
-            _inUpdate = true;
-            if(!_state.IsPlaying)
-            {
-                //close them all down
-                this.CloseOutAllEventCallbacks();
-            }
-            else
-            {
-                if(_timeoutInfos != null && _timeoutInfos.Count > 0)
-                {
-                    var e = _timeoutInfos.GetEnumerator();
-                    while(e.MoveNext())
-                    {
-                        e.Current.timeout -= e.Current.supplier.Delta;
-                        if(e.Current.timeout <= 0f)
-                        {
-                            var a = e.Current.callback;
-                            e.Current.callback = null;
-                            if (_toAddOrRemove == null) _toAddOrRemove = TempCollection.GetList<CallbackInfo>();
-                            _toAddOrRemove.Add(e.Current);
-
-                            try
-                            {
-                                a(_state);
-                            }
-                            catch (System.Exception ex)
-                            {
-                                Debug.LogException(ex);
-                            }
-                        }
-                    }
-                }
-            }
-            _inUpdate = false;
-
-            //check if any timeouts wanted to get registered while calling update
-            if (_toAddOrRemove != null)
-            {
-                var e = _toAddOrRemove.GetEnumerator();
-                while(e.MoveNext())
-                {
-                    if (e.Current.callback == null)
-                    {
-                        //I set it null in the loop above to flag it as 'remove' rather than 'add'
-                        _timeoutInfos.Remove(e.Current);
-                        _pool.Release(e.Current);
-                    }
-                    else
-                    {
-                        _timeoutInfos.Add(e.Current);
-                    }
-                }
-                _toAddOrRemove.Dispose();
-                _toAddOrRemove = null;
-            }
-
-
-            //stop us
-            if(!this.ContainsWaitHandles())
-            {
-                if (_waitRoutine != null && _waitRoutine.Active) _waitRoutine.Stop();
-            }
-        }
-
+        
         private bool ContainsWaitHandles()
         {
             if (_endOfLineCallback != null && _endOfLineCallback.callback != null) return true;
             return _timeoutInfos.Count != 0;
         }
-
-
-
-        private void InitWaitRoutine()
-        {
-            _waitRoutine = new RadicalCoroutine(this.DoUpdate()); //RadicalCoroutine.UpdateTicker(this.Update);
-            _waitRoutine.OnFinished += (s, e) =>
-            {
-                if (object.ReferenceEquals(s, _waitRoutine)) _waitRoutine = null;
-
-                _inUpdate = true;
-                this.CloseOutAllEventCallbacks();
-                _inUpdate = false;
-            };
-        }
-
+        
         private void CloseOutAllEventCallbacks()
         {
             if (_endOfLineCallback != null && _endOfLineCallback.callback != null)
@@ -238,6 +145,76 @@ namespace com.spacepuppy.Anim
 
         #endregion
 
+        #region IUpdateable Interface
+
+        void IUpdateable.Update()
+        {
+            _inUpdate = true;
+            if (TestAnimComplete(_state))
+            {
+                //close them all down
+                this.CloseOutAllEventCallbacks();
+            }
+            else
+            {
+                if (_timeoutInfos != null && _timeoutInfos.Count > 0)
+                {
+                    var e = _timeoutInfos.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        e.Current.current += e.Current.supplier.Delta;
+                        if (e.Current.current >= e.Current.timeout)
+                        {
+                            var a = e.Current.callback;
+                            e.Current.callback = null;
+                            if (_toAddOrRemove == null) _toAddOrRemove = TempCollection.GetList<CallbackInfo>();
+                            _toAddOrRemove.Add(e.Current);
+
+                            try
+                            {
+                                a(_state);
+                            }
+                            catch (System.Exception ex)
+                            {
+                                Debug.LogException(ex);
+                            }
+                        }
+                    }
+                }
+            }
+            _inUpdate = false;
+
+            //check if any timeouts wanted to get registered while calling update
+            if (_toAddOrRemove != null)
+            {
+                var e = _toAddOrRemove.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    if (e.Current.callback == null)
+                    {
+                        //I set it null in the loop above to flag it as 'remove' rather than 'add'
+                        _timeoutInfos.Remove(e.Current);
+                        _pool.Release(e.Current);
+                    }
+                    else
+                    {
+                        _timeoutInfos.Add(e.Current);
+                    }
+                }
+                _toAddOrRemove.Dispose();
+                _toAddOrRemove = null;
+            }
+
+
+            //stop us
+            if (!this.ContainsWaitHandles())
+            {
+                GameLoopEntry.UpdatePump.Remove(this);
+            }
+        }
+
+        #endregion
+
         #region IDisposable Interface
 
         public void Dispose()
@@ -254,6 +231,7 @@ namespace com.spacepuppy.Anim
             (info) =>
             {
                 info.callback = null;
+                info.current = 0f;
                 info.timeout = 0f;
                 info.supplier = null;
             });
@@ -261,8 +239,38 @@ namespace com.spacepuppy.Anim
         private class CallbackInfo
         {
             public System.Action<ISPAnim> callback;
+            public float current;
             public float timeout;
             public ITimeSupplier supplier;
+        }
+
+        public static bool TestAnimComplete(ISPAnim anim)
+        {
+            if (anim == null) throw new System.ArgumentNullException("anim");
+
+            if (!anim.IsPlaying) return true;
+
+            var a = anim as SPAnim;
+            if(a != null)
+            {
+                if (a.Controller == null || !a.Controller.isActiveAndEnabled) return true;
+
+                switch(a.WrapMode)
+                {
+                    case WrapMode.Default:
+                    case WrapMode.Once:
+                        return Time.time > (a.StartTime + a.ScaledDuration);
+                    case WrapMode.Loop:
+                    case WrapMode.PingPong:
+                    case WrapMode.ClampForever:
+                    default:
+                        return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
 
         #endregion

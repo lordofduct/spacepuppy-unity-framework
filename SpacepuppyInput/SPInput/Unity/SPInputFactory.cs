@@ -504,7 +504,7 @@ namespace com.spacepuppy.SPInput.Unity
                 return Merge(arr);
             }
         }
-
+        
         public static IButtonInputSignature CreateButtonSignature<TInputId>(this IEnumerable<IInputProfile<TInputId>> profiles, string id, TInputId button, Joystick joystick = Joystick.All, Comparison<IInputProfile<TInputId>> comparison = null)
             where TInputId : struct, System.IConvertible
         {

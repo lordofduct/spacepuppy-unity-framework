@@ -24,8 +24,9 @@ namespace com.spacepuppy.Anim
 
         WrapMode WrapMode { get; set; }
         float Speed { get; set; }
-        float ScaledDuration { get; }
         float Time { get; set; }
+        float ScaledTime { get; set; }
+        float ScaledDuration { get; }
         ITimeSupplier TimeSupplier { get; set; }
         bool IsPlaying { get; }
 

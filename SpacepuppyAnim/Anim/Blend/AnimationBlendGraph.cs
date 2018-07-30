@@ -101,6 +101,18 @@ namespace com.spacepuppy.Anim.Blend
             }
         }
 
+        public float ScaledTime
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+            set
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
         public float ScaledDuration
         {
             get

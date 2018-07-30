@@ -131,8 +131,8 @@ namespace com.spacepuppy.Scenes
                 var d = _onComplete;
                 _onComplete = null;
                 if (d != null) d(this);
-
-                com.spacepuppy.Utils.Messaging.FindAndBroadcast<ISceneLoadedFoundHandler>((o) => o.OnSceneLoaded(this));
+                
+                com.spacepuppy.Utils.Messaging.Broadcast<ISceneLoadedGlobalHandler>((o) => o.OnSceneLoaded(this));
             }
         }
 
