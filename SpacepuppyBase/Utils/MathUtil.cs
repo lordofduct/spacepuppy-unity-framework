@@ -764,7 +764,7 @@ namespace com.spacepuppy.Utils
         /// ex:
         /// Wrap(8,6,2) == 4
         /// Wrap(4,2,0) == 0
-        /// Wrap(4,2,-2) == -2
+        /// Wrap(4,2,-2) == 0
         /// </summary>
         /// <param name="value">value to wrap</param>
         /// <param name="max">max in range</param>

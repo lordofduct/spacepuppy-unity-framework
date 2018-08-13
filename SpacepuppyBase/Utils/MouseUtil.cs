@@ -10,7 +10,7 @@ namespace com.spacepuppy.Utils
 
         public static bool GuiClicked(Event ev, int btn, Rect area)
         {
-            return (ev.type == EventType.mouseDown && ev.button == btn && area.Contains(ev.mousePosition));
+            return (ev.type == EventType.MouseDown && ev.button == btn && area.Contains(ev.mousePosition));
         }
 
     }

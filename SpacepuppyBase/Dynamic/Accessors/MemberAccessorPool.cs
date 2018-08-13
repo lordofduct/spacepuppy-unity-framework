@@ -16,7 +16,7 @@ namespace com.spacepuppy.Dynamic.Accessors
                 case UnityEngine.RuntimePlatform.OSXEditor:
                 case UnityEngine.RuntimePlatform.OSXPlayer:
                 case UnityEngine.RuntimePlatform.WindowsPlayer:
-                case UnityEngine.RuntimePlatform.OSXDashboardPlayer:
+                //case UnityEngine.RuntimePlatform.OSXDashboardPlayer:
                 case UnityEngine.RuntimePlatform.WindowsEditor:
                 case UnityEngine.RuntimePlatform.LinuxPlayer:
                 case UnityEngine.RuntimePlatform.LinuxEditor:

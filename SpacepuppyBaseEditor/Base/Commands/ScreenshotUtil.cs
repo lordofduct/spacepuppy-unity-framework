@@ -135,7 +135,8 @@ namespace com.spacepuppyeditor.Base.Commands
             }
             else
             {
-                Application.CaptureScreenshot(path);
+                //Application.CaptureScreenshot(path);
+                ScreenCapture.CaptureScreenshot(path);
                 return true;
             }
         }

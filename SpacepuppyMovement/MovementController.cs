@@ -668,6 +668,7 @@ namespace com.spacepuppy
 
             public void OnHasHitListenersChanged()
             {
+                if (object.ReferenceEquals(_owner, null)) return;
                 if (_owner._movementControllerHit != null && object.ReferenceEquals(_hooks, null))
                 {
                     _hooks = _controller.AddComponent<ControllerColliderHitEventHooks>();

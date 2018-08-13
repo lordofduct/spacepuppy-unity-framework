@@ -278,9 +278,10 @@ namespace com.spacepuppyeditor
                     return "x86";
                 case BuildTarget.StandaloneLinux64:
                     return "x86_64";
-                case BuildTarget.StandaloneOSXIntel:
-                case BuildTarget.StandaloneOSXIntel64:
-                case BuildTarget.StandaloneOSXUniversal:
+                case BuildTarget.StandaloneOSX:
+                //case BuildTarget.StandaloneOSXIntel:
+                //case BuildTarget.StandaloneOSXIntel64:
+                //case BuildTarget.StandaloneOSXUniversal:
                     return "app";
                 default:
                     return string.Empty;

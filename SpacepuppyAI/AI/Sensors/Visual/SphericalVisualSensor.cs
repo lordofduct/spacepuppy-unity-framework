@@ -89,10 +89,10 @@ namespace com.spacepuppy.AI.Sensors.Visual
 
                 float a;
                 a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.x));
-                if (a > this._horizontalAngle)
+                if (a > this._horizontalAngle / 2f)
                     return false;
                 a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.y));
-                if (a > this._verticalAngle)
+                if (a > this._verticalAngle / 2f)
                     return false;
             }
 

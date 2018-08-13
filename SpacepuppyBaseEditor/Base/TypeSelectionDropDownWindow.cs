@@ -212,7 +212,7 @@ namespace com.spacepuppyeditor.Base
                 rect.x += 2f;
                 rect.width -= 2f;
 
-                if ((current.type == EventType.MouseMove || current.type == EventType.mouseDown) && rect.Contains(current.mousePosition))
+                if ((current.type == EventType.MouseMove || current.type == EventType.MouseDown) && rect.Contains(current.mousePosition))
                 {
                     _selectedIndex = index;
                     this.Repaint();

@@ -68,7 +68,7 @@ namespace com.spacepuppyeditor
         {
             var ev = Event.current;
             if (ev != null && selectionRect.Contains(ev.mousePosition)
-                && ev.button == 1 && ev.control && Event.current.type <= EventType.mouseUp)
+                && ev.button == 1 && ev.control && Event.current.type <= EventType.MouseUp)
             {
                 // Find what object this is
                 GameObject clickedObject = EditorUtility.InstanceIDToObject(instanceID) as GameObject;

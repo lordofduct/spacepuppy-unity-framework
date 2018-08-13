@@ -137,10 +137,10 @@ namespace com.spacepuppy.SPInput.Unity
                     return TargetPlatform.MacOSX;
                 case RuntimePlatform.WindowsPlayer:
                     return TargetPlatform.Windows;
-                case RuntimePlatform.OSXWebPlayer:
-                case RuntimePlatform.OSXDashboardPlayer:
-                    return TargetPlatform.MacOSX;
-                case RuntimePlatform.WindowsWebPlayer:
+                //case RuntimePlatform.OSXWebPlayer:
+                //case RuntimePlatform.OSXDashboardPlayer:
+                //    return TargetPlatform.MacOSX;
+                //case RuntimePlatform.WindowsWebPlayer:
                 case RuntimePlatform.WindowsEditor:
                     return TargetPlatform.Windows;
                 case RuntimePlatform.IPhonePlayer:

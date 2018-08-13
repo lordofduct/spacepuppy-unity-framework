@@ -47,7 +47,7 @@ namespace com.spacepuppyeditor.Geom
                     SPEditorGUI.DrawCurveSwatch(position1, curve, color, Color.gray);
                     //EditorStyles.colorPickerBox.Draw(position1, GUIContent.none, id, false);
                     break;
-                case EventType.mouseDown:
+                case EventType.MouseDown:
                     if(position.Contains(current.mousePosition))
                     {
                         //TODO - show CubicBezierCurveEditorWindow

@@ -61,11 +61,11 @@ namespace com.spacepuppyeditor
 
                 EditorApplication.hierarchyWindowChanged -= OnHierarchyChanged;
                 EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyItemGUI;
-                EditorApplication.playmodeStateChanged -= OnPlaymodeChanged;
+                EditorApplication.playModeStateChanged -= OnPlaymodeChanged;
 
                 EditorApplication.hierarchyWindowChanged += OnHierarchyChanged;
                 EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyItemGUI;
-                EditorApplication.playmodeStateChanged += OnPlaymodeChanged;
+                EditorApplication.playModeStateChanged += OnPlaymodeChanged;
             }
             else
             {
@@ -82,7 +82,7 @@ namespace com.spacepuppyeditor
 
                 EditorApplication.hierarchyWindowChanged -= OnHierarchyChanged;
                 EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyItemGUI;
-                EditorApplication.playmodeStateChanged -= OnPlaymodeChanged;
+                EditorApplication.playModeStateChanged -= OnPlaymodeChanged;
             }
         }
 
@@ -221,7 +221,7 @@ namespace com.spacepuppyeditor
             SyncActiveDrawers();
         }
 
-        private static void OnPlaymodeChanged()
+        private static void OnPlaymodeChanged(PlayModeStateChange mode)
         {
             foreach(var pair in _activeObjects)
             {
