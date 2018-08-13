@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{776AA1DA-15E2-4D90-97B5-330C6F1CB442}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.spacepuppy</RootNamespace>
+    <AssemblyName>SpacepuppyUnityFramework.Extended</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Resources\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ClassicTimers\GameTimer.cs" />
+    <Compile Include="ClassicTimers\RandomSwitch.cs" />
+    <Compile Include="ClassicTimers\Timer.cs" />
+    <Compile Include="ClassicTimers\TimerSwitch.cs" />
+    <Compile Include="Collections\DuplicateKeyAddAction.cs" />
+    <Compile Include="Collections\KeyedCollection.cs" />
+    <Compile Include="Collections\LiveSPComponentCollection.cs" />
+    <Compile Include="Collections\SignalCollectionEventArgs.cs" />
+    <Compile Include="Collections\SignalingCollection.cs" />
+    <Compile Include="Collections\TaggedCollection.cs" />
+    <Compile Include="Collections\TaggedCollectionValidationException.cs" />
+    <Compile Include="Geom\ColliderOverlapResult.cs" />
+    <Compile Include="Geom\Frustum.cs" />
+    <Compile Include="Geom\LineSegment.cs" />
+    <Compile Include="Geom\ColliderOverlapResolver.cs" />
+    <Compile Include="Geom\RadialRing.cs" />
+    <Compile Include="Geom\SightGeom.cs" />
+    <Compile Include="Geom\ViewCone.cs" />
+    <Compile Include="Hooks\CharacterControllerCollisionNotification.cs" />
+    <Compile Include="Hooks\CharacterControllerCollisionNotifier.cs" />
+    <Compile Include="Hooks\ControllerColliderHitNotification.cs" />
+    <Compile Include="Hooks\ControllerColliderHitNotifier.cs" />
+    <Compile Include="Hooks\TriggerNotification.cs" />
+    <Compile Include="Hooks\TriggerNotifier.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TandemCoroutine.cs" />
+    <Compile Include="Utils\DblMathUtil.cs" />
+    <Compile Include="Utils\DebugUtils\InGameFlyCam.cs" />
+    <Compile Include="Utils\GizmosHelper.cs" />
+    <Compile Include="Utils\Json.cs" />
+    <Compile Include="Utils\PiWalker.cs" />
+    <Compile Include="Widgets\MirrorTransform.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpacepuppyBase\SpacepuppyBase.csproj">
+      <Project>{4b8e57ac-f3b2-4dfd-ba0b-20f6be3b17c9}</Project>
+      <Name>SpacepuppyBase</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
