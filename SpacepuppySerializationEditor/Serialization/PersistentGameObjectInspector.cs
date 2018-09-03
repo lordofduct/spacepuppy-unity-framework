@@ -46,7 +46,7 @@ namespace com.spacepuppyeditor.Serialization
                         {
                             if (string.IsNullOrEmpty(assetIdProp.stringValue))
                             {
-                                go = PrefabUtility.GetPrefabParent(go) as GameObject;
+                                go = PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject;
                                 if(go != null)
                                 {
                                     var path = AssetHelper.GetRelativeResourcePath(AssetDatabase.GetAssetPath(go));

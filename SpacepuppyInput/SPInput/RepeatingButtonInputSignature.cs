@@ -145,7 +145,7 @@ namespace com.spacepuppy.SPInput
         #endregion
 
         #region IInputSignature Interfacce
-
+        
         public override void Update()
         {
             //determine based on history

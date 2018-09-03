@@ -58,12 +58,12 @@ namespace com.spacepuppyeditor
             {
                 SyncAvailableDrawerTypes();
                 SyncActiveDrawers();
-
-                EditorApplication.hierarchyWindowChanged -= OnHierarchyChanged;
+                
+                EditorApplication.hierarchyChanged -= OnHierarchyChanged;
                 EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyItemGUI;
                 EditorApplication.playModeStateChanged -= OnPlaymodeChanged;
 
-                EditorApplication.hierarchyWindowChanged += OnHierarchyChanged;
+                EditorApplication.hierarchyChanged += OnHierarchyChanged;
                 EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyItemGUI;
                 EditorApplication.playModeStateChanged += OnPlaymodeChanged;
             }
@@ -80,7 +80,7 @@ namespace com.spacepuppyeditor
                 _activeGameObjects.Clear();
                 _ignoredIds.Clear();
 
-                EditorApplication.hierarchyWindowChanged -= OnHierarchyChanged;
+                EditorApplication.hierarchyChanged -= OnHierarchyChanged;
                 EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyItemGUI;
                 EditorApplication.playModeStateChanged -= OnPlaymodeChanged;
             }

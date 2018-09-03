@@ -11,7 +11,9 @@ using System;
 
 namespace com.spacepuppy.AI.Sensors.Collision
 {
-    public class ColliderSensor : Sensor
+
+    [RequireCollider()]
+    public class ColliderSensor : ActiveSensor
     {
 
         [System.Flags()]
@@ -99,12 +101,26 @@ namespace com.spacepuppy.AI.Sensors.Collision
         {
             if (!this.ConcernedWith(coll)) return;
 
-            _intersectingColliders.Add(coll);
+            bool none = _intersectingColliders.Count == 0;
+            if(_intersectingColliders.Add(coll))
+            {
+                if (this.HasSensedAspectListeners)
+                {
+                    this.OnSensedAspect(ColliderAspect.GetAspect(coll));
+                }
+                if(none)
+                {
+                    this.OnSensorAlert();
+                }
+            }
         }
 
         protected void OnTriggerExit(Collider coll)
         {
-            _intersectingColliders.Remove(coll);
+            if(_intersectingColliders.Remove(coll) && _intersectingColliders.Count == 0)
+            {
+                this.OnSensorSleep();
+            }
         }
 
         private bool ConcernedWith(Collider coll)
@@ -310,4 +326,5 @@ namespace com.spacepuppy.AI.Sensors.Collision
         #endregion
 
     }
+
 }

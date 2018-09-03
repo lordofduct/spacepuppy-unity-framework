@@ -18,8 +18,11 @@ namespace com.spacepuppy
         object GetTarget(object arg);
     }
 
+    /// <summary>
+    /// A serializable IProxy struct that will search the scene for an object by name/tag/type.
+    /// </summary>
     [System.Serializable]
-    public struct Proxy : IProxy
+    public struct QueryProxy : IProxy
     {
 
         #region Fields
@@ -35,11 +38,25 @@ namespace com.spacepuppy
 
         #region CONSTRUCTOR
 
-        public Proxy(SearchBy searchBy)
+        public QueryProxy(UnityEngine.Object target)
+        {
+            _target = target;
+            _searchBy = SearchBy.Nothing;
+            _queryString = null;
+        }
+
+        public QueryProxy(SearchBy searchBy)
         {
             _target = null;
             _searchBy = searchBy;
             _queryString = null;
+        }
+
+        public QueryProxy(SearchBy searchBy, string query)
+        {
+            _target = null;
+            _searchBy = searchBy;
+            _queryString = query;
         }
 
         #endregion
@@ -161,6 +178,115 @@ namespace com.spacepuppy
                     throw new TypeArgumentMismatchException(targetType, typeof(UnityEngine.Object), "targetType");
 
                 this.TargetType = targetType;
+            }
+
+        }
+
+        #endregion
+
+    }
+
+    /// <summary>
+    /// A serializable IProxy struct that will access a target's member/property for an object.
+    /// </summary>
+    [System.Serializable]
+    public struct MemberProxy : IProxy
+    {
+
+        #region Fields
+
+        [SerializeField()]
+        [SelectableObject]
+        private UnityEngine.Object _target;
+        [SerializeField()]
+        private string _memberName;
+
+        #endregion
+
+        #region Properties
+
+        public UnityEngine.Object Target
+        {
+            get { return _target; }
+            set { _target = value; }
+        }
+
+        public string MemberName
+        {
+            get { return _memberName; }
+            set { _memberName = value; }
+        }
+
+        public object Value
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        #endregion
+
+        #region Methods
+
+        public object GetValue()
+        {
+            if (_target == null)
+                return null;
+            else
+                return DynamicUtil.GetValue(_target, _memberName);
+        }
+        
+        public T GetValue<T>()
+        {
+            if (_target == null)
+                return default(T);
+            else
+            {
+                var result = DynamicUtil.GetValue(_target, _memberName);
+                if (result is T)
+                    return (T)result;
+                else if (ConvertUtil.IsSupportedType(typeof(T)))
+                    return ConvertUtil.ToPrim<T>(result);
+                else
+                    return default(T);
+            }
+        }
+
+        public bool SetValue(object value)
+        {
+            return DynamicUtil.SetValue(_target, _memberName, value);
+        }
+        
+        #endregion
+
+        #region IProxy Interface
+
+        object IProxy.GetTarget()
+        {
+            return this.GetValue();
+        }
+
+        object IProxy.GetTarget(object arg)
+        {
+            return this.GetValue();
+        }
+
+        System.Type IProxy.GetTargetType()
+        {
+            if (_memberName == null) return typeof(object);
+            return DynamicUtil.GetReturnType(DynamicUtil.GetMember(_target, _memberName, false)) ?? typeof(object);
+        }
+
+        #endregion
+
+        #region Config Attrib
+
+        public class ConfigAttribute : System.Attribute
+        {
+            public DynamicMemberAccess MemberAccessLevel;
+
+            public ConfigAttribute(DynamicMemberAccess memberAccessLevel)
+            {
+                this.MemberAccessLevel = memberAccessLevel;
             }
 
         }
@@ -429,7 +555,6 @@ namespace com.spacepuppy
 
     }
 
-
     [CreateAssetMenu(fileName = "ProxyMediator", menuName = "Spacepuppy/ProxyMediator")]
     public class ProxyMediator : ScriptableObject, ITriggerableMechanism
     {
@@ -533,5 +658,5 @@ namespace com.spacepuppy
         #endregion
 
     }
-
+    
 }

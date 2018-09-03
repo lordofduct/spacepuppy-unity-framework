@@ -7,11 +7,12 @@ using System.Linq;
 using com.spacepuppy.Collections;
 using com.spacepuppy.Scenario;
 using com.spacepuppy.Utils;
+using System;
 
 namespace com.spacepuppy.AI.Sensors.Audible
 {
 
-    public class AudibleSensor : SPComponent
+    public class AudibleSensor : ActiveSensor
     {
         
         #region Static Multiton Interface
@@ -31,6 +32,8 @@ namespace com.spacepuppy.AI.Sensors.Audible
         [SerializeField]
         [Tooltip("Should we signal the entire entity if one exists?")]
         private bool _signalEntity = true;
+        [SerializeField()]
+        private bool _canDetectSelf;
 
         [SerializeField()]
         private LayerMask _aspectLayerMask = -1;
@@ -42,6 +45,9 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
         [System.NonSerialized]
         private SPEntity _entity;
+
+        [System.NonSerialized]
+        private HashSet<AudibleAspect> _activeSirens;
 
         #endregion
 
@@ -84,6 +90,12 @@ namespace com.spacepuppy.AI.Sensors.Audible
             set { _range = value; }
         }
 
+        public bool CanDetectSelf
+        {
+            get { return _canDetectSelf; }
+            set { _canDetectSelf = value; }
+        }
+
         public LayerMask AspectLayerMask
         {
             get { return _aspectLayerMask; }
@@ -114,6 +126,10 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
         public void SignalBlip(IAspect aspect)
         {
+            var audible = aspect as AudibleAspect;
+            if (object.ReferenceEquals(audible, null) || !this.ConcernedWith(audible)) return;
+
+            this.OnSensedAspect(aspect);
             if (_onHeardSound.Count > 0) _onHeardSound.ActivateTrigger(this, aspect);
 
             if(_signalEntity && !object.ReferenceEquals(_entity, null))
@@ -128,6 +144,15 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
         public void SignalEnterSiren(IAspect aspect)
         {
+            var audible = aspect as AudibleAspect;
+            if (object.ReferenceEquals(audible, null) || !this.ConcernedWith(audible)) return;
+
+            if (_activeSirens == null) _activeSirens = new HashSet<AudibleAspect>();
+            bool none = _activeSirens.Count == 0;
+            if (!_activeSirens.Add(audible)) return;
+            
+            this.OnSensedAspect(aspect);
+            if (none) this.OnSensorAlert();
             if (_onHeardSound.Count > 0) _onHeardSound.ActivateTrigger(this, aspect);
 
             if (_signalEntity && !object.ReferenceEquals(_entity, null))
@@ -142,6 +167,9 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
         public void SignalSirenStay(IAspect aspect)
         {
+            var audible = aspect as AudibleAspect;
+            if (object.ReferenceEquals(audible, null) || _activeSirens == null || !_activeSirens.Contains(audible)) return;
+
             if (_signalEntity && !object.ReferenceEquals(_entity, null))
             {
                 Messaging.Broadcast<IAudibleSirenResponder>(_entity.gameObject, (o) => o.OnSoundStay(aspect));
@@ -154,6 +182,16 @@ namespace com.spacepuppy.AI.Sensors.Audible
 
         public void SignalExitSiren(IAspect aspect)
         {
+            var audible = aspect as AudibleAspect;
+            if (object.ReferenceEquals(audible, null) || _activeSirens == null || !_activeSirens.Contains(audible)) return;
+            
+            _activeSirens.Remove(audible);
+
+            if(_activeSirens.Count == 0)
+            {
+                this.OnSensorSleep();
+            }
+
             if (_signalEntity && !object.ReferenceEquals(_entity, null))
             {
                 Messaging.Broadcast<IAudibleSirenResponder>(_entity.gameObject, (o) => o.OnSoundExit(aspect));
@@ -162,6 +200,125 @@ namespace com.spacepuppy.AI.Sensors.Audible
             {
                 Messaging.Execute<IAudibleSirenResponder>(this.gameObject, (o) => o.OnSoundExit(aspect));
             }
+        }
+
+        #endregion
+
+        #region Sensor Interface
+
+        public override bool ConcernedWith(UnityEngine.Object obj)
+        {
+            if (obj is AudibleAspect)
+            {
+                return this.ConcernedWith(obj as AudibleAspect);
+            }
+            else
+            {
+                var go = GameObjectUtil.GetGameObjectFromSource(obj);
+                if (go == null) return false;
+                using (var set = com.spacepuppy.Collections.TempCollection.GetSet<AudibleAspect>())
+                {
+                    go.FindComponents<AudibleAspect>(set);
+                    var e = set.GetEnumerator();
+                    while (e.MoveNext())
+                    {
+                        if (this.ConcernedWith(e.Current))
+                            return true;
+                    }
+                    return false;
+                }
+            }
+        }
+        private bool ConcernedWith(AudibleAspect aspect)
+        {
+            if (aspect == null) return false;
+            if (!aspect.isActiveAndEnabled) return false;
+            if (_aspectLayerMask != -1 && !aspect.gameObject.IntersectsLayerMask(_aspectLayerMask)) return false;
+            if (!_aspectTagMask.Intersects(aspect)) return false;
+            if (!_canDetectSelf && aspect.entityRoot == this.entityRoot) return false;
+
+            return true;
+        }
+
+        public override bool SenseAny(Func<IAspect, bool> p = null)
+        {
+            if (_activeSirens == null || _activeSirens.Count == 0) return false;
+
+            if(p != null)
+            {
+                var e = _activeSirens.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    if (p(e.Current)) return true;
+                }
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public override bool Visible(IAspect aspect)
+        {
+            return _activeSirens != null && aspect is AudibleAspect && _activeSirens.Contains(aspect as AudibleAspect);
+        }
+
+        public override IAspect Sense(Func<IAspect, bool> p = null)
+        {
+            if (_activeSirens == null || _activeSirens.Count == 0) return null;
+
+            var e = _activeSirens.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (p == null || p(e.Current)) return e.Current;
+            }
+            return null;
+        }
+
+        public override IEnumerable<IAspect> SenseAll(Func<IAspect, bool> p = null)
+        {
+            if (_activeSirens == null || _activeSirens.Count == 0) yield break;
+
+            var e = _activeSirens.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (p == null || p(e.Current)) yield return e.Current;
+            }
+        }
+
+        public override int SenseAll(ICollection<IAspect> lst, Func<IAspect, bool> p = null)
+        {
+            if (_activeSirens == null || _activeSirens.Count == 0) return 0;
+
+            var e = _activeSirens.GetEnumerator();
+            int cnt = 0;
+            while (e.MoveNext())
+            {
+                if (p == null || p(e.Current))
+                {
+                    cnt++;
+                    lst.Add(e.Current);
+                }
+            }
+            return cnt;
+        }
+
+        public override int SenseAll<T>(ICollection<T> lst, Func<T, bool> p = null)
+        {
+            if (_activeSirens == null || _activeSirens.Count == 0) return 0;
+
+            var e = _activeSirens.GetEnumerator();
+            int cnt = 0;
+            while (e.MoveNext())
+            {
+                if (e.Current is T && (p == null || p(e.Current as T)))
+                {
+                    cnt++;
+                    lst.Add(e.Current as T);
+                }
+            }
+            return cnt;
         }
 
         #endregion

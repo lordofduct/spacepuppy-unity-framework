@@ -5,6 +5,13 @@ using System.Text;
 
 namespace com.spacepuppy.SPInput
 {
+
+    public enum InputDeviceType
+    {
+        Unknown = -1,
+        KBM = 0,
+        Joystick = 1
+    }
     
     public enum Joystick : sbyte
     {

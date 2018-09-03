@@ -18,7 +18,7 @@ namespace com.spacepuppyeditor.Internal
 
         #region Fields
 
-        private static PropertyHandlerCache _handlerCache = new PropertyHandlerCache();
+        public static PropertyHandlerCache _handlerCache = new PropertyHandlerCache();
 
 
 
@@ -52,6 +52,16 @@ namespace com.spacepuppyeditor.Internal
 
         public static System.Type GetDrawerTypeForType(System.Type tp)
         {
+            //HACK FIX FOR Vector2 AND Vector3
+            if(tp == typeof(Vector2))
+            {
+                return typeof(HackVector2PropertyDrawer);
+            }
+            else if(tp == typeof(Vector3))
+            {
+                return typeof(HackVector3PropertyDrawer);
+            }
+
             if (_imp_getDrawerTypeForType == null) _imp_getDrawerTypeForType = _accessWrapper.GetStaticMethod("GetDrawerTypeForType", typeof(System.Func<System.Type, System.Type>)) as System.Func<System.Type, System.Type>;
             return _imp_getDrawerTypeForType(tp);
         }

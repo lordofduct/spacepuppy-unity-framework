@@ -78,7 +78,7 @@ namespace com.spacepuppy.SPInput.Legacy
         #endregion
 
         #region IInputSignature Interfacce
-
+        
         public override void Update()
         {
             //determine based on history
@@ -159,7 +159,7 @@ namespace com.spacepuppy.SPInput.Legacy
         {
             get
             {
-                if(GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
+                if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
                 {
                     return _currentFixed;
                 }
@@ -195,7 +195,7 @@ namespace com.spacepuppy.SPInput.Legacy
         #endregion
 
         #region IInputSignature Interfacce
-
+        
         public override void Update()
         {
             ////determine based on history
@@ -308,7 +308,7 @@ namespace com.spacepuppy.SPInput.Legacy
         #endregion
 
         #region IInputSignature Interfacce
-
+        
         public override void Update()
         {
             /*
@@ -428,7 +428,7 @@ namespace com.spacepuppy.SPInput.Legacy
         #endregion
 
         #region IInputSignature Interface
-
+        
         public override void Update()
         {
             /*
@@ -465,7 +465,7 @@ namespace com.spacepuppy.SPInput.Legacy
                 return Input.mousePosition;
             }
         }
-
+        
         public override void Update()
         {
             //do nothing
@@ -545,6 +545,14 @@ namespace com.spacepuppy.SPInput.Legacy
         #endregion
 
         #region IInputSignature Interfacce
+
+        public bool Active
+        {
+            get
+            {
+                return this.CurrentState > ButtonState.None;
+            }
+        }
 
         public override void Update()
         {

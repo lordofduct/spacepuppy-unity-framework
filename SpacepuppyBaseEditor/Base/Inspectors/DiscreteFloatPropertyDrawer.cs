@@ -49,5 +49,30 @@ namespace com.spacepuppyeditor.Base
             return (newValue != oldValue && MathUtil.Shear(newValue) == oldValue) ? Mathf.Ceil(newValue) : Mathf.Floor(newValue);
         }
 
+        public static float GetValue(SerializedProperty prop)
+        {
+            if(prop != null)
+            {
+                var propValue = prop.FindPropertyRelative("_value");
+                return propValue != null && propValue.propertyType == SerializedPropertyType.Float ? propValue.floatValue : float.NaN;
+            }
+
+            return float.NaN;
+        }
+
+        public static float SetValue(SerializedProperty prop, float value)
+        {
+            if (prop != null)
+            {
+                var propValue = prop.FindPropertyRelative("_value");
+                if (propValue != null && propValue.propertyType == SerializedPropertyType.Float)
+                {
+                    propValue.floatValue = Mathf.Round(value);
+                }
+            }
+
+            return float.NaN;
+        }
+
     }
 }

@@ -582,6 +582,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region "ConvertToLong"
+
         public static long ToLong(sbyte value)
         {
             return System.Convert.ToInt64(value);
@@ -689,6 +690,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region "ToSingle"
+
         public static float ToSingle(sbyte value)
         {
             return System.Convert.ToSingle(value);
@@ -815,6 +817,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region "ToDouble"
+
         public static double ToDouble(sbyte value)
         {
             return System.Convert.ToDouble(value);
@@ -2094,9 +2097,72 @@ namespace com.spacepuppy.Utils
             }
             return ToQuaternion(System.Convert.ToString(value));
         }
-        
+
         #endregion
 
+        #region ToNumeric
+
+        public static INumeric ToNumeric(System.Type tp, float value)
+        {
+            return Numerics.CreateNumeric(tp, (double)value);
+        }
+
+        public static INumeric ToNumeric(System.Type tp, double value)
+        {
+            return Numerics.CreateNumeric(tp, value);
+        }
+
+        public static INumeric ToNumeric(System.Type tp, int value)
+        {
+            return Numerics.CreateNumeric(tp, (long)value);
+        }
+
+        public static INumeric ToNumeric(System.Type tp, long value)
+        {
+            return Numerics.CreateNumeric(tp, value);
+        }
+
+        public static INumeric ToNumeric(System.Type tp, object value)
+        {
+            var result = Numerics.CreateNumeric(tp, 0);
+            if (value == null) return result;
+
+            if(value is System.IConvertible)
+            {
+                var tc = (value as System.IConvertible).GetTypeCode();
+                if (tc == System.TypeCode.Object && value is INumeric) tc = (value as INumeric).GetUnderlyingTypeCode();
+
+                switch (tc)
+                {
+                    case System.TypeCode.Boolean:
+                    case System.TypeCode.Char:
+                    case System.TypeCode.Byte:
+                    case System.TypeCode.Int16:
+                    case System.TypeCode.UInt16:
+                    case System.TypeCode.Int32:
+                    case System.TypeCode.UInt32:
+                    case System.TypeCode.Int64:
+                    case System.TypeCode.UInt64:
+                        result.FromLong((value as System.IConvertible).ToInt64(null));
+                        break;
+                    case System.TypeCode.Single:
+                    case System.TypeCode.Double:
+                        result.FromDouble((value as System.IConvertible).ToDouble(null));
+                        break;
+                    default:
+                        result.FromDouble(ConvertUtil.ToDouble(value));
+                        break;
+                }
+            }
+            else
+            {
+                result.FromDouble(ConvertUtil.ToDouble(value));
+            }
+
+            return result;
+        }
+
+        #endregion
 
         #region "Is Supported"
 
@@ -2114,11 +2180,19 @@ namespace com.spacepuppy.Utils
 
         private static bool IsSupportedType(System.Type tp, System.TypeCode code)
         {
-            if (tp !=null && tp.IsEnum) return true;
+            if (tp != null && tp.IsEnum) return true;
 
             if (code == System.TypeCode.Object)
             {
-                return object.ReferenceEquals(tp, typeof(object)) || object.ReferenceEquals(tp, typeof(System.TimeSpan));
+                if (tp == typeof(object)) return true;
+                else if (tp == typeof(System.TimeSpan)) return true;
+                else if (tp == typeof(Vector2)) return true;
+                else if (tp == typeof(Vector3)) return true;
+                else if (tp == typeof(Vector4)) return true;
+                else if (tp == typeof(Quaternion)) return true;
+                else if (tp == typeof(Color)) return true;
+                else if (typeof(INumeric).IsAssignableFrom(tp) && !tp.IsAbstract) return true;
+                else return false;
             }
             else
             {
@@ -2196,20 +2270,57 @@ namespace com.spacepuppy.Utils
                     ));
         }
         
-        public static bool IsInteger(object value, bool bBlankIsZero = false)
+        /// <summary>
+        /// Returns true if the value is a numeric type that is a whole round number.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="bBlankIsZero"></param>
+        /// <returns></returns>
+        public static bool IsInteger(object value)
         {
-            if (value == null) return bBlankIsZero;
-            if (ValueIsNumericType(value)) return true;
+            if (value == null) return false;
 
-            //string sval = (System.Convert.ToString(value) + "").Trim();
-            string sval = System.Convert.ToString(value);
+            if(value is System.IConvertible)
+            {
+                var conv = value as System.IConvertible;
+                if (IsInteger(conv.GetTypeCode())) return true;
+                return (conv.ToDouble(null) % 1d) == 0d;
+            }
 
-            if (string.IsNullOrEmpty(sval))
-                return bBlankIsZero;
+            return false;
+        }
 
-            //'Return Regex.Match(sval, "\d+", RegexOptions.Compiled).Success
-            int i = 0;
-            return int.TryParse(sval, out i);
+        public static bool IsInteger(System.TypeCode code)
+        {
+            switch (code)
+            {
+                case System.TypeCode.SByte:
+                    //5
+                    return true;
+                case System.TypeCode.Byte:
+                    //6
+                    return true;
+                case System.TypeCode.Int16:
+                    //7
+                    return true;
+                case System.TypeCode.UInt16:
+                    //8
+                    return true;
+                case System.TypeCode.Int32:
+                    //9
+                    return true;
+                case System.TypeCode.UInt32:
+                    //10
+                    return true;
+                case System.TypeCode.Int64:
+                    //11
+                    return true;
+                case System.TypeCode.UInt64:
+                    //12
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         /// <summary>
@@ -2220,12 +2331,8 @@ namespace com.spacepuppy.Utils
         /// <remarks></remarks>
         public static bool ValueIsNumericType(object obj)
         {
-
-            if (obj == null)
-                return false;
-
-            return IsNumericType(obj.GetType());
-
+            if (obj == null) return false;
+            return obj is INumeric || IsNumericType(obj.GetType());
         }
 
         /// <summary>
@@ -2236,7 +2343,8 @@ namespace com.spacepuppy.Utils
         /// <remarks></remarks>
         public static bool IsNumericType(System.Type tp)
         {
-            return IsNumericType(System.Type.GetTypeCode(tp));
+            if (tp == null) return false;
+            return typeof(INumeric).IsAssignableFrom(tp) || IsNumericType(System.Type.GetTypeCode(tp));
         }
 
         public static bool IsNumericType(System.TypeCode code)
@@ -2817,11 +2925,13 @@ namespace com.spacepuppy.Utils
         /// Converts value to a Prim type of "T"
         /// </summary>
         /// <typeparam name="T">Prim type to be converted to</typeparam>
-        /// <param name="value">Object value to be convertyed</param>
+        /// <param name="value">Object value to be converted</param>
         /// <returns>Value as new converted type</returns>
         /// <remarks></remarks>
         public static T ToPrim<T>(object value)
         {
+            if (value is T) return (T)value;
+
             System.Type tp = typeof(T);
             System.TypeCode code = System.Type.GetTypeCode(tp);
             if (!ConvertUtil.IsSupportedType(tp, code))
@@ -2835,10 +2945,12 @@ namespace com.spacepuppy.Utils
         public static object ToPrim(object value, System.Type tp)
         {
             if (tp == null) throw new System.ArgumentException("Type must be non-null", "tp");
+            if (value != null && tp.IsAssignableFrom(value.GetType())) return value;
+
             System.TypeCode code = System.Type.GetTypeCode(tp);
             if (!ConvertUtil.IsSupportedType(tp, code))
             {
-                throw new System.Exception(tp.Name + " is not accepted as a generic type for ConvertUtil.ToPrim.");
+                throw new System.Exception(tp.Name + " is not accepted as a type for ConvertUtil.ToPrim.");
             }
 
             return ConvertUtil.ToPrim(value, tp, code);
@@ -2877,6 +2989,7 @@ namespace com.spacepuppy.Utils
 
         public static object ToPrim(object value, System.TypeCode code)
         {
+            if (System.Convert.GetTypeCode(value) == code) return value;
             return ToPrim(value, null, code);
         }
 
@@ -2887,9 +3000,10 @@ namespace com.spacepuppy.Utils
             {
                 if (value is string)
                     return System.Enum.Parse(tp, value as string, true);
-
-                var vtp = value.GetType();
-                switch (System.Type.GetTypeCode(vtp))
+                else if (value == null)
+                    value = 0;
+                
+                switch (System.Type.GetTypeCode(value.GetType()))
                 {
                     case System.TypeCode.SByte:
                     case System.TypeCode.Byte:
@@ -2913,18 +3027,15 @@ namespace com.spacepuppy.Utils
                     return null;
                 case System.TypeCode.Object:
                     //1
-                    if (object.ReferenceEquals(tp, typeof(System.TimeSpan)))
-                    {
-                        return ConvertUtil.ToTime(value);
-                    }
-                    else if (tp == null || object.ReferenceEquals(tp, typeof(object)))
-                    {
-                        return value;
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                    if (tp == null || object.ReferenceEquals(tp, typeof(object))) return value;
+                    else if (tp == typeof(System.TimeSpan)) return ConvertUtil.ToTime(value);
+                    else if (tp == typeof(Vector2)) return ToVector2(value);
+                    else if (tp == typeof(Vector3)) return ToVector3(value);
+                    else if (tp == typeof(Vector4)) return ToVector4(value);
+                    else if (tp == typeof(Quaternion)) return ToQuaternion(value);
+                    else if (tp == typeof(Color)) return ToColor(value);
+                    else if (typeof(INumeric).IsAssignableFrom(tp) && !tp.IsAbstract) return ToNumeric(tp, value);
+                    else return null;
 
                 case System.TypeCode.DBNull:
                     //2

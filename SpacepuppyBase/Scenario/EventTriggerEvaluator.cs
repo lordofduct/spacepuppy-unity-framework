@@ -266,7 +266,7 @@ namespace com.spacepuppy.Scenario
 
         public interface IEvaluator
         {
-
+            
             void GetAllTriggersOnTarget(object target, List<ITriggerableMechanism> outputColl);
 
             void TriggerAllOnTarget(object target, object sender, object arg, BlockingTriggerYieldInstruction instruction = null);

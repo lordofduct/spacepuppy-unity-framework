@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Base;
@@ -12,8 +13,8 @@ using com.spacepuppyeditor.Components;
 namespace com.spacepuppyeditor
 {
 
-    [CustomPropertyDrawer(typeof(Proxy))]
-    public class ProxyPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(QueryProxy))]
+    public class QueryProxyPropertyDrawer : PropertyDrawer
     {
         
         private const string PROP_TARGET = "_target";
@@ -63,7 +64,7 @@ namespace com.spacepuppyeditor
         {
             if (_manuallyConfigured) return;
 
-            var attrib = this.fieldInfo.GetCustomAttributes(typeof(Proxy.ConfigAttribute), false).FirstOrDefault() as Proxy.ConfigAttribute;
+            var attrib = this.fieldInfo.GetCustomAttributes(typeof(QueryProxy.ConfigAttribute), false).FirstOrDefault() as QueryProxy.ConfigAttribute;
             if(attrib != null)
             {
                 _inheritsFromType = attrib.TargetType;
@@ -76,10 +77,7 @@ namespace com.spacepuppyeditor
             }
         }
 
-
-
-
-
+        
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             return EditorGUIUtility.singleLineHeight;
@@ -158,4 +156,49 @@ namespace com.spacepuppyeditor
 
 
     }
+
+
+
+    [CustomPropertyDrawer(typeof(MemberProxy))]
+    public class MemberProxyPropertyDrawer : PropertyDrawer
+    {
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return EditorGUIUtility.singleLineHeight * 2f;
+        }
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            DynamicMemberAccess access = DynamicMemberAccess.Read;
+            if(this.fieldInfo != null)
+            {
+                var attrib = this.fieldInfo.GetCustomAttributes(typeof(MemberProxy.ConfigAttribute), true).FirstOrDefault() as MemberProxy.ConfigAttribute;
+                if (attrib != null) access = attrib.MemberAccessLevel;
+            }
+
+            DrawMemberProxy(position, property, label);
+        }
+        
+        public static System.Reflection.MemberInfo DrawMemberProxy(Rect position, SerializedProperty property, GUIContent label, DynamicMemberAccess memberAccessLevel = DynamicMemberAccess.Read)
+        {
+            var r0 = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
+            var r1 = new Rect(position.xMin, r0.yMax, position.width, EditorGUIUtility.singleLineHeight);
+
+            var targProp = property.FindPropertyRelative("_target");
+            var memberProp = property.FindPropertyRelative("_memberName");
+
+            SPEditorGUI.PropertyField(r0, targProp, label);
+            System.Reflection.MemberInfo selectedMember;
+            memberProp.stringValue = SPEditorGUI.ReflectedPropertyField(r1,
+                                                                        EditorHelper.TempContent(" - Property", "The property on the target to set."),
+                                                                        targProp.objectReferenceValue,
+                                                                        memberProp.stringValue,
+                                                                        memberAccessLevel,
+                                                                        out selectedMember);
+            return selectedMember;
+        }
+
+    }
+
 }

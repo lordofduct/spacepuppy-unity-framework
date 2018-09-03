@@ -230,6 +230,7 @@
     <Compile Include="Scenario\EventTriggerEvaluator.cs" />
     <Compile Include="Scenario\HijackTriggerEvents.cs" />
     <Compile Include="Scenario\i_KillTween.cs" />
+    <Compile Include="Scenario\i_TriggerFirstEnabledTarget.cs" />
     <Compile Include="Scenario\t_Timer.cs" />
     <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
@@ -340,7 +341,7 @@
     <Compile Include="SPComponent.cs" />
     <Compile Include="SPConstants.cs" />
     <Compile Include="SPNotifyingComponent.cs" />
-    <Compile Include="DiscreteFloat.cs" />
+    <Compile Include="Numeric.cs" />
     <Compile Include="SPTime.cs" />
     <Compile Include="SPTimeEnums.cs" />
     <Compile Include="StateMachine\ComponentStateSupplier.cs" />
@@ -355,6 +356,7 @@
     <Compile Include="StateMachine\StateMachine.cs" />
     <Compile Include="StateMachine\TypedStateMachine.cs" />
     <Compile Include="Project\TagData.cs" />
+    <Compile Include="CompoundStateLedger.cs" />
     <Compile Include="TagMask.cs" />
     <Compile Include="SPTimePeriod.cs" />
     <Compile Include="TempEventArgs.cs" />

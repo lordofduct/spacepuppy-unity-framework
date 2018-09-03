@@ -67,6 +67,8 @@ namespace com.spacepuppy.Anim
 
         private object PlayClip(SPAnimationController controller, UnityEngine.Object clip)
         {
+            if (controller == null || !controller.isActiveAndEnabled || clip == null) return null;
+
             if (clip is AnimationClip)
             {
                 if (_crossFadeDur > 0f)
@@ -86,28 +88,24 @@ namespace com.spacepuppy.Anim
             return null;
         }
 
-        private object PlayClip(Animation controller, UnityEngine.Object clip)
+        private object PlayClip(Animation controller, AnimationClip clip)
         {
-            if (clip is AnimationClip)
-            {
-                var animController = controller as Animation;
-                var id = "aux*" + clip.GetInstanceID();
-                var a = animController[id];
-                if (a == null || a.clip != clip)
-                {
-                    animController.AddClip(clip as AnimationClip, id);
-                }
+            if (controller == null || !controller.isActiveAndEnabled || clip == null) return null;
 
-                AnimationState anim;
-                if (_crossFadeDur > 0f)
-                    anim = animController.CrossFadeQueued(id, _crossFadeDur, _queueMode, _playMode);
-                else
-                    anim = animController.PlayQueued(id, _queueMode, _playMode);
-                if (_applyCustomSettings) _settings.Apply(anim);
-                return anim;
+            var id = "aux*" + clip.GetInstanceID();
+            var a = controller[id];
+            if (a == null || a.clip != clip)
+            {
+                controller.AddClip(clip, id);
             }
 
-            return null;
+            AnimationState anim;
+            if (_crossFadeDur > 0f)
+                anim = controller.CrossFadeQueued(id, _crossFadeDur, _queueMode, _playMode);
+            else
+                anim = controller.PlayQueued(id, _queueMode, _playMode);
+            if (_applyCustomSettings) _settings.Apply(anim);
+            return anim;
         }
 
         private object TryPlay(object controller)
@@ -139,7 +137,7 @@ namespace com.spacepuppy.Anim
                 switch (_mode)
                 {
                     case PlayByMode.PlayAnim:
-                        return PlayClip(controller as Animation, _clip);
+                        return PlayClip(controller as Animation, _clip as AnimationClip);
                     case PlayByMode.PlayAnimByID:
                         var comp = controller as Animation;
                         if (comp[_id] != null)
@@ -154,7 +152,7 @@ namespace com.spacepuppy.Anim
                         }
                         return null;
                     case PlayByMode.PlayAnimFromResource:
-                        return this.PlayClip(controller as Animation, Resources.Load<UnityEngine.Object>(_id));
+                        return this.PlayClip(controller as Animation, Resources.Load<AnimationClip>(_id));
                 }
             }
             else if(controller is ISPAnimationSource)

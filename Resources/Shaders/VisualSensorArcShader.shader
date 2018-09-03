@@ -1,4 +1,6 @@
-﻿Shader "SPEditor/VisualSensorArcShader"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "SPEditor/VisualSensorArcShader"
 {
     SubShader
     {
@@ -42,7 +44,7 @@
 													 0, 0, 0, 1);
 				
 				vert_out tOut;
-				tOut.position = mul(UNITY_MATRIX_MVP, mul(tForwardRotation, mul(tTiltRotation, mul(tBackRotation, v.vertex))));
+				tOut.position = UnityObjectToClipPos(mul(tForwardRotation, mul(tTiltRotation, mul(tBackRotation, v.vertex))));
 				tOut.texcoord = v.texcoord;
 				
 				return tOut;

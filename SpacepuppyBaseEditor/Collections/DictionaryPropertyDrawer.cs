@@ -13,13 +13,13 @@ namespace com.spacepuppyeditor.Collections
     [CustomPropertyDrawer(typeof(DrawableDictionary), true)]
     public class DictionaryPropertyDrawer : PropertyDrawer
     {
-
+        
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if(property.isExpanded)
             {
                 var keysProp = property.FindPropertyRelative("_keys");
-                return (keysProp.arraySize + 4) * EditorGUIUtility.singleLineHeight;
+                return (keysProp.arraySize + 2) * (EditorGUIUtility.singleLineHeight + 1f);
             }
             else
             {

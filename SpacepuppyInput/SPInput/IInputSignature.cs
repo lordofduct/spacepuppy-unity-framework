@@ -9,7 +9,7 @@ namespace com.spacepuppy.SPInput
 
         string Id { get; }
         float Precedence { get; set; }
-
+        
         /// <summary>
         /// Only called by the IPlayerInputDevice on Update, if called independent of IPlayerInputDevice, state of the input signature will be inaccurate.
         /// </summary>
@@ -88,7 +88,7 @@ namespace com.spacepuppy.SPInput
         public string Id { get { return _id; } }
         
         public float Precedence { get; set; }
-
+        
         public abstract void Update();
 
         public virtual void FixedUpdate()

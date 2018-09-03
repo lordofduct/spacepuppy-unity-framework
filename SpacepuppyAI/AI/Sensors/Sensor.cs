@@ -76,4 +76,66 @@ namespace com.spacepuppy.AI.Sensors
         
     }
 
+    public abstract class ActiveSensor : Sensor
+    {
+
+        /// <summary>
+        /// Occurs if the sensor actively picks something up.
+        /// </summary>
+        public event System.EventHandler<TempEventArgs> SensedAspect;
+        /// <summary>
+        /// Occurs when a long term sensor event begins (i.e. a collider entered the sensor and is staying)
+        /// </summary>
+        public event System.EventHandler SensorAlert;
+        /// <summary>
+        /// Occurs when a long term sensor event exits (i.e. all colliders have exited the sensor)
+        /// </summary>
+        public event System.EventHandler SensorSleep;
+
+        protected bool HasSensedAspectListeners
+        {
+            get { return SensedAspect != null; }
+        }
+
+        protected bool HasSensorAlertListeners
+        {
+            get { return SensorSleep != null; }
+        }
+
+        protected bool HasSensorSleepListeners
+        {
+            get { return SensorSleep != null; }
+        }
+
+        protected void OnSensedAspect(IAspect aspect)
+        {
+            var d = this.SensedAspect;
+            if(d != null)
+            {
+                var ev = TempEventArgs.Create(aspect);
+                d(this, ev);
+                TempEventArgs.Release(ev);
+            }
+        }
+
+        protected void OnSensorAlert()
+        {
+            var d = this.SensorAlert;
+            if (d != null)
+            {
+                d(this, System.EventArgs.Empty);
+            }
+        }
+
+        protected void OnSensorSleep()
+        {
+            var d = this.SensorSleep;
+            if (d != null)
+            {
+                d(this, System.EventArgs.Empty);
+            }
+        }
+
+    }
+
 }

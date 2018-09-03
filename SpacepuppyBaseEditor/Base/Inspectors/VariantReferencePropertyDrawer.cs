@@ -151,7 +151,8 @@ namespace com.spacepuppyeditor.Base
             
             var cache = SPGUI.DisableIf(this.RestrictVariantType);
             EditorGUI.BeginChangeCheck();
-            var valueType = (VariantType)EditorGUI.EnumPopup(r0, GUIContent.none, variant.ValueType);
+            var valueType = variant.ValueType;
+            valueType = (VariantType)EditorGUI.EnumPopup(r0, GUIContent.none, valueType);
             if (EditorGUI.EndChangeCheck())
             {
                 helper.PrepareForValueTypeChange(valueType);
@@ -184,7 +185,8 @@ namespace com.spacepuppyeditor.Base
                         variant.FloatValue = EditorGUI.FloatField(r1, variant.FloatValue);
                         break;
                     case VariantType.Double:
-                        variant.DoubleValue = ConvertUtil.ToDouble(EditorGUI.TextField(r1, variant.DoubleValue.ToString()));
+                        //variant.DoubleValue = ConvertUtil.ToDouble(EditorGUI.TextField(r1, variant.DoubleValue.ToString()));
+                        variant.DoubleValue = EditorGUI.DoubleField(r1, variant.DoubleValue);
                         break;
                     case VariantType.Vector2:
                         variant.Vector2Value = EditorGUI.Vector2Field(r1, GUIContent.none, variant.Vector2Value);
@@ -280,8 +282,28 @@ namespace com.spacepuppyeditor.Base
                             variant.RectValue = EditorGUI.RectField(r1, variant.RectValue);
                         }
                         break;
+                    case VariantType.Numeric:
+                        {
+                            //we just treat numeric types as double and let the numeric deal with it
+                            var tp = this.TypeRestrictedTo;
+                            if(tp != null && typeof(INumeric).IsAssignableFrom(tp))
+                            {
+                                var n = variant.NumericValue;
+                                double d = n != null ? n.ToDouble(null) : 0d;
+                                EditorGUI.BeginChangeCheck();
+                                d = EditorGUI.DoubleField(r1, d);
+                                if(EditorGUI.EndChangeCheck())
+                                {
+                                    variant.NumericValue = Numerics.CreateNumeric(tp, d);
+                                }
+                            }
+                            else
+                            {
+                                variant.DoubleValue = EditorGUI.DoubleField(r1, variant.DoubleValue);
+                            }
+                        }
+                        break;
                 }
-
             }
         }
         

@@ -6,6 +6,8 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.AI.Sensors.Collision
 {
+
+    [RequireComponent(typeof(Collider))]
     public class ColliderAspect : SPEntityComponent, IAspect
     {
 
@@ -66,4 +68,5 @@ namespace com.spacepuppy.AI.Sensors.Collision
         #endregion
 
     }
+
 }

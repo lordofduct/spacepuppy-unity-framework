@@ -74,7 +74,7 @@ namespace com.spacepuppy.SPInput
             }
         }
         
-        void IInputSignature.Update()
+        public virtual void Update()
         {
             var e = _signatures.GetEnumerator();
             while (e.MoveNext())
@@ -82,8 +82,8 @@ namespace com.spacepuppy.SPInput
                 e.Current.Update();
             }
         }
-
-        void IInputSignature.FixedUpdate()
+        
+        public virtual void FixedUpdate()
         {
             var e = _signatures.GetEnumerator();
             while (e.MoveNext())

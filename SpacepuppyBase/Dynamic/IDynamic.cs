@@ -279,7 +279,7 @@ namespace com.spacepuppy.Dynamic
         #endregion
 
         #region Direct Reflection
-
+        
         public static bool SetValueDirect(object obj, string sprop, object value)
         {
             return SetValueDirect(obj, sprop, value, (object[])null);
@@ -322,8 +322,8 @@ namespace com.spacepuppy.Dynamic
                     {
                         var rtp = GetReturnType(member);
                         object cobj = null;
-                        if (ConvertUtil.TryToPrim(obj, rtp, out cobj))
-                            obj = cobj;
+                        if (ConvertUtil.TryToPrim(value, rtp, out cobj))
+                            value = cobj;
 
                         switch (member.MemberType)
                         {
