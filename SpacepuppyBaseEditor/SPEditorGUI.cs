@@ -475,7 +475,7 @@ namespace com.spacepuppyeditor
         }
 
         #endregion
-
+        
         #region ObjectField w/ X-btn
 
         public static void ObjectFieldX(Rect position, SerializedProperty property, GUIContent label)

@@ -9,19 +9,25 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenario
 {
 
-    public class t_AllTriggered : TriggerComponent
+    public class t_AllTriggered : SPComponent, IObservableTrigger
     {
 
         #region Fields
 
+        [SerializeField()]
         [ReorderableArray()]
         [DisableOnPlay()]
+        private List<ObservableTargetData> _observedTargets;
+        
         [SerializeField()]
-        private ObservableTargetData[] _observedTargets;
         [OnChangedInEditor("ResetOnTriggeredChanged", OnlyAtRuntime = true)]
-        [SerializeField()]
+        [Tooltip("After the obvserved targets all signal and this signals in turn, should it reset and start listening again.")]
         private bool _resetOnTriggered;
-
+        
+        [SerializeField()]
+        private Trigger _trigger = new Trigger();
+        
+        [System.NonSerialized]
         private HashSet<ObservableTargetData> _activatedTriggers = new HashSet<ObservableTargetData>();
         [System.NonSerialized()]
         private bool _triggered;
@@ -62,6 +68,14 @@ namespace com.spacepuppy.Scenario
             }
         }
 
+        public Trigger Trigger
+        {
+            get
+            {
+                return _trigger;
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -81,7 +95,7 @@ namespace com.spacepuppy.Scenario
 
             ObservableTargetData targ;
             var d = new System.EventHandler<TempEventArgs>(this.OnTriggerActivated);
-            for (int i = 0; i < _observedTargets.Length; i++)
+            for (int i = 0; i < _observedTargets.Count; i++)
             {
                 targ = _observedTargets[i];
                 if (targ != null)
@@ -96,7 +110,7 @@ namespace com.spacepuppy.Scenario
         {
             ObservableTargetData targ;
             var d = new System.EventHandler<TempEventArgs>(this.OnTriggerActivated);
-            for (int i = 0; i < _observedTargets.Length; i++)
+            for (int i = 0; i < _observedTargets.Count; i++)
             {
                 targ = _observedTargets[i];
                 if (targ != null)
@@ -126,8 +140,17 @@ namespace com.spacepuppy.Scenario
                     _triggered = true;
                     this.UnRegisterListeners();
                 }
-                this.ActivateTrigger();
+                _trigger.ActivateTrigger(this, null);
             }
+        }
+
+        #endregion
+
+        #region IObservableTrigger Interface
+
+        Trigger[] IObservableTrigger.GetTriggers()
+        {
+            return new Trigger[] { _trigger };
         }
 
         #endregion

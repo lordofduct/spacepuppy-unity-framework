@@ -243,7 +243,7 @@ namespace com.spacepuppy.Utils
 
         public static string Stringify(Quaternion q)
         {
-            return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + q.w.ToString();
+            return q.x.ToString() + "," + q.y.ToString() + "," + q.z.ToString() + "," + q.w.ToString();
         }
 
         public static string ToDetailedString(this Quaternion v)

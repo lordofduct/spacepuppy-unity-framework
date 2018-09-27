@@ -74,6 +74,7 @@
     <Compile Include="Base\Inspectors\ShortUidPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\TetherJointInspector.cs" />
     <Compile Include="Base\Inspectors\VariableStoreInspector.cs" />
+    <Compile Include="Base\Inspectors\VariantMemberPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\VectorInspectorPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\VersionInfoPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\DisableIfModifier.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ReadOnlyModifier.cs" />
     <Compile Include="BulkBuildSettings.cs" />
+    <Compile Include="Components\TypeRestrictionPropertyDrawer.cs" />
     <Compile Include="Internal\HackPropertyDrawers.cs" />
     <Compile Include="Project\SerializableInterfaceRefPropertyDrawer.cs" />
     <Compile Include="Scenario\EventTriggerEvaluatorInspector.cs" />
@@ -142,7 +144,6 @@
     <Compile Include="EditorSceneEvents.cs" />
     <Compile Include="HandlesHelper.cs" />
     <Compile Include="Base\Inspectors\AdvancedAnimationInspector.cs" />
-    <Compile Include="Components\ComponentTypeRestrictionPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\EnumFlagsPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\EulerRotationInspectorPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\GenericMaskPropertyDrawer.cs" />

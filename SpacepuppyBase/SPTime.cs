@@ -92,6 +92,11 @@ namespace com.spacepuppy
             get { return _timeSupplierType; }
         }
 
+        public string CustomTimeSupplierName
+        {
+            get { return _timeSupplierName; }
+        }
+
         public ITimeSupplier TimeSupplier
         {
             get
@@ -112,7 +117,7 @@ namespace com.spacepuppy
                 }
             }
         }
-
+        
         public bool IsCustom
         {
             get { return _timeSupplierType == DeltaTimeType.Custom; }
@@ -311,6 +316,18 @@ namespace com.spacepuppy
         {
             if (_customTimes == null) return ArrayUtil.Empty<CustomTimeSupplier>();
             return _customTimes.Values.ToArray();
+        }
+
+        public static string GetCustomName(ITimeSupplier supplier)
+        {
+            if (_customTimes == null || supplier == null) return null;
+
+            var e = _customTimes.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (e.Current.Value == supplier) return e.Current.Key;
+            }
+            return null;
         }
 
         public static bool HasCustom(string id)

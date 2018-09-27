@@ -203,6 +203,31 @@ namespace com.spacepuppy.Geom
             return this.Matrix.inverse.MultiplyVector(v);
         }
 
+        /// <summary>
+        /// Transforms current state from global space to the local space of the passed in 'parent'. 
+        /// </summary>
+        /// <param name="parent">The parent to set local to. If null, stays global.</param>
+        public void TransformTo(Transform parent)
+        {
+            if (parent == null) return;
+
+            this.Position = parent.InverseTransformPoint(this.Position);
+            this.Rotation = parent.InverseTransformRotation(this.Rotation);
+            this.Scale = parent.InverseTransformVector(this.Scale);
+        }
+
+        /// <summary>
+        /// Transforms current state from local space of passed in 'parent' to the global space.
+        /// </summary>
+        /// <param name="parent">The parent to set global from. If null, stays same.</param>
+        public void TransformFrom(Transform parent)
+        {
+            if (parent == null) return;
+
+            this.Position = parent.TransformPoint(this.Position);
+            this.Rotation = parent.TransformRotation(this.Rotation);
+            this.Scale = parent.TransformVector(this.Scale);
+        }
 
         #endregion
 

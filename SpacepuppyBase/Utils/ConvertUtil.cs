@@ -146,16 +146,7 @@ namespace com.spacepuppy.Utils
         public static T ToEnum<T>(int val, T defaultValue) where T : struct, System.IConvertible
         {
             if (!typeof(T).IsEnum) throw new System.ArgumentException("T must be an enumerated type");
-
-            //object obj = val;
-            //if(System.Enum.IsDefined(typeof(T), obj))
-            //{
-            //    return (T)obj;
-            //}
-            //else
-            //{
-            //    return defaultValue;
-            //}
+            
             try
             {
                 return (T)System.Enum.ToObject(typeof(T), val);
@@ -202,16 +193,27 @@ namespace com.spacepuppy.Utils
 
         public static System.Enum ToEnumOfType(System.Type enumType, object value)
         {
-            return System.Enum.Parse(enumType, System.Convert.ToString(value), true) as System.Enum;
+            if (value == null)
+                return System.Enum.ToObject(enumType, 0) as System.Enum;
+            else if (IsNumeric(value))
+                return System.Enum.ToObject(enumType, ToInt(value)) as System.Enum;
+            else
+                return System.Enum.Parse(enumType, System.Convert.ToString(value), true) as System.Enum;
+
         }
 
-        public static bool TryToEnum<T>(object val, out T result) where T : struct, System.IConvertible
+        public static bool TryToEnum<T>(object value, out T result) where T : struct, System.IConvertible
         {
             if (!typeof(T).IsEnum) throw new System.ArgumentException("T must be an enumerated type");
 
             try
             {
-                result = (T)System.Enum.Parse(typeof(T), System.Convert.ToString(val), true);
+                if (value == null)
+                    result = (T)System.Enum.ToObject(typeof(T), 0);
+                else if (IsNumeric(value))
+                    result = (T)System.Enum.ToObject(typeof(T), ToInt(value));
+                else
+                    result = (T)System.Enum.Parse(typeof(T), System.Convert.ToString(value), true);
                 return true;
             }
             catch
@@ -224,6 +226,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region ConvertToUInt
+
         /// <summary>
         /// This will convert an integer to a uinteger. The negative integer value is treated as what the memory representation of that negative 
         /// value would be as a uinteger.
@@ -328,6 +331,7 @@ namespace com.spacepuppy.Utils
         {
             return ToUInt(ToDouble(value, System.Globalization.NumberStyles.Any));
         }
+
         #endregion
 
         #region ConvertToInt
@@ -448,6 +452,14 @@ namespace com.spacepuppy.Utils
             {
                 return 0;
             }
+            else if (value is Color)
+            {
+                return ToInt((Color)value);
+            }
+            else if(value is Color32)
+            {
+                return ToInt((Color32)value);
+            }
             else if (value is System.IConvertible)
             {
                 try
@@ -473,6 +485,7 @@ namespace com.spacepuppy.Utils
         {
             return ToInt(ToDouble(value, System.Globalization.NumberStyles.Any));
         }
+
         #endregion
 
         #region "ConvertToULong"
@@ -1737,6 +1750,7 @@ namespace com.spacepuppy.Utils
         #endregion
 
         #region "ToString"
+
         public static string ToString(sbyte value)
         {
             return System.Convert.ToString(value);
@@ -1826,6 +1840,39 @@ namespace com.spacepuppy.Utils
         {
             return str;
         }
+
+        /// <summary>
+        /// Converts the object into a string, if it's a type that ConvertUtil works with, said string will be friendly to ConvertUtil.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static string Stringify(object obj)
+        {
+            if (obj == null)
+                return null;
+
+            if (obj is string)
+                return obj as string;
+            else if (obj is System.Enum)
+                return EnumUtil.ToEnumsNumericType(obj as System.Enum).ToString();
+            else if (obj is bool)
+                return (bool)obj ? "1" : "0";
+            else if (obj is Vector2)
+                return VectorUtil.Stringify((Vector2)obj);
+            else if (obj is Vector3)
+                return VectorUtil.Stringify((Vector3)obj);
+            else if (obj is Vector4)
+                return VectorUtil.Stringify((Vector4)obj);
+            else if (obj is Quaternion)
+                return QuaternionUtil.Stringify((Quaternion)obj);
+            else if (obj is Color)
+                return ToInt((Color)obj).ToString();
+            else if (obj is Color32)
+                return ToInt((Color32)obj).ToString();
+            else
+                return System.Convert.ToString(obj);
+        }
+
         #endregion
 
         #region ToVector2

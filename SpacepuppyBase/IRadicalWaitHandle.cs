@@ -56,6 +56,13 @@ namespace com.spacepuppy
             if (_callback != null) _callback(this);
         }
 
+        public void Reset()
+        {
+            _complete = false;
+            _callback = null;
+            this.Cancelled = false;
+        }
+
         protected virtual bool Tick(out object yieldObject)
         {
             yieldObject = null;
@@ -101,10 +108,9 @@ namespace com.spacepuppy
 
         void System.IDisposable.Dispose()
         {
+            this.Reset();
             if (this.GetType() == typeof(RadicalWaitHandle))
             {
-                _complete = false;
-                _callback = null;
                 _pool.Release(this);
             }
         }

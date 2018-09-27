@@ -413,7 +413,7 @@ namespace com.spacepuppy.Utils
 
                 //should only get here if last element had a zero weight, and the r was large
                 i = arr.Count - 1;
-                while (i > 0 || weights[i] <= 0f) i--;
+                while (i > 0 && weights[i] <= 0f) i--;
                 return arr[i];
             }
         }

@@ -68,13 +68,18 @@ namespace com.spacepuppy.Dynamic
     /// 
     /// These are global values, they are not case sensitive
     /// 
-    /// #Special Case
+    /// #Special Case - local variable
     /// $.nameOfProperty
     /// 
     /// In the case of the object referenced on a VariantReference, you can access its properties by typing $ followed by a dot (.) 
     /// and the name of the property. The property is case sensitive and must be spelled as it appears in code.
     /// 
     /// $.CurrentTime / $secsInHour % 24
+    /// 
+    /// #Special Case - cast local variable
+    /// $(Type).nameOfProperty
+    /// 
+    /// You can grab a component from the local variable before evaluating a property with the parens following $.
     /// </summary>
     public class DoubleEvaluator
     {
@@ -396,6 +401,60 @@ namespace com.spacepuppy.Dynamic
                         target = DynamicUtil.GetValue(target, sprop);
                     }
                     else if (char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')' || _current == ',')
+                        break;
+                    else
+                        throw new System.InvalidOperationException("Failed to parse the command.");
+                }
+
+                sprop = _strBuilder.ToString();
+                _strBuilder.Length = 0;
+                return ConvertUtil.ToDouble(DynamicUtil.GetValue(target, sprop));
+            }
+            else if (_current == '(')
+            {
+                for (i = _reader.Read(); i >= 0; i = _reader.Read())
+                {
+                    _current = (char)i;
+
+                    if (char.IsLetterOrDigit(_current) || _current == '_')
+                    {
+                        _strBuilder.Append(_current);
+                    }
+                    else if (_current == ')')
+                    {
+                        break;
+                    }
+                    else
+                        throw new System.InvalidOperationException("Failed to parse the command.");
+                }
+
+                i = _reader.Read();
+                if (i < 0 || (char)i != '.')
+                    throw new System.InvalidOperationException("Failed to parse the command.");
+
+                string stp = _strBuilder.ToString();
+                _strBuilder.Length = 0;
+
+                var go = GameObjectUtil.GetGameObjectFromSource(_x);
+                object target = go != null ? go.GetComponent(stp) : null;
+                string sprop;
+
+                //access target
+                for (i = _reader.Read(); i >= 0; i = _reader.Read())
+                {
+                    _current = (char)i;
+
+                    if (char.IsLetterOrDigit(_current) || _current == '_')
+                    {
+                        _strBuilder.Append(_current);
+                    }
+                    else if (_current == '.')
+                    {
+                        sprop = _strBuilder.ToString();
+                        _strBuilder.Length = 0;
+                        target = DynamicUtil.GetValue(target, sprop);
+                    }
+                    else if (char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')' || _current == ',' || _current == ']')
                         break;
                     else
                         throw new System.InvalidOperationException("Failed to parse the command.");

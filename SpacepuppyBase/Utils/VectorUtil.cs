@@ -55,6 +55,11 @@ namespace com.spacepuppy.Utils
             return v.x.ToString() + "," + v.y.ToString() + "," + v.z.ToString();
         }
 
+        public static string Stringify(Vector4 v)
+        {
+            return v.x.ToString() + "," + v.y.ToString() + "," + v.z.ToString() + "," + v.w.ToString();
+        }
+
         /// <summary>
         /// Get Vector2 from angle
         /// </summary>
@@ -873,6 +878,27 @@ namespace com.spacepuppy.Utils
                     return v.z;
                 default:
                     return 0f;
+            }
+        }
+
+        public static Vector3 GetUnitVector(CartesianAxis axis)
+        {
+            switch(axis)
+            {
+                case CartesianAxis.Zneg:
+                    return Vector3.back;
+                case CartesianAxis.Yneg:
+                    return Vector3.down;
+                case CartesianAxis.Xneg:
+                    return Vector3.right;
+                case CartesianAxis.X:
+                    return Vector3.right;
+                case CartesianAxis.Y:
+                    return Vector3.up;
+                case CartesianAxis.Z:
+                    return Vector3.forward;
+                default:
+                    return Vector3.zero;
             }
         }
 

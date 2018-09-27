@@ -183,6 +183,8 @@ namespace com.spacepuppy.Utils
             }
 
             if (rng == null) rng = RandomUtil.Standard;
+            if (total == 0f) return rng.Next(weights.Length);
+
             float r = rng.Next();
             float s = 0f;
 
@@ -200,7 +202,7 @@ namespace com.spacepuppy.Utils
 
             //should only get here if last element had a zero weight, and the r was large
             i = weights.Length - 1;
-            while (i > 0 || weights[i] <= 0f) i--;
+            while (i > 0 && weights[i] <= 0f) i--;
             return i;
         }
 
@@ -224,6 +226,8 @@ namespace com.spacepuppy.Utils
             }
 
             if (rng == null) rng = RandomUtil.Standard;
+            if (total == 0f) return rng.Next(weights.Length);
+
             float r = rng.Next();
             float s = 0f;
 
@@ -241,7 +245,7 @@ namespace com.spacepuppy.Utils
 
             //should only get here if last element had a zero weight, and the r was large
             i = last - 1;
-            while (i > 0 || weights[i] <= 0f) i--;
+            while (i > 0 && weights[i] <= 0f) i--;
             return i;
         }
 

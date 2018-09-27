@@ -231,6 +231,7 @@
     <Compile Include="Scenario\HijackTriggerEvents.cs" />
     <Compile Include="Scenario\i_KillTween.cs" />
     <Compile Include="Scenario\i_TriggerFirstEnabledTarget.cs" />
+    <Compile Include="Scenario\t_AllTriggersOccupied.cs" />
     <Compile Include="Scenario\t_Timer.cs" />
     <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
@@ -462,6 +463,7 @@
     <Compile Include="Utils\VectorUtil.cs" />
     <Compile Include="VariableStore.cs" />
     <Compile Include="VariantCollection.cs" />
+    <Compile Include="VariantMember.cs" />
     <Compile Include="VariantReference.cs" />
     <Compile Include="VersionInfo.cs" />
     <Compile Include="WaitForComplete.cs" />

@@ -54,6 +54,7 @@
     <Compile Include="AI\IAIController.cs" />
     <Compile Include="AI\IAINode.cs" />
     <Compile Include="AI\Scenario\i_ChangeAIState.cs" />
+    <Compile Include="AI\Scenario\i_SetAIVariable.cs" />
     <Compile Include="AI\Scenario\t_OnSense.cs" />
     <Compile Include="AI\Sensors\Audible\AudibleAspect.cs" />
     <Compile Include="AI\Sensors\Audible\AudibleSensor.cs" />

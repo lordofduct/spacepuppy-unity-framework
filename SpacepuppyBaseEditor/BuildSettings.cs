@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
 
 using com.spacepuppy;
 using com.spacepuppy.Collections;
@@ -60,6 +62,10 @@ namespace com.spacepuppyeditor
         [Tooltip("Semi-colon delimited symbols.")]
         private string _symbols;
 
+        [SerializeField]
+        [ReorderableArray]
+        private List<PlayerSettingOverride> _playerSettingOverrides = new List<PlayerSettingOverride>();
+
         #endregion
 
         #region Properties
@@ -106,6 +112,11 @@ namespace com.spacepuppyeditor
         {
             get { return _symbols; }
             set { _symbols = value; }
+        }
+
+        public List<PlayerSettingOverride> PlayerSettingsOverrides
+        {
+            get { return _playerSettingOverrides; }
         }
 
         #endregion
@@ -214,6 +225,7 @@ namespace com.spacepuppyeditor
                     //do build
                     InputSettings cacheInputs = null;
                     string cacheSymbols = null;
+                    Dictionary<BuildSettings.PlayerSettingOverride, object> cachePlayerSettings = null;
 
                     if (this.InputSettings != null)
                     {
@@ -226,6 +238,24 @@ namespace com.spacepuppyeditor
                         PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, this.Symbols);
                     }
 
+                    if (_playerSettingOverrides.Count > 0)
+                    {
+                        cachePlayerSettings = new Dictionary<PlayerSettingOverride, object>();
+                        foreach(var setting in _playerSettingOverrides)
+                        {
+                            if (setting.SettingInfo != null)
+                            {
+                                cachePlayerSettings[setting] = setting.SettingInfo.GetValue(null, null);
+                                try
+                                {
+                                    setting.SettingInfo.SetValue(null, setting.SettingValue, null);
+                                }
+                                catch(System.Exception)
+                                { }
+                            }
+                        }
+                    }
+
                     BuildPipeline.BuildPlayer(scenes, path, this.BuildTarget, this.BuildOptions);
 
                     if (cacheInputs != null)
@@ -235,6 +265,23 @@ namespace com.spacepuppyeditor
                     if (cacheSymbols != null)
                     {
                         PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, cacheSymbols);
+                    }
+                    if(cachePlayerSettings != null)
+                    {
+                        //loop backwards when resetting from cache
+                        for (int i = _playerSettingOverrides.Count - 1; i >= 0; i--)
+                        {
+                            var setting = _playerSettingOverrides[i];
+                            if(setting.SettingInfo != null)
+                            {
+                                try
+                                {
+                                    setting.SettingInfo.SetValue(null, cachePlayerSettings[setting], null);
+                                }
+                                catch(System.Exception)
+                                { }
+                            }
+                        }
                     }
 
 
@@ -265,6 +312,113 @@ namespace com.spacepuppyeditor
         #endregion
 
         #region Special Utils
+
+        [System.Serializable]
+        public class PlayerSettingOverride : ISerializationCallbackReceiver
+        {
+
+            [System.NonSerialized]
+            private PropertyInfo _settingInfo;
+            public PropertyInfo SettingInfo
+            {
+                get { return _settingInfo; }
+                set
+                {
+                    if (value == null || BuildSettings.IsValidPropertySettingInfo(value))
+                        _settingInfo = value;
+                    else
+                        throw new System.ArgumentException("PropertyInfo must be for a static property of the 'PlayerSettings' class.");
+                }
+            }
+            [System.NonSerialized]
+            public object SettingValue;
+            
+            #region Serialization Interface
+
+            [SerializeField]
+            private string _propertyName;
+            [SerializeField]
+            private string _serializedValue;
+            [SerializeField]
+            private UnityEngine.Object _serializedRef;
+
+            void ISerializationCallbackReceiver.OnAfterDeserialize()
+            {
+                _settingInfo = null;
+                this.SettingValue = null;
+                var info = typeof(PlayerSettings).GetProperty(_propertyName, BindingFlags.Static | BindingFlags.Public);
+                if (BuildSettings.IsValidPropertySettingInfo(info))
+                {
+                    var tp = info.PropertyType;
+                    if (typeof(UnityEngine.Object).IsAssignableFrom(tp))
+                    {
+                        _settingInfo = info;
+                        this.SettingValue = _serializedRef;
+                    }
+                    else if (ConvertUtil.IsSupportedType(tp))
+                    {
+                        _settingInfo = info;
+                        this.SettingValue = ConvertUtil.ToPrim(_serializedValue, tp);
+                    }
+                }
+            }
+
+            void ISerializationCallbackReceiver.OnBeforeSerialize()
+            {
+                if(BuildSettings.IsValidPropertySettingInfo(_settingInfo))
+                {
+                    _propertyName = _settingInfo.Name;
+                    if(typeof(UnityEngine.Object).IsAssignableFrom(_settingInfo.PropertyType))
+                    {
+                        _serializedRef = this.SettingValue as UnityEngine.Object;
+                        _serializedValue = null;
+                    }
+                    else
+                    {
+                        _serializedRef = null;
+                        _serializedValue = ConvertUtil.Stringify(this.SettingValue);
+                    }
+                }
+                else
+                {
+                    _propertyName = null;
+                    _serializedRef = null;
+                    _serializedValue = null;
+                }
+            }
+
+            #endregion
+
+        }
+
+        public static bool IsValidPropertySettingInfo(PropertyInfo info)
+        {
+            //is read write
+            if (info == null || !info.CanRead || !info.CanWrite) return false;
+            //is implemented by PlayerSettings
+            if (!info.DeclaringType.IsAssignableFrom(typeof(PlayerSettings))) return false;
+            //is supported type
+            if (!(typeof(UnityEngine.Object).IsAssignableFrom(info.PropertyType) || ConvertUtil.IsSupportedType(info.PropertyType))) return false;
+
+            //getter is public and static
+            var getter = info.GetGetMethod();
+            if (!getter.IsStatic || !getter.IsPublic) return false;
+
+            //setter is public and static
+            var setter = info.GetSetMethod();
+            if (!setter.IsStatic || !setter.IsPublic) return false;
+
+            return true;
+        }
+
+        public static IEnumerable<PropertyInfo> GetOverridablePlayerSettings()
+        {
+            return (from info in typeof(PlayerSettings).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+                    where info != null && info.CanRead && info.CanWrite &&
+                          (typeof(UnityEngine.Object).IsAssignableFrom(info.PropertyType) || ConvertUtil.IsSupportedType(info.PropertyType)) &&
+                          info.GetGetMethod().IsPublic && info.GetSetMethod().IsPublic
+                    select info);
+        }
 
         public static string GetExtension(BuildTarget target)
         {
@@ -306,6 +460,7 @@ namespace com.spacepuppyeditor
         public const string PROP_INPUTSETTINGS = "_inputSettings";
         public const string PROP_DEFINESYMBOLS = "_defineSymbols";
         public const string PROP_SYMBOLS = "_symbols";
+        public const string PROP_PLAYERSETTINGSOVERRIDES = "_playerSettingOverrides";
 
         #region Fields
 
@@ -356,6 +511,8 @@ namespace com.spacepuppyeditor
 
             this.DrawInputSettings();
 
+            this.DrawPlayerSettingOverrides();
+
             this.serializedObject.ApplyModifiedProperties();
 
             //build button
@@ -396,6 +553,11 @@ namespace com.spacepuppyeditor
         public virtual void DrawInputSettings()
         {
             this.DrawPropertyField(PROP_INPUTSETTINGS);
+        }
+
+        public virtual void DrawPlayerSettingOverrides()
+        {
+            this.DrawPropertyField(PROP_PLAYERSETTINGSOVERRIDES);
         }
 
         public virtual void DrawBuildButtons()
@@ -441,6 +603,139 @@ namespace com.spacepuppyeditor
         
         #endregion
         
+    }
+
+    [CustomPropertyDrawer(typeof(BuildSettings.PlayerSettingOverride))]
+    internal class PlayerSettingsOverridePropertyDrawer : PropertyDrawer
+    {
+
+        public const string PROP_NAME = "_propertyName";
+        public const string PROP_VALUE = "_serializedValue";
+        public const string PROP_REF = "_serializedRef";
+
+        private static PropertyInfo[] _knownPlayerSettings;
+        private static string[] _knownPlayerSettingPropNames;
+        private static GUIContent[] _knownPlayerSettingPropNamesPretty;
+        static PlayerSettingsOverridePropertyDrawer()
+        {
+            _knownPlayerSettings = BuildSettings.GetOverridablePlayerSettings().ToArray();
+            _knownPlayerSettingPropNames = (from info in _knownPlayerSettings select info.Name).ToArray();
+            _knownPlayerSettingPropNamesPretty = (from info in _knownPlayerSettings select new GUIContent(ObjectNames.NicifyVariableName(info.Name))).ToArray();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return EditorGUIUtility.singleLineHeight;
+        }
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var r0 = new Rect(position.xMin, position.yMin, position.width / 2f, position.height);
+            var r1 = new Rect(r0.xMax, position.yMin, position.width - r0.width, position.height);
+
+            var propName = property.FindPropertyRelative(PROP_NAME);
+            var propValue = property.FindPropertyRelative(PROP_VALUE);
+            var propRef = property.FindPropertyRelative(PROP_REF);
+
+            int index = System.Array.IndexOf(_knownPlayerSettingPropNames, propName.stringValue);
+            EditorGUI.BeginChangeCheck();
+            index = EditorGUI.Popup(r0, GUIContent.none, index, _knownPlayerSettingPropNamesPretty);
+            if(EditorGUI.EndChangeCheck())
+            {
+                if (index >= 0 && index < _knownPlayerSettingPropNames.Length)
+                    propName.stringValue = _knownPlayerSettingPropNames[index];
+                else
+                    propName.stringValue = string.Empty;
+
+                propValue.stringValue = string.Empty;
+                propRef.objectReferenceValue = null;
+            }
+
+            if (index < 0 || index >= _knownPlayerSettings.Length) return;
+
+            var info = _knownPlayerSettings[index];
+            if (info.PropertyType.IsEnum)
+            {
+                int ei = ConvertUtil.ToInt(propValue.stringValue);
+                propValue.stringValue = ConvertUtil.ToInt(EditorGUI.EnumPopup(r1, ConvertUtil.ToEnumOfType(info.PropertyType, ei))).ToString();
+                propRef.objectReferenceValue = null;
+            }
+            else
+            {
+                var etp = VariantReference.GetVariantType(info.PropertyType);
+                switch (etp)
+                {
+                    case VariantType.Null:
+                        propValue.stringValue = string.Empty;
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.String:
+                        propValue.stringValue = EditorGUI.TextField(r1, propValue.stringValue);
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Boolean:
+                        propValue.stringValue = ConvertUtil.Stringify(EditorGUI.Toggle(r1, GUIContent.none, ConvertUtil.ToBool(propValue.stringValue)));
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Integer:
+                        propValue.stringValue = EditorGUI.IntField(r1, GUIContent.none, ConvertUtil.ToInt(propValue.stringValue)).ToString();
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Float:
+                        propValue.stringValue = EditorGUI.FloatField(r1, GUIContent.none, ConvertUtil.ToSingle(propValue.stringValue)).ToString();
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Double:
+                        propValue.stringValue = EditorGUI.DoubleField(r1, GUIContent.none, ConvertUtil.ToDouble(propValue.stringValue)).ToString();
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Vector2:
+                        propValue.stringValue = ConvertUtil.Stringify(EditorGUI.Vector2Field(r1, GUIContent.none, ConvertUtil.ToVector2(propValue.stringValue)));
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Vector3:
+                        propValue.stringValue = ConvertUtil.Stringify(EditorGUI.Vector3Field(r1, GUIContent.none, ConvertUtil.ToVector3(propValue.stringValue)));
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Vector4:
+                        propValue.stringValue = ConvertUtil.Stringify(EditorGUI.Vector4Field(r1, (string)null, ConvertUtil.ToVector4(propValue.stringValue)));
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Quaternion:
+                        propValue.stringValue = ConvertUtil.Stringify(SPEditorGUI.QuaternionField(r1, GUIContent.none, ConvertUtil.ToQuaternion(propValue.stringValue)));
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Color:
+                        propValue.stringValue = ConvertUtil.Stringify(EditorGUI.ColorField(r1, ConvertUtil.ToColor(propValue.stringValue)));
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.DateTime:
+                        //TODO - should never actually occur
+                        propValue.stringValue = string.Empty;
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.GameObject:
+                    case VariantType.Component:
+                    case VariantType.Object:
+                        propValue.stringValue = string.Empty;
+                        propRef.objectReferenceValue = EditorGUI.ObjectField(r1, GUIContent.none, propValue.objectReferenceValue, info.PropertyType, false);
+                        break;
+                    case VariantType.LayerMask:
+                        propValue.stringValue = SPEditorGUI.LayerMaskField(r1, GUIContent.none, ConvertUtil.ToInt(propValue.stringValue)).ToString();
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Rect:
+                        //TODO - should never actually occur
+                        propValue.stringValue = string.Empty;
+                        propRef.objectReferenceValue = null;
+                        break;
+                    case VariantType.Numeric:
+
+                        break;
+                }
+            }
+        }
+
     }
 
 }

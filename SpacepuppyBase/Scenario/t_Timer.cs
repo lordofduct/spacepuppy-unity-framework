@@ -24,6 +24,7 @@ namespace com.spacepuppy.Scenario
         private SPTimePeriod _duration;
 
         [SerializeField]
+        [Tooltip("If this thing is triggered by another t_, it will do this action.")]
         private Action _onTriggeredAction = Action.Restart;
 
         [SerializeField]

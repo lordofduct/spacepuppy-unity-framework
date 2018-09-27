@@ -36,6 +36,10 @@ namespace com.spacepuppy
         [TagSelector()]
         private string[] _tags;
 
+        [SerializeField]
+        [Tooltip("An optional eval string that will be operated as part of the mask, the GameObject of the activator will be passed along as $.")]
+        private string _evalStatement;
+        
         #endregion
 
         #region Properties
@@ -52,6 +56,12 @@ namespace com.spacepuppy
             set { _tags = value; }
         }
 
+        public string EvalStatement
+        {
+            get { return _evalStatement; }
+            set { _evalStatement = value; }
+        }
+
         #endregion
 
         #region Methods
@@ -61,8 +71,10 @@ namespace com.spacepuppy
             if (go == null) return false;
 
             if (_testRoot) go = go.FindRoot();
-
-            return go.IntersectsLayerMask(_layerMask) && (_tags == null || _tags.Length == 0 || go.HasTag(_tags));
+            
+            bool result = _layerMask.Intersects(go) && (_tags == null || _tags.Length == 0 || go.HasTag(_tags));
+            if (result && !string.IsNullOrEmpty(_evalStatement)) result = com.spacepuppy.Dynamic.Evaluator.EvalBool(_evalStatement, go);
+            return result;
         }
 
         public bool Intersects(Component comp)

@@ -39,6 +39,21 @@ namespace com.spacepuppy
             _timeSupplierName = null;
         }
 
+        public SPTimePeriod(float seconds, DeltaTimeType type, string timeSupplierName = null)
+        {
+            _seconds = seconds;
+            _timeSupplierType = type;
+            _timeSupplierName = timeSupplierName;
+        }
+
+        public SPTimePeriod(float seconds, ITimeSupplier supplier)
+        {
+            _seconds = seconds;
+            _timeSupplierType = DeltaTimeType.Normal;
+            _timeSupplierName = null;
+            this.TimeSupplier = supplier;
+        }
+
         #endregion
 
         #region Properties
@@ -54,11 +69,29 @@ namespace com.spacepuppy
             get { return _timeSupplierType; }
         }
 
+        public string CustomTimeSupplierName
+        {
+            get { return _timeSupplierName; }
+        }
+
         public ITimeSupplier TimeSupplier
         {
             get
             {
                 return SPTime.GetTime(_timeSupplierType, _timeSupplierName);
+            }
+            set
+            {
+                _timeSupplierType = SPTime.GetDeltaType(value);
+                if (_timeSupplierType == DeltaTimeType.Custom)
+                {
+                    var cts = value as CustomTimeSupplier;
+                    _timeSupplierName = (cts != null) ? cts.Id : null;
+                }
+                else
+                {
+                    _timeSupplierName = null;
+                }
             }
         }
 
@@ -95,6 +128,11 @@ namespace com.spacepuppy
         public static implicit operator SPTime(SPTimePeriod period)
         {
             return new SPTime(period._timeSupplierType, period._timeSupplierName);
+        }
+
+        public static implicit operator SPTimePeriod(float seconds)
+        {
+            return new SPTimePeriod(seconds);
         }
 
         #endregion

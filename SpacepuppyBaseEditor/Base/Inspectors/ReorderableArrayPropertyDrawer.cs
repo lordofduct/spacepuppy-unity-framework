@@ -310,6 +310,7 @@ namespace com.spacepuppyeditor.Base
                                     {
                                         DragAndDrop.AcceptDrag();
                                         AddObjectsToArray(property, refs.ToArray());
+                                        GUI.changed = true;
                                     }
                                 }
                             }

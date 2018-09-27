@@ -30,6 +30,8 @@ namespace com.spacepuppy.Scenario
         [UnityEngine.Serialization.FormerlySerializedAs("Delay")]
         [TimeUnitsSelector()]
         private float _delay = 0f;
+        [SerializeField]
+        private SPTime _delayTimeSupplier;
 
         #endregion
 
@@ -46,10 +48,23 @@ namespace com.spacepuppy.Scenario
             set { _mode = value; }
         }
 
-        public float Delay
+        //public float Delay
+        //{
+        //    get { return _delay; }
+        //    set { _delay = value; }
+        //}
+
+        public SPTimePeriod Delay
         {
-            get { return _delay; }
-            set { _delay = value; }
+            get
+            {
+                return new SPTimePeriod(_delay, _delayTimeSupplier.TimeSupplierType, _delayTimeSupplier.CustomTimeSupplierName);
+            }
+            set
+            {
+                _delay = value.Seconds;
+                _delayTimeSupplier = (SPTime)value;
+            }
         }
 
         #endregion
@@ -91,7 +106,7 @@ namespace com.spacepuppy.Scenario
                 this.InvokeGuaranteed(() =>
                 {
                     this.SetEnabledByMode(arg);
-                }, _delay);
+                }, _delay, _delayTimeSupplier.TimeSupplier);
             }
             else
             {

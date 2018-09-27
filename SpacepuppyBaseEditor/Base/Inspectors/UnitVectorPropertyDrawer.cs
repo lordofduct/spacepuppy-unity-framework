@@ -15,6 +15,31 @@ namespace com.spacepuppyeditor.Base
 
         public const float BTN_WIDTH = 100f;
 
+        private enum Vector2Directions
+        {
+            Up,
+            Down,
+            Right,
+            Left,
+            Configure
+        }
+
+        private enum Vector3Directions
+        {
+            Up,
+            Down,
+            Right,
+            Left,
+            Forward,
+            Backward,
+            Configure
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return EditorGUIUtility.singleLineHeight;
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             switch(property.propertyType)
@@ -41,40 +66,66 @@ namespace com.spacepuppyeditor.Base
             position = EditorGUI.PrefixLabel(position, label);
 
             float btnw = Mathf.Min(position.width, BTN_WIDTH);
-            float w = (position.width - btnw) / 2f;
-            float h = position.height;
-            float y = position.yMin;
-
-            var r1 = new Rect(position.xMin, y, w, h);
-            var r2 = new Rect(r1.xMax, y, w, h);
-            var rbtn = new Rect(r2.xMax, y, btnw, h);
+            var rbtn = new Rect(position.xMax - btnw, position.yMin, btnw, EditorGUIUtility.singleLineHeight);
 
             var v = property.vector2Value;
-            EditorGUI.LabelField(r1, "X: " + v.x.ToString("0.#######"));
-            EditorGUI.LabelField(r2, "Y: " + v.y.ToString("0.#######"));
-            int i = EditorGUI.Popup(rbtn, -1, new string[] {"Up",
-                                                            "Down",
-                                                            "Right",
-                                                            "Left",
-                                                            "Configure"
-                                                            });
-            switch(i)
+            if (v == Vector2.zero)
             {
-                case 0:
-                    property.vector2Value = Vector2.up;
-                    break;
-                case 1:
-                    property.vector2Value = -Vector2.up;
-                    break;
-                case 2:
-                    property.vector2Value = Vector2.right;
-                    break;
-                case 3:
-                    property.vector2Value = -Vector2.right;
-                    break;
-                case 4:
-                    //TODO
-                    break;
+                v = Vector2.right;
+                property.vector2Value = Vector2.right;
+            }
+
+            Vector2Directions i = Vector2Directions.Configure;
+            if (v == Vector2.up)
+                i = Vector2Directions.Up;
+            else if (v == Vector2.down)
+                i = Vector2Directions.Down;
+            else if (v == Vector2.right)
+                i = Vector2Directions.Right;
+            else if (v == Vector2.left)
+                i = Vector2Directions.Left;
+            else
+                i = Vector2Directions.Configure;
+
+            EditorGUI.BeginChangeCheck();
+            i = (Vector2Directions)EditorGUI.EnumPopup(rbtn, i);
+            if (EditorGUI.EndChangeCheck())
+            {
+                switch (i)
+                {
+                    case Vector2Directions.Up:
+                        property.vector2Value = Vector2.up;
+                        break;
+                    case Vector2Directions.Down:
+                        property.vector2Value = Vector2.down;
+                        break;
+                    case Vector2Directions.Right:
+                        property.vector2Value = Vector2.right;
+                        break;
+                    case Vector2Directions.Left:
+                        property.vector2Value = Vector2.left;
+                        break;
+                }
+            }
+
+            if (i < Vector2Directions.Configure)
+            {
+                float w = (position.width - btnw) / 2f;
+                var r1 = new Rect(position.xMin, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                var r2 = new Rect(r1.xMax, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                EditorGUI.LabelField(r1, "X: " + v.x.ToString("0.#######"));
+                EditorGUI.LabelField(r2, "Y: " + v.y.ToString("0.#######"));
+            }
+            else
+            {
+                //TODO - need way to make this work effectively
+                var r = new Rect(position.xMin, position.yMin, position.width - btnw, EditorGUIUtility.singleLineHeight);
+                EditorGUI.BeginChangeCheck();
+                v = EditorGUI.Vector2Field(r, GUIContent.none, v);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    property.vector2Value = v.normalized;
+                }
             }
         }
 
@@ -83,50 +134,79 @@ namespace com.spacepuppyeditor.Base
             position = EditorGUI.PrefixLabel(position, label);
 
             float btnw = Mathf.Min(position.width, BTN_WIDTH);
-            float w = (position.width - btnw) / 3f;
-            float h = position.height;
-            float y = position.yMin;
-
-            var r1 = new Rect(position.xMin, y, w, h);
-            var r2 = new Rect(r1.xMax, y, w, h);
-            var r3 = new Rect(r2.xMax, y, w, h);
-            var rbtn = new Rect(r3.xMax, y, btnw, h);
+            var rbtn = new Rect(position.xMax - btnw, position.yMin, btnw, EditorGUIUtility.singleLineHeight);
 
             var v = property.vector3Value;
-            EditorGUI.LabelField(r1, "X: " + v.x.ToString("0.#######"));
-            EditorGUI.LabelField(r2, "Y: " + v.y.ToString("0.#######"));
-            EditorGUI.LabelField(r3, "Z: " + v.z.ToString("0.#######"));
-            int i = EditorGUI.Popup(rbtn, -1, new string[] {"Up",
-                                                            "Down",
-                                                            "Right",
-                                                            "Left",
-                                                            "Forward",
-                                                            "Backward",
-                                                            "Configure"
-                                                            });
-            switch (i)
+            if (v == Vector3.zero)
             {
-                case 0:
-                    property.vector3Value = Vector3.up;
-                    break;
-                case 1:
-                    property.vector3Value = Vector3.down;
-                    break;
-                case 2:
-                    property.vector3Value = Vector3.right;
-                    break;
-                case 3:
-                    property.vector3Value = Vector3.left;
-                    break;
-                case 4:
-                    property.vector3Value = Vector3.forward;
-                    break;
-                case 5:
-                    property.vector3Value = Vector3.back;
-                    break;
-                case 6:
-                    //TODO - configure
-                    break;
+                v = Vector3.forward;
+                property.vector3Value = Vector3.forward;
+            }
+
+            Vector3Directions i = Vector3Directions.Configure;
+            if (v == Vector3.up)
+                i = Vector3Directions.Up;
+            else if (v == Vector3.down)
+                i = Vector3Directions.Down;
+            else if (v == Vector3.right)
+                i = Vector3Directions.Right;
+            else if (v == Vector3.left)
+                i = Vector3Directions.Left;
+            else if (v == Vector3.forward)
+                i = Vector3Directions.Forward;
+            else if (v == Vector3.back)
+                i = Vector3Directions.Backward;
+            else
+                i = Vector3Directions.Configure;
+
+            EditorGUI.BeginChangeCheck();
+            i = (Vector3Directions)EditorGUI.EnumPopup(rbtn, i);
+            if(EditorGUI.EndChangeCheck())
+            {
+                switch (i)
+                {
+                    case Vector3Directions.Up:
+                        property.vector3Value = Vector3.up;
+                        break;
+                    case Vector3Directions.Down:
+                        property.vector3Value = Vector3.down;
+                        break;
+                    case Vector3Directions.Right:
+                        property.vector3Value = Vector3.right;
+                        break;
+                    case Vector3Directions.Left:
+                        property.vector3Value = Vector3.left;
+                        break;
+                    case Vector3Directions.Forward:
+                        property.vector3Value = Vector3.forward;
+                        break;
+                    case Vector3Directions.Backward:
+                        property.vector3Value = Vector3.back;
+                        break;
+                }
+            }
+
+            if (i < Vector3Directions.Configure)
+            {
+                float w = (position.width - btnw) / 3f;
+                var r1 = new Rect(position.xMin, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                var r2 = new Rect(r1.xMax, position.yMin, w, EditorGUIUtility.singleLineHeight);
+                var r3 = new Rect(r2.xMax, position.yMin, w, EditorGUIUtility.singleLineHeight);
+
+                EditorGUI.LabelField(r1, "X: " + v.x.ToString("0.#######"));
+                EditorGUI.LabelField(r2, "Y: " + v.y.ToString("0.#######"));
+                EditorGUI.LabelField(r3, "Z: " + v.z.ToString("0.#######"));
+            }
+            else
+            {
+                //TODO - need way to make this work effectively
+                var r = new Rect(position.xMin, position.yMin, position.width - btnw, EditorGUIUtility.singleLineHeight);
+                EditorGUI.BeginChangeCheck();
+                v = SPEditorGUI.DelayedVector3Field(r, GUIContent.none, v);
+                if(EditorGUI.EndChangeCheck())
+                {
+                    property.vector3Value = v.normalized;
+                }
             }
         }
 

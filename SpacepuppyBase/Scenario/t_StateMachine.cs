@@ -3,10 +3,10 @@ using UnityEngine;
 using System.Collections.Generic;
 
 using com.spacepuppy.StateMachine;
-using System.Collections;
 
 namespace com.spacepuppy.Scenario
 {
+
     public class t_StateMachine : SPComponent, IStateMachine<string>, IEnumerable<t_StateMachine.State>
     {
 
@@ -23,6 +23,10 @@ namespace com.spacepuppy.Scenario
         [Tooltip("When starting should the initial states 'OnEnterState' event be fired?")]
         private bool _notifyFirstStateOnStart;
 
+        [Space(10)]
+        [SerializeField]
+        private Trigger _onStateChanged;
+
         [System.NonSerialized]
         private State _currentState;
 
@@ -37,8 +41,8 @@ namespace com.spacepuppy.Scenario
             _currentState = (_initialState >= 0 && _initialState < _states.Length) ? _states[_initialState] : null;
             if(_notifyFirstStateOnStart && _currentState != null)
             {
-                _currentState.NotifyStateEntered();
-                if (this.StateChanged != null) this.StateChanged(this, new StateChangedEventArgs<string>(null, _currentState.Name));
+                _currentState.OnEnterState.ActivateTrigger(this, null);
+                this.OnStateChanged(null, _currentState.Name);
             }
         }
 
@@ -98,10 +102,10 @@ namespace com.spacepuppy.Scenario
 
             var lastState = _currentState;
             _currentState = s;
-            if (lastState != null) lastState.NotifyStateExited();
-            if (_currentState != null) _currentState.NotifyStateEntered();
+            if (lastState != null) lastState.OnExitState.ActivateTrigger(this, null);
+            if (_currentState != null) _currentState.OnEnterState.ActivateTrigger(this, null);
 
-            if (this.StateChanged != null) this.StateChanged(this, new StateChangedEventArgs<string>(lastState != null ? lastState.Name : null, _currentState != null ? _currentState.Name : null));
+            this.OnStateChanged(lastState != null ? lastState.Name : null, _currentState != null ? _currentState.Name : null);
             return _currentState;
         }
 
@@ -110,6 +114,13 @@ namespace com.spacepuppy.Scenario
         #region StateMachine Interface
 
         public event StateChangedEventHandler<string> StateChanged;
+        protected virtual void OnStateChanged(string from, string to)
+        {
+            _onStateChanged.ActivateTrigger(this, null);
+
+            var d = this.StateChanged;
+            if (d != null) d(this, new StateChangedEventArgs<string>(from, to));
+        }
 
         string IStateMachine<string>.Current
         {
@@ -140,10 +151,10 @@ namespace com.spacepuppy.Scenario
                 {
                     var lastState = _currentState;
                     _currentState = s;
-                    if (lastState != null) lastState.NotifyStateExited();
-                    _currentState.NotifyStateEntered();
-
-                    if (this.StateChanged != null) this.StateChanged(this, new StateChangedEventArgs<string>(lastState != null ? lastState.Name : null, state));
+                    if (lastState != null) lastState.OnExitState.ActivateTrigger(this, null);
+                    _currentState.OnEnterState.ActivateTrigger(this, null);
+                    
+                    this.OnStateChanged(lastState != null ? lastState.Name : null, state);
 
                     return state;
                 }
@@ -185,7 +196,7 @@ namespace com.spacepuppy.Scenario
             return (_states as IList<State>).GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
         }
@@ -209,18 +220,20 @@ namespace com.spacepuppy.Scenario
                 get { return _name; }
             }
 
-            public void NotifyStateEntered()
+            public Trigger OnEnterState
             {
-                _onEnterState.ActivateTrigger(this, null);
+                get { return _onEnterState; }
             }
 
-            public void NotifyStateExited()
+            public Trigger OnExitState
             {
-                _onExitState.ActivateTrigger(this, null);
+                get { return _onExitState; }
             }
+            
         }
 
         #endregion
 
     }
+
 }
