@@ -39,7 +39,8 @@ namespace com.spacepuppyeditor.AI
                 return;
             }
 
-            var names = (controller.Variables == null) ? new string[] {} : controller.Variables.Names.ToArray();
+            var names = (controller.Variables == null) ? ArrayUtil.Empty<string>() : controller.Variables.Names.ToArray();
+            /*
             var guiNames = (from n in names select EditorHelper.TempContent(n)).Append(EditorHelper.TempContent("Custom...")).ToArray();
             int index = names.IndexOf(property.stringValue);
             if (index < 0) index = names.Length;
@@ -67,6 +68,8 @@ namespace com.spacepuppyeditor.AI
                 index = EditorGUI.Popup(position, label, index, guiNames);
                 property.stringValue = (index >= 0 && index < names.Length) ? names[index] : null;
             }
+            */
+            property.stringValue = SPEditorGUI.OptionPopupWithCustom(position, label, property.stringValue, names);
         }
 
         #endregion

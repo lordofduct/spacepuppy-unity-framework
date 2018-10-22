@@ -37,6 +37,28 @@ namespace com.spacepuppy.AI
                     return ComplexTarget.Null;
             }
         }
+
+        public void SetAsComplexTarget(string key, ComplexTarget target)
+        {
+            switch(target.TargetType)
+            {
+                case ComplexTargetType.Null:
+                    this.GetVariant(key, true).Value = null;
+                    break;
+                case ComplexTargetType.Aspect:
+                    this.GetVariant(key, true).Value = target.TargetAspect;
+                    break;
+                case ComplexTargetType.Transform:
+                    this.GetVariant(key, true).Value = target.Transform;
+                    break;
+                case ComplexTargetType.Vector2:
+                    this.GetVariant(key, true).Value = target.Position2D;
+                    break;
+                case ComplexTargetType.Vector3:
+                    this.GetVariant(key, true).Value = target.Position;
+                    break;
+            }
+        }
         
     }
 }

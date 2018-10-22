@@ -67,6 +67,12 @@ namespace com.spacepuppy.AI
         void IAIState.Init(IAIStateMachine machine)
         {
             this.StateMachine = machine;
+            this.OnInit(machine);
+        }
+
+        protected virtual void OnInit(IAIStateMachine machine)
+        {
+
         }
 
         void IAIState.OnStateEntered(IAIStateMachine machine, IAIState lastState)

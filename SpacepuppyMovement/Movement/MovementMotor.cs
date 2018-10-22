@@ -24,7 +24,7 @@ namespace com.spacepuppy.Movement
 
         #region Fields
 
-        [DefaultFromSelf(UseEntity=true)]
+        [DefaultFromSelf(Relativity = EntityRelativity.Entity)]
         [SerializeField()]
         [Tooltip("The controller that this motor handles.")]
         private MovementController _controller;

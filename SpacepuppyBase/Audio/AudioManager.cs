@@ -9,6 +9,15 @@ namespace com.spacepuppy.Audio
     public interface IAudioManager : IService
     {
 
+        /// <summary>
+        /// The configured volume of the game. This is the volume that if all audio sources were at max, this is what it would sound at.
+        /// </summary>
+        float MasterVolume { get; set; }
+        /// <summary>
+        /// Allows you to fade the MasterVolume with out actually modifying it.
+        /// </summary>
+        float FadeVolume { get; set; }
+
         AudioSource BackgroundAmbientAudioSource { get; }
 
     }
@@ -18,6 +27,11 @@ namespace com.spacepuppy.Audio
     {
 
         #region Fields
+
+        [System.NonSerialized]
+        private float _masterVolume;
+        [System.NonSerialized]
+        private float _fadeVolume;
 
         [System.NonSerialized]
         private AudioSource _backgroundAmbientAudioSource;
@@ -30,12 +44,34 @@ namespace com.spacepuppy.Audio
         {
             base.OnValidAwake();
 
+            _masterVolume = AudioListener.volume;
+            _fadeVolume = 1f;
             _backgroundAmbientAudioSource = this.AddOrGetComponent<AudioSource>();
         }
 
         #endregion
 
         #region IAudioManager Interface
+
+        public float MasterVolume
+        {
+            get { return _masterVolume; }
+            set
+            {
+                _masterVolume = Mathf.Clamp01(value);
+                AudioListener.volume = _masterVolume * _fadeVolume;
+            }
+        }
+
+        public float FadeVolume
+        {
+            get { return _fadeVolume; }
+            set
+            {
+                _fadeVolume = Mathf.Clamp01(value);
+                AudioListener.volume = _masterVolume * _fadeVolume;
+            }
+        }
 
         public AudioSource BackgroundAmbientAudioSource
         {

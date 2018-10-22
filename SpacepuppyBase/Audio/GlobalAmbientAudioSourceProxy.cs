@@ -78,6 +78,11 @@ namespace com.spacepuppy.Audio
 
         #region IProxy Interface
 
+        bool IProxy.QueriesTarget
+        {
+            get { return false; }
+        }
+
         object IProxy.GetTarget()
         {
             return this.Target;

@@ -12,12 +12,7 @@ namespace com.spacepuppy.AI
 {
     public class AISubController : SimpleAIStateComponent, IAIStateMachine
     {
-
-        public void Blargh()
-        {
-
-        }
-
+        
         #region Fields
 
         [SerializeField()]

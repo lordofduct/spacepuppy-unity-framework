@@ -17,7 +17,7 @@ namespace com.spacepuppy.Scenario
 
         #region Fields
         
-        [DefaultFromSelf(UseEntity = true)]
+        [DefaultFromSelf(Relativity = EntityRelativity.Entity)]
         [DisableOnPlay()]
         [Tooltip("The GameObject that has the SpawnPoint on it.")]
         [SerializeField()]

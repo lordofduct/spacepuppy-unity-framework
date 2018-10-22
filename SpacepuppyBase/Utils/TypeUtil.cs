@@ -13,7 +13,7 @@ namespace com.spacepuppy.Utils
             {
                 foreach (var tp in assemb.GetTypes())
                 {
-                    if (predicate(tp)) yield return tp;
+                    if (predicate == null || predicate(tp)) yield return tp;
                 }
             }
         }

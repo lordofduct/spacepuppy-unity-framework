@@ -16,7 +16,9 @@ namespace com.spacepuppy.AI
     /// </summary>
     public class AIController : SPNotifyingComponent, IAIController, IAIStateMachine
     {
-        
+
+        public event System.EventHandler OnTick;
+
         #region Fields
 
         [SerializeField()]
@@ -162,7 +164,7 @@ namespace com.spacepuppy.AI
             }
         }
 
-        private void Update()
+        protected void Update()
         {
             if (Time.time - _t > _interval)
             {
@@ -171,6 +173,8 @@ namespace com.spacepuppy.AI
                 {
                     _stateMachine.Current.Tick(this);
                 }
+
+                this.OnTick?.Invoke(this, System.EventArgs.Empty);
             }
         }
 

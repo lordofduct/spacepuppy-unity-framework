@@ -64,6 +64,11 @@ namespace com.spacepuppy
             this.Value = value;
         }
 
+        public VariantReference(RefMode mode)
+        {
+            _mode = mode;
+        }
+
         #endregion
 
         #region Properties
@@ -72,6 +77,65 @@ namespace com.spacepuppy
         {
             get
             {
+                switch(_mode)
+                {
+                    case RefMode.Value:
+                        {
+                            switch (_type)
+                            {
+                                case VariantType.Object:
+                                    return this.ObjectValue;
+                                case VariantType.String:
+                                    return this.StringValue;
+                                case VariantType.Boolean:
+                                    return this.BoolValue;
+                                case VariantType.Integer:
+                                    return this.IntValue;
+                                case VariantType.Float:
+                                    return this.FloatValue;
+                                case VariantType.Double:
+                                    return this.DoubleValue;
+                                case VariantType.Vector2:
+                                    return this.Vector2Value;
+                                case VariantType.Vector3:
+                                    return this.Vector3Value;
+                                case VariantType.Quaternion:
+                                    return this.QuaternionValue;
+                                case VariantType.Color:
+                                    return this.ColorValue;
+                                case VariantType.DateTime:
+                                    return this.DateValue;
+                                case VariantType.GameObject:
+                                    return this.GameObjectValue;
+                                case VariantType.Component:
+                                    return this.ComponentValue;
+                                case VariantType.LayerMask:
+                                    return this.LayerMaskValue;
+                                case VariantType.Rect:
+                                    return this.RectValue;
+                                case VariantType.Numeric:
+                                    return this.NumericValue;
+                            }
+                        }
+                        break;
+                    case RefMode.Property:
+                        return this.EvaluateProperty();
+                    case RefMode.Eval:
+                        {
+                            try
+                            {
+                                return Evaluator.EvalValue(_string, ObjUtil.ReduceIfProxy(_unityObjectReference));
+                            }
+                            catch
+                            {
+                                Debug.LogWarning("Failed to evaluate statement defined in VariantRefernce");
+                            }
+                        }
+                        break;
+                }
+
+                return null;
+                /*
                 if(_mode == RefMode.Eval)
                 {
                     try
@@ -121,8 +185,8 @@ namespace com.spacepuppy
                             return this.NumericValue;
                     }
                 }
-
                 return null;
+                */
             }
             set
             {
@@ -193,6 +257,11 @@ namespace com.spacepuppy
                     }
                 }
             }
+        }
+
+        public RefMode Mode
+        {
+            get { return _mode; }
         }
 
         public VariantType ValueType
@@ -1308,6 +1377,24 @@ namespace com.spacepuppy
 
             _string = property;
             _unityObjectReference = obj;
+        }
+
+        /// <summary>
+        /// If Mode is RefMode.Property this will attempt to determine the member type of the target property. Null is returned if it can't be determined.
+        /// </summary>
+        /// <returns></returns>
+        public System.Type GetPropertyReturnType()
+        {
+            if(_mode == RefMode.Property)
+            {
+                var member = DynamicUtil.GetMember(_unityObjectReference, _string, false);
+                if(member != null)
+                {
+                    return DynamicUtil.GetReturnType(member);
+                }
+            }
+
+            return null;
         }
 
         public void SetToEvalStatement(string statement, UnityEngine.Object optionalParam = null)

@@ -480,15 +480,16 @@ namespace com.spacepuppy.Dynamic
                         break;
                     case '|':
                         {
-                            v = this.EvalNextValue(out temp);
                             if (_reader.Peek() == '|')
                             {
                                 _reader.Read();
+                                v = this.EvalNextValue(out temp);
                                 state = State.None;
                                 result = (ConvertUtil.ToBool(result.x) || ConvertUtil.ToBool(v.x)) ? Vector4.one : Vector4.zero;
                             }
                             else
                             {
+                                v = this.EvalNextValue(out temp);
                                 state = State.Scalar;
                                 result = new Vector4((float)((int)result.x | (int)v.x), 0f);
                             }
@@ -496,15 +497,16 @@ namespace com.spacepuppy.Dynamic
                         break;
                     case '&':
                         {
-                            v = this.EvalNextValue(out temp);
                             if (_reader.Peek() == '&')
                             {
                                 _reader.Read();
+                                v = this.EvalNextValue(out temp);
                                 state = State.None;
                                 result = (ConvertUtil.ToBool(result.x) && ConvertUtil.ToBool(v.x)) ? Vector4.one : Vector4.zero;
                             }
                             else
                             {
+                                v = this.EvalNextValue(out temp);
                                 state = State.Scalar;
                                 result = new Vector4((float)((int)result.x & (int)v.x), 0f);
                             }

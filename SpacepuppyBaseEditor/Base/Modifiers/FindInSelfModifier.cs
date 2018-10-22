@@ -21,65 +21,34 @@ namespace com.spacepuppyeditor.Modifiers
 
             if (property.isArray && TypeUtil.IsListType(fieldInfo.FieldType, true))
             {
-                this.ApplyDefaultAsList(property, TypeUtil.GetElementTypeOfListType(this.fieldInfo.FieldType), name, bUseEntity);
+                var elementType = EditorHelper.GetRestrictedFieldType(this.fieldInfo, true) ?? TypeUtil.GetElementTypeOfListType(this.fieldInfo.FieldType);
+                ApplyDefaultAsList(property, elementType, name, bUseEntity);
             }
             else
             {
-                this.ApplyDefaultAsSingle(property, name, bUseEntity);
+                var elementType = EditorHelper.GetRestrictedFieldType(this.fieldInfo);
+                ApplyDefaultAsSingle(property, elementType, name, bUseEntity);
             }
         }
 
 
 
 
-        private void ApplyDefaultAsSingle(SerializedProperty property, string name, bool bUseEntity)
+        private static void ApplyDefaultAsSingle(SerializedProperty property, System.Type fieldType, string name, bool bUseEntity)
         {
-            if (TypeUtil.IsType(fieldInfo.FieldType, typeof(Component)) && property.objectReferenceValue == null)
-            {
-                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                if (targ != null)
-                {
-                    var restrictAttrib = this.fieldInfo.GetCustomAttributes(typeof(TypeRestrictionAttribute), false).FirstOrDefault() as TypeRestrictionAttribute;
-                    var componentType = (restrictAttrib != null && restrictAttrib.InheritsFromType != null) ? restrictAttrib.InheritsFromType : this.fieldInfo.FieldType;
-                    var root = (bUseEntity) ? targ.FindRoot() : targ;
-                    
-                    foreach(var obj in root.transform.FindAllByName(name))
-                    {
-                        var c = obj.GetComponent(componentType);
-                        if(c != null)
-                        {
-                            property.objectReferenceValue = c;
-                            property.serializedObject.ApplyModifiedProperties();
-                            return;
-                        }
-                    }
+            if (fieldType == null) return;
 
-                }
-            }
-            else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(GameObject)) && property.objectReferenceValue == null)
-            {
-                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                if (targ != null)
-                {
-                    var root = (bUseEntity) ? targ.FindRoot() : targ;
-                    var go = root.FindByName(name);
-                    if(go != null)
-                    {
-                        property.objectReferenceValue = go;
-                        property.serializedObject.ApplyModifiedProperties();
-                        return;
-                    }
-                }
-            }
-            else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(VariantReference)))
+            var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+            if (targ == null) return;
+            if (bUseEntity) targ = targ.FindRoot();
+
+            if (TypeUtil.IsType(fieldType, typeof(VariantReference)))
             {
                 var variant = EditorHelper.GetTargetObjectOfProperty(property) as VariantReference;
                 if (variant != null && variant.Value == null && variant.ValueType == VariantType.GameObject)
                 {
-                    var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                    var root = (bUseEntity) ? targ.FindRoot() : targ;
-                    var go = root.FindByName(name);
-                    if(go != null)
+                    var go = targ.FindByName(name);
+                    if (go != null)
                     {
                         variant.GameObjectValue = go;
                         property.serializedObject.Update();
@@ -87,25 +56,59 @@ namespace com.spacepuppyeditor.Modifiers
                     }
                 }
             }
+            else if (property.objectReferenceValue == null)
+            {
+                foreach (var obj in targ.transform.FindAllByName(name))
+                {
+                    var o = ObjUtil.GetAsFromSource(fieldType, obj) as UnityEngine.Object;
+                    if(o != null)
+                    {
+                        property.objectReferenceValue = o;
+                        property.serializedObject.ApplyModifiedProperties();
+                        return;
+                    }
+                }
+            }
         }
 
 
-        private void ApplyDefaultAsList(SerializedProperty property, System.Type elementType, string name, bool bUseEntity)
+        private static void ApplyDefaultAsList(SerializedProperty property, System.Type elementType, string name, bool bUseEntity)
         {
+            if (elementType == null) return;
             if (property.arraySize != 0) return;
+            
+            var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+            if (targ == null) return;
+            if (bUseEntity) targ = targ.FindRoot();
 
-            if (TypeUtil.IsType(elementType, typeof(Component)))
+            if (TypeUtil.IsType(elementType, typeof(VariantReference)))
             {
-                using (var lst = TempCollection.GetList<Component>())
+                var arr = targ.transform.FindAllByName(name);
+                if (arr.Length > 0)
                 {
-                    var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                    if (targ != null)
+                    property.arraySize = arr.Length;
+                    property.serializedObject.ApplyModifiedProperties();
+                    for (int i = 0; i < arr.Length; i++)
                     {
-                        var root = (bUseEntity) ? targ.FindRoot() : targ;
-                        foreach(var child in root.transform.FindAllByName(name))
+                        var variant = EditorHelper.GetTargetObjectOfProperty(property.GetArrayElementAtIndex(i)) as VariantReference;
+                        if (variant != null && variant.Value == null && variant.ValueType == VariantType.GameObject)
+                        {
+                            variant.GameObjectValue = arr[i].gameObject;
+                        }
+                    }
+                    property.serializedObject.Update();
+                }
+            }
+            else
+            {
+                if (ComponentUtil.IsAcceptableComponentType(elementType))
+                {
+                    using (var lst = TempCollection.GetList<Component>())
+                    {
+                        foreach (var child in targ.transform.FindAllByName(name))
                         {
                             child.GetComponents(elementType, lst);
-                            if(lst.Count > 0)
+                            if (lst.Count > 0)
                             {
                                 int low = property.arraySize;
                                 property.arraySize += lst.Count;
@@ -118,18 +121,13 @@ namespace com.spacepuppyeditor.Modifiers
                         }
                     }
                 }
-            }
-            else if (TypeUtil.IsType(elementType, typeof(GameObject)))
-            {
-                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                if (targ != null)
+                else if (TypeUtil.IsType(elementType, typeof(GameObject)))
                 {
-                    var root = (bUseEntity) ? targ.FindRoot() : targ;
-                    var arr = root.transform.FindAllByName(name);
-                    if(arr.Length > 0)
+                    var arr = targ.transform.FindAllByName(name);
+                    if (arr.Length > 0)
                     {
                         property.arraySize = arr.Length;
-                        for(int i = 0; i < arr.Length; i++)
+                        for (int i = 0; i < arr.Length; i++)
                         {
                             property.GetArrayElementAtIndex(i).objectReferenceValue = arr[i].gameObject;
                         }

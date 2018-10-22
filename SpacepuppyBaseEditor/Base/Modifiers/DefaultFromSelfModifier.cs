@@ -13,146 +13,275 @@ namespace com.spacepuppyeditor.Modifiers
     [CustomPropertyDrawer(typeof(DefaultFromSelfAttribute))]
     public class DefaultFromSelfModifier : PropertyModifier
     {
-
-        private bool _handled = false;
+        
+        private HashSet<int> _handled = new HashSet<int>();
 
         protected internal override void OnBeforeGUI(SerializedProperty property)
         {
-            if (_handled) return;
+            int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(property);
+            if (_handled.Contains(hash)) return;
+            if ((this.attribute as DefaultFromSelfAttribute).HandleOnce) _handled.Add(hash);
 
-            bool bUseEntity = (this.attribute as DefaultFromSelfAttribute).UseEntity;
-            _handled = (this.attribute as DefaultFromSelfAttribute).HandleOnce;
+            var relativity = (this.attribute as DefaultFromSelfAttribute).Relativity;
 
             if (property.isArray && TypeUtil.IsListType(fieldInfo.FieldType, true))
             {
-                this.ApplyDefaultAsList(property, TypeUtil.GetElementTypeOfListType(this.fieldInfo.FieldType), bUseEntity);
+                var elementType = TypeUtil.GetElementTypeOfListType(this.fieldInfo.FieldType);
+                var restrictionType = EditorHelper.GetRestrictedFieldType(this.fieldInfo, true) ?? elementType;
+                ApplyDefaultAsList(property, elementType, restrictionType, relativity);
             }
             else
             {
-                this.ApplyDefaultAsSingle(property, bUseEntity);
+                ApplyDefaultAsSingle(property, this.fieldInfo.FieldType, EditorHelper.GetRestrictedFieldType(this.fieldInfo), relativity);
             }
-            
         }
 
 
 
-        private void ApplyDefaultAsSingle(SerializedProperty property, bool bUseEntity)
+        private static void ApplyDefaultAsSingle(SerializedProperty property, System.Type fieldType, System.Type restrictionType, EntityRelativity relativity)
         {
-            if (TypeUtil.IsType(fieldInfo.FieldType, typeof(Component)) && property.objectReferenceValue == null)
-            {
-                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                if (targ != null)
-                {
-                    var restrictAttrib = this.fieldInfo.GetCustomAttributes(typeof(TypeRestrictionAttribute), false).FirstOrDefault() as TypeRestrictionAttribute;
-                    var componentType = (restrictAttrib != null && restrictAttrib.InheritsFromType != null) ? restrictAttrib.InheritsFromType : this.fieldInfo.FieldType;
-                    if (bUseEntity)
-                    {
-                        property.objectReferenceValue = targ.FindComponent(componentType);
-                    }
-                    else
-                    {
-                        property.objectReferenceValue = targ.GetComponent(componentType);
-                    }
-                    property.serializedObject.ApplyModifiedProperties();
-                }
-            }
-            else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(GameObject)) && property.objectReferenceValue == null)
-            {
-                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                if (targ != null)
-                {
-                    if (bUseEntity)
-                    {
-                        property.objectReferenceValue = targ.FindRoot();
-                    }
-                    else
-                    {
-                        property.objectReferenceValue = targ;
-                    }
-                    property.serializedObject.ApplyModifiedProperties();
-                }
-            }
-            else if(TypeUtil.IsType(fieldInfo.FieldType, typeof(UnityEngine.Object)) && property.objectReferenceValue == null)
-            {
-                var obj = property.serializedObject.targetObject;
-                if (GameObjectUtil.IsGameObjectSource(obj))
-                    obj = GameObjectUtil.GetGameObjectFromSource(obj);
-                property.objectReferenceValue = obj;
-                property.serializedObject.ApplyModifiedProperties();
-            }
-            else if (TypeUtil.IsType(fieldInfo.FieldType, typeof(VariantReference)))
+            if (fieldType == null) return;
+            
+            if (TypeUtil.IsType(fieldType, typeof(VariantReference)))
             {
                 var variant = EditorHelper.GetTargetObjectOfProperty(property) as VariantReference;
-                if (variant != null && variant.Value == null && variant.ValueType == VariantType.GameObject)
-                {
-                    var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                    if (bUseEntity)
-                    {
-                        variant.GameObjectValue = targ.FindRoot();
-                    }
-                    else
-                    {
-                        variant.GameObjectValue = targ;
-                    }
+                if (variant == null) return;
+                if (variant.Value != null) return;
 
-                    property.serializedObject.Update();
+                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                if (targ == null)
+                {
+                    var obj = ObjUtil.GetAsFromSource(restrictionType, property.serializedObject.targetObject);
+                    if (obj != null)
+                    {
+                        variant.Value = obj;
+                        property.serializedObject.Update();
+                        GUI.changed = true;
+                    }
+                    return;
+                }
+
+                switch (relativity)
+                {
+                    case EntityRelativity.Entity:
+                        {
+                            targ = targ.FindRoot();
+
+                            var obj = ObjUtil.GetAsFromSource(restrictionType, targ);
+                            if (obj == null && ComponentUtil.IsAcceptableComponentType(restrictionType)) obj = targ.GetComponentInChildren(restrictionType);
+                            if (obj != null)
+                            {
+                                variant.Value = obj;
+                                property.serializedObject.Update();
+                            }
+                        }
+                        break;
+                    case EntityRelativity.Self:
+                        {
+                            var obj = ObjUtil.GetAsFromSource(restrictionType, targ);
+                            if (obj != null)
+                            {
+                                variant.Value = obj;
+                                property.serializedObject.Update();
+                            }
+                        }
+                        break;
+                    case EntityRelativity.SelfAndChildren:
+                        {
+                            var obj = ObjUtil.GetAsFromSource(restrictionType, targ);
+                            if (obj == null && ComponentUtil.IsAcceptableComponentType(restrictionType)) obj = targ.GetComponentInChildren(restrictionType);
+                            if (obj != null)
+                            {
+                                variant.Value = obj;
+                                property.serializedObject.Update();
+                            }
+                        }
+                        break;
+                }
+            }
+            else if (property.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                if (property.objectReferenceValue != null) return;
+
+                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                if (targ == null)
+                {
+                    property.objectReferenceValue = ObjUtil.GetAsFromSource(restrictionType, property.serializedObject.targetObject) as UnityEngine.Object;
+                    return;
+                }
+
+                switch (relativity)
+                {
+                    case EntityRelativity.Entity:
+                        {
+                            targ = targ.FindRoot();
+
+                            var obj = ObjUtil.GetAsFromSource(restrictionType, targ) as UnityEngine.Object;
+                            if (obj == null && ComponentUtil.IsAcceptableComponentType(restrictionType)) obj = targ.GetComponentInChildren(restrictionType);
+                            if (obj != null)
+                            {
+                                property.objectReferenceValue = obj;
+                                GUI.changed = true;
+                            }
+                        }
+                        break;
+                    case EntityRelativity.Self:
+                        {
+                            var obj = ObjUtil.GetAsFromSource(restrictionType, targ) as UnityEngine.Object;
+                            if (obj != null)
+                            {
+                                property.objectReferenceValue = obj;
+                                GUI.changed = true;
+                            }
+                        }
+                        break;
+                    case EntityRelativity.SelfAndChildren:
+                        {
+                            var obj = ObjUtil.GetAsFromSource(restrictionType, targ) as UnityEngine.Object;
+                            if (obj == null && ComponentUtil.IsAcceptableComponentType(restrictionType)) obj = targ.GetComponentInChildren(restrictionType);
+                            if (obj != null)
+                            {
+                                property.objectReferenceValue = obj;
+                                GUI.changed = true;
+                            }
+                        }
+                        break;
                 }
             }
         }
-
-
-        private void ApplyDefaultAsList(SerializedProperty property, System.Type elementType, bool bUseEntity)
+        
+        private static void ApplyDefaultAsList(SerializedProperty property, System.Type elementType, System.Type restrictionType, EntityRelativity relativity)
         {
             if (property.arraySize != 0) return;
+            if (elementType == null || restrictionType == null) return;
 
-            if(TypeUtil.IsType(elementType, typeof(Component)))
+            if (TypeUtil.IsType(elementType, typeof(VariantReference)))
             {
-                using (var lst = TempCollection.GetList<Component>())
-                {
-                    var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                    if(targ != null)
-                    {
-                        if (bUseEntity)
-                            targ.FindComponents(elementType, lst, true);
-                        else
-                            targ.GetComponents(elementType, lst);
-                    }
-                    
-                    property.arraySize = lst.Count;
-                    for(int i = 0; i < lst.Count; i++)
-                    {
-                        property.GetArrayElementAtIndex(i).objectReferenceValue = lst[i];
-                    }
-                    property.serializedObject.ApplyModifiedProperties();
-                }
-            }
-            else if(TypeUtil.IsType(elementType, typeof(GameObject)))
-            {
-
                 var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
-                if (targ != null)
+                if (targ == null)
                 {
-                    if (bUseEntity)
+                    var obj = ObjUtil.GetAsFromSource(restrictionType, property.serializedObject.targetObject);
+                    if (obj != null)
                     {
                         property.arraySize = 1;
-                        property.GetArrayElementAtIndex(0).objectReferenceValue = targ.FindRoot();
+                        var variant = EditorHelper.GetTargetObjectOfProperty(property.GetArrayElementAtIndex(0)) as VariantReference;
+                        if (variant == null) return;
+                        variant.Value = obj;
+                        property.serializedObject.Update();
+                        GUI.changed = true;
                     }
-                    else
+                    else if (property.arraySize > 0)
                     {
-                        property.arraySize = 1;
-                        property.GetArrayElementAtIndex(0).objectReferenceValue = targ;
+                        property.arraySize = 0;
+                        GUI.changed = true;
                     }
-                    property.serializedObject.ApplyModifiedProperties();
+                    return;
+                }
+
+                switch (relativity)
+                {
+                    case EntityRelativity.Entity:
+                        {
+                            targ = targ.FindRoot();
+                            var arr = ObjUtil.GetAllFromSource(restrictionType, targ, true);
+
+                            property.arraySize = arr.Length;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                var variant = EditorHelper.GetTargetObjectOfProperty(property.GetArrayElementAtIndex(i)) as VariantReference;
+                                if (variant != null) variant.Value = arr[i];
+                            }
+                            property.serializedObject.Update();
+                            GUI.changed = true;
+                        }
+                        break;
+                    case EntityRelativity.Self:
+                        {
+                            var arr = ObjUtil.GetAllFromSource(restrictionType, targ, false);
+
+                            property.arraySize = arr.Length;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                var variant = EditorHelper.GetTargetObjectOfProperty(property.GetArrayElementAtIndex(i)) as VariantReference;
+                                if (variant != null) variant.Value = arr[i];
+                            }
+                            property.serializedObject.Update();
+                            GUI.changed = true;
+                        }
+                        break;
+                    case EntityRelativity.SelfAndChildren:
+                        {
+                            var arr = ObjUtil.GetAllFromSource(restrictionType, targ, true);
+
+                            property.arraySize = arr.Length;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                var variant = EditorHelper.GetTargetObjectOfProperty(property.GetArrayElementAtIndex(i)) as VariantReference;
+                                if (variant != null) variant.Value = arr[i];
+                            }
+                            property.serializedObject.Update();
+                            GUI.changed = true;
+                        }
+                        break;
                 }
             }
             else if (TypeUtil.IsType(elementType, typeof(UnityEngine.Object)))
             {
-                property.arraySize = 1;
-                var obj = property.serializedObject.targetObject;
-                if (GameObjectUtil.IsGameObjectSource(obj))
-                    obj = GameObjectUtil.GetGameObjectFromSource(obj);
-                property.GetArrayElementAtIndex(0).objectReferenceValue = obj;
-                property.serializedObject.ApplyModifiedProperties();
+                var targ = GameObjectUtil.GetGameObjectFromSource(property.serializedObject.targetObject);
+                if (targ == null)
+                {
+                    var obj = ObjUtil.GetAsFromSource(restrictionType, property.serializedObject.targetObject) as UnityEngine.Object;
+                    if (obj != null)
+                    {
+                        property.arraySize = 1;
+                        property.GetArrayElementAtIndex(0).objectReferenceValue = obj;
+                        GUI.changed = true;
+                    }
+                    else if (property.arraySize > 0)
+                    {
+                        property.arraySize = 0;
+                        GUI.changed = true;
+                    }
+                    return;
+                }
+
+                switch (relativity)
+                {
+                    case EntityRelativity.Entity:
+                        {
+                            targ = targ.FindRoot();
+                            var arr = ObjUtil.GetAllFromSource(restrictionType, targ, true);
+
+                            property.arraySize = arr.Length;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                property.GetArrayElementAtIndex(i).objectReferenceValue = arr[i] as UnityEngine.Object;
+                            }
+                        }
+                        break;
+                    case EntityRelativity.Self:
+                        {
+                            var arr = ObjUtil.GetAllFromSource(restrictionType, targ, false);
+
+                            property.arraySize = arr.Length;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                property.GetArrayElementAtIndex(i).objectReferenceValue = arr[i] as UnityEngine.Object;
+                            }
+                        }
+                        break;
+                    case EntityRelativity.SelfAndChildren:
+                        {
+                            var arr = ObjUtil.GetAllFromSource(restrictionType, targ, true);
+
+                            property.arraySize = arr.Length;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                property.GetArrayElementAtIndex(i).objectReferenceValue = arr[i] as UnityEngine.Object;
+                            }
+                        }
+                        break;
+                }
             }
         }
 

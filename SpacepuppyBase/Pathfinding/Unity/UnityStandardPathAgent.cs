@@ -15,7 +15,7 @@ namespace com.spacepuppy.Pathfinding.Unity
         #region Fields
 
         [SerializeField]
-        [DefaultFromSelf(UseEntity = true)]
+        [DefaultFromSelf(Relativity = EntityRelativity.Entity)]
         private NavMeshAgent _agent;
 
         #endregion

@@ -26,6 +26,7 @@ namespace com.spacepuppyeditor.Base
             {
                 if (_inputIds == null) this.Init();
 
+                /*
                 var guiIds = (from s in _inputIds select EditorHelper.TempContent(s)).Append(EditorHelper.TempContent("Custom...")).ToArray();
                 int index = System.Array.IndexOf(_inputIds, property.stringValue);
                 if (index < 0) index = _inputIds.Length;
@@ -53,6 +54,9 @@ namespace com.spacepuppyeditor.Base
                     index = EditorGUI.Popup(position, label, index, guiIds);
                     property.stringValue = (index >= 0 && index < _inputIds.Length) ? _inputIds[index] : null;
                 }
+                */
+
+                property.stringValue = SPEditorGUI.OptionPopupWithCustom(position, label, property.stringValue, _inputIds);
             }
             else
             {

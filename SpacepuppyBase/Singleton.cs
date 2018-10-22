@@ -463,7 +463,8 @@ namespace com.spacepuppy
                         {
                             Object.Destroy(_target.gameObject);
                         }
-                        throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
+                        //throw new System.InvalidOperationException("Attempted to create an instance of a Singleton out of its appropriate operating bounds.");
+                        throw new System.InvalidOperationException(string.Format("Attempted to create an instance of a '{0}' Singleton out of its appropriate operating bounds.", targTp.Name));
                     }
                 }
 

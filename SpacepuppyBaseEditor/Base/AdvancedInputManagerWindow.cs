@@ -42,6 +42,7 @@ namespace com.spacepuppyeditor.Base
 
         private SerializedObject _inputManagerAsset;
         private SPReorderableList _axesList;
+        private Vector2 _scrollPos = Vector2.zero;
 
 
         private void OnEnable()
@@ -85,7 +86,22 @@ namespace com.spacepuppyeditor.Base
             _inputManagerAsset.Update();
             EditorGUI.BeginChangeCheck();
 
-            _axesList.DoLayoutList();
+            const float MARGIN_BOTTOM = 15f;
+            float lstHeight = _axesList.GetHeight();
+            float otherHeight = (_axesList.index >= 0 && _axesList.index < _axesList.serializedProperty.arraySize) ? EditorGUI.GetPropertyHeight(_axesList.serializedProperty.GetArrayElementAtIndex(_axesList.index)) : 0f;
+            float totalHeight = lstHeight + otherHeight + MARGIN_BOTTOM;
+            if(totalHeight > this.position.height)
+            {
+                _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, GUILayout.Height(this.position.height - otherHeight - MARGIN_BOTTOM));
+                _axesList.DoLayoutList();
+                EditorGUILayout.EndScrollView();
+            }
+            else
+            {
+                _scrollPos = Vector2.zero;
+                _axesList.DoLayoutList();
+            }
+
             this.DrawCurrentElementExtended();
 
             if (EditorGUI.EndChangeCheck())

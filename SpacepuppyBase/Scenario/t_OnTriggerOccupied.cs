@@ -2,24 +2,19 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
 
-    public class t_OnTriggerOccupied : SPComponent, ICompoundTriggerEnterResponder, ICompoundTriggerExitResponder, IOccupiedTrigger, IUpdateable
+    public class t_OnTriggerOccupied : SPComponent, ICompoundTriggerEnterResponder, ICompoundTriggerExitResponder, IOccupiedTrigger
     {
 
         #region Fields
 
         [SerializeField]
         private EventActivatorMaskRef _mask = new EventActivatorMaskRef();
-
-        [SerializeField]
-        [Tooltip("If true, when an object is intersected we'll habitually retest the object in case its state changes for any reason.")]
-        private bool _activelyRetestObjects;
-
+        
         [SerializeField]
         private Trigger _onTriggerOccupied;
 
@@ -30,18 +25,7 @@ namespace com.spacepuppy.Scenario
         private HashSet<GameObject> _activeObjects = new HashSet<GameObject>();
 
         #endregion
-
-        #region CONSTRUCTOR
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-
-            GameLoopEntry.UpdatePump.Remove(this);
-        }
-
-        #endregion
-
+        
         #region Properties
 
         public Trigger OnTriggerOccupied
@@ -76,7 +60,6 @@ namespace com.spacepuppy.Scenario
             if(_activeObjects.Count == 0)
             {
                 _activeObjects.Add(obj);
-                if (_activelyRetestObjects) GameLoopEntry.UpdatePump.Add(this);
                 _onTriggerOccupied.ActivateTrigger(this, obj);
             }
             else
@@ -92,7 +75,6 @@ namespace com.spacepuppy.Scenario
             _activeObjects.Remove(obj);
             if(_activeObjects.Count == 0)
             {
-                GameLoopEntry.UpdatePump.Remove(this);
                 _onTriggerLastExited.ActivateTrigger(this, obj);
             }
         }
@@ -128,49 +110,7 @@ namespace com.spacepuppy.Scenario
         }
 
         #endregion
-
-        #region IUpdateable Interface
-
-        void IUpdateable.Update()
-        {
-            if(!_activelyRetestObjects || !this.isActiveAndEnabled || _activeObjects.Count == 0)
-            {
-                GameLoopEntry.UpdatePump.Remove(this);
-                return;
-            }
-
-            if (_mask.Value == null) return;
-
-            using (var toRemove = TempCollection.GetSet<GameObject>())
-            {
-                var e = _activeObjects.GetEnumerator();
-                while (e.MoveNext())
-                {
-                    if(!ObjUtil.IsObjectAlive(e.Current) || !e.Current.activeInHierarchy || !_mask.Value.Intersects(e.Current))
-                    {
-                        toRemove.Add(e.Current);
-                    }
-                }
-
-                if(toRemove.Count > 0)
-                {
-                    e = toRemove.GetEnumerator();
-                    while(e.MoveNext())
-                    {
-                        this.RemoveObject(e.Current);
-                    }
-
-                    if(_activeObjects.Count == 0)
-                    {
-                        GameLoopEntry.UpdatePump.Remove(this);
-                        return;
-                    }
-                }
-            }
-        }
-
-        #endregion
-
+        
         #region IOccupiedObservableTrigger Interface
 
         Trigger[] IObservableTrigger.GetTriggers()

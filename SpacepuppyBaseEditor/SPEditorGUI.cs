@@ -581,13 +581,84 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Option Popup w/ Custom
+
+        public static string OptionPopupWithCustom(Rect position, string label, string value, string[] options)
+        {
+            if (options == null) options = ArrayUtil.Empty<string>();
+
+            var guiOptions = (from s in options select EditorHelper.TempContent(s)).Append(EditorHelper.TempContent("Custom...")).ToArray();
+
+            int index = System.Array.IndexOf(options, value);
+            if (index < 0) index = options.Length;
+
+            if (index == options.Length)
+            {
+                var fw = position.width - EditorGUIUtility.labelWidth;
+                var wl = EditorGUIUtility.labelWidth + (fw / 4f);
+                var wr = position.width - wl - 1f;
+
+                var rl = new Rect(position.xMin, position.yMin, wl, EditorGUIUtility.singleLineHeight);
+                var rr = new Rect(rl.xMax + 1f, rl.yMin, wr, EditorGUIUtility.singleLineHeight);
+
+                index = EditorGUI.Popup(rl, EditorHelper.TempContent(label), index, guiOptions);
+                if (index >= 0 && index < options.Length)
+                {
+                    return options[index];
+                }
+                else
+                {
+                    return EditorGUI.TextField(rr, value);
+                }
+            }
+            else
+            {
+                index = EditorGUI.Popup(position, EditorHelper.TempContent(label), index, guiOptions);
+                return (index >= 0 && index < options.Length) ? options[index] : null;
+            }
+        }
+
+        public static string OptionPopupWithCustom(Rect position, GUIContent label, string value, string[] options)
+        {
+            if (options == null) options = ArrayUtil.Empty<string>();
+
+            var guiOptions = (from s in options select EditorHelper.TempContent(s)).Append(EditorHelper.TempContent("Custom...")).ToArray();
+
+            int index = System.Array.IndexOf(options, value);
+            if (index < 0) index = options.Length;
+
+            if (index == options.Length)
+            {
+                var fw = position.width - EditorGUIUtility.labelWidth;
+                var wl = EditorGUIUtility.labelWidth + (fw / 4f);
+                var wr = position.width - wl - 1f;
+
+                var rl = new Rect(position.xMin, position.yMin, wl, EditorGUIUtility.singleLineHeight);
+                var rr = new Rect(rl.xMax + 1f, rl.yMin, wr, EditorGUIUtility.singleLineHeight);
+
+                index = EditorGUI.Popup(rl, label, index, guiOptions);
+                if (index >= 0 && index < options.Length)
+                {
+                    return options[index];
+                }
+                else
+                {
+                    return EditorGUI.TextField(rr, value);
+                }
+            }
+            else
+            {
+                index = EditorGUI.Popup(position, label, index, guiOptions);
+                return (index >= 0 && index < options.Length) ? options[index] : null;
+            }
+        }
+
+        #endregion
+
         #region EnumFlag Inspector
 
         public static int EnumFlagField(Rect position, System.Type enumType, GUIContent label, int value)
         {
-            //var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
-            //return EditorGUI.MaskField(position, label, value, names);
-
             var code = System.Type.GetTypeCode(enumType);
             switch(code)
             {
@@ -647,27 +718,53 @@ namespace com.spacepuppyeditor
                         lst.Add(e);
                 }
 
-                var evalue = ConvertUtil.ToEnumOfType(enumType, value);
-                int normalizedValue = 0;
-                for (int i = 0; i < lst.Count; i++)
+                //convert to normalized mask
+                int normalizedValue;
+                if(value == 0)
                 {
-                    if (EnumUtil.HasFlag(evalue, lst[i]))
+                    normalizedValue = 0;
+                }
+                else if(value == -1)
+                {
+                    normalizedValue = -1;
+                }
+                else
+                {
+                    normalizedValue = 0;
+                    var evalue = ConvertUtil.ToEnumOfType(enumType, value);
+                    for (int i = 0; i < lst.Count; i++)
                     {
-                        normalizedValue |= (1 << i);
+                        if (EnumUtil.HasFlag(evalue, lst[i]))
+                        {
+                            normalizedValue |= (1 << i);
+                        }
                     }
                 }
 
+                //show maskfield
                 normalizedValue = EditorGUI.MaskField(position, label, normalizedValue, (from e in lst select System.Enum.GetName(enumType, e)).ToArray());
 
-                value = 0;
-                for (int i = 0; i < lst.Count; i++)
+                //convert from normalized mask
+                if (normalizedValue == 0)
                 {
-                    int j = (1 << i);
-                    if ((normalizedValue & j) == j)
-                        value |= lst[i];
+                    return 0;
                 }
+                else if (normalizedValue == -1)
+                {
+                    return -1;
+                }
+                else
+                {
+                    value = 0;
+                    for (int i = 0; i < lst.Count; i++)
+                    {
+                        int j = (1 << i);
+                        if ((normalizedValue & j) == j)
+                            value |= lst[i];
+                    }
 
-                return value;
+                    return value;
+                }
             }
         }
 

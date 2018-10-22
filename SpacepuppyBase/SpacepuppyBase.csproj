@@ -230,8 +230,11 @@
     <Compile Include="Scenario\EventTriggerEvaluator.cs" />
     <Compile Include="Scenario\HijackTriggerEvents.cs" />
     <Compile Include="Scenario\i_KillTween.cs" />
+    <Compile Include="Scenario\i_ModifyTag.cs" />
     <Compile Include="Scenario\i_TriggerFirstEnabledTarget.cs" />
+    <Compile Include="Scenario\i_TriggerOnEnumState.cs" />
     <Compile Include="Scenario\t_AllTriggersOccupied.cs" />
+    <Compile Include="Scenario\t_OnTriggerOccupiedActive.cs" />
     <Compile Include="Scenario\t_Timer.cs" />
     <Compile Include="Scenes\SceneRef.cs" />
     <Compile Include="Proxy.cs" />
@@ -371,7 +374,7 @@
     <Compile Include="Timers\SystemTimers.cs" />
     <Compile Include="Timers\Timer.cs" />
     <Compile Include="Timers\TimerCollection.cs" />
-    <Compile Include="TinyUid.cs" />
+    <Compile Include="ShortUid.cs" />
     <Compile Include="Tuple.cs" />
     <Compile Include="Tween\Accessors\CustomTweenMemberAccessorFactory.cs" />
     <Compile Include="Tween\Accessors\FollowTargetPositionAccessor.cs" />

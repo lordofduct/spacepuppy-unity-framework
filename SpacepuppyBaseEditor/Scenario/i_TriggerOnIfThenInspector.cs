@@ -15,7 +15,6 @@ namespace com.spacepuppyeditor.Scenario
     [CustomEditor(typeof(i_TriggerOnIfThen), true)]
     public class i_TriggerOnIfThenInspector : SPEditor
     {
-        public const string PROP_ORDER = EditorHelper.PROP_ORDER;
         public const string PROP_CONDITIONS = "_conditions";
         public const string PROP_ELSECONDITION = "_elseCondition";
         private const string PROP_CONDITIONBLOCK_CONDITION = "_condition";
@@ -28,7 +27,8 @@ namespace com.spacepuppyeditor.Scenario
             this.serializedObject.Update();
 
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
-            this.DrawPropertyField(PROP_ORDER);
+            this.DrawPropertyField(EditorHelper.PROP_ORDER);
+            this.DrawPropertyField(EditorHelper.PROP_ACTIVATEON);
 
 
             EditorGUILayout.BeginVertical("Box");
@@ -69,11 +69,12 @@ namespace com.spacepuppyeditor.Scenario
 
             EditorGUILayout.EndVertical();
 
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_ORDER, PROP_CONDITIONS, PROP_ELSECONDITION);
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, EditorHelper.PROP_ORDER, EditorHelper.PROP_ACTIVATEON, PROP_CONDITIONS, PROP_ELSECONDITION);
 
 
             this.serializedObject.ApplyModifiedProperties();
         }
 
     }
+
 }

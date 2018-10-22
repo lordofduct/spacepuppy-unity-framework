@@ -76,6 +76,17 @@ namespace com.spacepuppy.Scenario
 
         #region Properties
 
+        /// <summary>
+        /// Returns true if the target is explicitly null. Meaning that it was setup or configured to return null as its target, rather than null resulting from a failed find.
+        /// </summary>
+        public bool IsConfiguredNull
+        {
+            get { return _configured && !ObjUtil.IsValidObject(_target); }
+        }
+
+        /// <summary>
+        /// Returns true if the target is calculated based off the passed in arg.
+        /// </summary>
         public bool TargetsTriggerArg
         {
             get { return !_configured; }
@@ -91,7 +102,7 @@ namespace com.spacepuppy.Scenario
         /// </summary>
         public bool ImplicityReducesEntireEntity
         {
-            get { return !_configured || _find >= FindCommand.FindInScene; }
+            get { return !_configured || _find >= FindCommand.FindInScene || (_target is IProxy && (_target as IProxy).QueriesTarget); }
         }
 
         public UnityEngine.Object Target

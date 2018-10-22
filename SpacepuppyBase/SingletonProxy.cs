@@ -33,6 +33,11 @@ namespace com.spacepuppy
             return Singletons.Get(_singletonType.Type, _createIfNone);
         }
 
+        bool IProxy.QueriesTarget
+        {
+            get { return false; }
+        }
+
         object IProxy.GetTarget()
         {
             return this.GetTarget();

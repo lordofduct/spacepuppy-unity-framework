@@ -17,6 +17,7 @@ namespace com.spacepuppyeditor
 
         public const string PROP_SCRIPT = "m_Script";
         public const string PROP_ORDER = "_order";
+        public const string PROP_ACTIVATEON = "_activateOn";
 
         public const float OBJFIELD_DOT_WIDTH = 18f;
 
@@ -549,6 +550,31 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Serialized Field Helpers
+
+        /// <summary>
+        /// Get the type defined in a TypeRestrictionAttribute attached to the field, otherwise returns the FieldType as defined by the field itself.
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="returnNullIfNoTypeRestrictionAttribute">Return null if TypeRestrictionAttribute is not found</param>
+        /// <returns></returns>
+        public static System.Type GetRestrictedFieldType(System.Reflection.FieldInfo field, bool returnNullIfNoTypeRestrictionAttribute = false)
+        {
+            if (field == null) return null;
+
+            var attrib = field.GetCustomAttributes(typeof(TypeRestrictionAttribute), true).FirstOrDefault() as TypeRestrictionAttribute;
+            if(attrib != null && attrib.InheritsFromType != null)
+            {
+                return attrib.InheritsFromType;
+            }
+            else
+            {
+                return returnNullIfNoTypeRestrictionAttribute ? null : field.FieldType;
+            }
+        }
+
+        #endregion
+
         #region Path
 
         public static string GetFullPathForAssetPath(string assetPath)
@@ -626,7 +652,45 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Enum Utils
 
+        public static int ConvertPopupMaskToEnumMask(int mask, System.Enum[] enumFlagValues)
+        {
+            if (enumFlagValues == null || enumFlagValues.Length == 0) return 0;
+            if (mask == 0) return 0;
+            if (mask == -1) return -1;
+
+            int result = 0;
+            for(int i = 0; i < enumFlagValues.Length; i++)
+            {
+                int flag = 1 << i;
+                if((mask & flag) != 0)
+                {
+                    result |= ConvertUtil.ToInt(enumFlagValues[i]);
+                }
+            }
+            return result;
+        }
+
+        public static int ConvertEnumMaskToPopupMask(int mask, System.Enum[] enumFlagValues)
+        {
+            if (enumFlagValues == null || enumFlagValues.Length == 0) return 0;
+            if (mask == 0) return 0;
+            if (mask == -1) return -1;
+
+            int result = 0;
+            for (int i = 0; i < enumFlagValues.Length; i++)
+            {
+                int e = ConvertUtil.ToInt(enumFlagValues[i]);
+                if((mask & e) != 0)
+                {
+                    result |= (1 << i);
+                }
+            }
+            return result;
+        }
+
+        #endregion
 
         #region State Cache
 

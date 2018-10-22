@@ -102,7 +102,11 @@ namespace com.spacepuppy
 
         public VariantReference GetVariant(string key)
         {
-            return _table[key];
+            VariantReference v;
+            if (_table.TryGetValue(key, out v))
+                return v;
+            else
+                return null;
         }
 
         public VariantReference GetVariant(string key, bool createIfNotExist)

@@ -26,6 +26,8 @@ namespace com.spacepuppyeditor.Scenario
             this.serializedObject.Update();
 
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
+            this.DrawPropertyField(EditorHelper.PROP_ORDER);
+            this.DrawPropertyField(EditorHelper.PROP_ACTIVATEON);
 
             this.DrawPropertyField(PROP_TARGET);
             
@@ -51,7 +53,7 @@ namespace com.spacepuppyeditor.Scenario
                     break;
             }
             
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_TARGET, PROP_SOURCE, PROP_SOURCEALT);
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, EditorHelper.PROP_ORDER, EditorHelper.PROP_ACTIVATEON, PROP_TARGET, PROP_SOURCE, PROP_SOURCEALT);
 
             this.serializedObject.ApplyModifiedProperties();
         }

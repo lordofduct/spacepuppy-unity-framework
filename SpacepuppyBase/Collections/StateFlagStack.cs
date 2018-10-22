@@ -66,8 +66,7 @@ namespace com.spacepuppy.Collections
                 _stack.Add(token);
                 if(_stack.Count > 0 && this.ActiveChanged != null)
                 {
-                    var d = this.ActiveChanged;
-                    d(this, EventArgs.Empty);
+                    this.ActiveChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
             else
@@ -84,8 +83,7 @@ namespace com.spacepuppy.Collections
             _stack.Remove(token);
             if(_stack.Count == 0 && this.ActiveChanged != null)
             {
-                var d = this.ActiveChanged;
-                d(this, EventArgs.Empty);
+                this.ActiveChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -96,8 +94,7 @@ namespace com.spacepuppy.Collections
             _stack.Clear();
             if (this.ActiveChanged != null)
             {
-                var d = this.ActiveChanged;
-                d(this, EventArgs.Empty);
+                this.ActiveChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 

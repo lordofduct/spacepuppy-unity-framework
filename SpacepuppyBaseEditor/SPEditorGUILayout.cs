@@ -176,12 +176,53 @@ namespace com.spacepuppyeditor
 
         #endregion
 
+        #region Option Popup w/ Custom
+
+        public static string OptionPopupWithCustom(string label, string value, string[] options)
+        {
+            return SPEditorGUI.OptionPopupWithCustom(EditorGUILayout.GetControlRect(false), label, value, options);
+        }
+
+        public static string OptionPopupWithCustom(GUIContent label, string value, string[] options)
+        {
+            return SPEditorGUI.OptionPopupWithCustom(EditorGUILayout.GetControlRect(false), label, value, options);
+        }
+
+        #endregion
+
         #region EnumFlag Inspector
+
+        public static int EnumFlagField(System.Type enumType, int value)
+        {
+            //var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
+            //return EditorGUILayout.MaskField(value, names);
+
+            var enums = EnumUtil.GetUniqueEnumFlags(enumType).ToArray();
+            var names = (from e in enums select e.ToString()).ToArray();
+            int mask = EditorHelper.ConvertEnumMaskToPopupMask(value, enums);
+            mask = EditorGUILayout.MaskField(mask, names);
+            return EditorHelper.ConvertPopupMaskToEnumMask(mask, enums);
+        }
+
+        public static System.Enum EnumFlagField(System.Enum value)
+        {
+            if (value == null) throw new System.ArgumentException("Enum value must be non-null.", "value");
+
+            var enumType = value.GetType();
+            int i = EnumFlagField(enumType, System.Convert.ToInt32(value));
+            return System.Enum.ToObject(enumType, i) as System.Enum;
+        }
 
         public static int EnumFlagField(System.Type enumType, GUIContent label, int value)
         {
-            var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
-            return EditorGUILayout.MaskField(label, value, names);
+            //var names = (from e in EnumUtil.GetUniqueEnumFlags(enumType) select e.ToString()).ToArray();
+            //return EditorGUILayout.MaskField(label, value, names);
+
+            var enums = EnumUtil.GetUniqueEnumFlags(enumType).ToArray();
+            var names = (from e in enums select e.ToString()).ToArray();
+            int mask = EditorHelper.ConvertEnumMaskToPopupMask(value, enums);
+            mask = EditorGUILayout.MaskField(mask, names);
+            return EditorHelper.ConvertPopupMaskToEnumMask(mask, enums);
         }
 
         public static System.Enum EnumFlagField(GUIContent label, System.Enum value)

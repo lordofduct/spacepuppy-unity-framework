@@ -30,6 +30,8 @@ namespace com.spacepuppyeditor.Scenario
             this.serializedObject.Update();
 
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
+            this.DrawPropertyField(EditorHelper.PROP_ORDER);
+            this.DrawPropertyField(EditorHelper.PROP_ACTIVATEON);
             this.DrawPropertyField(PROP_TARGET);
             this.DrawPropertyField(PROP_LINKTARGET);
             this.DrawPropertyField(PROP_UPDATEMODE);
@@ -65,7 +67,8 @@ namespace com.spacepuppyeditor.Scenario
             }
 
 
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_TARGET, PROP_LINKTARGET, PROP_UPDATEMODE, PROP_CONSTRAINT, PROP_DOPOSDAMPING, PROP_POSDAMPING, PROP_POSDAMPINGSTR, PROP_DOROTDAMPING, PROP_ROTDAMPING, PROP_ROTDAMPINGSTR);
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, EditorHelper.PROP_ORDER, EditorHelper.PROP_ACTIVATEON,
+                                            PROP_TARGET, PROP_LINKTARGET, PROP_UPDATEMODE, PROP_CONSTRAINT, PROP_DOPOSDAMPING, PROP_POSDAMPING, PROP_POSDAMPINGSTR, PROP_DOROTDAMPING, PROP_ROTDAMPING, PROP_ROTDAMPINGSTR);
 
             this.serializedObject.ApplyModifiedProperties();
         }

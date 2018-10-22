@@ -196,9 +196,9 @@ namespace com.spacepuppy.Anim
             if (ObjUtil.GetAsFromSource<Animation>(obj, out anim))
                 return anim;
 
-            if(_targetAnimator.ImplicityReducesEntireEntity)
+            if (obj is SPEntity || _targetAnimator.ImplicityReducesEntireEntity)
             {
-                var go = GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
+                var go = obj is SPEntity ? (obj as SPEntity).gameObject : GameObjectUtil.FindRoot(GameObjectUtil.GetGameObjectFromSource(obj));
                 if (go == null) return null;
 
                 SPAnimationController spcont;

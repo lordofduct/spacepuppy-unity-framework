@@ -156,11 +156,27 @@ namespace com.spacepuppy.Scenario
             this.OnTriggerActivated(sender, arg);
         }
 
-        protected void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
+        protected void ActivateRandomTrigger(object sender, object arg, bool considerWeights, bool selectOnlyIfActive)
         {
             if (_targets.Count > 0)
             {
-                TriggerTarget trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
+                TriggerTarget trig;
+                if (selectOnlyIfActive)
+                {
+                    using (var lst = TempCollection.GetList<TriggerTarget>())
+                    {
+                        for(int i = 0; i < _targets.Count; i++)
+                        {
+                            var go = GameObjectUtil.GetGameObjectFromSource(_targets[i].CalculateTarget(arg));
+                            if (object.ReferenceEquals(go, null) || go.IsAliveAndActive()) lst.Add(_targets[i]);
+                        }
+                        trig = (considerWeights) ? lst.PickRandom((t) => { return t.Weight; }) : lst.PickRandom();
+                    }
+                }
+                else
+                {
+                    trig = (considerWeights) ? _targets.PickRandom((t) => { return t.Weight; }) : _targets.PickRandom();
+                }
                 if (trig != null) trig.Trigger(sender, arg);
             }
 
@@ -274,8 +290,7 @@ namespace com.spacepuppy.Scenario
         }
 
         #endregion
-
-
+        
         #region Special Types
 
         public struct Enumerator : IEnumerator<TriggerTarget>
@@ -356,9 +371,9 @@ namespace com.spacepuppy.Scenario
             base.ActivateTriggerAt(index, sender, arg);
         }
 
-        public new void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
+        public new void ActivateRandomTrigger(object sender, object arg, bool considerWeights, bool selectOnlyIfActive)
         {
-            base.ActivateRandomTrigger(sender, arg, considerWeights);
+            base.ActivateRandomTrigger(sender, arg, considerWeights, selectOnlyIfActive);
         }
 
         public new IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
@@ -404,11 +419,7 @@ namespace com.spacepuppy.Scenario
         public new event System.EventHandler<T> TriggerActivated;
         protected virtual void OnTriggerActivated(object sender, T e)
         {
-            if (TriggerActivated != null)
-            {
-                var d = this.TriggerActivated;
-                d(sender, e);
-            }
+            this.TriggerActivated?.Invoke(sender, e);
         }
 
         #endregion
@@ -458,9 +469,9 @@ namespace com.spacepuppy.Scenario
             this.OnTriggerActivated(sender, arg);
         }
 
-        public void ActivateRandomTrigger(object sender, T arg, bool considerWeights)
+        public void ActivateRandomTrigger(object sender, T arg, bool considerWeights, bool selectOnlyIfActive)
         {
-            base.ActivateRandomTrigger(sender, arg, considerWeights);
+            base.ActivateRandomTrigger(sender, arg, considerWeights, selectOnlyIfActive);
             this.OnTriggerActivated(sender, arg);
         }
 
@@ -570,9 +581,9 @@ namespace com.spacepuppy.Scenario
             this.OnTriggerActivated(sender, arg);
         }
 
-        public void ActivateRandomTrigger(object sender, T arg, bool considerWeights)
+        public void ActivateRandomTrigger(object sender, T arg, bool considerWeights, bool selectOnlyIfActive)
         {
-            base.ActivateRandomTrigger(sender, arg, considerWeights);
+            base.ActivateRandomTrigger(sender, arg, considerWeights, selectOnlyIfActive);
             this.OnTriggerActivated(sender, arg);
         }
 
@@ -620,34 +631,34 @@ namespace com.spacepuppy.Scenario
 
         #endregion
 
-        #region Methods
+        //#region Methods
 
-        public new void ActivateTrigger(object sender, object arg)
-        {
-            base.ActivateTrigger(sender, arg);
-        }
+        //public new void ActivateTrigger(object sender, object arg)
+        //{
+        //    base.ActivateTrigger(sender, arg);
+        //}
 
-        public new void ActivateTriggerAt(int index, object sender, object arg)
-        {
-            base.ActivateTriggerAt(index, sender, arg);
-        }
+        //public new void ActivateTriggerAt(int index, object sender, object arg)
+        //{
+        //    base.ActivateTriggerAt(index, sender, arg);
+        //}
 
-        public new void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
-        {
-            base.ActivateRandomTrigger(sender, arg, considerWeights);
-        }
+        //public new void ActivateRandomTrigger(object sender, object arg, bool considerWeights)
+        //{
+        //    base.ActivateRandomTrigger(sender, arg, considerWeights);
+        //}
 
-        public new IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
-        {
-            return base.ActivateTriggerYielding(sender, arg);
-        }
+        //public new IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
+        //{
+        //    return base.ActivateTriggerYielding(sender, arg);
+        //}
 
-        public new void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
-        {
-            base.DaisyChainTriggerYielding(sender, arg, instruction);
-        }
+        //public new void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
+        //{
+        //    base.DaisyChainTriggerYielding(sender, arg, instruction);
+        //}
 
-        #endregion
+        //#endregion
 
         #region Special Types
 
@@ -670,7 +681,7 @@ namespace com.spacepuppy.Scenario
 
     }
 
-    
+
     public class BlockingTriggerYieldInstruction : RadicalYieldInstruction, IPooledYieldInstruction
     {
 

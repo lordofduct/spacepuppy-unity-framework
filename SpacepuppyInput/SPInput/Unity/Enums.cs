@@ -91,6 +91,17 @@ namespace com.spacepuppy.SPInput.Unity
         Custom
     }
 
+    [System.Flags]
+    public enum KeyCodeType
+    {
+        All = 7,
+        None = 0,
+        Keyboard = 1,
+        MouseButton = 2,
+        KeyboardAndMouse = 3,
+        JoystickButton = 4
+    }
+
     public enum InputMode
     {
         Axis,

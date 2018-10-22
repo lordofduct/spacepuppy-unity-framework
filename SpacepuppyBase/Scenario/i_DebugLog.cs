@@ -13,6 +13,8 @@ namespace com.spacepuppy.Scenario
 
         [SerializeField]
         private bool _logStackTrace;
+        [SerializeField]
+        private bool _logEvenInBuild;
 
         #endregion
 
@@ -22,6 +24,7 @@ namespace com.spacepuppy.Scenario
         public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
+            if (!_logEvenInBuild && !Application.isEditor) return false;
 
             if(_logStackTrace)
             {

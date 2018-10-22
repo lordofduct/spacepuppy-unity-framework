@@ -122,12 +122,18 @@ namespace com.spacepuppy.SPInput
             if (!_active) return ButtonState.None;
 
             var sig = _signatures.GetSignature(id);
-            //if (sig == null) return ButtonState.None;
-            if (!(sig is IButtonInputSignature)) return ButtonState.None;
-
-            var result = (sig as IButtonInputSignature).CurrentState;
-            if (consume) (sig as IButtonInputSignature).Consume();
-            return result;
+            if (sig is IButtonInputSignature)
+            {
+                var result = (sig as IButtonInputSignature).CurrentState;
+                if (consume) (sig as IButtonInputSignature).Consume();
+                return result;
+            }
+            else if (sig is IAxleInputSignature)
+                return (sig as IAxleInputSignature).CurrentState > InputUtil.DEFAULT_AXLEBTNDEADZONE ? ButtonState.Held : ButtonState.None;
+            else if (sig is IDualAxleInputSignature)
+                return (sig as IDualAxleInputSignature).CurrentState.sqrMagnitude > InputUtil.DEFAULT_AXLEBTNDEADZONE * InputUtil.DEFAULT_AXLEBTNDEADZONE ? ButtonState.Held : ButtonState.None;
+            else
+                return ButtonState.None;
         }
         
         public float GetAxleState(string id)
@@ -135,10 +141,14 @@ namespace com.spacepuppy.SPInput
             if (!_active) return 0f;
 
             var sig = _signatures.GetSignature(id);
-            if (sig == null) return 0f;
-            if (!(sig is IAxleInputSignature)) return 0f;
-
-            return (sig as IAxleInputSignature).CurrentState;
+            if (sig is IAxleInputSignature)
+                return (sig as IAxleInputSignature).CurrentState;
+            else if (sig is IDualAxleInputSignature)
+                return (sig as IDualAxleInputSignature).CurrentState.x;
+            else if (sig is IButtonInputSignature)
+                return (sig as IButtonInputSignature).CurrentState > ButtonState.None ? 1f : 0f;
+            else
+                return 0f;
         }
         
         public Vector2 GetDualAxleState(string id)
@@ -146,10 +156,14 @@ namespace com.spacepuppy.SPInput
             if (!_active) return Vector2.zero;
 
             var sig = _signatures.GetSignature(id);
-            if (sig == null) return Vector2.zero;
-            if (!(sig is IDualAxleInputSignature)) return Vector2.zero;
-
-            return (sig as IDualAxleInputSignature).CurrentState;
+            if (sig is IDualAxleInputSignature)
+                return (sig as IDualAxleInputSignature).CurrentState;
+            else if (sig is IAxleInputSignature)
+                return new Vector2((sig as IAxleInputSignature).CurrentState, 0f);
+            else if (sig is IButtonInputSignature)
+                return new Vector2((sig as IButtonInputSignature).CurrentState > ButtonState.None ? 1f : 0f, 0f);
+            else
+                return Vector2.zero;
         }
         
         public Vector2 GetCursorState(string id)
@@ -157,7 +171,6 @@ namespace com.spacepuppy.SPInput
             if (!_active) return Vector2.zero;
 
             var sig = _signatures.GetSignature(id);
-            if (sig == null) return Vector2.zero;
             if (!(sig is ICursorInputSignature)) return Vector2.zero;
 
             return (sig as ICursorInputSignature).CurrentState;

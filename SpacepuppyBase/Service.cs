@@ -868,6 +868,11 @@ namespace com.spacepuppy
     public class ServiceProxy<T> : ScriptableObject, IProxy where T : class, IService
     {
 
+        bool IProxy.QueriesTarget
+        {
+            get { return false; }
+        }
+
         public object GetTarget()
         {
             return Services.Get<T>();

@@ -66,6 +66,20 @@ namespace com.spacepuppy.Project
             }
         }
 
+        /// <summary>
+        /// Replaces the internal collection with a new set of assets.
+        /// </summary>
+        /// <param name="assets"></param>
+        public void ResetAssets(IEnumerable<UnityEngine.Object> assets)
+        {
+            _assets = assets.ToArray();
+            if(_table != null)
+            {
+                _table.Clear();
+                this.SetupTable();
+            }
+        }
+
         #endregion
 
         #region IAssetBundle Interface

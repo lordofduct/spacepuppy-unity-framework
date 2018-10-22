@@ -14,7 +14,10 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         [Trigger.Config(Weighted=true)]
         private Trigger _targets;
-        
+
+        [SerializeField]
+        private bool _selectOnlyActiveTargets;
+
         [SerializeField()]
         [UnityEngine.Serialization.FormerlySerializedAs("PassAlongTriggerArg")]
         private bool _passAlongTriggerArg;
@@ -29,6 +32,12 @@ namespace com.spacepuppy.Scenario
         #endregion
 
         #region Properties
+
+        public bool SelectOnlyActiveTargets
+        {
+            get { return _selectOnlyActiveTargets; }
+            set { _selectOnlyActiveTargets = value; }
+        }
 
         public bool PassAlongTriggerArg
         {
@@ -68,17 +77,17 @@ namespace com.spacepuppy.Scenario
                 this.InvokeGuaranteed(() =>
                 {
                     if (this._passAlongTriggerArg)
-                        _targets.ActivateRandomTrigger(this, arg, true);
+                        _targets.ActivateRandomTrigger(this, arg, true, _selectOnlyActiveTargets);
                     else
-                        _targets.ActivateRandomTrigger(this, null, true);
+                        _targets.ActivateRandomTrigger(this, null, true, _selectOnlyActiveTargets);
                 }, _delay, _delayTimeSupplier.TimeSupplier);
             }
             else
             {
                 if (this._passAlongTriggerArg)
-                    _targets.ActivateRandomTrigger(this, arg, true);
+                    _targets.ActivateRandomTrigger(this, arg, true, _selectOnlyActiveTargets);
                 else
-                    _targets.ActivateRandomTrigger(this, null, true);
+                    _targets.ActivateRandomTrigger(this, null, true, _selectOnlyActiveTargets);
             }
 
             return true;

@@ -601,7 +601,7 @@ namespace com.spacepuppy.Utils
         
 
 
-        public static T[] GetAllFromSource<T>(object obj) where T : class
+        public static T[] GetAllFromSource<T>(object obj, bool includeChildren = false) where T : class
         {
             if (obj == null) return ArrayUtil.Empty<T>();
 
@@ -626,15 +626,36 @@ namespace com.spacepuppy.Utils
                         var entity = SPEntity.Pool.GetFromSource(tp, go) as T;
                         if (entity != null) set.Add(entity);
                     }
+                    else if (typeof(UnityEngine.GameObject).IsAssignableFrom(tp))
+                    {
+                        if (includeChildren)
+                        {
+                            using (var lst = TempCollection.GetList<UnityEngine.Transform>())
+                            {
+                                go.GetComponentsInChildren<UnityEngine.Transform>(lst);
+
+                                var e = lst.GetEnumerator();
+                                while (e.MoveNext())
+                                {
+                                    set.Add(e.Current.gameObject as T);
+                                }
+                            }
+                        }
+                    }
                     if (ComponentUtil.IsAcceptableComponentType(tp))
-                        go.GetComponentsAlt<T>(set);
+                    {
+                        if (includeChildren)
+                            go.GetChildComponents<T>(set, true);
+                        else
+                            go.GetComponentsAlt<T>(set);
+                    }
                 }
 
                 return set.Count > 0 ? set.ToArray() : ArrayUtil.Empty<T>();
             }
         }
 
-        public static object[] GetAllFromSource(System.Type tp, object obj)
+        public static object[] GetAllFromSource(System.Type tp, object obj, bool includeChildren = false)
         {
             if (obj == null) return ArrayUtil.Empty<object>();
 
@@ -656,11 +677,35 @@ namespace com.spacepuppy.Utils
                         var entity = SPEntity.Pool.GetFromSource(tp, go);
                         if (entity != null) set.Add(entity);
                     }
+                    else if(typeof(UnityEngine.GameObject).IsAssignableFrom(tp))
+                    {
+                        if (includeChildren)
+                        {
+                            using (var lst = TempCollection.GetList<UnityEngine.Transform>())
+                            {
+                                go.GetComponentsInChildren<UnityEngine.Transform>(lst);
+
+                                var e = lst.GetEnumerator();
+                                while (e.MoveNext())
+                                {
+                                    set.Add(e.Current.gameObject);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            set.Add(go);
+                        }
+                    }
                     else if(ComponentUtil.IsAcceptableComponentType(tp))
                     {
                         using (var lst = TempCollection.GetList<UnityEngine.Component>())
                         {
-                            go.GetComponents(tp, lst);
+                            if (includeChildren)
+                                ComponentUtil.GetChildComponents(go, tp, lst, true);
+                            else
+                                go.GetComponents(tp, lst);
+
                             var e = lst.GetEnumerator();
                             while(e.MoveNext())
                             {
@@ -705,7 +750,11 @@ namespace com.spacepuppy.Utils
         {
             if (obj.IsNullOrDestroyed()) return;
 
-            if (UnityEngine.Application.isPlaying)
+            if (UnityEngine.Application.isEditor && !UnityEngine.Application.isPlaying)
+            {
+                UnityEngine.Object.DestroyImmediate(obj);
+            }
+            else
             {
                 //UnityEngine.Object.Destroy(obj);
                 if (obj is UnityEngine.GameObject)
@@ -714,10 +763,6 @@ namespace com.spacepuppy.Utils
                     (obj as UnityEngine.Transform).gameObject.Kill();
                 else
                     UnityEngine.Object.Destroy(obj);
-            }
-            else
-            {
-                UnityEngine.Object.DestroyImmediate(obj);
             }
         }
 
@@ -814,9 +859,56 @@ namespace com.spacepuppy.Utils
             return true;
         }
 
+        /// <summary>
+        /// Returns true if the object passed in is one of the many UnityEngine.Object's that unity will create that are invalid and report being null, but ReferenceEquals reports not being null. 
+        /// This is opposed to 'IsDestroyed' since this object should have never existed in the first place.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsInvalidObject(UnityEngine.Object obj)
+        {
+            //note - we use 'GetHashCode' because it returns the instanceId BUT doesn't do the stupid main thread test
+            return !object.ReferenceEquals(obj, null) && obj.GetHashCode() == 0;
+        }
+
+        /// <summary>
+        /// Returns true if the Unity object passed in is not null but isn't necessarily alive/destroyed. 
+        /// This is a compliment to IsInvalidObject for use when you want to determine if some value was ever once valid. 
+        /// For example if in the inspector you leave a UnityEngin.Object field null, the serializer will actually populate it with an 'Invalid Object'. 
+        /// If you ever needed to differentiate between if that value was ever a value but since destroyed VS being an invalid object, this will help.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsValidObject(UnityEngine.Object obj)
+        {
+            //note - we use 'GetHashCode' because it returns the instanceId BUT doesn't do the stupid main thread test
+            return !object.ReferenceEquals(obj, null) && obj.GetHashCode() != 0;
+        }
+
         #endregion
 
         #region Misc
+
+        /// <summary>
+        /// Returns true if 'obj' is 'parent', attached to 'parent', or part of the child hiearchy of 'parent'.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static bool IsRelatedTo(UnityEngine.Object parent, UnityEngine.Object obj)
+        {
+            if (parent == null || obj == null) return false;
+            if (parent == obj) return true;
+
+            var go = GameObjectUtil.GetGameObjectFromSource(parent);
+            if (go == null) return false;
+
+            var child = GameObjectUtil.GetGameObjectFromSource(obj);
+            if (child == null) return false;
+
+            if (go == child) return true;
+            return child.transform.IsChildOf(go.transform);
+        }
 
         public static bool EqualsAny(System.Object obj, params System.Object[] others)
         {

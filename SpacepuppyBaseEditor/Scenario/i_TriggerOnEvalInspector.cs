@@ -23,7 +23,8 @@ namespace com.spacepuppyeditor.Scenario
             this.serializedObject.Update();
 
             this.DrawPropertyField(EditorHelper.PROP_SCRIPT);
-            this.DrawPropertyField("_order");
+            this.DrawPropertyField(EditorHelper.PROP_ORDER);
+            this.DrawPropertyField(EditorHelper.PROP_ACTIVATEON);
 
 
             EditorGUILayout.BeginVertical("Box");
@@ -56,7 +57,7 @@ namespace com.spacepuppyeditor.Scenario
 
             EditorGUILayout.EndVertical();
 
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, "_order", "_conditions");
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, EditorHelper.PROP_ORDER, EditorHelper.PROP_ACTIVATEON, "_conditions");
 
 
             this.serializedObject.ApplyModifiedProperties();

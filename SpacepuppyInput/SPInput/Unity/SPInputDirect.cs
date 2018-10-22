@@ -121,6 +121,101 @@ namespace com.spacepuppy.SPInput.Unity
             }
         }
 
+        /// <summary>
+        /// Returns if any key of a specific type is pressed.
+        /// This can be sort of slow if testing anything other than 'All'/'None' since it must loop all keys.
+        /// </summary>
+        /// <param name="etp"></param>
+        /// <returns></returns>
+        public static bool GetAnyKey(KeyCodeType etp)
+        {
+            if (!Input.anyKey) return false;
+
+            const int MOUSE_LOW = (int)KeyCode.Mouse0;
+            const int MOUSE_HIGH = (int)KeyCode.Mouse6;
+            const int JOY_LOW = (int)KeyCode.JoystickButton0;
+            const int JOY_HIGH = (int)KeyCode.JoystickButton19;
+            
+            switch((int)etp & 7)
+            {
+                case 0:
+                    return false;
+                case 1: //keyboard only
+                    {
+                        if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
+
+                        for (int i = 0; i < _allKeyCodes.Length; i++)
+                        {
+                            if ((int)_allKeyCodes[i] >= MOUSE_LOW) break;
+
+                            if (Input.GetKey(_allKeyCodes[i])) return true;
+                        }
+
+                        return false;
+                    }
+                case 2: //mouse only
+                    {
+                        for(int i = MOUSE_LOW; i <= MOUSE_HIGH; i++)
+                        {
+                            if (Input.GetKey((KeyCode)i)) return true;
+                        }
+
+                        return false;
+                    }
+                case 3: // k/m
+                    {
+                        if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
+
+                        for (int i = 0; i < _allKeyCodes.Length; i++)
+                        {
+                            if ((int)_allKeyCodes[i] > MOUSE_HIGH) break;
+
+                            if (Input.GetKey(_allKeyCodes[i])) return true;
+                        }
+
+                        return false;
+                    }
+                case 4: //joystick only
+                    {
+                        for (int i = JOY_LOW; i <= JOY_HIGH; i++)
+                        {
+                            if (Input.GetKey((KeyCode)i)) return true;
+                        }
+
+                        return false;
+                    }
+                case 5: //keyboard & joystick
+                    {
+                        if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
+
+                        for (int i = 0; i < _allKeyCodes.Length; i++)
+                        {
+                            if ((int)_allKeyCodes[i] >= MOUSE_LOW || (int)_allKeyCodes[i] <= MOUSE_HIGH) continue;
+
+                            if (Input.GetKey(_allKeyCodes[i])) return true;
+                        }
+
+                        return false;
+                    }
+                case 6: //joystick & mouse
+                    {
+                        for (int i = MOUSE_LOW; i <= MOUSE_HIGH; i++)
+                        {
+                            if (Input.GetKey((KeyCode)i)) return true;
+                        }
+
+                        for (int i = JOY_LOW; i <= JOY_HIGH; i++)
+                        {
+                            if (Input.GetKey((KeyCode)i)) return true;
+                        }
+
+                        return false;
+                    }
+                default:
+                    return Input.anyKey;
+            }
+        }
+        
         #endregion
 
         #region Polling
@@ -410,9 +505,11 @@ namespace com.spacepuppy.SPInput.Unity
 
         public static KeyCode[] PollAllKeys(ButtonState state = ButtonState.Down)
         {
+            if (_allKeyCodes == null) _allKeyCodes = System.Enum.GetValues(typeof(UnityEngine.KeyCode)) as UnityEngine.KeyCode[];
+
             using (var lst = com.spacepuppy.Collections.TempCollection.GetList<KeyCode>())
             {
-                for (int i = ID_BUTTONLOW; i <= ID_BUTTONHIGH; i++)
+                for (int i = 0; i < _allKeyCodes.Length; i++)
                 {
                     switch (state)
                     {

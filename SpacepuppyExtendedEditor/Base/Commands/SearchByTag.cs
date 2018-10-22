@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Collections;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor.Base
@@ -25,7 +26,7 @@ namespace com.spacepuppyeditor.Base
         {
             EditorWindow.GetWindow<SearchByTag>();
 
-            searchResult = GameObjectUtil.FindGameObjectsWithMultiTag(tagValue).ToArray(); //GameObject.FindGameObjectsWithTag(tagValue);
+            searchResult = FindGameObjectsWithMultiTagSlow(tagValue).ToArray(); //GameObject.FindGameObjectsWithTag(tagValue);
             Selection.objects = searchResult;
         }
 
@@ -36,7 +37,7 @@ namespace com.spacepuppyeditor.Base
 
             if (tagValue != oldTagValue)
             {
-                searchResult = GameObjectUtil.FindGameObjectsWithMultiTag(tagValue).ToArray(); //GameObject.FindGameObjectsWithTag(tagValue);
+                searchResult = FindGameObjectsWithMultiTagSlow(tagValue).ToArray(); //GameObject.FindGameObjectsWithTag(tagValue);
                 Selection.objects = searchResult;
             }
 
@@ -56,7 +57,7 @@ namespace com.spacepuppyeditor.Base
                     }
                     else
                     {
-                        searchResult = GameObjectUtil.FindGameObjectsWithMultiTag(tagValue).ToArray(); //GameObject.FindGameObjectsWithTag(tagValue);
+                        searchResult = FindGameObjectsWithMultiTagSlow(tagValue).ToArray(); //GameObject.FindGameObjectsWithTag(tagValue);
                         Selection.objects = searchResult;
                         break;
                     }
@@ -67,5 +68,30 @@ namespace com.spacepuppyeditor.Base
             EditorGUILayout.EndScrollView();
         }
 
+
+
+        public static GameObject[] FindGameObjectsWithMultiTagSlow(string tag)
+        {
+            if (tag == SPConstants.TAG_MULTITAG)
+            {
+                return GameObject.FindGameObjectsWithTag(SPConstants.TAG_MULTITAG);
+            }
+            else
+            {
+                using (var tmp = TempList<GameObject>.GetList())
+                {
+                    foreach (var go in GameObject.FindGameObjectsWithTag(tag)) tmp.Add(go);
+
+                    foreach (var m in GameObject.FindObjectsOfType<MultiTag>())
+                    {
+                        if (m.HasTag(tag)) tmp.Add(m.gameObject);
+                    }
+
+                    return tmp.ToArray();
+                }
+            }
+        }
+
     }
+
 }

@@ -34,7 +34,7 @@ namespace com.spacepuppy
         internal static void FindAll(string tag, ICollection<GameObject> coll)
         {
             var e = Pool.GetEnumerator();
-            while(e.MoveNext())
+            while (e.MoveNext())
             {
                 if (e.Current.HasTag(tag)) coll.Add(e.Current.gameObject);
             }

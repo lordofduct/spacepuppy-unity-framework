@@ -31,7 +31,7 @@ namespace com.spacepuppy.Anim
         #region Fields
 
         [SerializeField()]
-        [DefaultFromSelf(UseEntity = true)]
+        [DefaultFromSelf(Relativity = EntityRelativity.Entity)]
         private SPAnimationController _controller;
 
         [System.NonSerialized]

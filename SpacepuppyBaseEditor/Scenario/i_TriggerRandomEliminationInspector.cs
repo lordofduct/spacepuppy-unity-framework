@@ -15,7 +15,7 @@ namespace com.spacepuppyeditor.Scenario
     {
 
         public const string PROP_ORDER = EditorHelper.PROP_ORDER;
-        public const string PROP_ACTIVATEON = "_activateOn";
+        public const string PROP_ACTIVATEON = EditorHelper.PROP_ACTIVATEON;
         public const string PROP_TARGETS = "_targets";
 
         private TriggerPropertyDrawer _targetsDrawer = new TriggerPropertyDrawer()

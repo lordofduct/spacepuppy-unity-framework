@@ -12,6 +12,12 @@ namespace com.spacepuppy
 
     public interface IProxy
     {
+
+        /// <summary>
+        /// Returns true if the underlying proxy performs a search/query of the scene.
+        /// </summary>
+        bool QueriesTarget { get; }
+
         System.Type GetTargetType();
 
         object GetTarget();
@@ -138,6 +144,11 @@ namespace com.spacepuppy
 
         #region IProxy Interface
 
+        bool IProxy.QueriesTarget
+        {
+            get { return _searchBy > SearchBy.Nothing; }
+        }
+
         object IProxy.GetTarget()
         {
             return this.GetTarget();
@@ -255,10 +266,15 @@ namespace com.spacepuppy
         {
             return DynamicUtil.SetValue(_target, _memberName, value);
         }
-        
+
         #endregion
 
         #region IProxy Interface
+
+        bool IProxy.QueriesTarget
+        {
+            get { return false; }
+        }
 
         object IProxy.GetTarget()
         {
@@ -345,6 +361,11 @@ namespace com.spacepuppy
         #endregion
 
         #region IProxy Interface
+
+        bool IProxy.QueriesTarget
+        {
+            get { return _target.ImplicityReducesEntireEntity; }
+        }
 
         public object GetTarget()
         {
@@ -512,6 +533,11 @@ namespace com.spacepuppy
         #endregion
 
         #region IProxy Interface
+
+        bool IProxy.QueriesTarget
+        {
+            get { return _target.ImplicityReducesEntireEntity; }
+        }
 
         public object GetTarget()
         {

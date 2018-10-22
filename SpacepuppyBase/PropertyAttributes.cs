@@ -17,6 +17,24 @@ namespace com.spacepuppy
 
 
     #region Component Attributes
+    
+    /*
+     * TODO
+     * 
+    [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class ExecutionOrderAttribute : System.Attribute
+    {
+
+        public int Order;
+        public bool Inherited;
+
+        public ExecutionOrderAttribute(int order)
+        {
+            this.Order = order;
+        }
+
+    }
+    */
 
     public abstract class ComponentHeaderAttribute : PropertyAttribute
     {
@@ -458,8 +476,14 @@ namespace com.spacepuppy
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class DefaultFromSelfAttribute : PropertyModifierAttribute
     {
-        public bool UseEntity = false;
+        public EntityRelativity Relativity = EntityRelativity.Self;
         public bool HandleOnce = true;
+
+        public DefaultFromSelfAttribute(EntityRelativity relativity = EntityRelativity.Self)
+        {
+            this.Relativity = relativity;
+        }
+
     }
 
     /// <summary>
@@ -485,12 +509,13 @@ namespace com.spacepuppy
     public class ForceFromSelfAttribute : PropertyModifierAttribute
     {
 
-        public EntityRelativity Relativity;
-
-        public ForceFromSelfAttribute(EntityRelativity relativity)
+        public EntityRelativity Relativity = EntityRelativity.Self;
+        
+        public ForceFromSelfAttribute(EntityRelativity relativity = EntityRelativity.Self)
         {
             this.Relativity = relativity;
         }
+
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
