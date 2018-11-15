@@ -62,6 +62,7 @@
     <Compile Include="Base\Commands\SPCreateRagdollWizard.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\ForceRootTagHeaderDrawer.cs" />
     <Compile Include="Base\ComponentHeaderDrawers\RequireColliderHeaderDrawer.cs" />
+    <Compile Include="Base\Inspectors\AnimationCurveConstraintPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\ConstraintPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DisplayFlatPropertyDrawer.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Base\Inspectors\VariantMemberPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\VectorInspectorPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\VersionInfoPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\WeightedValueCollectionPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\DisableIfModifier.cs" />
     <Compile Include="Base\Modifiers\FindInSelfModifier.cs" />
     <Compile Include="Base\Modifiers\ForceFromSelfModifier.cs" />

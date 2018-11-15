@@ -11,7 +11,7 @@ using System;
 
 namespace com.spacepuppy.Anim
 {
-    public class i_PlayAnimation : TriggerableMechanism, IObservableTrigger, IBlockingTriggerableMechanism
+    public class i_PlayAnimation : TriggerableMechanism, IObservableTrigger, IBlockingTriggerableMechanism, ISerializationCallbackReceiver
     {
 
         private const string TRG_ONANIMCOMPLETE = "OnAnimComplete";
@@ -22,7 +22,7 @@ namespace com.spacepuppy.Anim
             PlayAnimByID,
             PlayAnimFromResource
         }
-
+        
         #region Fields
 
         [SerializeField]
@@ -38,7 +38,9 @@ namespace com.spacepuppy.Anim
         private UnityEngine.Object _clip;
 
         [SerializeField]
-        private bool _applyCustomSettings;
+        private bool _applyCustomSettings; //OBSOLETE
+        [SerializeField]
+        private AnimSettingsMask _settingsMask;
         [SerializeField]
         private AnimSettings _settings = AnimSettings.Default;
 
@@ -73,11 +75,11 @@ namespace com.spacepuppy.Anim
             {
                 if (_crossFadeDur > 0f)
                     return controller.CrossFadeAuxiliary(clip as AnimationClip,
-                                                         _applyCustomSettings ? _settings : AnimSettings.Default,
+                                                         (_settingsMask != 0) ? AnimSettings.Intersect(AnimSettings.Default, _settings, _settingsMask) : AnimSettings.Default,
                                                          _crossFadeDur, _queueMode, _playMode);
                 else
                     return controller.PlayAuxiliary(clip as AnimationClip,
-                                                    _applyCustomSettings ? _settings : AnimSettings.Default,
+                                                    (_settingsMask != 0) ? AnimSettings.Intersect(AnimSettings.Default, _settings, _settingsMask) : AnimSettings.Default,
                                                     _queueMode, _playMode);
             }
             else if (clip is IScriptableAnimationClip)
@@ -104,7 +106,7 @@ namespace com.spacepuppy.Anim
                 anim = controller.CrossFadeQueued(id, _crossFadeDur, _queueMode, _playMode);
             else
                 anim = controller.PlayQueued(id, _queueMode, _playMode);
-            if (_applyCustomSettings) _settings.Apply(anim);
+            if (_settingsMask != 0) _settings.Apply(anim, _settingsMask);
             return anim;
         }
 
@@ -124,7 +126,7 @@ namespace com.spacepuppy.Anim
                                 anim.CrossFade(_crossFadeDur, _queueMode, _playMode);
                             else
                                 anim.Play(_queueMode, _playMode);
-                            if (_applyCustomSettings) _settings.Apply(anim);
+                            if (_settingsMask != 0) _settings.Apply(anim, _settingsMask);
                             return anim;
                         }
                         return null;
@@ -147,7 +149,7 @@ namespace com.spacepuppy.Anim
                                 anim = comp.CrossFadeQueued(_id, _crossFadeDur, _queueMode, _playMode);
                             else
                                 anim = comp.PlayQueued(_id, _queueMode, _playMode);
-                            if (_applyCustomSettings) _settings.Apply(anim);
+                            if (_settingsMask != 0) _settings.Apply(anim, _settingsMask);
                             return anim;
                         }
                         return null;
@@ -166,7 +168,7 @@ namespace com.spacepuppy.Anim
                             anim.CrossFade(_crossFadeDur, _queueMode, _playMode);
                         else
                             anim.Play(_queueMode, _playMode);
-                        if (_applyCustomSettings) _settings.Apply(anim);
+                        if (_settingsMask != 0) _settings.Apply(anim, _settingsMask);
                         return anim;
                     }
                     return null;
@@ -274,6 +276,28 @@ namespace com.spacepuppy.Anim
         Trigger[] IObservableTrigger.GetTriggers()
         {
             return new Trigger[] { _onAnimComplete };
+        }
+
+        #endregion
+
+        #region ISerializationCallbackReceiver Interface
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            if(_applyCustomSettings)
+            {
+                _applyCustomSettings = false;
+                _settingsMask = (AnimSettingsMask)(-1);
+            }
+        }
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            if (_applyCustomSettings)
+            {
+                _applyCustomSettings = false;
+                _settingsMask = (AnimSettingsMask)(-1);
+            }
         }
 
         #endregion

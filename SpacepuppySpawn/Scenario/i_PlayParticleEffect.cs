@@ -107,7 +107,7 @@ namespace com.spacepuppy.Scenario
                 this.InvokeGuaranteed(() =>
                 {
                     go.Kill();
-                }, dur);
+                }, dur, _effectPrefab.main.useUnscaledTime ? SPTime.Real : SPTime.Normal);
             }
 
             if (_onSpawnedObject != null && _onSpawnedObject.Count > 0)

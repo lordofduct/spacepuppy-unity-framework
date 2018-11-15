@@ -33,7 +33,7 @@ namespace com.spacepuppy.Scenario
         private Trigger _onAudioComplete;
 
         [System.NonSerialized()]
-        private RadicalCoroutine _completeRoutine;
+        private System.IDisposable _completeRoutine;
 
         #endregion
 
@@ -91,7 +91,7 @@ namespace com.spacepuppy.Scenario
                 switch (this.Interrupt)
                 {
                     case AudioInterruptMode.StopIfPlaying:
-                        if (_completeRoutine != null) _completeRoutine.Cancel();
+                        if (_completeRoutine != null) _completeRoutine.Dispose();
                         _completeRoutine = null;
                         src.Stop();
                         break;
@@ -114,17 +114,29 @@ namespace com.spacepuppy.Scenario
                     {
                         if (src != null)
                         {
-                            _completeRoutine = this.Invoke(this.OnAudioComplete, clip.length);
-                            //src.Play();
-                            src.PlayOneShot(clip);
+                            if(src != null && src.isActiveAndEnabled)
+                            {
+                                _completeRoutine = this.InvokeGuaranteed(this.OnAudioComplete, clip.length, SPTime.Real);
+                                src.PlayOneShot(clip);
+                            }
+                            else
+                            {
+                                this.OnAudioComplete();
+                            }
                         }
                     }, _delay);
                 }
                 else
                 {
-                    _completeRoutine = this.Invoke(this.OnAudioComplete, clip.length);
-                    //src.Play();
-                    src.PlayOneShot(clip);
+                    if (src != null && src.isActiveAndEnabled)
+                    {
+                        _completeRoutine = this.InvokeGuaranteed(this.OnAudioComplete, clip.length, SPTime.Real);
+                        src.PlayOneShot(clip);
+                    }
+                    else
+                    {
+                        this.OnAudioComplete();
+                    }
                 }
 
                 return true;

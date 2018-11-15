@@ -144,7 +144,7 @@ namespace com.spacepuppy.Scenario
             if (_signal == SignalMode.Auto)
             {
                 IAutoSequenceSignal signal;
-                var targ = GameObjectUtil.GetGameObjectFromSource(_trigger.Targets[i].Target);
+                var targ = GameObjectUtil.GetGameObjectFromSource(_trigger.Targets[i].Target, true);
                 if(targ != null && targ.GetComponentInChildren<IAutoSequenceSignal>(out signal))
                 if (signal != null)
                 {
@@ -166,7 +166,7 @@ namespace com.spacepuppy.Scenario
                 int i = this.CurrentIndexNormalized;
                 if (i < 0 || i >= _trigger.Targets.Count) yield break;
                 
-                var go = GameObjectUtil.GetGameObjectFromSource(_trigger.Targets[i].Target);
+                var go = GameObjectUtil.GetGameObjectFromSource(_trigger.Targets[i].Target, true);
                 if (go != null && go.GetComponentInChildren<IAutoSequenceSignal>(out signal))
                 {
                     var handle = signal.Wait();

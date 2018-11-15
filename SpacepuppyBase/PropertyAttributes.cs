@@ -419,6 +419,45 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class AnimationCurveConstraintAttribute : PropertyAttribute
+    {
+        public float x;
+        public float y;
+        public float width = float.PositiveInfinity;
+        public float height = float.PositiveInfinity;
+        public Color color = Color.green;
+    }
+
+    public class AnimationCurveEaseScaleAttribute : PropertyAttribute
+    {
+        public float overscan = 1f;
+        public Color color = Color.green;
+    }
+
+    /// <summary>
+    /// A specialized PropertyDrawer that draws a struct/class in the shape:
+    /// struct Pair
+    /// {
+    ///     float Weight;
+    ///     UnityEngine.Object Value;
+    /// }
+    /// 
+    /// It is drawn in the inspector as a single row as weight : value. 
+    /// It is intended for use with arrays/lists of values that can be randomly selected by some weight.
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class WeightedValueCollectionAttribute : ReorderableArrayAttribute
+    {
+        public string WeightPropertyName = "Weight";
+
+        public WeightedValueCollectionAttribute(string weightPropName, string valuePropName)
+        {
+            this.WeightPropertyName = weightPropName;
+            this.ChildPropertyToDrawAsElementEntry = valuePropName;
+        }
+    }
+
     #endregion
 
     #region Default Or Configured Property Drawer Attribute

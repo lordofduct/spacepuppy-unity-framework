@@ -4,25 +4,32 @@ using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
+
     public class i_SignalEvent : AutoTriggerableMechanism
     {
 
-        public event System.EventHandler OnSignal;
-        public event System.EventHandler OneUseOnSignal;
+        private System.Action<string> _signal;
+
+        public void WaitOne(System.Action<string> callback)
+        {
+            _signal += callback;
+        }
+
+        public void Signal(string token)
+        {
+            var d = _signal;
+            _signal = null;
+            if (d != null) d(token);
+        }
         
         public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
 
-            if (this.OnSignal != null) this.OnSignal(this, System.EventArgs.Empty);
-            if (this.OneUseOnSignal != null)
-            {
-                var ev = this.OneUseOnSignal;
-                this.OneUseOnSignal = null;
-                ev(this, System.EventArgs.Empty);
-            }
+            this.Signal(null);
             return true;
         }
 
     }
+
 }

@@ -55,6 +55,7 @@
     <Compile Include="Spawn\ISpawnPointPrefabSelector.cs" />
     <Compile Include="Spawn\ISpawnerModifier.cs" />
     <Compile Include="Spawn\i_SpawnFromResources.cs" />
+    <Compile Include="Spawn\i_SpawnWeighted.cs" />
     <Compile Include="Spawn\OrientOnSpawn.cs" />
     <Compile Include="Spawn\ProxySpawnPoint.cs" />
     <Compile Include="Spawn\ProxySpawnPointManager.cs" />

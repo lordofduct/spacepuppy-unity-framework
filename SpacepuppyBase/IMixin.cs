@@ -93,7 +93,7 @@ namespace com.spacepuppy
             {
                 c.OnStarted += (s, e) =>
                 {
-                    GameLoopEntry.UpdateHandle.BeginInvoke(() =>
+                    GameLoopEntry.LateUpdateHandle.BeginInvoke(() =>
                     {
                         c.OnLateStart();
                     });
@@ -125,7 +125,7 @@ namespace com.spacepuppy
             {
                 c.OnEnabled += (s, e) =>
                 {
-                    GameLoopEntry.UpdateHandle.BeginInvoke(() =>
+                    GameLoopEntry.LateUpdateHandle.BeginInvoke(() =>
                     {
                         c.OnLateStartOrEnable();
                     });

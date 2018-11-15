@@ -126,6 +126,10 @@ namespace com.spacepuppy.AI.Sensors.Visual
         [SerializeField()]
         private float _precedence;
 
+        [SerializeField]
+        [MinRange(0f)]
+        private float _radius;
+
         [SerializeField()]
         private Color _aspectColor = Color.blue;
 
@@ -158,7 +162,13 @@ namespace com.spacepuppy.AI.Sensors.Visual
         #endregion
 
         #region Properties
-
+        
+        public float Radius
+        {
+            get { return _radius; }
+            set { _radius = value = Mathf.Max(0f, value); }
+        }
+        
         public bool OmniPresent
         {
             get { return _omniPresent; }

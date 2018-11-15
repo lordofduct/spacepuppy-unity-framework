@@ -1255,10 +1255,26 @@ namespace com.spacepuppyeditor
         /// </summary>
         public static string ReflectedPropertyField(Rect position, GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
         {
-            if(targObj is IDynamic)
+            if (targObj is IDynamic || targObj is IProxy)
             {
                 var mask = allowSetterMethods ? System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Method : System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property;
-                var members = DynamicUtil.GetEasilySerializedMembers(targObj, mask, access).ToArray();
+                System.Reflection.MemberInfo[] members = null;
+                System.Type targTp = null;
+                if (targObj is IDynamic)
+                {
+                    targTp = targObj.GetType();
+                    members = DynamicUtil.GetEasilySerializedMembers(targObj, mask, access).ToArray();
+                }
+                else if (targObj is IProxy)
+                {
+                    targTp = (targObj as IProxy).GetTargetType();
+                    members = DynamicUtil.GetEasilySerializedMembersFromType(targTp, mask, access).ToArray();
+                }
+                else
+                {
+                    targTp = typeof(object);
+                    members = ArrayUtil.Empty<System.Reflection.MemberInfo>();
+                }
                 var entries = new GUIContent[members.Length + 1];
 
                 int index = -1;
@@ -1266,9 +1282,9 @@ namespace com.spacepuppyeditor
                 {
                     var m = members[i];
                     if ((DynamicUtil.GetMemberAccessLevel(m) & DynamicMemberAccess.Write) != 0)
-                        entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj, true)));
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, EditorHelper.GetValueWithMemberSafe(m, targObj, true)));
                     else
-                        entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj, true)));
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, EditorHelper.GetValueWithMemberSafe(m, targObj, true)));
 
                     if (index < 0 && m.Name == selectedMemberName)
                     {
@@ -1300,12 +1316,12 @@ namespace com.spacepuppyeditor
                     else
                     {
                         selectedMemberName = EditorGUI.TextField(r1, selectedMemberName);
-                        selectedMember = new DynamicPropertyInfo(selectedMemberName, targObj.GetType(), typeof(Variant));
+                        selectedMember = new DynamicPropertyInfo(selectedMemberName, targTp, typeof(Variant));
                         return selectedMemberName;
                     }
                 }
             }
-            if (targObj != null)
+            else if (targObj != null)
             {
                 var members = DynamicUtil.GetEasilySerializedMembers(targObj, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Method, access).ToArray();
                 var entries = new GUIContent[members.Length];
@@ -1315,9 +1331,9 @@ namespace com.spacepuppyeditor
                 {
                     var m = members[i];
                     if((DynamicUtil.GetMemberAccessLevel(m) & DynamicMemberAccess.Write) != 0)
-                        entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj, true)));
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, EditorHelper.GetValueWithMemberSafe(m, targObj, true)));
                     else
-                        entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, DynamicUtil.GetValueWithMember(m, targObj, true)));
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, EditorHelper.GetValueWithMemberSafe(m, targObj, true)));
 
                     if (index < 0 && m.Name == selectedMemberName)
                     {

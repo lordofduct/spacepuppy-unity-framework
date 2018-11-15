@@ -41,7 +41,7 @@ namespace com.spacepuppyeditor.Scenario
             System.Reflection.MemberInfo selectedMember = null;
             var restrictType = TypeReferencePropertyDrawer.GetTypeFromTypeReference(restrictTypeProp);
             
-            if (!targetRef.TargetsTriggerArg && targetRef.Target != null && 
+            if (restrictType == null && !targetRef.TargetsTriggerArg && targetRef.Target != null &&
                 targetRef.Find == TriggerableTargetObject.FindCommand.Direct && targetRef.ResolveBy != TriggerableTargetObject.ResolveByCommand.WithType && 
                 targetRef.Target.GetType() != restrictType)
             {

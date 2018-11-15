@@ -5,6 +5,10 @@ using System.Text;
 
 namespace com.spacepuppy.Spawn
 {
+
+    /// <summary>
+    /// Only supported by i_Spawner/Spawner
+    /// </summary>
     public interface ISpawnPointSelector : IComponent
     {
 

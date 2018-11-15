@@ -511,13 +511,21 @@ namespace com.spacepuppy.Spawn
             [System.NonSerialized()]
             private SpawnPool _owner;
             [System.NonSerialized()]
-            private HashSet<SpawnedObjectController> _instances = new HashSet<SpawnedObjectController>(ObjectReferenceEqualityComparer<SpawnedObjectController>.Default);
+            private HashSet<SpawnedObjectController> _instances;
             [System.NonSerialized()]
-            private HashSet<SpawnedObjectController> _activeInstances = new HashSet<SpawnedObjectController>(ObjectReferenceEqualityComparer<SpawnedObjectController>.Default);
+            private HashSet<SpawnedObjectController> _activeInstances;
+
+            protected PrefabCacheOptions()
+            {
+                _instances = new HashSet<SpawnedObjectController>(ObjectReferenceEqualityComparer<SpawnedObjectController>.Default);
+                _activeInstances = new HashSet<SpawnedObjectController>(ObjectReferenceEqualityComparer<SpawnedObjectController>.Default);
+            }
 
             internal PrefabCacheOptions(GameObject prefab)
             {
                 _prefab = prefab;
+                _instances = new HashSet<SpawnedObjectController>(ObjectReferenceEqualityComparer<SpawnedObjectController>.Default);
+                _activeInstances = new HashSet<SpawnedObjectController>(ObjectReferenceEqualityComparer<SpawnedObjectController>.Default);
             }
 
             public GameObject Prefab

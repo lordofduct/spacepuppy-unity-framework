@@ -101,9 +101,7 @@ namespace com.spacepuppy.Geom
         }
 
         #endregion
-
-
-
+        
         #region IGeom Interface
 
         public void Move(Vector3 mv)
@@ -201,6 +199,49 @@ namespace com.spacepuppy.Geom
             {
                 float radialDistSqr = rod.sqrMagnitude - dot * dot / sqrRailLength;
                 if (radialDistSqr > radius * radius || radialDistSqr < innerRadius * innerRadius)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
+        public static bool ContainsSphere(Vector3 start, Vector3 end, float radius, Vector3 pnt, float sphereRadius)
+        {
+            var rail = end - start;
+            var rod = pnt - start;
+            var dot = Vector3.Dot(rod, rail);
+            float sqrRailLength = rail.sqrMagnitude;
+            float sqrSphereRad = sphereRadius * sphereRadius;
+
+            if (dot < -sqrSphereRad || dot > sqrRailLength + sqrSphereRad)
+            {
+                return false;
+            }
+            else
+            {
+                if (rod.sqrMagnitude - dot * dot / sqrRailLength > radius * radius + sqrSphereRad)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
+        public static bool ContainsSphere(Vector3 start, Vector3 end, float radius, float innerRadius, Vector3 pnt, float sphereRadius)
+        {
+            var rail = end - start;
+            var rod = pnt - start;
+            var dot = Vector3.Dot(rod, rail);
+            var sqrRailLength = rail.sqrMagnitude;
+            float sqrSphereRad = sphereRadius * sphereRadius;
+
+            if (dot < -sqrSphereRad || dot > sqrRailLength + sqrSphereRad)
+            {
+                return false;
+            }
+            else
+            {
+                float radialDistSqr = rod.sqrMagnitude - dot * dot / sqrRailLength;
+                if (radialDistSqr > radius * radius + sqrSphereRad || radialDistSqr < innerRadius * innerRadius - sqrSphereRad)
                     return false;
                 else
                     return true;

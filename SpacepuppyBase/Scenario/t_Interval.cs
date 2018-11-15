@@ -88,7 +88,7 @@ namespace com.spacepuppy.Scenario
                 _routine = null;
             }
 
-            this.StartRadicalCoroutine(this.TickerCallback(), RadicalCoroutineDisableMode.CancelOnDisable);
+            _routine = this.StartRadicalCoroutine(this.TickerCallback(), RadicalCoroutineDisableMode.CancelOnDisable);
         }
 
 

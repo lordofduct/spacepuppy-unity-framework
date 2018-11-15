@@ -149,7 +149,6 @@ namespace com.spacepuppy.SPInput
                     return ButtonPress.None;
             }
         }
-        
 
         public static bool GetInputIsActivated(this IInputSignature sig)
         {

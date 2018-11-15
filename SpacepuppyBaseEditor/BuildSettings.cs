@@ -206,6 +206,8 @@ namespace com.spacepuppyeditor
         {
             try
             {
+                AssetDatabase.SaveAssets();
+
                 var scenes = this.GetScenePaths();
                 var buildGroup = BuildPipeline.GetBuildTargetGroup(this.BuildTarget);
 
@@ -256,7 +258,7 @@ namespace com.spacepuppyeditor
                         }
                     }
 
-                    BuildPipeline.BuildPlayer(scenes, path, this.BuildTarget, this.BuildOptions);
+                    var report = BuildPipeline.BuildPlayer(scenes, path, this.BuildTarget, this.BuildOptions);
 
                     if (cacheInputs != null)
                     {
@@ -284,20 +286,29 @@ namespace com.spacepuppyeditor
                         }
                     }
 
+                    EditorUtility.SetDirty(this);
+                    AssetDatabase.SaveAssets();
 
-                    //save
-                    if ((option & PostBuildOption.OpenFolder) != 0)
+                    if(report != null && report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
                     {
-                        EditorUtility.RevealInFinder(path);
-                    }
-                    if ((option & PostBuildOption.Run) != 0)
-                    {
-                        var proc = new System.Diagnostics.Process();
-                        proc.StartInfo.FileName = path;
-                        proc.Start();
-                    }
+                        //save
+                        if ((option & PostBuildOption.OpenFolder) != 0)
+                        {
+                            EditorUtility.RevealInFinder(path);
+                        }
+                        if ((option & PostBuildOption.Run) != 0)
+                        {
+                            var proc = new System.Diagnostics.Process();
+                            proc.StartInfo.FileName = path;
+                            proc.Start();
+                        }
 
-                    return true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
 
             }
@@ -464,7 +475,7 @@ namespace com.spacepuppyeditor
 
         #region Fields
 
-        private com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer _scenesDrawer = new com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer();
+        private com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer _scenesDrawer = new com.spacepuppyeditor.Base.ReorderableArrayPropertyDrawer(typeof(SceneAsset));
 
         #endregion
 

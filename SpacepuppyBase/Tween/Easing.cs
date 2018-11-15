@@ -819,6 +819,11 @@ namespace com.spacepuppy.Tween
 
         #region AnimationCurve
 
+        /// <summary>
+        /// Returns an Ease method that ignores start and end. Instead just returning the value in the curve for 'c', as if you called Evaluate(c).
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
         public static Ease FromAnimationCurve(AnimationCurve curve)
         {
             return (c, s, e, d) =>
@@ -827,6 +832,34 @@ namespace com.spacepuppy.Tween
             };
         }
 
+        /// <summary>
+        /// This treats the curve as if it's a scaling factor. The vertical from 0->1 is the value s->e. And the horizontal is just 'c'. 'd' is ignored in favor of the duration of the curve.
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public static Ease FromVerticalScalingAnimationCurve(AnimationCurve curve)
+        {
+            return (c, s, e, d) =>
+            {
+                if (d <= 0f) return e;
+                return Mathf.LerpUnclamped(s, e, curve.Evaluate(c / d));
+            };
+        }
+
+        /// <summary>
+        /// This treats the curve as if it's a scaling factor. The vertical from 0->1 is the value s->e. And the horizontal from 0->1 is the time from c->d.
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public static Ease FromScalingAnimationCurve(AnimationCurve curve)
+        {
+            return (c, s, e, d) =>
+            {
+                if (d <= 0f) return e;
+                return Mathf.LerpUnclamped(s, e, curve.Evaluate(c / d));
+            };
+        }
+        
         #endregion
 
         #region Configurable Cubic Bezier

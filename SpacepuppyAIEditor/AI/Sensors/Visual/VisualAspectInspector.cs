@@ -64,6 +64,16 @@ namespace com.spacepuppyeditor.AI.Sensors.Visual
                 Graphics.DrawMeshNow(PrimitiveUtil.GetMesh(PrimitiveType.Sphere), mat);
             }
         }
+
+        [DrawGizmo(GizmoType.Selected | GizmoType.InSelectionHierarchy | GizmoType.Active)]
+        private static void DrawSphereGizmo(VisualAspect aspect, GizmoType gizmoType)
+        {
+            if(aspect.Radius > 0f)
+            {
+                Gizmos.color = aspect.AspectColor;
+                Gizmos.DrawWireSphere(aspect.transform.position, aspect.Radius);
+            }
+        }
         
     }
 

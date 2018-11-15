@@ -62,7 +62,6 @@
     <Compile Include="Attributes.cs" />
     <Compile Include="Audio\AudioGroup.cs" />
     <Compile Include="Audio\AudioManager.cs" />
-    <Compile Include="Audio\GlobalAmbientAudioSourceProxy.cs" />
     <Compile Include="Audio\IAudioGroup.cs" />
     <Compile Include="AutoNotificationManager.cs" />
     <Compile Include="Cameras\Events.cs" />

@@ -36,6 +36,10 @@ namespace com.spacepuppy.Geom
             var geom2 = new AABBox(bounds);
             return Intersects(geom, geom2);
         }
+        
+
+
+
 
         /// <summary>
         /// Find intersecting line of two planes

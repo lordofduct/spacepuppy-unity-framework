@@ -530,6 +530,65 @@ namespace com.spacepuppyeditor
             }
         }
 
+        public static double GetNumericValue(this SerializedProperty prop)
+        {
+            switch (prop.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    return (double)prop.intValue;
+                case SerializedPropertyType.Boolean:
+                    return prop.boolValue ? 1d : 0d;
+                case SerializedPropertyType.Float:
+                    return prop.type == "double" ? prop.doubleValue : (double)prop.floatValue;
+                case SerializedPropertyType.ArraySize:
+                    return (double)prop.arraySize;
+                case SerializedPropertyType.Character:
+                    return (double)prop.intValue;
+                default:
+                    return 0d;
+            }
+        }
+
+        public static void SetNumericValue(this SerializedProperty prop, double value)
+        {
+            switch (prop.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                    prop.intValue = (int)value;
+                    break;
+                case SerializedPropertyType.Boolean:
+                    prop.boolValue = (System.Math.Abs(value) > MathUtil.DBL_EPSILON);
+                    break;
+                case SerializedPropertyType.Float:
+                    if (prop.type == "double")
+                        prop.doubleValue = value;
+                    else
+                        prop.floatValue = (float)value;
+                    break;
+                case SerializedPropertyType.ArraySize:
+                    prop.arraySize = (int)value;
+                    break;
+                case SerializedPropertyType.Character:
+                    prop.intValue = (int)value;
+                    break;
+            }
+        }
+
+        public static bool IsNumericValue(this SerializedProperty prop)
+        {
+            switch (prop.propertyType)
+            {
+                case SerializedPropertyType.Integer:
+                case SerializedPropertyType.Boolean:
+                case SerializedPropertyType.Float:
+                case SerializedPropertyType.ArraySize:
+                case SerializedPropertyType.Character:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
 
 
         public static int GetChildPropertyCount(SerializedProperty property, bool includeGrandChildren = false)
@@ -652,7 +711,34 @@ namespace com.spacepuppyeditor
 
         #endregion
 
-        #region Enum Utils
+        #region Value Utils
+
+        /// <summary>
+        /// An editor time safe version of DynamicUtil.GetValueWithMember that attempts to not leak various values into the scene (like materials).
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="targObj"></param>
+        /// <param name="ignoreMethod"></param>
+        /// <returns></returns>
+        public static object GetValueWithMemberSafe(MemberInfo info, object targObj, bool ignoreMethod)
+        {
+            if (info == null) return null;
+            targObj = ObjUtil.ReduceIfProxy(targObj);
+
+            var tp = info.DeclaringType;
+            if(TypeUtil.IsType(tp, typeof(Renderer)))
+            {
+                switch(info.Name)
+                {
+                    case "material":
+                        return DynamicUtil.GetValue(targObj, "sharedMaterial");
+                    case "materials":
+                        return DynamicUtil.GetValue(targObj, "sharedMaterials");
+                }
+            }
+
+            return DynamicUtil.GetValueWithMember(info, targObj, ignoreMethod);
+        }
 
         public static int ConvertPopupMaskToEnumMask(int mask, System.Enum[] enumFlagValues)
         {

@@ -107,22 +107,46 @@ namespace com.spacepuppy.AI.Sensors.Visual
             var center = this.GetCenterInWorldSpace();
             var otherPos = aspect.transform.position;
 
-            if (!Cylinder.ContainsPoint(center - (rod * halfHeight),
-                                       center + (rod * halfHeight),
-                                       _radius,
-                                       _innerRadius,
-                                       otherPos))
+            float aspRad = aspect.Radius;
+            if(aspRad > MathUtil.EPSILON)
             {
-                return false;
-            }
+                if (!Cylinder.ContainsSphere(center - (rod * halfHeight),
+                                           center + (rod * halfHeight),
+                                           _radius,
+                                           _innerRadius,
+                                           otherPos,
+                                           aspRad))
+                {
+                    return false;
+                }
 
-            if(this._angle < 360.0f)
+                if (this._angle < 360.0f)
+                {
+                    var v = VectorUtil.SetLengthOnAxis(otherPos - center, rod, 0f);
+                    var a = Vector3.Angle(this.transform.forward, v);
+                    float k = 2f * Mathf.Asin(aspRad / (Mathf.Sqrt(v.sqrMagnitude + (aspRad * aspRad) / 4f))) * Mathf.Rad2Deg;
+                    if (a > (_angle / 2.0f) - k) return false;
+                }
+            }
+            else
             {
-                var v = VectorUtil.SetLengthOnAxis(otherPos - center, rod, 0f);
-                var a = Vector3.Angle(this.transform.forward, v);
-                if (a > this._angle / 2.0f) return false;
-            }
+                if (!Cylinder.ContainsPoint(center - (rod * halfHeight),
+                                           center + (rod * halfHeight),
+                                           _radius,
+                                           _innerRadius,
+                                           otherPos))
+                {
+                    return false;
+                }
 
+                if (this._angle < 360.0f)
+                {
+                    var v = VectorUtil.SetLengthOnAxis(otherPos - center, rod, 0f);
+                    var a = Vector3.Angle(this.transform.forward, v);
+                    if (a > this._angle / 2.0f) return false;
+                }
+            }
+            
             if (this.RequiresLineOfSight)
             {
                 var v = otherPos - center;

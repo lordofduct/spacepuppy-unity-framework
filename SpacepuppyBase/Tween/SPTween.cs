@@ -366,19 +366,23 @@ namespace com.spacepuppy.Tween
             return tween;
         }
 
-        public static Tweener PlayCurve(object targ, string propName, AnimationCurve curve, float dur, object option = null)
-        {
-            if (curve == null) throw new System.ArgumentNullException("curve");
-            var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, EaseMethods.FromAnimationCurve(curve), null, null, dur, option));
-            tween.Play();
-            return tween;
-        }
-
         public static Tweener PlayCurve(object targ, string propName, AnimationCurve curve, object option = null)
         {
             if (curve == null) throw new System.ArgumentNullException("curve");
             float dur = (curve.keys.Length > 0) ? curve.keys.Last().time : 0f;
-            var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, EaseMethods.FromAnimationCurve(curve), null, null, dur, option));
+            var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName, 
+                                                                         EaseMethods.FromAnimationCurve(curve), 
+                                                                         null, null, dur, option));
+            tween.Play();
+            return tween;
+        }
+
+        public static Tweener PlayCurve(object targ, string propName, AnimationCurve curve, float dur, object option = null)
+        {
+            if (curve == null) throw new System.ArgumentNullException("curve");
+            var tween = new ObjectTweener(targ, MemberCurve.CreateFromTo(targ, propName,
+                                          EaseMethods.FromAnimationCurve(curve), 
+                                          null, null, dur, option));
             tween.Play();
             return tween;
         }

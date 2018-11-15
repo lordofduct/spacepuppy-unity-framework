@@ -182,10 +182,11 @@ namespace com.spacepuppy.Utils
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
 
-            using (var lst = TempCollection.GetSet<T>())
+            using (var coll = TempCollection.GetSet<T>())
             {
-                ObjUtil.FindObjectsOfInterface<T>(lst);
-                var e = lst.GetEnumerator();
+                ObjUtil.FindObjectsOfInterface<T>(coll);
+                GlobalMessagePool<T>.CopyReceivers(coll);
+                var e = coll.GetEnumerator();
                 while (e.MoveNext())
                 {
                     if (includeDisabledComponents || TargetIsValid(e.Current))
@@ -205,10 +206,11 @@ namespace com.spacepuppy.Utils
         {
             if (functor == null) throw new System.ArgumentNullException("functor");
 
-            using (var lst = TempCollection.GetSet<TInterface>())
+            using (var coll = TempCollection.GetSet<TInterface>())
             {
-                ObjUtil.FindObjectsOfInterface<TInterface>(lst);
-                var e = lst.GetEnumerator();
+                ObjUtil.FindObjectsOfInterface<TInterface>(coll);
+                GlobalMessagePool<TInterface>.CopyReceivers(coll);
+                var e = coll.GetEnumerator();
                 while (e.MoveNext())
                 {
                     if (includeDisabledComponents || TargetIsValid(e.Current))
@@ -448,7 +450,21 @@ namespace com.spacepuppy.Utils
 
             public static T[] CopyReceivers()
             {
+                if (_receivers == null || _receivers.Count == 0) return ArrayUtil.Empty<T>();
                 return _receivers.ToArray();
+            }
+
+            public static int CopyReceivers(ICollection<T> coll)
+            {
+                if (_receivers == null || _receivers.Count == 0) return 0;
+
+                int cnt = coll.Count;
+                var e = _receivers.GetEnumerator();
+                while(e.MoveNext())
+                {
+                    coll.Add(e.Current);
+                }
+                return coll.Count - cnt;
             }
 
             public static void Execute(System.Action<T> functor)

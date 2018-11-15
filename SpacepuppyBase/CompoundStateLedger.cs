@@ -30,9 +30,11 @@ namespace com.spacepuppy
         {
             base.OnDestroy();
 
-            foreach(var e in _table)
+            var values = _table.Values.ToArray();
+            _table.Clear();
+            foreach(var e in values)
             {
-                e.Value.Dispose();
+                e.Dispose();
             }
             _table.Clear();
         }

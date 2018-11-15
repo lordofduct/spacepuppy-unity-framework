@@ -424,10 +424,10 @@ namespace com.spacepuppy.Collections
         #endregion
 
     }
-
+    
     public class UniqueToEntityMultitonPool<T> : MultitonPool<T> where T : class
     {
-
+        
         #region CONSTRUCTOR
 
         public UniqueToEntityMultitonPool() : base()
@@ -498,7 +498,7 @@ namespace com.spacepuppy.Collections
         }
 
         #endregion
-
+        
     }
 
 }

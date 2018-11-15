@@ -69,13 +69,29 @@ namespace com.spacepuppy.AI.Sensors.Visual
         protected override bool TestVisibility(VisualAspect aspect)
         {
             //if not in cylinder, can not see it
-            if(!Cone.ContainsPoint(this.transform.position,
+            float aspRad = aspect.Radius;
+            if (aspRad > MathUtil.EPSILON)
+            {
+                if (!Cone.ContainsSphere(this.transform.position,
+                                       this.transform.position + this.Direction * _range,
+                                       _startRadius,
+                                       _endRadius,
+                                       aspect.transform.position,
+                                       aspRad))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (!Cone.ContainsPoint(this.transform.position,
                                        this.transform.position + this.Direction * _range,
                                        _startRadius,
                                        _endRadius,
                                        aspect.transform.position))
-            {
-                return false;
+                {
+                    return false;
+                }
             }
 
             if (this.RequiresLineOfSight)

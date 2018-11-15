@@ -73,38 +73,43 @@ namespace com.spacepuppy.AI.Sensors.Visual
 
         protected override bool TestVisibility(VisualAspect aspect)
         {
-            var sqrRadius = _radius * _radius;
-            var v = aspect.transform.position - this.transform.position;
-            if (v.sqrMagnitude > sqrRadius) return false;
-            if (this._innerRadius > 0f && v.sqrMagnitude < this._innerRadius * this._innerRadius) return false;
+            float aspRad = aspect.Radius;
+            float sqrRadius = _radius * _radius;
+            Vector3 v = aspect.transform.position - this.transform.position;
+            float sqrDist = v.sqrMagnitude;
 
-            if(this._horizontalAngle != 360.0f && this._verticalAngle != 360.0f)
+            if (sqrDist - (aspRad * aspRad) > sqrRadius) return false;
+            if (this._innerRadius > aspRad && sqrDist < this._innerRadius * this._innerRadius) return false;
+
+            if(this._horizontalAngle < 360.0f && this._verticalAngle < 360.0f)
             {
                 Vector3 directionOfAspectInLocalSpace = this.transform.InverseTransformDirection(v); //Quaternion.Inverse(this.transform.rotation) * v;
-                //var lookAtAngles = (VectorUtil.NearZeroVector(directionOfAspectInLocalSpace)) ? Vector3.zero : Quaternion.LookRotation(directionOfAspectInLocalSpace).eulerAngles;
-                //if (Mathf.Abs(lookAtAngles.y * 2.0f) > this._horizontalAngle)
-                //    return false;
-                //else if (Mathf.Abs(lookAtAngles.x * 2.0f) > this._verticalAngle)
-                //    return false;
-
                 float a;
-                a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.x));
-                if (a > this._horizontalAngle / 2f)
-                    return false;
-                a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.y));
-                if (a > this._verticalAngle / 2f)
-                    return false;
+                if (aspRad > MathUtil.EPSILON)
+                {
+                    float k = 2f * Mathf.Asin(aspRad / (Mathf.Sqrt(sqrDist + (aspRad * aspRad) / 4f))) * Mathf.Rad2Deg;
+                    a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.x));
+                    
+                    if (a > (this._horizontalAngle / 2f) - k)
+                        return false;
+                    a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.y));
+                    if (a > (this._verticalAngle / 2f) - k)
+                        return false;
+                }
+                else
+                {
+                    a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.x));
+                    if (a > this._horizontalAngle / 2f)
+                        return false;
+                    a = VectorUtil.AngleBetween(new Vector2(1f, 0f), new Vector2(directionOfAspectInLocalSpace.z, directionOfAspectInLocalSpace.y));
+                    if (a > this._verticalAngle / 2f)
+                        return false;
+                }
+
             }
 
             if(this.RequiresLineOfSight)
             {
-                //RaycastHit[] hits = Physics.RaycastAll(this.transform.position, v, v.magnitude, this.LineOfSightMask);
-                //foreach(var hit in hits)
-                //{
-                //    //we ignore ourself
-                //    var r = hit.collider.FindRoot();
-                //    if (r != aspect.entityRoot && r != this.entityRoot) return false;
-                //}
                 using (var lst = com.spacepuppy.Collections.TempCollection.GetList<RaycastHit>())
                 {
                     int cnt = PhysicsUtil.RaycastAll(this.transform.position, v, lst, v.magnitude, this.LineOfSightMask);

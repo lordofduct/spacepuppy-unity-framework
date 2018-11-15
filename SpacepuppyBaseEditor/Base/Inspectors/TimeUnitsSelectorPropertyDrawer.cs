@@ -103,16 +103,23 @@ namespace com.spacepuppyeditor.Base
 
             var r = new Rect(position.xMin, position.yMin, Mathf.Min(position.width, desiredWidth), position.height);
 
-            var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute, this.TimeUnitsCalculator);
-            
-            double dur = property.doubleValue;
-            if (MathUtil.IsReal(dur)) dur = this.TimeUnitsCalculator.SecondsToTimeUnits(units, dur);
-            EditorGUI.BeginChangeCheck();
-            dur = EditorGUI.DoubleField(r, (float)dur);
-            if (EditorGUI.EndChangeCheck())
+            if (property.IsNumericValue())
             {
-                if(MathUtil.IsReal(dur)) dur = this.TimeUnitsCalculator.TimeUnitsToSeconds(units, dur);
-                property.doubleValue = dur;
+                var units = GetUnits(property, this.attribute as TimeUnitsSelectorAttribute, this.TimeUnitsCalculator);
+
+                double dur = property.GetNumericValue();
+                if (MathUtil.IsReal(dur)) dur = this.TimeUnitsCalculator.SecondsToTimeUnits(units, dur);
+                EditorGUI.BeginChangeCheck();
+                dur = EditorGUI.DoubleField(r, (float)dur);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (MathUtil.IsReal(dur)) dur = this.TimeUnitsCalculator.TimeUnitsToSeconds(units, dur);
+                    property.SetNumericValue(dur);
+                }
+            }
+            else
+            {
+                EditorGUI.LabelField(r, "Unsupported type: " + property.type);
             }
 
             return new Rect(r.xMax, position.yMin, Mathf.Max(position.width - r.width, 0f), position.height);

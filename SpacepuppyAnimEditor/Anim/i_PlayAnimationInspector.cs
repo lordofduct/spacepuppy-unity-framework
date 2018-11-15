@@ -20,11 +20,14 @@ namespace com.spacepuppyeditor.Anim
         public const string PROP_TARGETANIMATOR = "_targetAnimator";
         public const string PROP_ID = "_id";
         public const string PROP_CLIP = "_clip";
-        public const string PROP_APPLYSETTINGS = "_applyCustomSettings";
+        private const string PROP_APPLYSETTINGS = "_applyCustomSettings"; //OBSOLETE
+        public const string PROP_SETTINGSMASK = "_settingsMask";
         public const string PROP_SETTINGS = "_settings";
         public const string PROP_QUEUEMODE = "_queueMode";
         public const string PROP_PLAYMODE = "_playMode";
         public const string PROP_CROSSFADEDUR = "_crossFadeDur";
+        private static string[] PROPS_ANIMSETTINGS = new string[] { "weight", "speed", "layer", "wrapMode", "blendMode", "timeSupplier" };
+
 
         private TriggerableTargetObjectPropertyDrawer _targetDrawer = new TriggerableTargetObjectPropertyDrawer()
         {
@@ -114,7 +117,7 @@ namespace com.spacepuppyeditor.Anim
                     break;
             }
             
-            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_ORDER, PROP_MODE, PROP_TARGETANIMATOR, PROP_ID, PROP_CLIP, PROP_APPLYSETTINGS, PROP_SETTINGS, PROP_QUEUEMODE, PROP_PLAYMODE, PROP_CROSSFADEDUR);
+            this.DrawDefaultInspectorExcept(EditorHelper.PROP_SCRIPT, PROP_ORDER, PROP_MODE, PROP_TARGETANIMATOR, PROP_ID, PROP_CLIP, PROP_APPLYSETTINGS, PROP_SETTINGSMASK, PROP_SETTINGS, PROP_QUEUEMODE, PROP_PLAYMODE, PROP_CROSSFADEDUR);
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -160,6 +163,7 @@ namespace com.spacepuppyeditor.Anim
 
         private void DrawAnimSettings()
         {
+            /*
             var propApply = this.serializedObject.FindProperty(PROP_APPLYSETTINGS);
             SPEditorGUILayout.PropertyField(propApply);
             if (propApply.boolValue)
@@ -169,6 +173,38 @@ namespace com.spacepuppyeditor.Anim
                 SPEditorGUILayout.FlatChildPropertyField(this.serializedObject.FindProperty(PROP_SETTINGS));
                 EditorGUI.indentLevel--;
             }
+            */
+
+            var propMask = this.serializedObject.FindProperty(PROP_SETTINGSMASK);
+            var propSettings = this.serializedObject.FindProperty(PROP_SETTINGS);
+
+            int mask = propMask.intValue;
+            propSettings.isExpanded = EditorGUILayout.Foldout(propSettings.isExpanded, mask != 0 ? "Custom Settings : Active" : "Custom Settings");
+
+            EditorGUI.BeginChangeCheck();
+            for (int i = 0; i < PROPS_ANIMSETTINGS.Length; i++)
+            {
+                int m = 1 << i;
+                bool active = (mask & m) != 0;
+                if (!propSettings.isExpanded && !active) continue;
+
+                var propSet = propSettings.FindPropertyRelative(PROPS_ANIMSETTINGS[i]);
+                EditorGUILayout.BeginHorizontal();
+                if (EditorGUILayout.Toggle(active, GUILayout.MaxWidth(20f)))
+                {
+                    mask |= m;
+                    EditorGUILayout.PropertyField(propSet);
+                }
+                else
+                {
+                    mask &= ~m;
+                    EditorGUILayout.PrefixLabel(EditorHelper.TempContent(propSet.displayName, propSet.tooltip));
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+            if (EditorGUI.EndChangeCheck())
+                propMask.intValue = mask;
         }
 
         private void DrawAnimIdSelector(object animator)

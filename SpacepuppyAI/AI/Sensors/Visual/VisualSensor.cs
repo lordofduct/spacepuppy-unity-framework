@@ -31,6 +31,7 @@ namespace com.spacepuppy.AI.Sensors.Visual
         private bool _requiresLineOfSight;
         [SerializeField()]
         [FormerlySerializedAs("LineOfSightMask")]
+        [Tooltip("Line of sight includes a raycast to the aspect. Radii of fat aspects are not respected.")]
         private LayerMask _lineOfSightMask;
 
         #endregion

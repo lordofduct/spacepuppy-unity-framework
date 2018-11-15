@@ -180,6 +180,33 @@ namespace com.spacepuppy.Geom
             }
         }
 
+        public static bool ContainsSphere(Vector3 start, Vector3 end, float startRadius, float endRadius, Vector3 pnt, float sphereRadius)
+        {
+            var rail = end - start;
+            var rod = pnt - start;
+            var dot = Vector3.Dot(rod, rail);
+            var sqrRailLength = rail.sqrMagnitude;
+            float sqrSphereRad = sphereRadius * sphereRadius;
+
+            if (dot < -sqrSphereRad || dot > sqrRailLength + sqrSphereRad)
+            {
+                return false;
+            }
+            else
+            {
+                float radius;
+                if (sqrRailLength < 0.0001f)
+                    radius = Mathf.Max(startRadius, endRadius);
+                else
+                    radius = startRadius + (endRadius - startRadius) * dot / sqrRailLength;
+
+                if (rod.sqrMagnitude - dot * dot / sqrRailLength > radius * radius + sqrSphereRad)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
         #endregion
 
     }

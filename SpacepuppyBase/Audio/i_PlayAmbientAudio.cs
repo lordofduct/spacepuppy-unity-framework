@@ -30,7 +30,7 @@ namespace com.spacepuppy.Audio
         private Trigger _onAudioComplete;
 
         [System.NonSerialized()]
-        private RadicalCoroutine _completeRoutine;
+        private System.IDisposable _completeRoutine;
 
         #endregion
 
@@ -85,12 +85,18 @@ namespace com.spacepuppy.Audio
             }
 
             var src = manager.BackgroundAmbientAudioSource;
+            if (src == null)
+            {
+                Debug.LogWarning("Failed to play audio due to a lack of BackgroundAmbientAudioSource on the AudioManager.", this);
+                return false;
+            }
+
             if (src.isPlaying)
             {
                 switch (this.Interrupt)
                 {
                     case AudioInterruptMode.StopIfPlaying:
-                        if (_completeRoutine != null) _completeRoutine.Cancel();
+                        if (_completeRoutine != null) _completeRoutine.Dispose();
                         _completeRoutine = null;
                         src.Stop();
                         break;
@@ -113,7 +119,7 @@ namespace com.spacepuppy.Audio
                     {
                         if (src != null)
                         {
-                            _completeRoutine = this.Invoke(this.OnAudioComplete, clip.length);
+                            _completeRoutine = this.InvokeGuaranteed(this.OnAudioComplete, clip.length, SPTime.Real);
                             //src.Play();
                             src.PlayOneShot(clip);
                         }
@@ -121,7 +127,7 @@ namespace com.spacepuppy.Audio
                 }
                 else
                 {
-                    _completeRoutine = this.Invoke(this.OnAudioComplete, clip.length);
+                    _completeRoutine = this.InvokeGuaranteed(this.OnAudioComplete, clip.length, SPTime.Real);
                     //src.Play();
                     src.PlayOneShot(clip);
                 }

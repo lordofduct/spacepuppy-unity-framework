@@ -157,8 +157,7 @@ namespace com.spacepuppyeditor
 
     }
 
-
-
+    
     [CustomPropertyDrawer(typeof(MemberProxy))]
     public class MemberProxyPropertyDrawer : PropertyDrawer
     {
@@ -200,5 +199,5 @@ namespace com.spacepuppyeditor
         }
 
     }
-
+    
 }
