@@ -352,6 +352,22 @@ namespace com.spacepuppyeditor.Scenario
             }
         }
 
+        public static System.Type GetTargetType(SerializedProperty prop)
+        {
+            var field = EditorHelper.GetFieldOfProperty(prop);
+            var attrib = field != null ? field.GetCustomAttributes(typeof(TriggerableTargetObject.ConfigAttribute), false).FirstOrDefault() as TriggerableTargetObject.ConfigAttribute : null;
+            if (attrib != null && attrib.TargetType != null) return attrib.TargetType;
+
+            var targ = EditorHelper.GetTargetObjectOfProperty(prop) as TriggerableTargetObject;
+            return targ != null ? targ.GetTargetType() : typeof(UnityEngine.Object);
+        }
+
+        public static object GetTarget(SerializedProperty prop, System.Type tp, object triggerArg = null)
+        {
+            var targ = EditorHelper.GetTargetObjectOfProperty(prop) as TriggerableTargetObject;
+            return targ != null ? targ.GetTarget(tp, triggerArg) : null;
+        }
+
         #endregion
 
     }

@@ -16,7 +16,7 @@ namespace com.spacepuppyeditor.Modifiers
         
         private HashSet<int> _handled = new HashSet<int>();
 
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             int hash = com.spacepuppyeditor.Internal.PropertyHandlerCache.GetIndexRespectingPropertyHash(property);
             if (_handled.Contains(hash)) return;

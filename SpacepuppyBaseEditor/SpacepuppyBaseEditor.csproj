@@ -66,6 +66,8 @@
     <Compile Include="Base\Inspectors\ConstraintPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DisplayFlatPropertyDrawer.cs" />
+    <Compile Include="Base\Modifiers\DisplayIfPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\EnumInCustomOrderPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentLongPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentPropertyDrawer.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Internal\HackPropertyDrawers.cs" />
     <Compile Include="Project\SerializableInterfaceRefPropertyDrawer.cs" />
     <Compile Include="Scenario\EventTriggerEvaluatorInspector.cs" />
+    <Compile Include="Scenario\i_PlayAudioInspector.cs" />
     <Compile Include="Scenario\i_TriggerOnEnumStateInspector.cs" />
     <Compile Include="SpacepuppySettings.cs" />
     <Compile Include="BuildSettings.cs" />

@@ -178,6 +178,7 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class EnumPopupExcludingAttribute : SPPropertyAttribute
     {
 
@@ -186,6 +187,19 @@ namespace com.spacepuppy
         public EnumPopupExcludingAttribute(params int[] excluded)
         {
             excludedValues = excluded;
+        }
+
+    }
+    
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class EnumInCustomOrderAttribute : SPPropertyAttribute
+    {
+
+        public readonly int[] customOrder;
+
+        public EnumInCustomOrderAttribute(params int[] enumOrder)
+        {
+            this.customOrder = enumOrder;
         }
 
     }
@@ -398,6 +412,7 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
     public class DisplayFlatAttribute : SPPropertyAttribute
     {
 
@@ -570,6 +585,22 @@ namespace com.spacepuppy
         public bool DisableIfNot;
         
         public DisableIfAttribute(string memberName)
+        {
+            this.MemberName = memberName;
+        }
+
+    }
+
+    /// <summary>
+    /// Display a field in the inspector only if the property/method returns true (supports private).
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class DisplayIfAttribute : SPPropertyAttribute
+    {
+        public readonly string MemberName;
+        public bool DisplayIfNot;
+
+        public DisplayIfAttribute(string memberName)
         {
             this.MemberName = memberName;
         }

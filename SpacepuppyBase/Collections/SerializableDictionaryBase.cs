@@ -6,7 +6,7 @@ namespace com.spacepuppy.Collections
 
     public abstract class DrawableDictionary
     {
-
+        
     }
 
     [System.Serializable()]
@@ -17,6 +17,31 @@ namespace com.spacepuppy.Collections
 
         [System.NonSerialized()]
         private Dictionary<TKey, TValue> _dict;
+        [System.NonSerialized()]
+        private IEqualityComparer<TKey> _comparer;
+
+        #endregion
+
+        #region CONSTRUCTOR
+
+        public SerializableDictionaryBase()
+        {
+
+        }
+
+        public SerializableDictionaryBase(IEqualityComparer<TKey> comparer)
+        {
+            _comparer = comparer;
+        }
+
+        #endregion
+
+        #region Properties
+
+        public IEqualityComparer<TKey> Comparer
+        {
+            get { return _comparer; }
+        }
 
         #endregion
 
@@ -29,7 +54,7 @@ namespace com.spacepuppy.Collections
 
         public void Add(TKey key, TValue value)
         {
-            if (_dict == null) _dict = new Dictionary<TKey, TValue>();
+            if (_dict == null) _dict = new Dictionary<TKey, TValue>(_comparer);
             _dict.Add(key, value);
         }
 
@@ -43,7 +68,7 @@ namespace com.spacepuppy.Collections
         {
             get
             {
-                if (_dict == null) _dict = new Dictionary<TKey, TValue>();
+                if (_dict == null) _dict = new Dictionary<TKey, TValue>(_comparer);
                 return _dict.Keys;
             }
         }
@@ -68,7 +93,7 @@ namespace com.spacepuppy.Collections
         {
             get
             {
-                if (_dict == null) _dict = new Dictionary<TKey, TValue>();
+                if (_dict == null) _dict = new Dictionary<TKey, TValue>(_comparer);
                 return _dict.Values;
             }
         }
@@ -82,7 +107,7 @@ namespace com.spacepuppy.Collections
             }
             set
             {
-                if (_dict == null) _dict = new Dictionary<TKey, TValue>();
+                if (_dict == null) _dict = new Dictionary<TKey, TValue>(_comparer);
                 _dict[key] = value;
             }
         }
@@ -94,7 +119,7 @@ namespace com.spacepuppy.Collections
 
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
         {
-            if (_dict == null) _dict = new Dictionary<TKey, TValue>();
+            if (_dict == null) _dict = new Dictionary<TKey, TValue>(_comparer);
             (_dict as ICollection<KeyValuePair<TKey, TValue>>).Add(item);
         }
 
@@ -152,7 +177,7 @@ namespace com.spacepuppy.Collections
         {
             if(_keys != null && _values != null)
             {
-                if (_dict == null) _dict = new Dictionary<TKey, TValue>(_keys.Length);
+                if (_dict == null) _dict = new Dictionary<TKey, TValue>(_keys.Length, _comparer);
                 else _dict.Clear();
                 for(int i = 0; i < _keys.Length; i++)
                 {

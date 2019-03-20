@@ -24,9 +24,6 @@ namespace com.spacepuppy.Scenario
         [System.NonSerialized()]
         private BaseSPEvent _targetEvent;
         
-        [System.NonSerialized]
-        private TriggerTarget[] _hijackCache;
-
         #endregion
 
         #region Properties
@@ -90,7 +87,7 @@ namespace com.spacepuppy.Scenario
         {
             if(_targetEvent != null)
             {
-                if (_hijackCache != null) this.EndHijack();
+                _targetEvent.EndHijack(this);
                 _targetEvent.TriggerActivated -= this.OnTriggerActivated;
                 _targetEvent = null;
             }
@@ -102,21 +99,16 @@ namespace com.spacepuppy.Scenario
             if (!_initialized) this.Init();
 
             if (_targetEvent == null) return false;
-            
-            if(_hijackCache == null)
-            {
-                _hijackCache = _targetEvent.Targets.ToArray();
-                _targetEvent.Targets.Clear();
-            }
+
+            _targetEvent.BeginHijack(this);
             return true;
         }
 
         public void EndHijack()
         {
-            if(_hijackCache != null)
+            if(_targetEvent != null)
             {
-                _targetEvent.Targets.AddRange(_hijackCache);
-                _hijackCache = null;
+                _targetEvent.EndHijack(this);
             }
         }
 

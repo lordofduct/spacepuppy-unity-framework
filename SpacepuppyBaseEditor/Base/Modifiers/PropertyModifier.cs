@@ -40,7 +40,7 @@ namespace com.spacepuppyeditor.Modifiers
 
         #region Overridables
 
-        protected internal virtual void OnBeforeGUI(SerializedProperty property)
+        protected internal virtual void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
 
         }

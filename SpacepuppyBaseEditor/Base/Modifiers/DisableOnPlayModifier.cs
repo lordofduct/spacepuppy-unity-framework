@@ -12,7 +12,7 @@ namespace com.spacepuppyeditor.Modifiers
     public class DisableOnPlayModifier : PropertyModifier
     {
         
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             if (Application.isPlaying)
             {

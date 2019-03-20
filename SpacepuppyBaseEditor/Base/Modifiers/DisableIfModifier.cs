@@ -14,7 +14,7 @@ namespace com.spacepuppyeditor.Modifiers
     public class DisableIfModifier : PropertyModifier
     {
         
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             var attrib = this.attribute as DisableIfAttribute;
             var targ = EditorHelper.GetTargetObjectWithProperty(property);

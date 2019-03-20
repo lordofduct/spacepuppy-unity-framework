@@ -1053,7 +1053,7 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembersFromType(System.Type tp, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite)
+        public static IEnumerable<System.Reflection.MemberInfo> GetEasilySerializedMembersFromType(System.Type tp, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite, bool ignoreObsoleteMembers = true)
         {
             if (tp == null) yield break;
 
@@ -1063,6 +1063,7 @@ namespace com.spacepuppy.Dynamic
             foreach (var mi in members)
             {
                 if ((mi.MemberType & mask) == 0) continue;
+                if (ignoreObsoleteMembers && mi.IsObsolete()) continue;
 
                 if ((mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
                      mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||

@@ -60,6 +60,7 @@
     <Compile Include="Async\RadicalTask.cs" />
     <Compile Include="Async\SPThreadPool.cs" />
     <Compile Include="Attributes.cs" />
+    <Compile Include="AudioSettings.cs" />
     <Compile Include="Audio\AudioGroup.cs" />
     <Compile Include="Audio\AudioManager.cs" />
     <Compile Include="Audio\IAudioGroup.cs" />
@@ -230,6 +231,7 @@
     <Compile Include="Scenario\HijackTriggerEvents.cs" />
     <Compile Include="Scenario\i_KillTween.cs" />
     <Compile Include="Scenario\i_ModifyTag.cs" />
+    <Compile Include="Scenario\i_PlayAudio.cs" />
     <Compile Include="Scenario\i_TriggerFirstEnabledTarget.cs" />
     <Compile Include="Scenario\i_TriggerOnEnumState.cs" />
     <Compile Include="Scenario\t_AllTriggersOccupied.cs" />

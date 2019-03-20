@@ -20,6 +20,11 @@ namespace com.spacepuppy.SPInput
         /// </summary>
         void FixedUpdate();
 
+        /// <summary>
+        /// Resets the state of the input.
+        /// </summary>
+        void Reset();
+
     }
 
     public interface IButtonInputSignature : IInputSignature
@@ -95,6 +100,8 @@ namespace com.spacepuppy.SPInput
         {
 
         }
+
+        public abstract void Reset();
 
         #endregion
         

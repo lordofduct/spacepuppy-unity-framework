@@ -200,6 +200,9 @@ namespace com.spacepuppy.SPInput.Legacy
         void IInputSignature.FixedUpdate()
         {
         }
+        void IInputSignature.Reset()
+        {
+        }
 
         public bool Contains(string id)
         {

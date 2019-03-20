@@ -58,6 +58,10 @@ namespace com.spacepuppy.Scenario
         [System.NonSerialized()]
         private string _id;
 
+
+        [System.NonSerialized]
+        private HashSet<object> _hijackTokens;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -120,6 +124,11 @@ namespace com.spacepuppy.Scenario
             }
         }
 
+        public bool CurrentlyHijacked
+        {
+            get { return _hijackTokens != null && _hijackTokens.Count > 0; }
+        }
+
         #endregion
 
         #region Methods
@@ -130,10 +139,46 @@ namespace com.spacepuppy.Scenario
             _targets.Add(targ);
             return targ;
         }
+
+        /// <summary>
+        /// Begins a hijack, when a trigger is hijacked none of its targets are triggered, but its TriggerActivated event still fires. 
+        /// If tokens are passed in it allows compounded hijacking so that just because one caller ends the hijack, another can still continue hijacking.
+        /// </summary>
+        /// <param name="token"></param>
+        public void BeginHijack(object token = null)
+        {
+            if (token == null) token = "*DEFAULT*";
+
+            if (_hijackTokens == null) _hijackTokens = new HashSet<object>();
+            _hijackTokens.Add(token);
+        }
         
+        /// <summary>
+        /// Attempts to stop a hijack, but if more than one token has been used to hijack the event it may continue hijacking.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns>Returns true if the trigger is no longer hijacked after calling this</returns>
+        public bool EndHijack(object token = null)
+        {
+            if (_hijackTokens == null) return true;
+            
+            _hijackTokens.Remove(token ?? "*DEFAULT*");
+            return _hijackTokens.Count == 0;
+        }
+
+        /// <summary>
+        /// Forces the end of a hijack.
+        /// </summary>
+        public void ForceEndHijack()
+        {
+            if (_hijackTokens != null) _hijackTokens.Clear();
+        }
+
+
+
         protected void ActivateTrigger(object sender, object arg)
         {
-            if (_targets.Count > 0)
+            if (_targets.Count > 0 && !this.CurrentlyHijacked)
             {
                 var e = _targets.GetEnumerator();
                 while (e.MoveNext())
@@ -147,7 +192,7 @@ namespace com.spacepuppy.Scenario
 
         protected void ActivateTriggerAt(int index, object sender, object arg)
         {
-            if (index >= 0 && index < _targets.Count)
+            if (index >= 0 && index < _targets.Count && !this.CurrentlyHijacked)
             {
                 TriggerTarget trig = _targets[index];
                 if(trig != null) trig.Trigger(sender, arg);
@@ -158,7 +203,7 @@ namespace com.spacepuppy.Scenario
 
         protected void ActivateRandomTrigger(object sender, object arg, bool considerWeights, bool selectOnlyIfActive)
         {
-            if (_targets.Count > 0)
+            if (_targets.Count > 0 && !this.CurrentlyHijacked)
             {
                 TriggerTarget trig;
                 if (selectOnlyIfActive)
@@ -185,7 +230,7 @@ namespace com.spacepuppy.Scenario
 
         protected IRadicalYieldInstruction ActivateTriggerYielding(object sender, object arg)
         {
-            if (_yield && _targets.Count > 0)
+            if (_yield && _targets.Count > 0 && !this.CurrentlyHijacked)
             {
                 var instruction = BlockingTriggerYieldInstruction.Create();
 
@@ -201,7 +246,7 @@ namespace com.spacepuppy.Scenario
             }
             else
             {
-                if (_targets.Count > 0)
+                if (_targets.Count > 0 && !this.CurrentlyHijacked)
                 {
                     var e = _targets.GetEnumerator();
                     while (e.MoveNext())
@@ -219,7 +264,7 @@ namespace com.spacepuppy.Scenario
 
         protected void DaisyChainTriggerYielding(object sender, object arg, BlockingTriggerYieldInstruction instruction)
         {
-            if (_targets.Count > 0)
+            if (_targets.Count > 0 && !this.CurrentlyHijacked)
             {
                 var e = _targets.GetEnumerator();
                 while (e.MoveNext())
@@ -681,6 +726,8 @@ namespace com.spacepuppy.Scenario
 
     }
 
+
+    
 
     public class BlockingTriggerYieldInstruction : RadicalYieldInstruction, IPooledYieldInstruction
     {

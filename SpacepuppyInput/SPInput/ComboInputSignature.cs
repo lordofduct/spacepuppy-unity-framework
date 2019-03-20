@@ -35,6 +35,10 @@ namespace com.spacepuppy.SPInput
 
         }
 
+        public override void Reset()
+        {
+        }
+
         #endregion
 
     }

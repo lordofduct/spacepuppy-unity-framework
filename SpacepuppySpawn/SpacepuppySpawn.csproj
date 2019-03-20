@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenario\i_Spawn.cs" />
     <Compile Include="Spawn\AbstractSpawner.cs" />
     <Compile Include="Spawn\ISpawner.cs" />
     <Compile Include="Spawn\ISpawnFactory.cs" />

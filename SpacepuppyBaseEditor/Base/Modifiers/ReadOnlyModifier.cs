@@ -14,7 +14,7 @@ namespace com.spacepuppyeditor.Modifiers
 
         private bool? _cached = null;
 
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             if(this.IsDrawer)
             {

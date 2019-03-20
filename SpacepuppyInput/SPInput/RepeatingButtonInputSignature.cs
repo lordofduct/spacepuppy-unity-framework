@@ -46,7 +46,7 @@ namespace com.spacepuppy.SPInput
             this.RepeatLerp = 0f;
             this.MaxRepeat = repeatDelay;
         }
-        
+
         #endregion
 
         #region Properties
@@ -145,7 +145,7 @@ namespace com.spacepuppy.SPInput
         #endregion
 
         #region IInputSignature Interfacce
-        
+
         public override void Update()
         {
             //determine based on history
@@ -172,6 +172,13 @@ namespace com.spacepuppy.SPInput
         {
             //determine based on history
             _currentFixed = InputUtil.GetNextButtonState(_current, _button != null ? _button() : false);
+        }
+
+        public override void Reset()
+        {
+            _current = ButtonState.None;
+            _currentFixed = ButtonState.None;
+            _lastDown = 0f;
         }
 
         #endregion

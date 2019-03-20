@@ -13,6 +13,7 @@ namespace com.spacepuppy.Scenario
         OnStart = 1,
         OnEnable = 2,
         OnStartOrEnable = 3,
-        Awake = 4
+        Awake = 4,
+        OnDisable = 8
     }
 }

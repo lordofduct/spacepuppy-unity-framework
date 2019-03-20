@@ -105,7 +105,29 @@ namespace com.spacepuppy.SPInput
             return ButtonState.None;
         }
 
-        
+        public static ButtonState GetNextFixedButtonStateFromCurrent(ButtonState currentFixedState, ButtonState current)
+        {
+            switch (currentFixedState)
+            {
+                case ButtonState.Released:
+                    return ButtonState.None;
+                case ButtonState.None:
+                    if (current > ButtonState.None)
+                        return ButtonState.Down;
+                    else
+                        return ButtonState.None;
+                case ButtonState.Down:
+                case ButtonState.Held:
+                    if (current > ButtonState.None)
+                        return ButtonState.Held;
+                    else
+                        return ButtonState.Released;
+                default:
+                    return ButtonState.None;
+            }
+        }
+
+
         public static ButtonPress GetButtonPress(this IInputDevice device, string id, float duration)
         {
             if (device == null) return ButtonPress.None;

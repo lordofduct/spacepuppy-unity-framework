@@ -12,6 +12,7 @@ namespace com.spacepuppy.Scenario
         [SerializeField]
         private TriggerableTargetObject _child;
         [SerializeField]
+        [TriggerableTargetObject.Config(typeof(Transform))]
         private TriggerableTargetObject _parent;
 
         #endregion

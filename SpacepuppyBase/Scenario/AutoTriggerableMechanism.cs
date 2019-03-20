@@ -12,6 +12,9 @@ namespace com.spacepuppy.Scenario
         [SerializeField()]
         private ActivateEvent _activateOn = ActivateEvent.None;
 
+        [System.NonSerialized]
+        private bool _inDisable;
+
         #endregion
 
         #region CONSTRUCTOR
@@ -48,6 +51,18 @@ namespace com.spacepuppy.Scenario
             }
         }
 
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            
+            if((_activateOn & ActivateEvent.OnDisable) != 0)
+            {
+                _inDisable = true;
+                this.Trigger(this, null);
+                _inDisable = false;
+            }
+        }
+
         #endregion
 
         #region Properties
@@ -56,6 +71,14 @@ namespace com.spacepuppy.Scenario
         {
             get { return _activateOn; }
             set { _activateOn = value; }
+        }
+
+        public override bool CanTrigger
+        {
+            get
+            {
+                return _inDisable || base.CanTrigger;
+            }
         }
 
         #endregion

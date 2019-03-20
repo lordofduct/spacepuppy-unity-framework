@@ -97,6 +97,13 @@ namespace com.spacepuppy.SPInput
             _currentFixed = InputUtil.GetNextButtonState(_currentFixed, _delegate != null ? _delegate() : false);
         }
 
+        public override void Reset()
+        {
+            _current = ButtonState.None;
+            _currentFixed = ButtonState.None;
+            _lastDown = 0f;
+        }
+
         #endregion
 
     }
@@ -237,6 +244,13 @@ namespace com.spacepuppy.SPInput
             }
         }
 
+        public override void Reset()
+        {
+            _current = ButtonState.None;
+            _currentFixed = ButtonState.None;
+            _lastDown = 0f;
+        }
+
         #endregion
 
     }
@@ -309,6 +323,10 @@ namespace com.spacepuppy.SPInput
         public override void Update()
         {
 
+        }
+
+        public override void Reset()
+        {
         }
 
         #endregion
@@ -410,6 +428,10 @@ namespace com.spacepuppy.SPInput
         public override void Update()
         {
 
+        }
+
+        public override void Reset()
+        {
         }
 
         #endregion

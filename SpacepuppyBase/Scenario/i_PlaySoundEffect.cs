@@ -6,6 +6,10 @@ using com.spacepuppy.Utils;
 namespace com.spacepuppy.Scenario
 {
 
+    /// <summary>
+    /// Plays a sound on an AudioSource as a one shot.
+    /// </summary>
+    [Infobox("Plays a sound on an AudioSource as a one shot.")]
     public class i_PlaySoundEffect : AutoTriggerableMechanism
     {
 

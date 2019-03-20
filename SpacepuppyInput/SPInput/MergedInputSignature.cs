@@ -56,6 +56,14 @@ namespace com.spacepuppy.SPInput
             }
         }
 
+        public override void Reset()
+        {
+            for (int i = 0; i < _signatures.Count; i++)
+            {
+                _signatures[i].Reset();
+            }
+        }
+
         #endregion
 
     }
@@ -154,6 +162,16 @@ namespace com.spacepuppy.SPInput
             }
             _currentFixed = InputUtil.GetNextButtonState(_currentFixed, down);
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            _current = ButtonState.None;
+            _currentFixed = ButtonState.None;
+            _lastDown = 0f;
+        }
+
     }
 
     public class MergedAxleInputSignature : MergedInputSignature<IAxleInputSignature>, IAxleInputSignature

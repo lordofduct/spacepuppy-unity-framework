@@ -84,6 +84,15 @@ namespace com.spacepuppy.SPInput
             }
         }
 
+        public virtual void Reset()
+        {
+            var e = _signatures.GetEnumerator();
+            while (e.MoveNext())
+            {
+                e.Current.Reset();
+            }
+        }
+
         #endregion
 
         #region IPlayerInputDevice Interface

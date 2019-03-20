@@ -107,7 +107,7 @@ namespace com.spacepuppy.Scenario
                     case WrapMode.Clamp:
                         return Mathf.Clamp(_currentIndex, 0, _trigger.Targets.Count - 1);
                     case WrapMode.Loop:
-                        return _currentIndex % _trigger.Targets.Count;
+                        return MathUtil.Wrap(_currentIndex, _trigger.Targets.Count);
                     case WrapMode.PingPong:
                         return (int)Mathf.PingPong(_currentIndex, _trigger.Targets.Count - 1);
                     default:

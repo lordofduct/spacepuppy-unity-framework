@@ -14,7 +14,7 @@ namespace com.spacepuppyeditor.Modifiers
     public class FindInSelfModifier : PropertyModifier
     {
 
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             string name = (this.attribute as FindInSelfAttribute).Name;
             bool bUseEntity = (this.attribute as FindInSelfAttribute).UseEntity;

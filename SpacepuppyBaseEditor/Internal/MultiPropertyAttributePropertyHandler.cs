@@ -209,15 +209,18 @@ namespace com.spacepuppyeditor.Internal
 
         public override bool OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
+            bool cancelDraw = false;
+
             if (_modifiers != null)
             {
                 for (int i = 0; i < _modifiers.Count; i++)
                 {
-                    _modifiers[i].OnBeforeGUI(property);
+                    _modifiers[i].OnBeforeGUI(property, ref cancelDraw);
                 }
             }
 
-            bool result = base.OnGUI(position, property, label, includeChildren);
+            bool result = false;
+            if (!cancelDraw) result = base.OnGUI(position, property, label, includeChildren);
             PropertyHandlerValidationUtility.AddAsHandled(property, this);
 
             if (_modifiers != null)
@@ -233,15 +236,18 @@ namespace com.spacepuppyeditor.Internal
 
         public override bool OnGUILayout(SerializedProperty property, GUIContent label, bool includeChildren, GUILayoutOption[] options)
         {
+            bool cancelDraw = false;
+
             if (_modifiers != null)
             {
                 for (int i = 0; i < _modifiers.Count; i++)
                 {
-                    _modifiers[i].OnBeforeGUI(property);
+                    _modifiers[i].OnBeforeGUI(property, ref cancelDraw);
                 }
             }
 
-            var result = base.OnGUILayout(property, label, includeChildren, options);
+            bool result = false;
+            if (!cancelDraw) result = base.OnGUILayout(property, label, includeChildren, options);
             PropertyHandlerValidationUtility.AddAsHandled(property, this);
 
             if (_modifiers != null)

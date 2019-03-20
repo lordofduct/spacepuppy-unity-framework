@@ -14,7 +14,7 @@ namespace com.spacepuppyeditor.Modifiers
     public class ForceFromSelfModifier : PropertyModifier
     {
         
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             var relativity = (this.attribute as ForceFromSelfAttribute).Relativity;
 

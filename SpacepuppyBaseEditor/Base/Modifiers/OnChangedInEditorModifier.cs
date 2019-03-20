@@ -15,7 +15,7 @@ namespace com.spacepuppyeditor.Modifiers
         private object _valueBeforeChange;
         private bool _valueDidChange;
 
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             _valueDidChange = false;
             _valueBeforeChange = EditorHelper.GetTargetObjectOfProperty(property);

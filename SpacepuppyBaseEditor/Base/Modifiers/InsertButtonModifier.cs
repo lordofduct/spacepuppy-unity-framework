@@ -14,7 +14,7 @@ namespace com.spacepuppyeditor.Modifiers
     public class InsertButtonModifier : PropertyModifier
     {
 
-        protected internal override void OnBeforeGUI(SerializedProperty property)
+        protected internal override void OnBeforeGUI(SerializedProperty property, ref bool cancelDraw)
         {
             var attrib = this.attribute as InsertButtonAttribute;
             if(attrib.PrecedeProperty && (!attrib.RuntimeOnly || Application.isPlaying))
