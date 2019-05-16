@@ -22,6 +22,16 @@ namespace com.spacepuppy.Utils
             return new MicrosoftRNG();
         }
 
+        /// <summary>
+        /// Create an rng that is deterministic to that 'seed' across all platforms.
+        /// </summary>
+        /// <param name="seed"></param>
+        /// <returns></returns>
+        public static IRandom CreateDeterministicRNG(int seed)
+        {
+            return LinearCongruentialRNG.CreateMMIXKnuth(seed);
+        }
+
         public static VB_RNG CreateVB_RNG()
         {
             return new VB_RNG();
@@ -401,6 +411,90 @@ namespace com.spacepuppy.Utils
                 int num3 = (num2 & (int)ushort.MaxValue ^ num2 >> 16) << 8;
                 int num4 = num1 & -16776961 | num3;
                 _seed = num4;
+            }
+
+            #endregion
+
+        }
+
+        /// <summary>
+        /// A simple deterministic rng using a linear congruential algorithm. 
+        /// Not the best, but fast and effective for deterministic rng for games.
+        /// 
+        /// Various known parameter configurations are included as static factory methods for ease of creating known long-period generators.
+        /// See the wiki article for a list of more known long period parameters: https://en.wikipedia.org/wiki/Linear_congruential_generator
+        /// </summary>
+        public class LinearCongruentialRNG : IRandom
+        {
+
+            #region Fields
+
+            private ulong _mode;
+            private ulong _mult;
+            private ulong _incr;
+            private ulong _seed;
+
+            #endregion
+
+            #region CONSTRUCTOR
+
+            public LinearCongruentialRNG(long seed, ulong increment, ulong mult, ulong mode)
+            {
+                _mode = System.Math.Max(1, mode);
+                _mult = System.Math.Max(1, System.Math.Min(mode - 1, mult));
+                _incr = System.Math.Max(0, System.Math.Min(mode - 1, increment));
+                if (seed < 0)
+                {
+                    seed = System.DateTime.Now.Millisecond;
+                }
+                _seed = (ulong)seed % _mode;
+            }
+
+            #endregion
+
+            #region IRandom Interface
+
+            public double NextDouble()
+            {
+                _seed = (_mult * _seed + _incr) % _mode;
+                return (double)_seed / (double)_mode;
+            }
+
+            public float Next()
+            {
+                _seed = (_mult * _seed + _incr) % _mode;
+                return (float)_seed / (float)_mode;
+            }
+
+            public int Next(int size)
+            {
+                _seed = (_mult * _seed + _incr) % _mode;
+                return (int)(size * ((double)_seed / (double)_mode));
+            }
+
+            public int Next(int low, int high)
+            {
+                _seed = (_mult * _seed + _incr) % _mode;
+                return (int)((high - low) * ((double)_seed / (double)_mode)) + low;
+            }
+
+            #endregion
+
+            #region Static Factory
+
+            public static LinearCongruentialRNG CreateMMIXKnuth(long seed = -1)
+            {
+                return new LinearCongruentialRNG(seed, 1442695040888963407, 6364136223846793005, ulong.MaxValue);
+            }
+
+            public static LinearCongruentialRNG CreateAppleCarbonLib(int seed = -1)
+            {
+                return new LinearCongruentialRNG(seed, 0, 16807, 16807);
+            }
+
+            public static LinearCongruentialRNG CreateGLibc(int seed = -1)
+            {
+                return new LinearCongruentialRNG(seed, 12345, 1103515245, 2147483648);
             }
 
             #endregion

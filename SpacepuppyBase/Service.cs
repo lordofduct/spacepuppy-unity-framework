@@ -546,11 +546,24 @@ namespace com.spacepuppy
         #region Fields
 
         [SerializeField]
+        private bool _autoRegisterService;
+        [SerializeField]
         private bool _destroyIfMultiple;
 
         #endregion
 
         #region CONSTRUCTOR
+
+        public ServiceComponent()
+        {
+
+        }
+
+        public ServiceComponent(bool autoRegister, bool destroyIfMultiple)
+        {
+            _autoRegisterService = autoRegister;
+            _destroyIfMultiple = destroyIfMultiple;
+        }
 
         protected override void Awake()
         {
@@ -565,7 +578,8 @@ namespace com.spacepuppy
             var inst = Services.Get<T>();
             if(inst == null)
             {
-                Services.Register<T>(this as T);
+                if (_autoRegisterService)
+                    Services.Register<T>(this as T);
             }
             else if(object.ReferenceEquals(this, inst))
             {
@@ -715,6 +729,8 @@ namespace com.spacepuppy
         #region Fields
 
         [SerializeField]
+        private bool _autoRegisterService;
+        [SerializeField]
         private bool _destroyIfMultiple;
         [System.NonSerialized]
         private System.EventHandler _onDisposed;
@@ -722,6 +738,17 @@ namespace com.spacepuppy
         #endregion
 
         #region CONSTRUCTOR
+
+        public ServiceScriptableObject()
+        {
+
+        }
+
+        public ServiceScriptableObject(bool autoRegister, bool destroyIfMultiple)
+        {
+            _autoRegisterService = autoRegister;
+            _destroyIfMultiple = destroyIfMultiple;
+        }
 
         protected virtual void Awake()
         {
@@ -734,7 +761,8 @@ namespace com.spacepuppy
             var inst = Services.Get<T>();
             if (inst == null)
             {
-                Services.Register<T>(this as T);
+                if(_autoRegisterService)
+                    Services.Register<T>(this as T);
             }
             else if (object.ReferenceEquals(this, inst))
             {

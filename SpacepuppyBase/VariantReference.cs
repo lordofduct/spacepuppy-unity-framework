@@ -1051,7 +1051,7 @@ namespace com.spacepuppy
                 switch (_mode)
                 {
                     case RefMode.Value:
-                        return _unityObjectReference;
+                        return _unityObjectReference == null ? null : _unityObjectReference;
                     case RefMode.Property:
                         var obj = this.EvaluateProperty();
                         if (obj is UnityEngine.Object)
@@ -1516,6 +1516,26 @@ namespace com.spacepuppy
                 default:
                     return DecodeB64Numeric(_string);
             }
+        }
+
+
+        public void CopyValue(VariantReference v)
+        {
+            if(v == null)
+            {
+                this.Value = null;
+                return;
+            }
+
+            _mode = v._mode;
+            _type = v._type;
+            _x = v._x;
+            _y = v._y;
+            _z = v._z;
+            _w = v._w;
+            _string = v._string;
+            _unityObjectReference = v._unityObjectReference;
+            _numeric = v._numeric;
         }
 
         #endregion

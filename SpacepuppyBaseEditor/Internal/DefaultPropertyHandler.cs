@@ -78,7 +78,7 @@ namespace com.spacepuppyeditor.Internal
                     r = new Rect(position.xMin, position.yMin, position.width, h);
                     position = new Rect(r.xMin, r.yMax, r.width, position.height - h);
 
-                    SPEditorGUI.PropertyField(r, iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren);
+                    SPEditorGUI.PropertyField(r, iterator, EditorHelper.TempContent(iterator.displayName, iterator.tooltip), iterator.hasVisibleChildren);
                 }
             }
 
@@ -110,7 +110,7 @@ namespace com.spacepuppyeditor.Internal
                     if (SerializedProperty.EqualContents(iterator, end))
                         break;
 
-                    SPEditorGUILayout.PropertyField(iterator, EditorHelper.TempContent(iterator.displayName), iterator.hasVisibleChildren, options);
+                    SPEditorGUILayout.PropertyField(iterator, EditorHelper.TempContent(iterator.displayName, iterator.tooltip), iterator.hasVisibleChildren, options);
                 }
             }
 

@@ -315,6 +315,7 @@ namespace com.spacepuppy
         public float ElementPadding = 0f;
         public bool DrawElementAtBottom = false;
         public bool HideElementLabel = false;
+        public bool ShowTooltipInHeader = false;
 
         /// <summary>
         /// If DrawElementAtBottom is true, this child element can be displayed as the label in the reorderable list.

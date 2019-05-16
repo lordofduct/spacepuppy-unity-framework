@@ -121,7 +121,7 @@ namespace com.spacepuppy
         */
 
         #endregion
-
+        
         #region ISPDisposable Interface
 
         bool ISPDisposable.IsDisposed

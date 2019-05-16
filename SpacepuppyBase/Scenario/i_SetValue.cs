@@ -32,8 +32,7 @@ namespace com.spacepuppy.Scenario
         private SetMode _mode;
 
         #endregion
-
-
+        
         #region TriggerableMechanism Interface
 
         public override bool CanTrigger

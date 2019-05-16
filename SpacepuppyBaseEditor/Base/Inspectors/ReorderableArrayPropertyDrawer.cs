@@ -24,9 +24,9 @@ namespace com.spacepuppyeditor.Base
 
         #region Fields
 
-        public string Label;
+        public GUIContent CustomLabel;
         private CachedReorderableList _lst;
-        private GUIContent _label;
+        private GUIContent _labelContent;
         private bool _disallowFoldout;
         private bool _removeBackgroundWhenCollapsed;
         private bool _draggable = true;
@@ -36,6 +36,7 @@ namespace com.spacepuppyeditor.Base
         private string _childPropertyAsEntry;
         private ReorderableList.AddCallbackDelegate _addCallback;
         private bool _allowDragAndDrop = true;
+        private bool _showTooltipInHeader;
 
         private PropertyDrawer _internalDrawer;
         
@@ -119,6 +120,7 @@ namespace com.spacepuppyeditor.Base
                 _childPropertyAsLabel = attrib.ChildPropertyToDrawAsElementLabel;
                 _childPropertyAsEntry = attrib.ChildPropertyToDrawAsElementEntry;
                 _allowDragAndDrop = attrib.AllowDragAndDrop;
+                _showTooltipInHeader = attrib.ShowTooltipInHeader;
                 if (!string.IsNullOrEmpty(attrib.OnAddCallback))
                 {
                     _addCallback = (lst) =>
@@ -140,7 +142,7 @@ namespace com.spacepuppyeditor.Base
                 }
             }
 
-            _label = label;
+            _labelContent = label;
 
             _lst = this.GetList(property, label);
             if (_lst.index >= _lst.count) _lst.index = -1;
@@ -164,7 +166,7 @@ namespace com.spacepuppyeditor.Base
         private void EndOnGUI(SerializedProperty property, GUIContent label)
         {
             _lst.serializedProperty = null;
-            _label = null;
+            _labelContent = null;
         }
 
         #endregion
@@ -228,6 +230,12 @@ namespace com.spacepuppyeditor.Base
             set { _allowDragAndDrop = false; }
         }
 
+        public bool ShowTooltipInHeader
+        {
+            get { return _showTooltipInHeader; }
+            set { _showTooltipInHeader = value; }
+        }
+        
         /// <summary>
         /// The type of the element in the array/list, will effect drag & drop filtering (unless overriden).
         /// </summary>
@@ -292,6 +300,30 @@ namespace com.spacepuppyeditor.Base
 
             if (property.isArray)
             {
+                if (this.CustomLabel != null)
+                {
+                    label = this.CustomLabel;
+                }
+                else if (label != null)
+                {
+                    label = EditorHelper.CloneContent(label);
+                    if (_showTooltipInHeader)
+                    {
+                        label.text = string.Format("{0} [{1:0}] - {2}", label.text, property.arraySize, (string.IsNullOrEmpty(label.tooltip) ? property.tooltip : label.tooltip));
+                    }
+                    else
+                    {
+                        label.text = string.Format("{0} [{1:0}]", label.text, property.arraySize);
+                    }
+
+                    if (string.IsNullOrEmpty(label.tooltip)) label.tooltip = property.tooltip;
+                }
+                else
+                {
+                    label = EditorHelper.TempContent(property.displayName, property.tooltip);
+                }
+
+
                 //const float WIDTH_FOLDOUT = 5f;
                 var foldoutRect = new Rect(position.xMin, position.yMin, position.width, EditorGUIUtility.singleLineHeight);
                 position = EditorGUI.IndentedRect(position);
@@ -386,13 +418,9 @@ namespace com.spacepuppyeditor.Base
 
         private void _maskList_DrawHeader(Rect area)
         {
-            if(this.Label != null)
+            if(_labelContent != null)
             {
-                EditorGUI.LabelField(area, this.Label ?? _lst.serializedProperty.displayName);
-            }
-            else
-            {
-                EditorGUI.LabelField(area, _label ?? EditorHelper.TempContent(_lst.serializedProperty.displayName));
+                EditorGUI.LabelField(area, _labelContent);
             }
         }
 

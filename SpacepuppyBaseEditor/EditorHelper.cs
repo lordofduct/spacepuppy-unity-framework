@@ -778,7 +778,16 @@ namespace com.spacepuppyeditor
             c.tooltip = tooltip;
             return c;
         }
-        
+
+        public static GUIContent CloneContent(GUIContent content)
+        {
+            var c = _temp_text.GetInstance();
+            c.text = content.text;
+            c.tooltip = content.tooltip;
+            c.image = content.image;
+            return c;
+        }
+
         #endregion
 
         #region Indent Helper

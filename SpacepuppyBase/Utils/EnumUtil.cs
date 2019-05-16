@@ -145,7 +145,7 @@ namespace com.spacepuppy.Utils
             return (System.Convert.ToInt64(e) & value) != 0;
         }
 
-        public static IEnumerable<System.Enum> GetFlags(System.Enum e)
+        public static IEnumerable<System.Enum> EnumerateFlags(System.Enum e)
         {
             if (e == null) throw new System.ArgumentNullException("e");
 
@@ -171,7 +171,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        public static IEnumerable<T> GetFlags<T>(T e) where T : struct, System.IConvertible
+        public static IEnumerable<T> EnumerateFlags<T>(T e) where T : struct, System.IConvertible
         {
             var tp = e.GetType();
             if (!tp.IsEnum) throw new System.ArgumentException("Type must be an enum.", "T");

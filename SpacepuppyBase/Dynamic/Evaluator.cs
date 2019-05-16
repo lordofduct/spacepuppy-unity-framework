@@ -13,6 +13,7 @@ namespace com.spacepuppy.Dynamic
     /// <summary>
     /// ##Statements
     /// (...)
+    /// "..."
     /// ##Operators
     /// +
     /// *
@@ -32,6 +33,7 @@ namespace com.spacepuppy.Dynamic
     /// Does not respect order of operations, use parens to define order.
     /// 
     /// ##Functions
+    /// Str(x)
     /// Abs(x)
     /// Sqrt(x)
     /// Cos(x)
@@ -54,6 +56,7 @@ namespace com.spacepuppy.Dynamic
     /// These function names are not case sensitive
     /// 
     /// #Constants
+    /// $null
     /// $true
     /// $false
     /// $pi
@@ -98,93 +101,10 @@ namespace com.spacepuppy.Dynamic
         #region Static Interface
 
         private static com.spacepuppy.Collections.ObjectCachePool<Evaluator> _pool = new ObjectCachePool<Evaluator>(64);
+        private static com.spacepuppy.Collections.ObjectCachePool<VariantReference> _variantPool = new ObjectCachePool<VariantReference>(128, () => new VariantReference(), (v) => v.Value = null);
         private static com.spacepuppy.Collections.ObjectCachePool<ReusableStringReader> _readerPool = new ObjectCachePool<ReusableStringReader>(64);
 
         public static object EvalValue(string command, object x)
-        {
-            var obj = _pool.GetInstance();
-            try
-            {
-                var r = _readerPool.GetInstance();
-                r.Reset(command);
-
-                obj._reader = r;
-                obj._x = x;
-                obj._strBuilder.Length = 0;
-                obj._parenCount = 0;
-                obj._current = (char)0;
-
-                State t1;
-                bool t2;
-                Vector4 result = obj.EvalStatement(out t1, out t2);
-
-                obj._reader.Dispose();
-                _readerPool.Release(obj._reader as ReusableStringReader);
-                obj._x = null;
-                obj._strBuilder.Length = 0;
-                obj._parenCount = 0;
-                obj._current = (char)0;
-
-                switch (t1)
-                {
-                    case State.None:
-                        return result;
-                    case State.Scalar:
-                        return result.x;
-                    case State.Vector:
-                        return result;
-                    case State.Quaternion:
-                        return ConvertUtil.ToQuaternion(result);
-                    default:
-                        return result;
-                }
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static float EvalNumber(string command, object x)
-        {
-            var obj = _pool.GetInstance();
-            try
-            {
-                return obj.EvalStatement(command, x).x;
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static UnityEngine.Vector2 EvalVector2(string command, object x)
-        {
-            var obj = _pool.GetInstance();
-            try
-            {
-                return ConvertUtil.ToVector2(obj.EvalStatement(command, x));
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static UnityEngine.Vector3 EvalVector3(string command, object x)
-        {
-            var obj = _pool.GetInstance();
-            try
-            {
-                return ConvertUtil.ToVector3(obj.EvalStatement(command, x));
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static Vector4 EvalVector4(string command, object x)
         {
             var obj = _pool.GetInstance();
             try
@@ -197,62 +117,10 @@ namespace com.spacepuppy.Dynamic
             }
         }
 
-        public static Quaternion EvalQuaternion(string command, object x)
+        public static float EvalNumber(string command, object x)
         {
             var obj = _pool.GetInstance();
-            try
-            {
-                return ConvertUtil.ToQuaternion(obj.EvalStatement(command, x));
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static UnityEngine.Color EvalColor(string command, object x)
-        {
-            var obj = _pool.GetInstance();
-            try
-            {
-                return ConvertUtil.ToColor(obj.EvalStatement(command, x));
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static bool EvalBool(string command, object x)
-        {
-            var obj = _pool.GetInstance();
-            try
-            {
-                return !MathUtil.FuzzyEqual(obj.EvalStatement(command, x).x, 0f);
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static UnityEngine.Rect EvalRect(string command, object x)
-        {
-            var obj = _pool.GetInstance();
-            try
-            {
-                var v = obj.EvalStatement(command, x);
-                return new UnityEngine.Rect(v.x, v.y, v.z, v.w);
-            }
-            finally
-            {
-                _pool.Release(obj);
-            }
-        }
-
-        public static string EvalString(string command, object x)
-        {
-            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
             try
             {
                 var r = _readerPool.GetInstance();
@@ -264,9 +132,8 @@ namespace com.spacepuppy.Dynamic
                 obj._parenCount = 0;
                 obj._current = (char)0;
 
-                State t1;
-                bool t2;
-                Vector4 result = obj.EvalStatement(out t1, out t2);
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.FloatValue;
 
                 obj._reader.Dispose();
                 _readerPool.Release(obj._reader as ReusableStringReader);
@@ -274,24 +141,285 @@ namespace com.spacepuppy.Dynamic
                 obj._strBuilder.Length = 0;
                 obj._parenCount = 0;
                 obj._current = (char)0;
-                
-                switch(t1)
-                {
-                    case State.None:
-                        return result.ToString();
-                    case State.Scalar:
-                        return result.x.ToString();
-                    case State.Vector:
-                        return result.ToDetailedString();
-                    case State.Quaternion:
-                        return ConvertUtil.ToQuaternion(result).eulerAngles.ToDetailedString();
-                    default:
-                        return result.ToString();
-                }
+
+                return result;
             }
             finally
             {
                 _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static UnityEngine.Vector2 EvalVector2(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.Vector2Value;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static UnityEngine.Vector3 EvalVector3(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.Vector3Value;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static Vector4 EvalVector4(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.Vector4Value;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static Quaternion EvalQuaternion(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.QuaternionValue;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static UnityEngine.Color EvalColor(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.ColorValue;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static bool EvalBool(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.BoolValue;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static UnityEngine.Rect EvalRect(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.RectValue;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
+            }
+        }
+
+        public static string EvalString(string command, object x)
+        {
+            var obj = _pool.GetInstance();
+            var temp = _variantPool.GetInstance();
+            try
+            {
+                var r = _readerPool.GetInstance();
+                r.Reset(command);
+
+                obj._reader = r;
+                obj._x = x;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                bool t2 = obj.EvalStatement(temp);
+                var result = temp.StringValue;
+
+                obj._reader.Dispose();
+                _readerPool.Release(obj._reader as ReusableStringReader);
+                obj._x = null;
+                obj._strBuilder.Length = 0;
+                obj._parenCount = 0;
+                obj._current = (char)0;
+
+                return result;
+            }
+            finally
+            {
+                _pool.Release(obj);
+                _variantPool.Release(temp);
             }
         }
 
@@ -305,21 +433,12 @@ namespace com.spacepuppy.Dynamic
         private StringBuilder _strBuilder = new StringBuilder();
         private int _parenCount;
         private char _current;
-
-
-        private enum State
-        {
-            None,
-            Scalar,
-            Vector,
-            Quaternion
-        }
-
+        
         #endregion
 
         #region Methods
 
-        public Vector4 EvalStatement(string command, object x)
+        public object EvalStatement(string command, object x)
         {
             var r = _readerPool.GetInstance();
             r.Reset(command);
@@ -330,9 +449,10 @@ namespace com.spacepuppy.Dynamic
             _parenCount = 0;
             _current = (char)0;
 
-            State t1;
-            bool t2;
-            Vector4 result = this.EvalStatement(out t1, out t2);
+            var temp = _variantPool.GetInstance();
+            bool t2 = this.EvalStatement(temp);
+            var result = temp.Value;
+            _variantPool.Release(temp);
 
             _reader.Dispose();
             _readerPool.Release(_reader as ReusableStringReader);
@@ -344,7 +464,7 @@ namespace com.spacepuppy.Dynamic
             return result;
         }
 
-        public Vector4 EvalStatement(System.IO.TextReader command, object x)
+        public object EvalStatement(System.IO.TextReader command, object x)
         {
             if (command == null) throw new System.ArgumentNullException("command");
 
@@ -354,9 +474,10 @@ namespace com.spacepuppy.Dynamic
             _parenCount = 0;
             _current = (char)0;
 
-            State t1;
-            bool t2;
-            Vector4 result = this.EvalStatement(out t1, out t2);
+            var temp = _variantPool.GetInstance();
+            bool t2 = this.EvalStatement(temp);
+            var result = temp.Value;
+            _variantPool.Release(temp);
 
             _reader.Dispose();
             _x = null;
@@ -366,189 +487,186 @@ namespace com.spacepuppy.Dynamic
 
             return result;
         }
-
-
-        private Vector4 EvalStatement(out State state, out bool reachedEndOfParams, bool requireClosingParen = false)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="requireClosingParen"></param>
+        /// <returns>Returns true if successfully evaluated the entire statement</returns>
+        private bool EvalStatement(VariantReference state, bool requireClosingParen = false)
         {
-            Vector4 result = this.EvalNextValue(out state);
+            this.EvalNextValue(state);
 
             if (_current == ')')
             {
                 int c = _reader.Read();
                 if (c >= 0) _current = (char)c;
                 _parenCount--;
-                reachedEndOfParams = true;
-                return result;
+                return true;
             }
 
-            State temp;
-            Vector4 v;
-            for (int i = _current; i >= 0; i = _reader.Read())
+            VariantReference temp = _variantPool.GetInstance();
+            try
             {
-                _current = (char)i;
-
-                if (char.IsWhiteSpace(_current)) continue;
-
-                switch (_current)
+                for (int i = _current; i >= 0; i = _reader.Read())
                 {
-                    case '+':
-                        v = this.EvalNextValue(out temp);
-                        result = DoSum(result, v, state, temp, out state);
-                        break;
-                    case '-':
-                        v = this.EvalNextValue(out temp);
-                        result = DoMinus(result, v, state, temp, out state);
-                        break;
-                    case '*':
-                        v = this.EvalNextValue(out temp);
-                        result = DoProduct(result, v, state, temp, out state);
-                        break;
-                    case '/':
-                        v = this.EvalNextValue(out temp);
-                        result = DoDivide(result, v, state, temp, out state);
-                        break;
-                    case '^':
-                        state = State.Scalar;
-                        v = this.EvalNextValue(out temp);
-                        result = new Vector4((float)Math.Pow(result.x, v.x), 0f);
-                        break;
-                    case '%':
-                        state = State.Scalar;
-                        v = this.EvalNextValue(out temp);
-                        result = new Vector4(result.x % v.x, 0f);
-                        break;
-                    case '=':
-                        {
-                            if (_reader.Peek() == '=')
+                    _current = (char)i;
+
+                    if (char.IsWhiteSpace(_current)) continue;
+
+                    switch (_current)
+                    {
+                        case '+':
+                            this.EvalNextValue(temp);
+                            DoSum(state, temp);
+                            break;
+                        case '-':
+                            this.EvalNextValue(temp);
+                            DoMinus(state, temp);
+                            break;
+                        case '*':
+                            this.EvalNextValue(temp);
+                            DoProduct(state, temp);
+                            break;
+                        case '/':
+                            this.EvalNextValue(temp);
+                            DoDivide(state, temp);
+                            break;
+                        case '^':
+                            this.EvalNextValue(temp);
+                            state.DoubleValue = Math.Pow(state.DoubleValue, temp.DoubleValue);
+                            break;
+                        case '%':
+                            this.EvalNextValue(temp);
+                            state.DoubleValue = state.DoubleValue % temp.DoubleValue;
+                            break;
+                        case '=':
                             {
-                                _reader.Read();
-                                v = this.EvalNextValue(out temp);
-                                result = DoEquals(result, v, state, temp, out state);
+                                if (_reader.Peek() == '=')
+                                {
+                                    _reader.Read();
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = TryEquals(state, temp);
+                                }
+                                else
+                                {
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = TryEquals(state, temp);
+                                }
                             }
-                            else
+                            break;
+                        case '!':
                             {
-                                v = this.EvalNextValue(out temp);
-                                result = DoEquals(result, v, state, temp, out state);
+                                if (_reader.Peek() == '=')
+                                {
+                                    _reader.Read();
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = !TryEquals(state, temp);
+                                }
+                                else
+                                {
+                                    throw new System.InvalidOperationException("Failed to parse the command.");
+                                }
                             }
-                        }
-                        break;
-                    case '!':
-                        {
-                            if (_reader.Peek() == '=')
+                            break;
+                        case '<':
                             {
-                                _reader.Read();
-                                v = this.EvalNextValue(out temp);
-                                result = DoNotEquals(result, v, state, temp, out state);
+                                if (_reader.Peek() == '=')
+                                {
+                                    _reader.Read();
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = (state.DoubleValue <= temp.DoubleValue);
+                                }
+                                else
+                                {
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = (state.DoubleValue < temp.DoubleValue);
+                                }
                             }
-                            else
+                            break;
+                        case '>':
                             {
-                                throw new System.InvalidOperationException("Failed to parse the command.");
+                                if (_reader.Peek() == '=')
+                                {
+                                    _reader.Read();
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = (state.DoubleValue >= temp.DoubleValue);
+                                }
+                                else
+                                {
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = (state.DoubleValue > temp.DoubleValue);
+                                }
                             }
-                        }
-                        break;
-                    case '<':
-                        {
-                            state = State.None;
-                            if (_reader.Peek() == '=')
+                            break;
+                        case '|':
                             {
-                                _reader.Read();
-                                v = this.EvalNextValue(out temp);
-                                result = (result.x <= v.x) ? Vector4.one : Vector4.zero;
+                                if (_reader.Peek() == '|')
+                                {
+                                    _reader.Read();
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = state.BoolValue || temp.BoolValue;
+                                }
+                                else
+                                {
+                                    this.EvalNextValue(temp);
+                                    state.IntValue = state.IntValue | temp.IntValue;
+                                }
                             }
-                            else
+                            break;
+                        case '&':
                             {
-                                v = this.EvalNextValue(out temp);
-                                result = (result.x < v.x) ? Vector4.one : Vector4.zero;
+                                if (_reader.Peek() == '&')
+                                {
+                                    _reader.Read();
+                                    this.EvalNextValue(temp);
+                                    state.BoolValue = state.BoolValue && temp.BoolValue;
+                                }
+                                else
+                                {
+                                    this.EvalNextValue(temp);
+                                    state.IntValue = state.IntValue & temp.IntValue;
+                                }
                             }
-                        }
-                        break;
-                    case '>':
-                        {
-                            state = State.None;
-                            if (_reader.Peek() == '=')
-                            {
-                                _reader.Read();
-                                v = this.EvalNextValue(out temp);
-                                result = (result.x >= v.x) ? Vector4.one : Vector4.zero;
-                            }
-                            else
-                            {
-                                v = this.EvalNextValue(out temp);
-                                result = (result.x > v.x) ? Vector4.one : Vector4.zero;
-                            }
-                        }
-                        break;
-                    case '|':
-                        {
-                            if (_reader.Peek() == '|')
-                            {
-                                _reader.Read();
-                                v = this.EvalNextValue(out temp);
-                                state = State.None;
-                                result = (ConvertUtil.ToBool(result.x) || ConvertUtil.ToBool(v.x)) ? Vector4.one : Vector4.zero;
-                            }
-                            else
-                            {
-                                v = this.EvalNextValue(out temp);
-                                state = State.Scalar;
-                                result = new Vector4((float)((int)result.x | (int)v.x), 0f);
-                            }
-                        }
-                        break;
-                    case '&':
-                        {
-                            if (_reader.Peek() == '&')
-                            {
-                                _reader.Read();
-                                v = this.EvalNextValue(out temp);
-                                state = State.None;
-                                result = (ConvertUtil.ToBool(result.x) && ConvertUtil.ToBool(v.x)) ? Vector4.one : Vector4.zero;
-                            }
-                            else
-                            {
-                                v = this.EvalNextValue(out temp);
-                                state = State.Scalar;
-                                result = new Vector4((float)((int)result.x & (int)v.x), 0f);
-                            }
-                        }
-                        break;
-                    case ',':
-                        //reached the end of the first parameter
-                        reachedEndOfParams = false;
-                        return result;
-                    case ')':
-                        //reached the end of the statement
+                            break;
+                        case ',':
+                            //reached the end of the first parameter
+                            return false;
+                        case ')':
+                            //reached the end of the statement
+                            int c = _reader.Read();
+                            if (c >= 0) _current = (char)c;
+                            _parenCount--;
+                            return true;
+                    }
+
+                    if (_current == ',')
+                    {
+                        return false;
+                    }
+                    if (_current == ')')
+                    {
                         int c = _reader.Read();
                         if (c >= 0) _current = (char)c;
                         _parenCount--;
-                        reachedEndOfParams = true;
-                        return result;
+                        return true;
+                    }
                 }
-
-                if (_current == ',')
-                {
-                    reachedEndOfParams = false;
-                    return result;
-                }
-                if (_current == ')')
-                {
-                    int c = _reader.Read();
-                    if (c >= 0) _current = (char)c;
-                    _parenCount--;
-                    reachedEndOfParams = true;
-                    return result;
-                }
+            }
+            finally
+            {
+                _variantPool.Release(temp);
             }
 
             //ran out of statement with no errors, must be the end
             if (requireClosingParen)
                 throw new System.InvalidOperationException("Failed to parse the command.");
 
-            reachedEndOfParams = true;
-            return result;
+            return true;
         }
 
-        private Vector4 EvalNextValue(out State state)
+        private void EvalNextValue(VariantReference state)
         {
             int i = _reader.Read();
             for (; i >= 0 && char.IsWhiteSpace((char)i); i = _reader.Read())
@@ -556,8 +674,8 @@ namespace com.spacepuppy.Dynamic
             }
             if (i < 0)
             {
-                state = State.None;
-                return Vector4.zero;
+                state.Value = null;
+                return;
             }
 
             _current = (char)i;
@@ -565,40 +683,42 @@ namespace com.spacepuppy.Dynamic
 
             if (char.IsDigit(_current))
             {
-                state = State.Scalar;
-                return new Vector4(EvalNumber(), 0f);
+                state.DoubleValue = EvalNumber();
+                return;
             }
             if (char.IsLetter(_current))
             {
-                return EvalFunc(out state);
+                EvalFunc(state);
+                return;
             }
 
             switch (_current)
             {
                 case '$':
-                    return this.EvalVariable(out state);
+                    this.EvalVariable(state);
+                    return;
                 case '(':
                     _parenCount++;
-                    bool temp;
-                    return this.EvalStatement(out state, out temp);
+                    bool temp = this.EvalStatement(state);
+                    return;
                 case '+':
-                    return this.EvalNextValue(out state);
+                    this.EvalNextValue(state);
+                    return;
                 case '-':
-                    var result = this.EvalNextValue(out state);
-                    if (state == State.Quaternion)
-                        result = ConvertUtil.ToVector4(Quaternion.Inverse(ConvertUtil.ToQuaternion(result)));
-                    else
-                        result = -result;
-                    return result;
+                    this.EvalNextValue(state);
+                    DoNegate(state);
+                    return;
+                case '\"':
+                    EvalString(state);
+                    return;
                 case ')':
-                    state = State.None;
-                    return Vector4.zero;
+                    return;
                 default:
                     throw new System.InvalidOperationException("Failed to parse the command.");
             }
         }
 
-        private float EvalNumber()
+        private double EvalNumber()
         {
             const int CHAR_0 = (int)'0';
             long high = ((int)_current - CHAR_0);
@@ -644,18 +764,19 @@ namespace com.spacepuppy.Dynamic
             }
 
             if (low != 0)
-                return (float)((double)high + ((double)low / Math.Pow(10, lowLen)));
+                return ((double)high + ((double)low / Math.Pow(10, lowLen)));
             else
-                return (float)high;
+                return (double)high;
         }
 
-        private Vector4 EvalVariable(out State state)
+        private void EvalVariable(VariantReference state)
         {
             _strBuilder.Length = 0;
             int i = _reader.Read();
             if (i < 0)
             {
-                return SmartConvertToVector(_x, out state);
+                state.Value = _x;
+                return;
             }
 
             _current = (char)i;
@@ -687,7 +808,8 @@ namespace com.spacepuppy.Dynamic
 
                 sprop = _strBuilder.ToString();
                 _strBuilder.Length = 0;
-                return SmartConvertToVector(DynamicUtil.GetValue(target, sprop), out state);
+                state.Value = DynamicUtil.GetValue(target, sprop);
+                return;
             }
             else if(_current == '(')
             {
@@ -741,7 +863,8 @@ namespace com.spacepuppy.Dynamic
 
                 sprop = _strBuilder.ToString();
                 _strBuilder.Length = 0;
-                return SmartConvertToVector(DynamicUtil.GetValue(target, sprop), out state);
+                state.Value = DynamicUtil.GetValue(target, sprop);
+                return;
             }
             else if (char.IsLetterOrDigit(_current) || _current == '_' || _current == '-')
             {
@@ -769,76 +892,80 @@ namespace com.spacepuppy.Dynamic
                 switch (str)
                 {
                     case "true":
-                        state = State.None;
-                        return Vector4.one;
+                        state.BoolValue = true;
+                        return;
                     case "false":
-                        state = State.None;
-                        return Vector4.zero;
+                        state.BoolValue = false;
+                        return;
+                    case "null":
+                        state.Value = null;
+                        return;
                     case "pi":
-                        state = State.Scalar;
-                        return new Vector4((float)System.Math.PI, 0f);
+                        state.DoubleValue = Math.PI;
+                        return;
                     case "2pi":
-                        const float TWO_PI = (float)(System.Math.PI * 2d);
-                        state = State.Scalar;
-                        return new Vector4(TWO_PI, 0f);
+                        const double TWO_PI = (System.Math.PI * 2d);
+                        state.DoubleValue = TWO_PI;
+                        return;
                     case "pi_2":
-                        const float PI_TWO = (float)(System.Math.PI / 2d);
-                        state = State.Scalar;
-                        return new Vector4(PI_TWO, 0f);
+                        const double PI_TWO = (System.Math.PI / 2d);
+                        state.DoubleValue = PI_TWO;
+                        return;
                     case "rad2deg":
-                        const float RAD2DEG = (float)(180d / System.Math.PI);
-                        state = State.Scalar;
-                        return new Vector4(RAD2DEG, 0f);
+                        const double RAD2DEG = (180d / System.Math.PI);
+                        state.DoubleValue = RAD2DEG;
+                        return;
                     case "deg2rad":
-                        const float DEG2RAD = (float)(System.Math.PI / 180d);
-                        state = State.Scalar;
-                        return new Vector4(DEG2RAD, 0f);
+                        const double DEG2RAD = (System.Math.PI / 180d);
+                        state.DoubleValue = DEG2RAD;
+                        return;
                     case "secsinmin":
-                        state = State.Scalar;
-                        return new Vector4(60f, 0f);
+                        state.DoubleValue = 60d;
+                        return;
                     case "secsinhour":
-                        state = State.Scalar;
-                        return new Vector4(3600f, 0f);
+                        state.DoubleValue = 3600d;
+                        return;
                     case "secsinday":
-                        state = State.Scalar;
-                        return new Vector4(86400f, 0f);
+                        state.DoubleValue = 86400d;
+                        return;
                     case "secsinweek":
-                        state = State.Scalar;
-                        return new Vector4(604800f, 0f);
+                        state.DoubleValue = 604800d;
+                        return;
                     case "secsinyear":
-                        state = State.Scalar;
-                        return new Vector4(31536000f, 0f);
+                        state.DoubleValue = 31536000d;
+                        return;
                     case "infinity":
                     case "inf":
-                        state = State.Scalar;
-                        return Vector4.one * float.PositiveInfinity;
+                        state.DoubleValue = double.PositiveInfinity;
+                        return;
                     case "-infinity":
                     case "-inf":
-                        state = State.Scalar;
-                        return Vector4.one * float.NegativeInfinity;
+                        state.DoubleValue = double.NegativeInfinity;
+                        return;
                     case "time":
-                        state = State.Scalar;
-                        return new Vector4(UnityEngine.Time.time, 0f);
+                        state.DoubleValue = UnityEngine.Time.time;
+                        return;
                     case "unscaledtime":
-                        state = State.Scalar;
-                        return new Vector4(UnityEngine.Time.unscaledTime, 0f);
+                        state.DoubleValue = UnityEngine.Time.unscaledTime;
+                        return;
                     case "fixedtime":
-                        state = State.Scalar;
-                        return new Vector4(UnityEngine.Time.fixedTime, 0f);
+                        state.DoubleValue = UnityEngine.Time.fixedTime;
+                        return;
                     case "deltatime":
-                        state = State.Scalar;
-                        return new Vector4(UnityEngine.Time.deltaTime, 0f);
+                        state.DoubleValue = UnityEngine.Time.deltaTime;
+                        return;
                     case "fixeddeltatime":
-                        state = State.Scalar;
-                        return new Vector4(UnityEngine.Time.fixedDeltaTime, 0f);
+                        state.DoubleValue = UnityEngine.Time.fixedDeltaTime;
+                        return;
                     default:
-                        state = State.None;
-                        return Vector4.zero;
+                        state.Value = null;
+                        return;
                 }
             }
             else if (char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')' || _current == ',' || _current == ']')
             {
-                return SmartConvertToVector(_x, out state);
+                state.Value = _x;
+                return;
             }
             else
             {
@@ -847,7 +974,7 @@ namespace com.spacepuppy.Dynamic
 
         }
 
-        private Vector4 EvalFunc(out State state)
+        private void EvalFunc(VariantReference state)
         {
             _strBuilder.Length = 0;
             _strBuilder.Append(char.ToLower(_current));
@@ -871,214 +998,336 @@ namespace com.spacepuppy.Dynamic
 
             _parenCount++;
 
-            State temp;
-            bool reachedEnd;
-            switch (name)
+            VariantReference temp = _variantPool.GetInstance();
+            try
             {
-                case "abs":
-                    {
-                        var result = Math.Abs(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "sqrt":
-                    {
-                        var result = Math.Sqrt(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "cos":
-                    {
-                        var result = Math.Cos(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "sin":
-                    {
-                        var result = Math.Sin(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "tan":
-                    {
-                        var result = Math.Tan(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "acos":
-                    {
-                        var result = Math.Acos(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "asin":
-                    {
-                        var result = Math.Asin(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "atan":
-                    {
-                        var result = Math.Atan(EvalStatement(out temp, out reachedEnd, true).x);
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)result, 0f);
-                    }
-                case "atan2":
-                    {
-                        float y = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        float x = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        state = State.Scalar;
-                        return new Vector4((float)Math.Atan2(y, x), 0f);
-                    }
-                case "rand":
-                    {
-                        var x = this.EvalStatement(out state, out reachedEnd, true);
-                        if (state == State.Quaternion)
+                bool reachedEnd;
+                switch (name)
+                {
+                    case "str":
                         {
-                            state = State.Quaternion;
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.StringValue = temp.StringValue;
+                            return;
+                        }
+                    case "abs":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Abs(temp.DoubleValue);
+                            return;
+                        }
+                    case "sqrt":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Sqrt(temp.DoubleValue);
+                            return;
+                        }
+                    case "cos":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Cos(temp.DoubleValue);
+                            return;
+                        }
+                    case "sin":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Sin(temp.DoubleValue);
+                            return;
+                        }
+                    case "tan":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Tan(temp.DoubleValue);
+                            return;
+                        }
+                    case "acos":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Acos(temp.DoubleValue);
+                            return;
+                        }
+                    case "asin":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Asin(temp.DoubleValue);
+                            return;
+                        }
+                    case "atan":
+                        {
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            state.DoubleValue = Math.Atan(temp.DoubleValue);
+                            return;
+                        }
+                    case "atan2":
+                        {
+                            reachedEnd = this.EvalStatement(temp, true);
                             if (reachedEnd)
-                                return ConvertUtil.ToVector4(Quaternion.Slerp(Quaternion.identity, ConvertUtil.ToQuaternion(x), RandomUtil.Standard.Next()));
-                            var y = this.EvalStatement(out temp, out reachedEnd, true);
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            double y = temp.DoubleValue;
+
+                            reachedEnd = EvalStatement(temp, true);
+                            if (!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            double x = temp.DoubleValue;
+
+                            state.DoubleValue = Math.Atan2(y, x);
+                            return;
+                        }
+                    case "rand":
+                        {
+                            reachedEnd = this.EvalStatement(temp, true);
+                            if (temp.ValueType == VariantType.Quaternion)
+                            {
+                                if (reachedEnd)
+                                {
+                                    state.QuaternionValue = Quaternion.Slerp(Quaternion.identity, temp.QuaternionValue, RandomUtil.Standard.Next());
+                                    return;
+                                }
+
+                                var x = temp.QuaternionValue;
+                                reachedEnd = this.EvalStatement(temp, true);
+                                if (reachedEnd)
+                                {
+                                    state.QuaternionValue = Quaternion.Slerp(x, temp.QuaternionValue, RandomUtil.Standard.Next());
+                                    return;
+                                }
+                                
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            }
+                            else
+                            {
+                                if(reachedEnd)
+                                {
+                                    DoProductInterlerp(temp, RandomUtil.Standard.NextDouble());
+                                    state.CopyValue(temp);
+                                    return;
+                                }
+
+                                var x = temp.Value;
+                                reachedEnd = this.EvalStatement(temp, true);
+                                if(reachedEnd)
+                                {
+                                    state.Value = TryLerp(x, temp.Value, RandomUtil.Standard.Next());
+                                    return;
+                                }
+
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+                            }
+                        }
+                    case "randint":
+                        {
+                            reachedEnd = this.EvalStatement(temp, true);
+                            if(reachedEnd)
+                            {
+                                state.IntValue = RandomUtil.Standard.Next(temp.IntValue);
+                                return;
+                            }
+
+                            int x = temp.IntValue;
+                            reachedEnd = this.EvalStatement(temp, true);
+                            if(!reachedEnd)
+                                throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
+
+                            state.IntValue = RandomUtil.Standard.Next(x, temp.IntValue);
+                            return;
+                        }
+                    case "vec":
+                        {
+                            reachedEnd = this.EvalStatement(temp, true);
+                            if(reachedEnd)
+                            {
+                                switch(temp.ValueType)
+                                {
+                                    case VariantType.Vector2:
+                                    case VariantType.Vector3:
+                                    case VariantType.Vector4:
+                                    case VariantType.Quaternion:
+                                        state.CopyValue(temp);
+                                        break;
+                                    default:
+                                        state.Vector2Value = new UnityEngine.Vector2(temp.FloatValue, 0f);
+                                        break;
+                                }
+                                return;
+                            }
+
+                            float x = temp.FloatValue;
+                            reachedEnd = this.EvalStatement(temp, true);
+                            if(reachedEnd)
+                            {
+                                switch(temp.ValueType)
+                                {
+                                    case VariantType.Vector2:
+                                        state.Vector3Value = new UnityEngine.Vector3(x, temp.Vector2Value.x, temp.Vector2Value.y);
+                                        break;
+                                    case VariantType.Vector3:
+                                        state.Vector4Value = new UnityEngine.Vector4(x, temp.Vector3Value.x, temp.Vector3Value.y, temp.Vector3Value.z);
+                                        break;
+                                    case VariantType.Vector4:
+                                        state.Vector4Value = new UnityEngine.Vector4(x, temp.Vector4Value.x, temp.Vector4Value.y, temp.Vector4Value.z);
+                                        break;
+                                    default:
+                                        state.Vector2Value = new UnityEngine.Vector2(x, temp.FloatValue);
+                                        break;
+                                }
+                                return;
+                            }
+
+                            float y = temp.FloatValue;
+                            reachedEnd = this.EvalStatement(temp, true);
+                            if(reachedEnd)
+                            {
+                                switch (temp.ValueType)
+                                {
+                                    case VariantType.Vector2:
+                                        state.Vector4Value = new UnityEngine.Vector4(x, y, temp.Vector2Value.x, temp.Vector2Value.y);
+                                        break;
+                                    case VariantType.Vector3:
+                                        state.Vector4Value = new UnityEngine.Vector4(x, y, temp.Vector3Value.x, temp.Vector3Value.y);
+                                        break;
+                                    case VariantType.Vector4:
+                                        state.Vector4Value = new UnityEngine.Vector4(x, y, temp.Vector4Value.x, temp.Vector4Value.y);
+                                        break;
+                                    default:
+                                        state.Vector3Value = new UnityEngine.Vector3(x, y, temp.FloatValue);
+                                        break;
+                                }
+                                return;
+                            }
+
+                            float z = temp.FloatValue;
+                            reachedEnd = this.EvalStatement(temp, true);
                             if (reachedEnd)
-                                return ConvertUtil.ToVector4(Quaternion.Slerp(ConvertUtil.ToQuaternion(x), ConvertUtil.ToQuaternion(y), RandomUtil.Standard.Next()));
+                            {
+                                state.Vector4Value = new UnityEngine.Vector4(x, y, z, temp.FloatValue);
+                                return;
+                            }
+
                             throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
                         }
-                        else
+                    case "rot":
                         {
+                            reachedEnd = this.EvalStatement(temp, true);
                             if (reachedEnd)
-                                return x * RandomUtil.Standard.Next();
-                            var y = this.EvalStatement(out temp, out reachedEnd, true);
+                            {
+                                switch (temp.ValueType)
+                                {
+                                    case VariantType.Vector2:
+                                    case VariantType.Vector3:
+                                    case VariantType.Vector4:
+                                        state.QuaternionValue = Quaternion.Euler(temp.Vector3Value);
+                                        break;
+                                    case VariantType.Quaternion:
+                                        state.QuaternionValue = temp.QuaternionValue;
+                                        break;
+                                    default:
+                                        state.QuaternionValue = Quaternion.Euler(temp.FloatValue, 0f, 0f);
+                                        break;
+                                }
+                                return;
+                            }
+
+                            float x = temp.FloatValue;
+                            reachedEnd = this.EvalStatement(temp, true);
+                            if(reachedEnd)
+                            {
+                                switch (temp.ValueType)
+                                {
+                                    case VariantType.Vector2:
+                                    case VariantType.Vector3:
+                                    case VariantType.Vector4:
+                                    case VariantType.Quaternion:
+                                        state.QuaternionValue = Quaternion.Euler(x, temp.Vector2Value.x, temp.Vector2Value.y);
+                                        break;
+                                    default:
+                                        state.QuaternionValue = Quaternion.Euler(x, temp.FloatValue, 0f);
+                                        break;
+                                }
+                                return;
+                            }
+
+                            float y = temp.FloatValue;
+                            reachedEnd = this.EvalStatement(temp, true);
                             if (reachedEnd)
-                                return RandomUtil.Standard.Next() * (y - x) + x;
+                            {
+                                state.QuaternionValue = Quaternion.Euler(x, y, temp.FloatValue);
+                                return;
+                            }
+
                             throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
                         }
-                    }
-                case "randint":
-                    {
-                        state = State.Scalar;
-                        int x = (int)this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return new Vector4(RandomUtil.Standard.Next(x), 0f);
-                        int y = (int)this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (!reachedEnd)
-                            throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                        return new Vector4(RandomUtil.Standard.Next(x, y), 0f);
-                    }
-                case "vec":
-                    {
-                        state = State.Vector;
-                        float x = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return new Vector4(x, 0f);
-                        float y = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return new Vector4(x, y);
-                        float z = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return new Vector4(x, y, z);
-                        float w = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return new Vector4(x, y, z, w);
-                        throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                    }
-                case "rot":
-                    {
-                        state = State.Quaternion;
-                        float x = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return ConvertUtil.ToVector4(Quaternion.Euler(x, 0f, 0f));
-                        float y = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return ConvertUtil.ToVector4(Quaternion.Euler(x, y, 0f));
-                        float z = this.EvalStatement(out temp, out reachedEnd, true).x;
-                        if (reachedEnd)
-                            return ConvertUtil.ToVector4(Quaternion.Euler(x, y, z));
-                        throw new System.InvalidOperationException("Failed to parse the command: Parameter count mismatch.");
-                    }
-                default:
-                    throw new System.InvalidOperationException("Failed to parse the command: Unknown Function");
+                    default:
+                        throw new System.InvalidOperationException("Failed to parse the command: Unknown Function");
+                }
+            }
+            finally
+            {
+                _variantPool.Release(temp);
             }
         }
         
+        private void EvalString(VariantReference state)
+        {
+            _strBuilder.Length = 0;
+
+            bool successfulClose = false;
+            for (int i = _reader.Read(); i >= 0; i = _reader.Read())
+            {
+                _current = (char)i;
+                
+                if(_current == '\"')
+                {
+                    successfulClose = true;
+                    break;
+                }
+                else if (_current == '\\')
+                {
+                    i = _reader.Read();
+                    if(i < 0)
+                    {
+                        throw new System.InvalidOperationException("Failed to parse the command: string statement syntax error.");
+                    }
+
+                    _current = (char)i;
+                    _strBuilder.Append(_current);
+                }
+                else
+                {
+                    _strBuilder.Append(_current);
+                }
+            }
+
+            if(!successfulClose)
+            {
+                throw new System.InvalidOperationException("Failed to parse the command: string statement syntax error.");
+            }
+
+            state.StringValue = _strBuilder.ToString();
+            _strBuilder.Length = 0;
+        }
+
         #endregion
 
         #region Utils
-
-        private static State GetStateTypeOfObject(object obj)
-        {
-            if (obj == null) return State.None;
-
-            switch (VariantReference.GetVariantType(obj.GetType()))
-            {
-                case VariantType.Object:
-                case VariantType.Null:
-                case VariantType.String:
-                case VariantType.Boolean:
-                    return State.None;
-                case VariantType.Integer:
-                case VariantType.Float:
-                case VariantType.Double:
-                    return State.Scalar;
-                case VariantType.Vector2:
-                case VariantType.Vector3:
-                case VariantType.Vector4:
-                    return State.Vector;
-                case VariantType.Quaternion:
-                    return State.Quaternion;
-                case VariantType.Color:
-                    return State.Vector;
-                case VariantType.DateTime:
-                case VariantType.GameObject:
-                case VariantType.Component:
-                    return State.None;
-                case VariantType.LayerMask:
-                    return State.Scalar;
-                case VariantType.Rect:
-                    return State.Vector;
-                default:
-                    return State.None;
-            }
-        }
-
-        private static Vector4 SmartConvertToVector(object obj, out State state)
-        {
-            state = GetStateTypeOfObject(obj);
-            switch (state)
-            {
-                case State.None:
-                    return ConvertUtil.ToVector4(obj);
-                case State.Scalar:
-                    return new Vector4(ConvertUtil.ToSingle(obj), 0f);
-                case State.Vector:
-                case State.Quaternion:
-                    return ConvertUtil.ToVector4(obj);
-                default:
-                    return Vector4.zero;
-            }
-        }
-
-
-
+        
         private static bool IsArithmeticSymbol(char c)
         {
             switch (c)
@@ -1097,383 +1346,341 @@ namespace com.spacepuppy.Dynamic
 
         private static bool IsValidWordPrefix(char c)
         {
-            return char.IsLetterOrDigit(c) || c == '$' || c == '_' || c == '+' || c == '-' || c == '(';
+            return char.IsLetterOrDigit(c) || c == '$' || c == '_' || c == '+' || c == '-' || c == '(' || c == '\"';
         }
 
 
+        //these operations modify the state of 'left'
 
-        private static Vector4 DoSum(Vector4 left, Vector4 right, State sleft, State sright, out State state)
+        private static void DoNegate(VariantReference value)
         {
-            state = State.None;
-            Vector4 result = Vector4.zero;
-
-            switch (sleft)
+            switch (value.ValueType)
             {
-                case State.None:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Vector:
-                        case State.Scalar:
-                            state = sright;
-                            result = left + right;
-                            break;
-                        case State.Quaternion:
-                            state = State.None;
-                            result = left + right;
-                            break;
-                    }
+                case VariantType.Boolean:
+                    value.BoolValue = !value.BoolValue;
                     break;
-                case State.Scalar:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                        case State.Vector:
-                        case State.Quaternion:
-                            state = State.Scalar;
-                            result.x = left.x + right.x;
-                            break;
-                    }
+                case VariantType.Integer:
+                    value.IntValue = -value.IntValue;
                     break;
-                case State.Vector:
-                    switch (sright)
-                    {
-                        case State.None:
-                            state = State.None;
-                            result = left + right;
-                            break;
-                        case State.Scalar:
-                            state = State.Vector;
-                            result.x = left.x + right.x;
-                            break;
-                        case State.Vector:
-                            state = State.Vector;
-                            result = left + right;
-                            break;
-                        case State.Quaternion:
-                            state = State.None;
-                            result = left + right;
-                            break;
-                    }
+                case VariantType.Float:
+                    value.FloatValue = -value.FloatValue;
                     break;
-                case State.Quaternion:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                        case State.Vector:
-                        case State.Quaternion:
-                            state = State.None;
-                            result = left + right;
-                            break;
-                    }
+                case VariantType.Double:
+                    value.DoubleValue = -value.DoubleValue;
+                    break;
+                case VariantType.Vector2:
+                    value.Vector2Value = -value.Vector2Value;
+                    break;
+                case VariantType.Vector3:
+                    value.Vector3Value = -value.Vector3Value;
+                    break;
+                case VariantType.Vector4:
+                    value.Vector4Value = -value.Vector4Value;
+                    break;
+                case VariantType.Quaternion:
+                    value.QuaternionValue = Quaternion.Inverse(value.QuaternionValue);
+                    break;
+                case VariantType.Color:
+                    value.ColorValue = UnityEngine.Color.white - value.ColorValue;
+                    break;
+                case VariantType.LayerMask:
+                    value.LayerMaskValue = -value.LayerMaskValue;
+                    break;
+                case VariantType.Numeric:
+                    value.DoubleValue = -value.DoubleValue;
                     break;
             }
-
-            return result;
         }
 
-        private static Vector4 DoMinus(Vector4 left, Vector4 right, State sleft, State sright, out State state)
+        private static void DoSum(VariantReference left, VariantReference right)
         {
-            state = State.None;
-            Vector4 result = Vector4.zero;
-
-            switch (sleft)
+            if(left.ValueType == VariantType.String || right.ValueType == VariantType.String)
             {
-                case State.None:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Vector:
-                        case State.Scalar:
-                            state = sright;
-                            result = left - right;
-                            break;
-                        case State.Quaternion:
-                            state = State.None;
-                            result = left - right;
-                            break;
-                    }
-                    break;
-                case State.Scalar:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                        case State.Vector:
-                        case State.Quaternion:
-                            state = State.Scalar;
-                            result.x = left.x - right.x;
-                            break;
-                    }
-                    break;
-                case State.Vector:
-                    switch (sright)
-                    {
-                        case State.None:
-                            state = State.None;
-                            result = left - right;
-                            break;
-                        case State.Scalar:
-                            state = State.Vector;
-                            result.x = left.x - right.x;
-                            break;
-                        case State.Vector:
-                            state = State.Vector;
-                            result = left - right;
-                            break;
-                        case State.Quaternion:
-                            state = State.None;
-                            result = left - right;
-                            break;
-                    }
-                    break;
-                case State.Quaternion:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                        case State.Vector:
-                        case State.Quaternion:
-                            state = State.None;
-                            result = left - right;
-                            break;
-                    }
-                    break;
+                left.StringValue += right.StringValue;
+                return;
             }
 
-            return result;
-        }
-
-        private static Vector4 DoProduct(Vector4 left, Vector4 right, State sleft, State sright, out State state)
-        {
-            state = State.None;
-            Vector4 result = Vector4.zero;
-
-            switch (sleft)
+            switch (left.ValueType)
             {
-                case State.None:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Vector:
-                            state = State.None;
-                            result.x = left.x * right.x;
-                            result.y = left.y * right.y;
-                            result.z = left.z * right.z;
-                            result.w = left.w * right.w;
-                            break;
-                        case State.Scalar:
-                            state = State.Scalar;
-                            result.x = left.x * right.x;
-                            break;
-                        case State.Quaternion:
-                            state = State.Quaternion;
-                            result = ConvertUtil.ToVector4(ConvertUtil.ToQuaternion(left) * ConvertUtil.ToQuaternion(right));
-                            break;
-                    }
+                case VariantType.Integer:
+                    if (right.ValueType == VariantType.Integer)
+                        left.IntValue += right.IntValue;
+                    else
+                        left.DoubleValue += right.DoubleValue;
                     break;
-                case State.Scalar:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                            state = State.Scalar;
-                            result.x = left.x * right.x;
-                            break;
-                        case State.Vector:
-                            state = State.Vector;
-                            result = right * left.x;
-                            break;
-                        case State.Quaternion:
-                            state = State.None;
-                            result = right * left.x;
-                            break;
-                    }
+                case VariantType.Float:
+                    left.FloatValue += right.FloatValue;
                     break;
-                case State.Vector:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                            state = State.Vector;
-                            result = left * right.x;
-                            break;
-                        case State.Vector:
-                            state = State.None;
-                            result.x = left.x * right.x;
-                            result.y = left.y * right.y;
-                            result.z = left.z * right.z;
-                            result.w = left.w * right.w;
-                            break;
-                        case State.Quaternion:
-                            state = State.Quaternion;
-                            result = ConvertUtil.ToVector4(ConvertUtil.ToQuaternion(right) * left);
-                            break;
-                    }
+                case VariantType.Double:
+                    left.DoubleValue += right.DoubleValue;
                     break;
-                case State.Quaternion:
-                    switch (sright)
-                    {
-                        case State.None:
-                            state = State.None;
-                            result.x = left.x * right.x;
-                            result.y = left.y * right.y;
-                            result.z = left.z * right.z;
-                            result.w = left.w * right.w;
-                            break;
-                        case State.Scalar:
-                            state = State.None;
-                            result = left * right.x;
-                            break;
-                        case State.Vector:
-                            state = State.Vector;
-                            result = ConvertUtil.ToVector4(ConvertUtil.ToQuaternion(left) * right);
-                            break;
-                        case State.Quaternion:
-                            state = State.Quaternion;
-                            result = ConvertUtil.ToVector4(ConvertUtil.ToQuaternion(left) * ConvertUtil.ToQuaternion(right));
-                            break;
-                    }
+                case VariantType.Vector2:
+                    left.Vector2Value += right.Vector2Value;
                     break;
-            }
-
-            return result;
-        }
-
-        private static Vector4 DoDivide(Vector4 left, Vector4 right, State sleft, State sright, out State state)
-        {
-            state = State.None;
-            Vector4 result = Vector4.zero;
-
-            switch (sleft)
-            {
-                case State.None:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Vector:
-                            state = State.None;
-                            result.x = left.x / right.x;
-                            result.y = left.y / right.y;
-                            result.z = left.z / right.z;
-                            result.w = left.w / right.w;
-                            break;
-                        case State.Scalar:
-                            state = State.Scalar;
-                            result.x = left.x / right.x;
-                            break;
-                        case State.Quaternion:
-                            state = State.Quaternion;
-                            result = ConvertUtil.ToVector4(ConvertUtil.ToQuaternion(left) * Quaternion.Inverse(ConvertUtil.ToQuaternion(right)));
-                            break;
-                    }
+                case VariantType.Vector3:
+                    left.Vector3Value += right.Vector3Value;
                     break;
-                case State.Scalar:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                            state = State.Scalar;
-                            result.x = left.x / right.x;
-                            break;
-                        case State.Vector:
-                            state = State.Vector;
-                            result = right / left.x;
-                            break;
-                        case State.Quaternion:
-                            state = State.None;
-                            result = ConvertUtil.ToVector4(Quaternion.Inverse(ConvertUtil.ToQuaternion(right))) * left.x;
-                            break;
-                    }
+                case VariantType.Vector4:
+                    left.Vector4Value += right.Vector4Value;
                     break;
-                case State.Vector:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Scalar:
-                            state = State.Vector;
-                            result = left / right.x;
-                            break;
-                        case State.Vector:
-                            state = State.None;
-                            result.x = left.x / right.x;
-                            result.y = left.y / right.y;
-                            result.z = left.z / right.z;
-                            result.w = left.w / right.w;
-                            break;
-                        case State.Quaternion:
-                            state = State.Quaternion;
-                            result = ConvertUtil.ToVector4(Quaternion.Inverse(ConvertUtil.ToQuaternion(right)) * left);
-                            break;
-                    }
+                case VariantType.Quaternion:
+                    left.Vector4Value += right.Vector4Value;
                     break;
-                case State.Quaternion:
-                    switch (sright)
-                    {
-                        case State.None:
-                        case State.Vector:
-                            state = State.None;
-                            result.x = left.x / right.x;
-                            result.y = left.y / right.y;
-                            result.z = left.z / right.z;
-                            result.w = left.w / right.w;
-                            break;
-                        case State.Scalar:
-                            state = State.None;
-                            result = left / right.x;
-                            break;
-                        case State.Quaternion:
-                            state = State.Quaternion;
-                            result = ConvertUtil.ToVector4(ConvertUtil.ToQuaternion(left) * Quaternion.Inverse(ConvertUtil.ToQuaternion(right)));
-                            break;
-                    }
+                case VariantType.Color:
+                    left.ColorValue += right.ColorValue;
                     break;
-            }
-
-            return result;
-        }
-
-        private static Vector4 DoEquals(Vector4 left, Vector4 right, State sleft, State sright, out State state)
-        {
-            state = State.None;
-            Vector4 result = Vector4.zero;
-
-            switch (sleft)
-            {
-                case State.Scalar:
-                    state = State.None;
-                    result = MathUtil.FuzzyEqual(left.x, right.x) ? Vector4.one : Vector4.zero;
+                case VariantType.LayerMask:
+                    left.LayerMaskValue += right.LayerMaskValue;
+                    break;
+                case VariantType.Numeric:
+                    left.DoubleValue += right.DoubleValue;
                     break;
                 default:
-                    state = State.None;
-                    result = VectorUtil.FuzzyEquals(left, right) ? Vector4.one : Vector4.zero;
+                    left.DoubleValue = double.NaN;
                     break;
             }
-            return result;
         }
 
-        private static Vector4 DoNotEquals(Vector4 left, Vector4 right, State sleft, State sright, out State state)
+        private static void DoMinus(VariantReference left, VariantReference right)
         {
-            state = State.None;
-            Vector4 result = Vector4.zero;
-
-            switch (sleft)
+            switch (left.ValueType)
             {
-                case State.Scalar:
-                    state = State.None;
-                    result = MathUtil.FuzzyEqual(left.x, right.x) ? Vector4.zero : Vector4.one;
+                case VariantType.Integer:
+                    if (right.ValueType == VariantType.Integer)
+                        left.IntValue -= right.IntValue;
+                    else
+                        left.DoubleValue -= right.DoubleValue;
+                    break;
+                case VariantType.Float:
+                    left.FloatValue -= right.FloatValue;
+                    break;
+                case VariantType.Double:
+                    left.DoubleValue -= right.DoubleValue;
+                    break;
+                case VariantType.Vector2:
+                    left.Vector2Value -= right.Vector2Value;
+                    break;
+                case VariantType.Vector3:
+                    left.Vector3Value -= right.Vector3Value;
+                    break;
+                case VariantType.Vector4:
+                    left.Vector4Value -= right.Vector4Value;
+                    break;
+                case VariantType.Quaternion:
+                    left.Vector4Value -= right.Vector4Value;
+                    break;
+                case VariantType.Color:
+                    left.ColorValue -= right.ColorValue;
+                    break;
+                case VariantType.LayerMask:
+                    left.LayerMaskValue -= right.LayerMaskValue;
+                    break;
+                case VariantType.Numeric:
+                    left.DoubleValue -= right.DoubleValue;
                     break;
                 default:
-                    state = State.None;
-                    result = VectorUtil.FuzzyEquals(left, right) ? Vector4.zero : Vector4.one;
+                    left.DoubleValue = double.NaN;
                     break;
             }
-            return result;
+        }
+
+        private static void DoProductInterlerp(VariantReference left, double right)
+        {
+            Vector4 vl;
+            switch (left.ValueType)
+            {
+                case VariantType.Integer:
+                case VariantType.Float:
+                case VariantType.Double:
+                    left.DoubleValue *= right;
+                    break;
+                case VariantType.Vector2:
+                    vl = left.Vector2Value;
+                    vl.x = vl.x * (float)right;
+                    vl.y = vl.y * (float)right;
+                    left.Vector4Value = vl;
+                    break;
+                case VariantType.Vector3:
+                    vl = left.Vector3Value;
+                    vl.x = vl.x * (float)right;
+                    vl.y = vl.y * (float)right;
+                    vl.z = vl.z * (float)right;
+                    left.Vector4Value = vl;
+                    break;
+                case VariantType.Vector4:
+                    vl = left.Vector4Value;
+                    vl.x = vl.x * (float)right;
+                    vl.y = vl.y * (float)right;
+                    vl.z = vl.z * (float)right;
+                    vl.w = vl.w * (float)right;
+                    left.Vector4Value = vl;
+                    break;
+                case VariantType.Quaternion:
+                    left.Vector4Value = left.Vector4Value * (float)right;
+                    break;
+                case VariantType.Color:
+                    left.ColorValue = ColorUtil.Lerp(UnityEngine.Color.black, left.ColorValue, (float)right);
+                    break;
+                case VariantType.LayerMask:
+                case VariantType.Numeric:
+                    left.DoubleValue *= right;
+                    break;
+                default:
+                    left.DoubleValue = left.DoubleValue * right;
+                    break;
+            }
+        }
+
+        private static void DoProduct(VariantReference left, VariantReference right)
+        {
+            Vector4 vl;
+            Vector4 vr;
+            switch(left.ValueType)
+            {
+                case VariantType.Integer:
+                case VariantType.Float:
+                case VariantType.Double:
+                    left.DoubleValue *= right.DoubleValue;
+                    break;
+                case VariantType.Vector2:
+                    vl = left.Vector2Value;
+                    vr = right.Vector2Value;
+                    vl.x = vl.x * vr.x;
+                    vl.y = vl.y * vr.y;
+                    left.Vector2Value = vl;
+                    break;
+                case VariantType.Vector3:
+                    vl = left.Vector3Value;
+                    vr = right.Vector3Value;
+                    vl.x = vl.x * vr.x;
+                    vl.y = vl.y * vr.y;
+                    vl.z = vl.z * vr.z;
+                    left.Vector3Value = vl;
+                    break;
+                case VariantType.Vector4:
+                    vl = left.Vector4Value;
+                    vr = right.Vector4Value;
+                    vl.x = vl.x * vr.x;
+                    vl.y = vl.y * vr.y;
+                    vl.z = vl.z * vr.z;
+                    vl.w = vl.w * vr.w;
+                    left.Vector4Value = vl;
+                    break;
+                case VariantType.Quaternion:
+                    left.QuaternionValue = left.QuaternionValue * right.QuaternionValue;
+                    break;
+                case VariantType.LayerMask:
+                    left.LayerMaskValue *= right.LayerMaskValue;
+                    break;
+                case VariantType.Numeric:
+                    left.DoubleValue *= right.DoubleValue;
+                    break;
+                default:
+                    left.DoubleValue = double.NaN;
+                    break;
+            }
+        }
+
+        private static void DoDivide(VariantReference left, VariantReference right)
+        {
+            Vector4 vl;
+            Vector4 vr;
+
+            switch (left.ValueType)
+            {
+                case VariantType.Integer:
+                case VariantType.Float:
+                case VariantType.Double:
+                    left.DoubleValue /= right.DoubleValue;
+                    break;
+                case VariantType.Vector2:
+                    vl = left.Vector2Value;
+                    vr = right.Vector2Value;
+                    vl.x = vl.x / vr.x;
+                    vl.y = vl.y / vr.y;
+                    left.Vector2Value = vl;
+                    break;
+                case VariantType.Vector3:
+                    vl = left.Vector3Value;
+                    vr = right.Vector3Value;
+                    vl.x = vl.x / vr.x;
+                    vl.y = vl.y / vr.y;
+                    vl.z = vl.z / vr.z;
+                    left.Vector3Value = vl;
+                    break;
+                case VariantType.Vector4:
+                    vl = left.Vector4Value;
+                    vr = right.Vector4Value;
+                    vl.x = vl.x / vr.x;
+                    vl.y = vl.y / vr.y;
+                    vl.z = vl.z / vr.z;
+                    vl.w = vl.w / vr.w;
+                    left.Vector4Value = vl;
+                    break;
+                case VariantType.Quaternion:
+                    left.QuaternionValue *= Quaternion.Inverse(right.QuaternionValue);
+                    break;
+                case VariantType.LayerMask:
+                    left.LayerMaskValue /= right.LayerMaskValue;
+                    break;
+                case VariantType.Numeric:
+                    left.DoubleValue /= right.DoubleValue;
+                    break;
+                default:
+                    left.DoubleValue = double.NaN;
+                    break;
+            }
         }
 
 
+
+        private static bool TryEquals(VariantReference left, VariantReference right)
+        {
+            switch(left.ValueType)
+            {
+                case VariantType.Object:
+                    return left.ObjectValue == right.ObjectValue;
+                case VariantType.Null:
+                    return right.ValueType == VariantType.Null;
+                case VariantType.String:
+                    return left.StringValue == right.StringValue;
+                case VariantType.Boolean:
+                    return left.BoolValue == right.BoolValue;
+                case VariantType.Integer:
+                    if (right.ValueType == VariantType.Integer)
+                        return left.IntValue == right.IntValue;
+                    else
+                        return left.DoubleValue == right.DoubleValue;
+                case VariantType.Float:
+                    return left.FloatValue == right.FloatValue;
+                case VariantType.Double:
+                    return left.DoubleValue == right.DoubleValue;
+                case VariantType.Vector2:
+                    return left.Vector2Value == right.Vector2Value;
+                case VariantType.Vector3:
+                    return left.Vector3Value == right.Vector3Value;
+                case VariantType.Vector4:
+                    return left.Vector4Value == right.Vector4Value;
+                case VariantType.Quaternion:
+                    return left.QuaternionValue == right.QuaternionValue;
+                case VariantType.Color:
+                    return left.ColorValue == right.ColorValue;
+                case VariantType.DateTime:
+                    return left.DateValue == right.DateValue;
+                case VariantType.GameObject:
+                    return left.GameObjectValue == right.GameObjectValue;
+                case VariantType.Component:
+                    return left.ComponentValue == right.ComponentValue;
+                case VariantType.LayerMask:
+                    return left.LayerMaskValue == right.LayerMaskValue;
+                case VariantType.Rect:
+                    return left.RectValue == right.RectValue;
+                case VariantType.Numeric:
+                    return left.DoubleValue == right.DoubleValue;
+                default:
+                    return false;
+            }
+        }
 
 
 
@@ -1596,7 +1803,9 @@ namespace com.spacepuppy.Dynamic
             var atp = a.GetType();
             if (ConvertUtil.IsNumericType(atp))
             {
-                return ConvertUtil.ToPrim(MathUtil.Interpolate(ConvertUtil.ToSingle(a), ConvertUtil.ToSingle(b), t), atp);
+                var x = ConvertUtil.ToDouble(a);
+                var y = ConvertUtil.ToDouble(b);
+                return ConvertUtil.ToPrim(t * (y - x) + x, atp);
             }
             else if (atp == typeof(UnityEngine.Vector2))
             {

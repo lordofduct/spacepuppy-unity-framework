@@ -108,6 +108,7 @@ namespace com.spacepuppyeditor.Components
                 _selectComponentDrawer.RestrictionType = inheritsFromType ?? typeof(Component);
                 _selectComponentDrawer.AllowProxy = attrib.AllowProxy;
                 _selectComponentDrawer.ShowXButton = true;
+                _selectComponentDrawer.AllowNonComponents = true;
 
                 _selectComponentDrawer.OnGUI(position, property, label);
             }

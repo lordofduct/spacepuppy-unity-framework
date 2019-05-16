@@ -10,7 +10,7 @@ namespace com.spacepuppy.Tween
 {
 
     //[Singleton.Config(SingletonLifeCycleRule.LivesForever, ExcludeFromSingletonManager = true, LifeCycleReadOnly = true)]
-    public class SPTween : ServiceComponent<SPTween>, IService
+    public sealed class SPTween : ServiceComponent<SPTween>, IService
     {
 
         #region Singleton Entrance

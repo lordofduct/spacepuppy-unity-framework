@@ -884,6 +884,36 @@ namespace com.spacepuppy.Utils
             }
         }
 
+        public static Vector2 IncrementX(this Vector2 v, float x)
+        {
+            v.x += x;
+            return v;
+        }
+
+        public static Vector2 IncrementY(this Vector2 v, float y)
+        {
+            v.y += y;
+            return v;
+        }
+
+        public static Vector3 IncrementX(this Vector3 v, float x)
+        {
+            v.x += x;
+            return v;
+        }
+
+        public static Vector3 IncrementY(this Vector3 v, float y)
+        {
+            v.y += y;
+            return v;
+        }
+
+        public static Vector3 IncrementZ(this Vector3 v, float z)
+        {
+            v.z += z;
+            return v;
+        }
+
         public static Vector3 GetUnitVector(CartesianAxis axis)
         {
             switch(axis)

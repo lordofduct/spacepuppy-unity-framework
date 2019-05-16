@@ -141,7 +141,7 @@ namespace com.spacepuppyeditor
                 if (SerializedProperty.EqualContents(iterator, end))
                     break;
                 
-                PropertyField(iterator, EditorHelper.TempContent(iterator.displayName), true);
+                PropertyField(iterator, EditorHelper.TempContent(iterator.displayName, iterator.tooltip), true);
             }
             return EditorGUI.EndChangeCheck();
         }
