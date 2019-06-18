@@ -29,7 +29,7 @@ namespace com.spacepuppy.Utils
         /// <returns></returns>
         public static IRandom CreateDeterministicRNG(int seed)
         {
-            return LinearCongruentialRNG.CreateMMIXKnuth(seed);
+            return new SimplePCG(seed);
         }
         
         #endregion
@@ -433,26 +433,42 @@ namespace com.spacepuppy.Utils
 
         }
 
-        public class PCG : IRandom
+        public class SimplePCG : IRandom
         {
 
             #region Fields
 
             private ulong _seed;
-            private ulong _incr;
+            private ulong _inc;
 
             #endregion
 
             #region CONSTRUCTOR
 
-            public PCG(long seed = -1, ulong stream = 1)
+            public SimplePCG(long seed = -1, ulong inc = 1)
             {
                 if(seed < 0)
                 {
                     seed = System.DateTime.Now.Ticks;
                 }
-                _seed = (ulong)seed;
-                _incr = stream | 1;
+                _seed = 0;
+                _inc = (inc << 1) | 1;
+                this.GetNext();
+                _seed += (ulong)seed;
+                this.GetNext();
+            }
+
+            #endregion
+
+            #region Methods
+
+            private uint GetNext()
+            {
+                ulong old = _seed;
+                _seed = old * 6364136223846793005 + _inc;
+                uint xor = (uint)(((old >> 18) ^ old) >> 27);
+                int rot = (int)(old >> 59);
+                return (xor >> rot) | (xor << (64 - rot));
             }
 
             #endregion
@@ -461,23 +477,17 @@ namespace com.spacepuppy.Utils
 
             public double NextDouble()
             {
-                ulong old = _seed;
-                _seed = old * 6364136223846793005 + _incr;
-                uint xor = (uint)(((old >> 18) ^ old) >> 27);
-                int rot = (int)(old >> 59);
-
-                uint result = (xor >> rot) | (xor << (64 - rot));
-                return (double)result / (double)(0x100000000);
+                return (double)this.GetNext() / (double)(0x100000000u);
             }
 
             public float Next()
             {
-                return (float)this.NextDouble();
+                return (float)((double)this.GetNext() / (double)(0x100000000u));
             }
 
             public int Next(int size)
             {
-                return (int)(this.NextDouble() * size);
+                return (int)(size * this.NextDouble());
             }
 
             public int Next(int low, int high)
