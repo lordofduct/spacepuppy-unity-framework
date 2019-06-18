@@ -162,11 +162,8 @@ namespace com.spacepuppy.Utils
             t %= 1f / (float)(colors.Length - 1);
             return (Color)ColorHSV.Slerp((ColorHSV)colors[i], (ColorHSV)colors[i + 1], t);
         }
-
-
-
-
+        
         #endregion
-
+        
     }
 }

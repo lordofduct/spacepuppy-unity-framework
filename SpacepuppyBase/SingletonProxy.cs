@@ -30,7 +30,7 @@ namespace com.spacepuppy
             if (_singletonType == null || _singletonType.Type == null) return null;
 
             //return Singleton.GetInstance(_singletonType.Type, !_createIfNone);
-            return Singletons.Get(_singletonType.Type, _createIfNone);
+            return Singletons.Get(_singletonType.Type, _createIfNone && Application.isPlaying);
         }
 
         bool IProxy.QueriesTarget

@@ -136,7 +136,10 @@ namespace com.spacepuppy
             if (GameLoopEntry.ApplicationClosing) return null;
 
             if (bDoNotCreateIfNotExist)
-                return Singleton.GetGameObjectSource(true).GetComponent<T>();
+            {
+                var src = Singleton.GetGameObjectSource(false);
+                return !object.ReferenceEquals(src, null) ? src.GetComponent<T>() : null;
+            }
             else
             {
                 var tp = typeof(T);
@@ -158,7 +161,10 @@ namespace com.spacepuppy
             if (GameLoopEntry.ApplicationClosing) return null;
 
             if (bDoNotCreateIfNotExist)
-                return Singleton.GetGameObjectSource(true).GetComponent(tp) as IManagedSingleton;
+            {
+                var src = Singleton.GetGameObjectSource(false);
+                return !object.ReferenceEquals(src, null) ? src.GetComponent(tp) as IManagedSingleton : null;
+            }
             else
             {
                 var attrib = tp.GetCustomAttributes(typeof(ConfigAttribute), false).FirstOrDefault() as ConfigAttribute;

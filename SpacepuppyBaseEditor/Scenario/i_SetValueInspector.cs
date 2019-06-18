@@ -33,7 +33,7 @@ namespace com.spacepuppyeditor.Scenario
 
             //SELECT MEMBER
             System.Reflection.MemberInfo selectedMember;
-            memberProp.stringValue = SPEditorGUILayout.ReflectedPropertyField(EditorHelper.TempContent("Property", "The property on the target to set."),
+            memberProp.stringValue = SPEditorGUILayout.ReflectedRecursingPropertyField(EditorHelper.TempContent("Property", "The property on the target to set."),
                                                                               targProp.objectReferenceValue,
                                                                               memberProp.stringValue,
                                                                               com.spacepuppy.Dynamic.DynamicMemberAccess.ReadWrite,

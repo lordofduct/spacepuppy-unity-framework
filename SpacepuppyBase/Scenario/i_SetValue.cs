@@ -50,24 +50,24 @@ namespace com.spacepuppy.Scenario
             switch(_mode)
             {
                 case SetMode.Set:
-                    return DynamicUtil.SetValue(_target, _memberName, _value.Value);
+                    return DynamicUtil.SetValueRecursively(_target, _memberName, _value.Value);
                 case SetMode.Increment:
                     {
-                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        var v = DynamicUtil.GetValueRecursively(_target, _memberName);
                         v = Evaluator.TrySum(v, _value.Value);
-                        return DynamicUtil.SetValue(_target, _memberName, v);
+                        return DynamicUtil.SetValueRecursively(_target, _memberName, v);
                     }
                 case SetMode.Decrement:
                     {
-                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        var v = DynamicUtil.GetValueRecursively(_target, _memberName);
                         v = Evaluator.TryDifference(v, _value.Value);
-                        return DynamicUtil.SetValue(_target, _memberName, v);
+                        return DynamicUtil.SetValueRecursively(_target, _memberName, v);
                     }
                 case SetMode.Toggle:
                     {
-                        var v = DynamicUtil.GetValue(_target, _memberName);
+                        var v = DynamicUtil.GetValueRecursively(_target, _memberName);
                         v = Evaluator.TryToggle(v);
-                        return DynamicUtil.SetValue(_target, _memberName, v);
+                        return DynamicUtil.SetValueRecursively(_target, _memberName, v);
                     }
             }
 

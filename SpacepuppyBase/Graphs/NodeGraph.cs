@@ -28,11 +28,6 @@ namespace com.spacepuppy.Graphs
             _graph.Add(node);
         }
 
-        public bool Contains(T node)
-        {
-            return _graph.Contains(node);
-        }
-
         public bool Remove(T node)
         {
             if (node == null) throw new System.ArgumentNullException("node");
@@ -61,6 +56,11 @@ namespace com.spacepuppy.Graphs
         {
             if (!_graph.Contains(node)) throw new System.ArgumentException("Graph does not contain node.");
             return node.GetNeighbours(buffer);
+        }
+
+        public bool Contains(T node)
+        {
+            return _graph.Contains(node);
         }
 
         public IEnumerator<T> GetEnumerator()

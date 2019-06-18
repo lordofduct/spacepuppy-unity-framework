@@ -141,6 +141,8 @@
     <Compile Include="Geom\I3dSpline.cs" />
     <Compile Include="Geom\PlanarSurfaceComponent.cs" />
     <Compile Include="Graphs\AStarPathResolver.cs" />
+    <Compile Include="Collections\CovariantCollections.cs" />
+    <Compile Include="Graphs\CovariantGraph.cs" />
     <Compile Include="Graphs\DijkstraPathResolver.cs" />
     <Compile Include="Graphs\Exceptions.cs" />
     <Compile Include="Graphs\GridGraph.cs" />

@@ -18,7 +18,10 @@ namespace com.spacepuppy.Project
         [ReorderableArray()]
         private UnityEngine.Object[] _assets;
 
+        [System.NonSerialized]
         private Dictionary<string, UnityEngine.Object> _table;
+        [System.NonSerialized]
+        private bool _clean;
 
         #endregion
         
@@ -35,11 +38,12 @@ namespace com.spacepuppy.Project
             {
                 _table[_assets[i].name] = _assets[i];
             }
+            _clean = true;
         }
 
         public UnityEngine.Object GetAsset(string name)
         {
-            if (_table == null) this.SetupTable();
+            if (!_clean) this.SetupTable();
 
             UnityEngine.Object obj;
             if (_table.TryGetValue(name, out obj))
@@ -50,19 +54,23 @@ namespace com.spacepuppy.Project
 
         public IEnumerable<UnityEngine.Object> GetAllAssets()
         {
-            if (_table == null) this.SetupTable();
+            if (!_clean) this.SetupTable();
 
             return _table.Values;
         }
 
         public IEnumerable<T> GetAllAssets<T>() where T : class
         {
-            if (_table == null) this.SetupTable();
+            if (!_clean) this.SetupTable();
 
             var e = _table.Values.GetEnumerator();
             while(e.MoveNext())
             {
-                if (e.Current is T) yield return e.Current as T;
+                var obj = ObjUtil.GetAsFromSource<T>(e.Current);
+                if(!object.ReferenceEquals(obj, null))
+                {
+                    yield return obj;
+                }
             }
         }
 
@@ -86,7 +94,7 @@ namespace com.spacepuppy.Project
 
         public bool Contains(string name)
         {
-            if (_table == null) this.SetupTable();
+            if (!_clean) this.SetupTable();
 
             return _table.ContainsKey(name);
         }
@@ -98,7 +106,7 @@ namespace com.spacepuppy.Project
 
         public IEnumerable<string> GetAllAssetNames()
         {
-            if (_table == null) this.SetupTable();
+            if (!_clean) this.SetupTable();
 
             return _table.Keys;
         }
@@ -127,8 +135,12 @@ namespace com.spacepuppy.Project
             if (_table != null) _table.Clear();
             for(int i = 0; i < _assets.Length; i++)
             {
-                Resources.UnloadAsset(_assets[i]);
+                if(!(_assets[i] is GameObject))
+                {
+                    Resources.UnloadAsset(_assets[i]);
+                }
             }
+            _clean = false;
         }
 
         public void UnloadAsset(UnityEngine.Object asset)

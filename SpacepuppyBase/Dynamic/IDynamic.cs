@@ -279,10 +279,24 @@ namespace com.spacepuppy.Dynamic
 
         public static object GetValueRecursively(this object obj, string sprop)
         {
-            if (sprop.Contains('.'))
-                obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
+            if(obj is IDynamic)
+            {
+                return GetValue(obj, sprop);
+            }
 
+            if (sprop.Contains('.')) obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
             return GetValue(obj, sprop);
+        }
+
+        public static bool SetValueRecursively(this object obj, string sprop, object value)
+        {
+            if (obj is IDynamic)
+            {
+                return SetValue(obj, sprop, value);
+            }
+
+            if (sprop.Contains('.')) obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
+            return SetValue(obj, sprop, value);
         }
 
         #endregion
@@ -298,8 +312,7 @@ namespace com.spacepuppy.Dynamic
         {
             if (string.IsNullOrEmpty(sprop)) return false;
 
-            //if (sprop.Contains('.'))
-            //    obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
+            //if (sprop != null && sprop.Contains('.')) obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
             if (obj == null) return false;
 
             try
@@ -405,8 +418,7 @@ namespace com.spacepuppy.Dynamic
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             if (string.IsNullOrEmpty(sprop)) return null;
 
-            //if (sprop.Contains('.'))
-            //    obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
+            //if (sprop != null && sprop.Contains('.')) obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
             if (obj == null) return null;
 
             try
@@ -969,7 +981,8 @@ namespace com.spacepuppy.Dynamic
 
         public static object GetValueWithMember(MemberInfo info, object targObj, bool ignoreMethod)
         {
-            if (info == null) return null;
+            if (info == null || targObj == null) return null;
+            if (!TypeUtil.IsType(targObj.GetType(), info.DeclaringType)) return null;
 
             try
             {
@@ -1132,6 +1145,74 @@ namespace com.spacepuppy.Dynamic
                             if (p.GetIndexParameters().Length > 0) continue; //indexed properties are not allowed
 
                             if (VariantReference.AcceptableType(p.PropertyType)) yield return p;
+                        }
+                        break;
+                }
+
+            }
+        }
+
+        public static IEnumerable<System.Reflection.MemberInfo> GetEditorCompatibleMembersFromType(System.Type tp, MemberTypes mask = MemberTypes.All, DynamicMemberAccess access = DynamicMemberAccess.ReadWrite, bool ignoreObsoleteMembers = true)
+        {
+            if (tp == null) yield break;
+
+            bool bRead = (access & DynamicMemberAccess.Read) != 0;
+            bool bWrite = (access & DynamicMemberAccess.Write) != 0;
+            var members = com.spacepuppy.Dynamic.DynamicUtil.GetMembersFromType(tp, false);
+            foreach (var mi in members)
+            {
+                if ((mi.MemberType & mask) == 0) continue;
+                if (ignoreObsoleteMembers && mi.IsObsolete()) continue;
+
+                if ((mi.DeclaringType.IsAssignableFrom(typeof(UnityEngine.MonoBehaviour)) ||
+                     mi.DeclaringType.IsAssignableFrom(typeof(SPComponent)) ||
+                     mi.DeclaringType.IsAssignableFrom(typeof(SPNotifyingComponent))) && mi.Name != "enabled") continue;
+
+                switch (mi.MemberType)
+                {
+                    case System.Reflection.MemberTypes.Method:
+                        {
+                            var m = mi as System.Reflection.MethodInfo;
+                            if (m.IsSpecialName) continue;
+                            if (m.IsGenericMethod) continue;
+
+                            var parr = m.GetParameters();
+                            if (parr.Length == 0)
+                            {
+                                yield return m;
+                            }
+                            else
+                            {
+                                bool pass = true;
+                                foreach (var p in parr)
+                                {
+                                    if (!(VariantReference.AcceptableType(p.ParameterType) || p.ParameterType == typeof(object)))
+                                    {
+                                        pass = false;
+                                        break;
+                                    }
+                                }
+                                if (pass) yield return m;
+                            }
+                        }
+                        break;
+                    case System.Reflection.MemberTypes.Field:
+                        {
+                            var f = mi as System.Reflection.FieldInfo;
+                            if (f.IsSpecialName) continue;
+
+                            yield return f;
+                        }
+                        break;
+                    case System.Reflection.MemberTypes.Property:
+                        {
+                            var p = mi as System.Reflection.PropertyInfo;
+                            if (p.IsSpecialName) continue;
+                            if (!p.CanRead && bRead) continue;
+                            if (!p.CanWrite && bWrite) continue;
+                            if (p.GetIndexParameters().Length > 0) continue; //indexed properties are not allowed
+
+                            yield return p;
                         }
                         break;
                 }

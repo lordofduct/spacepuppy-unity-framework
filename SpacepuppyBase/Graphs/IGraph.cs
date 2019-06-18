@@ -13,6 +13,7 @@ namespace com.spacepuppy.Graphs
 
         IEnumerable<T> GetNeighbours(T node);
         int GetNeighbours(T node, ICollection<T> buffer);
+        bool Contains(T node);
 
     }
 }

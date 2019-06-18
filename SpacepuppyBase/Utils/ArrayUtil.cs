@@ -126,10 +126,6 @@ namespace com.spacepuppy.Utils
 
         public static IEnumerable<T> Append<T>(this IEnumerable<T> lst, T obj)
         {
-            //foreach (var o in lst)
-            //{
-            //    yield return o;
-            //}
             var e = new LightEnumerator<T>(lst);
             while (e.MoveNext())
             {
@@ -138,13 +134,23 @@ namespace com.spacepuppy.Utils
             yield return obj;
         }
 
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> first, IEnumerable<T> next)
+        {
+            var e = new LightEnumerator<T>(first);
+            while (e.MoveNext())
+            {
+                yield return e.Current;
+            }
+            e = new LightEnumerator<T>(next);
+            while (e.MoveNext())
+            {
+                yield return e.Current;
+            }
+        }
+
         public static IEnumerable<T> Prepend<T>(this IEnumerable<T> lst, T obj)
         {
             yield return obj;
-            //foreach (var o in lst)
-            //{
-            //    yield return o;
-            //}
             var e = new LightEnumerator<T>(lst);
             while(e.MoveNext())
             {

@@ -1420,9 +1420,9 @@ namespace com.spacepuppyeditor
             System.Reflection.MemberInfo selectedMember;
             return ReflectedPropertyField(position, GUIContent.none, targType, selectedMemberName, out selectedMember, allowSetterMethods);
         }
-
-        #endregion
         
+        #endregion
+
         #region X Button
 
         public const float X_BTN_WIDTH = 30f;

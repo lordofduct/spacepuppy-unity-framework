@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy;
+using com.spacepuppy.Dynamic;
 using com.spacepuppy.Utils;
 
 namespace com.spacepuppyeditor
@@ -384,6 +385,145 @@ namespace com.spacepuppyeditor
             var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
             System.Reflection.MemberInfo selectedMember;
             return SPEditorGUI.ReflectedPropertyField(position, label, targType, selectedMemberName, out selectedMember, allowSetterMethods);
+        }
+
+
+        
+        public static string ReflectedRecursingPropertyField(GUIContent label, object targObj, string selectedMemberName, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
+        {
+            if (targObj is IDynamic || targObj is IProxy)
+            {
+                var mask = allowSetterMethods ? System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Method : System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property;
+                System.Reflection.MemberInfo[] members = null;
+                System.Type targTp = null;
+                if (targObj is IDynamic)
+                {
+                    targTp = targObj.GetType();
+                    members = DynamicUtil.GetEasilySerializedMembers(targObj, mask, access).ToArray();
+                }
+                else if (targObj is IProxy)
+                {
+                    targTp = (targObj as IProxy).GetTargetType();
+                    members = DynamicUtil.GetEasilySerializedMembersFromType(targTp, mask, access).ToArray();
+                }
+                else
+                {
+                    targTp = typeof(object);
+                    members = ArrayUtil.Empty<System.Reflection.MemberInfo>();
+                }
+                var entries = new GUIContent[members.Length + 1];
+
+                int index = -1;
+                for (int i = 0; i < members.Length; i++)
+                {
+                    var m = members[i];
+                    if ((DynamicUtil.GetMemberAccessLevel(m) & DynamicMemberAccess.Write) != 0)
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} ({1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, EditorHelper.GetValueWithMemberSafe(m, targObj, true)));
+                    else
+                        entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1}) -> {2}", m.Name, DynamicUtil.GetReturnType(m).Name, EditorHelper.GetValueWithMemberSafe(m, targObj, true)));
+
+                    if (index < 0 && m.Name == selectedMemberName)
+                    {
+                        index = i;
+                    }
+                }
+
+                entries[entries.Length - 1] = EditorHelper.TempContent("...Custom");
+                if (index < 0)
+                    index = entries.Length - 1;
+
+                if (index < members.Length)
+                {
+                    index = EditorGUILayout.Popup(label, index, entries);
+                    selectedMember = (index >= 0 && index < members.Length) ? members[index] : null;
+                    return (selectedMember != null) ? selectedMember.Name : null;
+                }
+                else
+                {
+                    var position = EditorGUILayout.GetControlRect(label == GUIContent.none);
+                    position = EditorGUI.PrefixLabel(position, label);
+                    var r0 = new Rect(position.xMin, position.yMin, position.width / 2f, position.height);
+                    var r1 = new Rect(r0.xMax, r0.yMin, position.width - r0.width, r0.height);
+                    index = EditorGUI.Popup(r0, index, entries);
+                    if (index < members.Length)
+                    {
+                        selectedMember = (index >= 0) ? members[index] : null;
+                        return (selectedMember != null) ? selectedMember.Name : null;
+                    }
+                    else
+                    {
+                        selectedMemberName = EditorGUI.TextField(r1, selectedMemberName);
+                        selectedMember = new DynamicPropertyInfo(selectedMemberName, targTp, typeof(Variant));
+                        return selectedMemberName;
+                    }
+                }
+            }
+            else if (targObj != null)
+            {
+                var arr = string.IsNullOrEmpty(selectedMemberName) ? ArrayUtil.Empty<string>() : selectedMemberName.Split('.');
+                return ReflectedRecursingPropertyField(label, targObj.GetType(), arr, 0, access, out selectedMember, allowSetterMethods);
+            }
+            else
+            {
+                selectedMember = null;
+                EditorGUILayout.Popup(label, -1, new GUIContent[0]);
+                return null;
+            }
+        }
+
+        private static string ReflectedRecursingPropertyField(GUIContent label, System.Type tp, string[] selectedMemberNameChain, int chainIndex, DynamicMemberAccess access, out System.Reflection.MemberInfo selectedMember, bool allowSetterMethods = false)
+        {
+            if (tp != null)
+            {
+                var easyMembers = DynamicUtil.GetEasilySerializedMembersFromType(tp, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property | System.Reflection.MemberTypes.Method, access).ToArray();
+                var hardMembers = DynamicUtil.GetEditorCompatibleMembersFromType(tp, System.Reflection.MemberTypes.Field | System.Reflection.MemberTypes.Property, DynamicMemberAccess.Read).Where(m => !DynamicUtil.GetReturnType(m).IsValueType).Except(easyMembers).ToArray();
+
+                var lst = new List<System.Reflection.MemberInfo>();
+                lst.AddRange(easyMembers);
+                lst.AddRange(hardMembers);
+                var members = lst.ToArray();
+                var entries = new GUIContent[members.Length];
+
+                int index = -1;
+                for (int i = 0; i < members.Length; i++)
+                {
+                    var m = members[i];
+                    if(i < easyMembers.Length)
+                    {
+                        if ((DynamicUtil.GetMemberAccessLevel(m) & DynamicMemberAccess.Write) != 0)
+                            entries[i] = EditorHelper.TempContent(string.Format("{0} ({1})", m.Name, DynamicUtil.GetReturnType(m).Name));
+                        else
+                            entries[i] = EditorHelper.TempContent(string.Format("{0} (readonly - {1})", m.Name, DynamicUtil.GetReturnType(m).Name));
+                    }
+                    else
+                    {
+                        entries[i] = EditorHelper.TempContent(string.Format("-> {0} ({1})", m.Name, DynamicUtil.GetReturnType(m).Name));
+                    }
+
+                    if (index < 0 && selectedMemberNameChain != null && chainIndex < selectedMemberNameChain.Length && selectedMemberNameChain[chainIndex] == m.Name)
+                    {
+                        index = i;
+                    }
+                }
+                
+                index = EditorGUILayout.Popup(label, index, entries);
+                selectedMember = (index >= 0) ? members[index] : null;
+                if (hardMembers.Contains(selectedMember))
+                {
+                    var m = selectedMember;
+                    return m.Name + "." + ReflectedRecursingPropertyField(EditorHelper.TempContent("|-> " + m.Name), DynamicUtil.GetReturnType(m), selectedMemberNameChain, chainIndex + 1, access, out selectedMember, allowSetterMethods);
+                }
+                else
+                {
+                    return (selectedMember != null) ? selectedMember.Name : null;
+                }
+            }
+            else
+            {
+                selectedMember = null;
+                EditorGUILayout.Popup(label, -1, new GUIContent[0]);
+                return null;
+            }
         }
 
         #endregion

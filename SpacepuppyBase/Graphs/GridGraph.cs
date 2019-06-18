@@ -117,17 +117,37 @@ namespace com.spacepuppy.Graphs
 
         #region Methods
         
-        public void GetXYOfIndex(int index, out int x, out int y)
+        public bool GetXYOfIndex(int index, out int x, out int y)
         {
-            x = index % _colCount;
-            y = index / _colCount;
+            if(index < 0)
+            {
+                x = -1;
+                y = -1;
+                return false;
+            }
+            else
+            {
+                x = index % _colCount;
+                y = index / _colCount;
+                return true;
+            }
         }
 
-        public void GetXY(T node, out int x, out int y)
+        public bool GetXY(T node, out int x, out int y)
         {
             int index = this.IndexOf(node);
-            x = index % _colCount;
-            y = index / _colCount;
+            if(index < 0)
+            {
+                x = -1;
+                y = -1;
+                return false;
+            }
+            else
+            {
+                x = index % _colCount;
+                y = index / _colCount;
+                return true;
+            }
         }
 
         public T GetNeighbour(int x, int y, GridNeighbour side)

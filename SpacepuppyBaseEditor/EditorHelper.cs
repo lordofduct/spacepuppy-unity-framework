@@ -855,6 +855,14 @@ namespace com.spacepuppyeditor
                         return DynamicUtil.GetValue(targObj, "sharedMaterials");
                 }
             }
+            else if(TypeUtil.IsType(tp, typeof(MeshFilter)))
+            {
+                switch(info.Name)
+                {
+                    case "mesh":
+                        return DynamicUtil.GetValue(targObj, "sharedMesh");
+                }
+            }
 
             return DynamicUtil.GetValueWithMember(info, targObj, ignoreMethod);
         }

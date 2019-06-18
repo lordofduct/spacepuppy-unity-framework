@@ -31,17 +31,7 @@ namespace com.spacepuppy.Utils
         {
             return LinearCongruentialRNG.CreateMMIXKnuth(seed);
         }
-
-        public static VB_RNG CreateVB_RNG()
-        {
-            return new VB_RNG();
-        }
-
-        public static VB_RNG CreateVB_RNG(double seed)
-        {
-            return new VB_RNG(seed);
-        }
-
+        
         #endregion
 
         #region Static Properties
@@ -331,92 +321,7 @@ namespace com.spacepuppy.Utils
                 return this.Next(low, high);
             }
         }
-
-        public class VB_RNG : IRandom
-        {
-
-            #region Fields
-
-            private int _seed;
-
-            #endregion
-
-            #region Constructor
-
-            public VB_RNG()
-            {
-                this.Randomize();
-            }
-
-            public VB_RNG(double seed)
-            {
-                this.Randomize(seed);
-            }
-
-            #endregion
-
-            #region Methods
-            
-            public float Next()
-            {
-                return this.VBNext(1f);
-            }
-
-            public int Next(int size)
-            {
-                return (int)(this.Next() * size);
-            }
-
-            public int Next(int low, int high)
-            {
-                return (int)(this.Next() * (high - low)) + low;
-            }
-
-            public double NextDouble()
-            {
-                return (double)this.Next();
-            }
-
-            public float VBNext(float num)
-            {
-                int num1 = _seed;
-                if ((double)num != 0.0)
-                {
-                    if ((double)num < 0.0)
-                    {
-                        long num2 = (long)BitConverter.ToInt32(BitConverter.GetBytes(num), 0) & (long)uint.MaxValue;
-                        num1 = checked((int)(num2 + (num2 >> 24) & 16777215L));
-                    }
-                    num1 = checked((int)((long)num1 * 1140671485L + 12820163L & 16777215L));
-                }
-                _seed = num1;
-                return (float)num1 / 1.677722E+07f;
-            }
-
-            public void Randomize()
-            {
-                System.DateTime now = System.DateTime.Now;
-                float timer = (float)checked((60 * now.Hour + now.Minute) * 60 + now.Second) + (float)now.Millisecond / 1000f;
-                int num1 = _seed;
-                int num2 = BitConverter.ToInt32(BitConverter.GetBytes(timer), 0);
-                int num3 = (num2 & (int)ushort.MaxValue ^ num2 >> 16) << 8;
-                int num4 = num1 & -16776961 | num3;
-                _seed = num4;
-            }
-
-            public void Randomize(double num)
-            {
-                int num1 = _seed;
-                int num2 = !BitConverter.IsLittleEndian ? BitConverter.ToInt32(BitConverter.GetBytes(num), 0) : BitConverter.ToInt32(BitConverter.GetBytes(num), 4);
-                int num3 = (num2 & (int)ushort.MaxValue ^ num2 >> 16) << 8;
-                int num4 = num1 & -16776961 | num3;
-                _seed = num4;
-            }
-
-            #endregion
-
-        }
-
+        
         /// <summary>
         /// A simple deterministic rng using a linear congruential algorithm. 
         /// Not the best, but fast and effective for deterministic rng for games.
@@ -434,13 +339,15 @@ namespace com.spacepuppy.Utils
             private ulong _incr;
             private ulong _seed;
 
+            private System.Func<double> _getNext;
+
             #endregion
 
             #region CONSTRUCTOR
 
             public LinearCongruentialRNG(long seed, ulong increment, ulong mult, ulong mode)
             {
-                _mode = System.Math.Max(1, mode);
+                _mode = mode;
                 _mult = System.Math.Max(1, System.Math.Min(mode - 1, mult));
                 _incr = System.Math.Max(0, System.Math.Min(mode - 1, increment));
                 if (seed < 0)
@@ -448,6 +355,30 @@ namespace com.spacepuppy.Utils
                     seed = System.DateTime.Now.Millisecond;
                 }
                 _seed = (ulong)seed % _mode;
+
+                if(_mode == 0)
+                {
+                    //this counts as using 2^64 as the mode
+                    _getNext = () =>
+                    {
+                        _seed = _mult * _seed + _incr;
+                        return (double)((decimal)_seed / 18446744073709551616m); //use decimal for larger sig range
+                    };
+                }
+                else if(_mode > 0x10000000000000)
+                {
+                    //double doesn't have the sig range to handle these, so we'll use decimal
+                    _getNext = () =>
+                    {
+                        _seed = (_mult * _seed + _incr) % _mode;
+                        return (double)((decimal)_seed / 18446744073709551616m); //use decimal for larger sig range
+                    };
+                }
+                else
+                {
+                    //just do the maths
+                    _getNext = () => (double)(_seed = (_mult * _seed + _incr) % _mode) / (double)(_mode);
+                }
             }
 
             #endregion
@@ -456,26 +387,22 @@ namespace com.spacepuppy.Utils
 
             public double NextDouble()
             {
-                _seed = (_mult * _seed + _incr) % _mode;
-                return (double)_seed / (double)_mode;
+                return _getNext();
             }
 
             public float Next()
             {
-                _seed = (_mult * _seed + _incr) % _mode;
-                return (float)_seed / (float)_mode;
+                return (float)_getNext();
             }
 
             public int Next(int size)
             {
-                _seed = (_mult * _seed + _incr) % _mode;
-                return (int)(size * ((double)_seed / (double)_mode));
+                return (int)(size * _getNext());
             }
 
             public int Next(int low, int high)
             {
-                _seed = (_mult * _seed + _incr) % _mode;
-                return (int)((high - low) * ((double)_seed / (double)_mode)) + low;
+                return (int)((high - low) * _getNext() + low);
             }
 
             #endregion
@@ -484,7 +411,7 @@ namespace com.spacepuppy.Utils
 
             public static LinearCongruentialRNG CreateMMIXKnuth(long seed = -1)
             {
-                return new LinearCongruentialRNG(seed, 1442695040888963407, 6364136223846793005, ulong.MaxValue);
+                return new LinearCongruentialRNG(seed, 1442695040888963407, 6364136223846793005, 0);
             }
 
             public static LinearCongruentialRNG CreateAppleCarbonLib(int seed = -1)
@@ -497,8 +424,69 @@ namespace com.spacepuppy.Utils
                 return new LinearCongruentialRNG(seed, 12345, 1103515245, 2147483648);
             }
 
+            public static LinearCongruentialRNG CreateVB6(int seed = -1)
+            {
+                return new LinearCongruentialRNG(seed, 12820163, 1140671485, 16777216);
+            }
+
             #endregion
 
+        }
+
+        public class PCG : IRandom
+        {
+
+            #region Fields
+
+            private ulong _seed;
+            private ulong _incr;
+
+            #endregion
+
+            #region CONSTRUCTOR
+
+            public PCG(long seed = -1, ulong stream = 1)
+            {
+                if(seed < 0)
+                {
+                    seed = System.DateTime.Now.Ticks;
+                }
+                _seed = (ulong)seed;
+                _incr = stream | 1;
+            }
+
+            #endregion
+
+            #region IRandom Interface
+
+            public double NextDouble()
+            {
+                ulong old = _seed;
+                _seed = old * 6364136223846793005 + _incr;
+                uint xor = (uint)(((old >> 18) ^ old) >> 27);
+                int rot = (int)(old >> 59);
+
+                uint result = (xor >> rot) | (xor << (64 - rot));
+                return (double)result / (double)(0x100000000);
+            }
+
+            public float Next()
+            {
+                return (float)this.NextDouble();
+            }
+
+            public int Next(int size)
+            {
+                return (int)(this.NextDouble() * size);
+            }
+
+            public int Next(int low, int high)
+            {
+                return (int)((high - low) * this.NextDouble()) + low;
+            }
+
+            #endregion
+            
         }
 
         #endregion
