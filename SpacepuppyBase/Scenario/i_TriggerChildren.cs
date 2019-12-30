@@ -54,7 +54,7 @@ namespace com.spacepuppy.Scenario
         {
             get
             {
-                return new SPTimePeriod(_delay, _delayTimeSupplier.TimeSupplierType, _delayTimeSupplier.CustomTimeSupplierName);
+                return new SPTimePeriod(_delay, _delayTimeSupplier);
             }
             set
             {

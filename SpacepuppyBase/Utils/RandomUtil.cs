@@ -12,16 +12,6 @@ namespace com.spacepuppy.Utils
 
         public static IRandom Standard { get { return _unityRNG; } }
 
-        public static IRandom CreateRNG(int seed)
-        {
-            return new MicrosoftRNG(seed);
-        }
-
-        public static IRandom CreateRNG()
-        {
-            return new MicrosoftRNG();
-        }
-
         /// <summary>
         /// Create an rng that is deterministic to that 'seed' across all platforms.
         /// </summary>
@@ -287,7 +277,7 @@ namespace com.spacepuppy.Utils
             }
         }
 
-        private class MicrosoftRNG : System.Random, IRandom
+        public class MicrosoftRNG : System.Random, IRandom
         {
 
             public MicrosoftRNG() : base()

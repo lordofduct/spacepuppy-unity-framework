@@ -9,6 +9,8 @@ namespace com.spacepuppy
     public interface ITimeSupplier
     {
 
+        string Id { get; }
+
         float Total { get; }
         float Delta { get; }
         float Scale { get; }

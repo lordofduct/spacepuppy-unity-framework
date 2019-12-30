@@ -50,6 +50,13 @@ namespace com.spacepuppy.Graphs
             _comparer = comparer ?? EqualityComparer<T>.Default;
         }
 
+        public GridGraph(int width, int length, bool includeDiagonals, IEqualityComparer<T> comparer, IEnumerable<T> sequence)
+        {
+            _comparer = comparer ?? EqualityComparer<T>.Default;
+
+            this.Copy(width, length, includeDiagonals, sequence);
+        }
+
         #endregion
 
         #region Properties
@@ -403,6 +410,100 @@ namespace com.spacepuppy.Graphs
             }
 
             return GridNeighbour.None;
+        }
+
+
+        public void Resize(int width, int length)
+        {
+            this.Resize(this.Width, this.Length, this.IncludeDiagonals);
+        }
+
+        public void Resize(int width, int length, bool includeDiagonals)
+        {
+            var oarr = _data;
+            var owid = Math.Min(this.Width, width);
+            var olen = Math.Min(this.Length, length);
+
+            _rowCount = length;
+            _colCount = width;
+            _data = new T[Math.Max(_rowCount * _colCount, 0)];
+            _includeDiagonals = includeDiagonals;
+
+            if(oarr != null)
+            {
+                for(int i = 0; i < owid; i++)
+                {
+                    for(int j = 0; j < olen; j++)
+                    {
+                        _data[j * _colCount + i] = oarr[j * _colCount + i];
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies the tiles from another enumerable. The indexing of the enumerable should match this graph.
+        /// </summary>
+        /// <param name="sequence"></param>
+        public void Copy(IEnumerable<T> sequence)
+        {
+            if (_data.Length == 0) return;
+
+            int cnt = 0;
+            foreach (var t in sequence)
+            {
+                _data[cnt] = t;
+
+                cnt++;
+                if (cnt >= _data.Length) break;
+            }
+        }
+
+        public void Copy(int width, int length, IEnumerable<T> sequence)
+        {
+            this.Copy(width, length, this.IncludeDiagonals, sequence);
+        }
+
+        public void Copy(int width, int length, bool includeDiagonals, IEnumerable<T> sequence)
+        {
+            _rowCount = length;
+            _colCount = width;
+            _data = new T[Math.Max(_rowCount * _colCount, 0)];
+            _includeDiagonals = includeDiagonals;
+
+            if (_data.Length > 0)
+            {
+                int cnt = 0;
+                foreach (var t in sequence)
+                {
+                    _data[cnt] = t;
+
+                    cnt++;
+                    if (cnt >= _data.Length) break;
+                }
+            }
+        }
+
+        public T[] ToArray()
+        {
+            var arr = new T[Math.Max(_colCount * _rowCount, 0)];
+            Array.Copy(_data, 0, arr, 0, arr.Length);
+            return arr;
+        }
+
+        public T[] ToArray(int width, int length)
+        {
+            var arr = new T[Math.Max(width * length, 0)];
+            width = Math.Min(width, this.Width);
+            length = Math.Min(length, this.Length);
+            for(int i = 0; i < width; i++)
+            {
+                for(int j = 0; j < length; j++)
+                {
+                    arr[j * _colCount + i] = _data[j * _colCount + i];
+                }
+            }
+            return arr;
         }
 
         #endregion

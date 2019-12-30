@@ -800,6 +800,45 @@ namespace com.spacepuppy.Dynamic
                         _strBuilder.Length = 0;
                         target = DynamicUtil.GetValue(target, sprop);
                     }
+                    else if(_current == '(')
+                    {
+                        //it's a function!
+                        while (_reader.Peek() != 0 && char.IsWhiteSpace((char)_reader.Peek())) _reader.Read(); //consume whitespace
+
+                        if((char)_reader.Peek() == ')')
+                        {
+                            _reader.Read();
+                            sprop = _strBuilder.ToString();
+                            _strBuilder.Length = 0;
+                            state.Value = DynamicUtil.GetValue(target, sprop);
+                            return;
+                        }
+                        else
+                        {
+                            using (var lst = TempCollection.GetList<object>())
+                            {
+                                VariantReference temp = _variantPool.GetInstance();
+                                try
+                                {
+                                    bool complete = false;
+                                    while (!complete)
+                                    {
+                                        complete = this.EvalStatement(temp, true);
+                                        lst.Add(temp.Value);
+                                    }
+                                }
+                                finally
+                                {
+                                    _variantPool.Release(temp);
+                                }
+
+                                sprop = _strBuilder.ToString();
+                                _strBuilder.Length = 0;
+                                state.Value = DynamicUtil.GetValue(target, sprop, lst.ToArray());
+                                return;
+                            }
+                        }
+                    }
                     else if (char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')' || _current == ',' || _current == ']')
                         break;
                     else
@@ -854,6 +893,45 @@ namespace com.spacepuppy.Dynamic
                         sprop = _strBuilder.ToString();
                         _strBuilder.Length = 0;
                         target = DynamicUtil.GetValue(target, sprop);
+                    }
+                    else if (_current == '(')
+                    {
+                        //it's a function!
+                        while (_reader.Peek() != 0 && char.IsWhiteSpace((char)_reader.Peek())) _reader.Read(); //consume whitespace
+
+                        if ((char)_reader.Peek() == ')')
+                        {
+                            _reader.Read();
+                            sprop = _strBuilder.ToString();
+                            _strBuilder.Length = 0;
+                            state.Value = DynamicUtil.GetValue(target, sprop);
+                            return;
+                        }
+                        else
+                        {
+                            using (var lst = TempCollection.GetList<object>())
+                            {
+                                VariantReference temp = _variantPool.GetInstance();
+                                try
+                                {
+                                    bool complete = false;
+                                    while (!complete)
+                                    {
+                                        complete = this.EvalStatement(temp, true);
+                                        lst.Add(temp.Value);
+                                    }
+                                }
+                                finally
+                                {
+                                    _variantPool.Release(temp);
+                                }
+
+                                sprop = _strBuilder.ToString();
+                                _strBuilder.Length = 0;
+                                state.Value = DynamicUtil.GetValue(target, sprop, lst.ToArray());
+                                return;
+                            }
+                        }
                     }
                     else if (char.IsWhiteSpace(_current) || IsArithmeticSymbol(_current) || _current == ')' || _current == ',' || _current == ']')
                         break;
@@ -1346,7 +1424,7 @@ namespace com.spacepuppy.Dynamic
 
         private static bool IsValidWordPrefix(char c)
         {
-            return char.IsLetterOrDigit(c) || c == '$' || c == '_' || c == '+' || c == '-' || c == '(' || c == '\"';
+            return char.IsLetterOrDigit(c) || c == '$' || c == '_' || c == '+' || c == '-' || c == '(' || c == '\"' || c == ')';
         }
 
 
@@ -1544,30 +1622,77 @@ namespace com.spacepuppy.Dynamic
                     break;
                 case VariantType.Vector2:
                     vl = left.Vector2Value;
-                    vr = right.Vector2Value;
-                    vl.x = vl.x * vr.x;
-                    vl.y = vl.y * vr.y;
+                    switch(right.ValueType)
+                    {
+                        case VariantType.Integer:
+                        case VariantType.Float:
+                        case VariantType.Double:
+                            vl.x *= right.FloatValue;
+                            vl.y *= right.FloatValue;
+                            break;
+                        default:
+                            vr = right.Vector2Value;
+                            vl.x = vl.x * vr.x;
+                            vl.y = vl.y * vr.y;
+                            break;
+                    }
                     left.Vector2Value = vl;
                     break;
                 case VariantType.Vector3:
                     vl = left.Vector3Value;
                     vr = right.Vector3Value;
-                    vl.x = vl.x * vr.x;
-                    vl.y = vl.y * vr.y;
-                    vl.z = vl.z * vr.z;
+                    switch (right.ValueType)
+                    {
+                        case VariantType.Integer:
+                        case VariantType.Float:
+                        case VariantType.Double:
+                            vl.x *= right.FloatValue;
+                            vl.y *= right.FloatValue;
+                            vl.z *= right.FloatValue;
+                            break;
+                        default:
+                            vr = right.Vector3Value;
+                            vl.x = vl.x * vr.x;
+                            vl.y = vl.y * vr.y;
+                            vl.z = vl.z * vr.z;
+                            break;
+                    }
                     left.Vector3Value = vl;
                     break;
                 case VariantType.Vector4:
                     vl = left.Vector4Value;
                     vr = right.Vector4Value;
-                    vl.x = vl.x * vr.x;
-                    vl.y = vl.y * vr.y;
-                    vl.z = vl.z * vr.z;
-                    vl.w = vl.w * vr.w;
+                    switch (right.ValueType)
+                    {
+                        case VariantType.Integer:
+                        case VariantType.Float:
+                        case VariantType.Double:
+                            vl.x *= right.FloatValue;
+                            vl.y *= right.FloatValue;
+                            vl.z *= right.FloatValue;
+                            vl.w *= right.FloatValue;
+                            break;
+                        default:
+                            vr = right.Vector4Value;
+                            vl.x = vl.x * vr.x;
+                            vl.y = vl.y * vr.y;
+                            vl.z = vl.z * vr.z;
+                            vl.w = vl.w * vr.w;
+                            break;
+                    }
                     left.Vector4Value = vl;
                     break;
                 case VariantType.Quaternion:
-                    left.QuaternionValue = left.QuaternionValue * right.QuaternionValue;
+                    switch (right.ValueType)
+                    {
+                        case VariantType.Vector2:
+                        case VariantType.Vector3:
+                            left.Vector3Value = left.QuaternionValue * right.Vector3Value;
+                            break;
+                        default:
+                            left.QuaternionValue = left.QuaternionValue * right.QuaternionValue;
+                            break;
+                    }
                     break;
                 case VariantType.LayerMask:
                     left.LayerMaskValue *= right.LayerMaskValue;
@@ -1595,26 +1720,62 @@ namespace com.spacepuppy.Dynamic
                     break;
                 case VariantType.Vector2:
                     vl = left.Vector2Value;
-                    vr = right.Vector2Value;
-                    vl.x = vl.x / vr.x;
-                    vl.y = vl.y / vr.y;
+                    switch (right.ValueType)
+                    {
+                        case VariantType.Integer:
+                        case VariantType.Float:
+                        case VariantType.Double:
+                            vl.x /= right.FloatValue;
+                            vl.y /= right.FloatValue;
+                            break;
+                        default:
+                            vr = right.Vector2Value;
+                            vl.x = vl.x / vr.x;
+                            vl.y = vl.y / vr.y;
+                            break;
+                    }
                     left.Vector2Value = vl;
                     break;
                 case VariantType.Vector3:
                     vl = left.Vector3Value;
-                    vr = right.Vector3Value;
-                    vl.x = vl.x / vr.x;
-                    vl.y = vl.y / vr.y;
-                    vl.z = vl.z / vr.z;
+                    switch (right.ValueType)
+                    {
+                        case VariantType.Integer:
+                        case VariantType.Float:
+                        case VariantType.Double:
+                            vl.x /= right.FloatValue;
+                            vl.y /= right.FloatValue;
+                            vl.z /= right.FloatValue;
+                            break;
+                        default:
+                            vr = right.Vector3Value;
+                            vl.x = vl.x / vr.x;
+                            vl.y = vl.y / vr.y;
+                            vl.z = vl.z / vr.z;
+                            break;
+                    }
                     left.Vector3Value = vl;
                     break;
                 case VariantType.Vector4:
                     vl = left.Vector4Value;
-                    vr = right.Vector4Value;
-                    vl.x = vl.x / vr.x;
-                    vl.y = vl.y / vr.y;
-                    vl.z = vl.z / vr.z;
-                    vl.w = vl.w / vr.w;
+                    switch (right.ValueType)
+                    {
+                        case VariantType.Integer:
+                        case VariantType.Float:
+                        case VariantType.Double:
+                            vl.x /= right.FloatValue;
+                            vl.y /= right.FloatValue;
+                            vl.z /= right.FloatValue;
+                            vl.w /= right.FloatValue;
+                            break;
+                        default:
+                            vr = right.Vector4Value;
+                            vl.x = vl.x / vr.x;
+                            vl.y = vl.y / vr.y;
+                            vl.z = vl.z / vr.z;
+                            vl.w = vl.w / vr.w;
+                            break;
+                    }
                     left.Vector4Value = vl;
                     break;
                 case VariantType.Quaternion:

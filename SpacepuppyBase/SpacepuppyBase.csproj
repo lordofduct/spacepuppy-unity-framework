@@ -237,6 +237,7 @@
     <Compile Include="Scenario\i_PlayAudio.cs" />
     <Compile Include="Scenario\i_TriggerFirstEnabledTarget.cs" />
     <Compile Include="Scenario\i_TriggerOnEnumState.cs" />
+    <Compile Include="RNGAsset.cs" />
     <Compile Include="Scenario\t_AllTriggersOccupied.cs" />
     <Compile Include="Scenario\t_OnTriggerOccupiedActive.cs" />
     <Compile Include="Scenario\t_Timer.cs" />

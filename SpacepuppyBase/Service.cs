@@ -750,7 +750,7 @@ namespace com.spacepuppy
             _destroyIfMultiple = destroyIfMultiple;
         }
 
-        protected virtual void Awake()
+        protected virtual void OnEnable() //NOTE - using OnEnable now since it appears Awake doesn't occur on SOs that are created as an asset and loaded that way.
         {
             if (!(this is T))
             {

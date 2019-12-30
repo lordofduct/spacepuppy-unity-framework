@@ -137,7 +137,7 @@ namespace com.spacepuppy
 
             if (isFixed)
             {
-                _ft += (long)(Time.fixedDeltaTime * _scale * SECONDS_TO_TICKS);
+                _ft += (long)(Time.fixedUnscaledDeltaTime * _scale * SECONDS_TO_TICKS);
             }
             else
             {

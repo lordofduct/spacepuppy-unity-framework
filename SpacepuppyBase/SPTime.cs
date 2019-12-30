@@ -49,37 +49,40 @@ namespace com.spacepuppy
 
         #region CONSTRUCTOR
 
-        //public SPTime()
-        //{
-        //    //exists only for unity serialization
-        //}
-
         public SPTime(DeltaTimeType etp)
         {
             if (etp == DeltaTimeType.Custom) throw new System.ArgumentException("For custom time suppliers, you must specify it directly.");
             _timeSupplierType = etp;
-            _timeSupplierName = null;
+            _timeSupplierName = SPTime.GetTime(etp).Id;
         }
 
         public SPTime(ITimeSupplier ts)
         {
             if (ts == null) throw new System.ArgumentNullException("ts");
             _timeSupplierType = SPTime.GetDeltaType(ts);
-            if (ts is CustomTimeSupplier) _timeSupplierName = (ts as CustomTimeSupplier).Id;
-            else _timeSupplierName = null;
+            _timeSupplierName = SPTime.GetValidatedId(ts);
         }
 
         public SPTime(DeltaTimeType etp, string timeSupplierName)
         {
             if(etp == DeltaTimeType.Custom)
             {
-                _timeSupplierType = etp;
-                _timeSupplierName = timeSupplierName;
+                if(SPTime.IsStandardTimeSupplier(timeSupplierName))
+                {
+                    var ts = SPTime.GetTime(timeSupplierName);
+                    _timeSupplierType = GetDeltaType(ts);
+                    _timeSupplierName = ts.Id;
+                }
+                else
+                {
+                    _timeSupplierType = DeltaTimeType.Custom;
+                    _timeSupplierName = timeSupplierName;
+                }
             }
             else
             {
                 _timeSupplierType = etp;
-                _timeSupplierName = null;
+                _timeSupplierName = SPTime.GetTime(etp).Id;
             }
         }
 
@@ -92,9 +95,14 @@ namespace com.spacepuppy
             get { return _timeSupplierType; }
         }
 
-        public string CustomTimeSupplierName
+        public string TimeSupplierName
         {
-            get { return _timeSupplierName; }
+            get
+            {
+                if (_timeSupplierName != null) return _timeSupplierName;
+                else if (_timeSupplierType < DeltaTimeType.Custom) return SPTime.GetTime(_timeSupplierType).Id;
+                else return null;
+            }
         }
 
         public ITimeSupplier TimeSupplier
@@ -105,16 +113,9 @@ namespace com.spacepuppy
             }
             set
             {
-                _timeSupplierType = GetDeltaType(value);
-                if (_timeSupplierType == DeltaTimeType.Custom)
-                {
-                    var cts = value as CustomTimeSupplier;
-                    _timeSupplierName = (cts != null) ? cts.Id : null;
-                }
-                else
-                {
-                    _timeSupplierName = null;
-                }
+                if (value == null) value = SPTime.Normal;
+                _timeSupplierType = SPTime.GetDeltaType(value);
+                _timeSupplierName = SPTime.GetValidatedId(value);
             }
         }
         
@@ -173,6 +174,14 @@ namespace com.spacepuppy
 
         #endregion
 
+        #region ITimSupplier Interface
+
+        string ITimeSupplier.Id { get { return _timeSupplierName; } }
+
+        //the rest are implicitly implemented
+
+        #endregion
+
 
 
 
@@ -180,10 +189,28 @@ namespace com.spacepuppy
 
         #region Fields
 
-        private static Dictionary<string, CustomTimeSupplier> _customTimes;
+        private static Dictionary<string, ITimeSupplier> _registeredTimeSuppliers = new Dictionary<string, ITimeSupplier>();
+        private static HashSet<CustomTimeSupplier> _customTimeSuppliers = new HashSet<CustomTimeSupplier>();
         private static NormalTimeSupplier _normalTime = new NormalTimeSupplier();
         private static RealTimeSupplier _realTime = new RealTimeSupplier();
         private static SmoothTimeSupplier _smoothTime = new SmoothTimeSupplier();
+
+        #endregion
+
+        #region Events
+
+        public static event System.Action<ITimeSupplier> TimeSupplierRemoved;
+
+        #endregion
+
+        #region Static Constructor
+
+        static SPTime()
+        {
+            _registeredTimeSuppliers[_normalTime.Id] = _normalTime;
+            _registeredTimeSuppliers[_realTime.Id] = _realTime;
+            _registeredTimeSuppliers[_smoothTime.Id] = _smoothTime;
+        }
 
         #endregion
 
@@ -209,6 +236,16 @@ namespace com.spacepuppy
         #region Methods
 
         /// <summary>
+        /// Returns true if the id is for any of the standard time suppliers.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static bool IsStandardTimeSupplier(string id)
+        {
+            return _normalTime.Id == id || _realTime.Id == id || _smoothTime.Id == id;
+        }
+
+        /// <summary>
         /// Retrieve the ITimeSupplier for a specific DeltaTimeType, see com.spacepuppy.DeltaTimeType.
         /// </summary>
         /// <param name="etp"></param>
@@ -224,7 +261,7 @@ namespace com.spacepuppy
                 case DeltaTimeType.Smooth:
                     return _smoothTime;
                 default:
-                    return _customTimes.Values.FirstOrDefault();
+                    return _registeredTimeSuppliers.Values.FirstOrDefault();
             }
         }
 
@@ -241,14 +278,25 @@ namespace com.spacepuppy
                 default:
                     {
                         if (id == null) return null;
-                        CustomTimeSupplier ct;
-                        if (_customTimes.TryGetValue(id, out ct))
+                        ITimeSupplier ct;
+                        if (_registeredTimeSuppliers.TryGetValue(id, out ct))
                         {
                             return ct;
                         }
                         return null;
                     }
             }
+        }
+
+        public static ITimeSupplier GetTime(string id)
+        {
+            if (id == null) return null;
+
+            ITimeSupplier ts;
+            if (_registeredTimeSuppliers.TryGetValue(id, out ts))
+                return ts;
+            else
+                return null;
         }
 
         /// <summary>
@@ -258,7 +306,7 @@ namespace com.spacepuppy
         /// <returns></returns>
         public static DeltaTimeType GetDeltaType(ITimeSupplier time)
         {
-            if (time == _normalTime || time == null)
+            if (time == _normalTime)
                 return DeltaTimeType.Normal;
             else if (time == _realTime)
                 return DeltaTimeType.Real;
@@ -274,67 +322,80 @@ namespace com.spacepuppy
         /// <param name="id"></param>
         /// <param name="createIfNotExists"></param>
         /// <returns></returns>
-        public static CustomTimeSupplier Custom(string id, bool createIfNotExists = false)
+        public static ITimeSupplier Custom(string id, bool createIfNotExists = false)
         {
             if (id == null) return null;
-            if (_customTimes == null)
+
+            ITimeSupplier ts;
+            if(_registeredTimeSuppliers.TryGetValue(id, out ts))
             {
-                if (createIfNotExists)
-                {
-                    _customTimes = new Dictionary<string, CustomTimeSupplier>();
-                    GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
-                    var ct = new CustomTimeSupplier(id);
-                    _customTimes[ct.Id] = ct;
-                    return ct;
-                }
-                else
-                {
-                    return null;
-                }
+                return ts;
+            }
+            else if(createIfNotExists)
+            {
+                var ct = new CustomTimeSupplier(id);
+                _registeredTimeSuppliers[id] = ct;
+                if(_customTimeSuppliers.Count == 0) GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
+                _customTimeSuppliers.Add(ct);
+                return ct;
             }
             else
             {
-                CustomTimeSupplier ct;
-                if (_customTimes.TryGetValue(id, out ct))
-                {
-                    return ct;
-                }
-                else if (createIfNotExists)
-                {
-                    ct = new CustomTimeSupplier(id);
-                    _customTimes[ct.Id] = ct;
-                    return ct;
-                }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
         }
 
-        public static CustomTimeSupplier[] GetAllCustom()
+        public static ITimeSupplier[] GetAll()
         {
-            if (_customTimes == null) return ArrayUtil.Empty<CustomTimeSupplier>();
-            return _customTimes.Values.ToArray();
+            return _registeredTimeSuppliers.Values.ToArray();
         }
 
-        public static string GetCustomName(ITimeSupplier supplier)
+        public static ITimeSupplier[] GetAllCustom()
         {
-            if (_customTimes == null || supplier == null) return null;
+            return _registeredTimeSuppliers.Values.Except(ArrayUtil.Temp<ITimeSupplier>(_normalTime, _realTime, _smoothTime)).ToArray();
+        }
 
-            var e = _customTimes.GetEnumerator();
+        /// <summary>
+        /// Returns the Id of a time supplier as it is stored in the look up table. If the supplier is not managed, null is returned.
+        /// </summary>
+        /// <param name="supplier"></param>
+        /// <returns></returns>
+        public static string GetValidatedId(ITimeSupplier supplier)
+        {
+            if (supplier == null) return null;
+
+            string id = supplier.Id;
+            ITimeSupplier ts;
+
+            if(supplier is SPTime)
+            {
+                var dtp = ((SPTime)supplier).TimeSupplierType;
+                supplier = SPTime.GetTime(dtp, id);
+                if (supplier == null) return null;
+                else if (dtp != DeltaTimeType.Custom) return supplier.Id;
+                else return id;
+            }
+            else if (_registeredTimeSuppliers.TryGetValue(id, out ts) && ts == supplier)
+            {
+                return id;
+            }
+
+            var e = _registeredTimeSuppliers.GetEnumerator();
             while (e.MoveNext())
             {
-                if (e.Current.Value == supplier) return e.Current.Key;
+                if (e.Current.Value == supplier || e.Current.Value.Id == id)
+                {
+                    return e.Current.Key;
+                }
             }
             return null;
         }
 
-        public static bool HasCustom(string id)
+        public static bool HasTimeSupplier(string id)
         {
             if (id == null) return false;
-            if (_customTimes == null) return false;
-            return _customTimes.ContainsKey(id);
+
+            return _registeredTimeSuppliers.ContainsKey(id);
         }
 
         /// <summary>
@@ -345,8 +406,20 @@ namespace com.spacepuppy
         public static bool RemoveCustomTime(string id)
         {
             if (id == null) return false;
-            if (_customTimes != null) return _customTimes.Remove(id);
-            else return false;
+
+            ITimeSupplier ts;
+            if(_registeredTimeSuppliers.TryGetValue(id, out ts) && GetDeltaType(ts) == DeltaTimeType.Custom)
+            {
+                _registeredTimeSuppliers.Remove(id);
+                var ct = ts as CustomTimeSupplier;
+                if (ct != null) _customTimeSuppliers.Remove(ct);
+
+                SPTime.TimeSupplierRemoved?.Invoke(ts);
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -354,23 +427,9 @@ namespace com.spacepuppy
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        public static bool RemoveCustomTime(CustomTimeSupplier time)
+        public static bool RemoveCustomTime(ITimeSupplier supplier)
         {
-            if (_customTimes != null)
-            {
-                if (_customTimes.ContainsKey(time.Id) && _customTimes[time.Id] == time)
-                {
-                    return _customTimes.Remove(time.Id);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
+            return RemoveCustomTime(GetValidatedId(supplier));
         }
 
         /// <summary>
@@ -390,13 +449,17 @@ namespace com.spacepuppy
 
         private static void Update(bool isFixed)
         {
-            if(_customTimes.Count > 0)
+            if(_customTimeSuppliers.Count > 0)
             {
-                var e = _customTimes.GetEnumerator();
+                var e = _customTimeSuppliers.GetEnumerator();
                 while(e.MoveNext())
                 {
-                    e.Current.Value.Update(isFixed);
+                    e.Current.Update(isFixed);
                 }
+            }
+            else
+            {
+                GameLoopEntry.UnregisterInternalEarlyUpdate(SPTime.Update);
             }
         }
 
@@ -413,6 +476,8 @@ namespace com.spacepuppy
             private Dictionary<string, float> _scales = new Dictionary<string, float>();
 
             public event System.EventHandler TimeScaleChanged;
+
+            public string Id { get { return "time.default.normal"; } }
 
             public float Total
             {
@@ -547,6 +612,8 @@ namespace com.spacepuppy
         private class RealTimeSupplier : ITimeSupplier
         {
 
+            public string Id { get { return "time.default.real"; } }
+
             public float Total
             {
                 get { return UnityEngine.Time.unscaledTime; }
@@ -574,6 +641,8 @@ namespace com.spacepuppy
 
         private class SmoothTimeSupplier : IScalableTimeSupplier
         {
+
+            public string Id { get { return "time.default.smooth"; } }
 
             public float Total
             {

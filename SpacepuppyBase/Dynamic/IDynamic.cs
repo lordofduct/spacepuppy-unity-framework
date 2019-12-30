@@ -415,6 +415,85 @@ namespace com.spacepuppy.Dynamic
 
         public static object GetValueDirect(object obj, string sprop, params object[] args)
         {
+            if (string.IsNullOrEmpty(sprop)) return null;
+
+            //if (sprop != null && sprop.Contains('.')) obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
+            if (obj == null) return null;
+
+            try
+            {
+                var tp = obj.GetType();
+                foreach(var member in GetMembersFromType(tp, sprop, true))
+                {
+                    switch (member.MemberType)
+                    {
+                        case System.Reflection.MemberTypes.Field:
+                            var field = member as System.Reflection.FieldInfo;
+                            return field.GetValue(obj);
+
+                        case System.Reflection.MemberTypes.Property:
+                            {
+                                var prop = member as System.Reflection.PropertyInfo;
+                                var paramInfos = prop.GetIndexParameters();
+                                if (prop.CanRead && DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                                {
+                                    return prop.GetValue(obj, args);
+                                }
+                                break;
+                            }
+                        case System.Reflection.MemberTypes.Method:
+                            {
+                                var meth = member as System.Reflection.MethodInfo;
+                                var paramInfos = meth.GetParameters();
+                                if (DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                                {
+                                    return meth.Invoke(obj, args);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                //unstrict
+                foreach (var member in GetMembersFromType(tp, sprop, true))
+                {
+                    switch (member.MemberType)
+                    {
+                        case System.Reflection.MemberTypes.Field:
+                            var field = member as System.Reflection.FieldInfo;
+                            return field.GetValue(obj);
+
+                        case System.Reflection.MemberTypes.Property:
+                            {
+                                var prop = member as System.Reflection.PropertyInfo;
+                                var paramInfos = prop.GetIndexParameters();
+                                if (prop.CanRead && DynamicUtil.ParameterSignatureMatchesNumericallyUnstrict(args, paramInfos, false, true))
+                                {
+                                    return prop.GetValue(obj, args);
+                                }
+                                break;
+                            }
+                        case System.Reflection.MemberTypes.Method:
+                            {
+                                var meth = member as System.Reflection.MethodInfo;
+                                var paramInfos = meth.GetParameters();
+                                if (DynamicUtil.ParameterSignatureMatchesNumericallyUnstrict(args, paramInfos, false, true))
+                                {
+                                    return meth.Invoke(obj, args);
+                                }
+                                break;
+                            }
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+
+            return null;
+
+            /*
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             if (string.IsNullOrEmpty(sprop)) return null;
 
@@ -469,6 +548,7 @@ namespace com.spacepuppy.Dynamic
 
             }
             return null;
+            */
         }
 
         public static object GetValueDirect(this object obj, MemberInfo member, params object[] args)
@@ -501,11 +581,124 @@ namespace com.spacepuppy.Dynamic
                     }
             }
 
+            //unstrict
+            switch (member.MemberType)
+            {
+                case System.Reflection.MemberTypes.Field:
+                    var field = member as System.Reflection.FieldInfo;
+                    return field.GetValue(obj);
+
+                case System.Reflection.MemberTypes.Property:
+                    {
+                        var prop = member as System.Reflection.PropertyInfo;
+                        var paramInfos = prop.GetIndexParameters();
+                        if (prop.CanRead && DynamicUtil.ParameterSignatureMatchesNumericallyUnstrict(args, paramInfos, false, true))
+                        {
+                            return prop.GetValue(obj, args);
+                        }
+                        break;
+                    }
+                case System.Reflection.MemberTypes.Method:
+                    {
+                        var meth = member as System.Reflection.MethodInfo;
+                        var paramInfos = meth.GetParameters();
+                        if (DynamicUtil.ParameterSignatureMatchesNumericallyUnstrict(args, paramInfos, false, true))
+                        {
+                            return meth.Invoke(obj, args);
+                        }
+                        break;
+                    }
+            }
+
             return null;
         }
 
         public static bool TryGetValueDirect(object obj, string sprop, out object result, params object[] args)
         {
+            result = null;
+            if (string.IsNullOrEmpty(sprop)) return false;
+
+            //if (sprop != null && sprop.Contains('.')) obj = DynamicUtil.ReduceSubObject(obj, sprop, out sprop);
+            if (obj == null) return false;
+
+            try
+            {
+                var tp = obj.GetType();
+                foreach (var member in GetMembersFromType(tp, sprop, true))
+                {
+                    switch (member.MemberType)
+                    {
+                        case System.Reflection.MemberTypes.Field:
+                            var field = member as System.Reflection.FieldInfo;
+                            result = field.GetValue(obj);
+                            return true;
+                        case System.Reflection.MemberTypes.Property:
+                            {
+                                var prop = member as System.Reflection.PropertyInfo;
+                                var paramInfos = prop.GetIndexParameters();
+                                if (prop.CanRead && DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                                {
+                                    result = prop.GetValue(obj, args);
+                                    return true;
+                                }
+                                break;
+                            }
+                        case System.Reflection.MemberTypes.Method:
+                            {
+                                var meth = member as System.Reflection.MethodInfo;
+                                var paramInfos = meth.GetParameters();
+                                if (DynamicUtil.ParameterSignatureMatches(args, paramInfos, false))
+                                {
+                                    result = meth.Invoke(obj, args);
+                                    return true;
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                //unstrict
+                foreach (var member in GetMembersFromType(tp, sprop, true))
+                {
+                    switch (member.MemberType)
+                    {
+                        case System.Reflection.MemberTypes.Field:
+                            var field = member as System.Reflection.FieldInfo;
+                            result = field.GetValue(obj);
+                            return true;
+                        case System.Reflection.MemberTypes.Property:
+                            {
+                                var prop = member as System.Reflection.PropertyInfo;
+                                var paramInfos = prop.GetIndexParameters();
+                                if (prop.CanRead && DynamicUtil.ParameterSignatureMatchesNumericallyUnstrict(args, paramInfos, false, true))
+                                {
+                                    result = prop.GetValue(obj, args);
+                                    return true;
+                                }
+                                break;
+                            }
+                        case System.Reflection.MemberTypes.Method:
+                            {
+                                var meth = member as System.Reflection.MethodInfo;
+                                var paramInfos = meth.GetParameters();
+                                if (DynamicUtil.ParameterSignatureMatchesNumericallyUnstrict(args, paramInfos, false, true))
+                                {
+                                    result = meth.Invoke(obj, args);
+                                    return true;
+                                }
+                                break;
+                            }
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+
+            return false;
+
+            /*
             const BindingFlags BINDING = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             result = null;
             if (string.IsNullOrEmpty(sprop)) return false;
@@ -565,6 +758,7 @@ namespace com.spacepuppy.Dynamic
 
             }
             return false;
+            */
         }
         
         public static object InvokeMethodDirect(object obj, string name, params object[] args)
@@ -609,6 +803,13 @@ namespace com.spacepuppy.Dynamic
             if (obj == null) return Enumerable.Empty<MemberInfo>();
 
             return GetMembersFromType(obj.GetType(), includeNonPublic, mask);
+        }
+
+        public static IEnumerable<MemberInfo> GetMembersDirect(object obj, string name, bool includeNonPublic, MemberTypes mask = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method)
+        {
+            if (obj == null) return Enumerable.Empty<MemberInfo>();
+
+            return GetMembersFromType(obj.GetType(), name, includeNonPublic, mask);
         }
 
         public static IEnumerable<MemberInfo> GetMemberNamesDirect(object obj, bool includeNonPublic, MemberTypes mask = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method)
@@ -665,6 +866,36 @@ namespace com.spacepuppy.Dynamic
                 while (tp != null)
                 {
                     foreach (var m in tp.GetMembers(PRIV_BINDING))
+                    {
+                        if ((m.MemberType & mask) != 0)
+                        {
+                            yield return m;
+                        }
+                    }
+                    tp = tp.BaseType;
+                }
+            }
+        }
+
+        public static IEnumerable<MemberInfo> GetMembersFromType(System.Type tp, string name, bool includeNonPublic, MemberTypes mask = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method)
+        {
+            const BindingFlags BINDING = BindingFlags.Public | BindingFlags.Instance;
+            const BindingFlags PRIV_BINDING = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            if (tp == null) yield break;
+
+            foreach (var m in tp.GetMember(name, BINDING))
+            {
+                if ((m.MemberType & mask) != 0)
+                {
+                    yield return m;
+                }
+            }
+
+            if (includeNonPublic)
+            {
+                while (tp != null)
+                {
+                    foreach (var m in tp.GetMember(name, PRIV_BINDING))
                     {
                         if ((m.MemberType & mask) != 0)
                         {
@@ -1404,6 +1635,62 @@ namespace com.spacepuppy.Dynamic
             return paramInfos.Length == args.Length || (allowOptional && paramInfos[args.Length].IsOptional);
         }
 
+        private static bool ParameterSignatureMatchesNumericallyUnstrict(object[] args, ParameterInfo[] paramInfos, bool allowOptional, bool convertArgsOnSuccess)
+        {
+            if (args == null) args = ArrayUtil.Empty<object>();
+            if (paramInfos == null) ArrayUtil.Empty<ParameterInfo>();
+
+            if (args.Length == 0 && paramInfos.Length == 0) return true;
+            if (args.Length > paramInfos.Length) return false;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == null)
+                {
+                    continue;
+                }
+                var atp = args[i].GetType();
+                if (atp.IsAssignableFrom(paramInfos[i].ParameterType))
+                {
+                    continue;
+                }
+                if(ConvertUtil.IsNumericType(atp) && ConvertUtil.IsNumericType(paramInfos[i].ParameterType))
+                {
+                    continue;
+                }
+
+                return false;
+            }
+
+            if( paramInfos.Length == args.Length || (allowOptional && paramInfos[args.Length].IsOptional))
+            {
+                if(convertArgsOnSuccess)
+                {
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        if (args[i] == null)
+                        {
+                            continue;
+                        }
+                        var atp = args[i].GetType();
+                        if (atp.IsAssignableFrom(paramInfos[i].ParameterType))
+                        {
+                            continue;
+                        }
+                        if (ConvertUtil.IsNumericType(atp) && ConvertUtil.IsNumericType(paramInfos[i].ParameterType))
+                        {
+                            args[i] = ConvertUtil.ToPrim(args[i], paramInfos[i].ParameterType);
+                        }
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         private static IEnumerable<MemberInfo> FilterMembers(IEnumerable<MemberInfo> members, MemberTypes mask)
         {
             foreach (var m in members)
@@ -1441,7 +1728,9 @@ namespace com.spacepuppy.Dynamic
             {
                 case System.Reflection.MemberTypes.Field:
                     var field = member as System.Reflection.FieldInfo;
-                    if ((valueType == null && !field.FieldType.IsValueType) || field.FieldType == valueType)
+                    if ((valueType == null && !field.FieldType.IsValueType) || 
+                        field.FieldType.IsAssignableFrom(valueType) || 
+                        (ConvertUtil.IsNumericType(field.FieldType) && ConvertUtil.IsNumericType(valueType)))
                     {
                         return true;
                     }
@@ -1449,7 +1738,10 @@ namespace com.spacepuppy.Dynamic
                     break;
                 case System.Reflection.MemberTypes.Property:
                     var prop = member as System.Reflection.PropertyInfo;
-                    if (prop.CanWrite && ((valueType == null && !prop.PropertyType.IsValueType) || prop.PropertyType.IsAssignableFrom(valueType)) && prop.GetIndexParameters().Length == 0)
+                    if (prop.CanWrite && ((valueType == null && !prop.PropertyType.IsValueType) || 
+                                          prop.PropertyType.IsAssignableFrom(valueType) ||
+                                          (ConvertUtil.IsNumericType(prop.PropertyType) && ConvertUtil.IsNumericType(valueType))) && 
+                        prop.GetIndexParameters().Length == 0)
                     {
                         return true;
                     }
@@ -1459,8 +1751,9 @@ namespace com.spacepuppy.Dynamic
                         var meth = member as System.Reflection.MethodInfo;
                         var paramInfos = meth.GetParameters();
                         if (paramInfos.Length != 1) return false;
-                        if ((valueType == null && !paramInfos[0].ParameterType.IsValueType)
-                             || paramInfos[0].ParameterType.IsAssignableFrom(valueType))
+                        if ((valueType == null && !paramInfos[0].ParameterType.IsValueType) || 
+                            paramInfos[0].ParameterType.IsAssignableFrom(valueType) ||
+                            (ConvertUtil.IsNumericType(paramInfos[0].ParameterType) && ConvertUtil.IsNumericType(valueType)))
                         {
                             return true;
                         }

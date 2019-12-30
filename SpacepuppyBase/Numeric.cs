@@ -325,6 +325,16 @@ namespace com.spacepuppy
 
         #region Methods
 
+        /// <summary>
+        /// Returns the value as a positive value int where infinite is represented as -1.
+        /// </summary>
+        /// <returns></returns>
+        public int ToStandardMetricInt()
+        {
+            if (float.IsInfinity(_value)) return -1;
+            else return (int)Mathf.Abs(_value);
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is DiscreteFloat)
