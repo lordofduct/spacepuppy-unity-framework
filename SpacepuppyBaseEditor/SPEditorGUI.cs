@@ -246,13 +246,30 @@ namespace com.spacepuppyeditor
             {
                 case SerializedPropertyType.Integer:
                     EditorGUI.BeginChangeCheck();
-                    int num1 = EditorGUI.IntField(position, label, ConvertUtil.ToInt(value));
-                    if (EditorGUI.EndChangeCheck())
+                    switch(System.Type.GetTypeCode(valueType))
                     {
-                        return num1;
+                        case System.TypeCode.UInt32:
+                        case System.TypeCode.Int64:
+                        case System.TypeCode.UInt64:
+                            {
+                                long num = EditorGUI.LongField(position, label, ConvertUtil.ToLong(value));
+                                if (EditorGUI.EndChangeCheck())
+                                {
+                                    return num;
+                                }
+                            }
+                            break;
+                        default:
+                            {
+                                int num = EditorGUI.IntField(position, label, ConvertUtil.ToInt(value));
+                                if (EditorGUI.EndChangeCheck())
+                                {
+                                    return num;
+                                }
+                            }
+                            break;
                     }
-                    else
-                        break;
+                    break;
                 case SerializedPropertyType.Boolean:
                     EditorGUI.BeginChangeCheck();
                     bool flag2 = EditorGUI.Toggle(position, label, ConvertUtil.ToBool(value));
@@ -260,17 +277,31 @@ namespace com.spacepuppyeditor
                     {
                         return flag2;
                     }
-                    else
-                        break;
+                    break;
                 case SerializedPropertyType.Float:
                     EditorGUI.BeginChangeCheck();
-                    float num2 = EditorGUI.FloatField(position, label, ConvertUtil.ToSingle(value));
-                    if (EditorGUI.EndChangeCheck())
+                    switch (System.Type.GetTypeCode(valueType))
                     {
-                        return num2;
+                        case System.TypeCode.Double:
+                            {
+                                double num = EditorGUI.DoubleField(position, label, ConvertUtil.ToDouble(value));
+                                if (EditorGUI.EndChangeCheck())
+                                {
+                                    return num;
+                                }
+                            }
+                            break;
+                        default:
+                            {
+                                float num = EditorGUI.FloatField(position, label, ConvertUtil.ToSingle(value));
+                                if (EditorGUI.EndChangeCheck())
+                                {
+                                    return num;
+                                }
+                            }
+                            break;
                     }
-                    else
-                        break;
+                    break;
                 case SerializedPropertyType.String:
                     EditorGUI.BeginChangeCheck();
                     string str1 = EditorGUI.TextField(position, label, ConvertUtil.ToString(value));
@@ -278,8 +309,7 @@ namespace com.spacepuppyeditor
                     {
                         return str1;
                     }
-                    else
-                        break;
+                    break;
                 case SerializedPropertyType.Color:
                     EditorGUI.BeginChangeCheck();
                     Color color = EditorGUI.ColorField(position, label, ConvertUtil.ToColor(value));
@@ -287,8 +317,7 @@ namespace com.spacepuppyeditor
                     {
                         return color;
                     }
-                    else
-                        break;
+                    break;
                 case SerializedPropertyType.ObjectReference:
                     EditorGUI.BeginChangeCheck();
                     object obj = EditorGUI.ObjectField(position, label, value as UnityEngine.Object, valueType, true);

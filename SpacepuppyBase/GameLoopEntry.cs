@@ -37,13 +37,19 @@ namespace com.spacepuppy
         private UpdateEventHooks _updateHook;
         private TardyExecutionUpdateEventHooks _tardyUpdateHook;
 
-        private static UpdatePump _updatePump;
-        private static UpdatePump _fixedUpdatePump;
-        private static UpdatePump _lateUpdatePump;
+        [System.NonSerialized]
+        private static UpdatePump _updatePump = new UpdatePump();
+        [System.NonSerialized]
+        private static UpdatePump _fixedUpdatePump = new UpdatePump();
+        [System.NonSerialized]
+        private static UpdatePump _lateUpdatePump = new UpdatePump();
 
-        private static com.spacepuppy.Async.InvokePump _updateInvokeHandle;
-        private static com.spacepuppy.Async.InvokePump _lateUpdateInvokeHandle;
-        private static com.spacepuppy.Async.InvokePump _fixedUpdateInvokeHandle;
+        [System.NonSerialized]
+        private static com.spacepuppy.Async.InvokePump _updateInvokeHandle = new com.spacepuppy.Async.InvokePump();
+        [System.NonSerialized]
+        private static com.spacepuppy.Async.InvokePump _lateUpdateInvokeHandle = new com.spacepuppy.Async.InvokePump();
+        [System.NonSerialized]
+        private static com.spacepuppy.Async.InvokePump _fixedUpdateInvokeHandle = new com.spacepuppy.Async.InvokePump();
 
         private static int _currentFrame;
         private static int _currentLateFrame;
@@ -73,14 +79,6 @@ namespace com.spacepuppy
 
             _updateHook.LateUpdateHook += _updateHook_LateUpdate;
             _tardyUpdateHook.LateUpdateHook += _tardyUpdateHook_LateUpdate;
-
-            _updatePump = new UpdatePump();
-            _fixedUpdatePump = new UpdatePump();
-            _lateUpdatePump = new UpdatePump();
-
-            _updateInvokeHandle = new com.spacepuppy.Async.InvokePump();
-            _lateUpdateInvokeHandle = new com.spacepuppy.Async.InvokePump();
-            _fixedUpdateInvokeHandle = new com.spacepuppy.Async.InvokePump();
         }
 
         /// <summary>

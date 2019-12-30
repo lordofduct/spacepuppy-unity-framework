@@ -570,10 +570,14 @@ namespace com.spacepuppyeditor
                 case System.TypeCode.Int16:
                 case System.TypeCode.UInt16:
                 case System.TypeCode.Int32:
+                case System.TypeCode.UInt32:
+                case System.TypeCode.Int64:
+                case System.TypeCode.UInt64:
                     return SerializedPropertyType.Integer;
                 case System.TypeCode.Boolean:
                     return SerializedPropertyType.Boolean;
                 case System.TypeCode.Single:
+                case System.TypeCode.Double:
                     return SerializedPropertyType.Float;
                 case System.TypeCode.String:
                     return SerializedPropertyType.String;
