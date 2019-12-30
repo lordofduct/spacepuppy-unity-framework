@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using com.spacepuppy.Utils;
-using System;
 
 namespace com.spacepuppy
 {
@@ -317,31 +316,48 @@ namespace com.spacepuppy
         }
 
         /// <summary>
-        /// Retrieve a CustomTimeSupplier by name.
+        /// Retrieve a TimeSupplier by id or create a CustomTimeSupplier if it doesn't exist.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="createIfNotExists"></param>
         /// <returns></returns>
-        public static ITimeSupplier Custom(string id, bool createIfNotExists = false)
+        public static T GetOrCreate<T>(string id) where T : class, ITimeSupplier
         {
             if (id == null) return null;
 
             ITimeSupplier ts;
             if(_registeredTimeSuppliers.TryGetValue(id, out ts))
             {
-                return ts;
-            }
-            else if(createIfNotExists)
-            {
-                var ct = new CustomTimeSupplier(id);
-                _registeredTimeSuppliers[id] = ct;
-                if(_customTimeSuppliers.Count == 0) GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
-                _customTimeSuppliers.Add(ct);
-                return ct;
+                return ts as T;
             }
             else
             {
-                return null;
+                if(typeof(T).IsAssignableFrom(typeof(CustomTimeSupplier)))
+                {
+                    var ct = new CustomTimeSupplier(id);
+                    _registeredTimeSuppliers[id] = ct;
+                    if (_customTimeSuppliers.Count == 0) GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
+                    _customTimeSuppliers.Add(ct);
+                    return ct as T;
+                }
+                else
+                {
+                    throw new System.ArgumentException(string.Format("Supplied type '{0}' can not have a CustomTimeSupplier auto created for it.", typeof(T).FullName));
+                }
+            }
+        }
+
+        public static void RegisterCustom(ITimeSupplier supplier)
+        {
+            if (supplier == null) throw new System.ArgumentNullException("supplier");
+
+            string id = supplier.Id;
+            if (_registeredTimeSuppliers.ContainsKey(id)) throw new System.ArgumentException(string.Format("A timesupplier with id '{0}' already exists.", id));
+
+            _registeredTimeSuppliers[id] = supplier;
+            if(supplier is CustomTimeSupplier)
+            {
+                if (_customTimeSuppliers.Count == 0) GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
+                _customTimeSuppliers.Add(supplier as CustomTimeSupplier);
             }
         }
 
@@ -687,7 +703,7 @@ namespace com.spacepuppy
                 }
             }
 
-            event EventHandler IScalableTimeSupplier.TimeScaleChanged
+            event System.EventHandler IScalableTimeSupplier.TimeScaleChanged
             {
                 add
                 {
