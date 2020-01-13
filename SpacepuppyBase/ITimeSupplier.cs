@@ -39,4 +39,12 @@ namespace com.spacepuppy
 
     }
 
+    /// <summary>
+    /// Implement this interface if you want your custom time supplier type to receive update from SPTime when registered.
+    /// </summary>
+    public interface ICustomTimeSupplier : ITimeSupplier
+    {
+        void Update(bool isFixed);
+    }
+
 }

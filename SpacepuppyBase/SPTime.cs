@@ -189,7 +189,7 @@ namespace com.spacepuppy
         #region Fields
 
         private static Dictionary<string, ITimeSupplier> _registeredTimeSuppliers = new Dictionary<string, ITimeSupplier>();
-        private static HashSet<CustomTimeSupplier> _customTimeSuppliers = new HashSet<CustomTimeSupplier>();
+        private static HashSet<ICustomTimeSupplier> _customTimeSuppliers = new HashSet<ICustomTimeSupplier>();
         private static NormalTimeSupplier _normalTime = new NormalTimeSupplier();
         private static RealTimeSupplier _realTime = new RealTimeSupplier();
         private static SmoothTimeSupplier _smoothTime = new SmoothTimeSupplier();
@@ -354,10 +354,10 @@ namespace com.spacepuppy
             if (_registeredTimeSuppliers.ContainsKey(id)) throw new System.ArgumentException(string.Format("A timesupplier with id '{0}' already exists.", id));
 
             _registeredTimeSuppliers[id] = supplier;
-            if(supplier is CustomTimeSupplier)
+            if(supplier is ICustomTimeSupplier)
             {
                 if (_customTimeSuppliers.Count == 0) GameLoopEntry.RegisterInternalEarlyUpdate(SPTime.Update);
-                _customTimeSuppliers.Add(supplier as CustomTimeSupplier);
+                _customTimeSuppliers.Add(supplier as ICustomTimeSupplier);
             }
         }
 
@@ -427,7 +427,7 @@ namespace com.spacepuppy
             if(_registeredTimeSuppliers.TryGetValue(id, out ts) && GetDeltaType(ts) == DeltaTimeType.Custom)
             {
                 _registeredTimeSuppliers.Remove(id);
-                var ct = ts as CustomTimeSupplier;
+                var ct = ts as ICustomTimeSupplier;
                 if (ct != null) _customTimeSuppliers.Remove(ct);
 
                 SPTime.TimeSupplierRemoved?.Invoke(ts);

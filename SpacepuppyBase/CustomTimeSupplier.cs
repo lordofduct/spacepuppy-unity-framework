@@ -17,7 +17,7 @@ namespace com.spacepuppy
     /// maintaining at minimum 3 digits of fractional precision for seconds (millisecond precision) when at the 
     /// extents of its range.
     /// </summary>
-    public class CustomTimeSupplier : IScalableTimeSupplier, System.IDisposable
+    public class CustomTimeSupplier : ICustomTimeSupplier, IScalableTimeSupplier, System.IDisposable
     {
 
         private const long SECONDS_TO_TICKS = 10000000L;
@@ -97,7 +97,10 @@ namespace com.spacepuppy
             }
         }
 
-
+        /// <summary>
+        /// When updating should the world time scale be respected as well? Use this to cause the timer to pause when the normal time is paused.
+        /// </summary>
+        public bool TrackNormalTimeScale { get; set; }
 
 
         /// <summary>
@@ -130,20 +133,6 @@ namespace com.spacepuppy
         #endregion
 
         #region Methods
-
-        internal void Update(bool isFixed)
-        {
-            if (_paused) return;
-
-            if (isFixed)
-            {
-                _ft += (long)(Time.fixedUnscaledDeltaTime * _scale * SECONDS_TO_TICKS);
-            }
-            else
-            {
-                _t += (long)(Time.unscaledDeltaTime * _scale * SECONDS_TO_TICKS);
-            }
-        }
 
         public bool Destroy()
         {
@@ -317,6 +306,22 @@ namespace com.spacepuppy
         public bool HasScale(string id)
         {
             return _scales.ContainsKey(id);
+        }
+
+        void ICustomTimeSupplier.Update(bool isFixed)
+        {
+            if (_paused) return;
+
+            double scale = _scale;
+            if (this.TrackNormalTimeScale) scale *= SPTime.Normal.Scale;
+            if (isFixed)
+            {
+                _ft += (long)(Time.fixedUnscaledDeltaTime * scale * SECONDS_TO_TICKS);
+            }
+            else
+            {
+                _t += (long)(Time.unscaledDeltaTime * scale * SECONDS_TO_TICKS);
+            }
         }
 
         #endregion
