@@ -195,7 +195,35 @@ namespace com.spacepuppy.Utils
         {
             return obj != null && obj.isActiveAndEnabled && !obj.IsKilled();
         }
-        
+
+        public static bool TrySetActive(this GameObject go, bool active)
+        {
+            if (go != null)
+            {
+                go.SetActive(active);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool TrySetActive(this IGameObjectSource src, bool active)
+        {
+            if (src == null) return false;
+            var go = src.gameObject;
+            if (go != null)
+            {
+                go.SetActive(active);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Tests if the object is either destroyed or killed.
         /// </summary>

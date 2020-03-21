@@ -115,7 +115,7 @@ namespace com.spacepuppy.StateMachine
 
         public TSub StackState<TSub>() where TSub : class, T
         {
-            return this.StackState<TSub>();
+            return _stack.StackState<TSub>();
         }
 
         #endregion

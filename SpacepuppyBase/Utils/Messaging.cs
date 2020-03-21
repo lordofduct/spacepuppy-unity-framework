@@ -145,6 +145,12 @@ namespace com.spacepuppy.Utils
             GlobalMessagePool<T>.Remove(listener);
         }
 
+        public static bool ContainsGlobalListener<T>(T listener) where T : class
+        {
+            if (object.ReferenceEquals(listener, null)) throw new System.ArgumentNullException("listener");
+            return GlobalMessagePool<T>.Contains(listener);
+        }
+
         /// <summary>
         /// Broadcast a message globally to all registered for T. This is faster than FindAndBroadcast, but requires manuall registering/unregistering.
         /// </summary>
@@ -446,6 +452,11 @@ namespace com.spacepuppy.Utils
                         _receivers.Remove(listener);
                         break;
                 }
+            }
+
+            public static bool Contains(T listener)
+            {
+                return _receivers != null && _receivers.Contains(listener);
             }
 
             public static T[] CopyReceivers()
