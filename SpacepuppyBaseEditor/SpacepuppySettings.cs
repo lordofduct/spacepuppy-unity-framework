@@ -14,6 +14,7 @@ namespace com.spacepuppyeditor
         private const string SETTING_ADVANCEDANIMINSPECTOR_ACTIVE = "AdvancedAnimationInspector.Active";
         private const string SETTING_HIERARCHYDRAWER_ACTIVE = "EditorHierarchyEvents.Active";
         private const string SETTING_HIEARCHYALTERNATECONTEXTMENU_ACTIVE = "EditorHierarchyAlternateContextMenu.Active";
+        private const string SETTING_SIGNALIVALIDATERECEIVER_ACTIVE = "SignalValidateReceiver.Active";
 
         private const string SETTING_MODELIMPORT_USE = "ModelImportManager.UseSpacepuppyModelImportSettings";
         private const string SETTING_MODELIMPORT_SETMATERIALSEARCH = "ModelImportManager.SetMaterialSearch";
@@ -110,12 +111,30 @@ namespace com.spacepuppyeditor
             }
         }
 
+        public static bool SignalValidateReceiver
+        {
+            get
+            {
+                if (StoreSettingsLocal)
+                    return EditorProjectPrefs.Local.GetBool(SETTING_SIGNALIVALIDATERECEIVER_ACTIVE, true);
+                else
+                    return EditorProjectPrefs.Group.GetBool(SETTING_SIGNALIVALIDATERECEIVER_ACTIVE, true);
+            }
+            set
+            {
+                if (StoreSettingsLocal)
+                    EditorProjectPrefs.Local.SetBool(SETTING_SIGNALIVALIDATERECEIVER_ACTIVE, value);
+                else
+                    EditorProjectPrefs.Group.SetBool(SETTING_SIGNALIVALIDATERECEIVER_ACTIVE, value);
+            }
+        }
+
         /*
          * MODELIMPORT SETTINGS
          */
-         
+
         //Material Import Settings
-        
+
         public static bool SetMaterialSearchOnImport
         {
             get

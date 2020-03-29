@@ -128,6 +128,7 @@
     <Compile Include="Dynamic\IStateModifier.cs" />
     <Compile Include="Dynamic\Variant.cs" />
     <Compile Include="Dynamic\VectorEvaluator.cs" />
+    <Compile Include="EditorOnly\IValidateReceiver.cs" />
     <Compile Include="ExceptionsLite.cs" />
     <Compile Include="FixedPercentDecimal.cs" />
     <Compile Include="FixedPercentLong.cs" />

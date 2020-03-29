@@ -16,10 +16,8 @@ namespace com.spacepuppy.SPInput.EventSystems
         {
             base.Awake();
 
-            this.m_InputOverride = this.AddComponent<SPBaseInput>();
+            this.m_InputOverride = this.AddOrGetComponent<SPBaseInput>().Init(this);
         }
-
-
 
 
         private static AxisDelegate _defaultHorizontal = () => SPInputDirect.GetAxisRaw(SPInputId.Axis1);
@@ -57,28 +55,36 @@ namespace com.spacepuppy.SPInput.EventSystems
 
         public static AxisDelegate DefaultHorizontalCallback
         {
-            get { return _horizontal; }
+            get { return _defaultHorizontal; }
         }
 
         public static AxisDelegate DefaultVerticalCallback
         {
-            get { return _vertical; }
+            get { return _defaultVertical; }
         }
 
         public static ButtonDelegate DefaultSubmitCallback
         {
-            get { return _submit; }
+            get { return _defaultSubmit; }
         }
 
         public static ButtonDelegate DefaultCancelCallback
         {
-            get { return _cancel; }
+            get { return _defaultCancel; }
         }
 
 
 
         public class SPBaseInput : BaseInput
         {
+
+            private StandaloneInputModule _module;
+
+            internal SPBaseInput Init(StandaloneInputModule module)
+            {
+                _module = module;
+                return this;
+            }
 
             public override float GetAxisRaw(string axisName)
             {
@@ -90,20 +96,24 @@ namespace com.spacepuppy.SPInput.EventSystems
                         return device.GetAxleState(axisName);
                 }
 
-                switch (axisName)
+                if (_module != null)
                 {
-                    case "Horizontal":
+                    if (axisName == _module.horizontalAxis)
+                    {
                         if (_horizontal != null) return _horizontal();
-                        break;
-                    case "Vertical":
+                    }
+                    else if (axisName == _module.verticalAxis)
+                    {
                         if (_vertical != null) return _vertical();
-                        break;
-                    case "Submit":
+                    }
+                    else if (axisName == _module.submitButton)
+                    {
                         if (_submit != null) return _submit() ? 1f : 0f;
-                        break;
-                    case "Cancel":
+                    }
+                    else if (axisName == _module.cancelButton)
+                    {
                         if (_cancel != null) return _cancel() ? 1f : 0f;
-                        break;
+                    }
                 }
 
                 return base.GetAxisRaw(axisName);
@@ -119,20 +129,24 @@ namespace com.spacepuppy.SPInput.EventSystems
                         return device.GetButtonState(buttonName) == SPInput.ButtonState.Down;
                 }
 
-                switch (buttonName)
+                if (_module != null)
                 {
-                    case "Horizontal":
+                    if (buttonName == _module.horizontalAxis)
+                    {
                         if (_horizontal != null) return false;
-                        break;
-                    case "Vertical":
+                    }
+                    else if (buttonName == _module.verticalAxis)
+                    {
                         if (_vertical != null) return false;
-                        break;
-                    case "Submit":
+                    }
+                    else if (buttonName == _module.submitButton)
+                    {
                         if (_submit != null) return _submit();
-                        break;
-                    case "Cancel":
+                    }
+                    else if (buttonName == _module.cancelButton)
+                    {
                         if (_cancel != null) return _cancel();
-                        break;
+                    }
                 }
 
                 return base.GetButtonDown(buttonName);

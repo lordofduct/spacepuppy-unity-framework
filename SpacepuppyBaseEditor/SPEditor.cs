@@ -5,6 +5,7 @@ using System.Linq;
 
 using com.spacepuppy;
 using com.spacepuppy.Dynamic;
+using com.spacepuppy.EditorOnly;
 using com.spacepuppy.Utils;
 
 using com.spacepuppyeditor.Base;
@@ -84,6 +85,21 @@ namespace com.spacepuppyeditor
                 //do call onValidate
                 PropertyHandlerValidationUtility.OnInspectorGUIComplete(this.serializedObject, true);
                 this.OnValidate();
+
+                if (SpacepuppySettings.SignalValidateReceiver)
+                {
+                    foreach (var obj in this.serializedObject.targetObjects)
+                    {
+                        var iterator = serializedObject.GetIterator();
+                        while (iterator.Next(true))
+                        {
+                            if (iterator.propertyType == SerializedPropertyType.ObjectReference) continue;
+
+                            var validated = EditorHelper.GetTargetObjectOfProperty(iterator, obj) as IValidateReceiver;
+                            validated?.OnValidate();
+                        }
+                    }
+                }
             }
             else
             {
