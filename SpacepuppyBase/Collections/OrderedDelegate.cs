@@ -108,6 +108,7 @@ namespace com.spacepuppy.Collections
         public void Clear()
         {
             _delegates.Clear();
+            _callback = null;
         }
 
         public bool Remove(Delegate del)
