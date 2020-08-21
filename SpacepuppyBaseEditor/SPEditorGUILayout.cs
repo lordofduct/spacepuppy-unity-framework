@@ -160,6 +160,21 @@ namespace com.spacepuppyeditor
 
         #region EnumPopup Inspector
 
+        public static System.Enum EnumPopup(System.Enum enumValue)
+        {
+            return SPEditorGUI.EnumPopup(EditorGUILayout.GetControlRect(false), enumValue);
+        }
+
+        public static System.Enum EnumPopup(string label, System.Enum enumValue)
+        {
+            return SPEditorGUI.EnumPopup(EditorGUILayout.GetControlRect(true), EditorHelper.TempContent(label), enumValue);
+        }
+
+        public static System.Enum EnumPopup(GUIContent label, System.Enum enumValue)
+        {
+            return SPEditorGUI.EnumPopup(EditorGUILayout.GetControlRect(label != null && label != GUIContent.none), label, enumValue);
+        }
+
         public static System.Enum EnumPopupExcluding(System.Enum enumValue, params System.Enum[] ignoredValues)
         {
             return SPEditorGUI.EnumPopupExcluding(EditorGUILayout.GetControlRect(false), enumValue, ignoredValues);

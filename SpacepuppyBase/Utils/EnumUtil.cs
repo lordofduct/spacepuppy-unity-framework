@@ -245,6 +245,30 @@ namespace com.spacepuppy.Utils
                 }
             }
         }
-        
+
+        public static IEnumerable<string> GetFriendlyNames(System.Type enumType)
+        {
+            if (!enumType.IsEnum) throw new System.ArgumentException("Type must be an enum.", "enumType");
+
+            return enumType.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).OrderBy(fi => fi.GetValue(null)).Select(fi =>
+            {
+                var desc = fi.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).FirstOrDefault() as System.ComponentModel.DescriptionAttribute;
+                return desc != null ? desc.Description : StringUtil.NicifyVariableName(fi.Name);
+            });
+        }
+
+        public static string GetFriendlyName(System.Enum value)
+        {
+            if (value == null) return string.Empty;
+
+            var tp = value.GetType();
+            var nm = System.Enum.GetName(tp, value);
+            var fi = tp.GetField(nm);
+            if (fi == null) return nm;
+
+            var desc = fi.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).FirstOrDefault() as System.ComponentModel.DescriptionAttribute;
+            return desc != null ? desc.Description : StringUtil.NicifyVariableName(nm);
+        }
+
     }
 }

@@ -128,7 +128,7 @@ namespace com.spacepuppy.Utils
 
         #endregion
 
-        #region Methods
+        #region Range Methods
 
         /// <summary>
         /// Select between min and max, exclussive of max.
@@ -240,7 +240,6 @@ namespace com.spacepuppy.Utils
         }
 
         #endregion
-
 
 
 

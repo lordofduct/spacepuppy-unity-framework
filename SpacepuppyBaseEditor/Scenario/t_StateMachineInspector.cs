@@ -32,7 +32,14 @@ namespace com.spacepuppyeditor.Scenario
         {
             base.OnEnable();
 
-            _arrayDrawer.OnAddCallback = this.OnStateAdded;
+            _arrayDrawer.ElementAdded += OnStateAdded;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            _arrayDrawer.ElementAdded -= OnStateAdded;
         }
 
         protected override void OnSPInspectorGUI()
@@ -72,11 +79,12 @@ namespace com.spacepuppyeditor.Scenario
         }
 
 
-        private void OnStateAdded(ReorderableList lst)
+        private void OnStateAdded(object sender, System.EventArgs e)
         {
-            lst.serializedProperty.arraySize++;
-            lst.index = lst.serializedProperty.arraySize - 1;
-            
+            var drawer = sender as ReorderableArrayPropertyDrawer;
+            if (drawer == null || drawer.CurrentReorderableList == null) return;
+
+            var lst = drawer.CurrentReorderableList;
             var stateProp = lst.serializedProperty.GetArrayElementAtIndex(lst.index);
             stateProp.FindPropertyRelative(PROP_STATENAME).stringValue = "State " + lst.serializedProperty.arraySize.ToString();
         }

@@ -56,7 +56,7 @@ namespace com.spacepuppyeditor
 
         protected virtual void OnDisable()
         {
-
+            
         }
 
         #endregion

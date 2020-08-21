@@ -241,7 +241,7 @@ namespace com.spacepuppy.SPInput.Legacy
         {
             get
             {
-                if (GameLoop.CurrentSequence == UpdateSequence.FixedUpdate)
+                if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
                 {
                     return _currentFixed;
                 }
@@ -259,7 +259,7 @@ namespace com.spacepuppy.SPInput.Legacy
 
         public void Consume()
         {
-            if (GameLoop.CurrentSequence == UpdateSequence.FixedUpdate)
+            if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
             {
                 _currentFixed = InputUtil.ConsumeButtonState(_currentFixed);
             }
@@ -508,7 +508,7 @@ namespace com.spacepuppy.SPInput.Legacy
         {
             get
             {
-                if (GameLoop.CurrentSequence == UpdateSequence.FixedUpdate)
+                if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
                 {
                     return _currentFixed;
                 }
@@ -526,7 +526,7 @@ namespace com.spacepuppy.SPInput.Legacy
 
         public void Consume()
         {
-            if (GameLoop.CurrentSequence == UpdateSequence.FixedUpdate)
+            if (GameLoopEntry.CurrentSequence == UpdateSequence.FixedUpdate)
             {
                 _currentFixed = InputUtil.ConsumeButtonState(_currentFixed);
             }

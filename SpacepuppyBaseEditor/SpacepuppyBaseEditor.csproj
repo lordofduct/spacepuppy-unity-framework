@@ -66,6 +66,7 @@
     <Compile Include="Base\Inspectors\ConstraintPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DefaultOrConfiguredAttributePropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\DisplayFlatPropertyDrawer.cs" />
+    <Compile Include="Base\Inspectors\EnumPropertyDrawer.cs" />
     <Compile Include="Base\Modifiers\DisplayIfPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\EnumInCustomOrderPropertyDrawer.cs" />
     <Compile Include="Base\Inspectors\FixedPercentDecimalPropertyDrawer.cs" />

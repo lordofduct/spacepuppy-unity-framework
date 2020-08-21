@@ -987,6 +987,18 @@ namespace com.spacepuppy.Utils
 
 #region Parenting
 
+        public static GameObject SetParent(this GameObject obj, Transform parent)
+        {
+            obj.transform.parent = parent;
+            return obj;
+        }
+
+        public static Transform SetParent(this Transform obj, Transform parent)
+        {
+            obj.parent = parent;
+            return obj;
+        }
+
         public static IEnumerable<Transform> IterateAllChildren(this Transform trans)
         {
             for(int i = 0; i < trans.childCount; i++)
@@ -1200,71 +1212,78 @@ namespace com.spacepuppy.Utils
         /// <param name="obj"></param>
         /// <param name="child"></param>
         /// <param name="suppressChangeHierarchyMessage"></param>
-        public static void AddChild(this GameObject obj, GameObject child)
-        {
-            var p = (obj != null) ? obj.transform : null;
-            var t = (child != null) ? child.transform : null;
-            AddChild(p, t);
-        }
-        
-        /// <summary>
-        /// Set the parent of some GameObject to this GameObject.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="child"></param>
-        public static void AddChild(this GameObject obj, Transform child)
-        {
-            var p = (obj != null) ? obj.transform : null;
-            AddChild(p, child);
-        }
-
-        /// <summary>
-        /// Set the parent of some GameObject to this GameObject.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="child"></param>
-        public static void AddChild(this Transform obj, GameObject child)
-        {
-            var t = (child != null) ? child.transform : null;
-            AddChild(obj, t);
-        }
-
-        /// <summary>
-        /// Set the parent of some GameObject to this GameObject.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="child"></param>
-        public static void AddChild(this Transform obj, Transform child)
+        public static GameObject AddChild(this GameObject obj, GameObject child)
         {
             if (child == null) throw new System.ArgumentNullException("child");
 
-            if (child.parent == obj) return;
-            child.parent = obj;
+            var p = (obj != null) ? obj.transform : null;
+            child.transform.parent = p;
+            return obj;
+        }
+
+        /// <summary>
+        /// Set the parent of some GameObject to this GameObject.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="child"></param>
+        public static GameObject AddChild(this GameObject obj, Transform child)
+        {
+            if (child == null) throw new System.ArgumentNullException("child");
+
+            var p = (obj != null) ? obj.transform : null;
+            child.transform.parent = p;
+            return obj;
+        }
+
+        /// <summary>
+        /// Set the parent of some GameObject to this GameObject.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="child"></param>
+        public static Transform AddChild(this Transform obj, GameObject child)
+        {
+            if (child == null) throw new System.ArgumentNullException("child");
+
+            child.transform.parent = obj;
+            return obj;
+        }
+
+        /// <summary>
+        /// Set the parent of some GameObject to this GameObject.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="child"></param>
+        public static Transform AddChild(this Transform obj, Transform child)
+        {
+            if (child == null) throw new System.ArgumentNullException("child");
+
+            child.transform.parent = obj;
+            return obj;
         }
 
         /// <summary>
         /// Sets the parent property of this GameObject to null.
         /// </summary>
         /// <param name="obj"></param>
-        public static void RemoveFromParent(this GameObject obj)
+        public static GameObject RemoveFromParent(this GameObject obj)
         {
             if (obj == null) throw new System.ArgumentNullException("obj");
 
             var t = obj.transform;
-            if (t.parent == null) return;
             t.parent = null;
+            return obj;
         }
 
         /// <summary>
         /// Sets the parent property of this GameObject to null.
         /// </summary>
         /// <param name="obj"></param>
-        public static void RemoveFromParent(this Transform obj)
+        public static Transform RemoveFromParent(this Transform obj)
         {
-            if (obj == null) throw new System.ArgumentNullException("t");
+            if (obj == null) throw new System.ArgumentNullException("obj");
 
-            if (obj.parent == null) return;
-            obj.parent = null;
+            obj.transform.parent = null;
+            return obj;
         }
 
 #endregion

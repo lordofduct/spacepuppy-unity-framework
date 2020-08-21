@@ -206,6 +206,46 @@ namespace com.spacepuppy.Utils
 
         #region Morphing
 
+        public static string NicifyVariableName(string nm)
+        {
+            if (string.IsNullOrEmpty(nm)) return string.Empty;
+
+            int index = 0;
+            while(index < nm.Length && char.IsWhiteSpace(nm[index]))
+            {
+                index++;
+            }
+            if (index >= nm.Length) return string.Empty;
+
+            if(nm.IndexOf("m_", index) == 0)
+            {
+                index += 2;
+            }
+            else if(nm[index] == 'k' && nm.Length > (index + 2) && char.IsUpper(nm[index + 1]))
+            {
+                index += 1;
+            }
+
+            while(index < nm.Length && nm[index] == '_')
+            {
+                index++;
+            }
+            if (index >= nm.Length) return string.Empty;
+
+
+            var sb = GetTempStringBuilder();
+            sb.Append(char.ToUpper(nm[index]));
+            for (int i = index + 1; i < nm.Length; i++)
+            {
+                if(char.IsUpper(nm[i]))
+                {
+                    sb.Append(' ');
+                }
+                sb.Append(nm[i]);
+            }
+            return Release(sb);
+        }
+
         public static string ToLower(string value)
         {
             //return (value != null) ? value.ToLower() : null;

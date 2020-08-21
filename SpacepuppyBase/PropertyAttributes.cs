@@ -15,9 +15,26 @@ namespace com.spacepuppy
 
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+    public class DisplayNameAttribute : TooltipAttribute
+    {
+
+        public string DisplayName;
+
+        public DisplayNameAttribute(string displayName) : base(null)
+        {
+            this.DisplayName = displayName;
+        }
+
+        public DisplayNameAttribute(string displayName, string tooltip) : base(tooltip)
+        {
+            this.DisplayName = displayName;
+        }
+
+    }
 
     #region Component Attributes
-    
+
     /*
      * TODO
      * 

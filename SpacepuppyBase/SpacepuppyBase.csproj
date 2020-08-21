@@ -83,6 +83,7 @@
     <Compile Include="CancellableNotification.cs" />
     <Compile Include="Collections\BinaryHeap.cs" />
     <Compile Include="Collections\IForeachEnumerator.cs" />
+    <Compile Include="Collections\IIndexedEnumerable.cs" />
     <Compile Include="Collections\LightEnumerator.cs" />
     <Compile Include="Collections\MultitonPool.cs" />
     <Compile Include="Collections\PointOctree.cs" />
@@ -461,6 +462,7 @@
     <Compile Include="Utils\PrefabUtil.cs" />
     <Compile Include="Utils\PrimitiveUtil.cs" />
     <Compile Include="Utils\QuaternionUtil.cs" />
+    <Compile Include="Utils\RandomEnumUtil.cs" />
     <Compile Include="Utils\RandomUtil.cs" />
     <Compile Include="Utils\Rand\RandomRange.cs" />
     <Compile Include="Utils\StreamUtil.cs" />

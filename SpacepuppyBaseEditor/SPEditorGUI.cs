@@ -588,6 +588,26 @@ namespace com.spacepuppyeditor
 
         #region EnumPopup Inspector
 
+        public static System.Enum EnumPopup(Rect position, System.Enum enumValue)
+        {
+            return EnumPopup(position, GUIContent.none, enumValue);
+        }
+
+        public static System.Enum EnumPopup(Rect position, string label, System.Enum enumValue)
+        {
+            return EnumPopup(position, EditorHelper.TempContent(label), enumValue);
+        }
+
+        public static System.Enum EnumPopup(Rect position, GUIContent label, System.Enum enumValue)
+        {
+            var etp = enumValue.GetType();
+            var evalues = System.Enum.GetValues(etp).Cast<System.Enum>().ToArray();
+            if (evalues.Length == 0) throw new System.ArgumentException("Excluded all possible values, not a valid popup.");
+            var names = evalues.Select(e => EditorHelper.TempContent(EnumUtil.GetFriendlyName(e))).ToArray();
+            var index = EditorGUI.Popup(position, label, evalues.IndexOf(enumValue), names);
+            return (index >= 0) ? evalues[index] : evalues.First();
+        }
+
         public static System.Enum EnumPopupExcluding(Rect position, System.Enum enumValue, params System.Enum[] ignoredValues)
         {
             return EnumPopupExcluding(position, GUIContent.none, enumValue, ignoredValues);
@@ -603,7 +623,7 @@ namespace com.spacepuppyeditor
             var etp = enumValue.GetType();
             var evalues = System.Enum.GetValues(etp).Cast<System.Enum>().Except(ignoredValues).ToArray();
             if (evalues.Length == 0) throw new System.ArgumentException("Excluded all possible values, not a valid popup.");
-            var names = (from e in evalues select EditorHelper.TempContent(e.ToString())).ToArray();
+            var names = evalues.Select(e => EditorHelper.TempContent(EnumUtil.GetFriendlyName(e))).ToArray();
             var index = EditorGUI.Popup(position, label, evalues.IndexOf(enumValue), names);
             return (index >= 0) ? evalues[index] : evalues.First();
         }
@@ -771,7 +791,7 @@ namespace com.spacepuppyeditor
                 }
 
                 //show maskfield
-                normalizedValue = EditorGUI.MaskField(position, label, normalizedValue, (from e in lst select System.Enum.GetName(enumType, e)).ToArray());
+                normalizedValue = EditorGUI.MaskField(position, label, normalizedValue, lst.Select(e => EnumUtil.GetFriendlyName(System.Enum.ToObject(enumType, e) as System.Enum)).ToArray());
 
                 //convert from normalized mask
                 if (normalizedValue == 0)

@@ -234,6 +234,26 @@ namespace com.spacepuppyeditor
             return obj;
         }
 
+        public static object GetTargetObjectOfProperty(SerializedProperty prop, object targetObj)
+        {
+            var path = prop.propertyPath.Replace(".Array.data[", "[");
+            var elements = path.Split('.');
+            foreach (var element in elements)
+            {
+                if (element.Contains("["))
+                {
+                    var elementName = element.Substring(0, element.IndexOf("["));
+                    var index = System.Convert.ToInt32(element.Substring(element.IndexOf("[")).Replace("[", "").Replace("]", ""));
+                    targetObj = GetValue_Imp(targetObj, elementName, index);
+                }
+                else
+                {
+                    targetObj = GetValue_Imp(targetObj, element);
+                }
+            }
+            return targetObj;
+        }
+
         public static void SetTargetObjectOfProperty(SerializedProperty prop, object value)
         {
             var path = prop.propertyPath.Replace(".Array.data[", "[");
@@ -451,7 +471,7 @@ namespace com.spacepuppyeditor
             }
         }
 
-        public static void SetPropertyValue(SerializedProperty prop, object value)
+        public static void SetPropertyValue(this SerializedProperty prop, object value)
         {
             if (prop == null) throw new System.ArgumentNullException("prop");
 
@@ -511,7 +531,7 @@ namespace com.spacepuppyeditor
             }
         }
 
-        public static object GetPropertyValue(SerializedProperty prop)
+        public static object GetPropertyValue(this SerializedProperty prop)
         {
             if (prop == null) throw new System.ArgumentNullException("prop");
 
@@ -554,6 +574,22 @@ namespace com.spacepuppyeditor
             }
 
             return null;
+        }
+
+        public static T GetPropertyValue<T>(this SerializedProperty prop)
+        {
+            var obj = GetPropertyValue(prop);
+            if (obj is T) return (T)obj;
+
+            var tp = typeof(T);
+            try
+            {
+                return (T)System.Convert.ChangeType(obj, tp);
+            }
+            catch(System.Exception)
+            {
+                return default(T);
+            }
         }
 
         public static SerializedPropertyType GetPropertyType(System.Type tp)
@@ -672,6 +708,31 @@ namespace com.spacepuppyeditor
             }
         }
 
+        public static T[] GetAsArray<T>(this SerializedProperty prop)
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+            if (!prop.isArray) throw new System.ArgumentException("SerializedProperty does not represent an Array.", "prop");
+
+            var arr = new T[prop.arraySize];
+            for(int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = GetPropertyValue<T>(prop.GetArrayElementAtIndex(i));
+            }
+            return arr;
+        }
+
+        public static void SetAsArray<T>(this SerializedProperty prop, T[] arr)
+        {
+            if (prop == null) throw new System.ArgumentNullException("prop");
+            if (!prop.isArray) throw new System.ArgumentException("SerializedProperty does not represent an Array.", "prop");
+
+            int sz = arr != null ? arr.Length : 0;
+            prop.arraySize = sz;
+            for(int i = 0; i < sz; i++)
+            {
+                prop.GetArrayElementAtIndex(i).SetPropertyValue(arr[i]);
+            }
+        }
 
 
         public static int GetChildPropertyCount(SerializedProperty property, bool includeGrandChildren = false)
