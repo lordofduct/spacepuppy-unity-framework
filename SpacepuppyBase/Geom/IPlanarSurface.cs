@@ -48,4 +48,5 @@ namespace com.spacepuppy.Geom
         //Vector3 Mirror(Vector3 pos);
 
     }
+
 }

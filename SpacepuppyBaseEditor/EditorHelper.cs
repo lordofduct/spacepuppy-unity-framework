@@ -764,26 +764,28 @@ namespace com.spacepuppyeditor
 
             var path = prop.propertyPath.Replace(".Array.data[", "[");
             var elements = path.Split('.');
-            System.Reflection.FieldInfo field;
-            foreach (var element in elements.Take(elements.Length - 1))
+            System.Reflection.FieldInfo field = null;
+            foreach (var element in elements)
             {
                 if (element.Contains("["))
                 {
                     var elementName = element.Substring(0, element.IndexOf("["));
                     var index = System.Convert.ToInt32(element.Substring(element.IndexOf("[")).Replace("[", "").Replace("]", ""));
 
-                    field = tp.GetMember(elementName, MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault() as System.Reflection.FieldInfo;
+                    //field = tp.GetMember(elementName, MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault() as System.Reflection.FieldInfo;
+                    field = DynamicUtil.GetMemberFromType(tp, element, true, MemberTypes.Field) as System.Reflection.FieldInfo;
                     if (field == null) return null;
                     tp = field.FieldType;
                 }
                 else
                 {
-                    field = tp.GetMember(element, MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault() as System.Reflection.FieldInfo;
+                    //tp.GetMember(element, MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault() as System.Reflection.FieldInfo;
+                    field = DynamicUtil.GetMemberFromType(tp, element, true, MemberTypes.Field) as System.Reflection.FieldInfo;
                     if (field == null) return null;
                     tp = field.FieldType;
                 }
             }
-            return null;
+            return field;
         }
 
         /// <summary>

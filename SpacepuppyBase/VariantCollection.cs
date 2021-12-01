@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.Serialization;
 
 using com.spacepuppy.Dynamic;
-using System;
 using System.Collections;
 
 namespace com.spacepuppy

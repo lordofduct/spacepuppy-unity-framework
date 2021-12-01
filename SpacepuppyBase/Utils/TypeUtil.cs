@@ -39,7 +39,20 @@ namespace com.spacepuppy.Utils
 
         public static bool IsType(System.Type tp, System.Type assignableType)
         {
-            return assignableType.IsAssignableFrom(tp);
+            if (assignableType.IsGenericType)
+            {
+                while (tp != null && tp != typeof(object))
+                {
+                    var ctp = tp.IsGenericType ? tp.GetGenericTypeDefinition() : tp;
+                    if (ctp == assignableType) return true;
+                    tp = tp.BaseType;
+                }
+                return false;
+            }
+            else
+            {
+                return assignableType.IsAssignableFrom(tp);
+            }
         }
 
         public static bool IsType(System.Type tp, params System.Type[] assignableTypes)

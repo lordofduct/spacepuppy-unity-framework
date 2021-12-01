@@ -135,9 +135,9 @@ namespace com.spacepuppyeditor.Components
             if(allowProxy)
             {
                 if (searchChildren)
-                    return (from c in go.GetComponentsInChildren<Component>() where ObjUtil.IsType(c, restrictionType, allowProxy) select c).ToArray();
+                    return (from c in go.GetComponentsInChildren<Component>() where c != null && ObjUtil.IsType(c, restrictionType, allowProxy) select c).ToArray();
                 else
-                    return (from c in go.GetComponents<Component>() where ObjUtil.IsType(c, restrictionType, allowProxy) select c).ToArray();
+                    return (from c in go.GetComponents<Component>() where c != null && ObjUtil.IsType(c, restrictionType, allowProxy) select c).ToArray();
             }
             else
             {
@@ -165,6 +165,8 @@ namespace com.spacepuppyeditor.Components
                 //    _uniqueCount.Add(tp, 1);
                 //    yield return tp.Name;
                 //}
+
+                if (components[i] == null) continue;
 
                 var tp = components[i].GetType();
                 if (_uniqueCount.ContainsKey(tp))

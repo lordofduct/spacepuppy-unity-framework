@@ -1,9 +1,9 @@
-# TODO OBSOLETE - See Spacepuppy Unity Framework 3.0
-https://github.com/lordofduct/spacepuppy-unity-framework-3.0
+# TODO OBSOLETE - See Spacepuppy Unity Framework 4.0
+https://github.com/lordofduct/spacepuppy-unity-framework-4.0
 
-Over the years of working with Unity this framework has gathered up a lot of obsoleted code or features that proved unnecessary. That combined with the release of Unity2017 and its heavy revamp to the API and support for .Net 4.6; I'm going to be slowly stripping down and releasing a new version of Spacepuppy Unity Framework in a new repository.
+This version of spacepuppy is now obsolete. We've moved to a newer version of Unity that supports the newer C# versions in the compiler.
 
-This framework will remain for posterity sake, but will receive no new updates once we make the transition to the new Unity version (we're currently version frozen for a game release, our complete migration should be June 2018).
+This framework will remain for posterity sake.
 
 # spacepuppy-unity-framework
 A framework of reusable objects with the Unity game engine version 5.x.

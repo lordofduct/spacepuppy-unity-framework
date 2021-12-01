@@ -678,7 +678,7 @@ namespace com.spacepuppy.Tween
         public TweenHash Clone()
         {
             var hash = new TweenHash(_targ, _id);
-            hash._props = _props;
+            hash._props = _props.ToList();
             hash._defaultEase = _defaultEase;
             hash._delay = _delay;
             hash._updateType = _updateType;

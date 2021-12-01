@@ -3,6 +3,7 @@
 using UnityEngine;
 
 using com.spacepuppy.Dynamic;
+using com.spacepuppy.Utils;
 
 namespace com.spacepuppy.Scenario
 {
@@ -46,28 +47,29 @@ namespace com.spacepuppy.Scenario
         public override bool Trigger(object sender, object arg)
         {
             if (!this.CanTrigger) return false;
-            
+
+            var targ = ObjUtil.ReduceIfProxy(_target);
             switch(_mode)
             {
                 case SetMode.Set:
-                    return DynamicUtil.SetValueRecursively(_target, _memberName, _value.Value);
+                    return DynamicUtil.SetValueRecursively(targ, _memberName, _value.Value);
                 case SetMode.Increment:
                     {
-                        var v = DynamicUtil.GetValueRecursively(_target, _memberName);
+                        var v = DynamicUtil.GetValueRecursively(targ, _memberName);
                         v = Evaluator.TrySum(v, _value.Value);
-                        return DynamicUtil.SetValueRecursively(_target, _memberName, v);
+                        return DynamicUtil.SetValueRecursively(targ, _memberName, v);
                     }
                 case SetMode.Decrement:
                     {
-                        var v = DynamicUtil.GetValueRecursively(_target, _memberName);
+                        var v = DynamicUtil.GetValueRecursively(targ, _memberName);
                         v = Evaluator.TryDifference(v, _value.Value);
-                        return DynamicUtil.SetValueRecursively(_target, _memberName, v);
+                        return DynamicUtil.SetValueRecursively(targ, _memberName, v);
                     }
                 case SetMode.Toggle:
                     {
-                        var v = DynamicUtil.GetValueRecursively(_target, _memberName);
+                        var v = DynamicUtil.GetValueRecursively(targ, _memberName);
                         v = Evaluator.TryToggle(v);
-                        return DynamicUtil.SetValueRecursively(_target, _memberName, v);
+                        return DynamicUtil.SetValueRecursively(targ, _memberName, v);
                     }
             }
 
